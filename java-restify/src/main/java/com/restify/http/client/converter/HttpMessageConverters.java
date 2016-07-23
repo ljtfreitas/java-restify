@@ -5,8 +5,9 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import com.restify.http.client.converter.json.JacksonMessageConverter;
+import com.restify.http.client.converter.json.JsonMessageConverter;
 import com.restify.http.client.converter.text.TextHtmlMessageConverter;
+import com.restify.http.client.converter.text.TextPlainMessageConverter;
 import com.restify.http.client.converter.xml.JaxbXmlMessageConverter;
 
 public class HttpMessageConverters {
@@ -14,7 +15,8 @@ public class HttpMessageConverters {
 	private final Map<String, HttpMessageConverter> converters = new HashMap<>();
 
 	public HttpMessageConverters() {
-		this(new TextHtmlMessageConverter(), new JacksonMessageConverter(), new JaxbXmlMessageConverter());
+		this(new TextPlainMessageConverter(), new TextHtmlMessageConverter(), JsonMessageConverter.available(),
+				new JaxbXmlMessageConverter());
 	}
 
 	public HttpMessageConverters(HttpMessageConverter...converters) {

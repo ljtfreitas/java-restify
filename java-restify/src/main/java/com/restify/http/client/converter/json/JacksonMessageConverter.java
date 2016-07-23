@@ -14,9 +14,8 @@ import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.restify.http.RestifyHttpException;
 import com.restify.http.client.HttpRequestMessage;
 import com.restify.http.client.HttpResponseMessage;
-import com.restify.http.client.converter.HttpMessageConverter;
 
-public class JacksonMessageConverter implements HttpMessageConverter {
+public class JacksonMessageConverter extends JsonMessageConverter {
 
 	private final ObjectMapper objectMapper;
 
@@ -31,11 +30,6 @@ public class JacksonMessageConverter implements HttpMessageConverter {
 
 	public JacksonMessageConverter(ObjectMapper objectMapper) {
 		this.objectMapper = objectMapper;
-	}
-
-	@Override
-	public String contentType() {
-		return "application/json";
 	}
 
 	@Override
