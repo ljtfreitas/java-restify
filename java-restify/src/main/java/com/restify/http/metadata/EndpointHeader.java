@@ -1,5 +1,7 @@
 package com.restify.http.metadata;
 
+import static com.restify.http.metadata.Preconditions.nonNull;
+
 import java.util.Objects;
 
 public class EndpointHeader {
@@ -8,8 +10,8 @@ public class EndpointHeader {
 	private final String value;
 
 	public EndpointHeader(String name, String value) {
-		this.name = name;
-		this.value = value;
+		this.name = nonNull(name, "EndpointHeader need a name.");
+		this.value = nonNull(value, "EndpointHeader need a value.");
 	}
 
 	public String name() {

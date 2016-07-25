@@ -1,7 +1,7 @@
 package com.restify.http.client.converter.json;
 
 import com.restify.http.client.converter.HttpMessageConverter;
-import com.restify.http.metadata.reflection.ClassDiscovery;
+import com.restify.http.metadata.reflection.JavaClassDiscovery;
 
 public abstract class JsonMessageConverter implements HttpMessageConverter {
 
@@ -11,8 +11,8 @@ public abstract class JsonMessageConverter implements HttpMessageConverter {
 	}
 
 	public static JsonMessageConverter available() {
-		return ClassDiscovery.present("com.fasterxml.jackson.databind.ObjectMapper") ? new JacksonMessageConverter()
-			: ClassDiscovery.present("com.google.gson.Gson") ? new GsonMessageConverter()
+		return JavaClassDiscovery.present("com.fasterxml.jackson.databind.ObjectMapper") ? new JacksonMessageConverter()
+			: JavaClassDiscovery.present("com.google.gson.Gson") ? new GsonMessageConverter()
 				:  new FallbackJsonMessageConverter();
 	}
 }

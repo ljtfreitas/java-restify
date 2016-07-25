@@ -6,7 +6,7 @@ import java.util.Optional;
 import com.restify.http.client.EndpointMethodExecutor;
 import com.restify.http.client.EndpointRequestExecutor;
 import com.restify.http.client.HttpClientRequestFactory;
-import com.restify.http.client.RestifyEndpointRequestExecutor;
+import com.restify.http.client.DefaultEndpointRequestExecutor;
 import com.restify.http.client.converter.HttpMessageConverter;
 import com.restify.http.client.converter.HttpMessageConverters;
 import com.restify.http.client.jdk.JdkHttpClientRequestFactory;
@@ -65,8 +65,7 @@ public class RestifyProxyBuilder {
 		public T build() {
 			RestifyProxyHandler restifyProxyHandler = doBuild();
 
-			Class<?>[] types = new Class<?>[] {type};
-			return (T) Proxy.newProxyInstance(this.getClass().getClassLoader(), types, restifyProxyHandler);
+			return (T) Proxy.newProxyInstance(this.getClass().getClassLoader(), new Class[]{type}, restifyProxyHandler);
 		}
 
 		private RestifyProxyHandler doBuild() {
@@ -84,7 +83,7 @@ public class RestifyProxyBuilder {
 
 		private EndpointRequestExecutor endpointRequestExecutor() {
 			return Optional.ofNullable(endpointRequestExecutor)
-					.orElseGet(() -> new RestifyEndpointRequestExecutor(httpClientRequestFactory(), messageConverters()));
+					.orElseGet(() -> new DefaultEndpointRequestExecutor(httpClientRequestFactory(), messageConverters()));
 		}
 
 		private HttpMessageConverters messageConverters() {

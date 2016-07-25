@@ -4,6 +4,7 @@ import java.net.MalformedURLException;
 import java.net.URL;
 
 import com.restify.http.RestifyHttpException;
+import com.restify.http.metadata.EndpointHeaderParameterResolver;
 import com.restify.http.metadata.EndpointMethod;
 
 public class EndpointRequestFactory {
@@ -24,7 +25,8 @@ public class EndpointRequestFactory {
 
 			Headers headers = new Headers();
 			endpointMethod.headers().all().stream()
-				.forEach(h -> headers.add(new Header(h.name(), h.value())));
+				.forEach(h -> headers.add(new Header(h.name(), new EndpointHeaderParameterResolver(h.value(), endpointMethod.parameters())
+						.resolve(args))));
 
 			return new EndpointRequest(endpoint, endpointMethod.httpMethod(), headers, body, endpointMethod.expectedType());
 

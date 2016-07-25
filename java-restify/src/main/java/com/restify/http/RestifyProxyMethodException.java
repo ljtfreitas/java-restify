@@ -8,4 +8,8 @@ public class RestifyProxyMethodException extends RuntimeException {
 		super(cause);
 	}
 
+	public RestifyProxyMethodException(String message, Throwable cause) {
+		super(message, cause);
+	}
+
 }

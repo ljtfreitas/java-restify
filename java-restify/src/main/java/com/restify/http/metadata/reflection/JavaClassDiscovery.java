@@ -1,6 +1,6 @@
 package com.restify.http.metadata.reflection;
 
-public class ClassDiscovery {
+public class JavaClassDiscovery {
 
 	public static boolean present(String className) {
 		try {

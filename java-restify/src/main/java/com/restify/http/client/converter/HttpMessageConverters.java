@@ -8,7 +8,7 @@ import java.util.Optional;
 import com.restify.http.client.converter.json.JsonMessageConverter;
 import com.restify.http.client.converter.text.TextHtmlMessageConverter;
 import com.restify.http.client.converter.text.TextPlainMessageConverter;
-import com.restify.http.client.converter.xml.JaxbXmlMessageConverter;
+import com.restify.http.client.converter.xml.JaxBXmlMessageConverter;
 
 public class HttpMessageConverters {
 
@@ -16,7 +16,7 @@ public class HttpMessageConverters {
 
 	public HttpMessageConverters() {
 		this(new TextPlainMessageConverter(), new TextHtmlMessageConverter(), JsonMessageConverter.available(),
-				new JaxbXmlMessageConverter());
+				new JaxBXmlMessageConverter());
 	}
 
 	public HttpMessageConverters(HttpMessageConverter...converters) {

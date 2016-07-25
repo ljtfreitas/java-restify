@@ -11,6 +11,10 @@ public class EndpointRequest {
 	private final Object body;
 	private final Class<?> expectedType;
 
+	public EndpointRequest(URL endpoint, String method, Class<?> expectedType) {
+		this(endpoint, method, new Headers(), null, expectedType);
+	}
+
 	public EndpointRequest(URL endpoint, String method, Headers headers, Object body, Class<?> expectedType) {
 		this.endpoint = endpoint;
 		this.method = method;

@@ -15,4 +15,9 @@ public class EndpointResponseCode {
 	public int value() {
 		return code;
 	}
+
+	@Override
+	public String toString() {
+		return Integer.toString(code);
+	}
 }

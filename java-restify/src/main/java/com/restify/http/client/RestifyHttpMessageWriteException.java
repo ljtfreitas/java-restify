@@ -1,0 +1,17 @@
+package com.restify.http.client;
+
+import com.restify.http.RestifyHttpException;
+
+public class RestifyHttpMessageWriteException extends RestifyHttpException {
+
+	private static final long serialVersionUID = 1L;
+
+	public RestifyHttpMessageWriteException(String message) {
+		super(message);
+	}
+
+	public RestifyHttpMessageWriteException(String message, Throwable cause) {
+		super(message, cause);
+	}
+
+}

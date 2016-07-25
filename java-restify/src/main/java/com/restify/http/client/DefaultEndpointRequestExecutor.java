@@ -6,13 +6,13 @@ import com.restify.http.RestifyHttpException;
 import com.restify.http.client.converter.HttpMessageConverter;
 import com.restify.http.client.converter.HttpMessageConverters;
 
-public class RestifyEndpointRequestExecutor implements EndpointRequestExecutor {
+public class DefaultEndpointRequestExecutor implements EndpointRequestExecutor {
 
 	private final HttpClientRequestFactory httpClientRequestFactory;
 	private final HttpMessageConverters messageConverters;
 	private final EndpointResponseReader endpointResponseReader;
 
-	public RestifyEndpointRequestExecutor(HttpClientRequestFactory httpClientRequestFactory, HttpMessageConverters messageConverters) {
+	public DefaultEndpointRequestExecutor(HttpClientRequestFactory httpClientRequestFactory, HttpMessageConverters messageConverters) {
 		this.httpClientRequestFactory = httpClientRequestFactory;
 		this.messageConverters = messageConverters;
 		this.endpointResponseReader = new EndpointResponseReader(messageConverters);
@@ -23,7 +23,7 @@ public class RestifyEndpointRequestExecutor implements EndpointRequestExecutor {
 		try (EndpointResponse response = doExecute(endpointRequest)) {
 			return responseOf(response, endpointRequest.expectedType());
 
-		} catch (IOException e) {
+		} catch (Exception e) {
 			throw new RestifyHttpException(e);
 		}
 	}
@@ -33,11 +33,12 @@ public class RestifyEndpointRequestExecutor implements EndpointRequestExecutor {
 
 		endpointRequest.body().ifPresent(b -> {
 			String contentType = endpointRequest.headers().get("Content-Type")
-					.orElseThrow(() -> new IllegalStateException("Your request has a body, but the header [Content-Type] it was not provided."));
+					.orElseThrow(() -> new RestifyHttpMessageWriteException("Your request has a body, but the header [Content-Type] "
+							+ "it was not provided."));
 
 			HttpMessageConverter converter = messageConverters.by(contentType)
 					.filter(c -> c.canWrite(b.getClass()))
-					.orElseThrow(() -> new IllegalStateException("Your request has a [Content-Type] of type [" + contentType + "], "
+					.orElseThrow(() -> new RestifyHttpMessageWriteException("Your request has a [Content-Type] of type [" + contentType + "], "
 							+ "but there is no MessageConverter able to write your message."));
 
 			try {
@@ -47,7 +48,7 @@ public class RestifyEndpointRequestExecutor implements EndpointRequestExecutor {
 				httpClientRequest.output().close();
 
 			} catch (IOException e) {
-				throw new RestifyHttpException(e);
+				throw new RestifyHttpMessageWriteException("Error on try write http body of type [" + contentType + "]", e);
 			}
 		});
 
@@ -56,7 +57,7 @@ public class RestifyEndpointRequestExecutor implements EndpointRequestExecutor {
 
 	private Object responseOf(EndpointResponse response, Class<?> expectedType) {
 		return expectedType == Void.TYPE ? null :
-			endpointResponseReader.ifSuccess(response.code()).map(r -> {
+			endpointResponseReader.ifSuccess(response.code(), r -> {
 				try {
 					return r.read(response, expectedType);
 				} catch (Exception e) {

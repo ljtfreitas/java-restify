@@ -8,6 +8,8 @@ import java.util.stream.Collectors;
 import com.restify.http.RestifyHttpException;
 import com.restify.http.client.HttpRequestMessage;
 import com.restify.http.client.HttpResponseMessage;
+import com.restify.http.client.RestifyHttpMessageReadException;
+import com.restify.http.client.RestifyHttpMessageWriteException;
 import com.restify.http.client.converter.HttpMessageConverter;
 
 public abstract class TextMessageConverter implements HttpMessageConverter {
@@ -18,7 +20,7 @@ public abstract class TextMessageConverter implements HttpMessageConverter {
 	}
 
 	@Override
-	public void write(Object body, HttpRequestMessage httpRequestMessage) {
+	public void write(Object body, HttpRequestMessage httpRequestMessage) throws RestifyHttpMessageWriteException {
 		try {
 			httpRequestMessage.output().write(body.toString().getBytes());
 		} catch (IOException e) {
@@ -32,7 +34,7 @@ public abstract class TextMessageConverter implements HttpMessageConverter {
 	}
 
 	@Override
-	public Object read(Class<?> expectedType, HttpResponseMessage httpResponseMessage) {
+	public Object read(Class<?> expectedType, HttpResponseMessage httpResponseMessage) throws RestifyHttpMessageReadException {
 		try (BufferedReader buffer = new BufferedReader(new InputStreamReader(httpResponseMessage.input()))) {
             return buffer.lines().collect(Collectors.joining("\n"));
 

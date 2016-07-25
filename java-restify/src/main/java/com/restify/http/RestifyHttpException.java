@@ -12,4 +12,8 @@ public class RestifyHttpException extends RuntimeException {
 		super(message);
 	}
 
+	public RestifyHttpException(String message, Throwable cause) {
+		super(message, cause);
+	}
+
 }

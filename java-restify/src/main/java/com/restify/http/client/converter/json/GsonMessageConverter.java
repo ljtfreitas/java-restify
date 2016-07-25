@@ -1,5 +1,6 @@
 package com.restify.http.client.converter.json;
 
+import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
@@ -9,6 +10,7 @@ import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.restify.http.client.HttpRequestMessage;
 import com.restify.http.client.HttpResponseMessage;
+import com.restify.http.client.RestifyHttpMessageWriteException;
 
 public class GsonMessageConverter extends JsonMessageConverter {
 
@@ -33,7 +35,13 @@ public class GsonMessageConverter extends JsonMessageConverter {
 
 		OutputStreamWriter writer = new OutputStreamWriter(httpRequestMessage.output(), charset);
 
-		gson.toJson(body, writer);
+		try {
+			gson.toJson(body, writer);
+
+			writer.close();
+		} catch (IOException e) {
+			throw new RestifyHttpMessageWriteException("Error on try write json message", e);
+		}
 	}
 
 	@Override

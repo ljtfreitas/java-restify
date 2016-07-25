@@ -1,7 +1,6 @@
 package com.restify.http.metadata.reflection;
 
 import java.lang.invoke.MethodHandle;
-import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodHandles.Lookup;
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -25,8 +24,7 @@ public class JavaDefaultMethodExecutor {
 
 	private MethodHandle bind(Method method, Object target) {
 		try {
-			Constructor<MethodHandles.Lookup> constructor = Lookup.class.getDeclaredConstructor(Class.class, int.class);
-
+			Constructor<Lookup> constructor = Lookup.class.getDeclaredConstructor(Class.class, int.class);
 			constructor.setAccessible(true);
 
 			return constructor.newInstance(method.getDeclaringClass(), Lookup.PRIVATE)
@@ -36,7 +34,8 @@ public class JavaDefaultMethodExecutor {
 		} catch (NoSuchMethodException | SecurityException | IllegalAccessException | InstantiationException | IllegalArgumentException
 				| InvocationTargetException e) {
 
-			throw new RestifyProxyMethodException(e);
+			throw new RestifyProxyMethodException("Error on create MethodHandle to method [" + method + "], "
+					+ "and target type [" + target.getClass() + "]", e);
 		}
 	}
 }

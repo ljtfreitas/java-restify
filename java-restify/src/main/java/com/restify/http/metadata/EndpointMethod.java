@@ -1,5 +1,7 @@
 package com.restify.http.metadata;
 
+import static com.restify.http.metadata.Preconditions.nonNull;
+
 import java.lang.reflect.Method;
 import java.util.Objects;
 
@@ -11,14 +13,22 @@ public class EndpointMethod {
 	private final EndpointMethodParameters parameters;
 	private final EndpointHeaders headers;
 
+	public EndpointMethod(Method javaMethod, String path, String httpMethod) {
+		this(javaMethod, path, httpMethod, new EndpointMethodParameters());
+	}
+
+	public EndpointMethod(Method javaMethod, String path, String httpMethod, EndpointMethodParameters parameters) {
+		this(javaMethod, path, httpMethod, parameters, new EndpointHeaders());
+	}
+
 	public EndpointMethod(Method javaMethod, String path, String httpMethod, EndpointMethodParameters parameters,
 			EndpointHeaders headers) {
 
-		this.javaMethod = javaMethod;
-		this.path = path;
-		this.httpMethod = httpMethod;
-		this.parameters = parameters;
-		this.headers = headers;
+		this.javaMethod = nonNull(javaMethod, "EndpointMethod needs a Java method.");
+		this.path = nonNull(path, "EndpointMethod needs a endpoint path.");
+		this.httpMethod = nonNull(httpMethod, "EndpointMethod needs a HTTP method.");
+		this.parameters = nonNull(parameters, "EndpointMethod needs a parameters collection.");
+		this.headers = nonNull(headers, "EndpointMethod needs a HTTP headers collection.");
 	}
 
 	public String path() {

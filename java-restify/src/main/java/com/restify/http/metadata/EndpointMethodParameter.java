@@ -28,6 +28,10 @@ public class EndpointMethodParameter {
 		return arg.toString();
 	}
 
+	public String name() {
+		return name;
+	}
+
 	public int position() {
 		return position;
 	}

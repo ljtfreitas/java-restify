@@ -9,15 +9,20 @@ import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
+import javax.xml.stream.FactoryConfigurationError;
+import javax.xml.stream.XMLInputFactory;
+import javax.xml.stream.XMLStreamException;
+import javax.xml.stream.XMLStreamReader;
 import javax.xml.transform.stream.StreamResult;
 import javax.xml.transform.stream.StreamSource;
 
-import com.restify.http.RestifyHttpException;
 import com.restify.http.client.HttpRequestMessage;
 import com.restify.http.client.HttpResponseMessage;
+import com.restify.http.client.RestifyHttpMessageReadException;
+import com.restify.http.client.RestifyHttpMessageWriteException;
 import com.restify.http.client.converter.HttpMessageConverter;
 
-public class JaxbXmlMessageConverter implements HttpMessageConverter {
+public class JaxBXmlMessageConverter implements HttpMessageConverter {
 
 	private final Map<Class<?>, JAXBContext> contexts = new ConcurrentHashMap<>();
 
@@ -32,7 +37,7 @@ public class JaxbXmlMessageConverter implements HttpMessageConverter {
 	}
 
 	@Override
-	public void write(Object body, HttpRequestMessage httpRequestMessage) {
+	public void write(Object body, HttpRequestMessage httpRequestMessage) throws RestifyHttpMessageWriteException {
 		JAXBContext context = contextOf(body.getClass());
 
 		try {
@@ -42,7 +47,7 @@ public class JaxbXmlMessageConverter implements HttpMessageConverter {
 			marshaller.marshal(body, new StreamResult(httpRequestMessage.output()));
 
 		} catch (JAXBException e) {
-			throw new RestifyHttpException(e);
+			throw new RestifyHttpMessageWriteException("Error on try write xml message", e);
 		}
 	}
 
@@ -61,11 +66,13 @@ public class JaxbXmlMessageConverter implements HttpMessageConverter {
 
 			StreamSource source = new StreamSource(httpResponseMessage.input());
 
-			return expectedType.isAnnotationPresent(XmlRootElement.class) ? unmarshaller.unmarshal(source)
-					: unmarshaller.unmarshal(source, expectedType).getValue();
+			XMLStreamReader reader = XMLInputFactory.newInstance().createXMLStreamReader(source);
 
-		} catch (JAXBException e) {
-			throw new RestifyHttpException(e);
+			return expectedType.isAnnotationPresent(XmlRootElement.class) ? unmarshaller.unmarshal(reader)
+					: unmarshaller.unmarshal(reader, expectedType).getValue();
+
+		} catch (JAXBException | XMLStreamException | FactoryConfigurationError e) {
+			throw new RestifyHttpMessageReadException("Error on try read xml message", e);
 		}
 	}
 
@@ -77,7 +84,7 @@ public class JaxbXmlMessageConverter implements HttpMessageConverter {
 		try {
 			return JAXBContext.newInstance(type);
 		} catch (JAXBException e) {
-			throw new RestifyHttpException(e);
+			throw new UnsupportedOperationException(e);
 		}
 	}
 

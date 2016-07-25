@@ -1,5 +1,7 @@
 package com.restify.http.contract;
 
+import static com.restify.http.metadata.Preconditions.nonNull;
+
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.stream.Collectors;
@@ -13,6 +15,8 @@ public class DefaultRestifyContract implements RestifyContract {
 
 	@Override
 	public EndpointType read(EndpointTarget target) {
+		nonNull(target, "Endpoint target cannot be null.");
+
 		Class<?> javaType = target.type();
 
 		EndpointMethods endpointMethods = new EndpointMethods(

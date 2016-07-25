@@ -14,13 +14,21 @@ public class EndpointType {
 		this.endpointMethods = endpointMethods;
 	}
 
+	public Class<?> javaType() {
+		return target.type();
+	}
+
 	public Optional<EndpointMethod> find(Method method) {
 		return endpointMethods.find(method);
 	}
 
 	@Override
 	public boolean equals(Object obj) {
-		return target.equals(obj);
+		if (obj instanceof EndpointType) {
+			EndpointType that = (EndpointType) obj;
+			return target.equals(that.target);
+
+		} else return false;
 	}
 
 	@Override

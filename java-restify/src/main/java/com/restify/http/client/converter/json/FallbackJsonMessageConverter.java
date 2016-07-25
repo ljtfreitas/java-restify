@@ -1,8 +1,9 @@
 package com.restify.http.client.converter.json;
 
-import com.restify.http.RestifyHttpException;
 import com.restify.http.client.HttpRequestMessage;
 import com.restify.http.client.HttpResponseMessage;
+import com.restify.http.client.RestifyHttpMessageReadException;
+import com.restify.http.client.RestifyHttpMessageWriteException;
 
 public class FallbackJsonMessageConverter extends JsonMessageConverter {
 
@@ -13,7 +14,7 @@ public class FallbackJsonMessageConverter extends JsonMessageConverter {
 
 	@Override
 	public void write(Object body, HttpRequestMessage httpRequestMessage) {
-		throw new RestifyHttpException("This converter is not able to write your JSON message.");
+		throw new RestifyHttpMessageWriteException("This converter is not able to write your JSON message.");
 	}
 
 	@Override
@@ -23,7 +24,7 @@ public class FallbackJsonMessageConverter extends JsonMessageConverter {
 
 	@Override
 	public Object read(Class<?> expectedType, HttpResponseMessage httpResponseMessage) {
-		throw new RestifyHttpException("This converter is not able to read your JSON message.");
+		throw new RestifyHttpMessageReadException("This converter is not able to read your JSON message.");
 	}
 
 }

@@ -5,18 +5,18 @@ import java.util.regex.Matcher;
 
 public class EndpointHeaderParameterResolver {
 
-	private final String parameter;
+	private final String value;
 	private final EndpointMethodParameters parameters;
 
-	public EndpointHeaderParameterResolver(String parameter, EndpointMethodParameters parameters) {
-		this.parameter = parameter;
+	public EndpointHeaderParameterResolver(String value, EndpointMethodParameters parameters) {
+		this.value = value;
 		this.parameters = parameters;
 	}
 
 	public String resolve(Object[] args) {
 		StringBuffer builder = new StringBuffer();
 
-		Matcher matcher = DynamicParameterMatcher.matches(parameter);
+		Matcher matcher = DynamicParameterMatcher.matches(value);
 
 		while (matcher.find()) {
 			MatchResult match = matcher.toMatchResult();
