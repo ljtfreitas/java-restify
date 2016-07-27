@@ -20,6 +20,10 @@ public class EndpointMethodParameters {
 		return parameters.values().stream().filter(p -> p.ofBody()).findFirst();
 	}
 
+	public Optional<EndpointMethodParameter> ofQueryString() {
+		return parameters.values().stream().filter(p -> p.ofQueryString()).findFirst();
+	}
+
 	public void put(EndpointMethodParameter parameter) {
 		parameters.put(parameter.position(), parameter);
 	}

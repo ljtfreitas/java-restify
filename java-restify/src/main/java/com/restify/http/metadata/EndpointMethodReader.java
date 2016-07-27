@@ -63,12 +63,24 @@ public class EndpointMethodReader {
 			JavaMethodParameterMetadata javaMethodParameterMetadata = new JavaMethodParameterMetadata(javaMethodParameter);
 
 			EndpointMethodParameterType type = javaMethodParameterMetadata.ofPath()? EndpointMethodParameterType.PATH :
-				javaMethodParameterMetadata.ofHeader()? EndpointMethodParameterType.HEADER : EndpointMethodParameterType.BODY;
+				javaMethodParameterMetadata.ofHeader()? EndpointMethodParameterType.HEADER :
+					javaMethodParameterMetadata.ofBody() ? EndpointMethodParameterType.BODY :
+						EndpointMethodParameterType.QUERY_STRING;
 
-			parameters.put(new EndpointMethodParameter(position, javaMethodParameterMetadata.name(), type));
+			EndpointMethodParameterSerializer serializer = serializerOf(javaMethodParameterMetadata);
+
+			parameters.put(new EndpointMethodParameter(position, javaMethodParameterMetadata.name(), type, serializer));
 		}
 
 		return parameters;
+	}
+
+	private EndpointMethodParameterSerializer serializerOf(JavaMethodParameterMetadata javaMethodParameterMetadata) {
+		try {
+			return javaMethodParameterMetadata.serializer().newInstance();
+		} catch (InstantiationException | IllegalAccessException e) {
+			throw new UnsupportedOperationException("Cannot create new instance of EndpointMethodParameterSerializer type " + javaMethodParameterMetadata.serializer());
+		}
 	}
 
 	private EndpointHeaders endpointMethodHeaders(JavaTypeMetadata javaTypeMetadata, JavaMethodMetadata javaMethodMetadata) {

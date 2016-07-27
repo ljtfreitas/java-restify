@@ -13,6 +13,7 @@ import com.restify.http.metadata.EndpointMethod;
 import com.restify.http.metadata.EndpointMethodParameter;
 import com.restify.http.metadata.EndpointTarget;
 import com.restify.http.metadata.EndpointType;
+import com.restify.http.metadata.Parameters;
 
 public class DefaultRestifyContractTest {
 
@@ -158,12 +159,32 @@ public class DefaultRestifyContractTest {
 		assertEquals(Void.TYPE, endpointMethod.get().expectedType());
 	}
 
+	@Test
+	public void shouldReadMetadataOfMethodWithQueryStringParameter() throws Exception {
+		EndpointType endpointType = contract.read(endpointTarget);
+
+		assertEquals(MyApiType.class, endpointType.javaType());
+
+		Optional<EndpointMethod> endpointMethod = endpointType.find(MyApiType.class.getMethod("queryString", new Class[]{Parameters.class}));
+
+		assertTrue(endpointMethod.isPresent());
+
+		assertEquals("GET", endpointMethod.get().httpMethod());
+		assertEquals("http://my.api.com/query", endpointMethod.get().path());
+		assertEquals(Void.class, endpointMethod.get().expectedType());
+
+		Optional<EndpointMethodParameter> queryStringParameter = endpointMethod.get().parameters().get(0);
+		assertTrue(queryStringParameter.isPresent());
+		assertEquals("parameters", queryStringParameter.get().name());
+		assertTrue(queryStringParameter.get().ofQueryString());
+	}
+
 	@Path("http://my.api.com")
 	@Header(name = "X-My-Type", value = "MyApiType")
 	interface MyApiType {
 
 		@Path("/{path}") @Method("GET")
-		public String method(String path);
+		public String method(@PathParameter String path);
 
 		@Path("/{path}") @Method("GET")
 		@Header(name = "Content-Type", value = "{contentType}")
@@ -183,5 +204,8 @@ public class DefaultRestifyContractTest {
 
 		@Path("/some-method") @Post
 		public void metaAnnotationOfHttpMethod();
+
+		@Path("/query") @Get
+		public Void queryString(@QueryString Parameters parameters);
 	}
 }

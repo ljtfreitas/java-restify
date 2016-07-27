@@ -1,11 +1,17 @@
 package com.restify.http.metadata.reflection;
 
-import java.lang.reflect.Parameter;
+import static com.restify.http.metadata.Preconditions.isTrue;
+
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import com.restify.http.contract.BodyParameter;
 import com.restify.http.contract.HeaderParameter;
+import com.restify.http.contract.Parameter;
 import com.restify.http.contract.PathParameter;
+import com.restify.http.contract.QueryString;
+import com.restify.http.metadata.EndpointMethodParameterSerializer;
+import com.restify.http.metadata.SimpleEndpointMethodParameterSerializer;
 
 public class JavaMethodParameterMetadata {
 
@@ -13,18 +19,18 @@ public class JavaMethodParameterMetadata {
 	private final PathParameter pathParameter;
 	private final HeaderParameter headerParameter;
 	private final BodyParameter bodyParameter;
+	private final QueryString queryParameters;
+	private final Class<? extends EndpointMethodParameterSerializer> serializerType;
 
-	public JavaMethodParameterMetadata(Parameter javaMethodParameter) {
+	public JavaMethodParameterMetadata(java.lang.reflect.Parameter javaMethodParameter) {
 		this.pathParameter = javaMethodParameter.getAnnotation(PathParameter.class);
 		this.headerParameter = javaMethodParameter.getAnnotation(HeaderParameter.class);
 		this.bodyParameter = javaMethodParameter.getAnnotation(BodyParameter.class);
+		this.queryParameters = javaMethodParameter.getAnnotation(QueryString.class);
 
-		if ((pathParameter != null && headerParameter != null)
-				|| (pathParameter != null && bodyParameter != null)
-				|| (headerParameter != null && bodyParameter != null)) {
-
-			throw new IllegalStateException("Parameter " + javaMethodParameter + " has more than one annotation.");
-		}
+		isTrue(Stream.of(javaMethodParameter.getAnnotations())
+				.filter(a -> a.annotationType().isAnnotationPresent(Parameter.class))
+					.count() <= 1, "Parameter " + javaMethodParameter + " has more than one annotation.");
 
 		this.name = Optional.ofNullable(pathParameter)
 				.map(PathParameter::value)
@@ -35,6 +41,9 @@ public class JavaMethodParameterMetadata {
 									.orElseGet(() -> Optional.ofNullable(javaMethodParameter.getName())
 										.orElseThrow(() -> new IllegalStateException("Could not get the name of the parameter " + javaMethodParameter))));
 
+		this.serializerType = pathParameter != null ? pathParameter.serializer()
+				: queryParameters != null ? queryParameters.serializer()
+				: SimpleEndpointMethodParameterSerializer.class;
 	}
 
 	public String name() {
@@ -42,7 +51,7 @@ public class JavaMethodParameterMetadata {
 	}
 
 	public boolean ofPath() {
-		return pathParameter != null || (headerParameter == null && bodyParameter == null);
+		return pathParameter != null || (headerParameter == null && bodyParameter == null && queryParameters == null);
 	}
 
 	public boolean ofBody() {
@@ -51,6 +60,10 @@ public class JavaMethodParameterMetadata {
 
 	public boolean ofHeader() {
 		return headerParameter != null;
+	}
+
+	public Class<? extends EndpointMethodParameterSerializer> serializer() {
+		return serializerType;
 	}
 
 }

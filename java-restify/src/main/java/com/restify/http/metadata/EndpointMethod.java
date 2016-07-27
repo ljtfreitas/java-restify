@@ -56,8 +56,14 @@ public class EndpointMethod {
 	}
 
 	public String expand(final Object[] args) {
-		return new EndpointPathParameterResolver(path, parameters)
+		String endpoint = new EndpointPathParameterResolver(path, parameters)
 				.resolve(args);
+
+		String query = parameters.ofQueryString()
+				.map(p -> p.resolve(args[p.position()]))
+					.map(q -> "?" + q).orElse("");
+
+		return endpoint + query;
 	}
 
 	@Override

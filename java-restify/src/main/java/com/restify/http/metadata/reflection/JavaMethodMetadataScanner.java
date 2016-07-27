@@ -7,7 +7,7 @@ import java.util.Optional;
 
 public class JavaMethodMetadataScanner {
 
-	private final java.lang.reflect.Method javaMethod;
+	private final Method javaMethod;
 
 	public JavaMethodMetadataScanner(Method javaMethod) {
 		this.javaMethod = javaMethod;
