@@ -66,7 +66,7 @@ public class EndpointResponseReaderTest {
 
 	}
 
-	private class SimpleHttpMessageConverter implements HttpMessageConverter {
+	private class SimpleHttpMessageConverter implements HttpMessageConverter<Object> {
 
 		@Override
 		public String contentType() {

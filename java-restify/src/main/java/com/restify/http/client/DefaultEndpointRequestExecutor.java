@@ -36,8 +36,7 @@ public class DefaultEndpointRequestExecutor implements EndpointRequestExecutor {
 					.orElseThrow(() -> new RestifyHttpMessageWriteException("Your request has a body, but the header [Content-Type] "
 							+ "it was not provided."));
 
-			HttpMessageConverter converter = messageConverters.by(contentType)
-					.filter(c -> c.canWrite(b.getClass()))
+			HttpMessageConverter<Object> converter = messageConverters.writerOf(contentType, b.getClass())
 					.orElseThrow(() -> new RestifyHttpMessageWriteException("Your request has a [Content-Type] of type [" + contentType + "], "
 							+ "but there is no MessageConverter able to write your message."));
 
@@ -56,14 +55,14 @@ public class DefaultEndpointRequestExecutor implements EndpointRequestExecutor {
 	}
 
 	private Object responseOf(EndpointResponse response, Class<?> expectedType) {
-		return expectedType == Void.TYPE ? null :
+		return isVoid(expectedType) ? null :
 			endpointResponseReader.ifSuccess(response.code(), r -> {
-				try {
-					return r.read(response, expectedType);
-				} catch (Exception e) {
-					throw new RestifyHttpException(e);
-				}
+				return r.read(response, expectedType);
 
 			}).orElseThrow(() -> endpointResponseReader.onError(response));
+	}
+
+	private boolean isVoid(Class<?> expectedType) {
+		return expectedType == Void.TYPE || expectedType == Void.class;
 	}
 }

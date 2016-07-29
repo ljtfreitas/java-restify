@@ -7,12 +7,15 @@ import java.io.Reader;
 import java.nio.charset.Charset;
 
 import com.google.gson.Gson;
+import com.google.gson.JsonIOException;
+import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 import com.restify.http.client.HttpRequestMessage;
 import com.restify.http.client.HttpResponseMessage;
+import com.restify.http.client.RestifyHttpMessageReadException;
 import com.restify.http.client.RestifyHttpMessageWriteException;
 
-public class GsonMessageConverter extends JsonMessageConverter {
+public class GsonMessageConverter<T> extends JsonMessageConverter<T> {
 
 	private final Gson gson;
 
@@ -30,7 +33,7 @@ public class GsonMessageConverter extends JsonMessageConverter {
 	}
 
 	@Override
-	public void write(Object body, HttpRequestMessage httpRequestMessage) {
+	public void write(Object body, HttpRequestMessage httpRequestMessage) throws RestifyHttpMessageWriteException {
 		Charset charset = Charset.forName(httpRequestMessage.charset());
 
 		OutputStreamWriter writer = new OutputStreamWriter(httpRequestMessage.output(), charset);
@@ -39,8 +42,9 @@ public class GsonMessageConverter extends JsonMessageConverter {
 			gson.toJson(body, writer);
 
 			writer.close();
-		} catch (IOException e) {
-			throw new RestifyHttpMessageWriteException("Error on try write json message", e);
+
+		} catch (JsonIOException | IOException e) {
+			throw new RestifyHttpMessageWriteException(e);
 		}
 	}
 
@@ -50,12 +54,16 @@ public class GsonMessageConverter extends JsonMessageConverter {
 	}
 
 	@Override
-	public Object read(Class<?> expectedType, HttpResponseMessage httpResponseMessage) {
-		TypeToken<?> token = TypeToken.get(expectedType);
+	public T read(Class<? extends T> expectedType, HttpResponseMessage httpResponseMessage) throws RestifyHttpMessageReadException {
+		try {
+			TypeToken<?> token = TypeToken.get(expectedType);
 
-		Reader json = new InputStreamReader(httpResponseMessage.input());
+			Reader json = new InputStreamReader(httpResponseMessage.input());
 
-		return this.gson.fromJson(json, token.getType());
+			return this.gson.fromJson(json, token.getType());
+		} catch (JsonIOException | JsonSyntaxException e) {
+			throw new RestifyHttpMessageReadException(e);
+		}
 	}
 
 }

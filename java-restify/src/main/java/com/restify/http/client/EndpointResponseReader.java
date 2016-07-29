@@ -32,8 +32,7 @@ public class EndpointResponseReader {
 		public Object read(EndpointResponse response, Class<?> expectedType) {
 			String contentType = response.headers().get("Content-Type").orElse("text/plain");
 
-			HttpMessageConverter converter = converters.by(contentType)
-					.filter(c -> c.canRead(expectedType))
+			HttpMessageConverter<Object> converter = converters.readerOf(contentType, expectedType)
 					.orElseThrow(() -> new RestifyHttpMessageReadException("Your request responded a content "
 							+ "of type [" + contentType + "], but there is no MessageConverter able to read this message."));
 

@@ -19,7 +19,7 @@ import com.restify.http.client.converter.SimpleHttpResponseMessage;
 
 public class JaxBXmlMessageConverterTest {
 
-	private JaxBXmlMessageConverter converter = new JaxBXmlMessageConverter();
+	private JaxBXmlMessageConverter<MyXmlModel> converter = new JaxBXmlMessageConverter<>();
 
 	private String xml;
 
@@ -68,7 +68,7 @@ public class JaxBXmlMessageConverterTest {
 	public void shouldReadXmlMessage() {
 		ByteArrayInputStream input = new ByteArrayInputStream(xml.getBytes());
 
-		MyXmlModel myXmlModel = (MyXmlModel) converter.read(MyXmlModel.class, new SimpleHttpResponseMessage(input));
+		MyXmlModel myXmlModel = converter.read(MyXmlModel.class, new SimpleHttpResponseMessage(input));
 
 		assertEquals("Tiago de Freitas Lima", myXmlModel.name);
 		assertEquals(31, myXmlModel.age);

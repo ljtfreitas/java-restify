@@ -20,7 +20,7 @@ public class EndpointMethodQueryStringParametersSerializerTest {
 	}
 
 	@Test
-	public void shouldSerializeParametersObjectOnQueryParametersFormat() {
+	public void shouldSerializeParametersObjectToQueryParametersFormat() {
 		Parameters parameters = new Parameters();
 		parameters.put("param1", "value1");
 		parameters.put("param1", "value2");
@@ -32,7 +32,7 @@ public class EndpointMethodQueryStringParametersSerializerTest {
 	}
 
 	@Test
-	public void shouldSerializeMapOnQueryParametersFormat() {
+	public void shouldSerializeMapToQueryParametersFormat() {
 		Map<String, String> parameters = new LinkedHashMap<>();
 		parameters.put("param1", "value1");
 		parameters.put("param2", "value2");
@@ -44,7 +44,7 @@ public class EndpointMethodQueryStringParametersSerializerTest {
 	}
 
 	@Test
-	public void shouldSerializeMapOfIterableOnQueryParametersFormat() {
+	public void shouldSerializeMapOfIterableToQueryParametersFormat() {
 		Map<String, Collection<String>> parameters = new LinkedHashMap<>();
 		parameters.put("param1", Arrays.asList("value1", "value2", "value3"));
 		parameters.put("param2", Arrays.asList("value4", "value5"));

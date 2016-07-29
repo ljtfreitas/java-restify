@@ -13,4 +13,9 @@ public class Preconditions {
 		return value;
 	}
 
+	public static boolean isFalse(boolean value, String message) {
+		if (value) throw new IllegalArgumentException(message);
+		return value;
+	}
+
 }

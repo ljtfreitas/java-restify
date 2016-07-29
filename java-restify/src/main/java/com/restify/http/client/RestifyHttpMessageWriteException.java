@@ -10,6 +10,10 @@ public class RestifyHttpMessageWriteException extends RestifyHttpException {
 		super(message);
 	}
 
+	public RestifyHttpMessageWriteException(Throwable cause) {
+		super(cause);
+	}
+
 	public RestifyHttpMessageWriteException(String message, Throwable cause) {
 		super(message, cause);
 	}

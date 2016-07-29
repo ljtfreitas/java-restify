@@ -3,10 +3,10 @@ package com.restify.http;
 import java.lang.reflect.Proxy;
 import java.util.Optional;
 
+import com.restify.http.client.DefaultEndpointRequestExecutor;
 import com.restify.http.client.EndpointMethodExecutor;
 import com.restify.http.client.EndpointRequestExecutor;
 import com.restify.http.client.HttpClientRequestFactory;
-import com.restify.http.client.DefaultEndpointRequestExecutor;
 import com.restify.http.client.converter.HttpMessageConverter;
 import com.restify.http.client.converter.HttpMessageConverters;
 import com.restify.http.client.jdk.JdkHttpClientRequestFactory;
@@ -34,7 +34,7 @@ public class RestifyProxyBuilder {
 		return this;
 	}
 
-	public RestifyProxyBuilder converters(HttpMessageConverter...converters) {
+	public RestifyProxyBuilder converters(HttpMessageConverter<?>...converters) {
 		this.messageConverters = new HttpMessageConverters(converters);
 		return this;
 	}

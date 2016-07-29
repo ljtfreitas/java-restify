@@ -39,29 +39,26 @@ public class DefaultEndpointRequestExecutorTest {
 	private DefaultEndpointRequestExecutor endpointRequestExecutor;
 
 	@Mock
-	private HttpMessageConverter jsonHttpMessageConverterMock;
+	private HttpMessageConverter<Object> jsonHttpMessageConverterMock;
 
 	@Mock
-	private HttpMessageConverter textPlainHttpMessageConverterMock;
+	private HttpMessageConverter<Object> textPlainHttpMessageConverterMock;
 
 	private String endpointResult;
 
 	@Before
 	public void setup() {
-		when(httpMessageConvertersMock.by("application/json"))
+		when(httpMessageConvertersMock.writerOf(eq("application/json"), any()))
 			.thenReturn(Optional.of(jsonHttpMessageConverterMock));
 
-		when(httpMessageConvertersMock.by("text/plain"))
+		when(httpMessageConvertersMock.readerOf(eq("application/json"), any()))
+			.thenReturn(Optional.of(jsonHttpMessageConverterMock));
+
+		when(httpMessageConvertersMock.writerOf(eq("text/plain"), any()))
 			.thenReturn(Optional.of(textPlainHttpMessageConverterMock));
 
-		when(jsonHttpMessageConverterMock.canRead(any()))
-			.thenReturn(true);
-
-		when(jsonHttpMessageConverterMock.canWrite(MyModel.class))
-			.thenReturn(true);
-
-		when(textPlainHttpMessageConverterMock.canRead(any()))
-			.thenReturn(true);
+		when(httpMessageConvertersMock.readerOf(eq("text/plain"), any()))
+			.thenReturn(Optional.of(textPlainHttpMessageConverterMock));
 
 		endpointResult = "endpoint request result";
 

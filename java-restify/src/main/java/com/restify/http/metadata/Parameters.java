@@ -28,6 +28,11 @@ public class Parameters {
 		}
 	}
 
+	public Optional<String> first(String name) {
+		return Optional.ofNullable(parameters.get(name))
+			.flatMap(values -> values.stream().findFirst());
+	}
+
 	public Collection<Parameter> all() {
 		return parameters.entrySet().stream()
 					.map(e -> new Parameter(e.getKey(), e.getValue()))

@@ -13,7 +13,7 @@ import com.restify.http.client.converter.SimpleHttpResponseMessage;
 
 public class GsonMessageConverterTest {
 
-	private GsonMessageConverter converter = new GsonMessageConverter();
+	private GsonMessageConverter<MyJsonModel> converter = new GsonMessageConverter<>();
 
 	private String json;
 
@@ -41,7 +41,7 @@ public class GsonMessageConverterTest {
 	public void shouldReadJsonMessage() {
 		ByteArrayInputStream input = new ByteArrayInputStream(json.getBytes());
 
-		MyJsonModel myJsonModel = (MyJsonModel) converter.read(MyJsonModel.class, new SimpleHttpResponseMessage(input));
+		MyJsonModel myJsonModel = converter.read(MyJsonModel.class, new SimpleHttpResponseMessage(input));
 
 		assertEquals("Tiago de Freitas Lima", myJsonModel.name);
 		assertEquals(31, myJsonModel.age);

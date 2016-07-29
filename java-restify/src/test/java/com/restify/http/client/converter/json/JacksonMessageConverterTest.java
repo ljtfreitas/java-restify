@@ -13,7 +13,7 @@ import com.restify.http.client.converter.SimpleHttpResponseMessage;
 
 public class JacksonMessageConverterTest {
 
-	private JacksonMessageConverter converter = new JacksonMessageConverter();
+	private JacksonMessageConverter<MyJsonModel> converter = new JacksonMessageConverter<>();
 
 	private String json;
 
@@ -41,7 +41,7 @@ public class JacksonMessageConverterTest {
 	public void shouldReadJsonMessage() {
 		ByteArrayInputStream input = new ByteArrayInputStream(json.getBytes());
 
-		MyJsonModel myJsonModel = (MyJsonModel) converter.read(MyJsonModel.class, new SimpleHttpResponseMessage(input));
+		MyJsonModel myJsonModel = converter.read(MyJsonModel.class, new SimpleHttpResponseMessage(input));
 
 		assertEquals("Tiago de Freitas Lima", myJsonModel.name);
 		assertEquals(31, myJsonModel.age);

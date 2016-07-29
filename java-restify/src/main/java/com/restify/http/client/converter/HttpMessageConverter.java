@@ -5,15 +5,15 @@ import com.restify.http.client.HttpResponseMessage;
 import com.restify.http.client.RestifyHttpMessageReadException;
 import com.restify.http.client.RestifyHttpMessageWriteException;
 
-public interface HttpMessageConverter {
+public interface HttpMessageConverter<T> {
 
 	public String contentType();
 
 	public boolean canWrite(Class<?> type);
 
-	public void write(Object body, HttpRequestMessage httpRequestMessage) throws RestifyHttpMessageWriteException;
+	public void write(T body, HttpRequestMessage httpRequestMessage) throws RestifyHttpMessageWriteException;
 
 	public boolean canRead(Class<?> type);
 
-	public Object read(Class<?> expectedType, HttpResponseMessage httpResponseMessage) throws RestifyHttpMessageReadException;
+	public T read(Class<? extends T> expectedType, HttpResponseMessage httpResponseMessage) throws RestifyHttpMessageReadException;
 }

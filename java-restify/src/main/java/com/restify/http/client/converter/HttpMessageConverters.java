@@ -1,10 +1,12 @@
 package com.restify.http.client.converter;
 
+import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Collection;
 import java.util.Optional;
 
+import com.restify.http.client.converter.form.FormURLEncodedMapMessageConverter;
+import com.restify.http.client.converter.form.FormURLEncodedParametersMessageConverter;
 import com.restify.http.client.converter.json.JsonMessageConverter;
 import com.restify.http.client.converter.text.TextHtmlMessageConverter;
 import com.restify.http.client.converter.text.TextPlainMessageConverter;
@@ -12,24 +14,39 @@ import com.restify.http.client.converter.xml.JaxBXmlMessageConverter;
 
 public class HttpMessageConverters {
 
-	private final Map<String, HttpMessageConverter> converters = new HashMap<>();
+	private final Collection<HttpMessageConverter<?>> converters = new ArrayList<>();
 
 	public HttpMessageConverters() {
-		this(new TextPlainMessageConverter(), new TextHtmlMessageConverter(), JsonMessageConverter.available(),
-				new JaxBXmlMessageConverter());
+		this.converters.add(JsonMessageConverter.available());
+		this.converters.add(new TextPlainMessageConverter());
+		this.converters.add(new TextHtmlMessageConverter());
+		this.converters.add(new JaxBXmlMessageConverter<Object>());
+		this.converters.add(new FormURLEncodedParametersMessageConverter());
+		this.converters.add(new FormURLEncodedMapMessageConverter());
 	}
 
-	public HttpMessageConverters(HttpMessageConverter...converters) {
+	public HttpMessageConverters(HttpMessageConverter<?>...converters) {
 		Arrays.stream(converters)
-			.forEach(c -> this.converters.put(c.contentType(), c));
+			.forEach(c -> this.converters.add(c));
 	}
 
-	public Optional<HttpMessageConverter> by(String contentType) {
-		Optional<HttpMessageConverter> converter = Optional.ofNullable(converters.get(contentType));
+	public void add(HttpMessageConverter<?> converter) {
+		converters.add(converter);
+	}
 
-		return converter.isPresent() ? converter :
-			converters.values().stream()
-				.filter(c -> contentType.startsWith(c.contentType()))
+	@SuppressWarnings("unchecked")
+	public <T> Optional<HttpMessageConverter<T>> readerOf(String contentType, Class<?> type) {
+		return converters.stream()
+				.filter(c -> (c.contentType().equals(contentType) || contentType.startsWith(c.contentType()) && c.canRead(type)))
+					.map(c -> ((HttpMessageConverter<T>) c))
+						.findFirst();
+	}
+
+	@SuppressWarnings("unchecked")
+	public <T> Optional<HttpMessageConverter<T>> writerOf(String contentType, Class<?> type) {
+		return converters.stream()
+				.filter(c -> (c.contentType().equals(contentType) || contentType.startsWith(c.contentType()) && c.canWrite(type)))
+				.map(c -> ((HttpMessageConverter<T>) c))
 					.findFirst();
 	}
 }

@@ -22,7 +22,7 @@ import com.restify.http.client.RestifyHttpMessageReadException;
 import com.restify.http.client.RestifyHttpMessageWriteException;
 import com.restify.http.client.converter.HttpMessageConverter;
 
-public class JaxBXmlMessageConverter implements HttpMessageConverter {
+public class JaxBXmlMessageConverter<T> implements HttpMessageConverter<T> {
 
 	private final Map<Class<?>, JAXBContext> contexts = new ConcurrentHashMap<>();
 
@@ -37,7 +37,7 @@ public class JaxBXmlMessageConverter implements HttpMessageConverter {
 	}
 
 	@Override
-	public void write(Object body, HttpRequestMessage httpRequestMessage) throws RestifyHttpMessageWriteException {
+	public void write(T body, HttpRequestMessage httpRequestMessage) throws RestifyHttpMessageWriteException {
 		JAXBContext context = contextOf(body.getClass());
 
 		try {
@@ -57,8 +57,9 @@ public class JaxBXmlMessageConverter implements HttpMessageConverter {
 		return type.isAnnotationPresent(XmlRootElement.class) || type.isAnnotationPresent(XmlType.class);
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public Object read(Class<?> expectedType, HttpResponseMessage httpResponseMessage) {
+	public T read(Class<? extends T> expectedType, HttpResponseMessage httpResponseMessage) {
 		JAXBContext context = contextOf(expectedType);
 
 		try {
@@ -68,7 +69,7 @@ public class JaxBXmlMessageConverter implements HttpMessageConverter {
 
 			XMLStreamReader reader = XMLInputFactory.newInstance().createXMLStreamReader(source);
 
-			return expectedType.isAnnotationPresent(XmlRootElement.class) ? unmarshaller.unmarshal(reader)
+			return expectedType.isAnnotationPresent(XmlRootElement.class) ? (T) unmarshaller.unmarshal(reader)
 					: unmarshaller.unmarshal(reader, expectedType).getValue();
 
 		} catch (JAXBException | XMLStreamException | FactoryConfigurationError e) {
@@ -84,7 +85,7 @@ public class JaxBXmlMessageConverter implements HttpMessageConverter {
 		try {
 			return JAXBContext.newInstance(type);
 		} catch (JAXBException e) {
-			throw new UnsupportedOperationException(e);
+			throw new IllegalArgumentException(e);
 		}
 	}
 
