@@ -9,6 +9,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.UncheckedIOException;
+import java.lang.reflect.Type;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -83,12 +84,12 @@ public class EndpointResponseReaderTest {
 		}
 
 		@Override
-		public boolean canRead(Class<?> type) {
+		public boolean canRead(Type type) {
 			return true;
 		}
 
 		@Override
-		public Object read(Class<?> expectedType, HttpResponseMessage httpResponseMessage) {
+		public Object read(Type expectedType, HttpResponseMessage httpResponseMessage) {
 			try (BufferedReader buffer = new BufferedReader(new InputStreamReader(httpResponseMessage.input()))) {
 				return buffer.lines().collect(Collectors.joining("\n"));
 

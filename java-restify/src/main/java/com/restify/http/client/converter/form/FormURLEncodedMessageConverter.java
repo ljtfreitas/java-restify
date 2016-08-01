@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.UnsupportedEncodingException;
+import java.lang.reflect.Type;
 import java.net.URLDecoder;
 import java.util.Arrays;
 import java.util.stream.Collectors;
@@ -40,7 +41,7 @@ public abstract class FormURLEncodedMessageConverter<T> implements HttpMessageCo
 	}
 
 	@Override
-	public T read(Class<? extends T> expectedType, HttpResponseMessage httpResponseMessage) throws RestifyHttpMessageReadException {
+	public T read(Type expectedType, HttpResponseMessage httpResponseMessage) throws RestifyHttpMessageReadException {
 		try (BufferedReader buffer = new BufferedReader(new InputStreamReader(httpResponseMessage.input()))) {
             String content = buffer.lines().collect(Collectors.joining("\n"));
 

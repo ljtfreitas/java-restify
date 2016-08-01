@@ -1,5 +1,6 @@
 package com.restify.http.client.converter.xml;
 
+import java.lang.reflect.Type;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
@@ -53,14 +54,17 @@ public class JaxBXmlMessageConverter<T> implements HttpMessageConverter<T> {
 
 
 	@Override
-	public boolean canRead(Class<?> type) {
-		return type.isAnnotationPresent(XmlRootElement.class) || type.isAnnotationPresent(XmlType.class);
+	public boolean canRead(Type type) {
+		return type instanceof Class && (((Class<?>) type).isAnnotationPresent(XmlRootElement.class)
+				|| ((Class<?>) type).isAnnotationPresent(XmlType.class));
 	}
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public T read(Class<? extends T> expectedType, HttpResponseMessage httpResponseMessage) {
-		JAXBContext context = contextOf(expectedType);
+	public T read(Type expectedType, HttpResponseMessage httpResponseMessage) {
+		Class<T> expectedClassType = (Class<T>) expectedType;
+
+		JAXBContext context = contextOf(expectedClassType);
 
 		try {
 			Unmarshaller unmarshaller = context.createUnmarshaller();
@@ -69,8 +73,8 @@ public class JaxBXmlMessageConverter<T> implements HttpMessageConverter<T> {
 
 			XMLStreamReader reader = XMLInputFactory.newInstance().createXMLStreamReader(source);
 
-			return expectedType.isAnnotationPresent(XmlRootElement.class) ? (T) unmarshaller.unmarshal(reader)
-					: unmarshaller.unmarshal(reader, expectedType).getValue();
+			return expectedClassType.isAnnotationPresent(XmlRootElement.class) ? (T) unmarshaller.unmarshal(reader)
+					: unmarshaller.unmarshal(reader, expectedClassType).getValue();
 
 		} catch (JAXBException | XMLStreamException | FactoryConfigurationError e) {
 			throw new RestifyHttpMessageReadException("Error on try read xml message", e);

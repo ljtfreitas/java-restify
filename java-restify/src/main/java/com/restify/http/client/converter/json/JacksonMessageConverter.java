@@ -1,6 +1,7 @@
 package com.restify.http.client.converter.json;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.util.Arrays;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
@@ -58,13 +59,13 @@ public class JacksonMessageConverter<T> extends JsonMessageConverter<T> {
 	}
 
 	@Override
-	public boolean canRead(Class<?> type) {
+	public boolean canRead(Type type) {
 		TypeFactory typeFactory = objectMapper.getTypeFactory();
 		return objectMapper.canDeserialize(typeFactory.constructType(type));
 	}
 
 	@Override
-	public T read(Class<? extends T> expectedType, HttpResponseMessage httpResponseMessage) throws RestifyHttpMessageReadException {
+	public T read(Type expectedType, HttpResponseMessage httpResponseMessage) throws RestifyHttpMessageReadException {
 		try {
 			TypeFactory typeFactory = objectMapper.getTypeFactory();
 

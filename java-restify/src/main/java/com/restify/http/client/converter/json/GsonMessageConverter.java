@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
+import java.lang.reflect.Type;
 import java.nio.charset.Charset;
 
 import com.google.gson.Gson;
@@ -49,12 +50,12 @@ public class GsonMessageConverter<T> extends JsonMessageConverter<T> {
 	}
 
 	@Override
-	public boolean canRead(Class<?> type) {
+	public boolean canRead(Type type) {
 		return true;
 	}
 
 	@Override
-	public T read(Class<? extends T> expectedType, HttpResponseMessage httpResponseMessage) throws RestifyHttpMessageReadException {
+	public T read(Type expectedType, HttpResponseMessage httpResponseMessage) throws RestifyHttpMessageReadException {
 		try {
 			TypeToken<?> token = TypeToken.get(expectedType);
 

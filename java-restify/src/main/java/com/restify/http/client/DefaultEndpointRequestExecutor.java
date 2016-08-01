@@ -1,6 +1,7 @@
 package com.restify.http.client;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
 
 import com.restify.http.RestifyHttpException;
 import com.restify.http.client.converter.HttpMessageConverter;
@@ -54,7 +55,7 @@ public class DefaultEndpointRequestExecutor implements EndpointRequestExecutor {
 		return httpClientRequest.execute();
 	}
 
-	private Object responseOf(EndpointResponse response, Class<?> expectedType) {
+	private Object responseOf(EndpointResponse response, Type expectedType) {
 		return isVoid(expectedType) ? null :
 			endpointResponseReader.ifSuccess(response.code(), r -> {
 				return r.read(response, expectedType);
@@ -62,7 +63,7 @@ public class DefaultEndpointRequestExecutor implements EndpointRequestExecutor {
 			}).orElseThrow(() -> endpointResponseReader.onError(response));
 	}
 
-	private boolean isVoid(Class<?> expectedType) {
+	private boolean isVoid(Type expectedType) {
 		return expectedType == Void.TYPE || expectedType == Void.class;
 	}
 }

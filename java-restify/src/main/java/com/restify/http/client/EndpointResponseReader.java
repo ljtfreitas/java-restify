@@ -1,6 +1,7 @@
 package com.restify.http.client;
 
 import java.io.IOException;
+import java.lang.reflect.Type;
 import java.util.Optional;
 import java.util.function.Function;
 
@@ -29,7 +30,7 @@ public class EndpointResponseReader {
 
 	public class EndpointSuccessResponseReader {
 
-		public Object read(EndpointResponse response, Class<?> expectedType) {
+		public Object read(EndpointResponse response, Type expectedType) {
 			String contentType = response.headers().get("Content-Type").orElse("text/plain");
 
 			HttpMessageConverter<Object> converter = converters.readerOf(contentType, expectedType)

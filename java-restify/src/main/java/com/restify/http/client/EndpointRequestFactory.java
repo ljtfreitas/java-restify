@@ -32,7 +32,7 @@ public class EndpointRequestFactory {
 				.ofQueryString()
 					.map(p -> args[p.position()]).orElse(null);
 
-			return new EndpointRequest(endpoint, endpointMethod.httpMethod(), headers, body, endpointMethod.expectedType());
+			return new EndpointRequest(endpoint, endpointMethod.httpMethod(), headers, body, endpointMethod.returnType());
 
 		} catch (MalformedURLException e) {
 			throw new RestifyHttpException(e);

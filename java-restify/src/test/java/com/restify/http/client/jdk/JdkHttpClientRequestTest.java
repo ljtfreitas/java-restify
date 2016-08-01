@@ -7,6 +7,8 @@ import static org.mockserver.model.JsonBody.json;
 import static org.mockserver.model.StringBody.exact;
 import static org.mockserver.verify.VerificationTimes.once;
 
+import java.util.Collection;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -58,6 +60,22 @@ public class JdkHttpClientRequestTest {
 
 		assertEquals("Tiago de Freitas Lima", myModel.name);
 		assertEquals(31, myModel.age);
+	}
+
+	@Test
+	public void shouldGetCollectionOfJsonResponse() {
+		mockServerClient
+			.when(request()
+				.withMethod("GET")
+				.withPath("/json/all"))
+		.respond(response()
+				.withStatusCode(200)
+				.withHeader("Content-Type", "application/json")
+				.withBody(json("[{\"name\": \"Tiago de Freitas Lima 1\",\"age\":31},{\"name\": \"Tiago de Freitas Lima 2\",\"age\":32}]")));
+
+		Collection<MyModel> myModelCollection = myApi.jsonCollection();
+
+		assertEquals(2, myModelCollection.size());
 	}
 
 	@Test
@@ -126,6 +144,9 @@ public class JdkHttpClientRequestTest {
 		@Header(name = "Content-Type", value = "application/json")
 		public void json(@BodyParameter MyModel myModel);
 
+		@Path("/json/all") @Get
+		public Collection<MyModel> jsonCollection();
+
 		@Path("/xml") @Get
 		public MyModel xml();
 
@@ -148,6 +169,14 @@ public class JdkHttpClientRequestTest {
 			this.name = name;
 			this.age = age;
 		}
+	}
+	
+	interface MyGenericJsonApi<T> {
 
+		@Path("/json") @Get
+		public T json();
+	}
+	
+	interface MyModelJsonApi extends MyGenericJsonApi<MyModel> {
 	}
 }

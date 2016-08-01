@@ -1,5 +1,6 @@
 package com.restify.http.client.converter.form;
 
+import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.Map;
 
@@ -11,7 +12,7 @@ public class FormURLEncodedMapMessageConverter extends FormURLEncodedMessageConv
 	}
 
 	@Override
-	public boolean canRead(Class<?> type) {
+	public boolean canRead(Type type) {
 		return false;
 	}
 

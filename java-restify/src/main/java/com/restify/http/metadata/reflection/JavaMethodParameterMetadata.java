@@ -19,14 +19,14 @@ public class JavaMethodParameterMetadata {
 	private final PathParameter pathParameter;
 	private final HeaderParameter headerParameter;
 	private final BodyParameter bodyParameter;
-	private final QueryString queryParameters;
+	private final QueryString queryString;
 	private final Class<? extends EndpointMethodParameterSerializer> serializerType;
 
 	public JavaMethodParameterMetadata(java.lang.reflect.Parameter javaMethodParameter) {
 		this.pathParameter = javaMethodParameter.getAnnotation(PathParameter.class);
 		this.headerParameter = javaMethodParameter.getAnnotation(HeaderParameter.class);
 		this.bodyParameter = javaMethodParameter.getAnnotation(BodyParameter.class);
-		this.queryParameters = javaMethodParameter.getAnnotation(QueryString.class);
+		this.queryString = javaMethodParameter.getAnnotation(QueryString.class);
 
 		isTrue(Stream.of(javaMethodParameter.getAnnotations())
 				.filter(a -> a.annotationType().isAnnotationPresent(Parameter.class))
@@ -42,7 +42,7 @@ public class JavaMethodParameterMetadata {
 										.orElseThrow(() -> new IllegalStateException("Could not get the name of the parameter " + javaMethodParameter))));
 
 		this.serializerType = pathParameter != null ? pathParameter.serializer()
-				: queryParameters != null ? queryParameters.serializer()
+				: queryString != null ? queryString.serializer()
 				: SimpleEndpointMethodParameterSerializer.class;
 	}
 
@@ -51,7 +51,7 @@ public class JavaMethodParameterMetadata {
 	}
 
 	public boolean ofPath() {
-		return pathParameter != null || (headerParameter == null && bodyParameter == null && queryParameters == null);
+		return pathParameter != null || (headerParameter == null && bodyParameter == null && queryString == null);
 	}
 
 	public boolean ofBody() {
@@ -60,6 +60,10 @@ public class JavaMethodParameterMetadata {
 
 	public boolean ofHeader() {
 		return headerParameter != null;
+	}
+
+	public boolean ofQuery() {
+		return queryString != null;
 	}
 
 	public Class<? extends EndpointMethodParameterSerializer> serializer() {

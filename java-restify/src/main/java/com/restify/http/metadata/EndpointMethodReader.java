@@ -2,6 +2,7 @@ package com.restify.http.metadata;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
+import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -33,7 +34,9 @@ public class EndpointMethodReader {
 
 		EndpointHeaders headers = endpointMethodHeaders(javaTypeMetadata, javaMethodMetadata);
 
-		return new EndpointMethod(javaMethod, endpointPath, endpointHttpMethod, parameters, headers);
+		Type returnType = javaMethodMetadata.returnType(target.type());
+		
+		return new EndpointMethod(javaMethod, endpointPath, endpointHttpMethod, parameters, headers, returnType);
 	}
 
 	private String endpointTarget() {
@@ -41,10 +44,10 @@ public class EndpointMethodReader {
 	}
 
 	private String endpointTypePath(JavaTypeMetadata javaTypeMetadata) {
-		return javaTypeMetadata.path()
+		return Arrays.stream(javaTypeMetadata.paths())
 				.map(Path::value)
 				.map(p -> p.endsWith("/") ? p.substring(0, p.length() - 1) : p)
-				.orElse("");
+				.collect(Collectors.joining());
 	}
 
 	private String endpointMethodPath(JavaMethodMetadata javaMethodMetadata) {

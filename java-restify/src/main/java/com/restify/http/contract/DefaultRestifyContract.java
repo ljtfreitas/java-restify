@@ -20,8 +20,10 @@ public class DefaultRestifyContract implements RestifyContract {
 		Class<?> javaType = target.type();
 
 		EndpointMethods endpointMethods = new EndpointMethods(
-				Arrays.stream(javaType.getDeclaredMethods())
-					.filter(m -> !m.isDefault() && !Modifier.isStatic(m.getModifiers()))
+				Arrays.stream(javaType.getMethods())
+					.filter(javaMethod -> javaMethod.getDeclaringClass() != Object.class 
+						|| !javaMethod.isDefault() 
+						|| !Modifier.isStatic(javaMethod.getModifiers()))
 					.map(javaMethod -> new EndpointMethodReader(target).read(javaMethod))
 						.collect(Collectors.toSet()));
 

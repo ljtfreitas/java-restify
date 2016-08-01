@@ -1,5 +1,6 @@
 package com.restify.http.client.converter;
 
+import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -16,30 +17,17 @@ public class HttpMessageConverters {
 
 	private final Collection<HttpMessageConverter<?>> converters = new ArrayList<>();
 
-	public HttpMessageConverters() {
-		this.converters.add(JsonMessageConverter.available());
-		this.converters.add(new TextPlainMessageConverter());
-		this.converters.add(new TextHtmlMessageConverter());
-		this.converters.add(new JaxBXmlMessageConverter<Object>());
-		this.converters.add(new FormURLEncodedParametersMessageConverter());
-		this.converters.add(new FormURLEncodedMapMessageConverter());
-	}
-
 	public HttpMessageConverters(HttpMessageConverter<?>...converters) {
 		Arrays.stream(converters)
 			.forEach(c -> this.converters.add(c));
 	}
 
-	public void add(HttpMessageConverter<?> converter) {
-		converters.add(converter);
-	}
-
 	@SuppressWarnings("unchecked")
-	public <T> Optional<HttpMessageConverter<T>> readerOf(String contentType, Class<?> type) {
+	public <T> Optional<HttpMessageConverter<T>> readerOf(String contentType, Type type) {
 		return converters.stream()
 				.filter(c -> (c.contentType().equals(contentType) || contentType.startsWith(c.contentType()) && c.canRead(type)))
-					.map(c -> ((HttpMessageConverter<T>) c))
-						.findFirst();
+				.map(c -> ((HttpMessageConverter<T>) c))
+					.findFirst();
 	}
 
 	@SuppressWarnings("unchecked")
@@ -48,5 +36,14 @@ public class HttpMessageConverters {
 				.filter(c -> (c.contentType().equals(contentType) || contentType.startsWith(c.contentType()) && c.canWrite(type)))
 				.map(c -> ((HttpMessageConverter<T>) c))
 					.findFirst();
+	}
+	
+	public static HttpMessageConverters build() {
+		return new HttpMessageConverters(JsonMessageConverter.available(), 
+			new JaxBXmlMessageConverter<Object>(),
+			new TextPlainMessageConverter(), 
+			new TextHtmlMessageConverter(),
+			new FormURLEncodedParametersMessageConverter(), 
+			new FormURLEncodedMapMessageConverter());
 	}
 }

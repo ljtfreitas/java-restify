@@ -3,7 +3,9 @@ package com.restify.http.metadata;
 import static com.restify.http.metadata.Preconditions.nonNull;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Type;
 import java.util.Objects;
+import java.util.Optional;
 
 public class EndpointMethod {
 
@@ -12,6 +14,7 @@ public class EndpointMethod {
 	private final String httpMethod;
 	private final EndpointMethodParameters parameters;
 	private final EndpointHeaders headers;
+	private final Type returnType;
 
 	public EndpointMethod(Method javaMethod, String path, String httpMethod) {
 		this(javaMethod, path, httpMethod, new EndpointMethodParameters());
@@ -23,12 +26,18 @@ public class EndpointMethod {
 
 	public EndpointMethod(Method javaMethod, String path, String httpMethod, EndpointMethodParameters parameters,
 			EndpointHeaders headers) {
+		this(javaMethod, path, httpMethod, parameters, headers, null);
+	}
+	
+	public EndpointMethod(Method javaMethod, String path, String httpMethod, EndpointMethodParameters parameters,
+			EndpointHeaders headers, Type returnType) {
 
 		this.javaMethod = nonNull(javaMethod, "EndpointMethod needs a Java method.");
 		this.path = nonNull(path, "EndpointMethod needs a endpoint path.");
 		this.httpMethod = nonNull(httpMethod, "EndpointMethod needs a HTTP method.");
 		this.parameters = nonNull(parameters, "EndpointMethod needs a parameters collection.");
 		this.headers = nonNull(headers, "EndpointMethod needs a HTTP headers collection.");
+		this.returnType = Optional.ofNullable(returnType).orElse(javaMethod.getGenericReturnType());
 	}
 
 	public String path() {
@@ -51,8 +60,8 @@ public class EndpointMethod {
 		return headers;
 	}
 
-	public Class<?> expectedType() {
-		return javaMethod.getReturnType();
+	public Type returnType() {
+		return returnType;
 	}
 
 	public String expand(final Object[] args) {

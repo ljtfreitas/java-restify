@@ -88,7 +88,7 @@ public class RestifyProxyBuilder {
 
 		private HttpMessageConverters messageConverters() {
 			return Optional.ofNullable(messageConverters)
-					.orElseGet(() -> new HttpMessageConverters());
+					.orElseGet(() -> HttpMessageConverters.build());
 		}
 
 		private HttpClientRequestFactory httpClientRequestFactory() {

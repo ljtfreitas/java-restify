@@ -1,5 +1,6 @@
 package com.restify.http.metadata.reflection;
 
+import java.lang.reflect.Type;
 import java.util.Optional;
 
 import com.restify.http.contract.Header;
@@ -18,10 +19,10 @@ public class JavaMethodMetadata {
 		this.javaMethod = javaMethod;
 
 		this.path = Optional.ofNullable(javaMethod.getAnnotation(Path.class))
-				.orElseThrow(() -> new IllegalStateException("Method " + javaMethod + " does not have a @Path annotation"));
+				.orElseThrow(() -> new IllegalArgumentException("Method " + javaMethod + " does not have a @Path annotation"));
 
 		this.httpMethod = Optional.ofNullable(new JavaMethodMetadataScanner(javaMethod).scan(Method.class))
-				.orElseThrow(() -> new IllegalStateException("Method " + javaMethod + " does not have a @Method annotation"));
+				.orElseThrow(() -> new IllegalArgumentException("Method " + javaMethod + " does not have a @Method annotation"));
 
 		this.headers = Optional.ofNullable(javaMethod.getAnnotation(Headers.class))
 				.map(Headers::value)
@@ -42,5 +43,9 @@ public class JavaMethodMetadata {
 
 	public Header[] headers() {
 		return headers;
+	}
+
+	public Type returnType(Class<?> rawType) {
+		return new JavaMethodReturnTypeResolver(rawType).resolve(javaMethod);
 	}
 }
