@@ -1,6 +1,7 @@
 package com.restify.http.client;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.notNull;
@@ -12,7 +13,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.net.URL;
+import java.net.URI;
 import java.util.Optional;
 
 import org.junit.Before;
@@ -25,6 +26,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import com.restify.http.RestifyHttpException;
 import com.restify.http.client.converter.HttpMessageConverter;
 import com.restify.http.client.converter.HttpMessageConverters;
+import com.restify.http.client.interceptor.EndpointRequestInterceptorStack;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DefaultEndpointRequestExecutorTest {
@@ -34,6 +36,9 @@ public class DefaultEndpointRequestExecutorTest {
 
 	@Mock
 	private HttpClientRequestFactory httpClientRequestFactoryMock;
+
+	@Mock
+	private EndpointRequestInterceptorStack endpointRequestInterceptorStackMock;
 
 	@InjectMocks
 	private DefaultEndpointRequestExecutor endpointRequestExecutor;
@@ -68,11 +73,13 @@ public class DefaultEndpointRequestExecutorTest {
 		when(textPlainHttpMessageConverterMock.read(eq(String.class), notNull(HttpResponseMessage.class)))
 			.thenReturn(endpointResult);
 
+		when(endpointRequestInterceptorStackMock.apply(any()))
+			.then(returnsFirstArg());
 	}
 
 	@Test
 	public void shouldExecuteHttpClientRequestWithoutBody() throws Exception {
-		EndpointRequest endpointRequest = new EndpointRequest(new URL("http://my.api.com/path"), "GET", String.class);
+		EndpointRequest endpointRequest = new EndpointRequest(new URI("http://my.api.com/path"), "GET", String.class);
 
 		SimpleEndpointResponse response = new SimpleEndpointResponse(new EndpointResponseCode(200),
 				new ByteArrayInputStream(endpointResult.getBytes()));
@@ -91,7 +98,7 @@ public class DefaultEndpointRequestExecutorTest {
 	public void shouldExecuteHttpClientRequestWithBody() throws Exception {
 		MyModel body = new MyModel("My Name", 31);
 
-		EndpointRequest endpointRequest = new EndpointRequest(new URL("http://my.api.com/path"), "POST",
+		EndpointRequest endpointRequest = new EndpointRequest(new URI("http://my.api.com/path"), "POST",
 				new Headers(new Header("Content-Type", "application/json")), body, String.class);
 
 		SimpleEndpointResponse response = new SimpleEndpointResponse(new EndpointResponseCode(200),

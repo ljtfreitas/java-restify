@@ -49,18 +49,18 @@ public class OkHttpClientRequest implements HttpClientRequest {
 
 		byte[] content = outputStream.toByteArray();
 
-		RequestBody body = (content.length > 0 ? RequestBody.create(contentType, content) : null);
-
-		Request.Builder builder = new Request.Builder();
-
-		builder.url(endpointRequest.endpoint())
-			.method(endpointRequest.method(), body);
-
-		endpointRequest.headers().all().forEach(h -> builder.addHeader(h.name(), h.value()));
-
-		Request request = builder.build();
-
 		try {
+			RequestBody body = (content.length > 0 ? RequestBody.create(contentType, content) : null);
+
+			Request.Builder builder = new Request.Builder();
+
+			builder.url(endpointRequest.endpoint().toURL())
+				.method(endpointRequest.method(), body);
+
+			endpointRequest.headers().all().forEach(h -> builder.addHeader(h.name(), h.value()));
+
+			Request request = builder.build();
+
 			return responseOf(okHttpClient.newCall(request).execute());
 
 		} catch (IOException e) {

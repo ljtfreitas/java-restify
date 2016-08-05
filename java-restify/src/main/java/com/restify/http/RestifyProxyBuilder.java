@@ -7,8 +7,11 @@ import com.restify.http.client.DefaultEndpointRequestExecutor;
 import com.restify.http.client.EndpointMethodExecutor;
 import com.restify.http.client.EndpointRequestExecutor;
 import com.restify.http.client.HttpClientRequestFactory;
+import com.restify.http.client.authentication.Authentication;
 import com.restify.http.client.converter.HttpMessageConverter;
 import com.restify.http.client.converter.HttpMessageConverters;
+import com.restify.http.client.interceptor.EndpointRequestInterceptorStack;
+import com.restify.http.client.interceptor.authentication.EndpoinRequestAuthenticationInterceptor;
 import com.restify.http.client.jdk.JdkHttpClientRequestFactory;
 import com.restify.http.contract.DefaultRestifyContract;
 import com.restify.http.contract.RestifyContract;
@@ -23,6 +26,8 @@ public class RestifyProxyBuilder {
 	private HttpMessageConverters messageConverters;
 
 	private EndpointRequestExecutor endpointRequestExecutor;
+
+	private EndpointRequestInterceptorStack endpointRequestInterceptorStack = new EndpointRequestInterceptorStack();
 
 	public RestifyProxyBuilder client(HttpClientRequestFactory httpClientRequestFactory) {
 		this.httpClientRequestFactory = httpClientRequestFactory;
@@ -41,6 +46,11 @@ public class RestifyProxyBuilder {
 
 	public RestifyProxyBuilder executor(EndpointRequestExecutor endpointRequestExecutor) {
 		this.endpointRequestExecutor = endpointRequestExecutor;
+		return this;
+	}
+
+	public RestifyProxyBuilder authentication(Authentication authentication) {
+		endpointRequestInterceptorStack.add(new EndpoinRequestAuthenticationInterceptor(authentication));
 		return this;
 	}
 
@@ -83,7 +93,7 @@ public class RestifyProxyBuilder {
 
 		private EndpointRequestExecutor endpointRequestExecutor() {
 			return Optional.ofNullable(endpointRequestExecutor)
-					.orElseGet(() -> new DefaultEndpointRequestExecutor(httpClientRequestFactory(), messageConverters()));
+					.orElseGet(() -> new DefaultEndpointRequestExecutor(httpClientRequestFactory(), messageConverters(), endpointRequestInterceptorStack));
 		}
 
 		private HttpMessageConverters messageConverters() {

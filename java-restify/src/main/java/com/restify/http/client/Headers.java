@@ -22,6 +22,10 @@ public class Headers {
 		headers.add(header);
 	}
 
+	public void put(String name, String value) {
+		headers.add(new Header(name, value));
+	}
+
 	public void put(String name, Collection<String> values) {
 		values.forEach(value -> headers.add(new Header(name, value)));
 	}

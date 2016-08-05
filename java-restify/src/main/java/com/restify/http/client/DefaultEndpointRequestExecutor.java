@@ -6,22 +6,26 @@ import java.lang.reflect.Type;
 import com.restify.http.RestifyHttpException;
 import com.restify.http.client.converter.HttpMessageConverter;
 import com.restify.http.client.converter.HttpMessageConverters;
+import com.restify.http.client.interceptor.EndpointRequestInterceptorStack;
 
 public class DefaultEndpointRequestExecutor implements EndpointRequestExecutor {
 
 	private final HttpClientRequestFactory httpClientRequestFactory;
 	private final HttpMessageConverters messageConverters;
 	private final EndpointResponseReader endpointResponseReader;
+	private final EndpointRequestInterceptorStack endpointRequestInterceptorStack;
 
-	public DefaultEndpointRequestExecutor(HttpClientRequestFactory httpClientRequestFactory, HttpMessageConverters messageConverters) {
+	public DefaultEndpointRequestExecutor(HttpClientRequestFactory httpClientRequestFactory, HttpMessageConverters messageConverters,
+			EndpointRequestInterceptorStack endpointRequestInterceptorStack) {
 		this.httpClientRequestFactory = httpClientRequestFactory;
 		this.messageConverters = messageConverters;
+		this.endpointRequestInterceptorStack = endpointRequestInterceptorStack;
 		this.endpointResponseReader = new EndpointResponseReader(messageConverters);
 	}
 
 	@Override
 	public Object execute(EndpointRequest endpointRequest) {
-		try (EndpointResponse response = doExecute(endpointRequest)) {
+		try (EndpointResponse response = doExecute(intercepts(endpointRequest))) {
 			return responseOf(response, endpointRequest.expectedType());
 
 		} catch (Exception e) {
@@ -53,6 +57,10 @@ public class DefaultEndpointRequestExecutor implements EndpointRequestExecutor {
 		});
 
 		return httpClientRequest.execute();
+	}
+
+	private EndpointRequest intercepts(EndpointRequest endpointRequest) {
+		return endpointRequestInterceptorStack.apply(endpointRequest);
 	}
 
 	private Object responseOf(EndpointResponse response, Type expectedType) {

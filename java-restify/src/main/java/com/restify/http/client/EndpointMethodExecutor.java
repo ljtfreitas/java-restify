@@ -11,7 +11,7 @@ public class EndpointMethodExecutor {
 	}
 
 	public Object execute(EndpointMethod endpointMethod, Object[] args) {
-		EndpointRequest endpointRequest = new EndpointRequestFactory(endpointMethod).buildWith(args);
+		EndpointRequest endpointRequest = new EndpointRequestFactory(endpointMethod).createWith(args);
 
 		return endpointRequestExecutor.execute(endpointRequest);
 	}

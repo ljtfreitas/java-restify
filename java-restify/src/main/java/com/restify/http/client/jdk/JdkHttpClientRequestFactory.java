@@ -22,7 +22,7 @@ public class JdkHttpClientRequestFactory implements HttpClientRequestFactory {
 	@Override
 	public JdkHttpClientRequest createOf(EndpointRequest request) {
 		try {
-			HttpURLConnection connection = (HttpURLConnection) request.endpoint().openConnection();
+			HttpURLConnection connection = (HttpURLConnection) request.endpoint().toURL().openConnection();
 
 			connection.setDoOutput(true);
 			connection.setRequestMethod(request.method());

@@ -1,7 +1,7 @@
 package com.restify.http.client;
 
-import java.net.MalformedURLException;
-import java.net.URL;
+import java.net.URI;
+import java.net.URISyntaxException;
 
 import com.restify.http.RestifyHttpException;
 import com.restify.http.metadata.EndpointHeaderParameterResolver;
@@ -15,9 +15,9 @@ public class EndpointRequestFactory {
 		this.endpointMethod = endpointMethod;
 	}
 
-	public EndpointRequest buildWith(Object[] args) {
+	public EndpointRequest createWith(Object[] args) {
 		try {
-			URL endpoint = new URL(endpointMethod.expand(args));
+			URI endpoint = new URI(endpointMethod.expand(args));
 
 			Object body = endpointMethod.parameters()
 					.ofBody()
@@ -34,7 +34,7 @@ public class EndpointRequestFactory {
 
 			return new EndpointRequest(endpoint, endpointMethod.httpMethod(), headers, body, endpointMethod.returnType());
 
-		} catch (MalformedURLException e) {
+		} catch (URISyntaxException e) {
 			throw new RestifyHttpException(e);
 		}
 

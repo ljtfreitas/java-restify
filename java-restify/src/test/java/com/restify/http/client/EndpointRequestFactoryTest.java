@@ -27,7 +27,7 @@ public class EndpointRequestFactoryTest {
 		EndpointMethod endpointMethod = new EndpointMethod(TargetType.class.getMethod("simple"), "http://my.api.com/some",
 				"GET");
 
-		EndpointRequest endpointRequest = new EndpointRequestFactory(endpointMethod).buildWith(new Object[0]);
+		EndpointRequest endpointRequest = new EndpointRequestFactory(endpointMethod).createWith(new Object[0]);
 
 		assertEquals(endpointMethod.path(), endpointRequest.endpoint().toString());
 		assertEquals(endpointMethod.httpMethod(), endpointRequest.method());
@@ -49,7 +49,7 @@ public class EndpointRequestFactoryTest {
 
 		Object[] args = new Object[]{"argument"};
 
-		EndpointRequest endpointRequest = new EndpointRequestFactory(endpointMethod).buildWith(args);
+		EndpointRequest endpointRequest = new EndpointRequestFactory(endpointMethod).createWith(args);
 
 		assertEquals("http://my.api.com/some/argument", endpointRequest.endpoint().toString());
 		assertEquals(endpointMethod.httpMethod(), endpointRequest.method());
@@ -73,7 +73,7 @@ public class EndpointRequestFactoryTest {
 
 		Object[] args = new Object[]{"my-first-path", "my-second-path", "last-but-not-least-third-path"};
 
-		EndpointRequest endpointRequest = new EndpointRequestFactory(endpointMethod).buildWith(args);
+		EndpointRequest endpointRequest = new EndpointRequestFactory(endpointMethod).createWith(args);
 
 		assertEquals("http://my.api.com/some/my-first-path/my-second-path/last-but-not-least-third-path",
 				endpointRequest.endpoint().toString());
@@ -97,7 +97,7 @@ public class EndpointRequestFactoryTest {
 
 		Object[] args = new Object[]{"my body"};
 
-		EndpointRequest endpointRequest = new EndpointRequestFactory(endpointMethod).buildWith(args);
+		EndpointRequest endpointRequest = new EndpointRequestFactory(endpointMethod).createWith(args);
 
 		assertEquals("http://my.api.com/some", endpointRequest.endpoint().toString());
 		assertEquals(endpointMethod.httpMethod(), endpointRequest.method());
@@ -123,7 +123,7 @@ public class EndpointRequestFactoryTest {
 
 		Object[] args = new Object[]{"my custom header"};
 
-		EndpointRequest endpointRequest = new EndpointRequestFactory(endpointMethod).buildWith(args);
+		EndpointRequest endpointRequest = new EndpointRequestFactory(endpointMethod).createWith(args);
 
 		assertEquals("http://my.api.com/some", endpointRequest.endpoint().toString());
 		assertEquals(endpointMethod.httpMethod(), endpointRequest.method());
@@ -150,7 +150,7 @@ public class EndpointRequestFactoryTest {
 
 		Object[] args = new Object[]{parameters};
 
-		EndpointRequest endpointRequest = new EndpointRequestFactory(endpointMethod).buildWith(args);
+		EndpointRequest endpointRequest = new EndpointRequestFactory(endpointMethod).createWith(args);
 
 		assertEquals("http://my.api.com/query?param1=value1&param2=value2", endpointRequest.endpoint().toString());
 		assertEquals(endpointMethod.httpMethod(), endpointRequest.method());
@@ -175,7 +175,7 @@ public class EndpointRequestFactoryTest {
 
 		Object[] args = new Object[]{parameters};
 
-		EndpointRequest endpointRequest = new EndpointRequestFactory(endpointMethod).buildWith(args);
+		EndpointRequest endpointRequest = new EndpointRequestFactory(endpointMethod).createWith(args);
 
 		assertEquals("http://my.api.com/query?param1=value1&param2=value2", endpointRequest.endpoint().toString());
 		assertEquals(endpointMethod.httpMethod(), endpointRequest.method());
@@ -200,7 +200,7 @@ public class EndpointRequestFactoryTest {
 
 		Object[] args = new Object[]{parameters};
 
-		EndpointRequest endpointRequest = new EndpointRequestFactory(endpointMethod).buildWith(args);
+		EndpointRequest endpointRequest = new EndpointRequestFactory(endpointMethod).createWith(args);
 
 		assertEquals("http://my.api.com/query?param1=value1&param1=value2&param2=value3&param2=value4",
 				endpointRequest.endpoint().toString());
@@ -227,7 +227,7 @@ public class EndpointRequestFactoryTest {
 
 		Object[] args = new Object[]{"argument", "my custom header", "my body"};
 
-		EndpointRequest endpointRequest = new EndpointRequestFactory(endpointMethod).buildWith(args);
+		EndpointRequest endpointRequest = new EndpointRequestFactory(endpointMethod).createWith(args);
 
 		assertEquals("http://my.api.com/some/argument", endpointRequest.endpoint().toString());
 		assertEquals(endpointMethod.httpMethod(), endpointRequest.method());

@@ -1,22 +1,22 @@
 package com.restify.http.client;
 
 import java.lang.reflect.Type;
-import java.net.URL;
+import java.net.URI;
 import java.util.Optional;
 
 public class EndpointRequest {
 
-	private final URL endpoint;
+	private final URI endpoint;
 	private final String method;
 	private final Headers headers;
 	private final Object body;
 	private final Type expectedType;
 
-	public EndpointRequest(URL endpoint, String method, Type expectedType) {
+	public EndpointRequest(URI endpoint, String method, Type expectedType) {
 		this(endpoint, method, new Headers(), null, expectedType);
 	}
 
-	public EndpointRequest(URL endpoint, String method, Headers headers, Object body, Type expectedType) {
+	public EndpointRequest(URI endpoint, String method, Headers headers, Object body, Type expectedType) {
 		this.endpoint = endpoint;
 		this.method = method;
 		this.headers = headers;
@@ -24,7 +24,7 @@ public class EndpointRequest {
 		this.expectedType = expectedType;
 	}
 
-	public URL endpoint() {
+	public URI endpoint() {
 		return endpoint;
 	}
 
