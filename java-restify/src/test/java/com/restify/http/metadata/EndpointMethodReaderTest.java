@@ -16,7 +16,7 @@ import com.restify.http.contract.Method;
 import com.restify.http.contract.Path;
 import com.restify.http.contract.PathParameter;
 import com.restify.http.contract.Post;
-import com.restify.http.contract.QueryString;
+import com.restify.http.contract.QueryParameters;
 
 public class EndpointMethodReaderTest {
 
@@ -142,7 +142,7 @@ public class EndpointMethodReaderTest {
 		Optional<EndpointMethodParameter> queryStringParameter = endpointMethod.parameters().get(0);
 		assertTrue(queryStringParameter.isPresent());
 		assertEquals("parameters", queryStringParameter.get().name());
-		assertTrue(queryStringParameter.get().ofQueryString());
+		assertTrue(queryStringParameter.get().ofQuery());
 	}
 
 	@Path("http://my.api.com")
@@ -172,7 +172,7 @@ public class EndpointMethodReaderTest {
 		public void metaAnnotationOfHttpMethod();
 
 		@Path("/query") @Get
-		public Void queryString(@QueryString Parameters parameters);
+		public Void queryString(@QueryParameters Parameters parameters);
 	}
 
 }

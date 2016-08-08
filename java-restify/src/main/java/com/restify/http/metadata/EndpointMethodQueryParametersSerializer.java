@@ -4,17 +4,26 @@ import java.util.Map;
 
 import com.restify.http.contract.Form;
 
-public class EndpointMethodQueryStringParameterSerializer implements EndpointMethodParameterSerializer {
+public class EndpointMethodQueryParametersSerializer implements EndpointMethodParameterSerializer {
 
 	private EndpointMethodFormObjectParameterSerializer formObjectSerializer = new EndpointMethodFormObjectParameterSerializer();
 
 	@SuppressWarnings("unchecked")
 	@Override
 	public String serialize(Object source) {
-		return source instanceof Parameters ? serializeAsParameters((Parameters) source)
-				: source instanceof Map ? serializeAsMap((Map<String, ?>) source) :
-					isFormObject(source) ? serializeAsFormObject(source)
-							: source.toString();
+		if (source instanceof Parameters) {
+			return serializeAsParameters((Parameters) source);
+
+		} else if (source instanceof Map) {
+			return serializeAsMap((Map<String, ?>) source);
+
+		} else if (isFormObject(source)) {
+			return serializeAsFormObject(source);
+
+		} else {
+			throw new IllegalArgumentException(
+					"EndpointMethodQueryParametersSerializer does no support a parameter of type " + source.getClass());
+		}
 	}
 
 	private String serializeAsFormObject(Object source) {

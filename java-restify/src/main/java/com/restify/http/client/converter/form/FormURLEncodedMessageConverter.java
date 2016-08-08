@@ -15,11 +15,11 @@ import com.restify.http.client.HttpResponseMessage;
 import com.restify.http.client.RestifyHttpMessageReadException;
 import com.restify.http.client.RestifyHttpMessageWriteException;
 import com.restify.http.client.converter.HttpMessageConverter;
-import com.restify.http.metadata.EndpointMethodQueryStringParameterSerializer;
+import com.restify.http.metadata.EndpointMethodQueryParametersSerializer;
 
 public abstract class FormURLEncodedMessageConverter<T> implements HttpMessageConverter<T> {
 
-	private final EndpointMethodQueryStringParameterSerializer serializer = new EndpointMethodQueryStringParameterSerializer();
+	private final EndpointMethodQueryParametersSerializer serializer = new EndpointMethodQueryParametersSerializer();
 
 	@Override
 	public String contentType() {
@@ -51,7 +51,7 @@ public abstract class FormURLEncodedMessageConverter<T> implements HttpMessageCo
 
 			}).toArray(s -> new ParameterPair[s]);
 
-            return doRead(pairs);
+            return doRead(expectedType, pairs);
 
 		} catch (IOException e) {
 			throw new RestifyHttpMessageReadException(e);
@@ -66,7 +66,7 @@ public abstract class FormURLEncodedMessageConverter<T> implements HttpMessageCo
 		}
 	}
 
-	protected abstract T doRead(ParameterPair[] pairs);
+	protected abstract T doRead(Type expectedType, ParameterPair[] pairs);
 
 
 }

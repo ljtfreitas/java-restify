@@ -6,12 +6,12 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
 import com.restify.http.metadata.EndpointMethodParameterSerializer;
-import com.restify.http.metadata.EndpointMethodQueryStringParameterSerializer;
+import com.restify.http.metadata.EndpointMethodQueryParametersSerializer;
 
-@Target({ElementType.PARAMETER})
+@Target(ElementType.PARAMETER)
 @Retention(RetentionPolicy.RUNTIME)
 @Parameter
-public @interface QueryString {
+public @interface QueryParameters {
 
-	Class<? extends EndpointMethodParameterSerializer> serializer() default EndpointMethodQueryStringParameterSerializer.class;
+	Class<? extends EndpointMethodParameterSerializer> serializer() default EndpointMethodQueryParametersSerializer.class;
 }

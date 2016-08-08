@@ -9,7 +9,8 @@ import com.restify.http.contract.BodyParameter;
 import com.restify.http.contract.HeaderParameter;
 import com.restify.http.contract.Parameter;
 import com.restify.http.contract.PathParameter;
-import com.restify.http.contract.QueryString;
+import com.restify.http.contract.QueryParameter;
+import com.restify.http.contract.QueryParameters;
 import com.restify.http.metadata.EndpointMethodParameterSerializer;
 import com.restify.http.metadata.SimpleEndpointMethodParameterSerializer;
 
@@ -19,31 +20,33 @@ public class JavaMethodParameterMetadata {
 	private final PathParameter pathParameter;
 	private final HeaderParameter headerParameter;
 	private final BodyParameter bodyParameter;
-	private final QueryString queryString;
+	private final QueryParameter queryParameter;
+	private final QueryParameters queryParameters;
 	private final Class<? extends EndpointMethodParameterSerializer> serializerType;
 
 	public JavaMethodParameterMetadata(java.lang.reflect.Parameter javaMethodParameter) {
 		this.pathParameter = javaMethodParameter.getAnnotation(PathParameter.class);
 		this.headerParameter = javaMethodParameter.getAnnotation(HeaderParameter.class);
 		this.bodyParameter = javaMethodParameter.getAnnotation(BodyParameter.class);
-		this.queryString = javaMethodParameter.getAnnotation(QueryString.class);
+		this.queryParameter = javaMethodParameter.getAnnotation(QueryParameter.class);
+		this.queryParameters = javaMethodParameter.getAnnotation(QueryParameters.class);
 
 		isTrue(Stream.of(javaMethodParameter.getAnnotations())
 				.filter(a -> a.annotationType().isAnnotationPresent(Parameter.class))
 					.count() <= 1, "Parameter " + javaMethodParameter + " has more than one annotation.");
 
 		this.name = Optional.ofNullable(pathParameter)
-				.map(PathParameter::value)
-					.filter(s -> !s.trim().isEmpty())
-						.orElseGet(() -> Optional.ofNullable(headerParameter)
-							.map(HeaderParameter::value)
-								.filter(s -> !s.trim().isEmpty())
+				.map(PathParameter::value).filter(s -> !s.trim().isEmpty())
+					.orElseGet(() -> Optional.ofNullable(headerParameter)
+						.map(HeaderParameter::value).filter(s -> !s.trim().isEmpty())
+							.orElseGet(() -> Optional.ofNullable(queryParameter)
+								.map(QueryParameter::value).filter(s -> !s.trim().isEmpty())
 									.orElseGet(() -> Optional.ofNullable(javaMethodParameter.getName())
-										.orElseThrow(() -> new IllegalStateException("Could not get the name of the parameter " + javaMethodParameter))));
+											.orElseThrow(() -> new IllegalStateException("Could not get the name of the parameter " + javaMethodParameter)))));
 
 		this.serializerType = pathParameter != null ? pathParameter.serializer()
-				: queryString != null ? queryString.serializer()
-				: SimpleEndpointMethodParameterSerializer.class;
+				: queryParameters != null ? queryParameters.serializer()
+					: SimpleEndpointMethodParameterSerializer.class;
 	}
 
 	public String name() {
@@ -51,7 +54,7 @@ public class JavaMethodParameterMetadata {
 	}
 
 	public boolean ofPath() {
-		return pathParameter != null || (headerParameter == null && bodyParameter == null && queryString == null);
+		return pathParameter != null || (headerParameter == null && bodyParameter == null && queryParameters == null);
 	}
 
 	public boolean ofBody() {
@@ -63,7 +66,7 @@ public class JavaMethodParameterMetadata {
 	}
 
 	public boolean ofQuery() {
-		return queryString != null;
+		return queryParameters != null;
 	}
 
 	public Class<? extends EndpointMethodParameterSerializer> serializer() {

@@ -6,6 +6,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Type;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class EndpointMethod {
 
@@ -68,9 +69,14 @@ public class EndpointMethod {
 		String endpoint = new EndpointPathParameterResolver(path, parameters)
 				.resolve(args);
 
-		String query = parameters.ofQueryString()
-				.map(p -> p.resolve(args[p.position()]))
-					.map(q -> "?" + q).orElse("");
+		String query = Optional.ofNullable(parameters.ofQuery()
+					.stream()
+					.map(p -> p.resolve(args[p.position()]))
+					.filter(p -> !"".equals(p))
+					.collect(Collectors.joining("&")))
+				.filter(q -> !"".equals(q))
+				.map(q -> "?".concat(q))
+				.orElse("");
 
 		return endpoint + query;
 	}

@@ -92,6 +92,5 @@ public class JavaMethodMetadataTest {
 
 		@Path("/path")
 		public String methodWithoutHttpMethodAnnotation();
-
 	}
 }

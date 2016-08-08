@@ -25,7 +25,7 @@ public class FormURLEncodedMapMessageConverterTest {
 	}
 
 	@Test
-	public void shouldWriteFormUrlEncodedMessageWithParametersSource() {
+	public void shouldWriteFormUrlEncodedMessageWithMapSource() {
 		Map<String, String> body = new LinkedHashMap<>();
 		body.put("param1", "value1");
 		body.put("param2", "value2");
@@ -37,11 +37,10 @@ public class FormURLEncodedMapMessageConverterTest {
 		assertEquals(messageBody, output.toString());
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test(expected = UnsupportedOperationException.class)
 	public void shouldThrowUnsupportedOperationExceptionOnTryReadMessage() {
 		ByteArrayInputStream input = new ByteArrayInputStream(messageBody.getBytes());
 
-		converter.read((Class<? extends Map<?, ?>>) Map.class, new SimpleHttpResponseMessage(input));
+		converter.read(Map.class, new SimpleHttpResponseMessage(input));
 	}
 }

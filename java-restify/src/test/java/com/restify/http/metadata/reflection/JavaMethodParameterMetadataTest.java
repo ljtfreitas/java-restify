@@ -10,7 +10,7 @@ import org.junit.Test;
 import com.restify.http.contract.BodyParameter;
 import com.restify.http.contract.HeaderParameter;
 import com.restify.http.contract.PathParameter;
-import com.restify.http.contract.QueryString;
+import com.restify.http.contract.QueryParameters;
 import com.restify.http.metadata.EndpointMethodParameterSerializer;
 import com.restify.http.metadata.Parameters;
 
@@ -109,7 +109,7 @@ public class JavaMethodParameterMetadataTest {
 
 		public String methodWithBodyParameter(@BodyParameter Object body);
 
-		public String methodWithQueryStringParameter(@QueryString Parameters parameters);
+		public String methodWithQueryStringParameter(@QueryParameters Parameters parameters);
 
 		public String parameterWithMultiplesAnnotations(@PathParameter @HeaderParameter @BodyParameter String parameter);
 	}

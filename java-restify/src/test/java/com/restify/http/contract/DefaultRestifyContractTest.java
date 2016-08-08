@@ -182,7 +182,7 @@ public class DefaultRestifyContractTest {
 		Optional<EndpointMethodParameter> queryStringParameter = endpointMethod.get().parameters().get(0);
 		assertTrue(queryStringParameter.isPresent());
 		assertEquals("parameters", queryStringParameter.get().name());
-		assertTrue(queryStringParameter.get().ofQueryString());
+		assertTrue(queryStringParameter.get().ofQuery());
 	}
 
 	@Test
@@ -273,7 +273,7 @@ public class DefaultRestifyContractTest {
 		public void metaAnnotationOfHttpMethod();
 
 		@Path("/query") @Get
-		public Void queryString(@QueryString Parameters parameters);
+		public Void queryString(@QueryParameters Parameters parameters);
 	}
 
 	@Path("http://my.api.com")

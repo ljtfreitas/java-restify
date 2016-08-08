@@ -17,7 +17,7 @@ public class FormURLEncodedMapMessageConverter extends FormURLEncodedMessageConv
 	}
 
 	@Override
-	protected Map<String, ?> doRead(ParameterPair[] pairs) {
+	protected Map<String, ?> doRead(Type expectedType, ParameterPair[] pairs) {
 		throw new UnsupportedOperationException("Cannot convert http message to Map. Your http message is: " + Arrays.toString(pairs));
 	}
 

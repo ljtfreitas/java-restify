@@ -28,10 +28,6 @@ public class EndpointRequestFactory {
 				.forEach(h -> headers.add(new Header(h.name(), new EndpointHeaderParameterResolver(h.value(), endpointMethod.parameters())
 						.resolve(args))));
 
-			endpointMethod.parameters()
-				.ofQueryString()
-					.map(p -> args[p.position()]).orElse(null);
-
 			return new EndpointRequest(endpoint, endpointMethod.httpMethod(), headers, body, endpointMethod.returnType());
 
 		} catch (URISyntaxException e) {

@@ -17,7 +17,7 @@ public class FormURLEncodedParametersMessageConverter extends FormURLEncodedMess
 	}
 
 	@Override
-	protected Parameters doRead(ParameterPair[] pairs) {
+	protected Parameters doRead(Type expectedType, ParameterPair[] pairs) {
 		Parameters parameters = new Parameters();
 
 		for (ParameterPair pair : pairs) {

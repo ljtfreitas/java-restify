@@ -1,8 +1,10 @@
 package com.restify.http.metadata;
 
+import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class EndpointMethodParameters {
 
@@ -20,8 +22,9 @@ public class EndpointMethodParameters {
 		return parameters.values().stream().filter(p -> p.ofBody()).findFirst();
 	}
 
-	public Optional<EndpointMethodParameter> ofQueryString() {
-		return parameters.values().stream().filter(p -> p.ofQueryString()).findFirst();
+	public Collection<EndpointMethodParameter> ofQuery() {
+		return parameters.values().stream().filter(p -> p.ofQuery())
+				.collect(Collectors.toList());
 	}
 
 	public void put(EndpointMethodParameter parameter) {

@@ -54,8 +54,7 @@ public class EndpointMethodParameter {
 		return type == EndpointMethodParameterType.HEADER;
 	}
 
-	public boolean ofQueryString() {
+	public boolean ofQuery() {
 		return type == EndpointMethodParameterType.QUERY_STRING;
 	}
-
 }

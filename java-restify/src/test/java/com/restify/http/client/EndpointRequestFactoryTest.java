@@ -17,7 +17,7 @@ import com.restify.http.metadata.EndpointMethod;
 import com.restify.http.metadata.EndpointMethodParameter;
 import com.restify.http.metadata.EndpointMethodParameter.EndpointMethodParameterType;
 import com.restify.http.metadata.EndpointMethodParameters;
-import com.restify.http.metadata.EndpointMethodQueryStringParameterSerializer;
+import com.restify.http.metadata.EndpointMethodQueryParametersSerializer;
 import com.restify.http.metadata.Parameters;
 
 public class EndpointRequestFactoryTest {
@@ -139,7 +139,7 @@ public class EndpointRequestFactoryTest {
 	public void shouldCreateEndpointRequestUsingEndpointMethodWithQueryStringParameter() throws Exception {
 		EndpointMethodParameters endpointMethodParameters = new EndpointMethodParameters();
 		endpointMethodParameters.put(new EndpointMethodParameter(0, "parameters", EndpointMethodParameterType.QUERY_STRING,
-				new EndpointMethodQueryStringParameterSerializer()));
+				new EndpointMethodQueryParametersSerializer()));
 
 		EndpointMethod endpointMethod = new EndpointMethod(TargetType.class.getMethod("queryString", new Class[]{Parameters.class}),
 				"http://my.api.com/query", "GET", endpointMethodParameters);
@@ -164,7 +164,7 @@ public class EndpointRequestFactoryTest {
 	public void shouldCreateEndpointRequestUsingEndpointMethodWithQueryStringParameterAsMap() throws Exception {
 		EndpointMethodParameters endpointMethodParameters = new EndpointMethodParameters();
 		endpointMethodParameters.put(new EndpointMethodParameter(0, "parameters", EndpointMethodParameterType.QUERY_STRING,
-				new EndpointMethodQueryStringParameterSerializer()));
+				new EndpointMethodQueryParametersSerializer()));
 
 		EndpointMethod endpointMethod = new EndpointMethod(TargetType.class.getMethod("queryStringAsMap", new Class[]{Map.class}),
 				"http://my.api.com/query", "GET", endpointMethodParameters);
@@ -189,7 +189,7 @@ public class EndpointRequestFactoryTest {
 	public void shouldCreateEndpointRequestUsingEndpointMethodWithQueryStringParameterAsMapWithMultiplesValues() throws Exception {
 		EndpointMethodParameters endpointMethodParameters = new EndpointMethodParameters();
 		endpointMethodParameters.put(new EndpointMethodParameter(0, "parameters", EndpointMethodParameterType.QUERY_STRING,
-				new EndpointMethodQueryStringParameterSerializer()));
+				new EndpointMethodQueryParametersSerializer()));
 
 		EndpointMethod endpointMethod = new EndpointMethod(TargetType.class.getMethod("queryStringAsMultiValueMap", new Class[]{Map.class}),
 				"http://my.api.com/query", "GET", endpointMethodParameters);

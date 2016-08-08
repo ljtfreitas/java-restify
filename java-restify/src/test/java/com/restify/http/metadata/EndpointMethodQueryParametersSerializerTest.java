@@ -10,13 +10,13 @@ import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 
-public class EndpointMethodQueryStringParametersSerializerTest {
+public class EndpointMethodQueryParametersSerializerTest {
 
-	private EndpointMethodQueryStringParameterSerializer serializer;
+	private EndpointMethodQueryParametersSerializer serializer;
 
 	@Before
 	public void setup() {
-		serializer = new EndpointMethodQueryStringParameterSerializer();
+		serializer = new EndpointMethodQueryParametersSerializer();
 	}
 
 	@Test
