@@ -1,5 +1,7 @@
 package com.restify.http.metadata;
 
+import static com.restify.http.metadata.Preconditions.isFalse;
+
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -28,6 +30,9 @@ public class EndpointMethodParameters {
 	}
 
 	public void put(EndpointMethodParameter parameter) {
+		if (parameter.ofBody()) {
+			isFalse(parameters.values().stream().anyMatch(EndpointMethodParameter::ofBody), "Only one parameter annotated with @BodyParameter is allowed.");
+		}
 		parameters.put(parameter.position(), parameter);
 	}
 

@@ -145,6 +145,12 @@ public class EndpointMethodReaderTest {
 		assertTrue(queryStringParameter.get().ofQuery());
 	}
 
+	@Test(expected = IllegalArgumentException.class)
+	public void shouldThrowExceptionWhenMethodHasMoreThanOneBodyParameter() throws Exception {
+		new EndpointMethodReader(endpointTarget)
+				.read(MyApiType.class.getMethod("methodWithTwoBodyParameters", new Class[]{Object.class, Object.class}));
+	}
+
 	@Path("http://my.api.com")
 	@Header(name = "X-My-Type", value = "MyApiType")
 	interface MyApiType {
@@ -173,6 +179,9 @@ public class EndpointMethodReaderTest {
 
 		@Path("/query") @Get
 		public Void queryString(@QueryParameters Parameters parameters);
+
+		@Path("/twoBodyParameters") @Get
+		public String methodWithTwoBodyParameters(@BodyParameter Object first, @BodyParameter Object second);
 	}
 
 }
