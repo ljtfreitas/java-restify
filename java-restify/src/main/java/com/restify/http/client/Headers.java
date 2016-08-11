@@ -34,10 +34,9 @@ public class Headers {
 		return Collections.unmodifiableCollection(headers);
 	}
 
-	public Optional<String> get(String name) {
+	public Optional<Header> get(String name) {
 		return headers.stream().filter(h -> h.name().equals(name))
-				.findFirst()
-					.map(Header::value);
+				.findFirst();
 	}
 
 	@Override

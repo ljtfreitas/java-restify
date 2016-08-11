@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import com.restify.http.client.converter.form.FormURLEncodedMapMessageConverter;
 import com.restify.http.client.converter.form.FormURLEncodedParametersMessageConverter;
@@ -31,9 +32,18 @@ public class HttpMessageConverters {
 	}
 
 	@SuppressWarnings("unchecked")
+	public <T> Collection<HttpMessageConverter<T>> readersOf(Type type) {
+		return converters.stream()
+				.filter(c ->  c.canRead(type))
+				.map(c -> ((HttpMessageConverter<T>) c))
+				.collect(Collectors.toList());
+	}
+
+	@SuppressWarnings("unchecked")
 	public <T> Optional<HttpMessageConverter<T>> writerOf(String contentType, Class<?> type) {
 		return converters.stream()
-				.filter(c -> (c.contentType().equals(contentType) || contentType.startsWith(c.contentType()) && c.canWrite(type)))
+				.filter(c -> (contentType == null || c.contentType().equals(contentType) || contentType.startsWith(c.contentType()) 
+								&& c.canWrite(type)))
 				.map(c -> ((HttpMessageConverter<T>) c))
 					.findFirst();
 	}

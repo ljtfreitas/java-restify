@@ -10,6 +10,7 @@ import com.restify.http.client.HttpClientRequestFactory;
 import com.restify.http.client.authentication.Authentication;
 import com.restify.http.client.converter.HttpMessageConverter;
 import com.restify.http.client.converter.HttpMessageConverters;
+import com.restify.http.client.interceptor.AcceptHeaderEndpointRequestInterceptor;
 import com.restify.http.client.interceptor.EndpointRequestInterceptorStack;
 import com.restify.http.client.interceptor.authentication.EndpoinRequestAuthenticationInterceptor;
 import com.restify.http.client.jdk.JdkHttpClientRequestFactory;
@@ -93,7 +94,13 @@ public class RestifyProxyBuilder {
 
 		private EndpointRequestExecutor endpointRequestExecutor() {
 			return Optional.ofNullable(endpointRequestExecutor)
-					.orElseGet(() -> new DefaultEndpointRequestExecutor(httpClientRequestFactory(), messageConverters(), endpointRequestInterceptorStack));
+					.orElseGet(() -> new DefaultEndpointRequestExecutor(httpClientRequestFactory(), messageConverters(),
+							endpointRequestInterceptorStack()));
+		}
+
+		private EndpointRequestInterceptorStack endpointRequestInterceptorStack() {
+			endpointRequestInterceptorStack.add(new AcceptHeaderEndpointRequestInterceptor(messageConverters()));
+			return endpointRequestInterceptorStack;
 		}
 
 		private HttpMessageConverters messageConverters() {

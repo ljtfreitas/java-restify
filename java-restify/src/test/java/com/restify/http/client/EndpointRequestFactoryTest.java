@@ -130,7 +130,7 @@ public class EndpointRequestFactoryTest {
 
 		assertFalse(endpointRequest.body().isPresent());
 
-		assertEquals("my custom header", endpointRequest.headers().get("X-My-Custom-Header").get());
+		assertEquals("my custom header", endpointRequest.headers().get("X-My-Custom-Header").get().value());
 
 		assertEquals(String.class, endpointRequest.expectedType());
 	}
@@ -235,7 +235,7 @@ public class EndpointRequestFactoryTest {
 		assertTrue(endpointRequest.body().isPresent());
 		assertEquals("my body", endpointRequest.body().get());
 
-		assertEquals("my custom header", endpointRequest.headers().get("X-My-Custom-Header").get());
+		assertEquals("my custom header", endpointRequest.headers().get("X-My-Custom-Header").get().value());
 
 		assertEquals(String.class, endpointRequest.expectedType());
 	}

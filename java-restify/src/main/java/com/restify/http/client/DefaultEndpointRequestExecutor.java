@@ -37,11 +37,11 @@ public class DefaultEndpointRequestExecutor implements EndpointRequestExecutor {
 		HttpClientRequest httpClientRequest = httpClientRequestFactory.createOf(endpointRequest);
 
 		endpointRequest.body().ifPresent(b -> {
-			String contentType = endpointRequest.headers().get("Content-Type")
+			Header contentType = endpointRequest.headers().get("Content-Type")
 					.orElseThrow(() -> new RestifyHttpMessageWriteException("Your request has a body, but the header [Content-Type] "
 							+ "it was not provided."));
 
-			HttpMessageConverter<Object> converter = messageConverters.writerOf(contentType, b.getClass())
+			HttpMessageConverter<Object> converter = messageConverters.writerOf(contentType.value(), b.getClass())
 					.orElseThrow(() -> new RestifyHttpMessageWriteException("Your request has a [Content-Type] of type [" + contentType + "], "
 							+ "but there is no MessageConverter able to write your message."));
 
