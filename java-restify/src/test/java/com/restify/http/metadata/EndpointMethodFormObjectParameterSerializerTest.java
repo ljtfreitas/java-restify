@@ -23,7 +23,7 @@ public class EndpointMethodFormObjectParameterSerializerTest {
 		myFormObject.param1 = "value1";
 		myFormObject.param2 = "value2";
 
-		String result = serializer.serialize(myFormObject);
+		String result = serializer.serialize("name", MyFormObject.class, myFormObject);
 
 		assertEquals("param1=value1&customParamName=value2", result);
 	}

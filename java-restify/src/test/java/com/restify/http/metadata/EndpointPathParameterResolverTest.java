@@ -20,7 +20,7 @@ public class EndpointPathParameterResolverTest {
 
 	@Test
 	public void shouldResolveArgumentOnPath() {
-		parameters.put(new EndpointMethodParameter(0, "first"));
+		parameters.put(new EndpointMethodParameter(0, "first", String.class));
 
 		EndpointPathParameterResolver resolver = new EndpointPathParameterResolver("/method/{first}", parameters);
 
@@ -33,8 +33,8 @@ public class EndpointPathParameterResolverTest {
 
 	@Test
 	public void shouldResolveMultiplesArgumentsOnPath() {
-		parameters.put(new EndpointMethodParameter(0, "first"));
-		parameters.put(new EndpointMethodParameter(1, "second"));
+		parameters.put(new EndpointMethodParameter(0, "first", String.class));
+		parameters.put(new EndpointMethodParameter(1, "second", String.class));
 
 		EndpointPathParameterResolver resolver = new EndpointPathParameterResolver("/method/{first}/{second}", parameters);
 

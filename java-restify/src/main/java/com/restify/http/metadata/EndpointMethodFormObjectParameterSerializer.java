@@ -1,5 +1,7 @@
 package com.restify.http.metadata;
 
+import java.lang.reflect.Type;
+
 import com.restify.http.contract.Form;
 import com.restify.http.metadata.FormObjects.FormObject;
 
@@ -8,8 +10,12 @@ public class EndpointMethodFormObjectParameterSerializer implements EndpointMeth
 	private final FormObjects formObjects = FormObjects.cache();
 
 	@Override
-	public String serialize(Object source) {
-		return isFormObject(source) ? doSerialize(source) : source.toString();
+	public String serialize(String name, Type type, Object source) {
+		if (isFormObject(source)) {
+			return doSerialize(source);
+		} else {
+			throw new IllegalArgumentException("EndpointMethodFormObjectParameterSerializer cannot serialize an object without annotation @Form.");
+		}
 	}
 
 	private String doSerialize(Object source) {
@@ -18,7 +24,7 @@ public class EndpointMethodFormObjectParameterSerializer implements EndpointMeth
 	}
 
 	private boolean isFormObject(Object source) {
-		return source.getClass().getAnnotation(Form.class) != null;
+		return source.getClass().isAnnotationPresent(Form.class);
 	}
 
 }

@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
 
 import java.lang.reflect.Method;
+import java.lang.reflect.Type;
 
 import org.junit.Test;
 
@@ -116,7 +117,7 @@ public class JavaMethodParameterMetadataTest {
 
 	class StubEndpointMethodParameterSerializer implements EndpointMethodParameterSerializer {
 		@Override
-		public String serialize(Object source) {
+		public String serialize(String name, Type type, Object source) {
 			return null;
 		}
 	}

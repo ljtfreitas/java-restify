@@ -18,7 +18,7 @@ public class EndpointHeaderParameterResolverTest {
 
 	@Test
 	public void shouldResolveDynamicHeaderArgument() {
-		parameters.put(new EndpointMethodParameter(0, "contentType", EndpointMethodParameterType.HEADER));
+		parameters.put(new EndpointMethodParameter(0, "contentType", String.class, EndpointMethodParameterType.HEADER));
 
 		EndpointHeaderParameterResolver resolver = new EndpointHeaderParameterResolver("{contentType}", parameters);
 
@@ -31,7 +31,7 @@ public class EndpointHeaderParameterResolverTest {
 
 	@Test
 	public void shouldResolveStaticHeaderArgumentOn() {
-		parameters.put(new EndpointMethodParameter(0, "any", EndpointMethodParameterType.PATH));
+		parameters.put(new EndpointMethodParameter(0, "any", String.class, EndpointMethodParameterType.PATH));
 
 		EndpointHeaderParameterResolver resolver = new EndpointHeaderParameterResolver("application/json", parameters);
 

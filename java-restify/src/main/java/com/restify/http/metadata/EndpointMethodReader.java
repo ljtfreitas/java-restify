@@ -72,7 +72,7 @@ public class EndpointMethodReader {
 
 			EndpointMethodParameterSerializer serializer = serializerOf(javaMethodParameterMetadata);
 
-			parameters.put(new EndpointMethodParameter(position, javaMethodParameterMetadata.name(), type, serializer));
+			parameters.put(new EndpointMethodParameter(position, javaMethodParameterMetadata.name(), javaMethodParameterMetadata.javaType(), type, serializer));
 		}
 
 		return parameters;

@@ -2,6 +2,7 @@ package com.restify.http.metadata.reflection;
 
 import static com.restify.http.metadata.Preconditions.isTrue;
 
+import java.lang.reflect.Type;
 import java.util.Optional;
 import java.util.stream.Stream;
 
@@ -16,6 +17,7 @@ import com.restify.http.metadata.SimpleEndpointMethodParameterSerializer;
 
 public class JavaMethodParameterMetadata {
 
+	private final java.lang.reflect.Parameter javaMethodParameter;
 	private final String name;
 	private final PathParameter pathParameter;
 	private final HeaderParameter headerParameter;
@@ -25,6 +27,8 @@ public class JavaMethodParameterMetadata {
 	private final Class<? extends EndpointMethodParameterSerializer> serializerType;
 
 	public JavaMethodParameterMetadata(java.lang.reflect.Parameter javaMethodParameter) {
+		this.javaMethodParameter = javaMethodParameter;
+
 		this.pathParameter = javaMethodParameter.getAnnotation(PathParameter.class);
 		this.headerParameter = javaMethodParameter.getAnnotation(HeaderParameter.class);
 		this.bodyParameter = javaMethodParameter.getAnnotation(BodyParameter.class);
@@ -45,12 +49,17 @@ public class JavaMethodParameterMetadata {
 											.orElseThrow(() -> new IllegalStateException("Could not get the name of the parameter " + javaMethodParameter)))));
 
 		this.serializerType = pathParameter != null ? pathParameter.serializer()
-				: queryParameters != null ? queryParameters.serializer()
-					: SimpleEndpointMethodParameterSerializer.class;
+				: queryParameter != null ? queryParameter.serializer()
+						: queryParameters != null ? queryParameters.serializer()
+								: SimpleEndpointMethodParameterSerializer.class;
 	}
 
 	public String name() {
 		return name;
+	}
+
+	public Type javaType() {
+		return javaMethodParameter.getParameterizedType();
 	}
 
 	public boolean ofPath() {
@@ -72,5 +81,4 @@ public class JavaMethodParameterMetadata {
 	public Class<? extends EndpointMethodParameterSerializer> serializer() {
 		return serializerType;
 	}
-
 }

@@ -1,5 +1,7 @@
 package com.restify.http.metadata;
 
+import java.lang.reflect.Type;
+
 public class EndpointMethodParameter {
 
 	public enum EndpointMethodParameterType {
@@ -8,20 +10,23 @@ public class EndpointMethodParameter {
 
 	private final int position;
 	private final String name;
+	private final Type javaType;
 	private final EndpointMethodParameterType type;
 	private final EndpointMethodParameterSerializer serializer;
 
-	public EndpointMethodParameter(int position, String name) {
-		this(position, name, EndpointMethodParameterType.PATH);
+	public EndpointMethodParameter(int position, String name, Type javaType) {
+		this(position, name, javaType, EndpointMethodParameterType.PATH);
 	}
 
-	public EndpointMethodParameter(int position, String name, EndpointMethodParameterType type) {
-		this(position, name, type, new SimpleEndpointMethodParameterSerializer());
+	public EndpointMethodParameter(int position, String name, Type javaType, EndpointMethodParameterType type) {
+		this(position, name, javaType, type, new SimpleEndpointMethodParameterSerializer());
 	}
 
-	public EndpointMethodParameter(int position, String name, EndpointMethodParameterType type, EndpointMethodParameterSerializer serializer) {
+	public EndpointMethodParameter(int position, String name, Type javaType, EndpointMethodParameterType type,
+			EndpointMethodParameterSerializer serializer) {
 		this.position = position;
 		this.name = name;
+		this.javaType = javaType;
 		this.type = type;
 		this.serializer = serializer;
 	}
@@ -31,7 +36,7 @@ public class EndpointMethodParameter {
 	}
 
 	public String resolve(Object arg) {
-		return serializer.serialize(arg);
+		return serializer.serialize(name, javaType, arg);
 	}
 
 	public String name() {

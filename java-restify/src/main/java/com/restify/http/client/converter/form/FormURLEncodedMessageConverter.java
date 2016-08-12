@@ -31,7 +31,7 @@ public abstract class FormURLEncodedMessageConverter<T> implements HttpMessageCo
 
 		try {
 			OutputStreamWriter writer = new OutputStreamWriter(httpRequestMessage.output(), httpRequestMessage.charset());
-			writer.write(serializer.serialize(body));
+			writer.write(serializer.serialize("", String.class, body));
 
 			writer.flush();
 

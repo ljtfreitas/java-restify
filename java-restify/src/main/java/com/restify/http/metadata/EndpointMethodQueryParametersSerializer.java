@@ -1,5 +1,7 @@
 package com.restify.http.metadata;
 
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.Map;
 
 import com.restify.http.contract.Form;
@@ -8,17 +10,17 @@ public class EndpointMethodQueryParametersSerializer implements EndpointMethodPa
 
 	private EndpointMethodFormObjectParameterSerializer formObjectSerializer = new EndpointMethodFormObjectParameterSerializer();
 
-	@SuppressWarnings("unchecked")
+	@SuppressWarnings("rawtypes")
 	@Override
-	public String serialize(Object source) {
+	public String serialize(String name, Type type, Object source) {
 		if (source instanceof Parameters) {
 			return serializeAsParameters((Parameters) source);
 
-		} else if (source instanceof Map) {
-			return serializeAsMap((Map<String, ?>) source);
+		} else if (source instanceof Map && supportedMapKey(type)) {
+			return serializeAsMap((Map) source);
 
 		} else if (isFormObject(source)) {
-			return serializeAsFormObject(source);
+			return serializeAsFormObject(name, type, source);
 
 		} else {
 			throw new IllegalArgumentException(
@@ -26,23 +28,41 @@ public class EndpointMethodQueryParametersSerializer implements EndpointMethodPa
 		}
 	}
 
-	private String serializeAsFormObject(Object source) {
-		return formObjectSerializer.serialize(source);
+	private boolean supportedMapKey(Type type) {
+		if (type instanceof ParameterizedType) {
+			ParameterizedType parameterizedType = (ParameterizedType) type;
+
+			Type mapKeyType = parameterizedType.getActualTypeArguments()[0];
+
+			if (mapKeyType == String.class) {
+				return true;
+
+			} else {
+				throw new IllegalStateException("Your Map parameter must have a key of String type.");
+			}
+		} else {
+			return true;
+		}
+	}
+
+	private String serializeAsFormObject(String name, Type type, Object source) {
+		return formObjectSerializer.serialize(name, type, source);
 	}
 
 	private boolean isFormObject(Object source) {
 		return source.getClass().getAnnotation(Form.class) != null;
 	}
 
-	private String serializeAsMap(Map<String, ?> source) {
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	private String serializeAsMap(Map source) {
 		Parameters parameters = new Parameters();
 
 		source.forEach((key, value) -> {
 			if (value instanceof Iterable) {
-				((Iterable<?>) value).forEach(o -> parameters.put(key, o.toString()));
+				((Iterable) value).forEach(o -> parameters.put(key.toString(), o.toString()));
 
 			} else {
-				parameters.put(key, value.toString());
+				parameters.put(key.toString(), value.toString());
 			}
 		});
 
