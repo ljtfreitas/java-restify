@@ -23,7 +23,7 @@ import com.restify.http.client.RestifyHttpMessageReadException;
 import com.restify.http.client.RestifyHttpMessageWriteException;
 import com.restify.http.client.converter.HttpMessageConverter;
 
-public class JaxBXmlMessageConverter<T> implements HttpMessageConverter<T> {
+public class JaxbXmlMessageConverter<T> implements HttpMessageConverter<T> {
 
 	private final Map<Class<?>, JAXBContext> contexts = new ConcurrentHashMap<>();
 

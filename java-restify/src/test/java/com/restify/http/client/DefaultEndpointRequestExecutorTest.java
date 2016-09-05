@@ -122,6 +122,7 @@ public class DefaultEndpointRequestExecutorTest {
 		private final EndpointResponse response;
 
 		private final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+		private final Headers headers = new Headers();
 
 		public SimpleHttpClientRequest(EndpointResponse response) {
 			this.response = response;
@@ -142,6 +143,10 @@ public class DefaultEndpointRequestExecutorTest {
 			return response;
 		}
 
+		@Override
+		public Headers headers() {
+			return headers;
+		}
 	}
 
 	private class SimpleEndpointResponse extends EndpointResponse {

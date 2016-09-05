@@ -7,12 +7,17 @@ import java.util.Collection;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import com.restify.http.client.converter.form.FormURLEncodedFormObjectMessageConverter;
 import com.restify.http.client.converter.form.FormURLEncodedMapMessageConverter;
 import com.restify.http.client.converter.form.FormURLEncodedParametersMessageConverter;
+import com.restify.http.client.converter.form.multipart.MultipartFormFileObjectMessageConverter;
+import com.restify.http.client.converter.form.multipart.MultipartFormMapMessageConverter;
+import com.restify.http.client.converter.form.multipart.MultipartFormObjectMessageConverter;
+import com.restify.http.client.converter.form.multipart.MultipartFormParametersMessageConverter;
 import com.restify.http.client.converter.json.JsonMessageConverter;
 import com.restify.http.client.converter.text.TextHtmlMessageConverter;
 import com.restify.http.client.converter.text.TextPlainMessageConverter;
-import com.restify.http.client.converter.xml.JaxBXmlMessageConverter;
+import com.restify.http.client.converter.xml.JaxbXmlMessageConverter;
 
 public class HttpMessageConverters {
 
@@ -50,10 +55,15 @@ public class HttpMessageConverters {
 	
 	public static HttpMessageConverters build() {
 		return new HttpMessageConverters(JsonMessageConverter.available(), 
-			new JaxBXmlMessageConverter<Object>(),
+			new JaxbXmlMessageConverter<Object>(),
 			new TextPlainMessageConverter(), 
 			new TextHtmlMessageConverter(),
 			new FormURLEncodedParametersMessageConverter(), 
-			new FormURLEncodedMapMessageConverter());
+			new FormURLEncodedFormObjectMessageConverter(),
+			new FormURLEncodedMapMessageConverter(),
+			new MultipartFormParametersMessageConverter(),
+			new MultipartFormObjectMessageConverter(),
+			new MultipartFormFileObjectMessageConverter(),
+			new MultipartFormMapMessageConverter());
 	}
 }

@@ -21,6 +21,7 @@ import org.apache.http.protocol.HttpContext;
 
 import com.restify.http.client.EndpointRequest;
 import com.restify.http.client.HttpClientRequestFactory;
+import com.restify.http.client.charset.Encoding;
 
 public class ApacheHttpClientRequestFactory implements HttpClientRequestFactory {
 
@@ -33,7 +34,7 @@ public class ApacheHttpClientRequestFactory implements HttpClientRequestFactory 
 
 	public ApacheHttpClientRequestFactory(HttpClient httpClient) {
 		this.httpClient = httpClient;
-		this.charset = "UTF-8";
+		this.charset = Encoding.UTF_8.charset().name();
 	}
 
 	@Override
@@ -43,9 +44,7 @@ public class ApacheHttpClientRequestFactory implements HttpClientRequestFactory 
 
 		HttpContext context = contextOf(httpRequest);
 
-		endpointRequest.headers().all().forEach(h -> httpRequest.addHeader(h.name(), h.value()));
-
-		return new ApacheHttpClientRequest(httpClient, httpRequest, context, charset);
+		return new ApacheHttpClientRequest(httpClient, httpRequest, context, charset, endpointRequest.headers());
 	}
 
 	private HttpContext contextOf(HttpUriRequest httpRequest) {

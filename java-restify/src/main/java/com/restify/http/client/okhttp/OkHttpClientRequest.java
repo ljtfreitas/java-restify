@@ -43,6 +43,11 @@ public class OkHttpClientRequest implements HttpClientRequest {
 	}
 
 	@Override
+	public Headers headers() {
+		return endpointRequest.headers();
+	}
+
+	@Override
 	public EndpointResponse execute() throws RestifyHttpException {
 		MediaType contentType = endpointRequest.headers().get("Content-Type").map(header -> MediaType.parse(header.value()))
 				.orElse(null);

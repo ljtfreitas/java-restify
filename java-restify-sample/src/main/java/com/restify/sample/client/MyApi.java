@@ -1,37 +1,38 @@
 package com.restify.sample.client;
 
+import com.restify.http.contract.BodyParameter;
 import com.restify.http.contract.Delete;
 import com.restify.http.contract.Get;
+import com.restify.http.contract.Header;
 import com.restify.http.contract.Path;
+import com.restify.http.contract.PathParameter;
 import com.restify.http.contract.Post;
 import com.restify.http.contract.Put;
+import com.restify.http.metadata.MultipartParameters;
 import com.restify.sample.api.MyApiResponse;
 
 @Path("/api")
 public interface MyApi {
 
-	@Path("/json") @Get
-	public MyApiResponse getAsJson();
+	@Path("/{type}")
+	@Get
+	public MyApiResponse getAs(@PathParameter String type);
 
-	@Path("/json") @Post
-	public MyApiResponse postAsJson();
+	@Path("/{type}")
+	@Post
+	public MyApiResponse postAs(@PathParameter String type);
 
-	@Path("/json") @Put
-	public MyApiResponse putAsJson();
+	@Path("/{type}")
+	@Put
+	public MyApiResponse putAs(@PathParameter String type);
 
-	@Path("/json") @Delete
-	public MyApiResponse deleteAsJson();
+	@Path("/{type}")
+	@Delete
+	public MyApiResponse deleteAs(@PathParameter String type);
 
-	@Path("/xml") @Get
-	public MyApiResponse getAsXml();
-
-	@Path("/xml") @Post
-	public MyApiResponse postAsXml();
-
-	@Path("/xml") @Put
-	public MyApiResponse putAsXml();
-
-	@Path("/xml") @Delete
-	public MyApiResponse deleteAsXml();
+	@Path("/upload")
+	@Post
+	@Header(name = "Content-Type", value = "multipart/form-data")
+	public String upload(@BodyParameter MultipartParameters parameters);
 
 }

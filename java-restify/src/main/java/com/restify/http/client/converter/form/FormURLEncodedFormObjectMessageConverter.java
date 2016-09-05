@@ -7,6 +7,7 @@ import com.restify.http.client.RestifyHttpMessageReadException;
 import com.restify.http.contract.Form;
 import com.restify.http.metadata.FormObjects;
 import com.restify.http.metadata.FormObjects.FormObject;
+import com.restify.http.metadata.reflection.JavaAnnotationScanner;
 
 public class FormURLEncodedFormObjectMessageConverter extends FormURLEncodedMessageConverter<Object> {
 
@@ -14,7 +15,7 @@ public class FormURLEncodedFormObjectMessageConverter extends FormURLEncodedMess
 
 	@Override
 	public boolean canWrite(Class<?> type) {
-		return type.isAnnotationPresent(Form.class);
+		return new JavaAnnotationScanner(type).contains(Form.class);
 	}
 
 	@Override

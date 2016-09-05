@@ -1,7 +1,5 @@
 package com.restify.http.metadata;
 
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
@@ -11,21 +9,15 @@ import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.stream.Collectors;
 
+import com.restify.http.client.charset.Encoding;
+
 public class Parameters {
 
 	private Map<String, List<String>> parameters = new LinkedHashMap<>();
 
 	public void put(String name, String value) {
 		parameters.compute(name, (k, v) -> Optional.ofNullable(v).orElseGet(() -> new ArrayList<>()))
-			.add(encode(value));
-	}
-
-	private String encode(String value) {
-		try {
-			return URLEncoder.encode(value, "UTF-8");
-		} catch (UnsupportedEncodingException e) {
-			throw new UnsupportedOperationException(e);
-		}
+			.add(value);
 	}
 
 	public Optional<String> first(String name) {
@@ -43,10 +35,14 @@ public class Parameters {
 		StringJoiner joiner = new StringJoiner("&");
 
 		parameters.forEach((name, values) -> {
-			values.forEach(v -> joiner.add(name + "=" + v));
+			values.forEach(v -> joiner.add(encode(name) + "=" + encode(v)));
 		});
 
 		return joiner.toString();
+	}
+
+	private String encode(String value) {
+		return Encoding.UTF_8.encode(value);
 	}
 
 	public class Parameter {

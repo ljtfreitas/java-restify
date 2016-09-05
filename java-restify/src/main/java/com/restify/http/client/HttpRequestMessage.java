@@ -6,5 +6,8 @@ public interface HttpRequestMessage {
 
 	public OutputStream output();
 
+	public Headers headers();
+
 	public String charset();
+
 }

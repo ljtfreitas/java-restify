@@ -21,7 +21,7 @@ public class JavaMethodMetadata {
 		this.path = Optional.ofNullable(javaMethod.getAnnotation(Path.class))
 				.orElseThrow(() -> new IllegalArgumentException("Method " + javaMethod + " does not have a @Path annotation"));
 
-		this.httpMethod = Optional.ofNullable(new JavaMethodMetadataScanner(javaMethod).scan(Method.class))
+		this.httpMethod = Optional.ofNullable(new JavaAnnotationScanner(javaMethod).scan(Method.class))
 				.orElseThrow(() -> new IllegalArgumentException("Method " + javaMethod + " does not have a @Method annotation"));
 
 		this.headers = Optional.ofNullable(javaMethod.getAnnotation(Headers.class))

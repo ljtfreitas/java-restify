@@ -1,6 +1,9 @@
 package com.restify.sample.client;
 
 import com.restify.http.RestifyProxyBuilder;
+import com.restify.http.contract.MultipartFile;
+import com.restify.http.contract.MultipartFile.ContentType;
+import com.restify.http.metadata.MultipartParameters;
 
 public class MyApiClient {
 
@@ -9,16 +12,23 @@ public class MyApiClient {
 				.target(MyApi.class, "http://localhost:8080")
 				.build();
 
-		System.out.println(myApi.getAsJson());
-		System.out.println(myApi.postAsJson());
-		System.out.println(myApi.putAsJson());
-		System.out.println(myApi.deleteAsJson());
+		System.out.println(myApi.getAs("xml"));
+		System.out.println(myApi.postAs("xml"));
+		System.out.println(myApi.putAs("xml"));
+		System.out.println(myApi.deleteAs("xml"));
 
-		System.out.println(myApi.getAsXml());
-		System.out.println(myApi.postAsXml());
-		System.out.println(myApi.putAsXml());
-		System.out.println(myApi.deleteAsXml());
+		System.out.println(myApi.getAs("json"));
+		System.out.println(myApi.postAs("json"));
+		System.out.println(myApi.putAs("json"));
+		System.out.println(myApi.deleteAs("json"));
 
+		MultipartParameters parameters = new MultipartParameters();
+		parameters.put("destination", "/tmp/java-restify-api/");
+		parameters.put(MultipartFile.create("file", "java-restify-file.jpg", ContentType.of("image/jpeg"),
+				MyApiClient.class.getResourceAsStream("/file.jpg")));
+
+		String newFile = myApi.upload(parameters);
+		System.out.println(newFile);
 	}
 
 

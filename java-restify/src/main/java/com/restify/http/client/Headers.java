@@ -30,6 +30,11 @@ public class Headers {
 		values.forEach(value -> headers.add(new Header(name, value)));
 	}
 
+	public void replace(String name, String value) {
+		headers.removeIf(h -> h.name().equals(name));
+		headers.add(new Header(name, value));
+	}
+
 	public Collection<Header> all() {
 		return Collections.unmodifiableCollection(headers);
 	}

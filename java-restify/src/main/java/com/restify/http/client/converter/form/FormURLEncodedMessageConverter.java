@@ -4,9 +4,7 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
-import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Type;
-import java.net.URLDecoder;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
@@ -34,6 +32,7 @@ public abstract class FormURLEncodedMessageConverter<T> implements HttpMessageCo
 			writer.write(serializer.serialize("", String.class, body));
 
 			writer.flush();
+			writer.close();
 
 		} catch (IOException e) {
 			throw new RestifyHttpMessageWriteException(e);
@@ -47,7 +46,7 @@ public abstract class FormURLEncodedMessageConverter<T> implements HttpMessageCo
 
 			ParameterPair[] pairs = Arrays.stream(content.split("&")).map(p -> {
 				String[] parameter = p.split("=");
-				return new ParameterPair(decode(parameter[0]), decode(parameter[1]));
+				return new ParameterPair(parameter[0], parameter[1]);
 
 			}).toArray(s -> new ParameterPair[s]);
 
@@ -58,15 +57,9 @@ public abstract class FormURLEncodedMessageConverter<T> implements HttpMessageCo
 		}
 	}
 
-	private String decode(String value) {
-		try {
-			return URLDecoder.decode(value, "UTF-8");
-		} catch (UnsupportedEncodingException e) {
-			throw new UnsupportedOperationException(e);
-		}
+	protected T doRead(Type expectedType, ParameterPair[] pairs) {
+		throw new UnsupportedOperationException("Cannot convert http message to type " + expectedType + ".");
 	}
-
-	protected abstract T doRead(Type expectedType, ParameterPair[] pairs);
 
 
 }

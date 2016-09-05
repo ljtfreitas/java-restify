@@ -17,9 +17,9 @@ import org.junit.Test;
 import com.restify.http.client.converter.SimpleHttpRequestMessage;
 import com.restify.http.client.converter.SimpleHttpResponseMessage;
 
-public class JaxBXmlMessageConverterTest {
+public class JaxbXmlMessageConverterTest {
 
-	private JaxBXmlMessageConverter<MyXmlModel> converter = new JaxBXmlMessageConverter<>();
+	private JaxbXmlMessageConverter<MyXmlModel> converter = new JaxbXmlMessageConverter<>();
 
 	private String xml;
 

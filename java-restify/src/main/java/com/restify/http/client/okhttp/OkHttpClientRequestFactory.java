@@ -2,6 +2,7 @@ package com.restify.http.client.okhttp;
 
 import com.restify.http.client.EndpointRequest;
 import com.restify.http.client.HttpClientRequestFactory;
+import com.restify.http.client.charset.Encoding;
 
 import okhttp3.OkHttpClient;
 
@@ -15,7 +16,7 @@ public class OkHttpClientRequestFactory implements HttpClientRequestFactory {
 	}
 
 	public OkHttpClientRequestFactory(OkHttpClient okHttpClient) {
-		this(okHttpClient, "UTF-8");
+		this(okHttpClient, Encoding.UTF_8.charset().name());
 	}
 
 	public OkHttpClientRequestFactory(OkHttpClient okHttpClient, String charset) {

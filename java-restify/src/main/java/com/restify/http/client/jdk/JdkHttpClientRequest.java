@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
+import java.util.Collection;
 
 import com.restify.http.RestifyHttpException;
 import com.restify.http.client.EndpointResponse;
@@ -15,10 +16,12 @@ public class JdkHttpClientRequest implements HttpClientRequest {
 
 	private final HttpURLConnection connection;
 	private final String charset;
+	private final Headers headers;
 
-	public JdkHttpClientRequest(HttpURLConnection connection, String charset) {
+	public JdkHttpClientRequest(HttpURLConnection connection, String charset, Headers headers) {
 		this.connection = connection;
 		this.charset = charset;
+		this.headers = new JdkHttpClientHeadersDecorator(connection, headers);
 	}
 
 	@Override
@@ -67,5 +70,44 @@ public class JdkHttpClientRequest implements HttpClientRequest {
 	@Override
 	public String charset() {
 		return charset;
+	}
+
+	@Override
+	public Headers headers() {
+		return headers;
+	}
+
+	private class JdkHttpClientHeadersDecorator extends Headers {
+
+		private final Headers headers;
+		private final HttpURLConnection connection;
+
+		public JdkHttpClientHeadersDecorator(HttpURLConnection connection, Headers headers) {
+			this.connection = connection;
+			this.headers = headers;
+			apply();
+		}
+
+		private void apply() {
+			headers.all().forEach(h -> connection.setRequestProperty(h.name(), h.value()));
+		}
+
+		@Override
+		public void put(String name, String value) {
+			super.put(name, value);
+			connection.setRequestProperty(name, value);
+		}
+
+		@Override
+		public void put(String name, Collection<String> values) {
+			super.put(name, values);
+			values.forEach(value -> connection.setRequestProperty(name, value));
+		}
+
+		@Override
+		public void replace(String name, String value) {
+			super.replace(name, value);
+			connection.setRequestProperty(name, value);
+		}
 	}
 }
