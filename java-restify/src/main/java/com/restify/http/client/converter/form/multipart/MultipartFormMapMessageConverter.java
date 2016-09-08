@@ -17,7 +17,7 @@ public class MultipartFormMapMessageConverter extends MultipartFormMessageConver
 	}
 
 	@Override
-	public boolean canWrite(Class<?> type) {
+	public boolean writerOf(Class<?> type) {
 		return Map.class == type && supportedMapKey(type);
 	}
 

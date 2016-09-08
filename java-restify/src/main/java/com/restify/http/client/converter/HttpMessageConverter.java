@@ -11,11 +11,11 @@ public interface HttpMessageConverter<T> {
 
 	public String contentType();
 
-	public boolean canRead(Type type);
+	public boolean readerOf(Type type);
 
 	public T read(Type expectedType, HttpResponseMessage httpResponseMessage) throws RestifyHttpMessageReadException;
 
-	public boolean canWrite(Class<?> type);
+	public boolean writerOf(Class<?> type);
 
 	public void write(T body, HttpRequestMessage httpRequestMessage) throws RestifyHttpMessageWriteException;
 }

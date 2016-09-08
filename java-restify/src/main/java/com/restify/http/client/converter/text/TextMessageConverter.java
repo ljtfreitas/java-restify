@@ -15,7 +15,7 @@ import com.restify.http.client.converter.HttpMessageConverter;
 public abstract class TextMessageConverter implements HttpMessageConverter<String> {
 
 	@Override
-	public boolean canWrite(Class<?> type) {
+	public boolean writerOf(Class<?> type) {
 		return String.class == type;
 	}
 
@@ -29,7 +29,7 @@ public abstract class TextMessageConverter implements HttpMessageConverter<Strin
 	}
 
 	@Override
-	public boolean canRead(Type type) {
+	public boolean readerOf(Type type) {
 		return String.class == type;
 	}
 

@@ -25,15 +25,17 @@ import com.restify.http.client.converter.HttpMessageConverter;
 
 public class JaxbXmlMessageConverter<T> implements HttpMessageConverter<T> {
 
+	private static final String APPLICATION_XML = "application/xml";
+
 	private final Map<Class<?>, JAXBContext> contexts = new ConcurrentHashMap<>();
 
 	@Override
 	public String contentType() {
-		return "application/xml";
+		return APPLICATION_XML;
 	}
 
 	@Override
-	public boolean canWrite(Class<?> type) {
+	public boolean writerOf(Class<?> type) {
 		return type.isAnnotationPresent(XmlRootElement.class);
 	}
 
@@ -54,7 +56,7 @@ public class JaxbXmlMessageConverter<T> implements HttpMessageConverter<T> {
 
 
 	@Override
-	public boolean canRead(Type type) {
+	public boolean readerOf(Type type) {
 		return type instanceof Class && (((Class<?>) type).isAnnotationPresent(XmlRootElement.class)
 				|| ((Class<?>) type).isAnnotationPresent(XmlType.class));
 	}

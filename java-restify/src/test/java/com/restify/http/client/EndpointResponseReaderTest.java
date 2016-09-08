@@ -1,101 +1,91 @@
 package com.restify.http.client;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertFalse;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.when;
 
-import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
-import java.io.UncheckedIOException;
-import java.lang.reflect.Type;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
+import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 
 import com.restify.http.RestifyHttpException;
 import com.restify.http.client.converter.HttpMessageConverter;
 import com.restify.http.client.converter.HttpMessageConverters;
 
+@RunWith(MockitoJUnitRunner.class)
 public class EndpointResponseReaderTest {
+
+	@Mock
+	private HttpMessageConverters httpMessageConvertersMock;
+
+	@Mock
+	private HttpMessageConverter<Object> httpMessageConverterMock;
+
+	@InjectMocks
+	private EndpointResponseReader endpointResponseReader;
+
+	private String endpointResult;
+
+	private EndpointResponse endpointResponse;
+
+	@Before
+	public void setup() {
+		endpointResult = "expected result";
+
+		when(httpMessageConvertersMock.readerOf("text/plain", String.class))
+				.thenReturn(Optional.of(httpMessageConverterMock));
+
+		when(httpMessageConverterMock.read(eq(String.class), any())).thenReturn(endpointResult);
+	}
 
 	@Test
 	public void shouldReadSuccessResponse() {
-		EndpointResponseReader reader = new EndpointResponseReader(new HttpMessageConverters(new SimpleHttpMessageConverter()));
+		endpointResponse = new SimpleEndpointResponse(new EndpointResponseCode(200), 
+				new ByteArrayInputStream(endpointResult.getBytes()));
 
-		InputStream stream = new ByteArrayInputStream("expected result".getBytes());
+		Object result = endpointResponseReader.read(endpointResponse, String.class);
 
-		EndpointResponse response = new EndpointResponse(new EndpointResponseCode(200), new Headers(), stream) {
-			@Override
-			public void close() throws IOException {
-				stream.close();
-			}
-		};
-
-		Object result = reader.ifSuccess(response.code(), r -> r.read(response, String.class)).get();
-
-		assertEquals("expected result", result);
+		assertEquals(endpointResult, result);
 	}
 
-	@Test
-	public void shouldNotReadResponseWhenResponseCodeIsNotSuccess() {
-		EndpointResponseReader reader = new EndpointResponseReader(new HttpMessageConverters(new SimpleHttpMessageConverter()));
+	@Test(expected = RestifyHttpException.class)
+	public void shouldThrowExceptionWhenResponseStatusCodeIsError() {
+		endpointResponse = new SimpleEndpointResponse(new EndpointResponseCode(500));
 
-		Optional<Object> result = reader.ifSuccess(new EndpointResponseCode(400), null);
-
-		assertFalse(result.isPresent());
+		endpointResponseReader.read(endpointResponse, String.class);
 	}
 
-	@Test
-	public void shouldReadErrorResponse() {
-		EndpointResponseReader reader = new EndpointResponseReader(new HttpMessageConverters(new SimpleHttpMessageConverter()));
+	private class SimpleEndpointResponse extends EndpointResponse {
 
-		InputStream stream = new ByteArrayInputStream("error message".getBytes());
+		private final InputStream stream;
 
-		EndpointResponse response = new EndpointResponse(new EndpointResponseCode(500), new Headers(), stream) {
-			@Override
-			public void close() throws IOException {
-				stream.close();
-			}
-		};
+		public SimpleEndpointResponse(EndpointResponseCode code) {
+			this(code, new ByteArrayInputStream(new byte[0]));
+		}
 
-		RestifyHttpException e = reader.onError(response);
+		public SimpleEndpointResponse(EndpointResponseCode code, InputStream stream) {
+			super(code, new Headers(), stream);
+			this.stream = stream;
+		}
 
-		assertEquals("500 error message", e.getMessage());
-
-	}
-
-	private class SimpleHttpMessageConverter implements HttpMessageConverter<Object> {
-
-		@Override
-		public String contentType() {
-			return "text/plain";
+		public SimpleEndpointResponse(EndpointResponseCode code, Headers headers, InputStream stream) {
+			super(code, headers, stream);
+			this.stream = stream;
 		}
 
 		@Override
-		public boolean canWrite(Class<?> type) {
-			return true;
-		}
-
-		@Override
-		public void write(Object body, HttpRequestMessage httpRequestMessage) {
-		}
-
-		@Override
-		public boolean canRead(Type type) {
-			return true;
-		}
-
-		@Override
-		public Object read(Type expectedType, HttpResponseMessage httpResponseMessage) {
-			try (BufferedReader buffer = new BufferedReader(new InputStreamReader(httpResponseMessage.input()))) {
-				return buffer.lines().collect(Collectors.joining("\n"));
-
-			} catch (IOException e) {
-				throw new UncheckedIOException(e);
-			}
+		public void close() throws IOException {
+			stream.close();
 		}
 	}
+
 }

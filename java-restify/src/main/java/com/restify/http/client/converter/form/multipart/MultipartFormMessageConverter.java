@@ -12,6 +12,8 @@ import com.restify.http.client.converter.HttpMessageConverter;
 
 abstract class MultipartFormMessageConverter<T> implements HttpMessageConverter<T> {
 
+	private static final String MULTIPART_FORM_DATA = "multipart/form-data";
+
 	protected final MultipartFieldSerializers serializers = new MultipartFieldSerializers();
 
 	private final MultipartFormBoundaryGenerator boundaryGenerator;
@@ -26,11 +28,11 @@ abstract class MultipartFormMessageConverter<T> implements HttpMessageConverter<
 
 	@Override
 	public String contentType() {
-		return "multipart/form-data";
+		return MULTIPART_FORM_DATA;
 	}
 
 	@Override
-	public boolean canRead(Type type) {
+	public boolean readerOf(Type type) {
 		return false;
 	}
 

@@ -5,9 +5,11 @@ import com.restify.http.metadata.reflection.JavaClassDiscovery;
 
 public abstract class JsonMessageConverter<T> implements HttpMessageConverter<T> {
 
+	private static final String APPLICATION_JSON = "application/json";
+
 	@Override
 	public String contentType() {
-		return "application/json";
+		return APPLICATION_JSON;
 	}
 
 	public static JsonMessageConverter<Object> available() {

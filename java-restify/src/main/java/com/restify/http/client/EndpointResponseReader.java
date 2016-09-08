@@ -19,18 +19,30 @@ public class EndpointResponseReader {
 		this.converters = converters;
 	}
 
-	public Optional<Object> ifSuccess(EndpointResponseCode code, Function<EndpointSuccessResponseReader, Object> consumer) {
+	public Object read(EndpointResponse response, Type expectedType) {
+		return isVoid(expectedType) ? null : doRead(response, expectedType);
+	}
+
+	private boolean isVoid(Type expectedType) {
+		return expectedType == Void.TYPE || expectedType == Void.class;
+	}
+
+	private Object doRead(EndpointResponse response, Type expectedType) {
+		return ifSuccess(response.code(), r -> r.read(response, expectedType)).orElseThrow(() -> onError(response));
+	}
+
+	private Optional<Object> ifSuccess(EndpointResponseCode code, Function<EndpointSuccessResponseReader, Object> consumer) {
 		return code.isSucess() ? Optional.of(consumer.apply(new EndpointSuccessResponseReader())) : Optional.empty();
 	}
 
-	public RestifyHttpException onError(EndpointResponse response) {
+	private RestifyHttpException onError(EndpointResponse response) {
 		String message = (String) errorResponseMessageConverter.read(String.class, response);
-		return new RestifyHttpException(response.code() + " " + message);
+		return new RestifyHttpException("HTTP Status Code: " + response.code() + "\n" + message);
 	}
 
-	public class EndpointSuccessResponseReader {
+	private class EndpointSuccessResponseReader {
 
-		public Object read(EndpointResponse response, Type expectedType) {
+		private Object read(EndpointResponse response, Type expectedType) {
 			String contentType = response.headers().get("Content-Type").map(Header::value).orElse("text/plain");
 
 			HttpMessageConverter<Object> converter = converters.readerOf(contentType, expectedType)

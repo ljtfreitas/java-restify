@@ -35,7 +35,7 @@ public class JacksonMessageConverter<T> extends JsonMessageConverter<T> {
 	}
 
 	@Override
-	public boolean canWrite(Class<?> type) {
+	public boolean writerOf(Class<?> type) {
 		return objectMapper.canSerialize(type);
 	}
 
@@ -59,7 +59,7 @@ public class JacksonMessageConverter<T> extends JsonMessageConverter<T> {
 	}
 
 	@Override
-	public boolean canRead(Type type) {
+	public boolean readerOf(Type type) {
 		TypeFactory typeFactory = objectMapper.getTypeFactory();
 		return objectMapper.canDeserialize(typeFactory.constructType(type));
 	}

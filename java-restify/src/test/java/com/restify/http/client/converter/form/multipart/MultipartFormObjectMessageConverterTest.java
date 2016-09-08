@@ -58,7 +58,7 @@ public class MultipartFormObjectMessageConverterTest {
 			 + "Content-Type: text/plain"
 			 + "\r\n"
 			 + "\r\n"
-			 + "Tiago+de+Freitas+Lima"
+			 + "Tiago de Freitas Lima"
 			 + "\r\n"
 			 + "------myBoundary"
 			 + "\r\n"

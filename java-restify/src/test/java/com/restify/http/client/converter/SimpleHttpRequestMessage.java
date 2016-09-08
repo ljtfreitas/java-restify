@@ -2,6 +2,8 @@ package com.restify.http.client.converter;
 
 import java.io.OutputStream;
 
+import org.apache.commons.io.output.ByteArrayOutputStream;
+
 import com.restify.http.client.Headers;
 import com.restify.http.client.HttpRequestMessage;
 
@@ -9,6 +11,10 @@ public class SimpleHttpRequestMessage implements HttpRequestMessage {
 
 	private final OutputStream output;
 	private final Headers headers = new Headers();
+
+	public SimpleHttpRequestMessage() {
+		this(new ByteArrayOutputStream());
+	}
 
 	public SimpleHttpRequestMessage(OutputStream output) {
 		this.output = output;

@@ -3,9 +3,11 @@ package com.restify.http;
 import java.lang.reflect.Proxy;
 import java.util.Optional;
 
-import com.restify.http.client.DefaultEndpointRequestExecutor;
+import com.restify.http.client.RestifyEndpointRequestExecutor;
 import com.restify.http.client.EndpointMethodExecutor;
 import com.restify.http.client.EndpointRequestExecutor;
+import com.restify.http.client.EndpointRequestWriter;
+import com.restify.http.client.EndpointResponseReader;
 import com.restify.http.client.HttpClientRequestFactory;
 import com.restify.http.client.authentication.Authentication;
 import com.restify.http.client.converter.HttpMessageConverter;
@@ -93,9 +95,10 @@ public class RestifyProxyBuilder {
 		}
 
 		private EndpointRequestExecutor endpointRequestExecutor() {
+			HttpMessageConverters messageConverters = messageConverters();
 			return Optional.ofNullable(endpointRequestExecutor)
-					.orElseGet(() -> new DefaultEndpointRequestExecutor(httpClientRequestFactory(), messageConverters(),
-							endpointRequestInterceptorStack()));
+					.orElseGet(() -> new RestifyEndpointRequestExecutor(httpClientRequestFactory(), endpointRequestInterceptorStack(), 
+							new EndpointRequestWriter(messageConverters), new EndpointResponseReader(messageConverters)));
 		}
 
 		private EndpointRequestInterceptorStack endpointRequestInterceptorStack() {

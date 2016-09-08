@@ -17,11 +17,13 @@ import com.restify.http.metadata.EndpointMethodQueryParametersSerializer;
 
 public abstract class FormURLEncodedMessageConverter<T> implements HttpMessageConverter<T> {
 
+	private static final String APPLICATION_X_WWW_FORM_URLENCODED = "application/x-www-form-urlencoded";
+
 	private final EndpointMethodQueryParametersSerializer serializer = new EndpointMethodQueryParametersSerializer();
 
 	@Override
 	public String contentType() {
-		return "application/x-www-form-urlencoded";
+		return APPLICATION_X_WWW_FORM_URLENCODED;
 	}
 
 	@Override

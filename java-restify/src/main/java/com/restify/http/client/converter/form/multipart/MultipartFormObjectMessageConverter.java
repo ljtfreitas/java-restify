@@ -23,7 +23,7 @@ public class MultipartFormObjectMessageConverter extends MultipartFormMessageCon
 	}
 
 	@Override
-	public boolean canWrite(Class<?> type) {
+	public boolean writerOf(Class<?> type) {
 		return new JavaAnnotationScanner(type).contains(MultipartForm.class);
 	}
 

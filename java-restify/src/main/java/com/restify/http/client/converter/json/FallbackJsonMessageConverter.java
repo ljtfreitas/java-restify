@@ -10,7 +10,7 @@ import com.restify.http.client.RestifyHttpMessageWriteException;
 public class FallbackJsonMessageConverter<T> extends JsonMessageConverter<T> {
 
 	@Override
-	public boolean canWrite(Class<?> type) {
+	public boolean writerOf(Class<?> type) {
 		return false;
 	}
 
@@ -20,7 +20,7 @@ public class FallbackJsonMessageConverter<T> extends JsonMessageConverter<T> {
 	}
 
 	@Override
-	public boolean canRead(Type type) {
+	public boolean readerOf(Type type) {
 		return false;
 	}
 

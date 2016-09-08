@@ -37,12 +37,12 @@ public class JaxbXmlMessageConverterTest {
 
 	@Test
 	public void shouldCanWriteTypeWithJaxbElementAnnotation() {
-		assertTrue(converter.canWrite(MyXmlModel.class));
+		assertTrue(converter.writerOf(MyXmlModel.class));
 	}
 
 	@Test
 	public void shouldNotCanWriteTypeWithoutJaxbElementAnnotation() {
-		assertFalse(converter.canWrite(NoJaxBType.class));
+		assertFalse(converter.writerOf(NoJaxBType.class));
 	}
 
 	@Test
@@ -56,12 +56,12 @@ public class JaxbXmlMessageConverterTest {
 
 	@Test
 	public void shouldCanReadTypeWithJaxbElementAnnotation() {
-		assertTrue(converter.canRead(MyXmlModel.class));
+		assertTrue(converter.readerOf(MyXmlModel.class));
 	}
 
 	@Test
 	public void shouldNotCanReadTypeWithoutJaxbElementAnnotation() {
-		assertFalse(converter.canRead(NoJaxBType.class));
+		assertFalse(converter.readerOf(NoJaxBType.class));
 	}
 
 	@Test

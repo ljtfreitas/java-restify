@@ -17,6 +17,7 @@ import com.restify.http.client.converter.form.multipart.MultipartFormParametersM
 import com.restify.http.client.converter.json.JsonMessageConverter;
 import com.restify.http.client.converter.text.TextHtmlMessageConverter;
 import com.restify.http.client.converter.text.TextPlainMessageConverter;
+import com.restify.http.client.converter.text.ScalarMessageConverter;
 import com.restify.http.client.converter.xml.JaxbXmlMessageConverter;
 
 public class HttpMessageConverters {
@@ -31,7 +32,7 @@ public class HttpMessageConverters {
 	@SuppressWarnings("unchecked")
 	public <T> Optional<HttpMessageConverter<T>> readerOf(String contentType, Type type) {
 		return converters.stream()
-				.filter(c -> (c.contentType().equals(contentType) || contentType.startsWith(c.contentType()) && c.canRead(type)))
+				.filter(c -> (c.contentType().equals(contentType) || contentType.startsWith(c.contentType()) && c.readerOf(type)))
 				.map(c -> ((HttpMessageConverter<T>) c))
 					.findFirst();
 	}
@@ -39,7 +40,7 @@ public class HttpMessageConverters {
 	@SuppressWarnings("unchecked")
 	public <T> Collection<HttpMessageConverter<T>> readersOf(Type type) {
 		return converters.stream()
-				.filter(c ->  c.canRead(type))
+				.filter(c ->  c.readerOf(type))
 				.map(c -> ((HttpMessageConverter<T>) c))
 				.collect(Collectors.toList());
 	}
@@ -48,7 +49,7 @@ public class HttpMessageConverters {
 	public <T> Optional<HttpMessageConverter<T>> writerOf(String contentType, Class<?> type) {
 		return converters.stream()
 				.filter(c -> (contentType == null || c.contentType().equals(contentType) || contentType.startsWith(c.contentType()) 
-								&& c.canWrite(type)))
+								&& c.writerOf(type)))
 				.map(c -> ((HttpMessageConverter<T>) c))
 					.findFirst();
 	}
@@ -58,6 +59,7 @@ public class HttpMessageConverters {
 			new JaxbXmlMessageConverter<Object>(),
 			new TextPlainMessageConverter(), 
 			new TextHtmlMessageConverter(),
+			new ScalarMessageConverter(),
 			new FormURLEncodedParametersMessageConverter(), 
 			new FormURLEncodedFormObjectMessageConverter(),
 			new FormURLEncodedMapMessageConverter(),

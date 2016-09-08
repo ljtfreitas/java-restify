@@ -29,7 +29,7 @@ public class GsonMessageConverter<T> extends JsonMessageConverter<T> {
 	}
 
 	@Override
-	public boolean canWrite(Class<?> type) {
+	public boolean writerOf(Class<?> type) {
 		return true;
 	}
 
@@ -50,7 +50,7 @@ public class GsonMessageConverter<T> extends JsonMessageConverter<T> {
 	}
 
 	@Override
-	public boolean canRead(Type type) {
+	public boolean readerOf(Type type) {
 		return true;
 	}
 

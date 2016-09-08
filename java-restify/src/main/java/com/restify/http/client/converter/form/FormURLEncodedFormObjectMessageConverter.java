@@ -14,12 +14,12 @@ public class FormURLEncodedFormObjectMessageConverter extends FormURLEncodedMess
 	private final FormObjects formObjects = FormObjects.cache();
 
 	@Override
-	public boolean canWrite(Class<?> type) {
+	public boolean writerOf(Class<?> type) {
 		return new JavaAnnotationScanner(type).contains(Form.class);
 	}
 
 	@Override
-	public boolean canRead(Type type) {
+	public boolean readerOf(Type type) {
 		return type instanceof Class && ((Class<?>) type).isAnnotationPresent(Form.class);
 	}
 

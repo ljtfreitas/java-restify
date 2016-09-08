@@ -3,8 +3,7 @@ package com.restify.http.client;
 import static org.junit.Assert.assertEquals;
 import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.Matchers.any;
-import static org.mockito.Matchers.eq;
-import static org.mockito.Matchers.notNull;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -14,7 +13,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
-import java.util.Optional;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -24,15 +22,10 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import com.restify.http.RestifyHttpException;
-import com.restify.http.client.converter.HttpMessageConverter;
-import com.restify.http.client.converter.HttpMessageConverters;
 import com.restify.http.client.interceptor.EndpointRequestInterceptorStack;
 
 @RunWith(MockitoJUnitRunner.class)
-public class DefaultEndpointRequestExecutorTest {
-
-	@Mock
-	private HttpMessageConverters httpMessageConvertersMock;
+public class RestifyEndpointRequestExecutorTest {
 
 	@Mock
 	private HttpClientRequestFactory httpClientRequestFactoryMock;
@@ -40,69 +33,53 @@ public class DefaultEndpointRequestExecutorTest {
 	@Mock
 	private EndpointRequestInterceptorStack endpointRequestInterceptorStackMock;
 
+	@Mock
+	private EndpointRequestWriter endpointRequestWriterMock;
+
+	@Mock
+	private EndpointResponseReader endpointResponseReaderMock;
+
 	@InjectMocks
-	private DefaultEndpointRequestExecutor endpointRequestExecutor;
-
-	@Mock
-	private HttpMessageConverter<Object> jsonHttpMessageConverterMock;
-
-	@Mock
-	private HttpMessageConverter<Object> textPlainHttpMessageConverterMock;
+	private RestifyEndpointRequestExecutor endpointRequestExecutor;
 
 	private String endpointResult;
 
+	private EndpointResponse response;
+
 	@Before
 	public void setup() {
-		when(httpMessageConvertersMock.writerOf(eq("application/json"), any()))
-			.thenReturn(Optional.of(jsonHttpMessageConverterMock));
-
-		when(httpMessageConvertersMock.readerOf(eq("application/json"), any()))
-			.thenReturn(Optional.of(jsonHttpMessageConverterMock));
-
-		when(httpMessageConvertersMock.writerOf(eq("text/plain"), any()))
-			.thenReturn(Optional.of(textPlainHttpMessageConverterMock));
-
-		when(httpMessageConvertersMock.readerOf(eq("text/plain"), any()))
-			.thenReturn(Optional.of(textPlainHttpMessageConverterMock));
-
 		endpointResult = "endpoint request result";
 
-		when(jsonHttpMessageConverterMock.read(eq(String.class), notNull(HttpResponseMessage.class)))
-			.thenReturn(endpointResult);
+		response = new SimpleEndpointResponse(new EndpointResponseCode(200),
+				new ByteArrayInputStream(endpointResult.getBytes()));
 
-		when(textPlainHttpMessageConverterMock.read(eq(String.class), notNull(HttpResponseMessage.class)))
-			.thenReturn(endpointResult);
+		when(endpointRequestInterceptorStackMock.apply(any())).then(returnsFirstArg());
 
-		when(endpointRequestInterceptorStackMock.apply(any()))
-			.then(returnsFirstArg());
+		when(endpointResponseReaderMock.read(response, String.class))
+			.thenReturn(endpointResult);
 	}
 
 	@Test
 	public void shouldExecuteHttpClientRequestWithoutBody() throws Exception {
 		EndpointRequest endpointRequest = new EndpointRequest(new URI("http://my.api.com/path"), "GET", String.class);
 
-		SimpleEndpointResponse response = new SimpleEndpointResponse(new EndpointResponseCode(200),
-				new ByteArrayInputStream(endpointResult.getBytes()));
-
 		when(httpClientRequestFactoryMock.createOf(endpointRequest))
 			.thenReturn(new SimpleHttpClientRequest(response));
 
 		Object result = endpointRequestExecutor.execute(endpointRequest);
 
-		assertEquals("endpoint request result", result);
+		assertEquals(endpointResult, result);
 
-		verify(textPlainHttpMessageConverterMock).read(String.class, response);
+		verify(endpointRequestWriterMock, never()).write(any(), any());
+		verify(endpointResponseReaderMock).read(response, String.class);
 	}
 
 	@Test
 	public void shouldExecuteHttpClientRequestWithBody() throws Exception {
-		MyModel body = new MyModel("My Name", 31);
+		String body = "endpoint request body";
 
-		EndpointRequest endpointRequest = new EndpointRequest(new URI("http://my.api.com/path"), "POST",
-				new Headers(new Header("Content-Type", "application/json")), body, String.class);
-
-		SimpleEndpointResponse response = new SimpleEndpointResponse(new EndpointResponseCode(200),
-				new Headers(new Header("Content-Type", "application/json")), new ByteArrayInputStream("endpoint request result".getBytes()));
+		EndpointRequest endpointRequest = new EndpointRequest(new URI("http://my.api.com/path"), "POST", new Headers(),
+				body, String.class);
 
 		SimpleHttpClientRequest request = new SimpleHttpClientRequest(response);
 
@@ -111,10 +88,10 @@ public class DefaultEndpointRequestExecutorTest {
 
 		Object result = endpointRequestExecutor.execute(endpointRequest);
 
-		assertEquals("endpoint request result", result);
+		assertEquals(endpointResult, result);
 
-		verify(jsonHttpMessageConverterMock).write(body, request);
-		verify(jsonHttpMessageConverterMock).read(String.class, response);
+		verify(endpointRequestWriterMock).write(endpointRequest, request);
+		verify(endpointResponseReaderMock).read(response, String.class);
 	}
 
 	private class SimpleHttpClientRequest implements HttpClientRequest {
@@ -167,21 +144,5 @@ public class DefaultEndpointRequestExecutorTest {
 		public void close() throws IOException {
 			stream.close();
 		}
-	}
-
-	private class MyModel {
-
-		@SuppressWarnings("unused")
-		final String name;
-
-		@SuppressWarnings("unused")
-		final int age;
-
-		MyModel(String name, int age) {
-			this.name = name;
-			this.age = age;
-		}
-
-
 	}
 }

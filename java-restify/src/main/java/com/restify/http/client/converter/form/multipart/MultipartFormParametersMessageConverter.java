@@ -19,7 +19,7 @@ public class MultipartFormParametersMessageConverter extends MultipartFormMessag
 	}
 
 	@Override
-	public boolean canWrite(Class<?> type) {
+	public boolean writerOf(Class<?> type) {
 		return type == MultipartParameters.class;
 	}
 

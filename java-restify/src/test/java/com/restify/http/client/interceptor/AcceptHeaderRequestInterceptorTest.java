@@ -20,11 +20,11 @@ import com.restify.http.client.converter.HttpMessageConverter;
 import com.restify.http.client.converter.HttpMessageConverters;
 
 @RunWith(MockitoJUnitRunner.class)
-public class AcceptHeaderEndpointRequestInterceptorTest {
+public class AcceptHeaderRequestInterceptorTest {
 
 	private HttpMessageConverters httpMessageConverters;
 
-	private AcceptHeaderEndpointRequestInterceptor acceptHeaderEndpointRequestInterceptor;
+	private AcceptHeaderRequestInterceptor acceptHeaderEndpointRequestInterceptor;
 
 	@Mock
 	private HttpMessageConverter<String> httpTextMessageConverterMock;
@@ -49,7 +49,7 @@ public class AcceptHeaderEndpointRequestInterceptorTest {
 		when(httpXmlMessageConverterMock.readerOf(Object.class)).thenReturn(true);
 		when(httpXmlMessageConverterMock.contentType()).thenReturn("application/xml");
 
-		acceptHeaderEndpointRequestInterceptor = new AcceptHeaderEndpointRequestInterceptor(httpMessageConverters);
+		acceptHeaderEndpointRequestInterceptor = new AcceptHeaderRequestInterceptor(httpMessageConverters);
 	}
 
 	@Test
