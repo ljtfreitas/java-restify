@@ -16,12 +16,12 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.restify.http.client.converter.SimpleHttpRequestMessage;
+import com.restify.http.contract.ContentType;
 import com.restify.http.contract.MultipartFile;
-import com.restify.http.contract.MultipartFile.ContentType;
 
-public class MultipartFormMapMessageConverterTest {
+public class MultipartFormMapMessageWriterTest {
 
-	private MultipartFormMapMessageConverter converter;
+	private MultipartFormMapMessageWriter converter;
 
 	private Map<String, Object> parameters;
 
@@ -32,7 +32,7 @@ public class MultipartFormMapMessageConverterTest {
 
 	@Before
 	public void setup() throws IOException {
-		converter = new MultipartFormMapMessageConverter(new SimpleMultipartFormBoundaryGenerator("myBoundary"));
+		converter = new MultipartFormMapMessageWriter(new SimpleMultipartFormBoundaryGenerator("myBoundary"));
 
 		file = File.createTempFile("myTextFile", ".txt");
 

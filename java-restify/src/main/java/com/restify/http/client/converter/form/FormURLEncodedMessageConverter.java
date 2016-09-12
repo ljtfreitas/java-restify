@@ -12,10 +12,11 @@ import com.restify.http.client.HttpRequestMessage;
 import com.restify.http.client.HttpResponseMessage;
 import com.restify.http.client.RestifyHttpMessageReadException;
 import com.restify.http.client.RestifyHttpMessageWriteException;
-import com.restify.http.client.converter.HttpMessageConverter;
+import com.restify.http.client.converter.HttpMessageReader;
+import com.restify.http.client.converter.HttpMessageWriter;
 import com.restify.http.metadata.EndpointMethodQueryParametersSerializer;
 
-public abstract class FormURLEncodedMessageConverter<T> implements HttpMessageConverter<T> {
+public abstract class FormURLEncodedMessageConverter<T> implements HttpMessageReader<T>, HttpMessageWriter<T> {
 
 	private static final String APPLICATION_X_WWW_FORM_URLENCODED = "application/x-www-form-urlencoded";
 
@@ -27,8 +28,26 @@ public abstract class FormURLEncodedMessageConverter<T> implements HttpMessageCo
 	}
 
 	@Override
-	public void write(T body, HttpRequestMessage httpRequestMessage) throws RestifyHttpMessageWriteException {
+	public T read(Type expectedType, HttpResponseMessage httpResponseMessage) throws RestifyHttpMessageReadException {
+		try (BufferedReader buffer = new BufferedReader(new InputStreamReader(httpResponseMessage.input()))) {
+			String content = buffer.lines().collect(Collectors.joining("\n"));
 
+			ParameterPair[] pairs = Arrays.stream(content.split("&")).map(p -> {
+				String[] parameter = p.split("=");
+				return new ParameterPair(parameter[0], parameter[1]);
+			}).toArray(s -> new ParameterPair[s]);
+
+			return doRead(expectedType, pairs);
+
+		} catch (IOException e) {
+			throw new RestifyHttpMessageReadException(e);
+		}
+	}
+
+	protected abstract T doRead(Type expectedType, ParameterPair[] pairs);
+
+	@Override
+	public void write(T body, HttpRequestMessage httpRequestMessage) throws RestifyHttpMessageWriteException {
 		try {
 			OutputStreamWriter writer = new OutputStreamWriter(httpRequestMessage.output(), httpRequestMessage.charset());
 			writer.write(serializer.serialize("", String.class, body));
@@ -40,28 +59,4 @@ public abstract class FormURLEncodedMessageConverter<T> implements HttpMessageCo
 			throw new RestifyHttpMessageWriteException(e);
 		}
 	}
-
-	@Override
-	public T read(Type expectedType, HttpResponseMessage httpResponseMessage) throws RestifyHttpMessageReadException {
-		try (BufferedReader buffer = new BufferedReader(new InputStreamReader(httpResponseMessage.input()))) {
-            String content = buffer.lines().collect(Collectors.joining("\n"));
-
-			ParameterPair[] pairs = Arrays.stream(content.split("&")).map(p -> {
-				String[] parameter = p.split("=");
-				return new ParameterPair(parameter[0], parameter[1]);
-
-			}).toArray(s -> new ParameterPair[s]);
-
-            return doRead(expectedType, pairs);
-
-		} catch (IOException e) {
-			throw new RestifyHttpMessageReadException(e);
-		}
-	}
-
-	protected T doRead(Type expectedType, ParameterPair[] pairs) {
-		throw new UnsupportedOperationException("Cannot convert http message to type " + expectedType + ".");
-	}
-
-
 }

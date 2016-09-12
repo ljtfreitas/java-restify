@@ -6,9 +6,10 @@ import java.util.Optional;
 import java.util.function.Function;
 
 import com.restify.http.RestifyHttpException;
-import com.restify.http.client.converter.HttpMessageConverter;
 import com.restify.http.client.converter.HttpMessageConverters;
+import com.restify.http.client.converter.HttpMessageReader;
 import com.restify.http.client.converter.text.TextPlainMessageConverter;
+import com.restify.http.contract.ContentType;
 
 public class EndpointResponseReader {
 
@@ -43,9 +44,9 @@ public class EndpointResponseReader {
 	private class EndpointSuccessResponseReader {
 
 		private Object read(EndpointResponse response, Type expectedType) {
-			String contentType = response.headers().get("Content-Type").map(Header::value).orElse("text/plain");
+			ContentType contentType = ContentType.of(response.headers().get("Content-Type").map(Header::value).orElse("text/plain"));
 
-			HttpMessageConverter<Object> converter = converters.readerOf(contentType, expectedType)
+			HttpMessageReader<Object> converter = converters.readerOf(contentType, expectedType)
 					.orElseThrow(() -> new RestifyHttpMessageReadException("Your request responded a content "
 							+ "of type [" + contentType + "], but there is no MessageConverter able to read this message."));
 

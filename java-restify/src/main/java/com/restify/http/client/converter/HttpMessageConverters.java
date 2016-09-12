@@ -10,50 +10,55 @@ import java.util.stream.Collectors;
 import com.restify.http.client.converter.form.FormURLEncodedFormObjectMessageConverter;
 import com.restify.http.client.converter.form.FormURLEncodedMapMessageConverter;
 import com.restify.http.client.converter.form.FormURLEncodedParametersMessageConverter;
-import com.restify.http.client.converter.form.multipart.MultipartFormFileObjectMessageConverter;
-import com.restify.http.client.converter.form.multipart.MultipartFormMapMessageConverter;
-import com.restify.http.client.converter.form.multipart.MultipartFormObjectMessageConverter;
-import com.restify.http.client.converter.form.multipart.MultipartFormParametersMessageConverter;
+import com.restify.http.client.converter.form.multipart.MultipartFormFileObjectMessageWriter;
+import com.restify.http.client.converter.form.multipart.MultipartFormMapMessageWriter;
+import com.restify.http.client.converter.form.multipart.MultipartFormObjectMessageWriter;
+import com.restify.http.client.converter.form.multipart.MultipartFormParametersMessageWriter;
 import com.restify.http.client.converter.json.JsonMessageConverter;
+import com.restify.http.client.converter.text.ScalarMessageConverter;
 import com.restify.http.client.converter.text.TextHtmlMessageConverter;
 import com.restify.http.client.converter.text.TextPlainMessageConverter;
-import com.restify.http.client.converter.text.ScalarMessageConverter;
 import com.restify.http.client.converter.xml.JaxbXmlMessageConverter;
+import com.restify.http.contract.ContentType;
 
 public class HttpMessageConverters {
 
-	private final Collection<HttpMessageConverter<?>> converters = new ArrayList<>();
+	private final Collection<HttpMessageConverter> converters = new ArrayList<>();
 
-	public HttpMessageConverters(HttpMessageConverter<?>...converters) {
+	public HttpMessageConverters(HttpMessageConverter...converters) {
 		Arrays.stream(converters)
 			.forEach(c -> this.converters.add(c));
 	}
 
-	@SuppressWarnings("unchecked")
-	public <T> Optional<HttpMessageConverter<T>> readerOf(String contentType, Type type) {
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public <T> Optional<HttpMessageReader<T>> readerOf(ContentType contentType, Type type) {
 		return converters.stream()
-				.filter(c -> (c.contentType().equals(contentType) || contentType.startsWith(c.contentType()) && c.readerOf(type)))
-				.map(c -> ((HttpMessageConverter<T>) c))
-					.findFirst();
+				.filter(c -> c instanceof HttpMessageReader)
+					.map(c -> (HttpMessageReader) c)
+						.filter(c -> contentType.is(c.contentType()) && c.canRead(type))
+							.map(c -> ((HttpMessageReader<T>) c))
+								.findFirst();
 	}
 
-	@SuppressWarnings("unchecked")
-	public <T> Collection<HttpMessageConverter<T>> readersOf(Type type) {
+	@SuppressWarnings("rawtypes")
+	public <T> Collection<HttpMessageReader<T>> readersOf(Type type) {
 		return converters.stream()
-				.filter(c ->  c.readerOf(type))
-				.map(c -> ((HttpMessageConverter<T>) c))
-				.collect(Collectors.toList());
+				.filter(c -> c instanceof HttpMessageReader)
+					.map(c -> (HttpMessageReader) c)
+						.filter(c -> c.canRead(type))
+							.collect(Collectors.toList());
 	}
 
-	@SuppressWarnings("unchecked")
-	public <T> Optional<HttpMessageConverter<T>> writerOf(String contentType, Class<?> type) {
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	public <T> Optional<HttpMessageWriter<T>> writerOf(ContentType contentType, Class<?> type) {
 		return converters.stream()
-				.filter(c -> (contentType == null || c.contentType().equals(contentType) || contentType.startsWith(c.contentType()) 
-								&& c.writerOf(type)))
-				.map(c -> ((HttpMessageConverter<T>) c))
-					.findFirst();
+				.filter(c -> c instanceof HttpMessageWriter)
+					.map(c -> (HttpMessageWriter) c)
+						.filter(c -> contentType.is(c.contentType()) && c.canWrite(type))
+							.map(c -> (HttpMessageWriter<T>) c)
+								.findFirst();
 	}
-	
+
 	public static HttpMessageConverters build() {
 		return new HttpMessageConverters(JsonMessageConverter.available(), 
 			new JaxbXmlMessageConverter<Object>(),
@@ -63,9 +68,9 @@ public class HttpMessageConverters {
 			new FormURLEncodedParametersMessageConverter(), 
 			new FormURLEncodedFormObjectMessageConverter(),
 			new FormURLEncodedMapMessageConverter(),
-			new MultipartFormParametersMessageConverter(),
-			new MultipartFormObjectMessageConverter(),
-			new MultipartFormFileObjectMessageConverter(),
-			new MultipartFormMapMessageConverter());
+			new MultipartFormParametersMessageWriter(),
+			new MultipartFormObjectMessageWriter(),
+			new MultipartFormFileObjectMessageWriter(),
+			new MultipartFormMapMessageWriter());
 	}
 }

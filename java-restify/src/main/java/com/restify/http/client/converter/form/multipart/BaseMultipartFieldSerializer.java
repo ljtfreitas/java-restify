@@ -2,6 +2,7 @@ package com.restify.http.client.converter.form.multipart;
 
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.charset.Charset;
 
 import com.restify.http.client.HttpRequestMessage;
 import com.restify.http.client.RestifyHttpMessageWriteException;
@@ -63,7 +64,7 @@ abstract class BaseMultipartFieldSerializer<T> implements MultipartFieldSerializ
 
 	protected abstract ContentDisposition contentDispositionOf(MultipartField<T> field);
 
-	protected abstract byte[] valueOf(MultipartField<T> field, String charset);
+	protected abstract byte[] valueOf(MultipartField<T> field, Charset charset);
 
 	class ContentDisposition {
 

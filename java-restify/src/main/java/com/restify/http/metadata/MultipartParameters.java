@@ -11,8 +11,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import com.restify.http.contract.ContentType;
 import com.restify.http.contract.MultipartFile;
-import com.restify.http.contract.MultipartFile.ContentType;
 
 public class MultipartParameters {
 

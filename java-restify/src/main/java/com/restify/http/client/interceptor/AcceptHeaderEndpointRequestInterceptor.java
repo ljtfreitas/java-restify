@@ -6,8 +6,8 @@ import java.util.stream.Collectors;
 
 import com.restify.http.client.EndpointRequest;
 import com.restify.http.client.Header;
-import com.restify.http.client.converter.HttpMessageConverter;
 import com.restify.http.client.converter.HttpMessageConverters;
+import com.restify.http.client.converter.HttpMessageReader;
 
 public class AcceptHeaderEndpointRequestInterceptor implements EndpointRequestInterceptor {
 
@@ -21,10 +21,13 @@ public class AcceptHeaderEndpointRequestInterceptor implements EndpointRequestIn
 	public EndpointRequest intercepts(EndpointRequest endpointRequest) {
 		Type expectedType = endpointRequest.expectedType();
 
-		Collection<HttpMessageConverter<Object>> convertersOfType = messageConverters.readersOf(expectedType);
+		Collection<HttpMessageReader<Object>> convertersOfType = messageConverters.readersOf(expectedType);
 
 		if (!convertersOfType.isEmpty()) {
-			String acceptTypes = convertersOfType.stream().map(converter -> converter.contentType()).collect(Collectors.joining(", "));
+			String acceptTypes = convertersOfType.stream()
+					.map(converter -> converter.contentType())
+						.collect(Collectors.joining(", "));
+
 			endpointRequest.headers().add(new Header("Accept", acceptTypes));
 		}
 

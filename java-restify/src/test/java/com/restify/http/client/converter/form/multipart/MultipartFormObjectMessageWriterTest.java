@@ -16,9 +16,9 @@ import com.restify.http.contract.Form.Field;
 import com.restify.http.contract.MultipartForm;
 import com.restify.http.contract.MultipartForm.MultipartField;
 
-public class MultipartFormObjectMessageConverterTest {
+public class MultipartFormObjectMessageWriterTest {
 
-	private MultipartFormObjectMessageConverter converter;
+	private MultipartFormObjectMessageWriter converter;
 
 	private MyMultipartFormObject myMultipartFormObject;
 
@@ -29,7 +29,7 @@ public class MultipartFormObjectMessageConverterTest {
 
 	@Before
 	public void setup() throws IOException {
-		converter = new MultipartFormObjectMessageConverter(new SimpleMultipartFormBoundaryGenerator("myBoundary"));
+		converter = new MultipartFormObjectMessageWriter(new SimpleMultipartFormBoundaryGenerator("myBoundary"));
 
 		myMultipartFormObject = new MyMultipartFormObject();
 

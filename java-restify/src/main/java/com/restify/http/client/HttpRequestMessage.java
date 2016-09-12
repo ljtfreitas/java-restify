@@ -1,6 +1,7 @@
 package com.restify.http.client;
 
 import java.io.OutputStream;
+import java.nio.charset.Charset;
 
 public interface HttpRequestMessage {
 
@@ -8,6 +9,6 @@ public interface HttpRequestMessage {
 
 	public Headers headers();
 
-	public String charset();
+	public Charset charset();
 
 }

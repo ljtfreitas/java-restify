@@ -13,12 +13,12 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.restify.http.client.converter.SimpleHttpRequestMessage;
+import com.restify.http.contract.ContentType;
 import com.restify.http.contract.MultipartFile;
-import com.restify.http.contract.MultipartFile.ContentType;
 
-public class MultipartFormFileObjectMessageConverterTest {
+public class MultipartFormFileObjectMessageWriterTest {
 
-	private MultipartFormFileObjectMessageConverter converter;
+	private MultipartFormFileObjectMessageWriter converter;
 
 	private MultipartFile multipartFile;
 
@@ -29,7 +29,7 @@ public class MultipartFormFileObjectMessageConverterTest {
 
 	@Before
 	public void setup() throws IOException {
-		converter = new MultipartFormFileObjectMessageConverter(new SimpleMultipartFormBoundaryGenerator("myBoundary"));
+		converter = new MultipartFormFileObjectMessageWriter(new SimpleMultipartFormBoundaryGenerator("myBoundary"));
 
 		file = File.createTempFile("myTextFile", ".txt");
 

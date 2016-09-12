@@ -16,8 +16,8 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import com.restify.http.client.EndpointRequest;
 import com.restify.http.client.Header;
-import com.restify.http.client.converter.HttpMessageConverter;
 import com.restify.http.client.converter.HttpMessageConverters;
+import com.restify.http.client.converter.HttpMessageReader;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AcceptHeaderEndpointRequestInterceptorTest {
@@ -27,41 +27,16 @@ public class AcceptHeaderEndpointRequestInterceptorTest {
 	private AcceptHeaderEndpointRequestInterceptor acceptHeaderEndpointRequestInterceptor;
 
 	@Mock
-	private HttpMessageConverter<String> httpTextMessageConverterMock;
-
-	@Mock
-	private HttpMessageConverter<Object> httpJsonMessageConverterMock;
-
-	@Mock
-	private HttpMessageConverter<Object> httpXmlMessageConverterMock;
+	private HttpMessageReader<Object> httpMessageReaderMock;
 
 	@Before
 	public void setup() throws Exception {
-		httpMessageConverters = new HttpMessageConverters(httpTextMessageConverterMock, httpJsonMessageConverterMock,
-				httpXmlMessageConverterMock);
+		httpMessageConverters = new HttpMessageConverters(httpMessageReaderMock, httpMessageReaderMock, httpMessageReaderMock);
 
-		when(httpTextMessageConverterMock.readerOf(String.class)).thenReturn(true);
-		when(httpTextMessageConverterMock.contentType()).thenReturn("text/plain");
-
-		when(httpJsonMessageConverterMock.contentType()).thenReturn("application/json");
-		when(httpJsonMessageConverterMock.readerOf(Object.class)).thenReturn(true);
-
-		when(httpXmlMessageConverterMock.readerOf(Object.class)).thenReturn(true);
-		when(httpXmlMessageConverterMock.contentType()).thenReturn("application/xml");
+		when(httpMessageReaderMock.canRead(Object.class)).thenReturn(true);
+		when(httpMessageReaderMock.contentType()).thenReturn("text/plain", "application/json", "application/xml");
 
 		acceptHeaderEndpointRequestInterceptor = new AcceptHeaderEndpointRequestInterceptor(httpMessageConverters);
-	}
-
-	@Test
-	public void shouldBuildAcceptHeaderWithSingleSupportedContentType() throws Exception {
-		EndpointRequest endpointRequestStringExpected = acceptHeaderEndpointRequestInterceptor
-				.intercepts(new EndpointRequest(new URI("http://my.api.com/string"), "GET", String.class));
-
-		Optional<Header> acceptHeader = endpointRequestStringExpected.headers().get("Accept");
-
-		assertTrue(acceptHeader.isPresent());
-
-		assertEquals("text/plain", acceptHeader.get().value());
 	}
 
 	@Test
@@ -73,12 +48,15 @@ public class AcceptHeaderEndpointRequestInterceptorTest {
 
 		assertTrue(acceptHeader.isPresent());
 
-		assertEquals("application/json, application/xml", acceptHeader.get().value());
+		assertEquals("text/plain, application/json, application/xml", acceptHeader.get().value());
 	}
 
 	@Test
 	public void shouldNotCreateBuildAcceptHeaderWithAllSupportedContentTypes() throws Exception {
-		EndpointRequest endpointRquest = acceptHeaderEndpointRequestInterceptor.intercepts(new EndpointRequest(new URI("http://my.api.com/integer"), "GET", Integer.class));
+		when(httpMessageReaderMock.canRead(Object.class)).thenReturn(false);
+
+		EndpointRequest endpointRquest = acceptHeaderEndpointRequestInterceptor
+				.intercepts(new EndpointRequest(new URI("http://my.api.com/integer"), "GET", Integer.class));
 
 		Optional<Header> acceptHeader = endpointRquest.headers().get("Accept");
 

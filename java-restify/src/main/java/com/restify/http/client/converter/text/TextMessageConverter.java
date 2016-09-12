@@ -10,26 +10,13 @@ import com.restify.http.client.HttpRequestMessage;
 import com.restify.http.client.HttpResponseMessage;
 import com.restify.http.client.RestifyHttpMessageReadException;
 import com.restify.http.client.RestifyHttpMessageWriteException;
-import com.restify.http.client.converter.HttpMessageConverter;
+import com.restify.http.client.converter.HttpMessageReader;
+import com.restify.http.client.converter.HttpMessageWriter;
 
-public abstract class TextMessageConverter implements HttpMessageConverter<String> {
-
-	@Override
-	public boolean writerOf(Class<?> type) {
-		return String.class == type;
-	}
+public abstract class TextMessageConverter implements HttpMessageReader<String>, HttpMessageWriter<String> {
 
 	@Override
-	public void write(String body, HttpRequestMessage httpRequestMessage) throws RestifyHttpMessageWriteException {
-		try {
-			httpRequestMessage.output().write(body.toString().getBytes());
-		} catch (IOException e) {
-			throw new RestifyHttpMessageWriteException(e);
-		}
-	}
-
-	@Override
-	public boolean readerOf(Type type) {
+	public boolean canRead(Type type) {
 		return String.class == type;
 	}
 
@@ -40,6 +27,20 @@ public abstract class TextMessageConverter implements HttpMessageConverter<Strin
 
 		} catch (IOException e) {
 			throw new RestifyHttpMessageReadException(e);
+		}
+	}
+
+	@Override
+	public boolean canWrite(Class<?> type) {
+		return String.class == type;
+	}
+
+	@Override
+	public void write(String body, HttpRequestMessage httpRequestMessage) throws RestifyHttpMessageWriteException {
+		try {
+			httpRequestMessage.output().write(body.toString().getBytes());
+		} catch (IOException e) {
+			throw new RestifyHttpMessageWriteException(e);
 		}
 	}
 }

@@ -33,22 +33,22 @@ public class TextMessageConverterTest {
 
 	@Test
 	public void shouldCanWriteStringType() {
-		assertTrue(converter.writerOf(String.class));
+		assertTrue(converter.canWrite(String.class));
 	}
 
 	@Test
 	public void shouldNotCanWriteTypesTharAreNotString() {
-		assertFalse(converter.writerOf(Object.class));
+		assertFalse(converter.canRead(Object.class));
 	}
 
 	@Test
 	public void shouldCanReadStringType() {
-		assertTrue(converter.readerOf(String.class));
+		assertTrue(converter.canRead(String.class));
 	}
 
 	@Test
 	public void shouldNotCanReadTypesTharAreNotString() {
-		assertFalse(converter.readerOf(Object.class));
+		assertFalse(converter.canRead(Object.class));
 	}
 
 	@Test

@@ -8,6 +8,8 @@ import java.util.Optional;
 
 public class Headers {
 
+	public static final String CONTENT_TYPE = "Content-Type";
+
 	private final Collection<Header> headers;
 
 	public Headers() {
@@ -16,6 +18,10 @@ public class Headers {
 
 	public Headers(Header... headers) {
 		this.headers = new LinkedHashSet<>(Arrays.asList(headers));
+	}
+
+	public Headers(Headers source) {
+		this.headers = new LinkedHashSet<>(source.headers);
 	}
 
 	public void add(Header header) {

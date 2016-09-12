@@ -1,5 +1,6 @@
 package com.restify.http.client.apache.httpclient;
 
+import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Optional;
 
@@ -26,7 +27,7 @@ import com.restify.http.client.charset.Encoding;
 public class ApacheHttpClientRequestFactory implements HttpClientRequestFactory {
 
 	private final HttpClient httpClient;
-	private final String charset;
+	private final Charset charset;
 
 	public ApacheHttpClientRequestFactory() {
 		this(HttpClients.createSystem());
@@ -34,7 +35,7 @@ public class ApacheHttpClientRequestFactory implements HttpClientRequestFactory 
 
 	public ApacheHttpClientRequestFactory(HttpClient httpClient) {
 		this.httpClient = httpClient;
-		this.charset = Encoding.UTF_8.charset().name();
+		this.charset = Encoding.UTF_8.charset();
 	}
 
 	@Override

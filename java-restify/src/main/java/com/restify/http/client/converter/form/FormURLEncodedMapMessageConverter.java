@@ -6,12 +6,17 @@ import java.util.Map;
 public class FormURLEncodedMapMessageConverter extends FormURLEncodedMessageConverter<Map<String, ?>> {
 
 	@Override
-	public boolean writerOf(Class<?> type) {
-		return type == Map.class;
+	public boolean canRead(Type type) {
+		return false;
 	}
 
 	@Override
-	public boolean readerOf(Type type) {
-		return false;
+	protected Map<String, ?> doRead(Type expectedType, ParameterPair[] pairs) {
+		throw new UnsupportedOperationException("Cannot read HTTP response to Map type.");
+	}
+
+	@Override
+	public boolean canWrite(Class<?> type) {
+		return type == Map.class;
 	}
 }

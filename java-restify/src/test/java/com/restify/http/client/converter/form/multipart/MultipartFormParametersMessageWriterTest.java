@@ -13,13 +13,13 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.restify.http.client.converter.SimpleHttpRequestMessage;
+import com.restify.http.contract.ContentType;
 import com.restify.http.contract.MultipartFile;
-import com.restify.http.contract.MultipartFile.ContentType;
 import com.restify.http.metadata.MultipartParameters;
 
-public class MultipartFormParametersMessageConverterTest {
+public class MultipartFormParametersMessageWriterTest {
 
-	private MultipartFormParametersMessageConverter converter;
+	private MultipartFormParametersMessageWriter converter;
 
 	private MultipartParameters parameters;
 
@@ -30,7 +30,7 @@ public class MultipartFormParametersMessageConverterTest {
 
 	@Before
 	public void setup() throws IOException {
-		converter = new MultipartFormParametersMessageConverter(new SimpleMultipartFormBoundaryGenerator("myBoundary"));
+		converter = new MultipartFormParametersMessageWriter(new SimpleMultipartFormBoundaryGenerator("myBoundary"));
 
 		parameters = new MultipartParameters();
 

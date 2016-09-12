@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
+import java.nio.charset.Charset;
 import java.util.Collection;
 
 import com.restify.http.RestifyHttpException;
@@ -15,10 +16,10 @@ import com.restify.http.client.HttpClientRequest;
 public class JdkHttpClientRequest implements HttpClientRequest {
 
 	private final HttpURLConnection connection;
-	private final String charset;
+	private final Charset charset;
 	private final Headers headers;
 
-	public JdkHttpClientRequest(HttpURLConnection connection, String charset, Headers headers) {
+	public JdkHttpClientRequest(HttpURLConnection connection, Charset charset, Headers headers) {
 		this.connection = connection;
 		this.charset = charset;
 		this.headers = new JdkHttpClientHeadersDecorator(connection, headers);
@@ -68,7 +69,7 @@ public class JdkHttpClientRequest implements HttpClientRequest {
 	}
 
 	@Override
-	public String charset() {
+	public Charset charset() {
 		return charset;
 	}
 
@@ -83,6 +84,7 @@ public class JdkHttpClientRequest implements HttpClientRequest {
 		private final HttpURLConnection connection;
 
 		public JdkHttpClientHeadersDecorator(HttpURLConnection connection, Headers headers) {
+			super(headers);
 			this.connection = connection;
 			this.headers = headers;
 			apply();

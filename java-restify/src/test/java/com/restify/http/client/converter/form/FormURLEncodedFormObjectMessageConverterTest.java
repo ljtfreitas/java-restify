@@ -20,12 +20,12 @@ public class FormURLEncodedFormObjectMessageConverterTest {
 
 	@Test
 	public void shouldCanReadFormObjectType() {
-		assertTrue(converter.readerOf(MyFormObject.class));
+		assertTrue(converter.canRead(MyFormObject.class));
 	}
 
 	@Test
 	public void shouldCanWriteFormObjectType() {
-		assertTrue(converter.writerOf(MyFormObject.class));
+		assertTrue(converter.canWrite(MyFormObject.class));
 	}
 
 	@Test

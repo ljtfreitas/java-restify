@@ -35,7 +35,25 @@ public class JacksonMessageConverter<T> extends JsonMessageConverter<T> {
 	}
 
 	@Override
-	public boolean writerOf(Class<?> type) {
+	public boolean canRead(Type type) {
+		TypeFactory typeFactory = objectMapper.getTypeFactory();
+		return objectMapper.canDeserialize(typeFactory.constructType(type));
+	}
+
+	@Override
+	public T read(Type expectedType, HttpResponseMessage httpResponseMessage) throws RestifyHttpMessageReadException {
+		try {
+			TypeFactory typeFactory = objectMapper.getTypeFactory();
+
+			return objectMapper.readValue(httpResponseMessage.input(), typeFactory.constructType(expectedType));
+
+		} catch (IOException e) {
+			throw new RestifyHttpMessageReadException(e);
+		}
+	}
+
+	@Override
+	public boolean canWrite(Class<?> type) {
 		return objectMapper.canSerialize(type);
 	}
 
@@ -57,23 +75,4 @@ public class JacksonMessageConverter<T> extends JsonMessageConverter<T> {
 		}
 
 	}
-
-	@Override
-	public boolean readerOf(Type type) {
-		TypeFactory typeFactory = objectMapper.getTypeFactory();
-		return objectMapper.canDeserialize(typeFactory.constructType(type));
-	}
-
-	@Override
-	public T read(Type expectedType, HttpResponseMessage httpResponseMessage) throws RestifyHttpMessageReadException {
-		try {
-			TypeFactory typeFactory = objectMapper.getTypeFactory();
-
-			return objectMapper.readValue(httpResponseMessage.input(), typeFactory.constructType(expectedType));
-
-		} catch (IOException e) {
-			throw new RestifyHttpMessageReadException(e);
-		}
-	}
-
 }

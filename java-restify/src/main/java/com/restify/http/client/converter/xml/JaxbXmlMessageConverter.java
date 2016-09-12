@@ -21,9 +21,10 @@ import com.restify.http.client.HttpRequestMessage;
 import com.restify.http.client.HttpResponseMessage;
 import com.restify.http.client.RestifyHttpMessageReadException;
 import com.restify.http.client.RestifyHttpMessageWriteException;
-import com.restify.http.client.converter.HttpMessageConverter;
+import com.restify.http.client.converter.HttpMessageReader;
+import com.restify.http.client.converter.HttpMessageWriter;
 
-public class JaxbXmlMessageConverter<T> implements HttpMessageConverter<T> {
+public class JaxbXmlMessageConverter<T> implements HttpMessageReader<T>, HttpMessageWriter<T> {
 
 	private static final String APPLICATION_XML = "application/xml";
 
@@ -35,28 +36,7 @@ public class JaxbXmlMessageConverter<T> implements HttpMessageConverter<T> {
 	}
 
 	@Override
-	public boolean writerOf(Class<?> type) {
-		return type.isAnnotationPresent(XmlRootElement.class);
-	}
-
-	@Override
-	public void write(T body, HttpRequestMessage httpRequestMessage) throws RestifyHttpMessageWriteException {
-		JAXBContext context = contextOf(body.getClass());
-
-		try {
-			Marshaller marshaller = context.createMarshaller();
-			marshaller.setProperty(Marshaller.JAXB_ENCODING, httpRequestMessage.charset());
-
-			marshaller.marshal(body, new StreamResult(httpRequestMessage.output()));
-
-		} catch (JAXBException e) {
-			throw new RestifyHttpMessageWriteException("Error on try write xml message", e);
-		}
-	}
-
-
-	@Override
-	public boolean readerOf(Type type) {
+	public boolean canRead(Type type) {
 		return type instanceof Class && (((Class<?>) type).isAnnotationPresent(XmlRootElement.class)
 				|| ((Class<?>) type).isAnnotationPresent(XmlType.class));
 	}
@@ -95,4 +75,23 @@ public class JaxbXmlMessageConverter<T> implements HttpMessageConverter<T> {
 		}
 	}
 
+	@Override
+	public boolean canWrite(Class<?> type) {
+		return type.isAnnotationPresent(XmlRootElement.class);
+	}
+
+	@Override
+	public void write(T body, HttpRequestMessage httpRequestMessage) throws RestifyHttpMessageWriteException {
+		JAXBContext context = contextOf(body.getClass());
+
+		try {
+			Marshaller marshaller = context.createMarshaller();
+			marshaller.setProperty(Marshaller.JAXB_ENCODING, httpRequestMessage.charset().name());
+
+			marshaller.marshal(body, new StreamResult(httpRequestMessage.output()));
+
+		} catch (JAXBException e) {
+			throw new RestifyHttpMessageWriteException("Error on try write xml message", e);
+		}
+	}
 }

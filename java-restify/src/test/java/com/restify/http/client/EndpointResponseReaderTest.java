@@ -18,8 +18,9 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import com.restify.http.RestifyHttpException;
-import com.restify.http.client.converter.HttpMessageConverter;
 import com.restify.http.client.converter.HttpMessageConverters;
+import com.restify.http.client.converter.HttpMessageReader;
+import com.restify.http.contract.ContentType;
 
 @RunWith(MockitoJUnitRunner.class)
 public class EndpointResponseReaderTest {
@@ -28,7 +29,7 @@ public class EndpointResponseReaderTest {
 	private HttpMessageConverters httpMessageConvertersMock;
 
 	@Mock
-	private HttpMessageConverter<Object> httpMessageConverterMock;
+	private HttpMessageReader<Object> httpMessageReaderMock;
 
 	@InjectMocks
 	private EndpointResponseReader endpointResponseReader;
@@ -41,10 +42,10 @@ public class EndpointResponseReaderTest {
 	public void setup() {
 		endpointResult = "expected result";
 
-		when(httpMessageConvertersMock.readerOf("text/plain", String.class))
-				.thenReturn(Optional.of(httpMessageConverterMock));
+		when(httpMessageConvertersMock.readerOf(ContentType.of("text/plain"), String.class))
+				.thenReturn(Optional.of(httpMessageReaderMock));
 
-		when(httpMessageConverterMock.read(eq(String.class), any())).thenReturn(endpointResult);
+		when(httpMessageReaderMock.read(eq(String.class), any())).thenReturn(endpointResult);
 	}
 
 	@Test

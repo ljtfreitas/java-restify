@@ -6,6 +6,7 @@ import java.io.Closeable;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.charset.Charset;
 import java.util.Arrays;
 
 import org.apache.http.HttpEntity;
@@ -28,12 +29,12 @@ public class ApacheHttpClientRequest implements HttpClientRequest {
 	private final HttpClient httpClient;
 	private final HttpUriRequest httpRequest;
 	private final HttpContext httpContext;
-	private final String charset;
+	private final Charset charset;
 	private final Headers headers;
 
 	private final ByteArrayOutputStream outputStream = new ByteArrayOutputStream(1024);
 
-	public ApacheHttpClientRequest(HttpClient httpClient, HttpUriRequest httpRequest, HttpContext httpContext, String charset, Headers headers) {
+	public ApacheHttpClientRequest(HttpClient httpClient, HttpUriRequest httpRequest, HttpContext httpContext, Charset charset, Headers headers) {
 		this.httpClient = httpClient;
 		this.httpRequest = httpRequest;
 		this.httpContext = httpContext;
@@ -97,7 +98,7 @@ public class ApacheHttpClientRequest implements HttpClientRequest {
 	}
 
 	@Override
-	public String charset() {
+	public Charset charset() {
 		return charset;
 	}
 

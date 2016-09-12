@@ -9,21 +9,21 @@ import com.restify.http.contract.MultipartForm;
 import com.restify.http.metadata.MultipartFormObjects;
 import com.restify.http.metadata.reflection.JavaAnnotationScanner;
 
-public class MultipartFormObjectMessageConverter extends MultipartFormMessageConverter<Object> {
+public class MultipartFormObjectMessageWriter extends MultipartFormMessageWriter<Object> {
 
 	private final MultipartFormObjects multipartFormObjects = MultipartFormObjects.cache();
 
-	private final MultipartFormMapMessageConverter mapMessageConverter = new MultipartFormMapMessageConverter();
+	private final MultipartFormMapMessageWriter mapMessageConverter = new MultipartFormMapMessageWriter();
 
-	public MultipartFormObjectMessageConverter() {
+	public MultipartFormObjectMessageWriter() {
 	}
 
-	protected MultipartFormObjectMessageConverter(MultipartFormBoundaryGenerator boundaryGenerator) {
+	protected MultipartFormObjectMessageWriter(MultipartFormBoundaryGenerator boundaryGenerator) {
 		super(boundaryGenerator);
 	}
 
 	@Override
-	public boolean writerOf(Class<?> type) {
+	public boolean canWrite(Class<?> type) {
 		return new JavaAnnotationScanner(type).contains(MultipartForm.class);
 	}
 

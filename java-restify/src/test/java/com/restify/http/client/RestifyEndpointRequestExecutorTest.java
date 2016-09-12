@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
+import java.nio.charset.Charset;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -22,6 +23,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import com.restify.http.RestifyHttpException;
+import com.restify.http.client.charset.Encoding;
 import com.restify.http.client.interceptor.EndpointRequestInterceptorStack;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -111,8 +113,8 @@ public class RestifyEndpointRequestExecutorTest {
 		}
 
 		@Override
-		public String charset() {
-			return "UTF-8";
+		public Charset charset() {
+			return Encoding.UTF_8.charset();
 		}
 
 		@Override

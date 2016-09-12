@@ -5,7 +5,6 @@ import java.io.InputStreamReader;
 import java.io.OutputStreamWriter;
 import java.io.Reader;
 import java.lang.reflect.Type;
-import java.nio.charset.Charset;
 
 import com.google.gson.Gson;
 import com.google.gson.JsonIOException;
@@ -29,28 +28,7 @@ public class GsonMessageConverter<T> extends JsonMessageConverter<T> {
 	}
 
 	@Override
-	public boolean writerOf(Class<?> type) {
-		return true;
-	}
-
-	@Override
-	public void write(Object body, HttpRequestMessage httpRequestMessage) throws RestifyHttpMessageWriteException {
-		Charset charset = Charset.forName(httpRequestMessage.charset());
-
-		OutputStreamWriter writer = new OutputStreamWriter(httpRequestMessage.output(), charset);
-
-		try {
-			gson.toJson(body, writer);
-
-			writer.close();
-
-		} catch (JsonIOException | IOException e) {
-			throw new RestifyHttpMessageWriteException(e);
-		}
-	}
-
-	@Override
-	public boolean readerOf(Type type) {
+	public boolean canRead(Type type) {
 		return true;
 	}
 
@@ -67,4 +45,22 @@ public class GsonMessageConverter<T> extends JsonMessageConverter<T> {
 		}
 	}
 
+	@Override
+	public boolean canWrite(Class<?> type) {
+		return true;
+	}
+
+	@Override
+	public void write(Object body, HttpRequestMessage httpRequestMessage) throws RestifyHttpMessageWriteException {
+		OutputStreamWriter writer = new OutputStreamWriter(httpRequestMessage.output(), httpRequestMessage.charset());
+
+		try {
+			gson.toJson(body, writer);
+
+			writer.close();
+
+		} catch (JsonIOException | IOException e) {
+			throw new RestifyHttpMessageWriteException(e);
+		}
+	}
 }

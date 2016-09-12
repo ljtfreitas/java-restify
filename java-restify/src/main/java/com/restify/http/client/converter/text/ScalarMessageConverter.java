@@ -12,9 +12,10 @@ import com.restify.http.client.HttpRequestMessage;
 import com.restify.http.client.HttpResponseMessage;
 import com.restify.http.client.RestifyHttpMessageReadException;
 import com.restify.http.client.RestifyHttpMessageWriteException;
-import com.restify.http.client.converter.HttpMessageConverter;
+import com.restify.http.client.converter.HttpMessageReader;
+import com.restify.http.client.converter.HttpMessageWriter;
 
-public class ScalarMessageConverter implements HttpMessageConverter<Object> {
+public class ScalarMessageConverter implements HttpMessageReader<Object>, HttpMessageWriter<Object> {
 
 	private static final String TEXT_PLAIN = "text/plain";
 
@@ -47,7 +48,7 @@ public class ScalarMessageConverter implements HttpMessageConverter<Object> {
 	}
 
 	@Override
-	public boolean readerOf(Type type) {
+	public boolean canRead(Type type) {
 		return SCALAR_TYPES.contains(type);
 	}
 
@@ -61,7 +62,7 @@ public class ScalarMessageConverter implements HttpMessageConverter<Object> {
 	}
 
 	@Override
-	public boolean writerOf(Class<?> type) {
+	public boolean canWrite(Class<?> type) {
 		return SCALAR_TYPES.contains(type);
 	}
 

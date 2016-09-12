@@ -95,21 +95,4 @@ public class MultipartFile {
 		}
 	}
 
-	public static class ContentType {
-
-		private final String type;
-
-		public ContentType(String type) {
-			this.type = type;
-		}
-
-		public String name() {
-			return type;
-		}
-
-		public static ContentType of(String type) {
-			return new ContentType(type);
-		}
-	}
-
 }

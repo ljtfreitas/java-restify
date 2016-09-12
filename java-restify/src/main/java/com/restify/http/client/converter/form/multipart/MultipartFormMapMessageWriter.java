@@ -7,17 +7,17 @@ import java.util.Map;
 
 import com.restify.http.client.HttpRequestMessage;
 
-public class MultipartFormMapMessageConverter extends MultipartFormMessageConverter<Map<String, ?>> {
+public class MultipartFormMapMessageWriter extends MultipartFormMessageWriter<Map<String, ?>> {
 
-	public MultipartFormMapMessageConverter() {
+	public MultipartFormMapMessageWriter() {
 	}
 
-	protected MultipartFormMapMessageConverter(MultipartFormBoundaryGenerator boundaryGenerator) {
+	protected MultipartFormMapMessageWriter(MultipartFormBoundaryGenerator boundaryGenerator) {
 		super(boundaryGenerator);
 	}
 
 	@Override
-	public boolean writerOf(Class<?> type) {
+	public boolean canWrite(Class<?> type) {
 		return Map.class == type && supportedMapKey(type);
 	}
 

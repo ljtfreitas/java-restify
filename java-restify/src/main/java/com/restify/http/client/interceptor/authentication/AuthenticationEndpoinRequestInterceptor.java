@@ -4,11 +4,11 @@ import com.restify.http.client.EndpointRequest;
 import com.restify.http.client.authentication.Authentication;
 import com.restify.http.client.interceptor.EndpointRequestInterceptor;
 
-public class EndpoinRequestAuthenticationInterceptor implements EndpointRequestInterceptor {
+public class AuthenticationEndpoinRequestInterceptor implements EndpointRequestInterceptor {
 
 	private final Authentication authentication;
 
-	public EndpoinRequestAuthenticationInterceptor(Authentication authentication) {
+	public AuthenticationEndpoinRequestInterceptor(Authentication authentication) {
 		this.authentication = authentication;
 	}
 

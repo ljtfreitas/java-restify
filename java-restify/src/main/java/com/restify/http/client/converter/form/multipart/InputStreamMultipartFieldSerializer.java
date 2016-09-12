@@ -2,6 +2,7 @@ package com.restify.http.client.converter.form.multipart;
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.nio.charset.Charset;
 
 class InputStreamMultipartFieldSerializer extends BaseMultipartFieldSerializer<InputStream> {
 
@@ -16,7 +17,7 @@ class InputStreamMultipartFieldSerializer extends BaseMultipartFieldSerializer<I
 	}
 
 	@Override
-	protected byte[] valueOf(MultipartField<InputStream> field, String charset) {
+	protected byte[] valueOf(MultipartField<InputStream> field, Charset charset) {
 		try {
 			return new InputStreamMultipartFieldReader(field.value()).read();
 		} catch (IOException e) {

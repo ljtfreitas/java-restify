@@ -15,8 +15,8 @@ class SimpleMultipartFieldSerializer extends BaseMultipartFieldSerializer<Object
 	}
 
 	@Override
-	protected byte[] valueOf(MultipartField<Object> field, String charset) {
-		return field.value().toString().getBytes(Charset.forName(charset));
+	protected byte[] valueOf(MultipartField<Object> field, Charset charset) {
+		return field.value().toString().getBytes(charset);
 	}
 
 	@Override

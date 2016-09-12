@@ -2,6 +2,7 @@ package com.restify.http.client.converter.form.multipart;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.nio.charset.Charset;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
@@ -27,7 +28,7 @@ class PathMultipartFieldSerializer extends BaseMultipartFieldSerializer<Path> {
 	}
 
 	@Override
-	protected byte[] valueOf(MultipartField<Path> field, String charset) {
+	protected byte[] valueOf(MultipartField<Path> field, Charset charset) {
 		try {
 			ByteArrayOutputStream output = new ByteArrayOutputStream();
 			Files.copy(field.value(), output);

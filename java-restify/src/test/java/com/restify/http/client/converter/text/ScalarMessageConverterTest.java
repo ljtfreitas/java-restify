@@ -19,8 +19,8 @@ public class ScalarMessageConverterTest {
 
 	@Test
 	public void shouldCanReadByteType() {
-		assertTrue(converter.readerOf(Byte.class));
-		assertTrue(converter.readerOf(byte.class));
+		assertTrue(converter.canRead(Byte.class));
+		assertTrue(converter.canRead(byte.class));
 	}
 
 	@Test
@@ -33,8 +33,8 @@ public class ScalarMessageConverterTest {
 
 	@Test
 	public void shouldCanWriteByteType() {
-		assertTrue(converter.writerOf(Byte.class));
-		assertTrue(converter.writerOf(byte.class));
+		assertTrue(converter.canWrite(Byte.class));
+		assertTrue(converter.canWrite(byte.class));
 	}
 
 	@Test
@@ -49,8 +49,8 @@ public class ScalarMessageConverterTest {
 
 	@Test
 	public void shouldCanReadShortType() {
-		assertTrue(converter.readerOf(Short.class));
-		assertTrue(converter.readerOf(short.class));
+		assertTrue(converter.canRead(Short.class));
+		assertTrue(converter.canRead(short.class));
 	}
 
 	@Test
@@ -63,8 +63,8 @@ public class ScalarMessageConverterTest {
 
 	@Test
 	public void shouldCanWriteShortType() {
-		assertTrue(converter.writerOf(Short.class));
-		assertTrue(converter.writerOf(short.class));
+		assertTrue(converter.canWrite(Short.class));
+		assertTrue(converter.canWrite(short.class));
 	}
 
 	@Test
@@ -79,8 +79,8 @@ public class ScalarMessageConverterTest {
 
 	@Test
 	public void shouldCanReadIntegerType() {
-		assertTrue(converter.readerOf(Integer.class));
-		assertTrue(converter.readerOf(int.class));
+		assertTrue(converter.canRead(Integer.class));
+		assertTrue(converter.canRead(int.class));
 	}
 
 	@Test
@@ -93,8 +93,8 @@ public class ScalarMessageConverterTest {
 
 	@Test
 	public void shouldCanWriteIntegerType() {
-		assertTrue(converter.writerOf(Integer.class));
-		assertTrue(converter.writerOf(int.class));
+		assertTrue(converter.canWrite(Integer.class));
+		assertTrue(converter.canWrite(int.class));
 	}
 
 	@Test
@@ -109,8 +109,8 @@ public class ScalarMessageConverterTest {
 
 	@Test
 	public void shouldCanReadLongType() {
-		assertTrue(converter.readerOf(Long.class));
-		assertTrue(converter.readerOf(long.class));
+		assertTrue(converter.canRead(Long.class));
+		assertTrue(converter.canRead(long.class));
 	}
 
 	@Test
@@ -123,8 +123,8 @@ public class ScalarMessageConverterTest {
 
 	@Test
 	public void shouldCanWriteLongType() {
-		assertTrue(converter.writerOf(Long.class));
-		assertTrue(converter.writerOf(long.class));
+		assertTrue(converter.canWrite(Long.class));
+		assertTrue(converter.canWrite(long.class));
 	}
 
 	@Test
@@ -139,8 +139,8 @@ public class ScalarMessageConverterTest {
 
 	@Test
 	public void shouldCanReadFloatType() {
-		assertTrue(converter.readerOf(Float.class));
-		assertTrue(converter.readerOf(float.class));
+		assertTrue(converter.canRead(Float.class));
+		assertTrue(converter.canRead(float.class));
 	}
 
 	@Test
@@ -153,8 +153,8 @@ public class ScalarMessageConverterTest {
 
 	@Test
 	public void shouldCanWriteFloatType() {
-		assertTrue(converter.writerOf(Float.class));
-		assertTrue(converter.writerOf(float.class));
+		assertTrue(converter.canWrite(Float.class));
+		assertTrue(converter.canWrite(float.class));
 	}
 
 	@Test
@@ -169,8 +169,8 @@ public class ScalarMessageConverterTest {
 
 	@Test
 	public void shouldCanReadDoubleType() {
-		assertTrue(converter.readerOf(Double.class));
-		assertTrue(converter.readerOf(double.class));
+		assertTrue(converter.canRead(Double.class));
+		assertTrue(converter.canRead(double.class));
 	}
 
 	@Test
@@ -183,8 +183,8 @@ public class ScalarMessageConverterTest {
 
 	@Test
 	public void shouldCanWriteDoubleType() {
-		assertTrue(converter.writerOf(Double.class));
-		assertTrue(converter.writerOf(double.class));
+		assertTrue(converter.canWrite(Double.class));
+		assertTrue(converter.canWrite(double.class));
 	}
 
 	@Test
@@ -199,8 +199,8 @@ public class ScalarMessageConverterTest {
 
 	@Test
 	public void shouldCanReadBooleanType() {
-		assertTrue(converter.readerOf(Boolean.class));
-		assertTrue(converter.readerOf(boolean.class));
+		assertTrue(converter.canRead(Boolean.class));
+		assertTrue(converter.canRead(boolean.class));
 	}
 
 	@Test
@@ -213,8 +213,8 @@ public class ScalarMessageConverterTest {
 
 	@Test
 	public void shouldCanWriteBooleanType() {
-		assertTrue(converter.writerOf(Boolean.class));
-		assertTrue(converter.writerOf(boolean.class));
+		assertTrue(converter.canWrite(Boolean.class));
+		assertTrue(converter.canWrite(boolean.class));
 	}
 
 	@Test
@@ -229,8 +229,8 @@ public class ScalarMessageConverterTest {
 
 	@Test
 	public void shouldCanReadCharacterType() {
-		assertTrue(converter.readerOf(Character.class));
-		assertTrue(converter.readerOf(char.class));
+		assertTrue(converter.canRead(Character.class));
+		assertTrue(converter.canRead(char.class));
 	}
 
 	@Test
@@ -243,8 +243,8 @@ public class ScalarMessageConverterTest {
 
 	@Test
 	public void shouldCanWriteCharacterType() {
-		assertTrue(converter.writerOf(Character.class));
-		assertTrue(converter.writerOf(char.class));
+		assertTrue(converter.canWrite(Character.class));
+		assertTrue(converter.canWrite(char.class));
 	}
 
 	@Test

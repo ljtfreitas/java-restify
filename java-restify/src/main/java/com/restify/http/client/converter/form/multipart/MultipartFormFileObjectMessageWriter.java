@@ -5,17 +5,17 @@ import java.io.IOException;
 import com.restify.http.client.HttpRequestMessage;
 import com.restify.http.contract.MultipartFile;
 
-public class MultipartFormFileObjectMessageConverter extends MultipartFormMessageConverter<MultipartFile> {
+public class MultipartFormFileObjectMessageWriter extends MultipartFormMessageWriter<MultipartFile> {
 
-	public MultipartFormFileObjectMessageConverter() {
+	public MultipartFormFileObjectMessageWriter() {
 	}
 
-	protected MultipartFormFileObjectMessageConverter(MultipartFormBoundaryGenerator boundaryGenerator) {
+	protected MultipartFormFileObjectMessageWriter(MultipartFormBoundaryGenerator boundaryGenerator) {
 		super(boundaryGenerator);
 	}
 
 	@Override
-	public boolean writerOf(Class<?> type) {
+	public boolean canWrite(Class<?> type) {
 		return type == MultipartFile.class;
 	}
 

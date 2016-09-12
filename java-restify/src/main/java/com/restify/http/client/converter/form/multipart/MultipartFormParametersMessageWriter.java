@@ -7,19 +7,19 @@ import java.util.Map;
 import com.restify.http.client.HttpRequestMessage;
 import com.restify.http.metadata.MultipartParameters;
 
-public class MultipartFormParametersMessageConverter extends MultipartFormMessageConverter<MultipartParameters> {
+public class MultipartFormParametersMessageWriter extends MultipartFormMessageWriter<MultipartParameters> {
 
-	private final MultipartFormMapMessageConverter mapMessageConverter = new MultipartFormMapMessageConverter();
+	private final MultipartFormMapMessageWriter mapMessageConverter = new MultipartFormMapMessageWriter();
 
-	public MultipartFormParametersMessageConverter() {
+	public MultipartFormParametersMessageWriter() {
 	}
 
-	protected MultipartFormParametersMessageConverter(MultipartFormBoundaryGenerator boundaryGenerator) {
+	protected MultipartFormParametersMessageWriter(MultipartFormBoundaryGenerator boundaryGenerator) {
 		super(boundaryGenerator);
 	}
 
 	@Override
-	public boolean writerOf(Class<?> type) {
+	public boolean canWrite(Class<?> type) {
 		return type == MultipartParameters.class;
 	}
 

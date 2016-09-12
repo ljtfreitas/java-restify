@@ -1,8 +1,8 @@
 package com.restify.sample.client;
 
 import com.restify.http.RestifyProxyBuilder;
+import com.restify.http.contract.ContentType;
 import com.restify.http.contract.MultipartFile;
-import com.restify.http.contract.MultipartFile.ContentType;
 import com.restify.http.metadata.MultipartParameters;
 
 public class MyApiClient {

@@ -4,6 +4,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.nio.charset.Charset;
 
 import com.restify.http.RestifyHttpException;
 import com.restify.http.client.EndpointRequest;
@@ -22,11 +23,11 @@ public class OkHttpClientRequest implements HttpClientRequest {
 
 	private final OkHttpClient okHttpClient;
 	private final EndpointRequest endpointRequest;
-	private final String charset;
+	private final Charset charset;
 
 	private final ByteArrayOutputStream outputStream = new ByteArrayOutputStream(1024);
 
-	public OkHttpClientRequest(OkHttpClient okHttpClient, EndpointRequest endpointRequest, String charset) {
+	public OkHttpClientRequest(OkHttpClient okHttpClient, EndpointRequest endpointRequest, Charset charset) {
 		this.okHttpClient = okHttpClient;
 		this.endpointRequest = endpointRequest;
 		this.charset = charset;
@@ -38,7 +39,7 @@ public class OkHttpClientRequest implements HttpClientRequest {
 	}
 
 	@Override
-	public String charset() {
+	public Charset charset() {
 		return charset;
 	}
 

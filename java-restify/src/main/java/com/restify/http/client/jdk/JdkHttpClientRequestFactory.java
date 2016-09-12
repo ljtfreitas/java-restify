@@ -2,6 +2,7 @@ package com.restify.http.client.jdk;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
+import java.nio.charset.Charset;
 
 import com.restify.http.RestifyHttpException;
 import com.restify.http.client.EndpointRequest;
@@ -10,13 +11,13 @@ import com.restify.http.client.charset.Encoding;
 
 public class JdkHttpClientRequestFactory implements HttpClientRequestFactory {
 
-	private final String charset;
+	private final Charset charset;
 
 	public JdkHttpClientRequestFactory() {
-		this(Encoding.UTF_8.charset().name());
+		this(Encoding.UTF_8.charset());
 	}
 
-	public JdkHttpClientRequestFactory(String charset) {
+	public JdkHttpClientRequestFactory(Charset charset) {
 		this.charset = charset;
 	}
 

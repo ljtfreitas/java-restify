@@ -2,15 +2,15 @@ package com.restify.http.client.converter.form.multipart;
 
 import java.io.IOException;
 import java.io.OutputStream;
-import java.lang.reflect.Type;
 
+import com.restify.http.client.Header;
 import com.restify.http.client.HttpRequestMessage;
-import com.restify.http.client.HttpResponseMessage;
-import com.restify.http.client.RestifyHttpMessageReadException;
 import com.restify.http.client.RestifyHttpMessageWriteException;
-import com.restify.http.client.converter.HttpMessageConverter;
+import com.restify.http.client.converter.HttpMessageWriter;
+import com.restify.http.contract.ContentType;
+import static com.restify.http.client.Headers.CONTENT_TYPE;
 
-abstract class MultipartFormMessageConverter<T> implements HttpMessageConverter<T> {
+abstract class MultipartFormMessageWriter<T> implements HttpMessageWriter<T> {
 
 	private static final String MULTIPART_FORM_DATA = "multipart/form-data";
 
@@ -18,11 +18,11 @@ abstract class MultipartFormMessageConverter<T> implements HttpMessageConverter<
 
 	private final MultipartFormBoundaryGenerator boundaryGenerator;
 
-	public MultipartFormMessageConverter() {
+	public MultipartFormMessageWriter() {
 		this.boundaryGenerator = new UUIDMultipartFormBoundaryGenerator();
 	}
 
-	protected MultipartFormMessageConverter(MultipartFormBoundaryGenerator boundaryGenerator) {
+	protected MultipartFormMessageWriter(MultipartFormBoundaryGenerator boundaryGenerator) {
 		this.boundaryGenerator = boundaryGenerator;
 	}
 
@@ -32,22 +32,11 @@ abstract class MultipartFormMessageConverter<T> implements HttpMessageConverter<
 	}
 
 	@Override
-	public boolean readerOf(Type type) {
-		return false;
-	}
-
-	@Override
-	public T read(Type expectedType, HttpResponseMessage httpResponseMessage) throws RestifyHttpMessageReadException {
-		throw new RestifyHttpMessageReadException(
-				"Cannot read multipart/form-data response. But...this response format make sense?");
-	}
-
-	@Override
 	public void write(T body, HttpRequestMessage httpRequestMessage) throws RestifyHttpMessageWriteException {
 		try {
 			String boundary = boundaryGenerator.generate();
 
-			httpRequestMessage.headers().replace("Content-Type", "multipart/form-data; boundary=" + "----" + boundary);
+			addToContentType(boundary, httpRequestMessage);
 
 			doWrite("------" + boundary, body, httpRequestMessage);
 
@@ -62,6 +51,15 @@ abstract class MultipartFormMessageConverter<T> implements HttpMessageConverter<
 		} catch (IOException e) {
 			throw new RestifyHttpMessageWriteException(e);
 		}
+	}
+
+	private void addToContentType(String boundary, HttpRequestMessage httpRequestMessage) {
+		Header contentTypeHeader = httpRequestMessage.headers().get(CONTENT_TYPE)
+				.orElseGet(() -> new Header(CONTENT_TYPE, MULTIPART_FORM_DATA));
+
+		ContentType contentType = ContentType.of(contentTypeHeader.value());
+
+		httpRequestMessage.headers().replace(CONTENT_TYPE, contentType.newParameter("boundary", "----" + boundary).toString());
 	}
 
 	protected abstract void doWrite(String boundary, T body, HttpRequestMessage httpRequestMessage) throws IOException;

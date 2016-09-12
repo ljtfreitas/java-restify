@@ -7,12 +7,7 @@ import com.restify.http.metadata.Parameters;
 public class FormURLEncodedParametersMessageConverter extends FormURLEncodedMessageConverter<Parameters> {
 
 	@Override
-	public boolean writerOf(Class<?> type) {
-		return type == Parameters.class;
-	}
-
-	@Override
-	public boolean readerOf(Type type) {
+	public boolean canRead(Type type) {
 		return type == Parameters.class;
 	}
 
@@ -25,5 +20,10 @@ public class FormURLEncodedParametersMessageConverter extends FormURLEncodedMess
 		}
 
 		return parameters;
+	}
+
+	@Override
+	public boolean canWrite(Class<?> type) {
+		return type == Parameters.class;
 	}
 }

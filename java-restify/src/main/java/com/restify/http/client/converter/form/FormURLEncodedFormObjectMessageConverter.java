@@ -14,12 +14,7 @@ public class FormURLEncodedFormObjectMessageConverter extends FormURLEncodedMess
 	private final FormObjects formObjects = FormObjects.cache();
 
 	@Override
-	public boolean writerOf(Class<?> type) {
-		return new JavaAnnotationScanner(type).contains(Form.class);
-	}
-
-	@Override
-	public boolean readerOf(Type type) {
+	public boolean canRead(Type type) {
 		return type instanceof Class && ((Class<?>) type).isAnnotationPresent(Form.class);
 	}
 
@@ -40,5 +35,10 @@ public class FormURLEncodedFormObjectMessageConverter extends FormURLEncodedMess
 		} catch (InstantiationException | IllegalAccessException e) {
 			throw new RestifyHttpMessageReadException(e);
 		}
+	}
+
+	@Override
+	public boolean canWrite(Class<?> type) {
+		return new JavaAnnotationScanner(type).contains(Form.class);
 	}
 }
