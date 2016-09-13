@@ -2,7 +2,10 @@ package com.restify.http.client;
 
 import java.lang.reflect.Type;
 import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Optional;
+
+import com.restify.http.RestifyHttpException;
 
 public class EndpointRequest {
 
@@ -48,4 +51,21 @@ public class EndpointRequest {
 		return expectedType;
 	}
 
+	public EndpointRequest newParameter(String name, String value) {
+		String appender = endpoint.getQuery() == null ? "" : "&";
+
+		String newQuery = Optional.ofNullable(endpoint.getRawQuery())
+				.orElse("")
+					.concat(appender)
+						.concat(name + "=" + value);
+
+		try {
+			URI newURI = new URI(endpoint.getScheme(), endpoint.getRawAuthority(), endpoint.getRawPath(),
+					newQuery, endpoint.getRawFragment());
+
+			return new EndpointRequest(newURI, method, headers, body, expectedType);
+		} catch (URISyntaxException e) {
+			throw new RestifyHttpException(e);
+		}
+	}
 }
