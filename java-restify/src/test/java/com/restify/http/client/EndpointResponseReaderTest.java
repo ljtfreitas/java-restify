@@ -1,6 +1,6 @@
 package com.restify.http.client;
 
-import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.*;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.when;
@@ -63,6 +63,24 @@ public class EndpointResponseReaderTest {
 		endpointResponse = new SimpleEndpointResponse(new EndpointResponseCode(500));
 
 		endpointResponseReader.read(endpointResponse, String.class);
+	}
+
+	@Test
+	public void shouldReturnNullWhenExpectedTypeIsVoid() {
+		endpointResponse = new SimpleEndpointResponse(new EndpointResponseCode(200));
+
+		Object result = endpointResponseReader.read(endpointResponse, Void.class);
+
+		assertNull(result);
+	}
+
+	@Test
+	public void shouldReturnTheSameEndpointResponseParameterWhenReturnTypeIsEndpointResponse() {
+		endpointResponse = new SimpleEndpointResponse(new EndpointResponseCode(200));
+
+		Object result = endpointResponseReader.read(endpointResponse, EndpointResponse.class);
+
+		assertSame(endpointResponse, result);
 	}
 
 	private class SimpleEndpointResponse extends EndpointResponse {

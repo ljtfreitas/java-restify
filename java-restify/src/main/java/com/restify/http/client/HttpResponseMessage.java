@@ -4,5 +4,9 @@ import java.io.InputStream;
 
 public interface HttpResponseMessage {
 
-	public InputStream input();
+	public EndpointResponseCode code();
+
+	public Headers headers();
+
+	public InputStream body();
 }

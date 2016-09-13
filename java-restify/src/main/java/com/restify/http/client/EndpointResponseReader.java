@@ -21,11 +21,23 @@ public class EndpointResponseReader {
 	}
 
 	public Object read(EndpointResponse response, Type expectedType) {
-		return isVoid(expectedType) ? null : doRead(response, expectedType);
+		if (isVoid(expectedType)) {
+			return null;
+
+		} else if (isEndpointResponse(expectedType)) {
+			return response;
+
+		} else {
+			return doRead(response, expectedType);
+		}
 	}
 
 	private boolean isVoid(Type expectedType) {
 		return expectedType == Void.TYPE || expectedType == Void.class;
+	}
+
+	private boolean isEndpointResponse(Type expectedType) {
+		return EndpointResponse.class.equals(expectedType);
 	}
 
 	private Object doRead(EndpointResponse response, Type expectedType) {
@@ -53,7 +65,7 @@ public class EndpointResponseReader {
 			try {
 				Object responseObject = converter.read(expectedType, response);
 
-				response.input().close();
+				response.body().close();
 
 				return responseObject;
 

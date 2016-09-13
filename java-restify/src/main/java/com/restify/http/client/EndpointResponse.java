@@ -15,16 +15,18 @@ public abstract class EndpointResponse implements HttpResponseMessage, Closeable
 		this.stream = stream;
 	}
 
+	@Override
 	public Headers headers() {
 		return headers;
 	}
 
+	@Override
 	public EndpointResponseCode code() {
 		return code;
 	}
 
 	@Override
-	public InputStream input() {
+	public InputStream body() {
 		return stream;
 	}
 

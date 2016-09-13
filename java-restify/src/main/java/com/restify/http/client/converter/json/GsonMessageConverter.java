@@ -37,7 +37,7 @@ public class GsonMessageConverter<T> extends JsonMessageConverter<T> {
 		try {
 			TypeToken<?> token = TypeToken.get(expectedType);
 
-			Reader json = new InputStreamReader(httpResponseMessage.input());
+			Reader json = new InputStreamReader(httpResponseMessage.body());
 
 			return this.gson.fromJson(json, token.getType());
 		} catch (JsonIOException | JsonSyntaxException e) {

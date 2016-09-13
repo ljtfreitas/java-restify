@@ -51,7 +51,7 @@ public class JaxbXmlMessageConverter<T> implements HttpMessageReader<T>, HttpMes
 		try {
 			Unmarshaller unmarshaller = context.createUnmarshaller();
 
-			StreamSource source = new StreamSource(httpResponseMessage.input());
+			StreamSource source = new StreamSource(httpResponseMessage.body());
 
 			XMLStreamReader reader = XMLInputFactory.newInstance().createXMLStreamReader(source);
 
