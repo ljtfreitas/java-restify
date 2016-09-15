@@ -52,8 +52,7 @@ public class RestifyEndpointRequestExecutorTest {
 	public void setup() {
 		endpointResult = "endpoint request result";
 
-		response = new SimpleEndpointResponse(new EndpointResponseCode(200),
-				new ByteArrayInputStream(endpointResult.getBytes()));
+		response = new SimpleEndpointResponse(new ByteArrayInputStream(endpointResult.getBytes()));
 
 		when(endpointRequestInterceptorStackMock.apply(any())).then(returnsFirstArg());
 
@@ -132,13 +131,8 @@ public class RestifyEndpointRequestExecutorTest {
 
 		private final InputStream stream;
 
-		public SimpleEndpointResponse(EndpointResponseCode code, InputStream stream) {
-			super(code, new Headers(), stream);
-			this.stream = stream;
-		}
-
-		public SimpleEndpointResponse(EndpointResponseCode code, Headers headers, InputStream stream) {
-			super(code, headers, stream);
+		public SimpleEndpointResponse(InputStream stream) {
+			super(EndpointResponseCode.ok(), new Headers(), stream);
 			this.stream = stream;
 		}
 

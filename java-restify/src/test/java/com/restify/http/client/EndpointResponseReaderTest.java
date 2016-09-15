@@ -1,6 +1,8 @@
 package com.restify.http.client;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertSame;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
 import static org.mockito.Mockito.when;
@@ -50,8 +52,7 @@ public class EndpointResponseReaderTest {
 
 	@Test
 	public void shouldReadSuccessResponse() {
-		endpointResponse = new SimpleEndpointResponse(new EndpointResponseCode(200), 
-				new ByteArrayInputStream(endpointResult.getBytes()));
+		endpointResponse = new SimpleEndpointResponse(new ByteArrayInputStream(endpointResult.getBytes()));
 
 		Object result = endpointResponseReader.read(endpointResponse, String.class);
 
@@ -60,14 +61,14 @@ public class EndpointResponseReaderTest {
 
 	@Test(expected = RestifyHttpException.class)
 	public void shouldThrowExceptionWhenResponseStatusCodeIsError() {
-		endpointResponse = new SimpleEndpointResponse(new EndpointResponseCode(500));
+		endpointResponse = new SimpleEndpointResponse(EndpointResponseCode.internalServerError());
 
 		endpointResponseReader.read(endpointResponse, String.class);
 	}
 
 	@Test
 	public void shouldReturnNullWhenExpectedTypeIsVoid() {
-		endpointResponse = new SimpleEndpointResponse(new EndpointResponseCode(200));
+		endpointResponse = new SimpleEndpointResponse();
 
 		Object result = endpointResponseReader.read(endpointResponse, Void.class);
 
@@ -76,29 +77,56 @@ public class EndpointResponseReaderTest {
 
 	@Test
 	public void shouldReturnTheSameEndpointResponseParameterWhenReturnTypeIsEndpointResponse() {
-		endpointResponse = new SimpleEndpointResponse(new EndpointResponseCode(200));
+		endpointResponse = new SimpleEndpointResponse();
 
 		Object result = endpointResponseReader.read(endpointResponse, EndpointResponse.class);
 
 		assertSame(endpointResponse, result);
 	}
 
+	@Test
+	public void shouldReturnTheSameEndpointResponseHeadersOfParameterWhenReturnTypeIsHeaders() {
+		Headers responseHeaders = new Headers();
+
+		endpointResponse = new SimpleEndpointResponse(responseHeaders);
+
+		Object result = endpointResponseReader.read(endpointResponse, Headers.class);
+
+		assertSame(responseHeaders, result);
+	}
+
+	@Test
+	public void shouldReturnNullWhenEndpointResponseCodeIsNotReadable() {
+		endpointResponse = new SimpleEndpointResponse(EndpointResponseCode.noContent());
+
+		Object result = endpointResponseReader.read(endpointResponse, String.class);
+
+		assertNull(result);
+	}
+
 	private class SimpleEndpointResponse extends EndpointResponse {
 
 		private final InputStream stream;
 
-		public SimpleEndpointResponse(EndpointResponseCode code) {
-			this(code, new ByteArrayInputStream(new byte[0]));
-		}
-
-		public SimpleEndpointResponse(EndpointResponseCode code, InputStream stream) {
-			super(code, new Headers(), stream);
-			this.stream = stream;
-		}
-
-		public SimpleEndpointResponse(EndpointResponseCode code, Headers headers, InputStream stream) {
+		private SimpleEndpointResponse(EndpointResponseCode code, Headers headers, InputStream stream) {
 			super(code, headers, stream);
 			this.stream = stream;
+		}
+
+		public SimpleEndpointResponse() {
+			this(EndpointResponseCode.ok(), new Headers(), new ByteArrayInputStream(new byte[0]));
+		}
+
+		public SimpleEndpointResponse(EndpointResponseCode code) {
+			this(code, new Headers(), new ByteArrayInputStream(new byte[0]));
+		}
+
+		public SimpleEndpointResponse(Headers headers) {
+			this(EndpointResponseCode.ok(), headers, new ByteArrayInputStream(new byte[0]));
+		}
+
+		public SimpleEndpointResponse(InputStream stream) {
+			this(EndpointResponseCode.ok(), new Headers(), stream);
 		}
 
 		@Override

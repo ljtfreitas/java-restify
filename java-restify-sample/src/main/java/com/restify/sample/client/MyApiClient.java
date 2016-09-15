@@ -16,11 +16,15 @@ public class MyApiClient {
 		System.out.println(myApi.postAs("xml"));
 		System.out.println(myApi.putAs("xml"));
 		System.out.println(myApi.deleteAs("xml"));
+		System.out.println(myApi.headAs("json").headers().get("X-MyJsonApi-Timestamp").get());
+		System.out.println(myApi.optionsAs("json").get("Allow").get());
 
 		System.out.println(myApi.getAs("json"));
 		System.out.println(myApi.postAs("json"));
 		System.out.println(myApi.putAs("json"));
 		System.out.println(myApi.deleteAs("json"));
+		System.out.println(myApi.headAs("xml").headers().get("X-MyXmlApi-Timestamp").get());
+		System.out.println(myApi.optionsAs("xml").get("Allow").get());
 
 		MultipartParameters parameters = new MultipartParameters();
 		parameters.put("destination", "/tmp/java-restify-api/");
@@ -28,8 +32,6 @@ public class MyApiClient {
 				MyApiClient.class.getResourceAsStream("/file.jpg")));
 
 		String newFile = myApi.upload(parameters);
-		System.out.println(newFile);
+		System.out.println("New file created on server " + newFile);
 	}
-
-
 }

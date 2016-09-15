@@ -1,6 +1,7 @@
 package com.restify.sample.api;
 
 import java.io.IOException;
+import java.time.Instant;
 
 import javax.servlet.ServletException;
 import javax.servlet.ServletOutputStream;
@@ -46,6 +47,12 @@ public class MyJsonApi extends HttpServlet {
 	@Override
 	protected void doDelete(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
 		write(new MyApiResponse("DELETE", "My Api DELETE response"), resp);
+	}
+
+	@Override
+	protected void doHead(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+		super.doHead(req, resp);
+		resp.addDateHeader("X-MyJsonApi-Timestamp", Instant.now().toEpochMilli());
 	}
 
 	private void write(MyApiResponse myApiResponse, HttpServletResponse resp) throws IOException {

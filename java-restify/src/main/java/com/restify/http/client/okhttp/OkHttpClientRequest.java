@@ -75,7 +75,7 @@ public class OkHttpClientRequest implements HttpClientRequest {
 	}
 
 	private EndpointResponse responseOf(Response response) {
-		EndpointResponseCode code = new EndpointResponseCode(response.code());
+		EndpointResponseCode code = EndpointResponseCode.of(response.code());
 
 		Headers headers = new Headers();
 		response.headers().names().forEach(name -> headers.put(name, response.headers(name)));

@@ -13,8 +13,9 @@ import com.restify.http.contract.ContentType;
 
 public class EndpointResponseReader {
 
+	private static final TextPlainMessageConverter ERROR_RESPONSE_MESSAGE_CONVERTER = new TextPlainMessageConverter();
+
 	private final HttpMessageConverters converters;
-	private final TextPlainMessageConverter errorResponseMessageConverter = new TextPlainMessageConverter();
 
 	public EndpointResponseReader(HttpMessageConverters converters) {
 		this.converters = converters;
@@ -27,8 +28,14 @@ public class EndpointResponseReader {
 		} else if (isEndpointResponse(expectedType)) {
 			return response;
 
-		} else {
+		} else if (isHeaders(expectedType)) {
+			return response.headers();
+
+		} else if (response.readable()) {
 			return doRead(response, expectedType);
+
+		} else {
+			return null;
 		}
 	}
 
@@ -37,7 +44,13 @@ public class EndpointResponseReader {
 	}
 
 	private boolean isEndpointResponse(Type expectedType) {
-		return EndpointResponse.class.equals(expectedType);
+		return expectedType instanceof Class
+				&& EndpointResponse.class.isAssignableFrom((Class<?>) expectedType);
+	}
+
+	private boolean isHeaders(Type expectedType) {
+		return expectedType instanceof Class<?>
+			&& Headers.class.isAssignableFrom((Class<?>) expectedType);
 	}
 
 	private Object doRead(EndpointResponse response, Type expectedType) {
@@ -49,7 +62,7 @@ public class EndpointResponseReader {
 	}
 
 	private RestifyHttpException onError(EndpointResponse response) {
-		String message = (String) errorResponseMessageConverter.read(String.class, response);
+		String message = (String) ERROR_RESPONSE_MESSAGE_CONVERTER.read(String.class, response);
 		return new RestifyHttpException("HTTP Status Code: " + response.code() + "\n" + message);
 	}
 

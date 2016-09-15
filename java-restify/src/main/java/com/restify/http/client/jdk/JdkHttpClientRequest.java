@@ -40,7 +40,7 @@ public class JdkHttpClientRequest implements HttpClientRequest {
 	}
 
 	private EndpointResponse responseOf(HttpURLConnection connection) throws IOException {
-		EndpointResponseCode code = new EndpointResponseCode(connection.getResponseCode());
+		EndpointResponseCode code = EndpointResponseCode.of(connection.getResponseCode());
 
 		Headers headers = new Headers();
 

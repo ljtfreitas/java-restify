@@ -64,7 +64,7 @@ public class ApacheHttpClientRequest implements HttpClientRequest {
 	}
 
 	private EndpointResponse responseOf(HttpResponse httpResponse) throws IOException {
-		EndpointResponseCode code = new EndpointResponseCode(httpResponse.getStatusLine().getStatusCode());
+		EndpointResponseCode code = EndpointResponseCode.of(httpResponse.getStatusLine().getStatusCode());
 
 		Headers headers = new Headers();
 		Arrays.stream(httpResponse.getAllHeaders())
