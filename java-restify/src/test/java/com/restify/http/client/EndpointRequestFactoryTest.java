@@ -37,7 +37,7 @@ public class EndpointRequestFactoryTest {
 
 		assertTrue(endpointRequest.headers().all().isEmpty());
 
-		assertEquals(String.class, endpointRequest.expectedType());
+		assertEquals(EndpointExpectedType.of(String.class), endpointRequest.expectedType());
 	}
 
 	@Test
@@ -59,7 +59,7 @@ public class EndpointRequestFactoryTest {
 
 		assertTrue(endpointRequest.headers().all().isEmpty());
 
-		assertEquals(String.class, endpointRequest.expectedType());
+		assertEquals(EndpointExpectedType.of(String.class), endpointRequest.expectedType());
 	}
 
 	@Test
@@ -85,7 +85,7 @@ public class EndpointRequestFactoryTest {
 
 		assertTrue(endpointRequest.headers().all().isEmpty());
 
-		assertEquals(String.class, endpointRequest.expectedType());
+		assertEquals(EndpointExpectedType.of(String.class), endpointRequest.expectedType());
 	}
 
 	@Test
@@ -108,7 +108,7 @@ public class EndpointRequestFactoryTest {
 
 		assertTrue(endpointRequest.headers().all().isEmpty());
 
-		assertEquals(String.class, endpointRequest.expectedType());
+		assertEquals(EndpointExpectedType.of(String.class), endpointRequest.expectedType());
 	}
 
 	@Test
@@ -133,7 +133,7 @@ public class EndpointRequestFactoryTest {
 
 		assertEquals("my custom header", endpointRequest.headers().get("X-My-Custom-Header").get().value());
 
-		assertEquals(String.class, endpointRequest.expectedType());
+		assertEquals(EndpointExpectedType.of(String.class), endpointRequest.expectedType());
 	}
 
 	@Test
@@ -158,7 +158,7 @@ public class EndpointRequestFactoryTest {
 
 		assertFalse(endpointRequest.body().isPresent());
 
-		assertEquals(String.class, endpointRequest.expectedType());
+		assertEquals(EndpointExpectedType.of(String.class), endpointRequest.expectedType());
 	}
 
 	@Test
@@ -183,7 +183,7 @@ public class EndpointRequestFactoryTest {
 
 		assertFalse(endpointRequest.body().isPresent());
 
-		assertEquals(String.class, endpointRequest.expectedType());
+		assertEquals(EndpointExpectedType.of(String.class), endpointRequest.expectedType());
 	}
 
 	@Test
@@ -210,7 +210,7 @@ public class EndpointRequestFactoryTest {
 
 		assertFalse(endpointRequest.body().isPresent());
 
-		assertEquals(String.class, endpointRequest.expectedType());
+		assertEquals(EndpointExpectedType.of(String.class), endpointRequest.expectedType());
 	}
 
 	@Test
@@ -234,7 +234,7 @@ public class EndpointRequestFactoryTest {
 
 		assertFalse(endpointRequest.body().isPresent());
 
-		assertEquals(String.class, endpointRequest.expectedType());
+		assertEquals(EndpointExpectedType.of(String.class), endpointRequest.expectedType());
 	}
 
 	@Test
@@ -262,7 +262,7 @@ public class EndpointRequestFactoryTest {
 
 		assertEquals("my custom header", endpointRequest.headers().get("X-My-Custom-Header").get().value());
 
-		assertEquals(String.class, endpointRequest.expectedType());
+		assertEquals(EndpointExpectedType.of(String.class), endpointRequest.expectedType());
 	}
 
 	interface TargetType {

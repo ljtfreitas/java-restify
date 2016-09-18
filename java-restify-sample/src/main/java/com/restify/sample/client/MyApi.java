@@ -2,6 +2,7 @@ package com.restify.sample.client;
 
 import com.restify.http.client.EndpointResponse;
 import com.restify.http.client.Headers;
+import com.restify.http.client.Response;
 import com.restify.http.contract.BodyParameter;
 import com.restify.http.contract.Delete;
 import com.restify.http.contract.Get;
@@ -47,4 +48,7 @@ public interface MyApi {
 	@Header(name = "Content-Type", value = "multipart/form-data")
 	public String upload(@BodyParameter MultipartParameters parameters);
 
+	@Path("/{type}")
+	@Get
+	public Response<MyApiResponse> getResponseObjectAs(@PathParameter String type);
 }

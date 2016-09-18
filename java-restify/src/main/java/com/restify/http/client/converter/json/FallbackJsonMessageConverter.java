@@ -15,7 +15,7 @@ public class FallbackJsonMessageConverter<T> extends JsonMessageConverter<T> {
 	}
 
 	@Override
-	public T read(Type expectedType, HttpResponseMessage httpResponseMessage) {
+	public T read(HttpResponseMessage httpResponseMessage, Type expectedType) {
 		throw new RestifyHttpMessageReadException("This converter is not able to read your JSON message.");
 	}
 

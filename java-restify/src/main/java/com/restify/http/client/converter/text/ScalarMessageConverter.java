@@ -53,10 +53,10 @@ public class ScalarMessageConverter implements HttpMessageReader<Object>, HttpMe
 	}
 
 	@Override
-	public Object read(Type expectedType, HttpResponseMessage httpResponseMessage)
+	public Object read(HttpResponseMessage httpResponseMessage, Type expectedType)
 			throws RestifyHttpMessageReadException {
 
-		String responseAsString = textPlainMessageConverter.read(String.class, httpResponseMessage);
+		String responseAsString = textPlainMessageConverter.read(httpResponseMessage, String.class);
 
 		return ScalarType.of(expectedType).convert(responseAsString);
 	}

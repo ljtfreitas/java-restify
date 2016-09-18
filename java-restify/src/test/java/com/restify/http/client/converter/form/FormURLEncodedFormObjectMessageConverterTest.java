@@ -34,7 +34,7 @@ public class FormURLEncodedFormObjectMessageConverterTest {
 
 		HttpResponseMessage response = new SimpleHttpResponseMessage(new ByteArrayInputStream(source.getBytes()));
 
-		MyFormObject myFormObject = (MyFormObject) converter.read(MyFormObject.class, response);
+		MyFormObject myFormObject = (MyFormObject) converter.read(response, MyFormObject.class);
 
 		assertEquals("Tiago de Freitas", myFormObject.name);
 		assertEquals(31, myFormObject.age);

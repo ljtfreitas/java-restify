@@ -13,7 +13,7 @@ public class EndpointRequest {
 	private final String method;
 	private final Headers headers;
 	private final Object body;
-	private final Type expectedType;
+	private final EndpointExpectedType expectedType;
 
 	public EndpointRequest(URI endpoint, String method) {
 		this(endpoint, method, new Headers(), null, void.class);
@@ -24,6 +24,10 @@ public class EndpointRequest {
 	}
 
 	public EndpointRequest(URI endpoint, String method, Headers headers, Object body, Type expectedType) {
+		this(endpoint, method, headers, body, EndpointExpectedType.of(expectedType));
+	}
+
+	public EndpointRequest(URI endpoint, String method, Headers headers, Object body, EndpointExpectedType expectedType) {
 		this.endpoint = endpoint;
 		this.method = method;
 		this.headers = headers;
@@ -47,7 +51,7 @@ public class EndpointRequest {
 		return headers;
 	}
 
-	public Type expectedType() {
+	public EndpointExpectedType expectedType() {
 		return expectedType;
 	}
 

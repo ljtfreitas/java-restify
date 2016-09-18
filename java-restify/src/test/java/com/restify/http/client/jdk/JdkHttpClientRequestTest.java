@@ -34,6 +34,8 @@ public class JdkHttpClientRequestTest {
 
 	private MyApi myApi;
 
+	private MyModelJsonApi myModelJsonApi;
+
 	private MockServerClient mockServerClient;
 
 	@Before
@@ -42,6 +44,10 @@ public class JdkHttpClientRequestTest {
 
 		myApi = new RestifyProxyBuilder()
 				.target(MyApi.class, "http://localhost:7080")
+				.build();
+
+		myModelJsonApi = new RestifyProxyBuilder()
+				.target(MyModelJsonApi.class, "http://localhost:7080")
 				.build();
 	}
 
@@ -57,6 +63,23 @@ public class JdkHttpClientRequestTest {
 					.withBody(json("{\"name\": \"Tiago de Freitas Lima\",\"age\":31}")));
 
 		MyModel myModel = myApi.json();
+
+		assertEquals("Tiago de Freitas Lima", myModel.name);
+		assertEquals(31, myModel.age);
+	}
+
+	@Test
+	public void shouldSendGetRequestOnJsonFormatWithExtendedApi() {
+		mockServerClient
+			.when(request()
+					.withMethod("GET")
+					.withPath("/json"))
+			.respond(response()
+					.withStatusCode(200)
+					.withHeader("Content-Type", "application/json")
+					.withBody(json("{\"name\": \"Tiago de Freitas Lima\",\"age\":31}")));
+
+		MyModel myModel = myModelJsonApi.json();
 
 		assertEquals("Tiago de Freitas Lima", myModel.name);
 		assertEquals(31, myModel.age);

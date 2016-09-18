@@ -41,6 +41,6 @@ public class FormURLEncodedMapMessageConverterTest {
 	public void shouldThrowUnsupportedOperationExceptionOnTryReadMessage() {
 		ByteArrayInputStream input = new ByteArrayInputStream(messageBody.getBytes());
 
-		converter.read(Map.class, new SimpleHttpResponseMessage(input));
+		converter.read(new SimpleHttpResponseMessage(input), Map.class);
 	}
 }

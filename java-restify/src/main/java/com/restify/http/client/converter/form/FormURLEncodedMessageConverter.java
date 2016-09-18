@@ -28,7 +28,7 @@ public abstract class FormURLEncodedMessageConverter<T> implements HttpMessageRe
 	}
 
 	@Override
-	public T read(Type expectedType, HttpResponseMessage httpResponseMessage) throws RestifyHttpMessageReadException {
+	public T read(HttpResponseMessage httpResponseMessage, Type expectedType) throws RestifyHttpMessageReadException {
 		try (BufferedReader buffer = new BufferedReader(new InputStreamReader(httpResponseMessage.body()))) {
 			String content = buffer.lines().collect(Collectors.joining("\n"));
 

@@ -56,7 +56,7 @@ public class RestifyEndpointRequestExecutorTest {
 
 		when(endpointRequestInterceptorStackMock.apply(any())).then(returnsFirstArg());
 
-		when(endpointResponseReaderMock.read(response, String.class))
+		when(endpointResponseReaderMock.read(response, EndpointExpectedType.of(String.class)))
 			.thenReturn(endpointResult);
 	}
 
@@ -72,7 +72,7 @@ public class RestifyEndpointRequestExecutorTest {
 		assertEquals(endpointResult, result);
 
 		verify(endpointRequestWriterMock, never()).write(any(), any());
-		verify(endpointResponseReaderMock).read(response, String.class);
+		verify(endpointResponseReaderMock).read(response, EndpointExpectedType.of(String.class));
 	}
 
 	@Test
@@ -92,7 +92,7 @@ public class RestifyEndpointRequestExecutorTest {
 		assertEquals(endpointResult, result);
 
 		verify(endpointRequestWriterMock).write(endpointRequest, request);
-		verify(endpointResponseReaderMock).read(response, String.class);
+		verify(endpointResponseReaderMock).read(response, EndpointExpectedType.of(String.class));
 	}
 
 	private class SimpleHttpClientRequest implements HttpClientRequest {

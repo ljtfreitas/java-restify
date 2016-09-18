@@ -41,7 +41,7 @@ public class JacksonMessageConverter<T> extends JsonMessageConverter<T> {
 	}
 
 	@Override
-	public T read(Type expectedType, HttpResponseMessage httpResponseMessage) throws RestifyHttpMessageReadException {
+	public T read(HttpResponseMessage httpResponseMessage, Type expectedType) throws RestifyHttpMessageReadException {
 		try {
 			TypeFactory typeFactory = objectMapper.getTypeFactory();
 

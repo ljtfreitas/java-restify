@@ -64,7 +64,7 @@ public class TextMessageConverterTest {
 	public void shouldReadStringMessage() {
 		ByteArrayInputStream input = new ByteArrayInputStream(message.getBytes());
 
-		Object content = converter.read(String.class, new SimpleHttpResponseMessage(input));
+		Object content = converter.read(new SimpleHttpResponseMessage(input), String.class);
 
 		assertEquals(message, content);
 	}

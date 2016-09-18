@@ -43,7 +43,7 @@ public class JaxbXmlMessageConverter<T> implements HttpMessageReader<T>, HttpMes
 
 	@SuppressWarnings("unchecked")
 	@Override
-	public T read(Type expectedType, HttpResponseMessage httpResponseMessage) {
+	public T read(HttpResponseMessage httpResponseMessage, Type expectedType) {
 		Class<T> expectedClassType = (Class<T>) expectedType;
 
 		JAXBContext context = contextOf(expectedClassType);

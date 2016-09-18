@@ -41,4 +41,20 @@ public class SimpleWildcardType implements WildcardType {
 		} else return super.equals(obj);
 	}
 
+	@Override
+	public String toString() {
+		StringBuilder report = new StringBuilder();
+
+		report
+			.append("SimpleWildcardType: [")
+				.append("Upper Bounds: ")
+					.append(Arrays.toString(upperBounds))
+				.append(", ")
+				.append("Lower Bounds: ")
+					.append(lowerBounds)
+			.append("]");
+
+		return report.toString();
+
+	}
 }

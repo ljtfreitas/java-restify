@@ -62,7 +62,7 @@ public class GsonMessageConverterTest {
 	public void shouldReadJsonMessage() {
 		ByteArrayInputStream input = new ByteArrayInputStream(json.getBytes());
 
-		MyJsonModel myJsonModel = converter.read(MyJsonModel.class, new SimpleHttpResponseMessage(input));
+		MyJsonModel myJsonModel = converter.read(new SimpleHttpResponseMessage(input), MyJsonModel.class);
 
 		assertEquals("Tiago de Freitas Lima", myJsonModel.name);
 		assertEquals(31, myJsonModel.age);
@@ -75,7 +75,7 @@ public class GsonMessageConverterTest {
 
 		Type genericCollectionType = new SimpleParameterizedType(Collection.class, null, MyJsonModel.class);
 
-		Collection<MyJsonModel> collectionOfMyJsonModel = (Collection<MyJsonModel>) converter.read(genericCollectionType, new SimpleHttpResponseMessage(input));
+		Collection<MyJsonModel> collectionOfMyJsonModel = (Collection<MyJsonModel>) converter.read(new SimpleHttpResponseMessage(input), genericCollectionType);
 
 		assertEquals(2, collectionOfMyJsonModel.size());
 

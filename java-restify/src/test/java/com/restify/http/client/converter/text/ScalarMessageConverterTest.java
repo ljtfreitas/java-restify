@@ -26,7 +26,7 @@ public class ScalarMessageConverterTest {
 	@Test
 	public void shouldReadByteValue() {
 		HttpResponseMessage httpResponseMessage = new SimpleHttpResponseMessage(new ByteArrayInputStream("1".getBytes()));
-		Object value = converter.read(Byte.class, httpResponseMessage);
+		Object value = converter.read(httpResponseMessage, Byte.class);
 
 		assertEquals((byte) 1, value);
 	}
@@ -56,7 +56,7 @@ public class ScalarMessageConverterTest {
 	@Test
 	public void shouldReadShortValue() {
 		HttpResponseMessage httpResponseMessage = new SimpleHttpResponseMessage(new ByteArrayInputStream("1".getBytes()));
-		Object value = converter.read(Short.class, httpResponseMessage);
+		Object value = converter.read(httpResponseMessage, Short.class);
 
 		assertEquals((short) 1, value);
 	}
@@ -86,7 +86,7 @@ public class ScalarMessageConverterTest {
 	@Test
 	public void shouldReadIntegerValue() {
 		HttpResponseMessage httpResponseMessage = new SimpleHttpResponseMessage(new ByteArrayInputStream("1".getBytes()));
-		Object value = converter.read(Integer.class, httpResponseMessage);
+		Object value = converter.read(httpResponseMessage, Integer.class);
 
 		assertEquals((int) 1, value);
 	}
@@ -116,7 +116,7 @@ public class ScalarMessageConverterTest {
 	@Test
 	public void shouldReadLongValue() {
 		HttpResponseMessage httpResponseMessage = new SimpleHttpResponseMessage(new ByteArrayInputStream("1".getBytes()));
-		Object value = converter.read(Long.class, httpResponseMessage);
+		Object value = converter.read(httpResponseMessage, Long.class);
 
 		assertEquals((long) 1, value);
 	}
@@ -146,7 +146,7 @@ public class ScalarMessageConverterTest {
 	@Test
 	public void shouldReadFloatValue() {
 		HttpResponseMessage httpResponseMessage = new SimpleHttpResponseMessage(new ByteArrayInputStream("1.1".getBytes()));
-		Object value = converter.read(Float.class, httpResponseMessage);
+		Object value = converter.read(httpResponseMessage, Float.class);
 
 		assertEquals((float) 1.1, value);
 	}
@@ -176,7 +176,7 @@ public class ScalarMessageConverterTest {
 	@Test
 	public void shouldReadDoubleValue() {
 		HttpResponseMessage httpResponseMessage = new SimpleHttpResponseMessage(new ByteArrayInputStream("2.2".getBytes()));
-		Object value = converter.read(Double.class, httpResponseMessage);
+		Object value = converter.read(httpResponseMessage, Double.class);
 
 		assertEquals((double) 2.2, value);
 	}
@@ -206,7 +206,7 @@ public class ScalarMessageConverterTest {
 	@Test
 	public void shouldReadBooleanValue() {
 		HttpResponseMessage httpResponseMessage = new SimpleHttpResponseMessage(new ByteArrayInputStream("true".getBytes()));
-		Object value = converter.read(Boolean.class, httpResponseMessage);
+		Object value = converter.read(httpResponseMessage, Boolean.class);
 
 		assertEquals((boolean) true, value);
 	}
@@ -236,7 +236,7 @@ public class ScalarMessageConverterTest {
 	@Test
 	public void shouldReadCharacterValue() {
 		HttpResponseMessage httpResponseMessage = new SimpleHttpResponseMessage(new ByteArrayInputStream("a".getBytes()));
-		Object value = converter.read(Character.class, httpResponseMessage);
+		Object value = converter.read(httpResponseMessage, Character.class);
 
 		assertEquals((char) 'a', value);
 	}

@@ -29,5 +29,17 @@ public class SimpleGenericArrayType implements GenericArrayType {
 					
 		} else return super.equals(obj);
 	}
+	@Override
+	public String toString() {
+		StringBuilder report = new StringBuilder();
+
+		report
+			.append("SimpleGenericArrayType: [")
+				.append("Component Type: ")
+					.append(componentType)
+			.append("]");
+
+		return report.toString();
+	}
 
 }

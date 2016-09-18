@@ -32,6 +32,10 @@ public abstract class EndpointResponse implements HttpResponseMessage, Closeable
 		return stream;
 	}
 
+	public <T> Response<T> withBody(T body) {
+		return new Response<T>(code, headers, body);
+	}
+
 	public boolean readable() {
 		return statusIsReadable() && hasContentLength();
 	}

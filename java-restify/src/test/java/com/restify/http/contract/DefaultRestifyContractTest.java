@@ -5,6 +5,7 @@ import static org.junit.Assert.assertTrue;
 
 import java.lang.reflect.Type;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
@@ -219,6 +220,11 @@ public class DefaultRestifyContractTest {
 		assertEquals("http://my.model.api/all", endpointMethodAll.get().path());
 		assertEquals(new SimpleParameterizedType(Collection.class, null, MyModel.class), endpointMethodAll.get().returnType());
 
+		Optional<EndpointMethod> endpointMethodAllAsList = endpointType.find(MySpecificApi.class.getMethod("allAsList"));
+		assertTrue(endpointMethodAllAsList.isPresent());
+		assertEquals("http://my.model.api/all", endpointMethodAllAsList.get().path());
+		assertEquals(new SimpleParameterizedType(List.class, null, MyModel.class), endpointMethodAllAsList.get().returnType());
+
 		Optional<EndpointMethod> endpointMethodAllAsArray = endpointType.find(MySpecificApi.class.getMethod("allAsArray"));
 		assertTrue(endpointMethodAllAsArray.isPresent());
 		assertEquals("http://my.model.api/all", endpointMethodAllAsArray.get().path());
@@ -299,6 +305,9 @@ public class DefaultRestifyContractTest {
 
 		@Path("/all") @Get
 		public Collection<T> all();
+
+		@Path("/all") @Get
+		public List<T> allAsList();
 
 		@Path("/all") @Get
 		public T[] allAsArray();

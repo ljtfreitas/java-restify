@@ -9,5 +9,5 @@ public interface HttpMessageReader<T> extends HttpMessageConverter {
 
 	public boolean canRead(Type type);
 
-	public T read(Type expectedType, HttpResponseMessage httpResponseMessage) throws RestifyHttpMessageReadException;
+	public T read(HttpResponseMessage httpResponseMessage, Type expectedType) throws RestifyHttpMessageReadException;
 }

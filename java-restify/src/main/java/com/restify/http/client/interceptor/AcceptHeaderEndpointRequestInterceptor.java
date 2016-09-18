@@ -19,7 +19,7 @@ public class AcceptHeaderEndpointRequestInterceptor implements EndpointRequestIn
 
 	@Override
 	public EndpointRequest intercepts(EndpointRequest endpointRequest) {
-		Type expectedType = endpointRequest.expectedType();
+		Type expectedType = endpointRequest.expectedType().type();
 
 		Collection<HttpMessageReader<Object>> convertersOfType = messageConverters.readersOf(expectedType);
 

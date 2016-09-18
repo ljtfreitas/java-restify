@@ -49,4 +49,23 @@ public class SimpleParameterizedType implements ParameterizedType {
 		} else return false;
 	}
 
+	@Override
+	public String toString() {
+		StringBuilder report = new StringBuilder();
+
+		report
+			.append("SimpleParameterizedType: [")
+				.append("Raw Type: ")
+					.append(rawType)
+				.append(", ")
+				.append("Owner Type: ")
+					.append(ownerType)
+				.append(", ")
+				.append("Type Arguments: ")
+					.append(Arrays.toString(typeArguments))
+			.append("]");
+
+		return report.toString();
+
+	}
 }

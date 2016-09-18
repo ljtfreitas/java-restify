@@ -74,7 +74,7 @@ public class JacksonMessageConverterTest {
 	public void shouldReadJsonMessage() {
 		ByteArrayInputStream input = new ByteArrayInputStream(json.getBytes());
 
-		MyJsonModel myJsonModel = (MyJsonModel) converter.read(MyJsonModel.class, new SimpleHttpResponseMessage(input));
+		MyJsonModel myJsonModel = (MyJsonModel) converter.read(new SimpleHttpResponseMessage(input), MyJsonModel.class);
 
 		assertEquals("Tiago de Freitas Lima", myJsonModel.name);
 		assertEquals(31, myJsonModel.age);
@@ -87,7 +87,7 @@ public class JacksonMessageConverterTest {
 
 		Type genericCollectionType = new SimpleParameterizedType(Collection.class, null, MyJsonModel.class);
 
-		Collection<MyJsonModel> collectionOfMyJsonModel = (Collection<MyJsonModel>) converter.read(genericCollectionType, new SimpleHttpResponseMessage(input));
+		Collection<MyJsonModel> collectionOfMyJsonModel = (Collection<MyJsonModel>) converter.read(new SimpleHttpResponseMessage(input), genericCollectionType);
 
 		assertEquals(2, collectionOfMyJsonModel.size());
 

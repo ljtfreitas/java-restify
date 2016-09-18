@@ -1,9 +1,11 @@
 package com.restify.sample.client;
 
 import com.restify.http.RestifyProxyBuilder;
+import com.restify.http.client.Response;
 import com.restify.http.contract.ContentType;
 import com.restify.http.contract.MultipartFile;
 import com.restify.http.metadata.MultipartParameters;
+import com.restify.sample.api.MyApiResponse;
 
 public class MyApiClient {
 
@@ -33,5 +35,8 @@ public class MyApiClient {
 
 		String newFile = myApi.upload(parameters);
 		System.out.println("New file created on server " + newFile);
+
+		Response<MyApiResponse> responseObject = myApi.getResponseObjectAs("json");
+		System.out.println("Response object: " + responseObject);
 	}
 }

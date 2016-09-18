@@ -40,7 +40,7 @@ public class FormURLEncodedParametersMessageConverterTest {
 	public void shouldReadFormUrlEncodedMessageWhenParametersIsExpectedType() {
 		ByteArrayInputStream input = new ByteArrayInputStream(messageBody.getBytes());
 
-		Parameters parameters = converter.read(Parameters.class, new SimpleHttpResponseMessage(input));
+		Parameters parameters = converter.read(new SimpleHttpResponseMessage(input), Parameters.class);
 
 		assertEquals("value1", parameters.first("param1").get());
 		assertEquals("value2", parameters.first("param2").get());

@@ -21,7 +21,7 @@ public abstract class TextMessageConverter implements HttpMessageReader<String>,
 	}
 
 	@Override
-	public String read(Type expectedType, HttpResponseMessage httpResponseMessage) throws RestifyHttpMessageReadException {
+	public String read(HttpResponseMessage httpResponseMessage, Type expectedType) throws RestifyHttpMessageReadException {
 		try (BufferedReader buffer = new BufferedReader(new InputStreamReader(httpResponseMessage.body()))) {
             return buffer.lines().collect(Collectors.joining("\n"));
 

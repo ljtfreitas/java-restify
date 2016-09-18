@@ -1,7 +1,5 @@
 package com.restify.http.client;
 
-import java.lang.reflect.Type;
-
 import com.restify.http.RestifyHttpException;
 import com.restify.http.client.interceptor.EndpointRequestInterceptorStack;
 
@@ -42,7 +40,7 @@ public class RestifyEndpointRequestExecutor implements EndpointRequestExecutor {
 		return endpointRequestInterceptorStack.apply(endpointRequest);
 	}
 
-	private Object responseOf(EndpointResponse response, Type expectedType) {
+	private Object responseOf(EndpointResponse response, EndpointExpectedType expectedType) {
 		return endpointResponseReader.read(response, expectedType);
 	}
 }

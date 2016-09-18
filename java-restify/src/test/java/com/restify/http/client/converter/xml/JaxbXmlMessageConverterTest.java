@@ -68,7 +68,7 @@ public class JaxbXmlMessageConverterTest {
 	public void shouldReadXmlMessage() {
 		ByteArrayInputStream input = new ByteArrayInputStream(xml.getBytes());
 
-		MyXmlModel myXmlModel = converter.read(MyXmlModel.class, new SimpleHttpResponseMessage(input));
+		MyXmlModel myXmlModel = converter.read(new SimpleHttpResponseMessage(input), MyXmlModel.class);
 
 		assertEquals("Tiago de Freitas Lima", myXmlModel.name);
 		assertEquals(31, myXmlModel.age);
