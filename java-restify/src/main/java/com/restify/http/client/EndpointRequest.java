@@ -20,7 +20,11 @@ public class EndpointRequest {
 	}
 
 	public EndpointRequest(URI endpoint, String method, Type expectedType) {
-		this(endpoint, method, new Headers(), null, expectedType);
+		this(endpoint, method, new Headers(), expectedType);
+	}
+
+	public EndpointRequest(URI endpoint, String method, Headers headers, Type expectedType) {
+		this(endpoint, method, headers, null, expectedType);
 	}
 
 	public EndpointRequest(URI endpoint, String method, Headers headers, Object body, Type expectedType) {

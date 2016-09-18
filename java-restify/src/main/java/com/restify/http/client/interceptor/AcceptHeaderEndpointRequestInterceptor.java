@@ -1,7 +1,10 @@
 package com.restify.http.client.interceptor;
 
+import static com.restify.http.client.Headers.ACCEPT;
+
 import java.lang.reflect.Type;
 import java.util.Collection;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import com.restify.http.client.EndpointRequest;
@@ -19,16 +22,20 @@ public class AcceptHeaderEndpointRequestInterceptor implements EndpointRequestIn
 
 	@Override
 	public EndpointRequest intercepts(EndpointRequest endpointRequest) {
-		Type expectedType = endpointRequest.expectedType().type();
+		Optional<Header> accept = endpointRequest.headers().get(ACCEPT);
 
-		Collection<HttpMessageReader<Object>> convertersOfType = messageConverters.readersOf(expectedType);
+		if (!accept.isPresent()) {
+			Type expectedType = endpointRequest.expectedType().type();
 
-		if (!convertersOfType.isEmpty()) {
-			String acceptTypes = convertersOfType.stream()
-					.map(converter -> converter.contentType())
-						.collect(Collectors.joining(", "));
+			Collection<HttpMessageReader<Object>> convertersOfType = messageConverters.readersOf(expectedType);
 
-			endpointRequest.headers().add(new Header("Accept", acceptTypes));
+			if (!convertersOfType.isEmpty()) {
+				String acceptTypes = convertersOfType.stream()
+						.map(converter -> converter.contentType())
+							.collect(Collectors.joining(", "));
+
+				endpointRequest.headers().add(new Header(ACCEPT, acceptTypes));
+			}
 		}
 
 		return endpointRequest;
