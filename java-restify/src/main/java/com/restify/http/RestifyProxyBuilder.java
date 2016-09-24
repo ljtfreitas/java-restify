@@ -4,21 +4,21 @@ import java.lang.reflect.Proxy;
 import java.util.Optional;
 
 import com.restify.http.client.EndpointMethodExecutor;
-import com.restify.http.client.EndpointRequestExecutor;
-import com.restify.http.client.EndpointRequestWriter;
-import com.restify.http.client.EndpointResponseReader;
-import com.restify.http.client.HttpClientRequestFactory;
-import com.restify.http.client.RestifyEndpointRequestExecutor;
 import com.restify.http.client.authentication.Authentication;
-import com.restify.http.client.converter.HttpMessageConverter;
-import com.restify.http.client.converter.HttpMessageConverters;
-import com.restify.http.client.interceptor.AcceptHeaderEndpointRequestInterceptor;
-import com.restify.http.client.interceptor.EndpointRequestInterceptorStack;
-import com.restify.http.client.interceptor.authentication.AuthenticationEndpoinRequestInterceptor;
-import com.restify.http.client.jdk.JdkHttpClientRequestFactory;
+import com.restify.http.client.message.HttpMessageConverter;
+import com.restify.http.client.message.HttpMessageConverters;
+import com.restify.http.client.request.EndpointRequestExecutor;
+import com.restify.http.client.request.EndpointRequestWriter;
+import com.restify.http.client.request.HttpClientRequestFactory;
+import com.restify.http.client.request.RestifyEndpointRequestExecutor;
+import com.restify.http.client.request.interceptor.AcceptHeaderEndpointRequestInterceptor;
+import com.restify.http.client.request.interceptor.EndpointRequestInterceptorStack;
+import com.restify.http.client.request.interceptor.authentication.AuthenticationEndpoinRequestInterceptor;
+import com.restify.http.client.request.jdk.JdkHttpClientRequestFactory;
+import com.restify.http.client.response.EndpointResponseReader;
 import com.restify.http.contract.DefaultRestifyContract;
 import com.restify.http.contract.RestifyContract;
-import com.restify.http.metadata.EndpointTarget;
+import com.restify.http.contract.metadata.EndpointTarget;
 
 public class RestifyProxyBuilder {
 

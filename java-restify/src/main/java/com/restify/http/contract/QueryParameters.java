@@ -5,8 +5,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import com.restify.http.metadata.EndpointMethodParameterSerializer;
-import com.restify.http.metadata.EndpointMethodQueryParametersSerializer;
+import com.restify.http.contract.metadata.EndpointMethodParameterSerializer;
+import com.restify.http.contract.metadata.EndpointMethodQueryParametersSerializer;
 
 @Target(ElementType.PARAMETER)
 @Retention(RetentionPolicy.RUNTIME)

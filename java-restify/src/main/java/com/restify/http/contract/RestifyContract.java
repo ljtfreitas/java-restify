@@ -1,7 +1,7 @@
 package com.restify.http.contract;
 
-import com.restify.http.metadata.EndpointTarget;
-import com.restify.http.metadata.EndpointType;
+import com.restify.http.contract.metadata.EndpointTarget;
+import com.restify.http.contract.metadata.EndpointType;
 
 public interface RestifyContract {
 

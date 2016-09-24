@@ -17,10 +17,10 @@ import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import com.restify.http.client.EndpointMethodExecutor;
-import com.restify.http.metadata.EndpointMethod;
-import com.restify.http.metadata.EndpointMethods;
-import com.restify.http.metadata.EndpointTarget;
-import com.restify.http.metadata.EndpointType;
+import com.restify.http.contract.metadata.EndpointMethod;
+import com.restify.http.contract.metadata.EndpointMethods;
+import com.restify.http.contract.metadata.EndpointTarget;
+import com.restify.http.contract.metadata.EndpointType;
 
 @RunWith(MockitoJUnitRunner.class)
 public class RestifyProxyHandlerTest {

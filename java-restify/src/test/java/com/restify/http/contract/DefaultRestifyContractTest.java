@@ -12,15 +12,14 @@ import java.util.Optional;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.restify.http.metadata.EndpointHeader;
-import com.restify.http.metadata.EndpointMethod;
-import com.restify.http.metadata.EndpointMethodParameter;
-import com.restify.http.metadata.EndpointTarget;
-import com.restify.http.metadata.EndpointType;
-import com.restify.http.metadata.Parameters;
-import com.restify.http.metadata.reflection.SimpleGenericArrayType;
-import com.restify.http.metadata.reflection.SimpleParameterizedType;
-import com.restify.http.metadata.reflection.SimpleWildcardType;
+import com.restify.http.contract.metadata.EndpointHeader;
+import com.restify.http.contract.metadata.EndpointMethod;
+import com.restify.http.contract.metadata.EndpointMethodParameter;
+import com.restify.http.contract.metadata.EndpointTarget;
+import com.restify.http.contract.metadata.EndpointType;
+import com.restify.http.contract.metadata.reflection.SimpleGenericArrayType;
+import com.restify.http.contract.metadata.reflection.SimpleParameterizedType;
+import com.restify.http.contract.metadata.reflection.SimpleWildcardType;
 
 public class DefaultRestifyContractTest {
 

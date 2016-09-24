@@ -7,9 +7,9 @@ import java.util.Arrays;
 import java.util.Optional;
 
 import com.restify.http.client.EndpointMethodExecutor;
-import com.restify.http.metadata.EndpointMethod;
-import com.restify.http.metadata.EndpointType;
-import com.restify.http.metadata.reflection.JavaDefaultMethodExecutor;
+import com.restify.http.contract.metadata.EndpointMethod;
+import com.restify.http.contract.metadata.EndpointType;
+import com.restify.http.contract.metadata.reflection.JavaDefaultMethodExecutor;
 
 public class RestifyProxyHandler implements InvocationHandler {
 

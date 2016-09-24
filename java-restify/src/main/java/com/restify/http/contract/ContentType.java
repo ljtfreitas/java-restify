@@ -1,6 +1,6 @@
 package com.restify.http.contract;
 
-import static com.restify.http.metadata.Preconditions.isTrue;
+import static com.restify.http.util.Preconditions.isTrue;
 
 import java.util.Arrays;
 import java.util.LinkedHashMap;

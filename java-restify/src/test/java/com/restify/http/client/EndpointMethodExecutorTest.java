@@ -10,7 +10,9 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import com.restify.http.metadata.EndpointMethod;
+import com.restify.http.client.request.EndpointRequest;
+import com.restify.http.client.request.EndpointRequestExecutor;
+import com.restify.http.contract.metadata.EndpointMethod;
 
 @RunWith(MockitoJUnitRunner.class)
 public class EndpointMethodExecutorTest {

@@ -1,6 +1,9 @@
 package com.restify.http.client;
 
-import com.restify.http.metadata.EndpointMethod;
+import com.restify.http.client.request.EndpointRequest;
+import com.restify.http.client.request.EndpointRequestExecutor;
+import com.restify.http.client.request.EndpointRequestFactory;
+import com.restify.http.contract.metadata.EndpointMethod;
 
 public class EndpointMethodExecutor {
 

@@ -1,15 +1,15 @@
 package com.restify.http.contract;
 
-import static com.restify.http.metadata.Preconditions.nonNull;
+import static com.restify.http.util.Preconditions.nonNull;
 
 import java.lang.reflect.Modifier;
 import java.util.Arrays;
 import java.util.stream.Collectors;
 
-import com.restify.http.metadata.EndpointMethodReader;
-import com.restify.http.metadata.EndpointMethods;
-import com.restify.http.metadata.EndpointTarget;
-import com.restify.http.metadata.EndpointType;
+import com.restify.http.contract.metadata.EndpointMethodReader;
+import com.restify.http.contract.metadata.EndpointMethods;
+import com.restify.http.contract.metadata.EndpointTarget;
+import com.restify.http.contract.metadata.EndpointType;
 
 public class DefaultRestifyContract implements RestifyContract {
 
