@@ -103,7 +103,7 @@ public class ExpectedType {
 		return new ExpectedType(expectedType, EndpointResponse.class);
 	}
 
-	public static ExpectedType of(Type expectedType, Class<?> unwrapClassType) {
-		return new ExpectedType(expectedType, unwrapClassType);
+	public static ExpectedType of(Type expectedType, Class<?> disposableClassType) {
+		return new ExpectedType(expectedType, disposableClassType);
 	}
 }

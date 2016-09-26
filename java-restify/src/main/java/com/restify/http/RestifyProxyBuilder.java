@@ -18,11 +18,13 @@ import com.restify.http.client.request.jdk.JdkHttpClientRequestFactory;
 import com.restify.http.client.response.EndpointResponseReader;
 import com.restify.http.contract.DefaultRestifyContract;
 import com.restify.http.contract.RestifyContract;
+import com.restify.http.contract.metadata.DefaultRestifyContractReader;
 import com.restify.http.contract.metadata.EndpointTarget;
+import com.restify.http.contract.metadata.RestifyContractReader;
 
 public class RestifyProxyBuilder {
 
-	private RestifyContract contract;
+	private RestifyContractReader contractReader;
 
 	private HttpClientRequestFactory httpClientRequestFactory;
 
@@ -37,8 +39,8 @@ public class RestifyProxyBuilder {
 		return this;
 	}
 
-	public RestifyProxyBuilder contract(RestifyContract contract) {
-		this.contract = contract;
+	public RestifyProxyBuilder contract(RestifyContractReader contract) {
+		this.contractReader = contract;
 		return this;
 	}
 
@@ -90,8 +92,9 @@ public class RestifyProxyBuilder {
 		}
 
 		private RestifyContract contract() {
-			return Optional.ofNullable(contract)
-					.orElseGet(() -> new DefaultRestifyContract());
+			return Optional.ofNullable(contractReader)
+					.map(c -> new DefaultRestifyContract(c))
+						.orElseGet(() -> new DefaultRestifyContract(new DefaultRestifyContractReader()));
 		}
 
 		private EndpointRequestExecutor endpointRequestExecutor() {

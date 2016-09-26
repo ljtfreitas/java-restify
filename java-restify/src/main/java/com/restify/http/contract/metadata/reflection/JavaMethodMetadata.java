@@ -46,6 +46,6 @@ public class JavaMethodMetadata {
 	}
 
 	public Type returnType(Class<?> rawType) {
-		return new JavaMethodReturnTypeResolver(rawType).resolve(javaMethod);
+		return new JavaTypeResolver(rawType).returnTypeOf(javaMethod);
 	}
 }

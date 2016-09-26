@@ -31,6 +31,10 @@ public class EndpointMethodParameter {
 		this.serializer = serializer;
 	}
 
+	public Type javaType() {
+		return javaType;
+	}
+
 	public boolean is(String name) {
 		return this.name.equals(name);
 	}

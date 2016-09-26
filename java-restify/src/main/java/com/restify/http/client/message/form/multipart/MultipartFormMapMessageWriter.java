@@ -18,7 +18,7 @@ public class MultipartFormMapMessageWriter extends MultipartFormMessageWriter<Ma
 
 	@Override
 	public boolean canWrite(Class<?> type) {
-		return Map.class == type && supportedMapKey(type);
+		return Map.class.isAssignableFrom(type) && supportedMapKey(type);
 	}
 
 	private boolean supportedMapKey(Type type) {

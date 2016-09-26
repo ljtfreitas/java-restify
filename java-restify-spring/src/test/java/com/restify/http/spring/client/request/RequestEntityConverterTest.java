@@ -1,4 +1,4 @@
-package com.restify.http.client.spring;
+package com.restify.http.spring.client.request;
 
 import static org.junit.Assert.assertEquals;
 
@@ -13,6 +13,7 @@ import org.springframework.http.RequestEntity;
 
 import com.restify.http.client.Headers;
 import com.restify.http.client.request.EndpointRequest;
+import com.restify.http.spring.client.request.RequestEntityConverter;
 
 public class RequestEntityConverterTest {
 

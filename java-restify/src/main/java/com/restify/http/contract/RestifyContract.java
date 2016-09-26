@@ -5,5 +5,6 @@ import com.restify.http.contract.metadata.EndpointType;
 
 public interface RestifyContract {
 
-	public EndpointType read(EndpointTarget target);
+	EndpointType read(EndpointTarget target);
+
 }

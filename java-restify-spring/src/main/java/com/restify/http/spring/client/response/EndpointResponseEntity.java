@@ -1,10 +1,10 @@
-package com.restify.http.client.spring;
+package com.restify.http.spring.client.response;
 
 import org.springframework.http.ResponseEntity;
 
 import com.restify.http.client.request.ExpectedType;
 
-class EndpointResponseEntity {
+public class EndpointResponseEntity {
 
 	private final ResponseEntity<Object> response;
 	private final ExpectedType expectedType;

@@ -17,6 +17,6 @@ public class FormURLEncodedMapMessageConverter extends FormURLEncodedMessageConv
 
 	@Override
 	public boolean canWrite(Class<?> type) {
-		return type == Map.class;
+		return Map.class.isAssignableFrom(type);
 	}
 }

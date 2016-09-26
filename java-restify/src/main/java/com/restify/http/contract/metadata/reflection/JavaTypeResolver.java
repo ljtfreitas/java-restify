@@ -3,26 +3,31 @@ package com.restify.http.contract.metadata.reflection;
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.GenericDeclaration;
 import java.lang.reflect.Method;
+import java.lang.reflect.Parameter;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.lang.reflect.TypeVariable;
 import java.lang.reflect.WildcardType;
 import java.util.Arrays;
 
-public class JavaMethodReturnTypeResolver {
+public class JavaTypeResolver {
 
 	private final Class<?> contextRawType;
 	private final Type context;
 
-	public JavaMethodReturnTypeResolver(Class<?> contextRawType) {
+	public JavaTypeResolver(Class<?> contextRawType) {
 		this.contextRawType = contextRawType;
 		this.context = contextRawType;
 	}
 
-	public Type resolve(Method javaMethod) {
+	public Type returnTypeOf(Method javaMethod) {
 		Type returnType = javaMethod.getGenericReturnType();
-		
 		return doResolve(returnType);
+	}
+
+	public Type parameterizedTypeOf(Parameter parameter) {
+		Type parameterizedType = parameter.getParameterizedType();
+		return doResolve(parameterizedType);
 	}
 
 	private Type doResolve(Type methodReturnType) {

@@ -3,8 +3,13 @@ package com.restify.http.contract.metadata;
 import static com.restify.http.util.Preconditions.isTrue;
 import static com.restify.http.util.Preconditions.nonNull;
 
+import java.lang.reflect.Method;
+import java.lang.reflect.Modifier;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public class EndpointTarget {
 
@@ -29,6 +34,14 @@ public class EndpointTarget {
 
 	public Optional<String> endpoint() {
 		return Optional.ofNullable(endpoint);
+	}
+
+	public Collection<Method> methods() {
+		return Arrays.stream(type.getMethods())
+				.filter(javaMethod -> javaMethod.getDeclaringClass() != Object.class
+					|| !javaMethod.isDefault()
+					|| !Modifier.isStatic(javaMethod.getModifiers()))
+				.collect(Collectors.toSet());
 	}
 
 	@Override
@@ -60,5 +73,4 @@ public class EndpointTarget {
 
 		return report.toString();
 	}
-
 }

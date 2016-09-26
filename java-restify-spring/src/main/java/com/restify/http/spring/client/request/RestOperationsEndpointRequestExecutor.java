@@ -1,4 +1,4 @@
-package com.restify.http.client.spring;
+package com.restify.http.spring.client.request;
 
 import java.lang.reflect.Type;
 
@@ -8,6 +8,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestOperations;
 
 import com.restify.http.client.request.ExpectedType;
+import com.restify.http.spring.client.response.EndpointResponseEntity;
+import com.restify.http.spring.client.response.ResponseEntityConverter;
 import com.restify.http.client.request.EndpointRequest;
 import com.restify.http.client.request.EndpointRequestExecutor;
 
@@ -21,7 +23,7 @@ public class RestOperationsEndpointRequestExecutor implements EndpointRequestExe
 		this(rest, new RequestEntityConverter(), new ResponseEntityConverter());
 	}
 
-	public RestOperationsEndpointRequestExecutor(RestOperations rest, RequestEntityConverter requestEntityConverter, 
+	public RestOperationsEndpointRequestExecutor(RestOperations rest, RequestEntityConverter requestEntityConverter,
 			ResponseEntityConverter responseEntityConverter) {
 		this.rest = rest;
 		this.requestEntityConverter = requestEntityConverter;

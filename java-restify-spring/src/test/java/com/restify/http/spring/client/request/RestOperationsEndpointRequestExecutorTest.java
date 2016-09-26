@@ -1,4 +1,4 @@
-package com.restify.http.client.spring;
+package com.restify.http.spring.client.request;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.argThat;
@@ -27,6 +27,10 @@ import org.springframework.web.client.RestOperations;
 import com.restify.http.client.request.ExpectedType;
 import com.restify.http.client.request.EndpointRequest;
 import com.restify.http.contract.metadata.reflection.SimpleParameterizedType;
+import com.restify.http.spring.client.request.RequestEntityConverter;
+import com.restify.http.spring.client.request.RestOperationsEndpointRequestExecutor;
+import com.restify.http.spring.client.response.EndpointResponseEntity;
+import com.restify.http.spring.client.response.ResponseEntityConverter;
 
 @RunWith(MockitoJUnitRunner.class)
 public class RestOperationsEndpointRequestExecutorTest {

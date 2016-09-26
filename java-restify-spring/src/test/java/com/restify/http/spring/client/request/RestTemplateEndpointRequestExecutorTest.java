@@ -1,4 +1,4 @@
-package com.restify.http.client.spring;
+package com.restify.http.spring.client.request;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -19,6 +19,7 @@ import org.springframework.web.client.RestTemplate;
 
 import com.restify.http.client.request.EndpointRequest;
 import com.restify.http.contract.metadata.reflection.SimpleParameterizedType;
+import com.restify.http.spring.client.request.RestOperationsEndpointRequestExecutor;
 
 public class RestTemplateEndpointRequestExecutorTest {
 

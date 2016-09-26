@@ -2,6 +2,7 @@ package com.restify.http.contract.metadata;
 
 import java.lang.reflect.Type;
 
+import com.restify.http.client.charset.Encoding;
 import com.restify.http.contract.Parameters;
 
 public class EndpointMethodQueryParameterSerializer implements EndpointMethodParameterSerializer {
@@ -13,8 +14,12 @@ public class EndpointMethodQueryParameterSerializer implements EndpointMethodPar
 			return serializeAsIterable(name, (Iterable) source);
 
 		} else {
-			return name + "=" + source.toString();
+			return encode(name) + "=" + encode(source.toString());
 		}
+	}
+
+	private String encode(String value) {
+		return Encoding.UTF_8.encode(value);
 	}
 
 	@SuppressWarnings("rawtypes")

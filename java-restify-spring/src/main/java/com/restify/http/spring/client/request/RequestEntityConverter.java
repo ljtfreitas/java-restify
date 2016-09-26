@@ -1,4 +1,4 @@
-package com.restify.http.client.spring;
+package com.restify.http.spring.client.request;
 
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.http.HttpHeaders;

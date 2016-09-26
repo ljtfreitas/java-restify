@@ -13,20 +13,15 @@ import com.restify.http.contract.metadata.reflection.JavaMethodMetadata;
 import com.restify.http.contract.metadata.reflection.JavaMethodParameterMetadata;
 import com.restify.http.contract.metadata.reflection.JavaTypeMetadata;
 
-public class EndpointMethodReader {
+public class DefaultRestifyContractReader implements RestifyContractReader {
 
-	private final EndpointTarget target;
-
-	public EndpointMethodReader(EndpointTarget target) {
-		this.target = target;
-	}
-
-	public EndpointMethod read(java.lang.reflect.Method javaMethod) {
+	@Override
+	public EndpointMethod read(EndpointTarget target, java.lang.reflect.Method javaMethod) {
 		JavaTypeMetadata javaTypeMetadata = new JavaTypeMetadata(target.type());
 
 		JavaMethodMetadata javaMethodMetadata = new JavaMethodMetadata(javaMethod);
 
-		String endpointPath = endpointTarget() + endpointTypePath(javaTypeMetadata) + endpointMethodPath(javaMethodMetadata);
+		String endpointPath = endpointTarget(target) + endpointTypePath(javaTypeMetadata) + endpointMethodPath(javaMethodMetadata);
 
 		String endpointHttpMethod = javaMethodMetadata.httpMethod().value().toUpperCase();
 
@@ -39,15 +34,15 @@ public class EndpointMethodReader {
 		return new EndpointMethod(javaMethod, endpointPath, endpointHttpMethod, parameters, headers, returnType);
 	}
 
-	private String endpointTarget() {
+	private String endpointTarget(EndpointTarget target) {
 		return target.endpoint().orElse("");
 	}
 
 	private String endpointTypePath(JavaTypeMetadata javaTypeMetadata) {
 		return Arrays.stream(javaTypeMetadata.paths())
 				.map(Path::value)
-				.map(p -> p.endsWith("/") ? p.substring(0, p.length() - 1) : p)
-				.collect(Collectors.joining());
+					.map(p -> p.endsWith("/") ? p.substring(0, p.length() - 1) : p)
+						.collect(Collectors.joining());
 	}
 
 	private String endpointMethodPath(JavaMethodMetadata javaMethodMetadata) {

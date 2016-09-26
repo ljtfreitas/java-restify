@@ -1,4 +1,4 @@
-package com.restify.http.client.spring;
+package com.restify.http.spring.client.response;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -16,6 +16,8 @@ import com.restify.http.client.Headers;
 import com.restify.http.client.request.ExpectedType;
 import com.restify.http.client.response.EndpointResponse;
 import com.restify.http.contract.metadata.reflection.SimpleParameterizedType;
+import com.restify.http.spring.client.response.EndpointResponseEntity;
+import com.restify.http.spring.client.response.ResponseEntityConverter;
 
 public class ResponseEntityConverterTest {
 

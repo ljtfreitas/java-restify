@@ -1,4 +1,4 @@
-package com.restify.http.client.spring;
+package com.restify.http.spring.client.response;
 
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.http.HttpHeaders;
@@ -9,7 +9,7 @@ import com.restify.http.client.request.ExpectedType;
 import com.restify.http.client.response.EndpointResponse;
 import com.restify.http.client.response.EndpointResponseCode;
 
-class ResponseEntityConverter implements Converter<EndpointResponseEntity, Object> {
+public class ResponseEntityConverter implements Converter<EndpointResponseEntity, Object> {
 
 	@Override
 	public Object convert(EndpointResponseEntity source) {

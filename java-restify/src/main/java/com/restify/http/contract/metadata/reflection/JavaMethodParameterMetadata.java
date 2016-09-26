@@ -59,7 +59,8 @@ public class JavaMethodParameterMetadata {
 	}
 
 	public Type javaType() {
-		return javaMethodParameter.getParameterizedType();
+		return new JavaTypeResolver(javaMethodParameter.getDeclaringExecutable().getDeclaringClass())
+				.parameterizedTypeOf(javaMethodParameter);
 	}
 
 	public boolean ofPath() {
