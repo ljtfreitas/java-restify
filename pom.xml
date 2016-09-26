@@ -15,6 +15,7 @@
 		<module>java-restify</module>
 		<module>java-restify-sample</module>
 		<module>java-restify-spring</module>
+		<module>java-restify-spring-sample</module>
 	</modules>
 
 	<dependencies>
