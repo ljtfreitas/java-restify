@@ -1,6 +1,7 @@
 package com.restify.http;
 
 import java.lang.reflect.Proxy;
+import java.util.Arrays;
 import java.util.Optional;
 
 import com.restify.http.client.EndpointMethodExecutor;
@@ -12,6 +13,7 @@ import com.restify.http.client.request.EndpointRequestWriter;
 import com.restify.http.client.request.HttpClientRequestFactory;
 import com.restify.http.client.request.RestifyEndpointRequestExecutor;
 import com.restify.http.client.request.interceptor.AcceptHeaderEndpointRequestInterceptor;
+import com.restify.http.client.request.interceptor.EndpointRequestInterceptor;
 import com.restify.http.client.request.interceptor.EndpointRequestInterceptorStack;
 import com.restify.http.client.request.interceptor.authentication.AuthenticationEndpoinRequestInterceptor;
 import com.restify.http.client.request.jdk.JdkHttpClientRequestFactory;
@@ -51,6 +53,16 @@ public class RestifyProxyBuilder {
 
 	public RestifyProxyBuilder executor(EndpointRequestExecutor endpointRequestExecutor) {
 		this.endpointRequestExecutor = endpointRequestExecutor;
+		return this;
+	}
+
+	public RestifyProxyBuilder interceptor(EndpointRequestInterceptor interceptor) {
+		endpointRequestInterceptorStack.add(interceptor);
+		return this;
+	}
+
+	public RestifyProxyBuilder interceptors(EndpointRequestInterceptor...interceptors) {
+		Arrays.stream(interceptors).forEach(endpointRequestInterceptorStack::add);
 		return this;
 	}
 
