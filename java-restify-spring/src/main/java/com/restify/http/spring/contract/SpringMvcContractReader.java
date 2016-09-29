@@ -18,11 +18,23 @@ import com.restify.http.contract.metadata.EndpointMethodParameterSerializer;
 import com.restify.http.contract.metadata.EndpointMethodParameters;
 import com.restify.http.contract.metadata.EndpointTarget;
 import com.restify.http.contract.metadata.RestifyContractReader;
+import com.restify.http.spring.contract.metadata.EndpointParameterExpressionResolver;
+import com.restify.http.spring.contract.metadata.SimpleEndpointParameterExpressionResolver;
 import com.restify.http.spring.contract.metadata.reflection.SpringMvcJavaMethodMetadata;
 import com.restify.http.spring.contract.metadata.reflection.SpringMvcJavaMethodParameterMetadata;
 import com.restify.http.spring.contract.metadata.reflection.SpringMvcJavaTypeMetadata;
 
 public class SpringMvcContractReader implements RestifyContractReader {
+
+	private final EndpointParameterExpressionResolver resolver;
+
+	public SpringMvcContractReader() {
+		this(new SimpleEndpointParameterExpressionResolver());
+	}
+
+	public SpringMvcContractReader(EndpointParameterExpressionResolver resolver) {
+		this.resolver = resolver;
+	}
 
 	@Override
 	public EndpointMethod read(EndpointTarget target, Method javaMethod) {
@@ -30,8 +42,8 @@ public class SpringMvcContractReader implements RestifyContractReader {
 
 		SpringMvcJavaMethodMetadata javaMethodMetadata = new SpringMvcJavaMethodMetadata(javaMethod);
 
-		String endpointPath = endpointTarget(target) + endpointTypePath(javaTypeMetadata)
-				+ endpointMethodPath(javaMethodMetadata);
+		String endpointPath = resolver.resolve(endpointTarget(target) + endpointTypePath(javaTypeMetadata)
+				+ endpointMethodPath(javaMethodMetadata));
 
 		String endpointHttpMethod = javaMethodMetadata.httpMethod().name();
 
@@ -99,7 +111,7 @@ public class SpringMvcContractReader implements RestifyContractReader {
 					Stream.concat(Arrays.stream(javaTypeMetadata.headers()), Arrays.stream(javaMethodMetadata.headers()))
 						.map(h -> h.split("="))
 							.filter(h -> h.length == 2)
-								.map(h -> new EndpointHeader(h[0], h[1]))
+								.map(h -> new EndpointHeader(h[0], resolver.resolve(h[1])))
 									.collect(Collectors.toCollection(LinkedHashSet::new));
 
 			return new EndpointHeaders(headers);

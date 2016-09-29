@@ -2,6 +2,9 @@ package com.restify.http.spring.contract;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.AdditionalAnswers.returnsFirstArg;
+import static org.mockito.Matchers.anyString;
+import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Type;
 import java.util.Collection;
@@ -11,6 +14,10 @@ import java.util.Optional;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -28,7 +35,9 @@ import com.restify.http.contract.metadata.EndpointTarget;
 import com.restify.http.contract.metadata.reflection.SimpleGenericArrayType;
 import com.restify.http.contract.metadata.reflection.SimpleParameterizedType;
 import com.restify.http.contract.metadata.reflection.SimpleWildcardType;
+import com.restify.http.spring.contract.metadata.EndpointParameterExpressionResolver;
 
+@RunWith(MockitoJUnitRunner.class)
 public class SpringMvcContractReaderTest {
 
 	private EndpointTarget myApiTypeTarget;
@@ -39,6 +48,10 @@ public class SpringMvcContractReaderTest {
 
 	private EndpointTarget myContextApiTarget;
 
+	@Mock
+	private EndpointParameterExpressionResolver expressionResolverMock;
+
+	@InjectMocks
 	private SpringMvcContractReader springMvcContractReader;
 
 	@Before
@@ -51,7 +64,8 @@ public class SpringMvcContractReaderTest {
 
 		myContextApiTarget = new EndpointTarget(MyContextApi.class, "http://my.api.com");
 
-		springMvcContractReader = new SpringMvcContractReader();
+		when(expressionResolverMock.resolve(anyString()))
+			.then(returnsFirstArg());
 	}
 
 	@Test
