@@ -1,0 +1,10 @@
+{
+	"properties": [
+		{
+			"name": "restify",
+			"type": "java.util.Map<String, Object>",
+			"description": "Restify API configurations",
+			"sourceType": "com.restify.http.spring.autoconfigure.RestifyProperties.RestifyApiClient"
+		}
+	]
+}

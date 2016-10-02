@@ -18,21 +18,21 @@ import com.restify.http.contract.metadata.EndpointMethodParameterSerializer;
 import com.restify.http.contract.metadata.EndpointMethodParameters;
 import com.restify.http.contract.metadata.EndpointTarget;
 import com.restify.http.contract.metadata.RestifyContractReader;
-import com.restify.http.spring.contract.metadata.EndpointParameterExpressionResolver;
-import com.restify.http.spring.contract.metadata.SimpleEndpointParameterExpressionResolver;
+import com.restify.http.spring.contract.metadata.SpringDynamicParameterExpressionResolver;
+import com.restify.http.spring.contract.metadata.SimpleSpringDynamicParameterExpressionResolver;
 import com.restify.http.spring.contract.metadata.reflection.SpringMvcJavaMethodMetadata;
 import com.restify.http.spring.contract.metadata.reflection.SpringMvcJavaMethodParameterMetadata;
 import com.restify.http.spring.contract.metadata.reflection.SpringMvcJavaTypeMetadata;
 
 public class SpringMvcContractReader implements RestifyContractReader {
 
-	private final EndpointParameterExpressionResolver resolver;
+	private final SpringDynamicParameterExpressionResolver resolver;
 
 	public SpringMvcContractReader() {
-		this(new SimpleEndpointParameterExpressionResolver());
+		this(new SimpleSpringDynamicParameterExpressionResolver());
 	}
 
-	public SpringMvcContractReader(EndpointParameterExpressionResolver resolver) {
+	public SpringMvcContractReader(SpringDynamicParameterExpressionResolver resolver) {
 		this.resolver = resolver;
 	}
 

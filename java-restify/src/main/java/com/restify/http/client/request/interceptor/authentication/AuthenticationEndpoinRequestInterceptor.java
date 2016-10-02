@@ -1,5 +1,7 @@
 package com.restify.http.client.request.interceptor.authentication;
 
+import java.util.Optional;
+
 import com.restify.http.client.authentication.Authentication;
 import com.restify.http.client.request.EndpointRequest;
 import com.restify.http.client.request.interceptor.EndpointRequestInterceptor;
@@ -14,8 +16,10 @@ public class AuthenticationEndpoinRequestInterceptor implements EndpointRequestI
 
 	@Override
 	public EndpointRequest intercepts(EndpointRequest endpointRequest) {
-		endpointRequest.headers().put("Authorization", authentication.content());
+		Optional.ofNullable(authentication.content())
+			.filter(a -> !a.isEmpty())
+				.ifPresent(a -> endpointRequest.headers().put("Authorization", a));
+
 		return endpointRequest;
 	}
-
 }

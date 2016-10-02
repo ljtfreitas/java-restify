@@ -5,13 +5,13 @@ import org.springframework.beans.factory.config.BeanExpressionResolver;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.expression.StandardBeanExpressionResolver;
 
-public class SpelEndpointExpressionResolver implements EndpointParameterExpressionResolver {
+public class SpelDynamicParameterExpressionResolver implements SpringDynamicParameterExpressionResolver {
 
 	private final ConfigurableBeanFactory beanFactory;
 	private final BeanExpressionResolver resolver;
 	private final BeanExpressionContext context;
 
-	public SpelEndpointExpressionResolver(ConfigurableBeanFactory beanFactory) {
+	public SpelDynamicParameterExpressionResolver(ConfigurableBeanFactory beanFactory) {
 		this.beanFactory = beanFactory;
 		this.resolver = beanFactory.getBeanExpressionResolver();
 		this.context = new BeanExpressionContext(beanFactory, null);

@@ -35,7 +35,7 @@ import com.restify.http.contract.metadata.EndpointTarget;
 import com.restify.http.contract.metadata.reflection.SimpleGenericArrayType;
 import com.restify.http.contract.metadata.reflection.SimpleParameterizedType;
 import com.restify.http.contract.metadata.reflection.SimpleWildcardType;
-import com.restify.http.spring.contract.metadata.EndpointParameterExpressionResolver;
+import com.restify.http.spring.contract.metadata.SpringDynamicParameterExpressionResolver;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SpringMvcContractReaderTest {
@@ -49,7 +49,7 @@ public class SpringMvcContractReaderTest {
 	private EndpointTarget myContextApiTarget;
 
 	@Mock
-	private EndpointParameterExpressionResolver expressionResolverMock;
+	private SpringDynamicParameterExpressionResolver expressionResolverMock;
 
 	@InjectMocks
 	private SpringMvcContractReader springMvcContractReader;

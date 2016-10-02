@@ -16,16 +16,16 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration
 @TestPropertySource("classpath:spring-restify.properties")
-public class SpelEndpointExpressionResolverTest {
+public class SpelDynamicParameterExpressionResolverTest {
 
 	@Autowired
 	private ConfigurableBeanFactory beanFactory;
 
-	private EndpointParameterExpressionResolver resolver;
+	private SpringDynamicParameterExpressionResolver resolver;
 
 	@Before
 	public void setup() {
-		resolver = new SpelEndpointExpressionResolver(beanFactory);
+		resolver = new SpelDynamicParameterExpressionResolver(beanFactory);
 	}
 
 	@Test

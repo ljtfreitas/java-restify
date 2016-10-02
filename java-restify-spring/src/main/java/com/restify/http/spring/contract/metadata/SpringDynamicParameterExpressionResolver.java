@@ -1,6 +1,6 @@
 package com.restify.http.spring.contract.metadata;
 
-public interface EndpointParameterExpressionResolver {
+public interface SpringDynamicParameterExpressionResolver {
 
 	String resolve(String expression);
 
