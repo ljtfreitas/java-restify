@@ -1,17 +1,10 @@
 package com.restify.http.spring.autoconfigure;
 
-import static org.springframework.beans.factory.config.ConfigurableBeanFactory.SCOPE_PROTOTYPE;
-
-import java.net.URL;
-import java.util.Optional;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
-import org.springframework.beans.factory.ListableBeanFactory;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.boot.autoconfigure.AutoConfigurationPackages;
@@ -24,12 +17,9 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
-import org.springframework.context.annotation.Scope;
 import org.springframework.core.env.Environment;
 import org.springframework.core.type.AnnotationMetadata;
 
-import com.restify.http.RestifyProxyBuilder;
-import com.restify.http.client.authentication.Authentication;
 import com.restify.http.client.request.EndpointRequestExecutor;
 import com.restify.http.contract.metadata.RestifyContractReader;
 import com.restify.http.spring.autoconfigure.RestifyAutoConfiguration.RestifyAutoConfigurationRegistrar;
@@ -44,27 +34,8 @@ import com.restify.http.spring.contract.metadata.SpringDynamicParameterExpressio
 @AutoConfigureAfter(WebClientAutoConfiguration.class)
 public class RestifyAutoConfiguration {
 
-	@Autowired
-	private EndpointRequestExecutor endpointRequestExecutor;
-
-	@Autowired
-	private RestifyContractReader restifyContractReader;
-
-	@Autowired
-	private Authentication authentication;
-
-	@ConditionalOnMissingBean
-	@Scope(SCOPE_PROTOTYPE)
-	@Bean
-	public RestifyProxyBuilder restifyProxyBuilder() {
-		return new RestifyProxyBuilder()
-				.authentication(authentication)
-				.executor(endpointRequestExecutor)
-				.contract(restifyContractReader);
-	}
-
 	@Configuration
-	protected static class RestifyConfiguration {
+	protected static class RestifySpringMvcConfiguration {
 
 		@ConditionalOnMissingBean
 		@Bean
@@ -83,15 +54,9 @@ public class RestifyAutoConfiguration {
 		public SpringDynamicParameterExpressionResolver expressionResolver(ConfigurableBeanFactory beanFactory) {
 			return new SpelDynamicParameterExpressionResolver(beanFactory);
 		}
-
-		@ConditionalOnMissingBean
-		@Bean
-		public Authentication authentication() {
-			return () -> "";
-		}
 	}
 
-	static class RestifyAutoConfigurationRegistrar implements ImportBeanDefinitionRegistrar, EnvironmentAware, BeanFactoryAware {
+	protected static class RestifyAutoConfigurationRegistrar implements ImportBeanDefinitionRegistrar, BeanFactoryAware, EnvironmentAware {
 
 		private static final Logger log = LoggerFactory.getLogger(RestifyAutoConfigurationRegistrar.class);
 
@@ -102,45 +67,44 @@ public class RestifyAutoConfiguration {
 		private RestifyableTypeScanner scanner = new RestifyableTypeScanner();
 
 		@Override
-		public void registerBeanDefinitions(AnnotationMetadata annotationMetadata, BeanDefinitionRegistry registry) {
+		public void registerBeanDefinitions(AnnotationMetadata metadata, BeanDefinitionRegistry registry) {
 			AutoConfigurationPackages.get(beanFactory).forEach(p -> scan(p, registry));
 		}
 
 		private void scan(String packageName, BeanDefinitionRegistry registry) {
 			scanner.findCandidateComponents(packageName)
 				.stream()
-					.map(c -> new RestifyableType(c.getBeanClassName()))
-						.forEach(t -> create(t, registry));
+					.map(candidate -> new RestifyableType(candidate.getBeanClassName()))
+						.forEach(type -> create(type, registry));
 		}
 
-		private void create(RestifyableType restifyableType, BeanDefinitionRegistry registry) {
-			RestifyApiClient restifyApiClient = restifyProperties.client(restifyableType);
+		private void create(RestifyableType type, BeanDefinitionRegistry registry) {
+			RestifyApiClient restifyApiClient = restifyProperties.client(type);
 
-			URL endpoint = restifyableType.endpoint().orElseGet(restifyApiClient::getEndpoint);
+			String endpoint = type.endpoint().map(e -> resolve(e)).orElseGet(restifyApiClient::getEndpoint);
 
 			RestifyProxyBeanBuilder builder = new RestifyProxyBeanBuilder()
-					.target(new RestifyProxyTarget(restifyableType.objectType(), endpoint))
-						.proxyBuilderBeanName(name(RestifyProxyBuilder.class).orElse("restifyProxyBuilder"));
+					.objectType(type.objectType())
+						.endpoint(endpoint);
 
-			registry.registerBeanDefinition(restifyableType.name(), builder.build());
+			registry.registerBeanDefinition(type.name(), builder.build());
 
 			log.info("Create @Restifyable bean -> {} (API [{}] metadata: Description: [{}], and endpoint: [{}])",
-					restifyableType.objectType(), restifyableType.name(), restifyableType.description(), endpoint);
+					type.objectType(), type.name(), type.description(), endpoint);
 		}
 
-		private Optional<String> name(Class<?> beanType) {
-			String[] names = ((ListableBeanFactory) beanFactory).getBeanNamesForType(beanType);
-			return Optional.ofNullable(names.length == 0 ? null : names[0]);
-		}
-
-		@Override
-		public void setEnvironment(Environment environment) {
-			this.restifyProperties = new RestifyProperties(environment);
+		private String resolve(String expression) {
+			return restifyProperties.resolve(expression);
 		}
 
 		@Override
 		public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
 			this.beanFactory = beanFactory;
+		}
+
+		@Override
+		public void setEnvironment(Environment environment) {
+			this.restifyProperties = new RestifyProperties(environment);
 		}
 	}
 }

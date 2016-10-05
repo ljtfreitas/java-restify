@@ -1,7 +1,5 @@
 package com.restify.http.spring.autoconfigure;
 
-import java.net.URL;
-
 import org.springframework.boot.bind.PropertySourcesPropertyValues;
 import org.springframework.boot.bind.RelaxedDataBinder;
 import org.springframework.core.env.ConfigurableEnvironment;
@@ -26,15 +24,19 @@ class RestifyProperties {
 		return restifyApiClient;
 	}
 
+	String resolve(String expression) {
+		return ((ConfigurableEnvironment) environment).resolvePlaceholders(expression);
+	}
+
 	class RestifyApiClient {
 
-		private URL endpoint;
+		private String endpoint;
 
-		public URL getEndpoint() {
+		public String getEndpoint() {
 			return endpoint;
 		}
 
-		public void setEndpoint(URL endpoint) {
+		public void setEndpoint(String endpoint) {
 			this.endpoint = endpoint;
 		}
 	}

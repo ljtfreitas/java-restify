@@ -2,8 +2,6 @@ package com.restify.http.spring.autoconfigure;
 
 import static org.springframework.core.annotation.AnnotationUtils.findAnnotation;
 
-import java.net.MalformedURLException;
-import java.net.URL;
 import java.util.Optional;
 
 class RestifyableType {
@@ -32,16 +30,7 @@ class RestifyableType {
 		return restifyable.description();
 	}
 
-	public Optional<URL> endpoint() {
-		return Optional.ofNullable(restifyable.endpoint()).filter(endpoint -> !endpoint.isEmpty()).map(this::convert);
-	}
-
-	private URL convert(String endpoint) {
-		try {
-			return new URL(endpoint);
-		} catch (MalformedURLException e) {
-			throw new RuntimeException(
-					"Malformed URL on @Restifyable API [" + restifyable.name() + "] " + "configuration: " + endpoint, e);
-		}
+	public Optional<String> endpoint() {
+		return Optional.ofNullable(restifyable.endpoint()).filter(endpoint -> !endpoint.isEmpty());
 	}
 }
