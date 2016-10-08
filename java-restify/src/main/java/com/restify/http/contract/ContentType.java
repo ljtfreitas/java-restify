@@ -23,10 +23,6 @@ public class ContentType {
 		return type;
 	}
 
-	public String value() {
-		return type;
-	}
-
 	public Optional<String> parameter(String name) {
 		return parameters.get(name);
 	}

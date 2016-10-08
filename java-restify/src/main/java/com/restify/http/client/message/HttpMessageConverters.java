@@ -2,32 +2,18 @@ package com.restify.http.client.message;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import com.restify.http.client.message.converter.json.JsonMessageConverter;
-import com.restify.http.client.message.converter.text.ScalarMessageConverter;
-import com.restify.http.client.message.converter.text.TextHtmlMessageConverter;
-import com.restify.http.client.message.converter.text.TextPlainMessageConverter;
-import com.restify.http.client.message.converter.xml.JaxbXmlMessageConverter;
-import com.restify.http.client.message.form.FormURLEncodedFormObjectMessageConverter;
-import com.restify.http.client.message.form.FormURLEncodedMapMessageConverter;
-import com.restify.http.client.message.form.FormURLEncodedParametersMessageConverter;
-import com.restify.http.client.message.form.multipart.MultipartFormFileObjectMessageWriter;
-import com.restify.http.client.message.form.multipart.MultipartFormMapMessageWriter;
-import com.restify.http.client.message.form.multipart.MultipartFormObjectMessageWriter;
-import com.restify.http.client.message.form.multipart.MultipartFormParametersMessageWriter;
 import com.restify.http.contract.ContentType;
 
 public class HttpMessageConverters {
 
-	private final Collection<HttpMessageConverter> converters = new ArrayList<>();
+	private final Collection<HttpMessageConverter> converters;
 
-	public HttpMessageConverters(HttpMessageConverter...converters) {
-		Arrays.stream(converters)
-			.forEach(c -> this.converters.add(c));
+	public HttpMessageConverters(Collection<HttpMessageConverter> converters) {
+		this.converters = new ArrayList<>(converters);
 	}
 
 	@SuppressWarnings({ "unchecked", "rawtypes" })
@@ -57,20 +43,5 @@ public class HttpMessageConverters {
 						.filter(c -> contentType.is(c.contentType()) && c.canWrite(type))
 							.map(c -> (HttpMessageWriter<T>) c)
 								.findFirst();
-	}
-
-	public static HttpMessageConverters build() {
-		return new HttpMessageConverters(JsonMessageConverter.available(), 
-				new JaxbXmlMessageConverter<Object>(),
-				new TextPlainMessageConverter(),
-				new TextHtmlMessageConverter(),
-				new ScalarMessageConverter(),
-				new FormURLEncodedParametersMessageConverter(),
-				new FormURLEncodedFormObjectMessageConverter(),
-				new FormURLEncodedMapMessageConverter(),
-				new MultipartFormParametersMessageWriter(),
-				new MultipartFormObjectMessageWriter(),
-				new MultipartFormFileObjectMessageWriter(),
-				new MultipartFormMapMessageWriter());
 	}
 }

@@ -31,6 +31,7 @@ import com.restify.http.spring.contract.metadata.SpringDynamicParameterExpressio
 
 @Configuration
 @Import(RestifyAutoConfigurationRegistrar.class)
+@ConditionalOnMissingBean(RestifyProxyFactoryBean.class)
 @AutoConfigureAfter(WebClientAutoConfiguration.class)
 public class RestifyAutoConfiguration {
 

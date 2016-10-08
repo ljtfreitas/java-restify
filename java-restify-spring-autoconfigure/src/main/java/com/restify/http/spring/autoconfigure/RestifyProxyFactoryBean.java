@@ -36,15 +36,14 @@ class RestifyProxyFactoryBean implements FactoryBean<Object> {
 	public Object getObject() throws Exception {
 		RestifyProxyBuilder builder = new RestifyProxyBuilder();
 
-		builder
-			.client(httpClientRequestFactory)
+		builder.client(httpClientRequestFactory)
 				.contract(restifyContractReader)
-					.converters(converters())
-						.executor(endpointRequestExecutor)
-							.interceptors(interceptors());
+				.executor(endpointRequestExecutor)
+				.converters(converters())
+				.interceptors(interceptors());
 
 		if (authentication != null) {
-			builder.authentication(authentication);
+			builder.interceptors().authentication(authentication);
 		}
 
 		return builder.target(objectType, endpoint()).build();
