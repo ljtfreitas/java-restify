@@ -25,7 +25,7 @@ public class Header {
 		if (obj instanceof Header) {
 			Header that = (Header) obj;
 
-			return this.name.equals(that.name)
+			return this.name.equalsIgnoreCase(that.name)
 				&& this.value.equals(that.value);
 
 		} else return false;

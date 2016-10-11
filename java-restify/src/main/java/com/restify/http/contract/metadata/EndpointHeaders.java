@@ -24,13 +24,13 @@ public class EndpointHeaders {
 
 	public Collection<EndpointHeader> find(String name) {
 		return headers.stream()
-			.filter(h -> h.name().equals(name))
+			.filter(h -> h.name().equalsIgnoreCase(name))
 				.collect(Collectors.toSet());
 	}
 
 	public Optional<EndpointHeader> first(String name) {
 		return headers.stream()
-				.filter(h -> h.name().equals(name))
+				.filter(h -> h.name().equalsIgnoreCase(name))
 					.findFirst();
 	}
 

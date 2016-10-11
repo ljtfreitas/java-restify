@@ -39,7 +39,7 @@ public class Headers {
 	}
 
 	public void replace(String name, String value) {
-		headers.removeIf(h -> h.name().equals(name));
+		headers.removeIf(h -> h.name().equalsIgnoreCase(name));
 		headers.add(new Header(name, value));
 	}
 
@@ -48,7 +48,7 @@ public class Headers {
 	}
 
 	public Optional<Header> get(String name) {
-		return headers.stream().filter(h -> h.name().equals(name))
+		return headers.stream().filter(h -> h.name().equalsIgnoreCase(name))
 				.findFirst();
 	}
 
