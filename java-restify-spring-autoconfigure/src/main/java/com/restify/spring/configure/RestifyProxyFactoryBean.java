@@ -1,4 +1,4 @@
-package com.restify.http.spring.autoconfigure;
+package com.restify.spring.configure;
 
 import java.net.URL;
 import java.util.ArrayList;
@@ -14,7 +14,7 @@ import com.restify.http.client.request.HttpClientRequestFactory;
 import com.restify.http.client.request.interceptor.EndpointRequestInterceptor;
 import com.restify.http.contract.metadata.RestifyContractReader;
 
-class RestifyProxyFactoryBean implements FactoryBean<Object> {
+public class RestifyProxyFactoryBean implements FactoryBean<Object> {
 
 	private Class<?> objectType;
 

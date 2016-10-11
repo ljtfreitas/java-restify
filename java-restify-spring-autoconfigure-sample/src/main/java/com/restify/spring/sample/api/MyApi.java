@@ -13,8 +13,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 
 import com.restify.http.client.Headers;
 import com.restify.http.contract.PathParameter;
-import com.restify.http.spring.autoconfigure.Restifyable;
 import com.restify.http.spring.contract.FormParameters;
+import com.restify.spring.configure.Restifyable;
 
 @Restifyable(name = "myApi", description = "My Api")
 public interface MyApi {

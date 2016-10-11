@@ -1,4 +1,4 @@
-package com.restify.http.spring.autoconfigure;
+package com.restify.spring.autoconfigure;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,12 +22,16 @@ import org.springframework.core.type.AnnotationMetadata;
 
 import com.restify.http.client.request.EndpointRequestExecutor;
 import com.restify.http.contract.metadata.RestifyContractReader;
-import com.restify.http.spring.autoconfigure.RestifyAutoConfiguration.RestifyAutoConfigurationRegistrar;
-import com.restify.http.spring.autoconfigure.RestifyProperties.RestifyApiClient;
 import com.restify.http.spring.client.request.RestOperationsEndpointRequestExecutor;
 import com.restify.http.spring.contract.SpringMvcContractReader;
 import com.restify.http.spring.contract.metadata.SpelDynamicParameterExpressionResolver;
 import com.restify.http.spring.contract.metadata.SpringDynamicParameterExpressionResolver;
+import com.restify.spring.autoconfigure.RestifyAutoConfiguration.RestifyAutoConfigurationRegistrar;
+import com.restify.spring.autoconfigure.RestifyProperties.RestifyApiClient;
+import com.restify.spring.configure.RestifyProxyBeanBuilder;
+import com.restify.spring.configure.RestifyProxyFactoryBean;
+import com.restify.spring.configure.RestifyableType;
+import com.restify.spring.configure.RestifyableTypeScanner;
 
 @Configuration
 @Import(RestifyAutoConfigurationRegistrar.class)

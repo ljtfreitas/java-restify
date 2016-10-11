@@ -1,4 +1,4 @@
-package com.restify.http.spring.autoconfigure;
+package com.restify.spring.configure;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
@@ -9,7 +9,7 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Restifyable {
 
-	String name();
+	String name() default "";
 
 	String description() default "";
 

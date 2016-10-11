@@ -1,28 +1,28 @@
-package com.restify.http.spring.autoconfigure;
+package com.restify.spring.configure;
 
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 
-class RestifyProxyBeanBuilder {
+public class RestifyProxyBeanBuilder {
 
 	private final BeanDefinitionBuilder builder;
 
-	RestifyProxyBeanBuilder() {
+	public RestifyProxyBeanBuilder() {
 		this.builder = BeanDefinitionBuilder.genericBeanDefinition(RestifyProxyFactoryBean.class);
 	}
 
-	RestifyProxyBeanBuilder objectType(Class<?> objectType) {
+	public RestifyProxyBeanBuilder objectType(Class<?> objectType) {
 		builder.addPropertyValue("objectType", objectType);
 		return this;
 	}
 
-	RestifyProxyBeanBuilder endpoint(String endpoint) {
+	public RestifyProxyBeanBuilder endpoint(String endpoint) {
 		builder.addPropertyValue("endpoint", endpoint);
 		return this;
 	}
 
-	BeanDefinition build() {
+	public BeanDefinition build() {
 		builder.setAutowireMode(AbstractBeanDefinition.AUTOWIRE_BY_TYPE);
 		return builder.getBeanDefinition();
 	}

@@ -1,15 +1,15 @@
-package com.restify.http.spring.autoconfigure;
+package com.restify.spring.configure;
 
 import static org.springframework.core.annotation.AnnotationUtils.findAnnotation;
 
 import java.util.Optional;
 
-class RestifyableType {
+public class RestifyableType {
 
 	private final Class<?> objectType;
 	private final Restifyable restifyable;
 
-	RestifyableType(String objectTypeName) {
+	public RestifyableType(String objectTypeName) {
 		try {
 			this.objectType = Class.forName(objectTypeName);
 		} catch (ClassNotFoundException e) {
@@ -23,7 +23,9 @@ class RestifyableType {
 	}
 
 	public String name() {
-		return restifyable.name();
+		return Optional.ofNullable(restifyable.name())
+				.filter(n -> !n.isEmpty())
+					.orElseGet(() -> objectType.getSimpleName());
 	}
 
 	public String description() {

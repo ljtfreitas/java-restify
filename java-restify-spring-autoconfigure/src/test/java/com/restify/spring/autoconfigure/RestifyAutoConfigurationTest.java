@@ -1,4 +1,4 @@
-package com.restify.http.spring.autoconfigure;
+package com.restify.spring.autoconfigure;
 
 import static org.junit.Assert.assertNotNull;
 
@@ -17,8 +17,8 @@ import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.test.context.junit4.SpringRunner;
 
-import com.restify.http.spring.autoconfigure.RestifyAutoConfigurationTest.TestRestifyConfiguration;
-import com.restify.http.spring.autoconfigure.RestifyAutoConfigurationTest.TestRestifyConfiguration.TestRestifyConfigurationRegistrar;
+import com.restify.spring.autoconfigure.RestifyAutoConfigurationTest.TestRestifyConfiguration;
+import com.restify.spring.autoconfigure.RestifyAutoConfigurationTest.TestRestifyConfiguration.TestRestifyConfigurationRegistrar;
 
 @RunWith(SpringRunner.class)
 @SpringBootTest(classes = {TestRestifyConfiguration.class, RestifyAutoConfiguration.class})

@@ -1,9 +1,11 @@
-package com.restify.http.spring.autoconfigure;
+package com.restify.spring.autoconfigure;
 
 import org.springframework.boot.bind.PropertySourcesPropertyValues;
 import org.springframework.boot.bind.RelaxedDataBinder;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.Environment;
+
+import com.restify.spring.configure.RestifyableType;
 
 class RestifyProperties {
 
