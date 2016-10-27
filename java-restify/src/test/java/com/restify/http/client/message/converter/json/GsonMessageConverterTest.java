@@ -11,14 +11,14 @@ import java.util.Iterator;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.restify.http.client.message.converter.json.GsonMessageConverter;
+import com.google.gson.internal.LinkedTreeMap;
 import com.restify.http.client.request.SimpleHttpRequestMessage;
 import com.restify.http.client.response.SimpleHttpResponseMessage;
 import com.restify.http.contract.metadata.reflection.SimpleParameterizedType;
 
 public class GsonMessageConverterTest {
 
-	private GsonMessageConverter<MyJsonModel> converter = new GsonMessageConverter<>();
+	private GsonMessageConverter<Object> converter = new GsonMessageConverter<>();
 
 	private String json;
 
@@ -63,10 +63,21 @@ public class GsonMessageConverterTest {
 	public void shouldReadJsonMessage() {
 		ByteArrayInputStream input = new ByteArrayInputStream(json.getBytes());
 
-		MyJsonModel myJsonModel = converter.read(new SimpleHttpResponseMessage(input), MyJsonModel.class);
+		MyJsonModel myJsonModel = (MyJsonModel) converter.read(new SimpleHttpResponseMessage(input), MyJsonModel.class);
 
 		assertEquals("Tiago de Freitas Lima", myJsonModel.name);
 		assertEquals(31, myJsonModel.age);
+	}
+
+	@SuppressWarnings("unchecked")
+	@Test
+	public void shouldReadJsonMessageToDefaultGsonObject() {
+		ByteArrayInputStream input = new ByteArrayInputStream(json.getBytes());
+
+		LinkedTreeMap<Object, Object> map = (LinkedTreeMap<Object, Object>) converter.read(new SimpleHttpResponseMessage(input), Object.class);
+
+		assertEquals("Tiago de Freitas Lima", map.get("name"));
+		assertEquals(Double.valueOf(31.0), Double.valueOf(map.get("age").toString()));
 	}
 
 	@SuppressWarnings("unchecked")

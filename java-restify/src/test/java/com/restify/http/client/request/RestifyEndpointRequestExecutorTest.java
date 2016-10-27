@@ -24,9 +24,11 @@ import com.restify.http.RestifyHttpException;
 import com.restify.http.client.Headers;
 import com.restify.http.client.charset.Encoding;
 import com.restify.http.client.request.interceptor.EndpointRequestInterceptorStack;
+import com.restify.http.client.response.EndpointResponse;
 import com.restify.http.client.response.EndpointResponseReader;
 import com.restify.http.client.response.HttpResponseMessage;
 import com.restify.http.client.response.SimpleHttpResponseMessage;
+import com.restify.http.contract.metadata.reflection.JavaType;
 
 @RunWith(MockitoJUnitRunner.class)
 public class RestifyEndpointRequestExecutorTest {
@@ -46,19 +48,19 @@ public class RestifyEndpointRequestExecutorTest {
 	@InjectMocks
 	private RestifyEndpointRequestExecutor endpointRequestExecutor;
 
-	private String endpointResult;
+	private SimpleEndpointResponse<String> endpointResult;
 
 	private HttpResponseMessage response;
 
 	@Before
 	public void setup() {
-		endpointResult = "endpoint request result";
+		endpointResult = new SimpleEndpointResponse<>("endpoint request result");
 
-		response = new SimpleHttpResponseMessage(new ByteArrayInputStream(endpointResult.getBytes()));
+		response = new SimpleHttpResponseMessage(new ByteArrayInputStream(endpointResult.body().getBytes()));
 
 		when(endpointRequestInterceptorStackMock.apply(any())).then(returnsFirstArg());
 
-		when(endpointResponseReaderMock.read(response, ExpectedType.of(String.class)))
+		when(endpointResponseReaderMock.<String> read(response, JavaType.of(String.class)))
 			.thenReturn(endpointResult);
 	}
 
@@ -74,7 +76,7 @@ public class RestifyEndpointRequestExecutorTest {
 		assertEquals(endpointResult, result);
 
 		verify(endpointRequestWriterMock, never()).write(any(), any());
-		verify(endpointResponseReaderMock).read(response, ExpectedType.of(String.class));
+		verify(endpointResponseReaderMock).read(response, JavaType.of(String.class));
 	}
 
 	@Test
@@ -94,7 +96,7 @@ public class RestifyEndpointRequestExecutorTest {
 		assertEquals(endpointResult, result);
 
 		verify(endpointRequestWriterMock).write(endpointRequest, request);
-		verify(endpointResponseReaderMock).read(response, ExpectedType.of(String.class));
+		verify(endpointResponseReaderMock).read(response, JavaType.of(String.class));
 	}
 
 	private class SimpleHttpClientRequest implements HttpClientRequest {
@@ -126,6 +128,12 @@ public class RestifyEndpointRequestExecutorTest {
 		@Override
 		public Headers headers() {
 			return headers;
+		}
+	}
+
+	private class SimpleEndpointResponse<T> extends EndpointResponse<T> {
+		public SimpleEndpointResponse(T body) {
+			super(null, null, body);
 		}
 	}
 }

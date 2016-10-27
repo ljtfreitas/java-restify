@@ -1,12 +1,10 @@
 package com.restify.http.spring.client.request;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
 import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
 
-import java.lang.reflect.Type;
 import java.net.URI;
 
 import org.junit.Before;
@@ -18,8 +16,7 @@ import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.RestTemplate;
 
 import com.restify.http.client.request.EndpointRequest;
-import com.restify.http.contract.metadata.reflection.SimpleParameterizedType;
-import com.restify.http.spring.client.request.RestOperationsEndpointRequestExecutor;
+import com.restify.http.client.response.EndpointResponse;
 
 public class RestTemplateEndpointRequestExecutorTest {
 
@@ -43,29 +40,12 @@ public class RestTemplateEndpointRequestExecutorTest {
 	public void shouldExecuteRequestWithRestTemplate() {
 		EndpointRequest endpointRequest = new EndpointRequest(URI.create("/my/api"), "GET", Model.class);
 
-		Model response = (Model) executor.execute(endpointRequest);
+		EndpointResponse<Model> response = executor.execute(endpointRequest);
 
-		assertEquals("Tiago de Freitas Lima", response.name);
-		assertEquals(31, response.age);
+		Model model = response.body();
 
-		server.verify();
-	}
-
-	@SuppressWarnings("unchecked")
-	@Test
-	public void shouldReturnResponseWhenResponseObjectIsExpectedType() {
-		Type expectedType = new SimpleParameterizedType(ResponseEntity.class, null, Model.class);
-
-		EndpointRequest endpointRequest = new EndpointRequest(URI.create("/my/api"), "GET", expectedType);
-
-		ResponseEntity<Model> response = (ResponseEntity<Model>) executor.execute(endpointRequest);
-
-		assertNotNull(response);
-
-		Model responseBody = response.getBody();
-
-		assertEquals("Tiago de Freitas Lima", responseBody.name);
-		assertEquals(31, responseBody.age);
+		assertEquals("Tiago de Freitas Lima", model.name);
+		assertEquals(31, model.age);
 
 		server.verify();
 	}

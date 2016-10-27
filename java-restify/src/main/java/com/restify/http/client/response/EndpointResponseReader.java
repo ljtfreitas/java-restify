@@ -1,8 +1,7 @@
 package com.restify.http.client.response;
 
 import java.io.IOException;
-import java.util.Optional;
-import java.util.function.Function;
+import java.lang.reflect.Type;
 
 import com.restify.http.RestifyHttpException;
 import com.restify.http.client.Header;
@@ -10,8 +9,8 @@ import com.restify.http.client.Headers;
 import com.restify.http.client.message.HttpMessageConverters;
 import com.restify.http.client.message.HttpMessageReader;
 import com.restify.http.client.message.converter.text.TextPlainMessageConverter;
-import com.restify.http.client.request.ExpectedType;
 import com.restify.http.contract.ContentType;
+import com.restify.http.contract.metadata.reflection.JavaType;
 
 public class EndpointResponseReader {
 
@@ -23,63 +22,53 @@ public class EndpointResponseReader {
 		this.converters = converters;
 	}
 
-	public Object read(HttpResponseMessage response, ExpectedType expectedType) {
-		if (expectedType.voidType()) {
-			return null;
-
-		} else if (expectedType.is(Headers.class)) {
-			return response.headers();
-
-		} else if (expectedType.is(HttpResponseMessage.class)) {
-			return response;
-
-		} else if (response.readable()) {
-			return doRead(response, expectedType);
-
-		} else return null;
-
+	public <T> EndpointResponse<T> read(HttpResponseMessage response, JavaType responseType) {
+		if (readableType(responseType) && response.readable()) {
+			return doRead(response, responseType);
+		} else {
+			return EndpointResponse.empty(response.code(), response.headers());
+		}
 	}
 
-	private Object doRead(HttpResponseMessage response, ExpectedType expectedType) {
-		EndpointResponse<? extends Object> endpointResponse = ifSuccess(response.code(), r -> r.read(response, expectedType))
-				.orElseThrow(() -> onError(response));
-
-		return expectedType.is(EndpointResponse.class) ? endpointResponse : endpointResponse.body();
+	private boolean readableType(JavaType responseType) {
+		return !(responseType.voidType() || responseType.is(Headers.class));
 	}
 
-	private Optional<EndpointResponse<? extends Object>> ifSuccess(EndpointResponseCode code,
-			Function<EndpointSuccessResponseReader, EndpointResponse<? extends Object>> consumer) {
-		return code.isSucess() ? Optional.of(consumer.apply(new EndpointSuccessResponseReader())) : Optional.empty();
+	private <T> EndpointResponse<T> doRead(HttpResponseMessage response, JavaType responseType) {
+		return new EndpointResponseContentReader<T>().read(response, responseType);
 	}
 
-	private RestifyHttpException onError(HttpResponseMessage response) {
-		String message = (String) EndpointResponseReader.ERROR_RESPONSE_MESSAGE_CONVERTER.read(response, String.class);
+	class EndpointResponseContentReader<T> {
+		private EndpointResponse<T> read(HttpResponseMessage response, JavaType responseType) {
+			if (response.code().isSucess()) {
+				return doRead(response, responseType.unwrap());
 
-		return new RestifyHttpException("HTTP Status Code: " + response.code() + "\n" + message);
-	}
-
-	class EndpointSuccessResponseReader {
-
-		EndpointResponse<? extends Object> read(HttpResponseMessage response, ExpectedType expectedType) {
-			Object responseObject = doRead(response, expectedType);
-
-			return new EndpointResponse<>(response.code(), response.headers(), responseObject);
+			} else {
+				throw doError(response);
+			}
 		}
 
-		private Object doRead(HttpResponseMessage response, ExpectedType expectedType) {
+		private RestifyHttpException doError(HttpResponseMessage response) {
+			String message = (String) EndpointResponseReader.ERROR_RESPONSE_MESSAGE_CONVERTER.read(response, String.class);
+
+			return new RestifyHttpException("HTTP Status Code: " + response.code() + "\n" + message);
+		}
+
+		@SuppressWarnings("unchecked")
+		private EndpointResponse<T> doRead(HttpResponseMessage response, Type responseType) {
 			ContentType contentType = ContentType
 					.of(response.headers().get("Content-Type").map(Header::value).orElse("text/plain"));
 
-			HttpMessageReader<Object> converter = converters.readerOf(contentType, expectedType.type()).orElseThrow(
+			HttpMessageReader<Object> converter = converters.readerOf(contentType, responseType).orElseThrow(
 					() -> new RestifyHttpMessageReadException("Your request responded a content " + "of type ["
 							+ contentType + "], but there is no MessageConverter able to read this message."));
 
 			try {
-				Object responseObject = converter.read(response, expectedType.type());
+				T responseObject = (T) converter.read(response, responseType);
 
 				response.body().close();
 
-				return responseObject;
+				return new EndpointResponse<>(response.code(), response.headers(), responseObject);
 
 			} catch (IOException e) {
 				throw new RestifyHttpMessageReadException(

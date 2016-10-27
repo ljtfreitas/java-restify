@@ -3,32 +3,56 @@ package com.restify.http.client.request;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.AdditionalAnswers.returnsFirstArg;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 
+import com.restify.http.client.request.interceptor.EndpointRequestInterceptorStack;
+import com.restify.http.client.response.EndpointResponse;
 import com.restify.http.contract.Parameters;
 import com.restify.http.contract.metadata.EndpointHeader;
 import com.restify.http.contract.metadata.EndpointHeaders;
 import com.restify.http.contract.metadata.EndpointMethod;
 import com.restify.http.contract.metadata.EndpointMethodParameter;
+import com.restify.http.contract.metadata.EndpointMethodParameter.EndpointMethodParameterType;
 import com.restify.http.contract.metadata.EndpointMethodParameters;
 import com.restify.http.contract.metadata.EndpointMethodQueryParameterSerializer;
 import com.restify.http.contract.metadata.EndpointMethodQueryParametersSerializer;
-import com.restify.http.contract.metadata.EndpointMethodParameter.EndpointMethodParameterType;
+import com.restify.http.contract.metadata.reflection.JavaType;
 
+@RunWith(MockitoJUnitRunner.class)
 public class EndpointRequestFactoryTest {
+
+	@Mock
+	private EndpointRequestInterceptorStack endpointRequestInterceptorStackMock;
+
+	@InjectMocks
+	private EndpointRequestFactory endpointRequestFactory;
+
+	@Before
+	public void setup() {
+		when(endpointRequestInterceptorStackMock.apply(any()))
+			.then(returnsFirstArg());
+	}
 
 	@Test
 	public void shouldCreateEndpointRequestUsingEndpointMethodWithoutParameters() throws Exception {
 		EndpointMethod endpointMethod = new EndpointMethod(TargetType.class.getMethod("simple"), "http://my.api.com/some",
 				"GET");
 
-		EndpointRequest endpointRequest = new EndpointRequestFactory(endpointMethod).createWith(new Object[0]);
+		EndpointRequest endpointRequest = endpointRequestFactory.createWith(endpointMethod, new Object[0]);
 
 		assertEquals(endpointMethod.path(), endpointRequest.endpoint().toString());
 		assertEquals(endpointMethod.httpMethod(), endpointRequest.method());
@@ -37,7 +61,7 @@ public class EndpointRequestFactoryTest {
 
 		assertTrue(endpointRequest.headers().all().isEmpty());
 
-		assertEquals(ExpectedType.of(String.class), endpointRequest.expectedType());
+		assertEquals(JavaType.of(String.class), endpointRequest.responseType());
 	}
 
 	@Test
@@ -50,7 +74,7 @@ public class EndpointRequestFactoryTest {
 
 		Object[] args = new Object[]{"argument"};
 
-		EndpointRequest endpointRequest = new EndpointRequestFactory(endpointMethod).createWith(args);
+		EndpointRequest endpointRequest = endpointRequestFactory.createWith(endpointMethod, args);
 
 		assertEquals("http://my.api.com/some/argument", endpointRequest.endpoint().toString());
 		assertEquals(endpointMethod.httpMethod(), endpointRequest.method());
@@ -59,7 +83,7 @@ public class EndpointRequestFactoryTest {
 
 		assertTrue(endpointRequest.headers().all().isEmpty());
 
-		assertEquals(ExpectedType.of(String.class), endpointRequest.expectedType());
+		assertEquals(JavaType.of(String.class), endpointRequest.responseType());
 	}
 
 	@Test
@@ -74,7 +98,7 @@ public class EndpointRequestFactoryTest {
 
 		Object[] args = new Object[]{"my-first-path", "my-second-path", "last-but-not-least-third-path"};
 
-		EndpointRequest endpointRequest = new EndpointRequestFactory(endpointMethod).createWith(args);
+		EndpointRequest endpointRequest = endpointRequestFactory.createWith(endpointMethod, args);
 
 		assertEquals("http://my.api.com/some/my-first-path/my-second-path/last-but-not-least-third-path",
 				endpointRequest.endpoint().toString());
@@ -85,7 +109,7 @@ public class EndpointRequestFactoryTest {
 
 		assertTrue(endpointRequest.headers().all().isEmpty());
 
-		assertEquals(ExpectedType.of(String.class), endpointRequest.expectedType());
+		assertEquals(JavaType.of(String.class), endpointRequest.responseType());
 	}
 
 	@Test
@@ -98,7 +122,7 @@ public class EndpointRequestFactoryTest {
 
 		Object[] args = new Object[]{"my body"};
 
-		EndpointRequest endpointRequest = new EndpointRequestFactory(endpointMethod).createWith(args);
+		EndpointRequest endpointRequest = endpointRequestFactory.createWith(endpointMethod, args);
 
 		assertEquals("http://my.api.com/some", endpointRequest.endpoint().toString());
 		assertEquals(endpointMethod.httpMethod(), endpointRequest.method());
@@ -108,7 +132,7 @@ public class EndpointRequestFactoryTest {
 
 		assertTrue(endpointRequest.headers().all().isEmpty());
 
-		assertEquals(ExpectedType.of(String.class), endpointRequest.expectedType());
+		assertEquals(JavaType.of(String.class), endpointRequest.responseType());
 	}
 
 	@Test
@@ -124,7 +148,7 @@ public class EndpointRequestFactoryTest {
 
 		Object[] args = new Object[]{"my custom header"};
 
-		EndpointRequest endpointRequest = new EndpointRequestFactory(endpointMethod).createWith(args);
+		EndpointRequest endpointRequest = endpointRequestFactory.createWith(endpointMethod, args);
 
 		assertEquals("http://my.api.com/some", endpointRequest.endpoint().toString());
 		assertEquals(endpointMethod.httpMethod(), endpointRequest.method());
@@ -133,7 +157,7 @@ public class EndpointRequestFactoryTest {
 
 		assertEquals("my custom header", endpointRequest.headers().get("X-My-Custom-Header").get().value());
 
-		assertEquals(ExpectedType.of(String.class), endpointRequest.expectedType());
+		assertEquals(JavaType.of(String.class), endpointRequest.responseType());
 	}
 
 	@Test
@@ -151,14 +175,14 @@ public class EndpointRequestFactoryTest {
 
 		Object[] args = new Object[]{parameters};
 
-		EndpointRequest endpointRequest = new EndpointRequestFactory(endpointMethod).createWith(args);
+		EndpointRequest endpointRequest = endpointRequestFactory.createWith(endpointMethod, args);
 
 		assertEquals("http://my.api.com/query?param1=value1&param2=value2", endpointRequest.endpoint().toString());
 		assertEquals(endpointMethod.httpMethod(), endpointRequest.method());
 
 		assertFalse(endpointRequest.body().isPresent());
 
-		assertEquals(ExpectedType.of(String.class), endpointRequest.expectedType());
+		assertEquals(JavaType.of(String.class), endpointRequest.responseType());
 	}
 
 	@Test
@@ -176,14 +200,14 @@ public class EndpointRequestFactoryTest {
 
 		Object[] args = new Object[]{parameters};
 
-		EndpointRequest endpointRequest = new EndpointRequestFactory(endpointMethod).createWith(args);
+		EndpointRequest endpointRequest = endpointRequestFactory.createWith(endpointMethod, args);
 
 		assertEquals("http://my.api.com/query?param1=value1&param2=value2", endpointRequest.endpoint().toString());
 		assertEquals(endpointMethod.httpMethod(), endpointRequest.method());
 
 		assertFalse(endpointRequest.body().isPresent());
 
-		assertEquals(ExpectedType.of(String.class), endpointRequest.expectedType());
+		assertEquals(JavaType.of(String.class), endpointRequest.responseType());
 	}
 
 	@Test
@@ -201,7 +225,7 @@ public class EndpointRequestFactoryTest {
 
 		Object[] args = new Object[]{parameters};
 
-		EndpointRequest endpointRequest = new EndpointRequestFactory(endpointMethod).createWith(args);
+		EndpointRequest endpointRequest = endpointRequestFactory.createWith(endpointMethod, args);
 
 		assertEquals("http://my.api.com/query?param1=value1&param1=value2&param2=value3&param2=value4",
 				endpointRequest.endpoint().toString());
@@ -210,7 +234,7 @@ public class EndpointRequestFactoryTest {
 
 		assertFalse(endpointRequest.body().isPresent());
 
-		assertEquals(ExpectedType.of(String.class), endpointRequest.expectedType());
+		assertEquals(JavaType.of(String.class), endpointRequest.responseType());
 	}
 
 	@Test
@@ -226,7 +250,7 @@ public class EndpointRequestFactoryTest {
 
 		Object[] args = new Object[] { parameter };
 
-		EndpointRequest endpointRequest = new EndpointRequestFactory(endpointMethod).createWith(args);
+		EndpointRequest endpointRequest = endpointRequestFactory.createWith(endpointMethod, args);
 
 		assertEquals("http://my.api.com/query?parameter=value", endpointRequest.endpoint().toString());
 
@@ -234,7 +258,7 @@ public class EndpointRequestFactoryTest {
 
 		assertFalse(endpointRequest.body().isPresent());
 
-		assertEquals(ExpectedType.of(String.class), endpointRequest.expectedType());
+		assertEquals(JavaType.of(String.class), endpointRequest.responseType());
 	}
 
 	@Test
@@ -252,7 +276,7 @@ public class EndpointRequestFactoryTest {
 
 		Object[] args = new Object[]{"argument", "my custom header", "my body"};
 
-		EndpointRequest endpointRequest = new EndpointRequestFactory(endpointMethod).createWith(args);
+		EndpointRequest endpointRequest = endpointRequestFactory.createWith(endpointMethod, args);
 
 		assertEquals("http://my.api.com/some/argument", endpointRequest.endpoint().toString());
 		assertEquals(endpointMethod.httpMethod(), endpointRequest.method());
@@ -262,7 +286,24 @@ public class EndpointRequestFactoryTest {
 
 		assertEquals("my custom header", endpointRequest.headers().get("X-My-Custom-Header").get().value());
 
-		assertEquals(ExpectedType.of(String.class), endpointRequest.expectedType());
+		assertEquals(JavaType.of(String.class), endpointRequest.responseType());
+	}
+
+	@Test
+	public void shouldCreateEndpointRequestWithResponseTypeDifferentOfTheMethodReturnType() throws Exception {
+		EndpointMethod endpointMethod = new EndpointMethod(TargetType.class.getMethod("genericType"), "http://my.api.com/some",
+				"GET");
+
+		EndpointRequest endpointRequest = endpointRequestFactory.createWith(endpointMethod, new Object[0], JavaType.of(String.class));
+
+		assertEquals(endpointMethod.path(), endpointRequest.endpoint().toString());
+		assertEquals(endpointMethod.httpMethod(), endpointRequest.method());
+
+		assertFalse(endpointRequest.body().isPresent());
+
+		assertTrue(endpointRequest.headers().all().isEmpty());
+
+		assertEquals(JavaType.of(String.class), endpointRequest.responseType());
 	}
 
 	interface TargetType {
@@ -286,5 +327,7 @@ public class EndpointRequestFactoryTest {
 		public String simpleQueryString(String parameter);
 
 		public String multiple(String path, String header, Object body);
+
+		public EndpointResponse<String> genericType();
 	}
 }

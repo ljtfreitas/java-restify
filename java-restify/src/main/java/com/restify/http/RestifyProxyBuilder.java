@@ -8,6 +8,9 @@ import java.util.Optional;
 
 import com.restify.http.client.EndpointMethodExecutor;
 import com.restify.http.client.authentication.Authentication;
+import com.restify.http.client.call.EndpointCallFactory;
+import com.restify.http.client.call.exec.EndpointCallExecutableFactory;
+import com.restify.http.client.call.exec.EndpointCallExecutables;
 import com.restify.http.client.message.HttpMessageConverter;
 import com.restify.http.client.message.HttpMessageConverters;
 import com.restify.http.client.message.converter.json.JsonMessageConverter;
@@ -23,6 +26,7 @@ import com.restify.http.client.message.form.multipart.MultipartFormMapMessageWri
 import com.restify.http.client.message.form.multipart.MultipartFormObjectMessageWriter;
 import com.restify.http.client.message.form.multipart.MultipartFormParametersMessageWriter;
 import com.restify.http.client.request.EndpointRequestExecutor;
+import com.restify.http.client.request.EndpointRequestFactory;
 import com.restify.http.client.request.EndpointRequestWriter;
 import com.restify.http.client.request.HttpClientRequestFactory;
 import com.restify.http.client.request.RestifyEndpointRequestExecutor;
@@ -51,6 +55,8 @@ public class RestifyProxyBuilder {
 
 	private EndpointRequestInterceptorsBuilder endpointRequestInterceptorsBuilder = new EndpointRequestInterceptorsBuilder(this);
 
+	private EndpointCallExecutablesBuilder endpointMethodExecutablesBuilder = new EndpointCallExecutablesBuilder(this);
+
 	public RestifyProxyBuilder client(HttpClientRequestFactory httpClientRequestFactory) {
 		this.httpClientRequestFactory = httpClientRequestFactory;
 		return this;
@@ -71,7 +77,7 @@ public class RestifyProxyBuilder {
 	}
 
 	public RestifyProxyBuilder converters(HttpMessageConverter...converters) {
-		this.httpMessageConvertersBuilder.and(converters);
+		this.httpMessageConvertersBuilder.add(converters);
 		return this;
 	}
 
@@ -80,7 +86,16 @@ public class RestifyProxyBuilder {
 	}
 
 	public RestifyProxyBuilder interceptors(EndpointRequestInterceptor...interceptors) {
-		this.endpointRequestInterceptorsBuilder.and(interceptors);
+		this.endpointRequestInterceptorsBuilder.add(interceptors);
+		return this;
+	}
+
+	public EndpointCallExecutablesBuilder executables() {
+		return this.endpointMethodExecutablesBuilder;
+	}
+
+	public RestifyProxyBuilder executables(EndpointCallExecutableFactory<?, ?>...factories) {
+		this.endpointMethodExecutablesBuilder.add(factories);
 		return this;
 	}
 
@@ -111,16 +126,23 @@ public class RestifyProxyBuilder {
 		private RestifyProxyHandler doBuild() {
 			EndpointTarget target = new EndpointTarget(type, endpoint);
 
-			EndpointMethodExecutor endpointMethodExecutor = new EndpointMethodExecutor(endpointRequestInterceptorsBuilder.build(), 
-					endpointRequestExecutor());
+			EndpointMethodExecutor endpointMethodExecutor = new EndpointMethodExecutor(endpointMethodExecutables(), endpointMethodCallFactory()); 
 
-			return new RestifyProxyHandler(contract().read(target), endpointMethodExecutor);
+			RestifyContract restifyContract = contract();
+
+			return new RestifyProxyHandler(restifyContract.read(target), endpointMethodExecutor);
 		}
 
-		private RestifyContract contract() {
-			return Optional.ofNullable(contractReader)
-					.map(c -> new DefaultRestifyContract(c))
-						.orElseGet(() -> new DefaultRestifyContract(new DefaultRestifyContractReader()));
+		private EndpointCallExecutables endpointMethodExecutables() {
+			return endpointMethodExecutablesBuilder.build();
+		}
+
+		private EndpointCallFactory endpointMethodCallFactory() {
+			return new EndpointCallFactory(endpointRequestFactory(), endpointRequestExecutor());
+		}
+
+		private EndpointRequestFactory endpointRequestFactory() {
+			return new EndpointRequestFactory(endpointRequestInterceptorsBuilder.build());
 		}
 
 		private EndpointRequestExecutor endpointRequestExecutor() {
@@ -133,6 +155,12 @@ public class RestifyProxyBuilder {
 		private HttpClientRequestFactory httpClientRequestFactory() {
 			return Optional.ofNullable(httpClientRequestFactory)
 					.orElseGet(() -> new JdkHttpClientRequestFactory());
+		}
+
+		private RestifyContract contract() {
+			return Optional.ofNullable(contractReader)
+					.map(c -> new DefaultRestifyContract(c))
+					.orElseGet(() -> new DefaultRestifyContract(new DefaultRestifyContractReader()));
 		}
 	}
 
@@ -177,9 +205,8 @@ public class RestifyProxyBuilder {
 			return json().xml().text().form();
 		}
 
-		public HttpMessageConvertersBuilder and(HttpMessageConverter...converters) {
-			Arrays.stream(converters)
-				.forEach(c -> this.converters.add(c));
+		public HttpMessageConvertersBuilder add(HttpMessageConverter...converters) {
+			this.converters.addAll(Arrays.asList(converters));
 			return this;
 		}
 
@@ -216,9 +243,8 @@ public class RestifyProxyBuilder {
 			return this;
 		}
 
-		public EndpointRequestInterceptorsBuilder and(EndpointRequestInterceptor...interceptors) {
-			Arrays.stream(interceptors)
-				.forEach(c -> this.interceptors.add(c));
+		public EndpointRequestInterceptorsBuilder add(EndpointRequestInterceptor...interceptors) {
+			this.interceptors.addAll(Arrays.asList(interceptors));
 			return this;
 		}
 
@@ -228,6 +254,34 @@ public class RestifyProxyBuilder {
 
 		private EndpointRequestInterceptorStack build() {
 			return new EndpointRequestInterceptorStack(interceptors);
+		}
+	}
+
+	public class EndpointCallExecutablesBuilder {
+
+		private final RestifyProxyBuilder context;
+		private final Collection<EndpointCallExecutableFactory<?, ?>> factories = new ArrayList<>();
+
+		private EndpointCallExecutablesBuilder(RestifyProxyBuilder context) {
+			this.context = context;
+		}
+
+		public EndpointCallExecutablesBuilder add(EndpointCallExecutableFactory<?, ?> endpointMethodExecutableFactory) {
+			factories.add(endpointMethodExecutableFactory);
+			return this;
+		}
+
+		public EndpointCallExecutablesBuilder add(EndpointCallExecutableFactory<?, ?>...factories) {
+			this.factories.addAll(Arrays.asList(factories));
+			return this;
+		}
+
+		public RestifyProxyBuilder and() {
+			return context;
+		}
+
+		private EndpointCallExecutables build() {
+			return new EndpointCallExecutables(factories);
 		}
 	}
 }

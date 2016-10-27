@@ -20,7 +20,7 @@ public class RequestEntityConverterTest {
 	private RequestEntityConverter converter = new RequestEntityConverter();
 
 	@Test
-	public void shouldConvertEndpointRequestToRequestEntity() {
+	public void shouldConvertRestifyEndpointRequestToRequestEntity() {
 		URI endpoint = URI.create("http://my.api.com/path");
 
 		Headers headers = new Headers();

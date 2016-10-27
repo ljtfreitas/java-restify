@@ -18,14 +18,14 @@ public class EndpointRequestTest {
 
 		EndpointRequest endpointRequest = new EndpointRequest(endpoint, "GET", new Headers(), "body", String.class);
 
-		EndpointRequest newEndpointRequest = endpointRequest.newParameter("param1", "value1");
+		EndpointRequest newEndpointRequest = endpointRequest.appendParameter("param1", "value1");
 
 		assertEquals(new URI("http://my.api.com/path/to/my/api?param1=value1"), newEndpointRequest.endpoint());
 		assertEquals(endpointRequest.method(), newEndpointRequest.method());
 
 		assertSame(endpointRequest.body().get(), newEndpointRequest.body().get());
 		assertSame(endpointRequest.headers(), newEndpointRequest.headers());
-		assertSame(endpointRequest.expectedType(), newEndpointRequest.expectedType());
+		assertSame(endpointRequest.responseType(), newEndpointRequest.responseType());
 	}
 
 	@Test
@@ -35,7 +35,7 @@ public class EndpointRequestTest {
 
 		EndpointRequest endpointRequest = new EndpointRequest(endpoint, "GET", new Headers(), "body", String.class);
 
-		EndpointRequest newEndpointRequest = endpointRequest.newParameter("param3", "value3");
+		EndpointRequest newEndpointRequest = endpointRequest.appendParameter("param3", "value3");
 
 		assertEquals(new URI("http://my.api.com/path/to/my/api?param1=value1&param2=value2&param3=value3"),
 				newEndpointRequest.endpoint());
@@ -43,6 +43,6 @@ public class EndpointRequestTest {
 
 		assertSame(endpointRequest.body().get(), newEndpointRequest.body().get());
 		assertSame(endpointRequest.headers(), newEndpointRequest.headers());
-		assertSame(endpointRequest.expectedType(), newEndpointRequest.expectedType());
+		assertSame(endpointRequest.responseType(), newEndpointRequest.responseType());
 	}
 }

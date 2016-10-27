@@ -8,6 +8,7 @@ import org.springframework.beans.factory.FactoryBean;
 
 import com.restify.http.RestifyProxyBuilder;
 import com.restify.http.client.authentication.Authentication;
+import com.restify.http.client.call.exec.EndpointCallExecutableFactory;
 import com.restify.http.client.message.HttpMessageConverter;
 import com.restify.http.client.request.EndpointRequestExecutor;
 import com.restify.http.client.request.HttpClientRequestFactory;
@@ -20,17 +21,19 @@ public class RestifyProxyFactoryBean implements FactoryBean<Object> {
 
 	private URL endpoint;
 
-	private RestifyContractReader restifyContractReader;
+	private HttpClientRequestFactory httpClientRequestFactory;
 
-	private Collection<HttpMessageConverter> converters = new ArrayList<>();
+	private RestifyContractReader restifyContractReader;
 
 	private EndpointRequestExecutor endpointRequestExecutor;
 
 	private Collection<EndpointRequestInterceptor> interceptors = new ArrayList<>();
 
-	private Authentication authentication;
+	private Collection<HttpMessageConverter> converters = new ArrayList<>();
 
-	private HttpClientRequestFactory httpClientRequestFactory;
+	private Collection<EndpointCallExecutableFactory<?, ?>> executables = new ArrayList<>();
+
+	private Authentication authentication;
 
 	@Override
 	public Object getObject() throws Exception {
@@ -39,6 +42,7 @@ public class RestifyProxyFactoryBean implements FactoryBean<Object> {
 		builder.client(httpClientRequestFactory)
 				.contract(restifyContractReader)
 				.executor(endpointRequestExecutor)
+				.executables(executables())
 				.converters(converters())
 				.interceptors(interceptors());
 
@@ -59,6 +63,10 @@ public class RestifyProxyFactoryBean implements FactoryBean<Object> {
 
 	private HttpMessageConverter[] converters() {
 		return converters.toArray(new HttpMessageConverter[0]);
+	}
+
+	private EndpointCallExecutableFactory<?, ?>[] executables() {
+		return executables.toArray(new EndpointCallExecutableFactory<?, ?>[0]);
 	}
 
 	@Override
@@ -101,5 +109,9 @@ public class RestifyProxyFactoryBean implements FactoryBean<Object> {
 
 	public void setHttpClientRequestFactory(HttpClientRequestFactory httpClientRequestFactory) {
 		this.httpClientRequestFactory = httpClientRequestFactory;
+	}
+
+	public void setExecutables(Collection<EndpointCallExecutableFactory<?, ?>> executables) {
+		this.executables = executables;
 	}
 }

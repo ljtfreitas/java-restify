@@ -7,6 +7,8 @@ import java.lang.reflect.Type;
 import java.util.Objects;
 import java.util.Optional;
 
+import com.restify.http.contract.metadata.reflection.JavaType;
+
 public class EndpointMethod {
 
 	private final Method javaMethod;
@@ -14,7 +16,7 @@ public class EndpointMethod {
 	private final String httpMethod;
 	private final EndpointMethodParameters parameters;
 	private final EndpointHeaders headers;
-	private final Type returnType;
+	private final JavaType returnType;
 
 	public EndpointMethod(Method javaMethod, String path, String httpMethod) {
 		this(javaMethod, path, httpMethod, new EndpointMethodParameters());
@@ -37,7 +39,7 @@ public class EndpointMethod {
 		this.httpMethod = nonNull(httpMethod, "EndpointMethod needs a HTTP method.");
 		this.parameters = nonNull(parameters, "EndpointMethod needs a parameters collection.");
 		this.headers = nonNull(headers, "EndpointMethod needs a HTTP headers collection.");
-		this.returnType = Optional.ofNullable(returnType).orElse(javaMethod.getGenericReturnType());
+		this.returnType = JavaType.of(Optional.ofNullable(returnType).orElse(javaMethod.getGenericReturnType()));
 	}
 
 	public String path() {
@@ -60,7 +62,7 @@ public class EndpointMethod {
 		return headers;
 	}
 
-	public Type returnType() {
+	public JavaType returnType() {
 		return returnType;
 	}
 

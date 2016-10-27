@@ -24,13 +24,10 @@ import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestOperations;
 
-import com.restify.http.client.request.ExpectedType;
 import com.restify.http.client.request.EndpointRequest;
-import com.restify.http.contract.metadata.reflection.SimpleParameterizedType;
-import com.restify.http.spring.client.request.RequestEntityConverter;
-import com.restify.http.spring.client.request.RestOperationsEndpointRequestExecutor;
-import com.restify.http.spring.client.response.EndpointResponseEntity;
-import com.restify.http.spring.client.response.ResponseEntityConverter;
+import com.restify.http.client.response.EndpointResponse;
+import com.restify.http.client.response.EndpointResponseCode;
+import com.restify.http.contract.metadata.reflection.JavaType;
 
 @RunWith(MockitoJUnitRunner.class)
 public class RestOperationsEndpointRequestExecutorTest {
@@ -42,7 +39,7 @@ public class RestOperationsEndpointRequestExecutorTest {
 	private RequestEntityConverter requestEntityConverterMock;
 
 	@Mock
-	private ResponseEntityConverter responseEntityConverterMock;
+	private EndpointResponseConverter responseEntityConverterMock;
 
 	@InjectMocks
 	private RestOperationsEndpointRequestExecutor executor;
@@ -68,43 +65,24 @@ public class RestOperationsEndpointRequestExecutorTest {
 		when(restOperationsMock.exchange(same(requestEntity), notNull(ParameterizedTypeReference.class)))
 			.thenReturn(responseEntity);
 
-		when(responseEntityConverterMock.convert(notNull(EndpointResponseEntity.class)))
-			.thenReturn(responseEntity.getBody());
+		when(responseEntityConverterMock.convert(notNull(ResponseEntity.class)))
+			.thenReturn(new EndpointResponse<>(EndpointResponseCode.ok(), null, responseEntity.getBody()));
 	}
 
 	@Test
 	public void shouldExecuteEndpointRequestWithSpringRestOperationsObject() {
 		EndpointRequest endpointRequest = new EndpointRequest(endpointUri, "GET", String.class);
 
-		Object result = executor.execute(endpointRequest);
+		EndpointResponse<Object> result = executor.execute(endpointRequest);
 
-		assertEquals(responseEntity.getBody(), result);
-
-		verify(requestEntityConverterMock).convert(endpointRequest);
-
-		verify(restOperationsMock).exchange(same(requestEntity), argThat(typeOf(String.class)));
-
-		verify(responseEntityConverterMock)
-			.convert(argThat(responseOf(responseEntity, ExpectedType.of(String.class))));
-	}
-
-	@Test
-	public void shouldExecuteEndpointRequestWithCorrectExpectedBodyTypeWhenExpectedMethodReturnIsResponseEntity() {
-		SimpleParameterizedType expectedType = new SimpleParameterizedType(ResponseEntity.class, null, String.class);
-
-		EndpointRequest endpointRequest = new EndpointRequest(endpointUri, "GET",
-				expectedType);
-
-		Object result = executor.execute(endpointRequest);
-
-		assertEquals(responseEntity.getBody(), result);
+		assertEquals(responseEntity.getBody(), result.body());
 
 		verify(requestEntityConverterMock).convert(endpointRequest);
 
 		verify(restOperationsMock).exchange(same(requestEntity), argThat(typeOf(String.class)));
 
 		verify(responseEntityConverterMock)
-			.convert(argThat(responseOf(responseEntity, ExpectedType.of(expectedType, ResponseEntity.class))));
+			.convert(argThat(responseOf(responseEntity, JavaType.of(String.class))));
 	}
 
 	private ArgumentMatcher<ParameterizedTypeReference<Object>> typeOf(Type expectedType) {
@@ -117,12 +95,13 @@ public class RestOperationsEndpointRequestExecutorTest {
 		};
 	}
 
-	private ArgumentMatcher<EndpointResponseEntity> responseOf(ResponseEntity<Object> responseEntity, ExpectedType expectedType) {
-		return new ArgumentMatcher<EndpointResponseEntity>() {
+	private ArgumentMatcher<ResponseEntity<Object>> responseOf(ResponseEntity<Object> responseEntity, JavaType expectedType) {
+		return new ArgumentMatcher<ResponseEntity<Object>>() {
+			@SuppressWarnings("unchecked")
 			@Override
 			public boolean matches(Object argument) {
-				EndpointResponseEntity arg = (EndpointResponseEntity) argument;
-				return arg.entity() == responseEntity && arg.expectedType().equals(expectedType);
+				ResponseEntity<Object> arg = (ResponseEntity<Object>) argument;
+				return arg.getBody() == responseEntity.getBody();
 			}
 		};
 	}

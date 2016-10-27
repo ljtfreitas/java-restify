@@ -1,8 +1,10 @@
 package com.restify.http.client.request;
 
 import com.restify.http.RestifyHttpException;
+import com.restify.http.client.response.EndpointResponse;
 import com.restify.http.client.response.EndpointResponseReader;
 import com.restify.http.client.response.HttpResponseMessage;
+import com.restify.http.contract.metadata.reflection.JavaType;
 
 public class RestifyEndpointRequestExecutor implements EndpointRequestExecutor {
 
@@ -18,9 +20,9 @@ public class RestifyEndpointRequestExecutor implements EndpointRequestExecutor {
 	}
 
 	@Override
-	public Object execute(EndpointRequest endpointRequest) {
+	public <T> EndpointResponse<T> execute(EndpointRequest endpointRequest) {
 		try (HttpResponseMessage response = doExecute(endpointRequest)) {
-			return responseOf(response, endpointRequest.expectedType());
+			return responseOf(response, endpointRequest.responseType());
 
 		} catch (Exception e) {
 			throw new RestifyHttpException(e);
@@ -35,7 +37,7 @@ public class RestifyEndpointRequestExecutor implements EndpointRequestExecutor {
 		return httpClientRequest.execute();
 	}
 
-	private Object responseOf(HttpResponseMessage response, ExpectedType expectedType) {
-		return endpointResponseReader.read(response, expectedType);
+	private <T> EndpointResponse<T> responseOf(HttpResponseMessage response, JavaType responseType) {
+		return endpointResponseReader.read(response, responseType);
 	}
 }

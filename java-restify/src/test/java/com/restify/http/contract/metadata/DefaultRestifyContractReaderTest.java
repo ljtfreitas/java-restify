@@ -59,7 +59,7 @@ public class DefaultRestifyContractReaderTest {
 
 		assertEquals("GET", endpointMethod.httpMethod());
 		assertEquals("http://my.api.com/{path}", endpointMethod.path());
-		assertEquals(String.class, endpointMethod.returnType());
+		assertEquals(String.class, endpointMethod.returnType().classType());
 
 		Optional<EndpointMethodParameter> parameter = endpointMethod.parameters().find("path");
 		assertTrue(parameter.isPresent());
@@ -75,7 +75,7 @@ public class DefaultRestifyContractReaderTest {
 
 		assertEquals("GET", endpointMethod.httpMethod());
 		assertEquals("http://my.api.com/{path}", endpointMethod.path());
-		assertEquals(String.class, endpointMethod.returnType());
+		assertEquals(String.class, endpointMethod.returnType().classType());
 
 		Optional<EndpointMethodParameter> pathParameter = endpointMethod.parameters().get(0);
 		assertTrue(pathParameter.isPresent());
@@ -100,7 +100,7 @@ public class DefaultRestifyContractReaderTest {
 
 		assertEquals("GET", endpointMethod.httpMethod());
 		assertEquals("http://my.api.com/path", endpointMethod.path());
-		assertEquals(String.class, endpointMethod.returnType());
+		assertEquals(String.class, endpointMethod.returnType().classType());
 	}
 
 	@Test
@@ -110,7 +110,7 @@ public class DefaultRestifyContractReaderTest {
 
 		assertEquals("GET", endpointMethod.httpMethod());
 		assertEquals("http://my.api.com/mergeHeaders", endpointMethod.path());
-		assertEquals(String.class, endpointMethod.returnType());
+		assertEquals(String.class, endpointMethod.returnType().classType());
 
 		Optional<EndpointHeader> myTypeHeader = endpointMethod.headers().first("X-My-Type");
 		assertTrue(myTypeHeader.isPresent());
@@ -132,7 +132,7 @@ public class DefaultRestifyContractReaderTest {
 
 		assertEquals("GET", endpointMethod.httpMethod());
 		assertEquals("http://my.api.com/{customArgumentPath}", endpointMethod.path());
-		assertEquals(Void.TYPE, endpointMethod.returnType());
+		assertEquals(Void.TYPE, endpointMethod.returnType().classType());
 
 		Optional<EndpointMethodParameter> pathParameter = endpointMethod.parameters().get(0);
 		assertTrue(pathParameter.isPresent());
@@ -152,7 +152,7 @@ public class DefaultRestifyContractReaderTest {
 
 		assertEquals("POST", endpointMethod.httpMethod());
 		assertEquals("http://my.api.com/some-method", endpointMethod.path());
-		assertEquals(Void.TYPE, endpointMethod.returnType());
+		assertEquals(Void.TYPE, endpointMethod.returnType().classType());
 	}
 
 	@Test
@@ -162,7 +162,7 @@ public class DefaultRestifyContractReaderTest {
 
 		assertEquals("GET", endpointMethod.httpMethod());
 		assertEquals("http://my.api.com/query", endpointMethod.path());
-		assertEquals(Void.class, endpointMethod.returnType());
+		assertEquals(Void.class, endpointMethod.returnType().classType());
 
 		Optional<EndpointMethodParameter> queryStringParameter = endpointMethod.parameters().get(0);
 		assertTrue(queryStringParameter.isPresent());
@@ -210,7 +210,7 @@ public class DefaultRestifyContractReaderTest {
 				MySpecificApi.class.getMethod("find", new Class[] { int.class }));
 
 		assertEquals("http://my.model.api/find", endpointMethod.path());
-		assertEquals(MyModel.class, endpointMethod.returnType());
+		assertEquals(MyModel.class, endpointMethod.returnType().classType());
 	}
 
 	@Test
@@ -219,7 +219,7 @@ public class DefaultRestifyContractReaderTest {
 				MySpecificApi.class.getMethod("allAsList"));
 
 		assertEquals("http://my.model.api/all", endpointMethod.path());
-		assertEquals(new SimpleParameterizedType(List.class, null, MyModel.class), endpointMethod.returnType());
+		assertEquals(new SimpleParameterizedType(List.class, null, MyModel.class), endpointMethod.returnType().unwrap());
 	}
 
 	@Test
@@ -228,7 +228,7 @@ public class DefaultRestifyContractReaderTest {
 				MySpecificApi.class.getMethod("allAsArray"));
 
 		assertEquals("http://my.model.api/all", endpointMethod.path());
-		assertEquals(new SimpleGenericArrayType(MyModel.class), endpointMethod.returnType());
+		assertEquals(new SimpleGenericArrayType(MyModel.class), endpointMethod.returnType().unwrap());
 	}
 
 	@Test
@@ -237,7 +237,7 @@ public class DefaultRestifyContractReaderTest {
 				MySpecificApi.class.getMethod("myModelArray"));
 
 		assertEquals("http://my.model.api/all", endpointMethod.path());
-		assertEquals(MyModel[].class, endpointMethod.returnType());
+		assertEquals(MyModel[].class, endpointMethod.returnType().classType());
 	}
 
 	@Test
@@ -247,7 +247,7 @@ public class DefaultRestifyContractReaderTest {
 
 		assertEquals("http://my.model.api/all", endpointMethod.path());
 		assertEquals(new SimpleParameterizedType(Map.class, null, String.class, MyModel.class),
-				endpointMethod.returnType());
+				endpointMethod.returnType().unwrap());
 	}
 
 	@Test
@@ -257,7 +257,7 @@ public class DefaultRestifyContractReaderTest {
 
 		assertEquals("http://my.model.api/all", endpointMethod.path());
 		assertEquals(new SimpleParameterizedType(Map.class, null, String.class, MyModel.class),
-				endpointMethod.returnType());
+				endpointMethod.returnType().unwrap());
 	}
 
 	@Test
@@ -270,7 +270,7 @@ public class DefaultRestifyContractReaderTest {
 				new SimpleParameterizedType(Map.class, null,
 						new SimpleWildcardType(new Type[] { Number.class }, new Type[0]),
 						new SimpleWildcardType(new Type[] { MyModel.class }, new Type[0])),
-				endpointMethod.returnType());
+				endpointMethod.returnType().unwrap());
 	}
 
 	@Test

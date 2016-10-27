@@ -7,6 +7,7 @@ import java.util.Optional;
 
 import com.restify.http.RestifyHttpException;
 import com.restify.http.client.Headers;
+import com.restify.http.contract.metadata.reflection.JavaType;
 
 public class EndpointRequest {
 
@@ -14,30 +15,30 @@ public class EndpointRequest {
 	private final String method;
 	private final Headers headers;
 	private final Object body;
-	private final ExpectedType expectedType;
+	private final JavaType responseType;
 
 	public EndpointRequest(URI endpoint, String method) {
 		this(endpoint, method, new Headers(), null, void.class);
 	}
 
-	public EndpointRequest(URI endpoint, String method, Type expectedType) {
-		this(endpoint, method, new Headers(), expectedType);
+	public EndpointRequest(URI endpoint, String method, Type responseType) {
+		this(endpoint, method, new Headers(), responseType);
 	}
 
-	public EndpointRequest(URI endpoint, String method, Headers headers, Type expectedType) {
-		this(endpoint, method, headers, null, expectedType);
+	public EndpointRequest(URI endpoint, String method, Headers headers, Type responseType) {
+		this(endpoint, method, headers, null, responseType);
 	}
 
-	public EndpointRequest(URI endpoint, String method, Headers headers, Object body, Type expectedType) {
-		this(endpoint, method, headers, body, ExpectedType.of(expectedType));
+	public EndpointRequest(URI endpoint, String method, Headers headers, Object body, Type responseType) {
+		this(endpoint, method, headers, body, JavaType.of(responseType));
 	}
 
-	public EndpointRequest(URI endpoint, String method, Headers headers, Object body, ExpectedType expectedType) {
+	public EndpointRequest(URI endpoint, String method, Headers headers, Object body, JavaType responseType) {
 		this.endpoint = endpoint;
 		this.method = method;
 		this.headers = headers;
 		this.body = body;
-		this.expectedType = expectedType;
+		this.responseType = responseType;
 	}
 
 	public URI endpoint() {
@@ -56,11 +57,11 @@ public class EndpointRequest {
 		return headers;
 	}
 
-	public ExpectedType expectedType() {
-		return expectedType;
+	public JavaType responseType() {
+		return responseType;
 	}
 
-	public EndpointRequest newParameter(String name, String value) {
+	public EndpointRequest appendParameter(String name, String value) {
 		String appender = endpoint.getQuery() == null ? "" : "&";
 
 		String newQuery = Optional.ofNullable(endpoint.getRawQuery())
@@ -72,7 +73,7 @@ public class EndpointRequest {
 			URI newURI = new URI(endpoint.getScheme(), endpoint.getRawAuthority(), endpoint.getRawPath(),
 					newQuery, endpoint.getRawFragment());
 
-			return new EndpointRequest(newURI, method, headers, body, expectedType);
+			return new EndpointRequest(newURI, method, headers, body, responseType);
 		} catch (URISyntaxException e) {
 			throw new RestifyHttpException(e);
 		}

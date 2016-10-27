@@ -1,7 +1,9 @@
 package com.restify.http.client.request;
 
+import com.restify.http.client.response.EndpointResponse;
+
 public interface EndpointRequestExecutor {
 
-	public Object execute(EndpointRequest endpointRequest);
+	public <T> EndpointResponse<T> execute(EndpointRequest endpointRequest);
 
 }

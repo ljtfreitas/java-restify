@@ -1,5 +1,6 @@
 package com.restify.http.contract.metadata.reflection;
 
+import java.lang.reflect.Array;
 import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.GenericDeclaration;
 import java.lang.reflect.Method;
@@ -158,5 +159,30 @@ public class JavaTypeResolver {
 		}
 
 		return classType;
+	}
+
+	public static Class<?> rawClassTypeOf(Type type) {
+		if (type instanceof Class) {
+			return (Class<?>) type;
+
+		} else if (type instanceof ParameterizedType) {
+			ParameterizedType parameterizedType = (ParameterizedType) type;
+			return rawClassTypeOf(parameterizedType.getRawType());
+
+		} else if (type instanceof GenericArrayType) {
+			GenericArrayType genericArrayType = (GenericArrayType) type;
+			return Array.newInstance(rawClassTypeOf(genericArrayType.getGenericComponentType()), 0).getClass();
+
+		} else if (type instanceof WildcardType) {
+			WildcardType wildcardType = (WildcardType) type;
+			return rawClassTypeOf(wildcardType.getUpperBounds()[0]);
+
+		} else if (type instanceof TypeVariable) {
+			return Object.class;
+
+		} else {
+			throw new IllegalArgumentException("The raw Class of type [" + type + "] cannot be determined");
+
+		}
 	}
 }

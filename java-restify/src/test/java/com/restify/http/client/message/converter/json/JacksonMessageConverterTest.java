@@ -8,11 +8,11 @@ import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Iterator;
+import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
 
-import com.restify.http.client.message.converter.json.JacksonMessageConverter;
 import com.restify.http.client.request.SimpleHttpRequestMessage;
 import com.restify.http.client.response.SimpleHttpResponseMessage;
 import com.restify.http.contract.metadata.reflection.SimpleParameterizedType;
@@ -79,6 +79,17 @@ public class JacksonMessageConverterTest {
 
 		assertEquals("Tiago de Freitas Lima", myJsonModel.name);
 		assertEquals(31, myJsonModel.age);
+	}
+
+	@SuppressWarnings("unchecked")
+	@Test
+	public void shouldReadJsonMessageToDefaultJacksonObject() {
+		ByteArrayInputStream input = new ByteArrayInputStream(json.getBytes());
+
+		Map<Object, Object> map = (Map<Object, Object>) converter.read(new SimpleHttpResponseMessage(input), Object.class);
+
+		assertEquals("Tiago de Freitas Lima", map.get("name"));
+		assertEquals(Integer.valueOf(31), Integer.valueOf(map.get("age").toString()));
 	}
 
 	@SuppressWarnings("unchecked")

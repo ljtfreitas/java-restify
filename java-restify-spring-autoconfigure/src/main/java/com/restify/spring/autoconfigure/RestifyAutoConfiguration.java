@@ -21,7 +21,11 @@ import org.springframework.core.env.Environment;
 import org.springframework.core.type.AnnotationMetadata;
 
 import com.restify.http.client.request.EndpointRequestExecutor;
+import com.restify.http.client.request.HttpClientRequestFactory;
+import com.restify.http.client.request.jdk.JdkHttpClientRequestFactory;
 import com.restify.http.contract.metadata.RestifyContractReader;
+import com.restify.http.spring.client.call.exec.HttpHeadersEndpointCallExecutableFactory;
+import com.restify.http.spring.client.call.exec.ResponseEntityEndpointCallExecutableFactory;
 import com.restify.http.spring.client.request.RestOperationsEndpointRequestExecutor;
 import com.restify.http.spring.contract.SpringMvcContractReader;
 import com.restify.http.spring.contract.metadata.SpelDynamicParameterExpressionResolver;
@@ -58,6 +62,24 @@ public class RestifyAutoConfiguration {
 		@Bean
 		public SpringDynamicParameterExpressionResolver expressionResolver(ConfigurableBeanFactory beanFactory) {
 			return new SpelDynamicParameterExpressionResolver(beanFactory);
+		}
+
+		@ConditionalOnMissingBean
+		@Bean
+		public HttpClientRequestFactory httpClientRequestFactory() {
+			return new JdkHttpClientRequestFactory();
+		}
+
+		@ConditionalOnMissingBean
+		@Bean
+		public HttpHeadersEndpointCallExecutableFactory httpHeadersEndpointCallExecutableFactory() {
+			return new HttpHeadersEndpointCallExecutableFactory();
+		}
+
+		@ConditionalOnMissingBean
+		@Bean
+		public ResponseEntityEndpointCallExecutableFactory<Object> responseEntityEndpointCallExecutableFactory() {
+			return new ResponseEntityEndpointCallExecutableFactory<>();
 		}
 	}
 

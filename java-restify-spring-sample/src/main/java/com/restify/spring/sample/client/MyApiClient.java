@@ -6,6 +6,8 @@ import org.springframework.web.client.RestTemplate;
 
 import com.restify.http.RestifyProxyBuilder;
 import com.restify.http.client.Headers;
+import com.restify.http.spring.client.call.exec.HttpHeadersEndpointCallExecutableFactory;
+import com.restify.http.spring.client.call.exec.ResponseEntityEndpointCallExecutableFactory;
 import com.restify.http.spring.client.request.RestOperationsEndpointRequestExecutor;
 import com.restify.http.spring.contract.FormParameters;
 import com.restify.http.spring.contract.FormParameters.Parameter;
@@ -17,9 +19,13 @@ public class MyApiClient {
 	public static void main(String[] args) {
 		MyApi myApi = new RestifyProxyBuilder()
 				.contract(new SpringMvcContractReader())
-					.executor(new RestOperationsEndpointRequestExecutor(new RestTemplate()))
-						.target(MyApi.class, "http://localhost:8080")
-							.build();
+				.executables()
+					.add(new HttpHeadersEndpointCallExecutableFactory())
+					.add(new ResponseEntityEndpointCallExecutableFactory<Object>())
+					.and()
+				.executor(new RestOperationsEndpointRequestExecutor(new RestTemplate()))
+				.target(MyApi.class, "http://localhost:8080")
+					.build();
 
 		MyApiResponse response = myApi.get("1234");
 		System.out.println(response);

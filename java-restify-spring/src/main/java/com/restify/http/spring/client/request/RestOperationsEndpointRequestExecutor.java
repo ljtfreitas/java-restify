@@ -7,51 +7,49 @@ import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestOperations;
 
-import com.restify.http.client.request.ExpectedType;
-import com.restify.http.spring.client.response.EndpointResponseEntity;
-import com.restify.http.spring.client.response.ResponseEntityConverter;
 import com.restify.http.client.request.EndpointRequest;
 import com.restify.http.client.request.EndpointRequestExecutor;
+import com.restify.http.client.response.EndpointResponse;
+import com.restify.http.contract.metadata.reflection.JavaType;
 
 public class RestOperationsEndpointRequestExecutor implements EndpointRequestExecutor {
 
 	private final RestOperations rest;
 	private final RequestEntityConverter requestEntityConverter;
-	private final ResponseEntityConverter responseEntityConverter;
+	private final EndpointResponseConverter responseEntityConverter;
 
 	public RestOperationsEndpointRequestExecutor(RestOperations rest) {
-		this(rest, new RequestEntityConverter(), new ResponseEntityConverter());
+		this(rest, new RequestEntityConverter(), new EndpointResponseConverter());
 	}
 
 	public RestOperationsEndpointRequestExecutor(RestOperations rest, RequestEntityConverter requestEntityConverter,
-			ResponseEntityConverter responseEntityConverter) {
+			EndpointResponseConverter responseEntityConverter) {
 		this.rest = rest;
 		this.requestEntityConverter = requestEntityConverter;
 		this.responseEntityConverter = responseEntityConverter;
 	}
 
+	@SuppressWarnings("unchecked")
 	@Override
-	public Object execute(EndpointRequest endpointRequest) {
+	public <T> EndpointResponse<T> execute(EndpointRequest endpointRequest) {
 		RequestEntity<Object> request = requestEntityConverter.convert(endpointRequest);
 
-		ExpectedType requestExpectedType = endpointRequest.expectedType().dispose(ResponseEntity.class);
+		ResponseEntity<Object> response = rest.exchange(request, new JavaTypeReference(endpointRequest.responseType()));
 
-		ResponseEntity<Object> response = rest.exchange(request, new ExpectedTypeReference(requestExpectedType.type()));
-
-		return responseEntityConverter.convert(new EndpointResponseEntity(response, requestExpectedType));
+		return (EndpointResponse<T>) responseEntityConverter.convert(response);
 	}
 
-	private class ExpectedTypeReference extends ParameterizedTypeReference<Object> {
+	private class JavaTypeReference extends ParameterizedTypeReference<Object> {
 
-		private final Type type;
+		private final JavaType type;
 
-		public ExpectedTypeReference(Type type) {
+		public JavaTypeReference(JavaType type) {
 			this.type = type;
 		}
 
 		@Override
 		public Type getType() {
-			return type;
+			return type.unwrap();
 		}
 
 		@Override
@@ -67,7 +65,7 @@ public class RestOperationsEndpointRequestExecutor implements EndpointRequestExe
 
 		@Override
 		public String toString() {
-			return "ExpectedTypeReference<" + type + ">";
+			return "JavaTypeReference<" + type + ">";
 		}
 	}
 }

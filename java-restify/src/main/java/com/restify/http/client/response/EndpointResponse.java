@@ -25,4 +25,27 @@ public class EndpointResponse<T> {
 	public T body() {
 		return body;
 	}
+
+	@Override
+	public String toString() {
+		StringBuilder report = new StringBuilder();
+
+		report
+			.append("EndpointResponse: [")
+				.append("HTTP Status code: ")
+					.append(code)
+				.append(", ")
+				.append("Headers: ")
+					.append(headers)
+				.append(", ")
+				.append("Body: ")
+					.append(body)
+			.append("]");
+
+		return report.toString();
+	}
+
+	public static <T> EndpointResponse<T> empty(EndpointResponseCode code, Headers headers) {
+		return new EndpointResponse<T>(code, headers, null);
+	}
 }

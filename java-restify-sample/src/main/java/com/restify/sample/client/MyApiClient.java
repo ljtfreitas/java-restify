@@ -1,6 +1,7 @@
 package com.restify.sample.client;
 
 import com.restify.http.RestifyProxyBuilder;
+import com.restify.http.client.call.EndpointCall;
 import com.restify.http.client.response.EndpointResponse;
 import com.restify.http.contract.ContentType;
 import com.restify.http.contract.MultipartFile;
@@ -38,5 +39,8 @@ public class MyApiClient {
 
 		EndpointResponse<MyApiResponse> responseObject = myApi.getResponseObjectAs("json");
 		System.out.println("Response object: " + responseObject);
+
+		EndpointCall<MyApiResponse> call = myApi.call("json");
+		System.out.println("Response object: " + call.execute());
 	}
 }
