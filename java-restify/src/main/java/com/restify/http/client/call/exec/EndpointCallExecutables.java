@@ -3,6 +3,7 @@ package com.restify.http.client.call.exec;
 import java.util.ArrayList;
 import java.util.Collection;
 
+import com.restify.http.client.call.exec.jdk.OptionalEndpointCallExecutableFactory;
 import com.restify.http.contract.metadata.EndpointMethod;
 
 public class EndpointCallExecutables {
@@ -12,7 +13,7 @@ public class EndpointCallExecutables {
 
 	private final Collection<EndpointCallExecutableFactory<?, ?>> factories;
 
-	public EndpointCallExecutables(Collection<EndpointCallExecutableFactory<?, ?>> factories) {
+	private EndpointCallExecutables(Collection<EndpointCallExecutableFactory<?, ?>> factories) {
 		this.factories = new ArrayList<>(factories);
 	}
 
@@ -23,5 +24,11 @@ public class EndpointCallExecutables {
 						.findFirst()
 							.orElseGet(() -> DEFAULT_EXECUTABLE_FACTORY)
 								.create(endpointMethod);
+	}
+
+	public static EndpointCallExecutables create(Collection<EndpointCallExecutableFactory<?, ?>> factories) {
+		EndpointCallExecutables executables = new EndpointCallExecutables(factories);
+		executables.factories.add(new OptionalEndpointCallExecutableFactory<Object>());
+		return executables;
 	}
 }

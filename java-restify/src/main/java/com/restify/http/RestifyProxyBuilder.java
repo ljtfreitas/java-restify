@@ -281,7 +281,7 @@ public class RestifyProxyBuilder {
 		}
 
 		private EndpointCallExecutables build() {
-			return new EndpointCallExecutables(factories);
+			return EndpointCallExecutables.create(factories);
 		}
 	}
 }
