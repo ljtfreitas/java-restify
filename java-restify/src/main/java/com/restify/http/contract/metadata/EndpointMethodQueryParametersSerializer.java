@@ -14,19 +14,35 @@ public class EndpointMethodQueryParametersSerializer implements EndpointMethodPa
 	@SuppressWarnings("rawtypes")
 	@Override
 	public String serialize(String name, Type type, Object source) {
-		if (source instanceof Parameters) {
-			return serializeAsParameters((Parameters) source);
+		if (supported(type, source)) {
+			if (isParameters(source)) {
+				return serializeAsParameters((Parameters) source);
 
-		} else if (source instanceof Map && supportedMapKey(type)) {
-			return serializeAsMap((Map) source);
+			} else if (isSupportedMap(type, source)) {
+				return serializeAsMap((Map) source);
 
-		} else if (isFormObject(source)) {
-			return serializeAsFormObject(name, type, source);
-
-		} else {
-			throw new IllegalArgumentException(
-					"EndpointMethodQueryParametersSerializer does no support a parameter of type " + source.getClass());
+			} else if (isFormObject(source)) {
+				return serializeAsFormObject(name, type, source);
+			}
 		}
+
+		throw new IllegalArgumentException("EndpointMethodQueryParametersSerializer does no support a parameter of type " + source.getClass());
+	}
+
+	public boolean supports(Type type, Object source) {
+		return supported(type, source);
+	}
+
+	private boolean supported(Type type, Object source) {
+		return isParameters(source) || isSupportedMap(type, source) || isFormObject(source);
+	}
+
+	private boolean isParameters(Object source) {
+		return source instanceof Parameters;
+	}
+
+	private boolean isSupportedMap(Type type, Object source) {
+		return source instanceof Map && supportedMapKey(type);
 	}
 
 	private boolean supportedMapKey(Type type) {

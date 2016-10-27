@@ -20,14 +20,15 @@ public class SpringMvcEndpointMethodParameterSerializer {
 
 	public static class SpringMvcQueryParameterSerializer implements EndpointMethodParameterSerializer {
 
-		private final EndpointMethodQueryParametersSerializer queryParametersSerializer = new EndpointMethodQueryParametersSerializer();
 		private final EndpointMethodQueryParameterSerializer queryParameterSerializer = new EndpointMethodQueryParameterSerializer();
+
+		private final EndpointMethodQueryParametersSerializer queryParametersSerializer = new EndpointMethodQueryParametersSerializer();
 
 		@Override
 		public String serialize(String name, Type type, Object source) {
-			try {
+			if (queryParametersSerializer.supports(type, source)) {
 				return queryParametersSerializer.serialize(name, type, source);
-			} catch (IllegalArgumentException e) {
+			} else {
 				return queryParameterSerializer.serialize(name, type, source);
 			}
 		}
