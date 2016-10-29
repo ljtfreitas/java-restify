@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.eq;
+import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayInputStream;
@@ -16,7 +17,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import com.restify.http.RestifyHttpException;
 import com.restify.http.client.message.HttpMessageConverters;
 import com.restify.http.client.message.HttpMessageReader;
 import com.restify.http.contract.ContentType;
@@ -30,6 +30,9 @@ public class EndpointResponseReaderTest {
 
 	@Mock
 	private HttpMessageReader<Object> httpMessageReaderMock;
+
+	@Mock
+	private EndpointResponseErrorFallback endpointResponseErrorFallbackMock;
 
 	@InjectMocks
 	private EndpointResponseReader endpointResponseReader;
@@ -55,11 +58,14 @@ public class EndpointResponseReaderTest {
 		assertEquals(endpointResult, response.body());
 	}
 
-	@Test(expected = RestifyHttpException.class)
-	public void shouldThrowExceptionWhenResponseStatusCodeIsError() {
-		HttpResponseMessage httpResponseMessage = new SimpleHttpResponseMessage(EndpointResponseCode.internalServerError());
+	@Test
+	public void shouldCallEndpointResponseErorHandlerWhenResponseStatusCodeIsError() {
+		HttpResponseMessage httpResponseMessage = new SimpleHttpResponseMessage(StatusCode.internalServerError());
 
 		endpointResponseReader.read(httpResponseMessage, JavaType.of(String.class));
+
+		verify(endpointResponseErrorFallbackMock)
+			.onError(httpResponseMessage);
 	}
 
 	@Test
@@ -73,7 +79,7 @@ public class EndpointResponseReaderTest {
 
 	@Test
 	public void shouldReturnEmptyResponseWhenHttpResponseCodeIsNotReadable() {
-		HttpResponseMessage httpResponseMessage = new SimpleHttpResponseMessage(EndpointResponseCode.noContent());
+		HttpResponseMessage httpResponseMessage = new SimpleHttpResponseMessage(StatusCode.noContent());
 
 		EndpointResponse<String> response = endpointResponseReader.read(httpResponseMessage, JavaType.of(String.class));
 

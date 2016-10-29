@@ -3,27 +3,25 @@ package com.restify.http.client.response;
 import java.io.IOException;
 import java.lang.reflect.Type;
 
-import com.restify.http.RestifyHttpException;
 import com.restify.http.client.Header;
 import com.restify.http.client.Headers;
 import com.restify.http.client.message.HttpMessageConverters;
 import com.restify.http.client.message.HttpMessageReader;
-import com.restify.http.client.message.converter.text.TextPlainMessageConverter;
 import com.restify.http.contract.ContentType;
 import com.restify.http.contract.metadata.reflection.JavaType;
 
 public class EndpointResponseReader {
 
-	static final TextPlainMessageConverter ERROR_RESPONSE_MESSAGE_CONVERTER = new TextPlainMessageConverter();
-
 	private final HttpMessageConverters converters;
+	private final EndpointResponseErrorFallback endpointResponseErrorFallback;
 
-	public EndpointResponseReader(HttpMessageConverters converters) {
+	public EndpointResponseReader(HttpMessageConverters converters, EndpointResponseErrorFallback endpointResponseErrorFallback) {
 		this.converters = converters;
+		this.endpointResponseErrorFallback = endpointResponseErrorFallback;
 	}
 
 	public <T> EndpointResponse<T> read(HttpResponseMessage response, JavaType responseType) {
-		if (readableType(responseType) && response.readable()) {
+		if (readableType(responseType) && response.isReadable()) {
 			return doRead(response, responseType);
 		} else {
 			return EndpointResponse.empty(response.code(), response.headers());
@@ -44,14 +42,8 @@ public class EndpointResponseReader {
 				return doRead(response, responseType.unwrap());
 
 			} else {
-				throw doError(response);
+				return endpointResponseErrorFallback.onError(response);
 			}
-		}
-
-		private RestifyHttpException doError(HttpResponseMessage response) {
-			String message = (String) EndpointResponseReader.ERROR_RESPONSE_MESSAGE_CONVERTER.read(response, String.class);
-
-			return new RestifyHttpException("HTTP Status Code: " + response.code() + "\n" + message);
 		}
 
 		@SuppressWarnings("unchecked")

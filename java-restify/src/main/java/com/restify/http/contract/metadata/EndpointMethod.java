@@ -104,6 +104,9 @@ public class EndpointMethod {
 				.append(", ")
 				.append("HTTP Method: ")
 					.append(httpMethod)
+				.append(", ")
+				.append("Method Return Type: ")
+					.append(returnType)
 			.append("]");
 
 		return report.toString();

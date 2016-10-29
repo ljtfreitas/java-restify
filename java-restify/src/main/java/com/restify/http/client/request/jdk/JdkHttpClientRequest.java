@@ -10,7 +10,7 @@ import java.util.Collection;
 import com.restify.http.RestifyHttpException;
 import com.restify.http.client.Headers;
 import com.restify.http.client.request.HttpClientRequest;
-import com.restify.http.client.response.EndpointResponseCode;
+import com.restify.http.client.response.StatusCode;
 import com.restify.http.client.response.HttpResponseMessage;
 
 public class JdkHttpClientRequest implements HttpClientRequest {
@@ -38,7 +38,7 @@ public class JdkHttpClientRequest implements HttpClientRequest {
 	}
 
 	private JdkHttpClientResponse responseOf(HttpURLConnection connection) throws IOException {
-		EndpointResponseCode code = EndpointResponseCode.of(connection.getResponseCode());
+		StatusCode statusCode = StatusCode.of(connection.getResponseCode());
 
 		Headers headers = new Headers();
 
@@ -48,7 +48,7 @@ public class JdkHttpClientRequest implements HttpClientRequest {
 
 		InputStream stream = connection.getErrorStream() == null ? connection.getInputStream() : connection.getErrorStream();
 
-		return new JdkHttpClientResponse(code, headers, stream, connection);
+		return new JdkHttpClientResponse(statusCode, headers, stream, connection);
 	}
 
 	@Override

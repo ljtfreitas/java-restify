@@ -35,6 +35,8 @@ import com.restify.http.client.request.interceptor.EndpointRequestInterceptor;
 import com.restify.http.client.request.interceptor.EndpointRequestInterceptorStack;
 import com.restify.http.client.request.interceptor.authentication.AuthenticationEndpoinRequestInterceptor;
 import com.restify.http.client.request.jdk.JdkHttpClientRequestFactory;
+import com.restify.http.client.response.DefaultEndpointResponseErrorFallback;
+import com.restify.http.client.response.EndpointResponseErrorFallback;
 import com.restify.http.client.response.EndpointResponseReader;
 import com.restify.http.contract.ContentType;
 import com.restify.http.contract.DefaultRestifyContract;
@@ -56,6 +58,8 @@ public class RestifyProxyBuilder {
 	private EndpointRequestInterceptorsBuilder endpointRequestInterceptorsBuilder = new EndpointRequestInterceptorsBuilder(this);
 
 	private EndpointCallExecutablesBuilder endpointMethodExecutablesBuilder = new EndpointCallExecutablesBuilder(this);
+
+	private EndpointResponseErrorFallbackBuilder endpointResponseErrorFallbackBuilder = new EndpointResponseErrorFallbackBuilder(this);
 
 	public RestifyProxyBuilder client(HttpClientRequestFactory httpClientRequestFactory) {
 		this.httpClientRequestFactory = httpClientRequestFactory;
@@ -96,6 +100,15 @@ public class RestifyProxyBuilder {
 
 	public RestifyProxyBuilder executables(EndpointCallExecutableFactory<?, ?>...factories) {
 		this.endpointMethodExecutablesBuilder.add(factories);
+		return this;
+	}
+
+	public EndpointResponseErrorFallbackBuilder error() {
+		return endpointResponseErrorFallbackBuilder;
+	}
+
+	public RestifyProxyBuilder error(EndpointResponseErrorFallback fallback) {
+		this.endpointResponseErrorFallbackBuilder = new EndpointResponseErrorFallbackBuilder(this, fallback);
 		return this;
 	}
 
@@ -149,7 +162,12 @@ public class RestifyProxyBuilder {
 			HttpMessageConverters messageConverters = httpMessageConvertersBuilder.build();
 			return Optional.ofNullable(endpointRequestExecutor)
 					.orElseGet(() -> new RestifyEndpointRequestExecutor(httpClientRequestFactory(), 
-							new EndpointRequestWriter(messageConverters), new EndpointResponseReader(messageConverters)));
+							new EndpointRequestWriter(messageConverters),
+							new EndpointResponseReader(messageConverters, endpointResponseErrorFallbackBuilder())));
+		}
+
+		private EndpointResponseErrorFallback endpointResponseErrorFallbackBuilder() {
+			return endpointResponseErrorFallbackBuilder.build();
 		}
 
 		private HttpClientRequestFactory httpClientRequestFactory() {
@@ -282,6 +300,38 @@ public class RestifyProxyBuilder {
 
 		private EndpointCallExecutables build() {
 			return EndpointCallExecutables.create(factories);
+		}
+	}
+
+	public class EndpointResponseErrorFallbackBuilder {
+
+		private final RestifyProxyBuilder context;
+
+		private EndpointResponseErrorFallback fallback = null;
+		private boolean emptyOnNotFound = false;
+
+		private EndpointResponseErrorFallbackBuilder(RestifyProxyBuilder context) {
+			this.context = context;
+		}
+
+		private EndpointResponseErrorFallbackBuilder(RestifyProxyBuilder context, EndpointResponseErrorFallback fallback) {
+			this.context = context;
+			this.fallback = fallback;
+		}
+
+		public RestifyProxyBuilder emptyOnNotFound() {
+			this.emptyOnNotFound = true;
+			return context;
+		}
+
+		public RestifyProxyBuilder using(EndpointResponseErrorFallback fallback) {
+			this.fallback = fallback;
+			return context;
+		}
+
+		private EndpointResponseErrorFallback build() {
+			return Optional.ofNullable(fallback)
+					.orElseGet(() -> emptyOnNotFound ? DefaultEndpointResponseErrorFallback.emptyOnNotFound() : new DefaultEndpointResponseErrorFallback());
 		}
 	}
 }

@@ -26,7 +26,7 @@ import org.springframework.web.client.RestOperations;
 
 import com.restify.http.client.request.EndpointRequest;
 import com.restify.http.client.response.EndpointResponse;
-import com.restify.http.client.response.EndpointResponseCode;
+import com.restify.http.client.response.StatusCode;
 import com.restify.http.contract.metadata.reflection.JavaType;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -66,7 +66,7 @@ public class RestOperationsEndpointRequestExecutorTest {
 			.thenReturn(responseEntity);
 
 		when(responseEntityConverterMock.convert(notNull(ResponseEntity.class)))
-			.thenReturn(new EndpointResponse<>(EndpointResponseCode.ok(), null, responseEntity.getBody()));
+			.thenReturn(new EndpointResponse<>(StatusCode.ok(), null, responseEntity.getBody()));
 	}
 
 	@Test

@@ -1,5 +1,7 @@
 package com.restify.sample.client;
 
+import java.util.Optional;
+
 import com.restify.http.client.Headers;
 import com.restify.http.client.call.EndpointCall;
 import com.restify.http.client.response.EndpointResponse;
@@ -21,7 +23,7 @@ public interface MyApi {
 
 	@Path("/{type}")
 	@Get
-	public MyApiResponse getAs(@PathParameter String type);
+	public Optional<MyApiResponse> getAs(@PathParameter String type);
 
 	@Path("/{type}")
 	@Post
@@ -55,4 +57,8 @@ public interface MyApi {
 	@Path("/{type}")
 	@Get
 	public EndpointCall<MyApiResponse> call(@PathParameter String type);
+
+	@Path("/resource-not-found")
+	@Get
+	public Optional<String> optional();
 }

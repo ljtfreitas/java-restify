@@ -1,5 +1,7 @@
 package com.restify.sample.client;
 
+import java.util.Optional;
+
 import com.restify.http.RestifyProxyBuilder;
 import com.restify.http.client.call.EndpointCall;
 import com.restify.http.client.response.EndpointResponse;
@@ -12,6 +14,8 @@ public class MyApiClient {
 
 	public static void main(String[] args) {
 		MyApi myApi = new RestifyProxyBuilder()
+				.error()
+					.emptyOnNotFound()
 				.target(MyApi.class, "http://localhost:8080")
 				.build();
 
@@ -42,5 +46,8 @@ public class MyApiClient {
 
 		EndpointCall<MyApiResponse> call = myApi.call("json");
 		System.out.println("Response object: " + call.execute());
+
+		Optional<String> optional = myApi.optional();
+		System.out.println("Optional: " + optional);
 	}
 }

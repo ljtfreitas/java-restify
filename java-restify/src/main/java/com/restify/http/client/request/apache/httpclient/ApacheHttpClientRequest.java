@@ -19,7 +19,7 @@ import org.apache.http.protocol.HttpContext;
 import com.restify.http.RestifyHttpException;
 import com.restify.http.client.Headers;
 import com.restify.http.client.request.HttpClientRequest;
-import com.restify.http.client.response.EndpointResponseCode;
+import com.restify.http.client.response.StatusCode;
 import com.restify.http.client.response.HttpResponseMessage;
 
 public class ApacheHttpClientRequest implements HttpClientRequest {
@@ -62,7 +62,7 @@ public class ApacheHttpClientRequest implements HttpClientRequest {
 	}
 
 	private ApacheHttpClientResponse responseOf(HttpResponse httpResponse) throws IOException {
-		EndpointResponseCode code = EndpointResponseCode.of(httpResponse.getStatusLine().getStatusCode());
+		StatusCode statusCode = StatusCode.of(httpResponse.getStatusLine().getStatusCode());
 
 		Headers headers = new Headers();
 		Arrays.stream(httpResponse.getAllHeaders())
@@ -73,7 +73,7 @@ public class ApacheHttpClientRequest implements HttpClientRequest {
 		InputStream stream = entity != null ? entity.getContent()
 				: new ByteArrayInputStream(new byte[0]);
 
-		return new ApacheHttpClientResponse(code, headers, stream, entity, httpResponse);
+		return new ApacheHttpClientResponse(statusCode, headers, stream, entity, httpResponse);
 	}
 
 	@Override

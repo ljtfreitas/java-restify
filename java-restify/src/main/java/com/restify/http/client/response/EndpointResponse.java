@@ -4,12 +4,12 @@ import com.restify.http.client.Headers;
 
 public class EndpointResponse<T> {
 
-	private final EndpointResponseCode code;
+	private final StatusCode statusCode;
 	private final Headers headers;
 	private final T body;
 
-	public EndpointResponse(EndpointResponseCode code, Headers headers, T body) {
-		this.code = code;
+	public EndpointResponse(StatusCode statusCode, Headers headers, T body) {
+		this.statusCode = statusCode;
 		this.headers = headers;
 		this.body = body;
 	}
@@ -18,8 +18,8 @@ public class EndpointResponse<T> {
 		return headers;
 	}
 
-	public EndpointResponseCode code() {
-		return code;
+	public StatusCode code() {
+		return statusCode;
 	}
 
 	public T body() {
@@ -33,7 +33,7 @@ public class EndpointResponse<T> {
 		report
 			.append("EndpointResponse: [")
 				.append("HTTP Status code: ")
-					.append(code)
+					.append(statusCode)
 				.append(", ")
 				.append("Headers: ")
 					.append(headers)
@@ -45,7 +45,7 @@ public class EndpointResponse<T> {
 		return report.toString();
 	}
 
-	public static <T> EndpointResponse<T> empty(EndpointResponseCode code, Headers headers) {
-		return new EndpointResponse<T>(code, headers, null);
+	public static <T> EndpointResponse<T> empty(StatusCode statusCode, Headers headers) {
+		return new EndpointResponse<T>(statusCode, headers, null);
 	}
 }

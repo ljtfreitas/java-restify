@@ -10,7 +10,7 @@ import com.restify.http.RestifyHttpException;
 import com.restify.http.client.Headers;
 import com.restify.http.client.request.EndpointRequest;
 import com.restify.http.client.request.HttpClientRequest;
-import com.restify.http.client.response.EndpointResponseCode;
+import com.restify.http.client.response.StatusCode;
 import com.restify.http.client.response.HttpResponseMessage;
 
 import okhttp3.MediaType;
@@ -75,14 +75,14 @@ public class OkHttpClientRequest implements HttpClientRequest {
 	}
 
 	private OkHttpClientResponse responseOf(Response response) {
-		EndpointResponseCode code = EndpointResponseCode.of(response.code());
+		StatusCode statusCode = StatusCode.of(response.code());
 
 		Headers headers = new Headers();
 		response.headers().names().forEach(name -> headers.put(name, response.headers(name)));
 
 		InputStream stream = response.body().byteStream();
 
-		return new OkHttpClientResponse(code, headers, stream, response);
+		return new OkHttpClientResponse(statusCode, headers, stream, response);
 	}
 
 }

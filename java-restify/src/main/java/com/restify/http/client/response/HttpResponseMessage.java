@@ -7,11 +7,11 @@ import com.restify.http.client.Headers;
 
 public interface HttpResponseMessage extends Closeable {
 
-	public EndpointResponseCode code();
+	public StatusCode code();
 
 	public Headers headers();
 
 	public InputStream body();
 
-	public boolean readable();
+	public boolean isReadable();
 }

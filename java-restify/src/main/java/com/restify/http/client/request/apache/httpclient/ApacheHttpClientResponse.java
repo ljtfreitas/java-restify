@@ -10,16 +10,16 @@ import org.apache.http.util.EntityUtils;
 
 import com.restify.http.client.Headers;
 import com.restify.http.client.response.BaseHttpResponseMessage;
-import com.restify.http.client.response.EndpointResponseCode;
+import com.restify.http.client.response.StatusCode;
 
 class ApacheHttpClientResponse extends BaseHttpResponseMessage {
 
 	private final HttpEntity entity;
 	private final HttpResponse httpResponse;
 
-	ApacheHttpClientResponse(EndpointResponseCode code, Headers headers, InputStream body, 
+	ApacheHttpClientResponse(StatusCode statusCode, Headers headers, InputStream body,
 			HttpEntity entity, HttpResponse httpResponse) {
-		super(code, headers, body);
+		super(statusCode, headers, body);
 		this.entity = entity;
 		this.httpResponse = httpResponse;
 	}

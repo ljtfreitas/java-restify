@@ -6,13 +6,13 @@ import org.springframework.http.ResponseEntity;
 
 import com.restify.http.client.Headers;
 import com.restify.http.client.response.EndpointResponse;
-import com.restify.http.client.response.EndpointResponseCode;
+import com.restify.http.client.response.StatusCode;
 
 class EndpointResponseConverter implements Converter<ResponseEntity<Object>, EndpointResponse<Object>> {
 
 	@Override
 	public EndpointResponse<Object> convert(ResponseEntity<Object> source) {
-		EndpointResponseCode status = EndpointResponseCode.of(source.getStatusCodeValue());
+		StatusCode status = StatusCode.of(source.getStatusCodeValue());
 		Headers headers = headersOf(source.getHeaders());
 		return new EndpointResponse<>(status, headers, source.getBody());
 	}

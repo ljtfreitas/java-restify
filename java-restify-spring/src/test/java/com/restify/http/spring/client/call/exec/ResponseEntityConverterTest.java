@@ -12,7 +12,7 @@ import org.springframework.http.ResponseEntity;
 
 import com.restify.http.client.Headers;
 import com.restify.http.client.response.EndpointResponse;
-import com.restify.http.client.response.EndpointResponseCode;
+import com.restify.http.client.response.StatusCode;
 
 public class ResponseEntityConverterTest {
 
@@ -26,7 +26,7 @@ public class ResponseEntityConverterTest {
 		headers.put("Content-Type", MediaType.TEXT_PLAIN_VALUE);
 		headers.put("X-Header-Whatever", "whatever");
 
-		endpointResponse = new EndpointResponse<>(EndpointResponseCode.ok(), headers, "expected result");
+		endpointResponse = new EndpointResponse<>(StatusCode.ok(), headers, "expected result");
 	}
 
 	@Test

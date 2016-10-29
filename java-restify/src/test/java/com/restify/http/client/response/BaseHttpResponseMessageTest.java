@@ -16,43 +16,43 @@ public class BaseHttpResponseMessageTest {
 	@SuppressWarnings("resource")
 	@Test
 	public void shouldBeReadableWhenStatusCodeIsSuccess() {
-		BaseHttpResponseMessage httpResponseMessage = new StubHttpResponseMessage(EndpointResponseCode.ok());
-		assertTrue(httpResponseMessage.readable());
+		BaseHttpResponseMessage httpResponseMessage = new StubHttpResponseMessage(StatusCode.ok());
+		assertTrue(httpResponseMessage.isReadable());
 	}
 
 	@SuppressWarnings("resource")
 	@Test
 	public void shouldBeReadableWhenStatusCodeIsServerError() {
-		BaseHttpResponseMessage httpResponseMessage = new StubHttpResponseMessage(EndpointResponseCode.internalServerError());
-		assertTrue(httpResponseMessage.readable());
+		BaseHttpResponseMessage httpResponseMessage = new StubHttpResponseMessage(StatusCode.internalServerError());
+		assertTrue(httpResponseMessage.isReadable());
 	}
 
 	@SuppressWarnings("resource")
 	@Test
 	public void shouldBeReadableWhenStatusCodeIsClientError() {
-		BaseHttpResponseMessage httpResponseMessage = new StubHttpResponseMessage(EndpointResponseCode.notFound());
-		assertTrue(httpResponseMessage.readable());
+		BaseHttpResponseMessage httpResponseMessage = new StubHttpResponseMessage(StatusCode.notFound());
+		assertTrue(httpResponseMessage.isReadable());
 	}
 
 	@SuppressWarnings("resource")
 	@Test
 	public void shouldNotBeReadableWhenStatusCodeIsNoContent() {
-		BaseHttpResponseMessage httpResponseMessage = new StubHttpResponseMessage(EndpointResponseCode.noContent());
-		assertFalse(httpResponseMessage.readable());
+		BaseHttpResponseMessage httpResponseMessage = new StubHttpResponseMessage(StatusCode.noContent());
+		assertFalse(httpResponseMessage.isReadable());
 	}
 
 	@SuppressWarnings("resource")
 	@Test
 	public void shouldNotBeReadableWhenStatusCodeIsInformational() {
-		BaseHttpResponseMessage httpResponseMessage = new StubHttpResponseMessage(EndpointResponseCode.contine());
-		assertFalse(httpResponseMessage.readable());
+		BaseHttpResponseMessage httpResponseMessage = new StubHttpResponseMessage(StatusCode.contine());
+		assertFalse(httpResponseMessage.isReadable());
 	}
 
 	@SuppressWarnings("resource")
 	@Test
 	public void shouldNotBeReadableWhenStatusCodeIsNotModified() {
-		BaseHttpResponseMessage httpResponseMessage = new StubHttpResponseMessage(EndpointResponseCode.notModified());
-		assertFalse(httpResponseMessage.readable());
+		BaseHttpResponseMessage httpResponseMessage = new StubHttpResponseMessage(StatusCode.notModified());
+		assertFalse(httpResponseMessage.isReadable());
 	}
 
 	@SuppressWarnings("resource")
@@ -60,18 +60,18 @@ public class BaseHttpResponseMessageTest {
 	public void shouldNotBeReadableWhenContentLengthIsZero() {
 		Headers headers = new Headers(new Header(CONTENT_LENGTH, "0"));
 
-		BaseHttpResponseMessage httpResponseMessage = new StubHttpResponseMessage(EndpointResponseCode.ok(), headers);
-		assertFalse(httpResponseMessage.readable());
+		BaseHttpResponseMessage httpResponseMessage = new StubHttpResponseMessage(StatusCode.ok(), headers);
+		assertFalse(httpResponseMessage.isReadable());
 	}
 
 	private class StubHttpResponseMessage extends BaseHttpResponseMessage {
 
-		public StubHttpResponseMessage(EndpointResponseCode code) {
-			super(code, new Headers(), null);
+		public StubHttpResponseMessage(StatusCode statusCode) {
+			super(statusCode, new Headers(), null);
 		}
 
-		public StubHttpResponseMessage(EndpointResponseCode code, Headers headers) {
-			super(code, headers, null);
+		public StubHttpResponseMessage(StatusCode statusCode, Headers headers) {
+			super(statusCode, headers, null);
 		}
 
 		@Override

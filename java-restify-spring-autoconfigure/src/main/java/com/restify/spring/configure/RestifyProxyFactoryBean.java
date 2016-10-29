@@ -13,6 +13,7 @@ import com.restify.http.client.message.HttpMessageConverter;
 import com.restify.http.client.request.EndpointRequestExecutor;
 import com.restify.http.client.request.HttpClientRequestFactory;
 import com.restify.http.client.request.interceptor.EndpointRequestInterceptor;
+import com.restify.http.client.response.EndpointResponseErrorFallback;
 import com.restify.http.contract.metadata.RestifyContractReader;
 
 public class RestifyProxyFactoryBean implements FactoryBean<Object> {
@@ -35,6 +36,8 @@ public class RestifyProxyFactoryBean implements FactoryBean<Object> {
 
 	private Authentication authentication;
 
+	private EndpointResponseErrorFallback endpointResponseErrorFallback;
+
 	@Override
 	public Object getObject() throws Exception {
 		RestifyProxyBuilder builder = new RestifyProxyBuilder();
@@ -44,6 +47,7 @@ public class RestifyProxyFactoryBean implements FactoryBean<Object> {
 				.executor(endpointRequestExecutor)
 				.executables(executables())
 				.converters(converters())
+				.error(endpointResponseErrorFallback)
 				.interceptors(interceptors());
 
 		if (authentication != null) {
@@ -113,5 +117,9 @@ public class RestifyProxyFactoryBean implements FactoryBean<Object> {
 
 	public void setExecutables(Collection<EndpointCallExecutableFactory<?, ?>> executables) {
 		this.executables = executables;
+	}
+
+	public void setEndpointResponseErrorFallback(EndpointResponseErrorFallback endpointResponseErrorFallback) {
+		this.endpointResponseErrorFallback = endpointResponseErrorFallback;
 	}
 }

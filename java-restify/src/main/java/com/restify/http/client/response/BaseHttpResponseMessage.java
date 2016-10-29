@@ -8,19 +8,19 @@ import com.restify.http.client.Headers;
 
 public abstract class BaseHttpResponseMessage implements HttpResponseMessage {
 
-	private final EndpointResponseCode code;
+	private final StatusCode statusCode;
 	private final Headers headers;
 	private final InputStream body;
 
-	protected BaseHttpResponseMessage(EndpointResponseCode code, Headers headers, InputStream body) {
-		this.code = code;
+	protected BaseHttpResponseMessage(StatusCode statusCode, Headers headers, InputStream body) {
+		this.statusCode = statusCode;
 		this.headers = headers;
 		this.body = body;
 	}
 	
 	@Override
-	public EndpointResponseCode code() {
-		return code;
+	public StatusCode code() {
+		return statusCode;
 	}
 	
 	@Override
@@ -34,12 +34,12 @@ public abstract class BaseHttpResponseMessage implements HttpResponseMessage {
 	}
 	
 	@Override
-	public boolean readable() {
-		return readableStatus() && hasContentLength();
+	public boolean isReadable() {
+		return isReadableStatus() && hasContentLength();
 	}
 	
-	private boolean readableStatus() {
-		return !(code.isInformational() || code.isNoContent() || code.isNotModified());
+	private boolean isReadableStatus() {
+		return !(statusCode.isInformational() || statusCode.isNoContent() || statusCode.isNotModified());
 	}
 
 	private boolean hasContentLength() {

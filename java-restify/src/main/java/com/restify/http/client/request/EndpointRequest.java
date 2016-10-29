@@ -78,4 +78,23 @@ public class EndpointRequest {
 			throw new RestifyHttpException(e);
 		}
 	}
+
+	@Override
+	public String toString() {
+		StringBuilder report = new StringBuilder();
+
+		report
+			.append("EndpointRequest: [")
+				.append("URI: ")
+					.append(endpoint)
+				.append(", ")
+				.append("HTTP Method: ")
+					.append(method)
+				.append(", ")
+				.append("Body: ")
+					.append(body)
+			.append("]");
+
+		return report.toString();
+	}
 }

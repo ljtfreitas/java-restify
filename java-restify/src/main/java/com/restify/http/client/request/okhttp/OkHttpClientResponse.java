@@ -5,7 +5,7 @@ import java.io.InputStream;
 
 import com.restify.http.client.Headers;
 import com.restify.http.client.response.BaseHttpResponseMessage;
-import com.restify.http.client.response.EndpointResponseCode;
+import com.restify.http.client.response.StatusCode;
 
 import okhttp3.Response;
 
@@ -13,8 +13,8 @@ class OkHttpClientResponse extends BaseHttpResponseMessage {
 
 	private final Response response;
 
-	OkHttpClientResponse(EndpointResponseCode code, Headers headers, InputStream body, Response response) {
-		super(code, headers, body);
+	OkHttpClientResponse(StatusCode statusCode, Headers headers, InputStream body, Response response) {
+		super(statusCode, headers, body);
 		this.response = response;
 	}
 

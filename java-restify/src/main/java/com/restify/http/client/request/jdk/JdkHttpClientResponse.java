@@ -6,14 +6,14 @@ import java.net.HttpURLConnection;
 
 import com.restify.http.client.Headers;
 import com.restify.http.client.response.BaseHttpResponseMessage;
-import com.restify.http.client.response.EndpointResponseCode;
+import com.restify.http.client.response.StatusCode;
 
 class JdkHttpClientResponse extends BaseHttpResponseMessage {
 
 	private final HttpURLConnection connection;
 
-	JdkHttpClientResponse(EndpointResponseCode code, Headers headers, InputStream body, HttpURLConnection connection) {
-		super(code, headers, body);
+	JdkHttpClientResponse(StatusCode statusCode, Headers headers, InputStream body, HttpURLConnection connection) {
+		super(statusCode, headers, body);
 		this.connection = connection;
 	}
 
