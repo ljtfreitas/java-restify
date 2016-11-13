@@ -32,6 +32,10 @@ public class JavaType {
 		return rawClassType().equals(classType);
 	}
 
+	public boolean isAssignableFrom(Class<?> classType) {
+		return rawClassType().isAssignableFrom(classType);
+	}
+
 	public boolean parameterized() {
 		return type instanceof ParameterizedType;
 	}

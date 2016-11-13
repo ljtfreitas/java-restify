@@ -58,7 +58,8 @@ class RestifyConfigurationRegistrar implements ImportBeanDefinitionRegistrar, Be
 
 		RestifyProxyBeanBuilder builder = new RestifyProxyBeanBuilder()
 				.objectType(type.objectType())
-					.endpoint(endpoint);
+					.endpoint(endpoint)
+						.asyncExecutorServiceName("restifyAsyncExecutorService");
 
 		registry.registerBeanDefinition(type.name(), builder.build());
 

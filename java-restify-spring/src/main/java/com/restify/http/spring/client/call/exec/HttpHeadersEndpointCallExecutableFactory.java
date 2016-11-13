@@ -31,7 +31,7 @@ public class HttpHeadersEndpointCallExecutableFactory implements EndpointCallExe
 
 	@Override
 	public EndpointCallExecutable<HttpHeaders, EndpointResponse<Object>> create(EndpointMethod endpointMethod) {
-		return new HttpHeadersEndpointCallExecutable(JavaType.of(new SimpleParameterizedType(EndpointResponse.class, null, Object.class)));
+		return new HttpHeadersEndpointCallExecutable(JavaType.of(new SimpleParameterizedType(EndpointResponse.class, null, Void.class)));
 	}
 
 	private class HttpHeadersEndpointCallExecutable implements EndpointCallExecutable<HttpHeaders, EndpointResponse<Object>> {
@@ -40,7 +40,6 @@ public class HttpHeadersEndpointCallExecutableFactory implements EndpointCallExe
 
 		private HttpHeadersEndpointCallExecutable(JavaType returnType) {
 			this.returnType = returnType;
-
 		}
 
 		@Override
@@ -49,7 +48,7 @@ public class HttpHeadersEndpointCallExecutableFactory implements EndpointCallExe
 		}
 
 		@Override
-		public HttpHeaders execute(EndpointCall<EndpointResponse<Object>> call) {
+		public HttpHeaders execute(EndpointCall<EndpointResponse<Object>> call, Object[] args) {
 			EndpointResponse<Object> response = call.execute();
 			return endpointResponseConverter.convert(response).getHeaders();
 		}

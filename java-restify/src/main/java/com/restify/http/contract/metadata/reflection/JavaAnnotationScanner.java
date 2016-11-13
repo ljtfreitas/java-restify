@@ -13,6 +13,13 @@ public class JavaAnnotationScanner {
 		this.javaAnnotatedElement = javaAnnotatedElement;
 	}
 
+	public <T extends Annotation> Annotation with(Class<T> javaAnnotationType) {
+		return Arrays.stream(javaAnnotatedElement.getAnnotations())
+				.filter(a -> a.annotationType().isAnnotationPresent(javaAnnotationType))
+					.findFirst()
+						.orElse(null);
+	}
+
 	public <T extends Annotation> T scan(Class<T> javaAnnotationType) {
 		return doScan(javaAnnotationType);
 	}

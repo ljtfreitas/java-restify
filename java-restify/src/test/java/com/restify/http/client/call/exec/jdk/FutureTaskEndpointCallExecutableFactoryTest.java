@@ -38,7 +38,7 @@ public class FutureTaskEndpointCallExecutableFactoryTest {
 
 		String result = "future task result";
 
-		FutureTask<String> future = executable.execute(() -> result);
+		FutureTask<String> future = executable.execute(() -> result, null);
 
 		assertEquals(result, future.get());
 		assertEquals(JavaType.of(String.class), executable.returnType());

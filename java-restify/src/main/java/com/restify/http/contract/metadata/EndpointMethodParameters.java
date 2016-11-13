@@ -21,19 +21,30 @@ public class EndpointMethodParameters {
 	}
 
 	public Optional<EndpointMethodParameter> ofBody() {
-		return parameters.values().stream().filter(p -> p.ofBody()).findFirst();
+		return parameters.values().stream().filter(p -> p.body()).findFirst();
 	}
 
 	public Collection<EndpointMethodParameter> ofQuery() {
-		return parameters.values().stream().filter(p -> p.ofQuery())
+		return parameters.values().stream().filter(p -> p.query())
 				.collect(Collectors.toList());
 	}
 
-	public void put(EndpointMethodParameter parameter) {
-		if (parameter.ofBody()) {
-			isFalse(parameters.values().stream().anyMatch(EndpointMethodParameter::ofBody), "Only one parameter annotated with @BodyParameter is allowed.");
-		}
-		parameters.put(parameter.position(), parameter);
+	public Collection<EndpointMethodParameter> callbacks() {
+		return parameters.values().stream().filter(p -> p.callback())
+				.collect(Collectors.toList());
 	}
 
+	public Collection<EndpointMethodParameter> callbacks(Class<?> callbackClassType) {
+		return parameters.values().stream()
+				.filter(p -> p.callback() && callbackClassType.isAssignableFrom(p.javaType().classType()))
+					.collect(Collectors.toList());
+	}
+
+	public void put(EndpointMethodParameter parameter) {
+		if (parameter.body()) {
+			isFalse(parameters.values().stream().anyMatch(EndpointMethodParameter::body), "Only one parameter annotated with @BodyParameter is allowed.");
+		}
+
+		parameters.put(parameter.position(), parameter);
+	}
 }

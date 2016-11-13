@@ -37,7 +37,7 @@ public class OptionalEndpointCallExecutableFactoryTest {
 
 		String result = "result";
 
-		Optional<String> future = executable.execute(() -> result);
+		Optional<String> future = executable.execute(() -> result, null);
 
 		assertEquals(result, future.get());
 		assertEquals(JavaType.of(String.class), executable.returnType());

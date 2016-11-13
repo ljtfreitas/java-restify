@@ -35,16 +35,14 @@ public class FutureTaskEndpointCallExecutableFactory<T> implements EndpointCallE
 
 		Type responseType = type.parameterized() ? type.as(ParameterizedType.class).getActualTypeArguments()[0] : Object.class;
 
-		return new FutureTaskEndpointMethodExecutable(executorService, JavaType.of(responseType));
+		return new FutureTaskEndpointCallExecutable(JavaType.of(responseType));
 	}
 
-	private class FutureTaskEndpointMethodExecutable implements EndpointCallExecutable<FutureTask<T>, T> {
+	private class FutureTaskEndpointCallExecutable implements EndpointCallExecutable<FutureTask<T>, T> {
 
-		private final ExecutorService executorService;
 		private final JavaType type;
 
-		private FutureTaskEndpointMethodExecutable(ExecutorService executorService, JavaType type) {
-			this.executorService = executorService;
+		private FutureTaskEndpointCallExecutable(JavaType type) {
 			this.type = type;
 		}
 
@@ -54,7 +52,7 @@ public class FutureTaskEndpointCallExecutableFactory<T> implements EndpointCallE
 		}
 
 		@Override
-		public FutureTask<T> execute(EndpointCall<T> call) {
+		public FutureTask<T> execute(EndpointCall<T> call, Object[] args) {
 			FutureTask<T> task = new FutureTask<T>(() -> call.execute());
 			executorService.submit(task);
 			return task;

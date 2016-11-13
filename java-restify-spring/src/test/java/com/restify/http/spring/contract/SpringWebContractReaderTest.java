@@ -39,7 +39,7 @@ import com.restify.http.contract.metadata.reflection.SimpleWildcardType;
 import com.restify.http.spring.contract.metadata.SpringDynamicParameterExpressionResolver;
 
 @RunWith(MockitoJUnitRunner.class)
-public class SpringMvcContractReaderTest {
+public class SpringWebContractReaderTest {
 
 	private EndpointTarget myApiTypeTarget;
 
@@ -53,7 +53,7 @@ public class SpringMvcContractReaderTest {
 	private SpringDynamicParameterExpressionResolver expressionResolverMock;
 
 	@InjectMocks
-	private SpringMvcContractReader springMvcContractReader;
+	private SpringWebContractReader springMvcContractReader;
 
 	@Before
 	public void setup() {
@@ -92,7 +92,7 @@ public class SpringMvcContractReaderTest {
 		assertTrue(parameter.isPresent());
 
 		assertEquals(0, parameter.get().position());
-		assertTrue(parameter.get().ofPath());
+		assertTrue(parameter.get().path());
 	}
 
 	@Test
@@ -107,17 +107,17 @@ public class SpringMvcContractReaderTest {
 		Optional<EndpointMethodParameter> pathParameter = endpointMethod.parameters().get(0);
 		assertTrue(pathParameter.isPresent());
 		assertEquals("path", pathParameter.get().name());
-		assertTrue(pathParameter.get().ofPath());
+		assertTrue(pathParameter.get().path());
 
 		Optional<EndpointMethodParameter> headerParameter = endpointMethod.parameters().get(1);
 		assertTrue(headerParameter.isPresent());
 		assertEquals("contentType", headerParameter.get().name());
-		assertTrue(headerParameter.get().ofHeader());
+		assertTrue(headerParameter.get().header());
 
 		Optional<EndpointMethodParameter> bodyParameter = endpointMethod.parameters().get(2);
 		assertTrue(bodyParameter.isPresent());
 		assertEquals("body", bodyParameter.get().name());
-		assertTrue(bodyParameter.get().ofBody());
+		assertTrue(bodyParameter.get().body());
 	}
 
 	@Test
@@ -168,12 +168,12 @@ public class SpringMvcContractReaderTest {
 		Optional<EndpointMethodParameter> pathParameter = endpointMethod.parameters().get(0);
 		assertTrue(pathParameter.isPresent());
 		assertEquals("customArgumentPath", pathParameter.get().name());
-		assertTrue(pathParameter.get().ofPath());
+		assertTrue(pathParameter.get().path());
 
 		Optional<EndpointMethodParameter> headerParameter = endpointMethod.parameters().get(1);
 		assertTrue(headerParameter.isPresent());
 		assertEquals("customArgumentContentType", headerParameter.get().name());
-		assertTrue(headerParameter.get().ofHeader());
+		assertTrue(headerParameter.get().header());
 	}
 
 	@Test
@@ -198,7 +198,7 @@ public class SpringMvcContractReaderTest {
 		Optional<EndpointMethodParameter> queryStringParameter = endpointMethod.parameters().get(0);
 		assertTrue(queryStringParameter.isPresent());
 		assertEquals("parameters", queryStringParameter.get().name());
-		assertTrue(queryStringParameter.get().ofQuery());
+		assertTrue(queryStringParameter.get().query());
 	}
 
 	@Test(expected = IllegalArgumentException.class)
@@ -363,10 +363,10 @@ public class SpringMvcContractReaderTest {
 	interface MyGenericApiType<T> {
 
 		@PostMapping("/create")
-		public void create(T type);
+		public void create(@RequestBody T type);
 
 		@GetMapping("/find")
-		public T find(int id);
+		public T find(@RequestParam int id);
 
 		@GetMapping("/all")
 		public Collection<T> all();

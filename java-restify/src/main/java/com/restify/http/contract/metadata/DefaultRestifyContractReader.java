@@ -1,9 +1,12 @@
 package com.restify.http.contract.metadata;
 
+import static com.restify.http.util.Preconditions.isTrue;
+
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.lang.reflect.Type;
 import java.util.Arrays;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -25,7 +28,7 @@ public class DefaultRestifyContractReader implements RestifyContractReader {
 
 		String endpointHttpMethod = javaMethodMetadata.httpMethod().value().toUpperCase();
 
-		EndpointMethodParameters parameters = endpointMethodParameters(javaMethod);
+		EndpointMethodParameters parameters = endpointMethodParameters(javaMethod, target);
 
 		EndpointHeaders headers = endpointMethodHeaders(javaTypeMetadata, javaMethodMetadata);
 
@@ -50,7 +53,7 @@ public class DefaultRestifyContractReader implements RestifyContractReader {
 		return (endpointMethodPath.startsWith("/") ? endpointMethodPath : "/" + endpointMethodPath);
 	}
 
-	private EndpointMethodParameters endpointMethodParameters(Method javaMethod) {
+	private EndpointMethodParameters endpointMethodParameters(Method javaMethod, EndpointTarget target) {
 		EndpointMethodParameters parameters = new EndpointMethodParameters();
 
 		Parameter[] javaMethodParameters = javaMethod.getParameters();
@@ -58,14 +61,21 @@ public class DefaultRestifyContractReader implements RestifyContractReader {
 		for (int position = 0; position < javaMethodParameters.length; position ++) {
 			Parameter javaMethodParameter = javaMethodParameters[position];
 
-			JavaMethodParameterMetadata javaMethodParameterMetadata = new JavaMethodParameterMetadata(javaMethodParameter);
+			JavaMethodParameterMetadata javaMethodParameterMetadata = new JavaMethodParameterMetadata(javaMethodParameter, target.type());
 
-			EndpointMethodParameterType type = javaMethodParameterMetadata.ofPath()? EndpointMethodParameterType.PATH :
-				javaMethodParameterMetadata.ofHeader()? EndpointMethodParameterType.HEADER :
-					javaMethodParameterMetadata.ofBody() ? EndpointMethodParameterType.BODY :
-						EndpointMethodParameterType.QUERY_STRING;
+			EndpointMethodParameterType type = javaMethodParameterMetadata.path()? EndpointMethodParameterType.PATH :
+				javaMethodParameterMetadata.header()? EndpointMethodParameterType.HEADER :
+					javaMethodParameterMetadata.body() ? EndpointMethodParameterType.BODY :
+						javaMethodParameterMetadata.query() ? EndpointMethodParameterType.QUERY_STRING :
+							EndpointMethodParameterType.ENDPOINT_CALLBACK;
 
-			EndpointMethodParameterSerializer serializer = serializerOf(javaMethodParameterMetadata);
+			if (type == EndpointMethodParameterType.ENDPOINT_CALLBACK) {
+				isTrue(parameters.callbacks(javaMethodParameterMetadata.javaType().classType()).isEmpty(),
+						"Only one @CallbackParameter of type [" + javaMethodParameterMetadata.javaType() + "] is allowed.");
+			}
+
+			EndpointMethodParameterSerializer serializer = Optional.ofNullable(javaMethodParameterMetadata.serializer())
+					.map(s -> serializerOf(javaMethodParameterMetadata)).orElse(null);
 
 			parameters.put(new EndpointMethodParameter(position, javaMethodParameterMetadata.name(), javaMethodParameterMetadata.javaType(), type, serializer));
 		}

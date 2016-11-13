@@ -23,14 +23,14 @@ public class CallableEndpointCallExecutableFactory<T> implements EndpointCallExe
 
 		Type responseType = type.parameterized() ? type.as(ParameterizedType.class).getActualTypeArguments()[0] : Object.class;
 
-		return new CallableFutureEndpointMethodExecutable(JavaType.of(responseType));
+		return new CallableEndpointCallExecutable(JavaType.of(responseType));
 	}
 
-	private class CallableFutureEndpointMethodExecutable implements EndpointCallExecutable<Callable<T>, T> {
+	private class CallableEndpointCallExecutable implements EndpointCallExecutable<Callable<T>, T> {
 
 		private final JavaType type;
 
-		private CallableFutureEndpointMethodExecutable(JavaType type) {
+		private CallableEndpointCallExecutable(JavaType type) {
 			this.type = type;
 		}
 
@@ -40,7 +40,7 @@ public class CallableEndpointCallExecutableFactory<T> implements EndpointCallExe
 		}
 
 		@Override
-		public Callable<T> execute(EndpointCall<T> call) {
+		public Callable<T> execute(EndpointCall<T> call, Object[] args) {
 			return () -> call.execute();
 		}
 	}

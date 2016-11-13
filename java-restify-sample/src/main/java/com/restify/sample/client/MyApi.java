@@ -1,11 +1,14 @@
 package com.restify.sample.client;
 
 import java.util.Optional;
+import java.util.function.BiConsumer;
 
 import com.restify.http.client.Headers;
 import com.restify.http.client.call.EndpointCall;
+import com.restify.http.client.request.async.EndpointCallCallback;
 import com.restify.http.client.response.EndpointResponse;
 import com.restify.http.contract.BodyParameter;
+import com.restify.http.contract.CallbackParameter;
 import com.restify.http.contract.Delete;
 import com.restify.http.contract.Get;
 import com.restify.http.contract.Head;
@@ -61,4 +64,12 @@ public interface MyApi {
 	@Path("/resource-not-found")
 	@Get
 	public Optional<String> optional();
+
+	@Path("/{type}")
+	@Get
+	public void async(@PathParameter String type, @CallbackParameter EndpointCallCallback<MyApiResponse> callback);
+
+	@Path("/{type}")
+	@Get
+	public void asyncWithConsumerCallback(@PathParameter String type, @CallbackParameter BiConsumer<MyApiResponse, Throwable> callback);
 }

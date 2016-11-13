@@ -39,7 +39,7 @@ public class ListenableFutureTaskEndpointCallExecutableFactoryTest {
 
 		String result = "future result";
 
-		ListenableFuture<String> future = executable.execute(() -> result);
+		ListenableFuture<String> future = executable.execute(() -> result, null);
 
 		assertEquals(result, future.get());
 		assertEquals(JavaType.of(String.class), executable.returnType());

@@ -2,11 +2,12 @@ package com.restify.http.contract.metadata.reflection;
 
 import static com.restify.http.util.Preconditions.isTrue;
 
-import java.lang.reflect.Type;
+import java.lang.annotation.Annotation;
 import java.util.Optional;
 import java.util.stream.Stream;
 
 import com.restify.http.contract.BodyParameter;
+import com.restify.http.contract.CallbackParameter;
 import com.restify.http.contract.HeaderParameter;
 import com.restify.http.contract.Parameter;
 import com.restify.http.contract.PathParameter;
@@ -17,23 +18,23 @@ import com.restify.http.contract.metadata.SimpleEndpointMethodParameterSerialize
 
 public class JavaMethodParameterMetadata {
 
-	private final java.lang.reflect.Parameter javaMethodParameter;
+	private final JavaType type;
 	private final String name;
-	private final PathParameter pathParameter;
-	private final HeaderParameter headerParameter;
-	private final BodyParameter bodyParameter;
-	private final QueryParameter queryParameter;
-	private final QueryParameters queryParameters;
+	private final Annotation annotationParameter;
 	private final Class<? extends EndpointMethodParameterSerializer> serializerType;
 
 	public JavaMethodParameterMetadata(java.lang.reflect.Parameter javaMethodParameter) {
-		this.javaMethodParameter = javaMethodParameter;
+		this(javaMethodParameter, javaMethodParameter.getDeclaringExecutable().getDeclaringClass());
+	}
 
-		this.pathParameter = javaMethodParameter.getAnnotation(PathParameter.class);
-		this.headerParameter = javaMethodParameter.getAnnotation(HeaderParameter.class);
-		this.bodyParameter = javaMethodParameter.getAnnotation(BodyParameter.class);
-		this.queryParameter = javaMethodParameter.getAnnotation(QueryParameter.class);
-		this.queryParameters = javaMethodParameter.getAnnotation(QueryParameters.class);
+	public JavaMethodParameterMetadata(java.lang.reflect.Parameter javaMethodParameter, Class<?> targetClassType) {
+		this.type = JavaType.of(new JavaTypeResolver(targetClassType).parameterizedTypeOf(javaMethodParameter));
+
+		PathParameter pathParameter = javaMethodParameter.getAnnotation(PathParameter.class);
+		HeaderParameter headerParameter = javaMethodParameter.getAnnotation(HeaderParameter.class);
+		QueryParameter queryParameter = javaMethodParameter.getAnnotation(QueryParameter.class);
+		QueryParameters queryParameters = javaMethodParameter.getAnnotation(QueryParameters.class);
+		CallbackParameter callbackParameter = javaMethodParameter.getAnnotation(CallbackParameter.class);
 
 		isTrue(Stream.of(javaMethodParameter.getAnnotations())
 				.filter(a -> a.annotationType().isAnnotationPresent(Parameter.class))
@@ -51,32 +52,38 @@ public class JavaMethodParameterMetadata {
 		this.serializerType = pathParameter != null ? pathParameter.serializer()
 				: queryParameter != null ? queryParameter.serializer()
 						: queryParameters != null ? queryParameters.serializer()
-								: SimpleEndpointMethodParameterSerializer.class;
+								: callbackParameter != null ? null
+										: SimpleEndpointMethodParameterSerializer.class;
+
+		this.annotationParameter = new JavaAnnotationScanner(javaMethodParameter).with(Parameter.class);
 	}
 
 	public String name() {
 		return name;
 	}
 
-	public Type javaType() {
-		return new JavaTypeResolver(javaMethodParameter.getDeclaringExecutable().getDeclaringClass())
-				.parameterizedTypeOf(javaMethodParameter);
+	public JavaType javaType() {
+		return type;
 	}
 
-	public boolean ofPath() {
-		return pathParameter != null || (headerParameter == null && bodyParameter == null && queryParameters == null);
+	public boolean path() {
+		return annotationParameter instanceof PathParameter || annotationParameter == null;
 	}
 
-	public boolean ofBody() {
-		return bodyParameter != null;
+	public boolean body() {
+		return annotationParameter instanceof BodyParameter;
 	}
 
-	public boolean ofHeader() {
-		return headerParameter != null;
+	public boolean header() {
+		return annotationParameter instanceof HeaderParameter;
 	}
 
-	public boolean ofQuery() {
-		return queryParameters != null;
+	public boolean query() {
+		return annotationParameter instanceof QueryParameter || annotationParameter instanceof QueryParameters;
+	}
+
+	public boolean callback() {
+		return annotationParameter instanceof CallbackParameter;
 	}
 
 	public Class<? extends EndpointMethodParameterSerializer> serializer() {

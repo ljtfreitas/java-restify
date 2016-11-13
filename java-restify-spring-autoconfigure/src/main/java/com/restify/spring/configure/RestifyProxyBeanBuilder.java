@@ -22,6 +22,11 @@ public class RestifyProxyBeanBuilder {
 		return this;
 	}
 
+	public RestifyProxyBeanBuilder asyncExecutorServiceName(String executorServiceName) {
+		builder.addPropertyReference("asyncExecutorService", executorServiceName);
+		return this;
+	}
+
 	public BeanDefinition build() {
 		builder.setAutowireMode(AbstractBeanDefinition.AUTOWIRE_BY_TYPE);
 		return builder.getBeanDefinition();

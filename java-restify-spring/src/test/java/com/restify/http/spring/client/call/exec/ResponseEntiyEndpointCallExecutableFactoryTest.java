@@ -60,7 +60,7 @@ public class ResponseEntiyEndpointCallExecutableFactoryTest {
 	public void shouldCreateExecutableWithParameterizedEndpointResponseReturnTypeWhenEndpointMethodReturnTypeIsResponseEntity() throws Exception {
 		EndpointCallExecutable<ResponseEntity<String>, EndpointResponse<String>> executable = factory.create(new SimpleEndpointMethod(SomeType.class.getMethod("responseEntity")));
 
-		ResponseEntity<String> result = executable.execute(() -> endpointResponseMock);
+		ResponseEntity<String> result = executable.execute(() -> endpointResponseMock, null);
 
 		assertEquals(responseEntity, result);
 

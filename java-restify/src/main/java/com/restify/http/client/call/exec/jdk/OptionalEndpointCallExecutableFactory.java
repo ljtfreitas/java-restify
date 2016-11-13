@@ -23,14 +23,14 @@ public class OptionalEndpointCallExecutableFactory<T> implements EndpointCallExe
 
 		Type responseType = type.parameterized() ? type.as(ParameterizedType.class).getActualTypeArguments()[0] : Object.class;
 
-		return new OptionalEndpointMethodExecutable(JavaType.of(responseType));
+		return new OptionalEndpointCallExecutable(JavaType.of(responseType));
 	}
 
-	private class OptionalEndpointMethodExecutable implements EndpointCallExecutable<Optional<T>, T> {
+	private class OptionalEndpointCallExecutable implements EndpointCallExecutable<Optional<T>, T> {
 
 		private final JavaType returnType;
 
-		public OptionalEndpointMethodExecutable(JavaType returnType) {
+		public OptionalEndpointCallExecutable(JavaType returnType) {
 			this.returnType = returnType;
 		}
 
@@ -40,7 +40,7 @@ public class OptionalEndpointCallExecutableFactory<T> implements EndpointCallExe
 		}
 
 		@Override
-		public Optional<T> execute(EndpointCall<T> call) {
+		public Optional<T> execute(EndpointCall<T> call, Object[] args) {
 			return Optional.ofNullable(call.execute());
 		}
 	}

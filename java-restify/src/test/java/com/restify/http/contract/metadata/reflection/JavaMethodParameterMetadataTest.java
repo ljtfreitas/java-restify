@@ -25,7 +25,7 @@ public class JavaMethodParameterMetadataTest {
 		JavaMethodParameterMetadata javaMethodParameterMetadata = new JavaMethodParameterMetadata(javaMethod.getParameters()[0]);
 
 		assertEquals("path", javaMethodParameterMetadata.name());
-		assertTrue(javaMethodParameterMetadata.ofPath());
+		assertTrue(javaMethodParameterMetadata.path());
 	}
 
 	@Test
@@ -35,7 +35,7 @@ public class JavaMethodParameterMetadataTest {
 		JavaMethodParameterMetadata javaMethodParameterMetadata = new JavaMethodParameterMetadata(javaMethod.getParameters()[0]);
 
 		assertEquals("path", javaMethodParameterMetadata.name());
-		assertTrue(javaMethodParameterMetadata.ofPath());
+		assertTrue(javaMethodParameterMetadata.path());
 	}
 
 	@Test
@@ -45,7 +45,7 @@ public class JavaMethodParameterMetadataTest {
 		JavaMethodParameterMetadata javaMethodParameterMetadata = new JavaMethodParameterMetadata(javaMethod.getParameters()[0]);
 
 		assertEquals("otherName", javaMethodParameterMetadata.name());
-		assertTrue(javaMethodParameterMetadata.ofPath());
+		assertTrue(javaMethodParameterMetadata.path());
 	}
 
 	@Test
@@ -55,7 +55,7 @@ public class JavaMethodParameterMetadataTest {
 		JavaMethodParameterMetadata javaMethodParameterMetadata = new JavaMethodParameterMetadata(javaMethod.getParameters()[0]);
 
 		assertEquals("header", javaMethodParameterMetadata.name());
-		assertTrue(javaMethodParameterMetadata.ofHeader());
+		assertTrue(javaMethodParameterMetadata.header());
 	}
 
 	@Test
@@ -65,7 +65,7 @@ public class JavaMethodParameterMetadataTest {
 		JavaMethodParameterMetadata javaMethodParameterMetadata = new JavaMethodParameterMetadata(javaMethod.getParameters()[0]);
 
 		assertEquals("otherName", javaMethodParameterMetadata.name());
-		assertTrue(javaMethodParameterMetadata.ofHeader());
+		assertTrue(javaMethodParameterMetadata.header());
 	}
 
 	@Test
@@ -75,7 +75,7 @@ public class JavaMethodParameterMetadataTest {
 		JavaMethodParameterMetadata javaMethodParameterMetadata = new JavaMethodParameterMetadata(javaMethod.getParameters()[0]);
 
 		assertEquals("body", javaMethodParameterMetadata.name());
-		assertTrue(javaMethodParameterMetadata.ofBody());
+		assertTrue(javaMethodParameterMetadata.body());
 	}
 
 	@Test
@@ -85,7 +85,7 @@ public class JavaMethodParameterMetadataTest {
 		JavaMethodParameterMetadata javaMethodParameterMetadata = new JavaMethodParameterMetadata(javaMethod.getParameters()[0]);
 
 		assertEquals("parameters", javaMethodParameterMetadata.name());
-		assertTrue(javaMethodParameterMetadata.ofQuery());
+		assertTrue(javaMethodParameterMetadata.query());
 	}
 
 	@Test(expected = IllegalArgumentException.class)

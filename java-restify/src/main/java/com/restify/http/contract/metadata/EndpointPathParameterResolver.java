@@ -32,7 +32,7 @@ public class EndpointPathParameterResolver {
 			String name = match.group(1);
 
 			parameters.find(name)
-				.filter(p -> p.ofPath())
+				.filter(p -> p.path())
 					.ifPresent(p -> matcher.appendReplacement(builder, p.resolve(args[p.position()])));
 		}
 

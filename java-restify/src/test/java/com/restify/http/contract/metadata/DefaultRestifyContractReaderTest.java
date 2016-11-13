@@ -1,6 +1,7 @@
 package com.restify.http.contract.metadata;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
 import java.lang.reflect.Type;
@@ -12,7 +13,11 @@ import java.util.Optional;
 import org.junit.Before;
 import org.junit.Test;
 
+import com.restify.http.client.request.async.EndpointCallCallback;
+import com.restify.http.client.request.async.EndpointCallFailureCallback;
+import com.restify.http.client.request.async.EndpointCallSuccessCallback;
 import com.restify.http.contract.BodyParameter;
+import com.restify.http.contract.CallbackParameter;
 import com.restify.http.contract.Get;
 import com.restify.http.contract.Header;
 import com.restify.http.contract.HeaderParameter;
@@ -65,7 +70,7 @@ public class DefaultRestifyContractReaderTest {
 		assertTrue(parameter.isPresent());
 
 		assertEquals(0, parameter.get().position());
-		assertTrue(parameter.get().ofPath());
+		assertTrue(parameter.get().path());
 	}
 
 	@Test
@@ -80,17 +85,17 @@ public class DefaultRestifyContractReaderTest {
 		Optional<EndpointMethodParameter> pathParameter = endpointMethod.parameters().get(0);
 		assertTrue(pathParameter.isPresent());
 		assertEquals("path", pathParameter.get().name());
-		assertTrue(pathParameter.get().ofPath());
+		assertTrue(pathParameter.get().path());
 
 		Optional<EndpointMethodParameter> headerParameter = endpointMethod.parameters().get(1);
 		assertTrue(headerParameter.isPresent());
 		assertEquals("contentType", headerParameter.get().name());
-		assertTrue(headerParameter.get().ofHeader());
+		assertTrue(headerParameter.get().header());
 
 		Optional<EndpointMethodParameter> bodyParameter = endpointMethod.parameters().get(2);
 		assertTrue(bodyParameter.isPresent());
 		assertEquals("body", bodyParameter.get().name());
-		assertTrue(bodyParameter.get().ofBody());
+		assertTrue(bodyParameter.get().body());
 	}
 
 	@Test
@@ -137,12 +142,12 @@ public class DefaultRestifyContractReaderTest {
 		Optional<EndpointMethodParameter> pathParameter = endpointMethod.parameters().get(0);
 		assertTrue(pathParameter.isPresent());
 		assertEquals("customArgumentPath", pathParameter.get().name());
-		assertTrue(pathParameter.get().ofPath());
+		assertTrue(pathParameter.get().path());
 
 		Optional<EndpointMethodParameter> headerParameter = endpointMethod.parameters().get(1);
 		assertTrue(headerParameter.isPresent());
 		assertEquals("customArgumentContentType", headerParameter.get().name());
-		assertTrue(headerParameter.get().ofHeader());
+		assertTrue(headerParameter.get().header());
 	}
 
 	@Test
@@ -167,13 +172,63 @@ public class DefaultRestifyContractReaderTest {
 		Optional<EndpointMethodParameter> queryStringParameter = endpointMethod.parameters().get(0);
 		assertTrue(queryStringParameter.isPresent());
 		assertEquals("parameters", queryStringParameter.get().name());
-		assertTrue(queryStringParameter.get().ofQuery());
+		assertTrue(queryStringParameter.get().query());
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void shouldThrowExceptionWhenMethodHasMoreThanOneBodyParameter() throws Exception {
 		new DefaultRestifyContractReader().read(myApiTypeTarget,
 				MyApiType.class.getMethod("methodWithTwoBodyParameters", new Class[] { Object.class, Object.class }));
+	}
+
+	@Test
+	public void shouldCreateAsyncEndpointMethodWhenMethodHasOneCallback() throws Exception {
+		EndpointMethod endpointMethod = new DefaultRestifyContractReader().read(myApiTypeTarget,
+				MyApiType.class.getMethod("async", new Class[] { EndpointCallCallback.class }));
+
+		assertEquals("GET", endpointMethod.httpMethod());
+		assertEquals("http://my.api.com/async", endpointMethod.path());
+		assertTrue(endpointMethod.returnType().voidType());
+		assertTrue(endpointMethod.runnableAsync());
+
+		Optional<EndpointMethodParameter> callbackParameter = endpointMethod.parameters().get(0);
+		assertTrue(callbackParameter.isPresent());
+		assertEquals("callback", callbackParameter.get().name());
+		assertTrue(callbackParameter.get().callback());
+		assertEquals(new SimpleParameterizedType(EndpointCallCallback.class, null, String.class), callbackParameter.get().javaType().unwrap());
+
+		assertFalse(endpointMethod.parameters().callbacks().isEmpty());
+	}
+
+	@Test
+	public void shouldCreateAsyncEndpointMethodWhenMethodHasMultiplesCallbacks() throws Exception {
+		EndpointMethod endpointMethod = new DefaultRestifyContractReader().read(myApiTypeTarget,
+				MyApiType.class.getMethod("async", new Class[] { EndpointCallSuccessCallback.class, EndpointCallFailureCallback.class }));
+
+		assertEquals("GET", endpointMethod.httpMethod());
+		assertEquals("http://my.api.com/async", endpointMethod.path());
+		assertTrue(endpointMethod.returnType().voidType());
+		assertTrue(endpointMethod.runnableAsync());
+
+		Optional<EndpointMethodParameter> successCallbackParameter = endpointMethod.parameters().get(0);
+		assertTrue(successCallbackParameter.isPresent());
+		assertEquals("successCallback", successCallbackParameter.get().name());
+		assertTrue(successCallbackParameter.get().callback());
+		assertEquals(new SimpleParameterizedType(EndpointCallSuccessCallback.class, null, String.class), successCallbackParameter.get().javaType().unwrap());
+
+		Optional<EndpointMethodParameter> failureCallbackParameter = endpointMethod.parameters().get(1);
+		assertTrue(failureCallbackParameter.isPresent());
+		assertEquals("failureCallback", failureCallbackParameter.get().name());
+		assertTrue(failureCallbackParameter.get().callback());
+		assertEquals(EndpointCallFailureCallback.class, failureCallbackParameter.get().javaType().unwrap());
+
+		assertFalse(endpointMethod.parameters().callbacks().isEmpty());
+	}
+
+	@Test(expected = IllegalArgumentException.class)
+	public void shouldThrowExceptionWhenMethodHasMoreOneCallbackParameterOfSameType() throws Exception {
+		new DefaultRestifyContractReader().read(myApiTypeTarget,
+				MyApiType.class.getMethod("asyncWithTwoCallbacks", new Class[] { EndpointCallCallback.class, EndpointCallCallback.class }));
 	}
 
 	@Test
@@ -274,6 +329,25 @@ public class DefaultRestifyContractReaderTest {
 	}
 
 	@Test
+	public void shouldCreateAsyncEndpointMethodWhenMethodHasOneCallbackWithGenericType() throws Exception {
+		EndpointMethod endpointMethod = restifyContractReader.read(myGenericSpecificApiTarget,
+				MySpecificApi.class.getMethod("async", EndpointCallCallback.class));
+
+		assertEquals("http://my.model.api/async", endpointMethod.path());
+		assertEquals("GET", endpointMethod.httpMethod());
+		assertTrue(endpointMethod.returnType().voidType());
+		assertTrue(endpointMethod.runnableAsync());
+
+		Optional<EndpointMethodParameter> callbackParameter = endpointMethod.parameters().get(0);
+		assertTrue(callbackParameter.isPresent());
+		assertEquals("callback", callbackParameter.get().name());
+		assertTrue(callbackParameter.get().callback());
+		assertEquals(new SimpleParameterizedType(EndpointCallCallback.class, null, MyModel.class), callbackParameter.get().javaType().unwrap());
+
+		assertFalse(endpointMethod.parameters().callbacks().isEmpty());
+	}
+
+	@Test
 	public void shouldCreateEndpointMethodWhenTargetHasEndpointUrl() throws Exception {
 		EndpointMethod endpointMethod = restifyContractReader.read(myContextApiTarget,
 				MyContextApi.class.getMethod("method"));
@@ -321,6 +395,19 @@ public class DefaultRestifyContractReaderTest {
 		@Path("/twoBodyParameters")
 		@Get
 		public String methodWithTwoBodyParameters(@BodyParameter Object first, @BodyParameter Object second);
+
+		@Path("/async")
+		@Get
+		public void async(@CallbackParameter EndpointCallCallback<String> callback);
+
+		@Path("/async")
+		@Get
+		public void async(@CallbackParameter EndpointCallSuccessCallback<String> successCallback,
+				@CallbackParameter EndpointCallFailureCallback failureCallback);
+
+		@Path("/asyncWithTwoCallbacks")
+		@Get
+		public void asyncWithTwoCallbacks(@CallbackParameter EndpointCallCallback<String> first, @CallbackParameter EndpointCallCallback<String> second);
 	}
 
 	@Path("http://my.api.com")
@@ -367,6 +454,10 @@ public class DefaultRestifyContractReaderTest {
 		@Path("/any")
 		@Get
 		public Map<? extends Number, ? extends T> anyAsMap();
+
+		@Path("/async")
+		@Get
+		public void async(@CallbackParameter EndpointCallCallback<T> callback);
 	}
 
 	@Path("http://my.model.api")

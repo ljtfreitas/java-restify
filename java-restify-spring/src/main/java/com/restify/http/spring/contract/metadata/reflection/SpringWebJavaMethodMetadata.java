@@ -12,12 +12,12 @@ import org.springframework.web.bind.annotation.RequestMethod;
 
 import com.restify.http.contract.metadata.reflection.JavaTypeResolver;
 
-public class SpringMvcJavaMethodMetadata {
+public class SpringWebJavaMethodMetadata {
 
 	private final Method javaMethod;
-	private final SpringMvcRequestMappingMetadata mapping;
+	private final SpringWebRequestMappingMetadata mapping;
 
-	public SpringMvcJavaMethodMetadata(Method javaMethod) {
+	public SpringWebJavaMethodMetadata(Method javaMethod) {
 		this.javaMethod = javaMethod;
 
 		RequestMapping mapping = Optional.ofNullable(AnnotatedElementUtils.findMergedAnnotation(javaMethod, RequestMapping.class))
@@ -26,7 +26,7 @@ public class SpringMvcJavaMethodMetadata {
 		isTrue(mapping.value().length <= 1, "Only single path is allowed.");
 		isTrue(mapping.method().length == 1, "You must set the HTTP method (only one!) of your Java method [" + javaMethod + "].");
 
-		this.mapping = new SpringMvcRequestMappingMetadata(mapping);
+		this.mapping = new SpringWebRequestMappingMetadata(mapping);
 	}
 
 	public Optional<String> path() {

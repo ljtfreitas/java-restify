@@ -41,7 +41,7 @@ public class RunnableEndpointCallExecutableFactoryTest {
 	public void shouldCreateExecutableFromEndpointMethodWithRunnableReturnType() throws Exception {
 		EndpointCallExecutable<Runnable, String> executable = factory.create(new SimpleEndpointMethod(SomeType.class.getMethod("runnable")));
 
-		Runnable runnable = executable.execute(call);
+		Runnable runnable = executable.execute(call, null);
 
 		runnable.run();
 

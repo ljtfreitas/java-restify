@@ -30,7 +30,7 @@ public class DefaultEndpointCallExecutableFactory<M> implements EndpointCallExec
 		}
 
 		@Override
-		public M execute(EndpointCall<M> call) {
+		public M execute(EndpointCall<M> call, Object[] args) {
 			return call.execute();
 		}
 	}

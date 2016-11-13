@@ -38,7 +38,7 @@ public class CallableEndpointCallExecutableFactoryTest {
 
 		String result = "callable result";
 
-		Callable<String> callable = executable.execute(() -> result);
+		Callable<String> callable = executable.execute(() -> result, null);
 
 		assertEquals(result, callable.call());
 		assertEquals(JavaType.of(String.class), executable.returnType());

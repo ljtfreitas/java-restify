@@ -9,13 +9,13 @@ import java.util.Optional;
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 
-public class SpringMvcJavaTypeMetadata {
+public class SpringWebJavaTypeMetadata {
 
 	private final Class<?> javaType;
-	private final Optional<SpringMvcRequestMappingMetadata> mapping;
-	private final SpringMvcJavaTypeMetadata parent;
+	private final Optional<SpringWebRequestMappingMetadata> mapping;
+	private final SpringWebJavaTypeMetadata parent;
 
-	public SpringMvcJavaTypeMetadata(Class<?> javaType) {
+	public SpringWebJavaTypeMetadata(Class<?> javaType) {
 		isTrue(javaType.isInterface(), "Your type must be a Java interface.");
 		isTrue(javaType.getInterfaces().length <= 1, "Only single inheritance is supported.");
 
@@ -25,9 +25,9 @@ public class SpringMvcJavaTypeMetadata {
 			isTrue(mapping.method().length ==  0, "You must not set the HTTP method at the class level, only at the method level.");
 		}
 
-		this.mapping = Optional.ofNullable(mapping).map(m -> new SpringMvcRequestMappingMetadata(m));
+		this.mapping = Optional.ofNullable(mapping).map(m -> new SpringWebRequestMappingMetadata(m));
 		this.javaType = javaType;
-		this.parent = javaType.getInterfaces().length == 1 ? new SpringMvcJavaTypeMetadata(javaType.getInterfaces()[0]) : null;
+		this.parent = javaType.getInterfaces().length == 1 ? new SpringWebJavaTypeMetadata(javaType.getInterfaces()[0]) : null;
 	}
 
 	public Class<?> javaType() {

@@ -7,5 +7,5 @@ public interface EndpointCallExecutable<M, T> {
 
 	public JavaType returnType();
 
-	public M execute(EndpointCall<T> call);
+	public M execute(EndpointCall<T> call, Object[] args);
 }

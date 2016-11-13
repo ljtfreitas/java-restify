@@ -40,7 +40,7 @@ public class OptionalEndpointCallExecutableFactory<T> implements EndpointCallExe
 		}
 
 		@Override
-		public Optional<T> execute(EndpointCall<T> call) {
+		public Optional<T> execute(EndpointCall<T> call, Object[] args) {
 			return Optional.fromNullable(call.execute());
 		}
 	}

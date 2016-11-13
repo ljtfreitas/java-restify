@@ -3,6 +3,7 @@ package com.restify.spring.configure;
 import java.net.URL;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.concurrent.ExecutorService;
 
 import org.springframework.beans.factory.FactoryBean;
 
@@ -38,6 +39,8 @@ public class RestifyProxyFactoryBean implements FactoryBean<Object> {
 
 	private EndpointResponseErrorFallback endpointResponseErrorFallback;
 
+	private ExecutorService asyncExecutorService;
+
 	@Override
 	public Object getObject() throws Exception {
 		RestifyProxyBuilder builder = new RestifyProxyBuilder();
@@ -45,7 +48,10 @@ public class RestifyProxyFactoryBean implements FactoryBean<Object> {
 		builder.client(httpClientRequestFactory)
 				.contract(restifyContractReader)
 				.executor(endpointRequestExecutor)
-				.executables(executables())
+				.executables()
+					.add(executables())
+					.async(asyncExecutorService)
+					.and()
 				.converters(converters())
 				.error(endpointResponseErrorFallback)
 				.interceptors(interceptors());
@@ -121,5 +127,9 @@ public class RestifyProxyFactoryBean implements FactoryBean<Object> {
 
 	public void setEndpointResponseErrorFallback(EndpointResponseErrorFallback endpointResponseErrorFallback) {
 		this.endpointResponseErrorFallback = endpointResponseErrorFallback;
+	}
+
+	public void setAsyncExecutorService(ExecutorService asyncExecutorService) {
+		this.asyncExecutorService = asyncExecutorService;
 	}
 }

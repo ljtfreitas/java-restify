@@ -24,7 +24,7 @@ public class EndpointHeaderParameterResolver {
 			String name = match.group(1);
 
 			parameters.find(name)
-				.filter(p -> p.ofHeader())
+				.filter(p -> p.header())
 					.ifPresent(p -> matcher.appendReplacement(builder, p.resolve(args[p.position()])));
 		}
 

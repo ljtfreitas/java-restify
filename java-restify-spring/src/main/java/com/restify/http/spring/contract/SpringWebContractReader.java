@@ -1,5 +1,7 @@
 package com.restify.http.spring.contract;
 
+import static com.restify.http.util.Preconditions.nonNull;
+
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.lang.reflect.Type;
@@ -18,36 +20,36 @@ import com.restify.http.contract.metadata.EndpointMethodParameterSerializer;
 import com.restify.http.contract.metadata.EndpointMethodParameters;
 import com.restify.http.contract.metadata.EndpointTarget;
 import com.restify.http.contract.metadata.RestifyContractReader;
-import com.restify.http.spring.contract.metadata.SpringDynamicParameterExpressionResolver;
 import com.restify.http.spring.contract.metadata.SimpleSpringDynamicParameterExpressionResolver;
-import com.restify.http.spring.contract.metadata.reflection.SpringMvcJavaMethodMetadata;
-import com.restify.http.spring.contract.metadata.reflection.SpringMvcJavaMethodParameterMetadata;
-import com.restify.http.spring.contract.metadata.reflection.SpringMvcJavaTypeMetadata;
+import com.restify.http.spring.contract.metadata.SpringDynamicParameterExpressionResolver;
+import com.restify.http.spring.contract.metadata.reflection.SpringWebJavaMethodMetadata;
+import com.restify.http.spring.contract.metadata.reflection.SpringWebJavaMethodParameterMetadata;
+import com.restify.http.spring.contract.metadata.reflection.SpringWebJavaTypeMetadata;
 
-public class SpringMvcContractReader implements RestifyContractReader {
+public class SpringWebContractReader implements RestifyContractReader {
 
 	private final SpringDynamicParameterExpressionResolver resolver;
 
-	public SpringMvcContractReader() {
+	public SpringWebContractReader() {
 		this(new SimpleSpringDynamicParameterExpressionResolver());
 	}
 
-	public SpringMvcContractReader(SpringDynamicParameterExpressionResolver resolver) {
+	public SpringWebContractReader(SpringDynamicParameterExpressionResolver resolver) {
 		this.resolver = resolver;
 	}
 
 	@Override
 	public EndpointMethod read(EndpointTarget target, Method javaMethod) {
-		SpringMvcJavaTypeMetadata javaTypeMetadata = new SpringMvcJavaTypeMetadata(target.type());
+		SpringWebJavaTypeMetadata javaTypeMetadata = new SpringWebJavaTypeMetadata(target.type());
 
-		SpringMvcJavaMethodMetadata javaMethodMetadata = new SpringMvcJavaMethodMetadata(javaMethod);
+		SpringWebJavaMethodMetadata javaMethodMetadata = new SpringWebJavaMethodMetadata(javaMethod);
 
 		String endpointPath = resolver.resolve(endpointTarget(target) + endpointTypePath(javaTypeMetadata)
 				+ endpointMethodPath(javaMethodMetadata));
 
 		String endpointHttpMethod = javaMethodMetadata.httpMethod().name();
 
-		EndpointMethodParameters parameters = endpointMethodParameters(javaMethod);
+		EndpointMethodParameters parameters = endpointMethodParameters(javaMethod, target);
 
 		EndpointHeaders headers = endpointMethodHeaders(javaTypeMetadata, javaMethodMetadata);
 
@@ -60,19 +62,19 @@ public class SpringMvcContractReader implements RestifyContractReader {
 		return target.endpoint().orElse("");
 	}
 
-	private String endpointTypePath(SpringMvcJavaTypeMetadata javaTypeMetadata) {
+	private String endpointTypePath(SpringWebJavaTypeMetadata javaTypeMetadata) {
 		return Arrays.stream(javaTypeMetadata.paths())
 				.map(p -> p.endsWith("/") ? p.substring(0, p.length() - 1) : p)
 				.collect(Collectors.joining());
 	}
 
-	private String endpointMethodPath(SpringMvcJavaMethodMetadata javaMethodMetadata) {
+	private String endpointMethodPath(SpringWebJavaMethodMetadata javaMethodMetadata) {
 		String endpointMethodPath = javaMethodMetadata.path().orElse("");
 		return (endpointMethodPath.isEmpty() || endpointMethodPath.startsWith("/") ? endpointMethodPath
 				: "/" + endpointMethodPath);
 	}
 
-	private EndpointMethodParameters endpointMethodParameters(Method javaMethod) {
+	private EndpointMethodParameters endpointMethodParameters(Method javaMethod, EndpointTarget target) {
 		EndpointMethodParameters parameters = new EndpointMethodParameters();
 
 		Parameter[] javaMethodParameters = javaMethod.getParameters();
@@ -80,12 +82,14 @@ public class SpringMvcContractReader implements RestifyContractReader {
 		for (int position = 0; position < javaMethodParameters.length; position ++) {
 			Parameter javaMethodParameter = javaMethodParameters[position];
 
-			SpringMvcJavaMethodParameterMetadata javaMethodParameterMetadata = new SpringMvcJavaMethodParameterMetadata(javaMethodParameter);
+			SpringWebJavaMethodParameterMetadata javaMethodParameterMetadata = new SpringWebJavaMethodParameterMetadata(javaMethodParameter, target.type());
 
-			EndpointMethodParameterType type = javaMethodParameterMetadata.ofPath()? EndpointMethodParameterType.PATH :
-				javaMethodParameterMetadata.ofHeader()? EndpointMethodParameterType.HEADER :
-					javaMethodParameterMetadata.ofBody() ? EndpointMethodParameterType.BODY :
-						EndpointMethodParameterType.QUERY_STRING;
+			EndpointMethodParameterType type = nonNull(javaMethodParameterMetadata.path()? EndpointMethodParameterType.PATH :
+				javaMethodParameterMetadata.header()? EndpointMethodParameterType.HEADER :
+					javaMethodParameterMetadata.body() ? EndpointMethodParameterType.BODY :
+						javaMethodParameterMetadata.query() ? EndpointMethodParameterType.QUERY_STRING : null,
+								"The parameter [" + javaMethodParameterMetadata.name() + "] of method [" + javaMethod + "] "
+										+ "is not annotated with @PathVariable, @RequestHeader, @RequestBody or @RequestParam"); 
 
 			EndpointMethodParameterSerializer serializer = serializerOf(javaMethodParameterMetadata);
 
@@ -96,7 +100,7 @@ public class SpringMvcContractReader implements RestifyContractReader {
 		return parameters;
 	}
 
-	private EndpointMethodParameterSerializer serializerOf(SpringMvcJavaMethodParameterMetadata javaMethodParameterMetadata) {
+	private EndpointMethodParameterSerializer serializerOf(SpringWebJavaMethodParameterMetadata javaMethodParameterMetadata) {
 		try {
 			return javaMethodParameterMetadata.serializer().newInstance();
 		} catch (InstantiationException | IllegalAccessException e) {
@@ -104,8 +108,8 @@ public class SpringMvcContractReader implements RestifyContractReader {
 		}
 	}
 
-	private EndpointHeaders endpointMethodHeaders(SpringMvcJavaTypeMetadata javaTypeMetadata,
-			SpringMvcJavaMethodMetadata javaMethodMetadata) {
+	private EndpointHeaders endpointMethodHeaders(SpringWebJavaTypeMetadata javaTypeMetadata,
+			SpringWebJavaMethodMetadata javaMethodMetadata) {
 
 			Collection<EndpointHeader> headers =
 					Stream.concat(Arrays.stream(javaTypeMetadata.headers()), Arrays.stream(javaMethodMetadata.headers()))

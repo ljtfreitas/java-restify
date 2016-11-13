@@ -1,9 +1,12 @@
 package com.restify.sample.client;
 
 import java.util.Optional;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import com.restify.http.RestifyProxyBuilder;
 import com.restify.http.client.call.EndpointCall;
+import com.restify.http.client.request.async.EndpointCallCallback;
 import com.restify.http.client.response.EndpointResponse;
 import com.restify.http.contract.ContentType;
 import com.restify.http.contract.MultipartFile;
@@ -12,10 +15,15 @@ import com.restify.sample.api.MyApiResponse;
 
 public class MyApiClient {
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws Exception {
+		ExecutorService executor = Executors.newCachedThreadPool();
+
 		MyApi myApi = new RestifyProxyBuilder()
 				.error()
 					.emptyOnNotFound()
+				.executables()
+					.async(executor)
+					.and()
 				.target(MyApi.class, "http://localhost:8080")
 				.build();
 
@@ -49,5 +57,24 @@ public class MyApiClient {
 
 		Optional<String> optional = myApi.optional();
 		System.out.println("Optional: " + optional);
+
+		System.out.println("Start async method on thread " + Thread.currentThread());
+		myApi.async("xml", new EndpointCallCallback<MyApiResponse>() {
+
+			@Override
+			public void onFailure(Throwable throwable) {
+				System.err.println("Failure on thread: " + Thread.currentThread());
+				throwable.printStackTrace();
+			}
+
+			@Override
+			public void onSuccess(MyApiResponse response) {
+				System.out.println("Response: " + response + " (on thread " + Thread.currentThread() + ")");
+			}
+		});
+
+		myApi.asyncWithConsumerCallback("json", (r, ex) -> System.out.println("Response: " + r + " (on thread " + Thread.currentThread() + ")")); 
+
+		executor.shutdown();
 	}
 }

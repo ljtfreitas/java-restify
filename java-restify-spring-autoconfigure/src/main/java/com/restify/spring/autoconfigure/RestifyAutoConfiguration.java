@@ -1,10 +1,15 @@
 package com.restify.spring.autoconfigure;
 
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.boot.autoconfigure.AutoConfigurationPackages;
@@ -18,16 +23,26 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
 import org.springframework.core.env.Environment;
+import org.springframework.core.task.AsyncListenableTaskExecutor;
+import org.springframework.core.task.AsyncTaskExecutor;
+import org.springframework.core.task.SimpleAsyncTaskExecutor;
+import org.springframework.core.task.TaskExecutor;
+import org.springframework.core.task.support.ExecutorServiceAdapter;
 import org.springframework.core.type.AnnotationMetadata;
 
 import com.restify.http.client.request.EndpointRequestExecutor;
 import com.restify.http.client.request.HttpClientRequestFactory;
 import com.restify.http.client.request.jdk.JdkHttpClientRequestFactory;
 import com.restify.http.contract.metadata.RestifyContractReader;
+import com.restify.http.spring.client.call.exec.AsyncResultEndpointCallExecutableFactory;
+import com.restify.http.spring.client.call.exec.DeferredResultEndpointCallExecutableFactory;
 import com.restify.http.spring.client.call.exec.HttpHeadersEndpointCallExecutableFactory;
+import com.restify.http.spring.client.call.exec.ListenableFutureEndpointCallExecutableFactory;
+import com.restify.http.spring.client.call.exec.ListenableFutureTaskEndpointCallExecutableFactory;
 import com.restify.http.spring.client.call.exec.ResponseEntityEndpointCallExecutableFactory;
+import com.restify.http.spring.client.call.exec.WebAsyncTaskEndpointCallExecutableFactory;
 import com.restify.http.spring.client.request.RestOperationsEndpointRequestExecutor;
-import com.restify.http.spring.contract.SpringMvcContractReader;
+import com.restify.http.spring.contract.SpringWebContractReader;
 import com.restify.http.spring.contract.metadata.SpelDynamicParameterExpressionResolver;
 import com.restify.http.spring.contract.metadata.SpringDynamicParameterExpressionResolver;
 import com.restify.spring.autoconfigure.RestifyAutoConfiguration.RestifyAutoConfigurationRegistrar;
@@ -44,7 +59,7 @@ import com.restify.spring.configure.RestifyableTypeScanner;
 public class RestifyAutoConfiguration {
 
 	@Configuration
-	protected static class RestifySpringMvcConfiguration {
+	protected static class RestifySpringConfiguration {
 
 		@ConditionalOnMissingBean
 		@Bean
@@ -55,7 +70,7 @@ public class RestifyAutoConfiguration {
 		@ConditionalOnMissingBean
 		@Bean
 		public RestifyContractReader restifyContractReader(SpringDynamicParameterExpressionResolver expressionResolver) {
-			return new SpringMvcContractReader(expressionResolver);
+			return new SpringWebContractReader(expressionResolver);
 		}
 
 		@ConditionalOnMissingBean
@@ -80,6 +95,56 @@ public class RestifyAutoConfiguration {
 		@Bean
 		public ResponseEntityEndpointCallExecutableFactory<Object> responseEntityEndpointCallExecutableFactory() {
 			return new ResponseEntityEndpointCallExecutableFactory<>();
+		}
+	}
+
+	@Configuration
+	protected static class RestifySpringAsyncRequestConfiguration {
+
+		@Value("${restify.async.timeout:}")
+		private Long asyncTimeout;
+
+		@ConditionalOnMissingBean(name = "restifyAsyncTaskExecutor", value = AsyncListenableTaskExecutor.class)
+		@Bean
+		public AsyncListenableTaskExecutor restifyAsyncTaskExecutor() {
+			return new SimpleAsyncTaskExecutor("RestifyAsyncTaskExecutor");
+		}
+
+		@ConditionalOnMissingBean(name = "restifyAsyncExecutorService", value = ExecutorService.class)
+		@Bean
+		public ExecutorService restifyAsyncExecutorService(@Qualifier("restifyAsyncTaskExecutor") TaskExecutor executor) {
+			return new ExecutorServiceAdapter(executor);
+		}
+
+		@ConditionalOnMissingBean
+		@Bean
+		public AsyncResultEndpointCallExecutableFactory<Object> asyncResultEndpointCallExecutableFactory() {
+			return new AsyncResultEndpointCallExecutableFactory<>();
+		}
+
+		@ConditionalOnMissingBean
+		@Bean
+		public DeferredResultEndpointCallExecutableFactory<Object> deferredResultEndpointCallExecutableFactory(Environment environment, 
+				@Qualifier("restifyAsyncTaskExecutor") Executor executor) {
+			return new DeferredResultEndpointCallExecutableFactory<>(asyncTimeout, executor);
+		}
+
+		@ConditionalOnMissingBean
+		@Bean
+		public ListenableFutureEndpointCallExecutableFactory<Object> listenableFutureEndpointCallExecutableFactory(@Qualifier("restifyAsyncTaskExecutor") AsyncListenableTaskExecutor executor) {
+			return new ListenableFutureEndpointCallExecutableFactory<>(executor);
+		}
+
+		@ConditionalOnMissingBean
+		@Bean
+		public ListenableFutureTaskEndpointCallExecutableFactory<Object> listenableFutureTaskEndpointCallExecutableFactory(@Qualifier("restifyAsyncTaskExecutor") AsyncListenableTaskExecutor executor) {
+			return new ListenableFutureTaskEndpointCallExecutableFactory<>(executor);
+		}
+
+		@ConditionalOnMissingBean
+		@Bean
+		public WebAsyncTaskEndpointCallExecutableFactory<Object> webAsyncTaskEndpointCallExecutableFactory(@Qualifier("restifyAsyncTaskExecutor") AsyncTaskExecutor executor) {
+			return new WebAsyncTaskEndpointCallExecutableFactory<>(asyncTimeout, executor);
 		}
 	}
 
@@ -112,7 +177,8 @@ public class RestifyAutoConfiguration {
 
 			RestifyProxyBeanBuilder builder = new RestifyProxyBeanBuilder()
 					.objectType(type.objectType())
-						.endpoint(endpoint);
+						.endpoint(endpoint)
+							.asyncExecutorServiceName("restifyAsyncExecutorService");
 
 			registry.registerBeanDefinition(type.name(), builder.build());
 

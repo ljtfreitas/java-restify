@@ -38,7 +38,7 @@ public class CompletableFutureEndpointCallExecutableFactoryTest {
 
 		String result = "future result";
 
-		CompletableFuture<String> future = executable.execute(() -> result);
+		CompletableFuture<String> future = executable.execute(() -> result, null);
 
 		assertEquals(result, future.get());
 		assertEquals(JavaType.of(String.class), executable.returnType());

@@ -66,6 +66,10 @@ public class EndpointMethod {
 		return returnType;
 	}
 
+	public boolean runnableAsync() {
+		return returnType.voidType() && !parameters.callbacks().isEmpty();
+	}
+
 	public String expand(final Object[] args) {
 		String endpoint = new EndpointPathParameterResolver(path, parameters)
 				.resolve(args);

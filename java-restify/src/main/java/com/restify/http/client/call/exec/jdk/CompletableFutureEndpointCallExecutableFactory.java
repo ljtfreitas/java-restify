@@ -35,16 +35,14 @@ public class CompletableFutureEndpointCallExecutableFactory<T> implements Endpoi
 
 		Type responseType = type.parameterized() ? type.as(ParameterizedType.class).getActualTypeArguments()[0] : Object.class;
 
-		return new CompletableFutureEndpointMethodExecutable(executor, JavaType.of(responseType));
+		return new CompletableFutureEndpointCallExecutable(JavaType.of(responseType));
 	}
 
-	private class CompletableFutureEndpointMethodExecutable implements EndpointCallExecutable<CompletableFuture<T>, T> {
+	private class CompletableFutureEndpointCallExecutable implements EndpointCallExecutable<CompletableFuture<T>, T> {
 
-		private final Executor executor;
 		private final JavaType type;
 
-		private CompletableFutureEndpointMethodExecutable(Executor executor, JavaType type) {
-			this.executor = executor;
+		private CompletableFutureEndpointCallExecutable(JavaType type) {
 			this.type = type;
 		}
 
@@ -54,7 +52,7 @@ public class CompletableFutureEndpointCallExecutableFactory<T> implements Endpoi
 		}
 
 		@Override
-		public CompletableFuture<T> execute(EndpointCall<T> call) {
+		public CompletableFuture<T> execute(EndpointCall<T> call, Object[] args) {
 			return CompletableFuture.supplyAsync(() -> call.execute(), executor);
 		}
 	}

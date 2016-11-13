@@ -60,11 +60,11 @@ public class HttpHeadersEndpointCallExecutableFactoryTest {
 	public void shouldCreateExecutableWithParameterizedEndpointResponseReturnTypeWhenEndpointMethodReturnTypeIsHttpHeaders() throws Exception {
 		EndpointCallExecutable<HttpHeaders, EndpointResponse<Object>> executable = factory.create(new SimpleEndpointMethod(SomeType.class.getMethod("httpHeaders")));
 
-		HttpHeaders result = executable.execute(() -> endpointResponseMock);
+		HttpHeaders result = executable.execute(() -> endpointResponseMock, null);
 
 		assertEquals(httpHeaders, result);
 
-		assertEquals(JavaType.of(new SimpleParameterizedType(EndpointResponse.class, null, Object.class)), executable.returnType());
+		assertEquals(JavaType.of(new SimpleParameterizedType(EndpointResponse.class, null, Void.class)), executable.returnType());
 	}
 
 	interface SomeType {

@@ -46,7 +46,6 @@ public class ResponseEntityEndpointCallExecutableFactory<T> implements EndpointC
 
 		private ResponseEntityEndpointCallExecutable(JavaType returnType) {
 			this.returnType = returnType;
-
 		}
 
 		@Override
@@ -55,7 +54,7 @@ public class ResponseEntityEndpointCallExecutableFactory<T> implements EndpointC
 		}
 
 		@Override
-		public ResponseEntity<T> execute(EndpointCall<EndpointResponse<T>> call) {
+		public ResponseEntity<T> execute(EndpointCall<EndpointResponse<T>> call, Object[] args) {
 			EndpointResponse<T> response = call.execute();
 			return endpointResponseConverter.convert(response);
 		}

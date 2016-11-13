@@ -32,7 +32,7 @@ public class RunnableEndpointCallExecutableFactory<T> implements EndpointCallExe
 		}
 
 		@Override
-		public Runnable execute(EndpointCall<T> call) {
+		public Runnable execute(EndpointCall<T> call, Object[] args) {
 			return () -> call.execute();
 		}
 	}

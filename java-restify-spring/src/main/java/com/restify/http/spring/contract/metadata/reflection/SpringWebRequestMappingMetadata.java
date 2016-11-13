@@ -11,11 +11,11 @@ import java.util.stream.Collectors;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-public class SpringMvcRequestMappingMetadata {
+public class SpringWebRequestMappingMetadata {
 
 	private final RequestMapping mapping;
 
-	public SpringMvcRequestMappingMetadata(RequestMapping mapping) {
+	public SpringWebRequestMappingMetadata(RequestMapping mapping) {
 		this.mapping = nonNull(mapping, "@RequestMapping cannot be null");
 	}
 

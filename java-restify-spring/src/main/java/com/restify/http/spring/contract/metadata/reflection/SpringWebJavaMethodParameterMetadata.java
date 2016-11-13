@@ -1,7 +1,5 @@
 package com.restify.http.spring.contract.metadata.reflection;
 
-import java.lang.reflect.Parameter;
-import java.lang.reflect.Type;
 import java.util.Optional;
 
 import org.springframework.core.annotation.AnnotationUtils;
@@ -11,11 +9,13 @@ import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 
 import com.restify.http.contract.metadata.EndpointMethodParameterSerializer;
-import com.restify.http.spring.contract.metadata.SpringMvcEndpointMethodParameterSerializer;
+import com.restify.http.contract.metadata.reflection.JavaType;
+import com.restify.http.contract.metadata.reflection.JavaTypeResolver;
+import com.restify.http.spring.contract.metadata.SpringWebEndpointMethodParameterSerializer;
 
-public class SpringMvcJavaMethodParameterMetadata {
+public class SpringWebJavaMethodParameterMetadata {
 
-	private final Parameter javaMethodParameter;
+	private final JavaType type;
 	private final String name;
 	private final PathVariable pathParameter;
 	private final RequestHeader headerParameter;
@@ -23,8 +23,12 @@ public class SpringMvcJavaMethodParameterMetadata {
 	private final RequestParam queryParameter;
 	private final Class<? extends EndpointMethodParameterSerializer> serializerType;
 
-	public SpringMvcJavaMethodParameterMetadata(Parameter javaMethodParameter) {
-		this.javaMethodParameter = javaMethodParameter;
+	public SpringWebJavaMethodParameterMetadata(java.lang.reflect.Parameter javaMethodParameter) {
+		this(javaMethodParameter, javaMethodParameter.getDeclaringExecutable().getDeclaringClass());
+	}
+
+	public SpringWebJavaMethodParameterMetadata(java.lang.reflect.Parameter javaMethodParameter, Class<?> targetClassType) {
+		this.type = JavaType.of(new JavaTypeResolver(targetClassType).parameterizedTypeOf(javaMethodParameter));
 
 		this.pathParameter = AnnotationUtils.synthesizeAnnotation(javaMethodParameter.getAnnotation(PathVariable.class),
 				javaMethodParameter);
@@ -47,30 +51,30 @@ public class SpringMvcJavaMethodParameterMetadata {
 									.orElseGet(() -> Optional.ofNullable(javaMethodParameter.getName())
 											.orElseThrow(() -> new IllegalStateException("Could not get the name of the parameter " + javaMethodParameter)))));
 
-		this.serializerType = SpringMvcEndpointMethodParameterSerializer.of(this);
+		this.serializerType = SpringWebEndpointMethodParameterSerializer.of(this);
 	}
 
 	public String name() {
 		return name;
 	}
 
-	public Type javaType() {
-		return javaMethodParameter.getParameterizedType();
+	public JavaType javaType() {
+		return type;
 	}
 
-	public boolean ofPath() {
-		return pathParameter != null || (headerParameter == null && bodyParameter == null && queryParameter == null);
+	public boolean path() {
+		return pathParameter != null;
 	}
 
-	public boolean ofBody() {
+	public boolean body() {
 		return bodyParameter != null;
 	}
 
-	public boolean ofHeader() {
+	public boolean header() {
 		return headerParameter != null;
 	}
 
-	public boolean ofQuery() {
+	public boolean query() {
 		return queryParameter != null;
 	}
 

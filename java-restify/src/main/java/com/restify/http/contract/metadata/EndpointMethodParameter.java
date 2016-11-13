@@ -1,16 +1,19 @@
 package com.restify.http.contract.metadata;
 
 import java.lang.reflect.Type;
+import java.util.Optional;
+
+import com.restify.http.contract.metadata.reflection.JavaType;
 
 public class EndpointMethodParameter {
 
 	public enum EndpointMethodParameterType {
-		PATH, HEADER, BODY, QUERY_STRING;
+		PATH, HEADER, BODY, QUERY_STRING, ENDPOINT_CALLBACK;
 	}
 
 	private final int position;
 	private final String name;
-	private final Type javaType;
+	private final JavaType javaType;
 	private final EndpointMethodParameterType type;
 	private final EndpointMethodParameterSerializer serializer;
 
@@ -24,6 +27,11 @@ public class EndpointMethodParameter {
 
 	public EndpointMethodParameter(int position, String name, Type javaType, EndpointMethodParameterType type,
 			EndpointMethodParameterSerializer serializer) {
+		this(position, name, JavaType.of(javaType), type, serializer);
+	}
+
+	public EndpointMethodParameter(int position, String name, JavaType javaType, EndpointMethodParameterType type,
+			EndpointMethodParameterSerializer serializer) {
 		this.position = position;
 		this.name = name;
 		this.javaType = javaType;
@@ -31,7 +39,7 @@ public class EndpointMethodParameter {
 		this.serializer = serializer;
 	}
 
-	public Type javaType() {
+	public JavaType javaType() {
 		return javaType;
 	}
 
@@ -40,7 +48,9 @@ public class EndpointMethodParameter {
 	}
 
 	public String resolve(Object arg) {
-		return serializer.serialize(name, javaType, arg);
+		return Optional.ofNullable(serializer)
+				.map(s -> s.serialize(name, javaType.unwrap(), arg))
+					.orElseGet(() -> arg.toString());
 	}
 
 	public String name() {
@@ -51,19 +61,23 @@ public class EndpointMethodParameter {
 		return position;
 	}
 
-	public boolean ofBody() {
+	public boolean body() {
 		return type == EndpointMethodParameterType.BODY;
 	}
 
-	public boolean ofPath() {
+	public boolean path() {
 		return type == EndpointMethodParameterType.PATH;
 	}
 
-	public boolean ofHeader() {
+	public boolean header() {
 		return type == EndpointMethodParameterType.HEADER;
 	}
 
-	public boolean ofQuery() {
+	public boolean query() {
 		return type == EndpointMethodParameterType.QUERY_STRING;
+	}
+
+	public boolean callback() {
+		return type == EndpointMethodParameterType.ENDPOINT_CALLBACK;
 	}
 }

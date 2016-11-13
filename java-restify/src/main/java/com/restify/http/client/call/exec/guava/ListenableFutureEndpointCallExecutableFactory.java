@@ -36,16 +36,14 @@ public class ListenableFutureEndpointCallExecutableFactory<T> implements Endpoin
 
 		Type responseType = type.parameterized() ? type.as(ParameterizedType.class).getActualTypeArguments()[0] : String.class;
 
-		return new ListenableFutureEndpointMethodExecutable(executorService, JavaType.of(responseType));
+		return new ListenableFutureEndpointMethodExecutable(JavaType.of(responseType));
 	}
 
 	private class ListenableFutureEndpointMethodExecutable implements EndpointCallExecutable<ListenableFuture<T>, T> {
 
-		private final ListeningExecutorService executorService;
 		private final JavaType type;
 
-		private ListenableFutureEndpointMethodExecutable(ListeningExecutorService executorService, JavaType type) {
-			this.executorService = executorService;
+		private ListenableFutureEndpointMethodExecutable(JavaType type) {
 			this.type = type;
 		}
 
@@ -55,7 +53,7 @@ public class ListenableFutureEndpointCallExecutableFactory<T> implements Endpoin
 		}
 
 		@Override
-		public ListenableFuture<T> execute(EndpointCall<T> call) {
+		public ListenableFuture<T> execute(EndpointCall<T> call, Object[] args) {
 			return executorService.submit(() -> call.execute());
 		}
 	}

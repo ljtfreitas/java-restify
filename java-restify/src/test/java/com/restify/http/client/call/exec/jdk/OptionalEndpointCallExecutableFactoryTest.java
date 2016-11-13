@@ -3,17 +3,26 @@ package com.restify.http.client.call.exec.jdk;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.when;
 
 import java.util.Optional;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 
+import com.restify.http.client.call.EndpointCall;
 import com.restify.http.client.call.exec.EndpointCallExecutable;
 import com.restify.http.contract.metadata.SimpleEndpointMethod;
 import com.restify.http.contract.metadata.reflection.JavaType;
 
+@RunWith(MockitoJUnitRunner.class)
 public class OptionalEndpointCallExecutableFactoryTest {
+
+	@Mock
+	private EndpointCall<String> endpointCall;
 
 	private OptionalEndpointCallExecutableFactory<String> factory;
 
@@ -38,7 +47,10 @@ public class OptionalEndpointCallExecutableFactoryTest {
 
 		String result = "result";
 
-		Optional<String> future = executable.execute(() -> result);
+		when(endpointCall.execute())
+			.thenReturn(result);
+
+		Optional<String> future = executable.execute(endpointCall, null);
 
 		assertEquals(result, future.get());
 		assertEquals(JavaType.of(String.class), executable.returnType());

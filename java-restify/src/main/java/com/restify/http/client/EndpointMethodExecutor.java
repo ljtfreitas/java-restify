@@ -8,19 +8,19 @@ import com.restify.http.contract.metadata.EndpointMethod;
 
 public class EndpointMethodExecutor {
 
-	private final EndpointCallExecutables endpointMethodExecutables;
-	private final EndpointCallFactory endpointMethodCallFactory;
+	private final EndpointCallExecutables endpointCallExecutables;
+	private final EndpointCallFactory endpointCallFactory;
 
-	public EndpointMethodExecutor(EndpointCallExecutables endpointMethodExecutables, EndpointCallFactory endpointMethodCallFactory) {
-		this.endpointMethodExecutables = endpointMethodExecutables;
-		this.endpointMethodCallFactory = endpointMethodCallFactory;
+	public EndpointMethodExecutor(EndpointCallExecutables endpointCallExecutables, EndpointCallFactory endpointCallFactory) {
+		this.endpointCallExecutables = endpointCallExecutables;
+		this.endpointCallFactory = endpointCallFactory;
 	}
 
 	public Object execute(EndpointMethod endpointMethod, Object[] args) {
-		EndpointCallExecutable<Object, Object> executable = endpointMethodExecutables.of(endpointMethod);
+		EndpointCallExecutable<Object, Object> executable = endpointCallExecutables.of(endpointMethod);
 
-		EndpointCall<Object> call = endpointMethodCallFactory.createWith(endpointMethod, args, executable.returnType());
+		EndpointCall<Object> call = endpointCallFactory.createWith(endpointMethod, args, executable.returnType());
 
-		return executable.execute(call);
+		return executable.execute(call, args);
 	}
 }
