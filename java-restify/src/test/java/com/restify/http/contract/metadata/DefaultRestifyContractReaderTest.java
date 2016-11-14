@@ -16,11 +16,13 @@ import org.junit.Test;
 import com.restify.http.client.request.async.EndpointCallCallback;
 import com.restify.http.client.request.async.EndpointCallFailureCallback;
 import com.restify.http.client.request.async.EndpointCallSuccessCallback;
+import com.restify.http.contract.AcceptJson;
 import com.restify.http.contract.BodyParameter;
 import com.restify.http.contract.CallbackParameter;
 import com.restify.http.contract.Get;
 import com.restify.http.contract.Header;
 import com.restify.http.contract.HeaderParameter;
+import com.restify.http.contract.JsonContent;
 import com.restify.http.contract.Method;
 import com.restify.http.contract.Parameters;
 import com.restify.http.contract.Path;
@@ -128,6 +130,28 @@ public class DefaultRestifyContractReaderTest {
 		Optional<EndpointHeader> userAgentHeader = endpointMethod.headers().first("User-Agent");
 		assertTrue(userAgentHeader.isPresent());
 		assertEquals("Restify-Agent", userAgentHeader.get().value());
+	}
+
+	@Test
+	public void shouldCreateEndpointMethodWithEndpointHeadersMetaAnnotation() throws Exception {
+		EndpointMethod endpointMethod = restifyContractReader.read(myApiTypeTarget,
+				MyApiType.class.getMethod("metaHeaders"));
+
+		assertEquals("GET", endpointMethod.httpMethod());
+		assertEquals("http://my.api.com/metaHeaders", endpointMethod.path());
+		assertEquals(String.class, endpointMethod.returnType().classType());
+
+		Optional<EndpointHeader> contentTypeHeader = endpointMethod.headers().first("Content-Type");
+		assertTrue(contentTypeHeader.isPresent());
+		assertEquals("application/json", contentTypeHeader.get().value());
+
+		Optional<EndpointHeader> userAgentHeader = endpointMethod.headers().first("User-Agent");
+		assertTrue(userAgentHeader.isPresent());
+		assertEquals("Restify-Agent", userAgentHeader.get().value());
+
+		Optional<EndpointHeader> acceptHeader = endpointMethod.headers().first("Accept");
+		assertTrue(acceptHeader.isPresent());
+		assertEquals("application/json", acceptHeader.get().value());
 	}
 
 	@Test
@@ -408,6 +432,13 @@ public class DefaultRestifyContractReaderTest {
 		@Path("/asyncWithTwoCallbacks")
 		@Get
 		public void asyncWithTwoCallbacks(@CallbackParameter EndpointCallCallback<String> first, @CallbackParameter EndpointCallCallback<String> second);
+
+		@Path("/metaHeaders")
+		@Method("GET")
+		@JsonContent
+		@AcceptJson
+		@Header(name = "User-Agent", value = "Restify-Agent")
+		public String metaHeaders();
 	}
 
 	@Path("http://my.api.com")

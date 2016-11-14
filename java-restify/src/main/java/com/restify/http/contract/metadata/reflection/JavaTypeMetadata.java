@@ -25,9 +25,10 @@ public class JavaTypeMetadata {
 		this.parent = javaType.getInterfaces().length == 1 ? new JavaTypeMetadata(javaType.getInterfaces()[0]) : null;
 
 		this.path = javaType.getAnnotation(Path.class);
+
 		this.headers = Optional.ofNullable(javaType.getAnnotation(Headers.class))
-						.map(Headers::value)
-							.orElseGet(() -> javaType.getAnnotationsByType(Header.class));
+				.map(Headers::value)
+					.orElseGet(() -> new JavaAnnotationScanner(javaType).scanAll(Header.class));
 	}
 
 	public Optional<Path> path() {

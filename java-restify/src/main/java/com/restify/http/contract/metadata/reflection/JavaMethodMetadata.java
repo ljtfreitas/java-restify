@@ -26,7 +26,7 @@ public class JavaMethodMetadata {
 
 		this.headers = Optional.ofNullable(javaMethod.getAnnotation(Headers.class))
 				.map(Headers::value)
-					.orElseGet(() -> javaMethod.getAnnotationsByType(Header.class));
+					.orElseGet(() -> new JavaAnnotationScanner(javaMethod).scanAll(Header.class));
 	}
 
 	public Path path() {
