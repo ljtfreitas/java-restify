@@ -4,7 +4,7 @@ import com.restify.http.client.call.EndpointCall;
 import com.restify.http.contract.metadata.EndpointMethod;
 import com.restify.http.contract.metadata.reflection.JavaType;
 
-public class DefaultEndpointCallExecutableFactory<M> implements EndpointCallExecutableFactory<M, M> {
+class DefaultEndpointCallExecutableFactory<M> implements EndpointCallExecutableFactory<M, M> {
 
 	@Override
 	public boolean supports(EndpointMethod endpointMethod) {

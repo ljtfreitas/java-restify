@@ -27,7 +27,7 @@ public class OptionalEndpointCallExecutableFactoryTest {
 	}
 
 	@Test
-	public void shouldNotSupportsWhenEndpointMethodReturnTypeNotIsOptional() throws Exception {
+	public void shouldNotSupportsWhenEndpointMethodReturnTypeIsNotOptional() throws Exception {
 		assertFalse(factory.supports(new SimpleEndpointMethod(SomeType.class.getMethod("string"))));
 	}
 

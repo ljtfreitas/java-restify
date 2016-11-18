@@ -10,11 +10,11 @@ import org.springframework.web.context.request.async.DeferredResult;
 
 import com.restify.http.client.call.EndpointCall;
 import com.restify.http.client.call.exec.EndpointCallExecutable;
-import com.restify.http.client.call.exec.EndpointCallExecutableFactory;
+import com.restify.http.client.call.exec.EndpointCallExecutableDecoratorFactory;
 import com.restify.http.contract.metadata.EndpointMethod;
 import com.restify.http.contract.metadata.reflection.JavaType;
 
-public class DeferredResultEndpointCallExecutableFactory<T> implements EndpointCallExecutableFactory<DeferredResult<T>, T> {
+public class DeferredResultEndpointCallExecutableFactory<T, O> implements EndpointCallExecutableDecoratorFactory<DeferredResult<T>, T, O> {
 
 	private final Long timeout;
 	private final Executor executor;
@@ -42,32 +42,40 @@ public class DeferredResultEndpointCallExecutableFactory<T> implements EndpointC
 	}
 
 	@Override
-	public EndpointCallExecutable<DeferredResult<T>, T> create(EndpointMethod endpointMethod) {
-		JavaType type = endpointMethod.returnType();
-
-		Type responseType = type.parameterized() ? type.as(ParameterizedType.class).getActualTypeArguments()[0] : Object.class;
-
-		return new DeferredResultEndpointCallExecutable(JavaType.of(responseType));
+	public JavaType returnType(EndpointMethod endpointMethod) {
+		return JavaType.of(unwrap(endpointMethod.returnType()));
 	}
 
-	private class DeferredResultEndpointCallExecutable implements EndpointCallExecutable<DeferredResult<T>, T> {
+	private Type unwrap(JavaType declaredReturnType) {
+		return declaredReturnType.parameterized() ?
+				declaredReturnType.as(ParameterizedType.class).getActualTypeArguments()[0] :
+					Object.class;
+	}
 
-		private final JavaType returnType;
 
-		private DeferredResultEndpointCallExecutable(JavaType returnType) {
-			this.returnType = returnType;
+	@Override
+	public EndpointCallExecutable<DeferredResult<T>, O> create(EndpointMethod endpointMethod, EndpointCallExecutable<T, O> executable) {
+		return new DeferredResultEndpointCallExecutable(executable);
+	}
+
+	private class DeferredResultEndpointCallExecutable implements EndpointCallExecutable<DeferredResult<T>, O> {
+
+		private final EndpointCallExecutable<T, O> delegate;
+
+		public DeferredResultEndpointCallExecutable(EndpointCallExecutable<T, O> executable) {
+			this.delegate = executable;
 		}
 
 		@Override
 		public JavaType returnType() {
-			return returnType;
+			return delegate.returnType();
 		}
 
 		@Override
-		public DeferredResult<T> execute(EndpointCall<T> call, Object[] args) {
+		public DeferredResult<T> execute(EndpointCall<O> call, Object[] args) {
 			DeferredResult<T> deferredResult = new DeferredResult<>(timeout);
 
-			CompletableFuture.supplyAsync(() -> call.execute(), executor)
+			CompletableFuture.supplyAsync(() -> delegate.execute(call, args), executor)
 				.whenComplete((r, ex) -> {
 					if (r != null) {
 						deferredResult.setResult(r);

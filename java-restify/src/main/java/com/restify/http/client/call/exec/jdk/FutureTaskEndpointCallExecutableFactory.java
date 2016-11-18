@@ -8,11 +8,11 @@ import java.util.concurrent.FutureTask;
 
 import com.restify.http.client.call.EndpointCall;
 import com.restify.http.client.call.exec.EndpointCallExecutable;
-import com.restify.http.client.call.exec.EndpointCallExecutableFactory;
+import com.restify.http.client.call.exec.EndpointCallExecutableDecoratorFactory;
 import com.restify.http.contract.metadata.EndpointMethod;
 import com.restify.http.contract.metadata.reflection.JavaType;
 
-public class FutureTaskEndpointCallExecutableFactory<T> implements EndpointCallExecutableFactory<FutureTask<T>, T> {
+public class FutureTaskEndpointCallExecutableFactory<T, O> implements EndpointCallExecutableDecoratorFactory<FutureTask<T>, T, O> {
 
 	private final ExecutorService executorService;
 
@@ -30,30 +30,37 @@ public class FutureTaskEndpointCallExecutableFactory<T> implements EndpointCallE
 	}
 
 	@Override
-	public EndpointCallExecutable<FutureTask<T>, T> create(EndpointMethod endpointMethod) {
-		JavaType type = endpointMethod.returnType();
-
-		Type responseType = type.parameterized() ? type.as(ParameterizedType.class).getActualTypeArguments()[0] : Object.class;
-
-		return new FutureTaskEndpointCallExecutable(JavaType.of(responseType));
+	public JavaType returnType(EndpointMethod endpointMethod) {
+		return JavaType.of(unwrap(endpointMethod.returnType()));
 	}
 
-	private class FutureTaskEndpointCallExecutable implements EndpointCallExecutable<FutureTask<T>, T> {
+	private Type unwrap(JavaType declaredReturnType) {
+		return declaredReturnType.parameterized() ?
+				declaredReturnType.as(ParameterizedType.class).getActualTypeArguments()[0] :
+					Object.class;
+	}
 
-		private final JavaType type;
+	@Override
+	public EndpointCallExecutable<FutureTask<T>, O> create(EndpointMethod endpointMethod, EndpointCallExecutable<T, O> executable) {
+		return new FutureTaskEndpointCallExecutable(executable);
+	}
 
-		private FutureTaskEndpointCallExecutable(JavaType type) {
-			this.type = type;
+	private class FutureTaskEndpointCallExecutable implements EndpointCallExecutable<FutureTask<T>, O> {
+
+		private final EndpointCallExecutable<T, O> delegate;
+
+		public FutureTaskEndpointCallExecutable(EndpointCallExecutable<T, O> executable) {
+			this.delegate = executable;
 		}
 
 		@Override
 		public JavaType returnType() {
-			return type;
+			return delegate.returnType();
 		}
 
 		@Override
-		public FutureTask<T> execute(EndpointCall<T> call, Object[] args) {
-			FutureTask<T> task = new FutureTask<T>(() -> call.execute());
+		public FutureTask<T> execute(EndpointCall<O> call, Object[] args) {
+			FutureTask<T> task = new FutureTask<T>(() -> delegate.execute(call, args));
 			executorService.submit(task);
 			return task;
 		}

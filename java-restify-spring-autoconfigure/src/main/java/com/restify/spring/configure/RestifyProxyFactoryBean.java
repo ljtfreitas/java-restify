@@ -9,7 +9,7 @@ import org.springframework.beans.factory.FactoryBean;
 
 import com.restify.http.RestifyProxyBuilder;
 import com.restify.http.client.authentication.Authentication;
-import com.restify.http.client.call.exec.EndpointCallExecutableFactory;
+import com.restify.http.client.call.exec.EndpointCallExecutableProvider;
 import com.restify.http.client.message.HttpMessageConverter;
 import com.restify.http.client.request.EndpointRequestExecutor;
 import com.restify.http.client.request.HttpClientRequestFactory;
@@ -33,7 +33,7 @@ public class RestifyProxyFactoryBean implements FactoryBean<Object> {
 
 	private Collection<HttpMessageConverter> converters = new ArrayList<>();
 
-	private Collection<EndpointCallExecutableFactory<?, ?>> executables = new ArrayList<>();
+	private Collection<EndpointCallExecutableProvider> executables = new ArrayList<>();
 
 	private Authentication authentication;
 
@@ -75,8 +75,8 @@ public class RestifyProxyFactoryBean implements FactoryBean<Object> {
 		return converters.toArray(new HttpMessageConverter[0]);
 	}
 
-	private EndpointCallExecutableFactory<?, ?>[] executables() {
-		return executables.toArray(new EndpointCallExecutableFactory<?, ?>[0]);
+	private EndpointCallExecutableProvider[] executables() {
+		return executables.toArray(new EndpointCallExecutableProvider[0]);
 	}
 
 	@Override
@@ -121,7 +121,7 @@ public class RestifyProxyFactoryBean implements FactoryBean<Object> {
 		this.httpClientRequestFactory = httpClientRequestFactory;
 	}
 
-	public void setExecutables(Collection<EndpointCallExecutableFactory<?, ?>> executables) {
+	public void setExecutables(Collection<EndpointCallExecutableProvider> executables) {
 		this.executables = executables;
 	}
 

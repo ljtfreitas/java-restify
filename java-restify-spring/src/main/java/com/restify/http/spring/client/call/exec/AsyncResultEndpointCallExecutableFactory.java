@@ -7,11 +7,11 @@ import org.springframework.scheduling.annotation.AsyncResult;
 
 import com.restify.http.client.call.EndpointCall;
 import com.restify.http.client.call.exec.EndpointCallExecutable;
-import com.restify.http.client.call.exec.EndpointCallExecutableFactory;
+import com.restify.http.client.call.exec.EndpointCallExecutableDecoratorFactory;
 import com.restify.http.contract.metadata.EndpointMethod;
 import com.restify.http.contract.metadata.reflection.JavaType;
 
-public class AsyncResultEndpointCallExecutableFactory<T> implements EndpointCallExecutableFactory<AsyncResult<T>, T> {
+public class AsyncResultEndpointCallExecutableFactory<T, O> implements EndpointCallExecutableDecoratorFactory<AsyncResult<T>, T, O> {
 
 	@Override
 	public boolean supports(EndpointMethod endpointMethod) {
@@ -19,30 +19,37 @@ public class AsyncResultEndpointCallExecutableFactory<T> implements EndpointCall
 	}
 
 	@Override
-	public EndpointCallExecutable<AsyncResult<T>, T> create(EndpointMethod endpointMethod) {
-		JavaType type = endpointMethod.returnType();
-
-		Type responseType = type.parameterized() ? type.as(ParameterizedType.class).getActualTypeArguments()[0] : Object.class;
-
-		return new AsyncResultEndpointCallExecutable(JavaType.of(responseType));
+	public JavaType returnType(EndpointMethod endpointMethod) {
+		return JavaType.of(unwrap(endpointMethod.returnType()));
 	}
 
-	private class AsyncResultEndpointCallExecutable implements EndpointCallExecutable<AsyncResult<T>, T> {
+	private Type unwrap(JavaType declaredReturnType) {
+		return declaredReturnType.parameterized() ?
+				declaredReturnType.as(ParameterizedType.class).getActualTypeArguments()[0] :
+					Object.class;
+	}
 
-		private final JavaType returnType;
+	@Override
+	public EndpointCallExecutable<AsyncResult<T>, O> create(EndpointMethod endpointMethod, EndpointCallExecutable<T, O> executable) {
+		return new AsyncResultEndpointCallExecutable(executable);
+	}
 
-		private AsyncResultEndpointCallExecutable(JavaType returnType) {
-			this.returnType = returnType;
+	private class AsyncResultEndpointCallExecutable implements EndpointCallExecutable<AsyncResult<T>, O> {
+
+		private final EndpointCallExecutable<T, O> delegate;
+
+		private AsyncResultEndpointCallExecutable(EndpointCallExecutable<T, O> delegate) {
+			this.delegate = delegate;
 		}
 
 		@Override
 		public JavaType returnType() {
-			return returnType;
+			return delegate.returnType();
 		}
 
 		@Override
-		public AsyncResult<T> execute(EndpointCall<T> call, Object[] args) {
-			return new AsyncResult<>(call.execute());
+		public AsyncResult<T> execute(EndpointCall<O> call, Object[] args) {
+			return new AsyncResult<>(delegate.execute(call, args));
 		}
 	}
 }

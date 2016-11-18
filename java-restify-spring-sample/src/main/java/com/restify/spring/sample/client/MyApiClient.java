@@ -25,7 +25,7 @@ public class MyApiClient {
 				.executables()
 					.add(new HttpHeadersEndpointCallExecutableFactory())
 					.add(new ResponseEntityEndpointCallExecutableFactory<Object>())
-					.add(new ListenableFutureEndpointCallExecutableFactory<Object>())
+					.add(new ListenableFutureEndpointCallExecutableFactory<Object, Object>())
 					.and()
 				.executor(new RestOperationsEndpointRequestExecutor(new RestTemplate()))
 				.target(MyApi.class, "http://localhost:8080")

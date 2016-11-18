@@ -17,14 +17,14 @@ import com.restify.http.contract.metadata.SimpleEndpointMethod;
 @RunWith(MockitoJUnitRunner.class)
 public class RunnableEndpointCallExecutableFactoryTest {
 
-	private RunnableEndpointCallExecutableFactory<String> factory;
+	private RunnableEndpointCallExecutableFactory factory;
 
 	@Mock
-	private EndpointCall<String> call;
+	private EndpointCall<Void> call;
 
 	@Before
 	public void setup() {
-		factory = new RunnableEndpointCallExecutableFactory<>();
+		factory = new RunnableEndpointCallExecutableFactory();
 	}
 
 	@Test
@@ -33,13 +33,13 @@ public class RunnableEndpointCallExecutableFactoryTest {
 	}
 
 	@Test
-	public void shouldNotSupportsWhenEndpointMethodReturnTypeNotIsRunnable() throws Exception {
+	public void shouldNotSupportsWhenEndpointMethodReturnTypeIsNotRunnable() throws Exception {
 		assertFalse(factory.supports(new SimpleEndpointMethod(SomeType.class.getMethod("string"))));
 	}
 
 	@Test
 	public void shouldCreateExecutableFromEndpointMethodWithRunnableReturnType() throws Exception {
-		EndpointCallExecutable<Runnable, String> executable = factory.create(new SimpleEndpointMethod(SomeType.class.getMethod("runnable")));
+		EndpointCallExecutable<Runnable, Void> executable = factory.create(new SimpleEndpointMethod(SomeType.class.getMethod("runnable")));
 
 		Runnable runnable = executable.execute(call, null);
 

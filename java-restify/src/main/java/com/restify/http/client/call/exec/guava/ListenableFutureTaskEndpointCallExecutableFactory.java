@@ -9,11 +9,11 @@ import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 import com.restify.http.client.call.EndpointCall;
 import com.restify.http.client.call.exec.EndpointCallExecutable;
-import com.restify.http.client.call.exec.EndpointCallExecutableFactory;
+import com.restify.http.client.call.exec.EndpointCallExecutableDecoratorFactory;
 import com.restify.http.contract.metadata.EndpointMethod;
 import com.restify.http.contract.metadata.reflection.JavaType;
 
-public class ListenableFutureTaskEndpointCallExecutableFactory<T> implements EndpointCallExecutableFactory<ListenableFutureTask<T>, T> {
+public class ListenableFutureTaskEndpointCallExecutableFactory<T, O> implements EndpointCallExecutableDecoratorFactory<ListenableFutureTask<T>, T, O> {
 
 	private final ListeningExecutorService executorService;
 
@@ -31,30 +31,37 @@ public class ListenableFutureTaskEndpointCallExecutableFactory<T> implements End
 	}
 
 	@Override
-	public EndpointCallExecutable<ListenableFutureTask<T>, T> create(EndpointMethod endpointMethod) {
-		JavaType type = endpointMethod.returnType();
-
-		Type responseType = type.parameterized() ? type.as(ParameterizedType.class).getActualTypeArguments()[0] : String.class;
-
-		return new ListenableFutureTaskEndpointMethodExecutable(JavaType.of(responseType));
+	public JavaType returnType(EndpointMethod endpointMethod) {
+		return JavaType.of(unwrap(endpointMethod.returnType()));
 	}
 
-	private class ListenableFutureTaskEndpointMethodExecutable implements EndpointCallExecutable<ListenableFutureTask<T>, T> {
+	private Type unwrap(JavaType declaredReturnType) {
+		return declaredReturnType.parameterized() ?
+				declaredReturnType.as(ParameterizedType.class).getActualTypeArguments()[0] :
+					Object.class;
+	}
 
-		private final JavaType type;
+	@Override
+	public EndpointCallExecutable<ListenableFutureTask<T>, O> create(EndpointMethod endpointMethod, EndpointCallExecutable<T, O> executable) {
+		return new ListenableFutureTaskEndpointMethodExecutable(executable);
+	}
 
-		private ListenableFutureTaskEndpointMethodExecutable(JavaType type) {
-			this.type = type;
+	private class ListenableFutureTaskEndpointMethodExecutable implements EndpointCallExecutable<ListenableFutureTask<T>, O> {
+
+		private final EndpointCallExecutable<T, O> delegate;
+
+		public ListenableFutureTaskEndpointMethodExecutable(EndpointCallExecutable<T, O> executable) {
+			this.delegate = executable;
 		}
 
 		@Override
 		public JavaType returnType() {
-			return type;
+			return delegate.returnType();
 		}
 
 		@Override
-		public ListenableFutureTask<T> execute(EndpointCall<T> call, Object[] args) {
-			ListenableFutureTask<T> task = ListenableFutureTask.create(() -> call.execute());
+		public ListenableFutureTask<T> execute(EndpointCall<O> call, Object[] args) {
+			ListenableFutureTask<T> task = ListenableFutureTask.create(() -> delegate.execute(call, args));
 			executorService.submit(task);
 			return task;
 		}

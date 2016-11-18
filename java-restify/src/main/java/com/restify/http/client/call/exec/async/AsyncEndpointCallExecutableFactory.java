@@ -9,11 +9,11 @@ import com.restify.http.client.call.EndpointCall;
 import com.restify.http.client.call.async.AsyncEndpointCall;
 import com.restify.http.client.call.async.AsyncEndpointCallFactory;
 import com.restify.http.client.call.exec.EndpointCallExecutable;
-import com.restify.http.client.call.exec.EndpointCallExecutableFactory;
+import com.restify.http.client.call.exec.EndpointCallExecutableDecoratorFactory;
 import com.restify.http.contract.metadata.EndpointMethod;
 import com.restify.http.contract.metadata.reflection.JavaType;
 
-public class AsyncEndpointCallExecutableFactory<T> implements EndpointCallExecutableFactory<AsyncEndpointCall<T>, T> {
+public class AsyncEndpointCallExecutableFactory<T, O> implements EndpointCallExecutableDecoratorFactory<AsyncEndpointCall<T>, T, O> {
 
 	private final Executor executor;
 	private final AsyncEndpointCallFactory asyncEndpointCallFactory;
@@ -37,30 +37,37 @@ public class AsyncEndpointCallExecutableFactory<T> implements EndpointCallExecut
 	}
 
 	@Override
-	public EndpointCallExecutable<AsyncEndpointCall<T>, T> create(EndpointMethod endpointMethod) {
-		JavaType type = endpointMethod.returnType();
-
-		Type responseType = type.parameterized() ? type.as(ParameterizedType.class).getActualTypeArguments()[0] : Object.class;
-
-		return new AsyncEndpointCallExecutable(JavaType.of(responseType));
+	public JavaType returnType(EndpointMethod endpointMethod) {
+		return JavaType.of(unwrap(endpointMethod.returnType()));
 	}
 
-	private class AsyncEndpointCallExecutable implements EndpointCallExecutable<AsyncEndpointCall<T>, T> {
+	private Type unwrap(JavaType declaredReturnType) {
+		return declaredReturnType.parameterized() ?
+				declaredReturnType.as(ParameterizedType.class).getActualTypeArguments()[0] :
+					Object.class;
+	}
 
-		private final JavaType type;
+	@Override
+	public EndpointCallExecutable<AsyncEndpointCall<T>, O> create(EndpointMethod endpointMethod, EndpointCallExecutable<T, O> executable) {
+		return new AsyncEndpointCallExecutable(executable);
+	}
 
-		private AsyncEndpointCallExecutable(JavaType type) {
-			this.type = type;
+	private class AsyncEndpointCallExecutable implements EndpointCallExecutable<AsyncEndpointCall<T>, O> {
+
+		private final EndpointCallExecutable<T, O> delegate;
+
+		private AsyncEndpointCallExecutable(EndpointCallExecutable<T, O> executable) {
+			this.delegate = executable;;
 		}
 
 		@Override
 		public JavaType returnType() {
-			return type;
+			return delegate.returnType();
 		}
 
 		@Override
-		public AsyncEndpointCall<T> execute(EndpointCall<T> call, Object[] args) {
-			return asyncEndpointCallFactory.create(call, executor);
+		public AsyncEndpointCall<T> execute(EndpointCall<O> call, Object[] args) {
+			return asyncEndpointCallFactory.create(() -> delegate.execute(call, args), executor);
 		}
 	}
 }

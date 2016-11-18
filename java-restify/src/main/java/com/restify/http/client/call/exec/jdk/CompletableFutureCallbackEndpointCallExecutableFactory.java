@@ -1,6 +1,7 @@
 package com.restify.http.client.call.exec.jdk;
 
 import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
@@ -9,13 +10,13 @@ import java.util.function.BiConsumer;
 
 import com.restify.http.client.call.EndpointCall;
 import com.restify.http.client.call.exec.EndpointCallExecutable;
-import com.restify.http.client.call.exec.EndpointCallExecutableFactory;
+import com.restify.http.client.call.exec.EndpointCallExecutableDecoratorFactory;
 import com.restify.http.contract.metadata.EndpointMethod;
 import com.restify.http.contract.metadata.EndpointMethodParameter;
 import com.restify.http.contract.metadata.EndpointMethodParameters;
 import com.restify.http.contract.metadata.reflection.JavaType;
 
-public class CompletableFutureCallbackEndpointCallExecutableFactory<T> implements EndpointCallExecutableFactory<Void, T> {
+public class CompletableFutureCallbackEndpointCallExecutableFactory<T, O> implements EndpointCallExecutableDecoratorFactory<Void, T, O> {
 
 	private final Executor executor;
 
@@ -35,40 +36,43 @@ public class CompletableFutureCallbackEndpointCallExecutableFactory<T> implement
 	}
 
 	@Override
-	public EndpointCallExecutable<Void, T> create(EndpointMethod endpointMethod) {
-		JavaType responseType = callbackArgumentType(endpointMethod.parameters().callbacks());
-		return new CompletableFutureCallbackEndpointCallExecutable(responseType, endpointMethod.parameters().callbacks());
+	public JavaType returnType(EndpointMethod endpointMethod) {
+		return JavaType.of(callbackArgumentType(endpointMethod.parameters().callbacks()));
 	}
 
-	private JavaType callbackArgumentType(Collection<EndpointMethodParameter> callbackMethodParameters) {
+	private Type callbackArgumentType(Collection<EndpointMethodParameter> callbackMethodParameters) {
 		return callbackMethodParameters.stream()
 				.filter(p -> p.javaType().is(BiConsumer.class))
 					.findFirst()
 						.map(p -> p.javaType().parameterized() ? p.javaType().as(ParameterizedType.class).getActualTypeArguments()[0] : Object.class)
-							.map(t -> JavaType.of(t))
-								.orElseGet(() -> JavaType.of(Object.class));
+							.orElse(Object.class);
 	}
 
-	private class CompletableFutureCallbackEndpointCallExecutable implements EndpointCallExecutable<Void, T> {
+	@Override
+	public EndpointCallExecutable<Void, O> create(EndpointMethod endpointMethod, EndpointCallExecutable<T, O> executable) {
+		return new CompletableFutureCallbackEndpointCallExecutable(endpointMethod.parameters().callbacks(), executable);
+	}
 
-		private final JavaType type;
+	private class CompletableFutureCallbackEndpointCallExecutable implements EndpointCallExecutable<Void, O> {
+
 		private final Collection<EndpointMethodParameter> callbackMethodParameters;
+		private final EndpointCallExecutable<T, O> delegate;
 
-		private CompletableFutureCallbackEndpointCallExecutable(JavaType type, Collection<EndpointMethodParameter> callbackMethodParameters) {
-			this.type = type;
+		private CompletableFutureCallbackEndpointCallExecutable(Collection<EndpointMethodParameter> callbackMethodParameters, EndpointCallExecutable<T, O> executable) {
 			this.callbackMethodParameters = callbackMethodParameters;
+			this.delegate = executable;
 		}
 
 		@Override
 		public JavaType returnType() {
-			return type;
+			return delegate.returnType();
 		}
 
 		@Override
-		public Void execute(EndpointCall<T> call, Object[] args) {
+		public Void execute(EndpointCall<O> call, Object[] args) {
 			BiConsumer<? super T, ? super Throwable> callback = callbackParameter(args);
 
-			CompletableFuture.supplyAsync(() -> call.execute(), executor).whenComplete(callback);
+			CompletableFuture.supplyAsync(() -> delegate.execute(call, args), executor).whenComplete(callback);
 
 			return null;
 		}

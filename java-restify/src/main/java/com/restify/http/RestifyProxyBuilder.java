@@ -13,7 +13,10 @@ import com.restify.http.client.EndpointMethodExecutor;
 import com.restify.http.client.authentication.Authentication;
 import com.restify.http.client.call.EndpointCallFactory;
 import com.restify.http.client.call.exec.EndpointCallExecutableFactory;
+import com.restify.http.client.call.exec.EndpointCallExecutableProvider;
 import com.restify.http.client.call.exec.EndpointCallExecutables;
+import com.restify.http.client.call.exec.EndpointCallObjectExecutableFactory;
+import com.restify.http.client.call.exec.HeadersEndpointCallExecutableFactory;
 import com.restify.http.client.call.exec.async.AsyncCallbackEndpointCallExecutableFactory;
 import com.restify.http.client.call.exec.async.AsyncEndpointCallExecutableFactory;
 import com.restify.http.client.call.exec.jdk.CallableEndpointCallExecutableFactory;
@@ -290,15 +293,17 @@ public class RestifyProxyBuilder {
 	public class EndpointCallExecutablesBuilder {
 
 		private final RestifyProxyBuilder context;
-		private final EndpointAsyncCallExecutablesBuilder async = new EndpointAsyncCallExecutablesBuilder();
+		private final AsyncEndpointCallExecutablesBuilder async = new AsyncEndpointCallExecutablesBuilder();
 
-		private final Collection<EndpointCallExecutableFactory<?, ?>> factories = new ArrayList<>();
+		private final Collection<EndpointCallExecutableProvider> providers = new ArrayList<>();
 
 		private EndpointCallExecutablesBuilder(RestifyProxyBuilder context) {
 			this.context = context;
-			this.factories.add(new OptionalEndpointCallExecutableFactory<Object>());
-			this.factories.add(new CallableEndpointCallExecutableFactory<Object>());
-			this.factories.add(new RunnableEndpointCallExecutableFactory<Object>());
+			this.providers.add(new OptionalEndpointCallExecutableFactory<Object>());
+			this.providers.add(new CallableEndpointCallExecutableFactory<Object, Object>());
+			this.providers.add(new RunnableEndpointCallExecutableFactory());
+			this.providers.add(new EndpointCallObjectExecutableFactory<Object, Object>());
+			this.providers.add(new HeadersEndpointCallExecutableFactory());
 		}
 
 		public EndpointCallExecutablesBuilder async() {
@@ -316,13 +321,13 @@ public class RestifyProxyBuilder {
 			return this;
 		}
 
-		public EndpointCallExecutablesBuilder add(EndpointCallExecutableFactory<?, ?> endpointMethodExecutableFactory) {
-			factories.add(endpointMethodExecutableFactory);
+		public EndpointCallExecutablesBuilder add(EndpointCallExecutableProvider endpointCallExecutableProvider) {
+			providers.add(endpointCallExecutableProvider);
 			return this;
 		}
 
-		public EndpointCallExecutablesBuilder add(EndpointCallExecutableFactory<?, ?>...factories) {
-			this.factories.addAll(Arrays.asList(factories));
+		public EndpointCallExecutablesBuilder add(EndpointCallExecutableProvider...providers) {
+			this.providers.addAll(Arrays.asList(providers));
 			return this;
 		}
 
@@ -331,37 +336,37 @@ public class RestifyProxyBuilder {
 		}
 
 		private EndpointCallExecutables build() {
-			factories.addAll(async.build());
-			return new EndpointCallExecutables(factories);
+			providers.addAll(async.build());
+			return new EndpointCallExecutables(providers);
 		}
 	}
 
-	private class EndpointAsyncCallExecutablesBuilder {
+	private class AsyncEndpointCallExecutablesBuilder {
 
-		private final Collection<EndpointCallExecutableFactory<?, ?>> factories = new ArrayList<>();
+		private final Collection<EndpointCallExecutableProvider> providers = new ArrayList<>();
 
-		private EndpointAsyncCallExecutablesBuilder all() {
+		private AsyncEndpointCallExecutablesBuilder all() {
 			with(Executors.newCachedThreadPool());
 			return this;
 		}
 
-		private EndpointAsyncCallExecutablesBuilder with(ExecutorService executor) {
+		private AsyncEndpointCallExecutablesBuilder with(ExecutorService executor) {
 			with((Executor) executor);
-			factories.add(new FutureEndpointCallExecutableFactory<Object>(executor));
-			factories.add(new FutureTaskEndpointCallExecutableFactory<Object>(executor));
+			providers.add(new FutureEndpointCallExecutableFactory<Object, Object>(executor));
+			providers.add(new FutureTaskEndpointCallExecutableFactory<Object, Object>(executor));
 			return this;
 		}
 
-		private EndpointAsyncCallExecutablesBuilder with(Executor executor) {
-			factories.add(new CompletableFutureEndpointCallExecutableFactory<Object>(executor));
-			factories.add(new CompletableFutureCallbackEndpointCallExecutableFactory<Object>(executor));
-			factories.add(new AsyncEndpointCallExecutableFactory<Object>(executor));
-			factories.add(new AsyncCallbackEndpointCallExecutableFactory<Object>(executor));
+		private AsyncEndpointCallExecutablesBuilder with(Executor executor) {
+			providers.add(new CompletableFutureEndpointCallExecutableFactory<Object, Object>(executor));
+			providers.add(new CompletableFutureCallbackEndpointCallExecutableFactory<Object, Object>(executor));
+			providers.add(new AsyncEndpointCallExecutableFactory<Object, Object>(executor));
+			providers.add(new AsyncCallbackEndpointCallExecutableFactory<Object, Object>(executor));
 			return this;
 		}
 
-		private Collection<EndpointCallExecutableFactory<?, ?>> build() {
-			return factories.isEmpty() ? all().build() : factories;
+		private Collection<EndpointCallExecutableProvider> build() {
+			return providers.isEmpty() ? all().build() : providers;
 		}
 	}
 

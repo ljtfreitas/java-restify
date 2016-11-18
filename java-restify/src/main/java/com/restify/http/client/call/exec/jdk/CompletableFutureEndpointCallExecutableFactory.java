@@ -8,11 +8,11 @@ import java.util.concurrent.Executors;
 
 import com.restify.http.client.call.EndpointCall;
 import com.restify.http.client.call.exec.EndpointCallExecutable;
-import com.restify.http.client.call.exec.EndpointCallExecutableFactory;
+import com.restify.http.client.call.exec.EndpointCallExecutableDecoratorFactory;
 import com.restify.http.contract.metadata.EndpointMethod;
 import com.restify.http.contract.metadata.reflection.JavaType;
 
-public class CompletableFutureEndpointCallExecutableFactory<T> implements EndpointCallExecutableFactory<CompletableFuture<T>, T> {
+public class CompletableFutureEndpointCallExecutableFactory<T, O> implements EndpointCallExecutableDecoratorFactory<CompletableFuture<T>, T, O> {
 
 	private final Executor executor;
 
@@ -30,30 +30,37 @@ public class CompletableFutureEndpointCallExecutableFactory<T> implements Endpoi
 	}
 
 	@Override
-	public EndpointCallExecutable<CompletableFuture<T>, T> create(EndpointMethod endpointMethod) {
-		JavaType type = endpointMethod.returnType();
-
-		Type responseType = type.parameterized() ? type.as(ParameterizedType.class).getActualTypeArguments()[0] : Object.class;
-
-		return new CompletableFutureEndpointCallExecutable(JavaType.of(responseType));
+	public JavaType returnType(EndpointMethod endpointMethod) {
+		return JavaType.of(unwrap(endpointMethod.returnType()));
 	}
 
-	private class CompletableFutureEndpointCallExecutable implements EndpointCallExecutable<CompletableFuture<T>, T> {
+	private Type unwrap(JavaType declaredReturnType) {
+		return declaredReturnType.parameterized() ?
+				declaredReturnType.as(ParameterizedType.class).getActualTypeArguments()[0] :
+					Object.class;
+	}
 
-		private final JavaType type;
+	@Override
+	public EndpointCallExecutable<CompletableFuture<T>, O> create(EndpointMethod endpointMethod, EndpointCallExecutable<T, O> executable) {
+		return new CompletableFutureEndpointCallExecutable(executable);
+	}
 
-		private CompletableFutureEndpointCallExecutable(JavaType type) {
-			this.type = type;
+	private class CompletableFutureEndpointCallExecutable implements EndpointCallExecutable<CompletableFuture<T>, O> {
+
+		private final EndpointCallExecutable<T, O> delegate;
+
+		public CompletableFutureEndpointCallExecutable(EndpointCallExecutable<T, O> executable) {
+			this.delegate = executable;
 		}
 
 		@Override
 		public JavaType returnType() {
-			return type;
+			return delegate.returnType();
 		}
 
 		@Override
-		public CompletableFuture<T> execute(EndpointCall<T> call, Object[] args) {
-			return CompletableFuture.supplyAsync(() -> call.execute(), executor);
+		public CompletableFuture<T> execute(EndpointCall<O> call, Object[] args) {
+			return CompletableFuture.supplyAsync(() -> delegate.execute(call, args), executor);
 		}
 	}
 }

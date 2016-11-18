@@ -88,28 +88,28 @@ class RestifyConfiguration {
 		}
 
 		@Bean
-		public AsyncResultEndpointCallExecutableFactory<Object> asyncResultEndpointCallExecutableFactory() {
+		public AsyncResultEndpointCallExecutableFactory<Object, Object> asyncResultEndpointCallExecutableFactory() {
 			return new AsyncResultEndpointCallExecutableFactory<>();
 		}
 
 		@Bean
-		public DeferredResultEndpointCallExecutableFactory<Object> deferredResultEndpointCallExecutableFactory(Environment environment, 
+		public DeferredResultEndpointCallExecutableFactory<Object, Object> deferredResultEndpointCallExecutableFactory(Environment environment, 
 				@Qualifier("restifyAsyncTaskExecutor") Executor executor) {
 			return new DeferredResultEndpointCallExecutableFactory<>(asyncTimeout, executor);
 		}
 
 		@Bean
-		public ListenableFutureEndpointCallExecutableFactory<Object> listenableFutureEndpointCallExecutableFactory(@Qualifier("restifyAsyncTaskExecutor") AsyncListenableTaskExecutor executor) {
+		public ListenableFutureEndpointCallExecutableFactory<Object, Object> listenableFutureEndpointCallExecutableFactory(@Qualifier("restifyAsyncTaskExecutor") AsyncListenableTaskExecutor executor) {
 			return new ListenableFutureEndpointCallExecutableFactory<>(executor);
 		}
 
 		@Bean
-		public ListenableFutureTaskEndpointCallExecutableFactory<Object> listenableFutureTaskEndpointCallExecutableFactory(@Qualifier("restifyAsyncTaskExecutor") AsyncListenableTaskExecutor executor) {
+		public ListenableFutureTaskEndpointCallExecutableFactory<Object, Object> listenableFutureTaskEndpointCallExecutableFactory(@Qualifier("restifyAsyncTaskExecutor") AsyncListenableTaskExecutor executor) {
 			return new ListenableFutureTaskEndpointCallExecutableFactory<>(executor);
 		}
 
 		@Bean
-		public WebAsyncTaskEndpointCallExecutableFactory<Object> webAsyncTaskEndpointCallExecutableFactory(@Qualifier("restifyAsyncTaskExecutor") AsyncTaskExecutor executor) {
+		public WebAsyncTaskEndpointCallExecutableFactory<Object, Object> webAsyncTaskEndpointCallExecutableFactory(@Qualifier("restifyAsyncTaskExecutor") AsyncTaskExecutor executor) {
 			return new WebAsyncTaskEndpointCallExecutableFactory<>(asyncTimeout, executor);
 		}
 	}

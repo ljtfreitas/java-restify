@@ -22,7 +22,7 @@ public interface MyApi {
 	@GetMapping("/{id}")
 	public MyApiResponse get(@PathVariable String id);
 
-	@GetMapping("/api/{id}")
+	@GetMapping("/{id}")
 	public ListenableFuture<MyApiResponse> getAsync(@PathVariable String id);
 
 	@PostMapping(produces = "application/x-www-form-urlencoded")

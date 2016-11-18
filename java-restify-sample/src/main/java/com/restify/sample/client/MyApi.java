@@ -6,6 +6,7 @@ import java.util.function.BiConsumer;
 import com.restify.http.client.Headers;
 import com.restify.http.client.call.EndpointCall;
 import com.restify.http.client.request.async.EndpointCallCallback;
+import com.restify.http.client.request.async.EndpointCallSuccessCallback;
 import com.restify.http.client.response.EndpointResponse;
 import com.restify.http.contract.BodyParameter;
 import com.restify.http.contract.CallbackParameter;
@@ -72,4 +73,8 @@ public interface MyApi {
 	@Path("/{type}")
 	@Get
 	public void asyncWithConsumerCallback(@PathParameter String type, @CallbackParameter BiConsumer<MyApiResponse, Throwable> callback);
+
+	@Path("/{type}")
+	@Get
+	public void optionalAsync(@PathParameter String type, @CallbackParameter EndpointCallSuccessCallback<Optional<MyApiResponse>> callback);
 }

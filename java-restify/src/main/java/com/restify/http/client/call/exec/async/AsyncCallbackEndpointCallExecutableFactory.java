@@ -9,7 +9,7 @@ import com.restify.http.client.call.EndpointCall;
 import com.restify.http.client.call.async.AsyncEndpointCall;
 import com.restify.http.client.call.async.AsyncEndpointCallFactory;
 import com.restify.http.client.call.exec.EndpointCallExecutable;
-import com.restify.http.client.call.exec.EndpointCallExecutableFactory;
+import com.restify.http.client.call.exec.EndpointCallExecutableDecoratorFactory;
 import com.restify.http.client.request.async.EndpointCallFailureCallback;
 import com.restify.http.client.request.async.EndpointCallSuccessCallback;
 import com.restify.http.contract.metadata.EndpointMethod;
@@ -17,7 +17,7 @@ import com.restify.http.contract.metadata.EndpointMethodParameter;
 import com.restify.http.contract.metadata.EndpointMethodParameters;
 import com.restify.http.contract.metadata.reflection.JavaType;
 
-public class AsyncCallbackEndpointCallExecutableFactory<T> implements EndpointCallExecutableFactory<Void, T> {
+public class AsyncCallbackEndpointCallExecutableFactory<T, O> implements EndpointCallExecutableDecoratorFactory<Void, T, O> {
 
 	private final Executor executor;
 	private final AsyncEndpointCallFactory asyncEndpointCallFactory;
@@ -39,13 +39,18 @@ public class AsyncCallbackEndpointCallExecutableFactory<T> implements EndpointCa
 	public boolean supports(EndpointMethod endpointMethod) {
 		EndpointMethodParameters parameters = endpointMethod.parameters();
 		return endpointMethod.runnableAsync()
-				&& (!parameters.callbacks(EndpointCallSuccessCallback.class).isEmpty() || !parameters.callbacks(EndpointCallFailureCallback.class).isEmpty());
+				&& (!parameters.callbacks(EndpointCallSuccessCallback.class).isEmpty() 
+						|| !parameters.callbacks(EndpointCallFailureCallback.class).isEmpty());
 	}
 
 	@Override
-	public EndpointCallExecutable<Void, T> create(EndpointMethod endpointMethod) {
-		JavaType responseType = callbackArgumentType(endpointMethod.parameters().callbacks());
-		return new AsyncCallbackEndpointCallExecutable(responseType, endpointMethod.parameters().callbacks());
+	public JavaType returnType(EndpointMethod endpointMethod) {
+		return callbackArgumentType(endpointMethod.parameters().callbacks());
+	}
+
+	@Override
+	public EndpointCallExecutable<Void, O> create(EndpointMethod endpointMethod, EndpointCallExecutable<T, O> executable) {
+		return new AsyncCallbackEndpointCallExecutable(endpointMethod.parameters().callbacks(), executable);
 	}
 
 	private JavaType callbackArgumentType(Collection<EndpointMethodParameter> callbackMethodParameters) {
@@ -54,28 +59,28 @@ public class AsyncCallbackEndpointCallExecutableFactory<T> implements EndpointCa
 					.findFirst()
 						.map(p -> p.javaType().parameterized() ? p.javaType().as(ParameterizedType.class).getActualTypeArguments()[0] : Object.class)
 							.map(t -> JavaType.of(t))
-								.orElseGet(() -> JavaType.of(Object.class));
+								.orElseGet(() -> JavaType.of(Void.class));
 	}
 
-	private class AsyncCallbackEndpointCallExecutable implements EndpointCallExecutable<Void, T> {
+	private class AsyncCallbackEndpointCallExecutable implements EndpointCallExecutable<Void, O> {
 
-		private final JavaType type;
 		private final Collection<EndpointMethodParameter> callbackMethodParameters;
+		private final EndpointCallExecutable<T, O> delegate;
 
-		private AsyncCallbackEndpointCallExecutable(JavaType type, Collection<EndpointMethodParameter> callbackMethodParameters) {
-			this.type = type;
+		public AsyncCallbackEndpointCallExecutable(Collection<EndpointMethodParameter> callbackMethodParameters, EndpointCallExecutable<T, O> executable) {
 			this.callbackMethodParameters = callbackMethodParameters;
+			this.delegate = executable;
 		}
 
 		@Override
 		public JavaType returnType() {
-			return type;
+			return delegate.returnType();
 		}
 
 		@SuppressWarnings("unchecked")
 		@Override
-		public Void execute(EndpointCall<T> call, Object[] args) {
-			AsyncEndpointCall<T> asyncEndpointCall = asyncEndpointCallFactory.create(call, executor);
+		public Void execute(EndpointCall<O> call, Object[] args) {
+			AsyncEndpointCall<T> asyncEndpointCall = asyncEndpointCallFactory.create(() -> delegate.execute(call, args), executor);
 
 			EndpointCallSuccessCallback<T> successCallback = callback(EndpointCallSuccessCallback.class, args);
 			EndpointCallFailureCallback failureCallback = callback(EndpointCallFailureCallback.class, args);

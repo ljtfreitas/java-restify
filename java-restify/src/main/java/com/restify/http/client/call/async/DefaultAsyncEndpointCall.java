@@ -8,7 +8,7 @@ import com.restify.http.client.request.async.EndpointCallCallback;
 import com.restify.http.client.request.async.EndpointCallFailureCallback;
 import com.restify.http.client.request.async.EndpointCallSuccessCallback;
 
-public class DefaultAsyncEndpointCall<T> implements AsyncEndpointCall<T> {
+class DefaultAsyncEndpointCall<T> implements AsyncEndpointCall<T> {
 
 	private final Executor executor;
 	private final EndpointCall<T> source;

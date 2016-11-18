@@ -28,18 +28,22 @@ public class EndpointMethod {
 
 	public EndpointMethod(Method javaMethod, String path, String httpMethod, EndpointMethodParameters parameters,
 			EndpointHeaders headers) {
-		this(javaMethod, path, httpMethod, parameters, headers, null);
+		this(javaMethod, path, httpMethod, parameters, headers, (Type) null);
 	}
 
 	public EndpointMethod(Method javaMethod, String path, String httpMethod, EndpointMethodParameters parameters,
 			EndpointHeaders headers, Type returnType) {
+		this(javaMethod, path, httpMethod, parameters, headers, JavaType.of(Optional.ofNullable(returnType).orElseGet(() -> javaMethod.getGenericReturnType())));
+	}
 
+	private EndpointMethod(Method javaMethod, String path, String httpMethod, EndpointMethodParameters parameters,
+			EndpointHeaders headers, JavaType returnType) {
 		this.javaMethod = nonNull(javaMethod, "EndpointMethod needs a Java method.");
 		this.path = nonNull(path, "EndpointMethod needs a endpoint path.");
 		this.httpMethod = nonNull(httpMethod, "EndpointMethod needs a HTTP method.");
 		this.parameters = nonNull(parameters, "EndpointMethod needs a parameters collection.");
 		this.headers = nonNull(headers, "EndpointMethod needs a HTTP headers collection.");
-		this.returnType = JavaType.of(Optional.ofNullable(returnType).orElse(javaMethod.getGenericReturnType()));
+		this.returnType = returnType;
 	}
 
 	public String path() {
@@ -78,6 +82,10 @@ public class EndpointMethod {
 				.resolve(args);
 
 		return endpoint + query;
+	}
+
+	public EndpointMethod with(JavaType returnType) {
+		return new EndpointMethod(javaMethod, path, httpMethod, parameters, headers, returnType);
 	}
 
 	@Override

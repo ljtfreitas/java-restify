@@ -6,7 +6,7 @@ import com.restify.http.client.call.exec.EndpointCallExecutableFactory;
 import com.restify.http.contract.metadata.EndpointMethod;
 import com.restify.http.contract.metadata.reflection.JavaType;
 
-public class RunnableEndpointCallExecutableFactory<T> implements EndpointCallExecutableFactory<Runnable, T> {
+public class RunnableEndpointCallExecutableFactory implements EndpointCallExecutableFactory<Runnable, Void> {
 
 	@Override
 	public boolean supports(EndpointMethod endpointMethod) {
@@ -14,11 +14,11 @@ public class RunnableEndpointCallExecutableFactory<T> implements EndpointCallExe
 	}
 
 	@Override
-	public EndpointCallExecutable<Runnable, T> create(EndpointMethod endpointMethod) {
-		return new RunnableEndpointMethodExecutable(JavaType.of(void.class));
+	public EndpointCallExecutable<Runnable, Void> create(EndpointMethod endpointMethod) {
+		return new RunnableEndpointMethodExecutable(JavaType.of(Void.class));
 	}
 
-	private class RunnableEndpointMethodExecutable implements EndpointCallExecutable<Runnable, T> {
+	private class RunnableEndpointMethodExecutable implements EndpointCallExecutable<Runnable, Void> {
 
 		private final JavaType type;
 
@@ -32,7 +32,7 @@ public class RunnableEndpointCallExecutableFactory<T> implements EndpointCallExe
 		}
 
 		@Override
-		public Runnable execute(EndpointCall<T> call, Object[] args) {
+		public Runnable execute(EndpointCall<Void> call, Object[] args) {
 			return () -> call.execute();
 		}
 	}

@@ -1,28 +1,18 @@
 package com.restify.http.spring.client.call.exec;
 
-import org.springframework.core.convert.converter.Converter;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 
 import com.restify.http.client.call.EndpointCall;
 import com.restify.http.client.call.exec.EndpointCallExecutable;
-import com.restify.http.client.call.exec.EndpointCallExecutableFactory;
-import com.restify.http.client.response.EndpointResponse;
+import com.restify.http.client.call.exec.EndpointCallExecutableDecoratorFactory;
 import com.restify.http.contract.metadata.EndpointMethod;
 import com.restify.http.contract.metadata.reflection.JavaType;
 import com.restify.http.contract.metadata.reflection.SimpleParameterizedType;
 
-public class HttpHeadersEndpointCallExecutableFactory implements EndpointCallExecutableFactory<HttpHeaders, EndpointResponse<Object>> {
+public class HttpHeadersEndpointCallExecutableFactory implements EndpointCallExecutableDecoratorFactory<HttpHeaders, ResponseEntity<Void>, Void> {
 
-	private final Converter<EndpointResponse<Object>, ResponseEntity<Object>> endpointResponseConverter;
-
-	public HttpHeadersEndpointCallExecutableFactory() {
-		this(new ResponseEntityConverter<>());
-	}
-
-	public HttpHeadersEndpointCallExecutableFactory(Converter<EndpointResponse<Object>, ResponseEntity<Object>> endpointResponseConverter) {
-		this.endpointResponseConverter = endpointResponseConverter;
-	}
+	private static final JavaType DEFAULT_RETURN_TYPE = JavaType.of(new SimpleParameterizedType(ResponseEntity.class, null, Void.class));
 
 	@Override
 	public boolean supports(EndpointMethod endpointMethod) {
@@ -30,27 +20,31 @@ public class HttpHeadersEndpointCallExecutableFactory implements EndpointCallExe
 	}
 
 	@Override
-	public EndpointCallExecutable<HttpHeaders, EndpointResponse<Object>> create(EndpointMethod endpointMethod) {
-		return new HttpHeadersEndpointCallExecutable(JavaType.of(new SimpleParameterizedType(EndpointResponse.class, null, Void.class)));
+	public JavaType returnType(EndpointMethod endpointMethod) {
+		return DEFAULT_RETURN_TYPE;
 	}
 
-	private class HttpHeadersEndpointCallExecutable implements EndpointCallExecutable<HttpHeaders, EndpointResponse<Object>> {
+	@Override
+	public EndpointCallExecutable<HttpHeaders, Void> create(EndpointMethod endpointMethod, EndpointCallExecutable<ResponseEntity<Void>, Void> executable) {
+		return new HttpHeadersEndpointCallExecutable(executable);
+	}
 
-		private final JavaType returnType;
+	private class HttpHeadersEndpointCallExecutable implements EndpointCallExecutable<HttpHeaders, Void> {
 
-		private HttpHeadersEndpointCallExecutable(JavaType returnType) {
-			this.returnType = returnType;
+		private final EndpointCallExecutable<ResponseEntity<Void>, Void> delegate;
+
+		public HttpHeadersEndpointCallExecutable(EndpointCallExecutable<ResponseEntity<Void>, Void> executable) {
+			this.delegate = executable;
 		}
 
 		@Override
 		public JavaType returnType() {
-			return returnType;
+			return delegate.returnType();
 		}
 
 		@Override
-		public HttpHeaders execute(EndpointCall<EndpointResponse<Object>> call, Object[] args) {
-			EndpointResponse<Object> response = call.execute();
-			return endpointResponseConverter.convert(response).getHeaders();
+		public HttpHeaders execute(EndpointCall<Void> call, Object[] args) {
+			return delegate.execute(call, args).getHeaders();
 		}
 	}
 }

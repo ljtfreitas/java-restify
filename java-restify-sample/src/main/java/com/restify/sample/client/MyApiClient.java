@@ -7,6 +7,7 @@ import java.util.concurrent.Executors;
 import com.restify.http.RestifyProxyBuilder;
 import com.restify.http.client.call.EndpointCall;
 import com.restify.http.client.request.async.EndpointCallCallback;
+import com.restify.http.client.request.async.EndpointCallSuccessCallback;
 import com.restify.http.client.response.EndpointResponse;
 import com.restify.http.contract.ContentType;
 import com.restify.http.contract.MultipartFile;
@@ -74,6 +75,13 @@ public class MyApiClient {
 		});
 
 		myApi.asyncWithConsumerCallback("json", (r, ex) -> System.out.println("Response: " + r + " (on thread " + Thread.currentThread() + ")")); 
+
+		myApi.optionalAsync("json", new EndpointCallSuccessCallback<Optional<MyApiResponse>>() {
+			@Override
+			public void onSuccess(Optional<MyApiResponse> response) {
+				System.out.println("Response: " + response + " (on thread " + Thread.currentThread() + ")");
+			}
+		});
 
 		executor.shutdown();
 	}

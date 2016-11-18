@@ -9,11 +9,11 @@ import org.springframework.web.context.request.async.WebAsyncTask;
 
 import com.restify.http.client.call.EndpointCall;
 import com.restify.http.client.call.exec.EndpointCallExecutable;
-import com.restify.http.client.call.exec.EndpointCallExecutableFactory;
+import com.restify.http.client.call.exec.EndpointCallExecutableDecoratorFactory;
 import com.restify.http.contract.metadata.EndpointMethod;
 import com.restify.http.contract.metadata.reflection.JavaType;
 
-public class WebAsyncTaskEndpointCallExecutableFactory<T> implements EndpointCallExecutableFactory<WebAsyncTask<T>, T> {
+public class WebAsyncTaskEndpointCallExecutableFactory<T, O> implements EndpointCallExecutableDecoratorFactory<WebAsyncTask<T>, T, O> {
 
 	private final Long timeout;
 	private final AsyncTaskExecutor asyncTaskExecutor;
@@ -41,30 +41,37 @@ public class WebAsyncTaskEndpointCallExecutableFactory<T> implements EndpointCal
 	}
 
 	@Override
-	public EndpointCallExecutable<WebAsyncTask<T>, T> create(EndpointMethod endpointMethod) {
-		JavaType type = endpointMethod.returnType();
-
-		Type responseType = type.parameterized() ? type.as(ParameterizedType.class).getActualTypeArguments()[0] : Object.class;
-
-		return new WebAsyncTaskEndpointCallExecutable(JavaType.of(responseType));
+	public JavaType returnType(EndpointMethod endpointMethod) {
+		return JavaType.of(unwrap(endpointMethod.returnType()));
 	}
 
-	private class WebAsyncTaskEndpointCallExecutable implements EndpointCallExecutable<WebAsyncTask<T>, T> {
+	private Type unwrap(JavaType declaredReturnType) {
+		return declaredReturnType.parameterized() ?
+				declaredReturnType.as(ParameterizedType.class).getActualTypeArguments()[0] :
+					Object.class;
+	}
 
-		private final JavaType returnType;
+	@Override
+	public EndpointCallExecutable<WebAsyncTask<T>, O> create(EndpointMethod endpointMethod, EndpointCallExecutable<T, O> executable) {
+		return new WebAsyncTaskEndpointCallExecutable(executable);
+	}
 
-		private WebAsyncTaskEndpointCallExecutable(JavaType returnType) {
-			this.returnType = returnType;
+	private class WebAsyncTaskEndpointCallExecutable implements EndpointCallExecutable<WebAsyncTask<T>, O> {
+
+		private final EndpointCallExecutable<T, O> delegate;
+
+		public WebAsyncTaskEndpointCallExecutable(EndpointCallExecutable<T, O> executable) {
+			this.delegate = executable;
 		}
 
 		@Override
 		public JavaType returnType() {
-			return returnType;
+			return delegate.returnType();
 		}
 
 		@Override
-		public WebAsyncTask<T> execute(EndpointCall<T> call, Object[] args) {
-			return new WebAsyncTask<T>(timeout, asyncTaskExecutor, () -> call.execute());
+		public WebAsyncTask<T> execute(EndpointCall<O> call, Object[] args) {
+			return new WebAsyncTask<T>(timeout, asyncTaskExecutor, () -> delegate.execute(call, args));
 		}
 	}
 }

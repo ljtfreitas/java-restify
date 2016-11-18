@@ -3,6 +3,8 @@ package com.restify.http.spring.client.call.exec;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
+import static org.mockito.Matchers.anyVararg;
 import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Method;
@@ -13,13 +15,12 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
-import org.springframework.core.convert.converter.Converter;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 
 import com.restify.http.client.call.exec.EndpointCallExecutable;
-import com.restify.http.client.response.EndpointResponse;
 import com.restify.http.contract.metadata.EndpointMethod;
 import com.restify.http.contract.metadata.reflection.JavaType;
 import com.restify.http.contract.metadata.reflection.SimpleParameterizedType;
@@ -28,10 +29,7 @@ import com.restify.http.contract.metadata.reflection.SimpleParameterizedType;
 public class HttpHeadersEndpointCallExecutableFactoryTest {
 
 	@Mock
-	private Converter<EndpointResponse<Object>, ResponseEntity<Object>> endpointResponseConverterMock;
-
-	@Mock
-	private EndpointResponse<Object> endpointResponseMock;
+	private EndpointCallExecutable<ResponseEntity<Void>, Void> delegate;
 
 	@InjectMocks
 	private HttpHeadersEndpointCallExecutableFactory factory;
@@ -41,9 +39,15 @@ public class HttpHeadersEndpointCallExecutableFactoryTest {
 	@Before
 	public void setup() {
 		httpHeaders = new HttpHeaders();
+		httpHeaders.setContentType(MediaType.APPLICATION_JSON);
 
-		when(endpointResponseConverterMock.convert(endpointResponseMock))
-			.thenReturn(new ResponseEntity<>(httpHeaders, HttpStatus.OK));
+		ResponseEntity<Void> responseEntity = new ResponseEntity<>(null, httpHeaders, HttpStatus.OK);
+
+		when(delegate.execute(any(), anyVararg()))
+			.thenReturn(responseEntity);
+
+		when(delegate.returnType())
+			.thenReturn(JavaType.of(Void.class));
 	}
 
 	@Test
@@ -57,14 +61,20 @@ public class HttpHeadersEndpointCallExecutableFactoryTest {
 	}
 
 	@Test
-	public void shouldCreateExecutableWithParameterizedEndpointResponseReturnTypeWhenEndpointMethodReturnTypeIsHttpHeaders() throws Exception {
-		EndpointCallExecutable<HttpHeaders, EndpointResponse<Object>> executable = factory.create(new SimpleEndpointMethod(SomeType.class.getMethod("httpHeaders")));
+	public void shouldReturnResponseEntityDecoratedType() throws Exception {
+		assertEquals(JavaType.of(new SimpleParameterizedType(ResponseEntity.class, null, Void.class)),
+				factory.returnType(new SimpleEndpointMethod(SomeType.class.getMethod("httpHeaders"))));
+	}
 
-		HttpHeaders result = executable.execute(() -> endpointResponseMock, null);
+	@Test
+	public void shouldCreateExecutableWithResponseEntityReturnType() throws Exception {
+		EndpointCallExecutable<HttpHeaders, Void> executable = factory
+				.create(new SimpleEndpointMethod(SomeType.class.getMethod("httpHeaders")), delegate);
+
+		HttpHeaders result = executable.execute(() -> null, null);
 
 		assertEquals(httpHeaders, result);
-
-		assertEquals(JavaType.of(new SimpleParameterizedType(EndpointResponse.class, null, Void.class)), executable.returnType());
+		assertEquals(delegate.returnType(), executable.returnType());
 	}
 
 	interface SomeType {

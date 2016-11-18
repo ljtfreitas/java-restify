@@ -93,6 +93,9 @@ public class EndpointRequest {
 				.append(", ")
 				.append("Body: ")
 					.append(body)
+				.append(", ")
+					.append("Response Type: ")
+					.append(responseType)
 			.append("]");
 
 		return report.toString();
