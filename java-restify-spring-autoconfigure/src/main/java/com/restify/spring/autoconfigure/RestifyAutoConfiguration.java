@@ -3,11 +3,6 @@ package com.restify.spring.autoconfigure;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.BeanFactoryAware;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -17,11 +12,9 @@ import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.web.WebClientAutoConfiguration;
 import org.springframework.boot.web.client.RestTemplateBuilder;
-import org.springframework.context.EnvironmentAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
 import org.springframework.core.env.Environment;
 import org.springframework.core.task.AsyncListenableTaskExecutor;
 import org.springframework.core.task.AsyncTaskExecutor;
@@ -46,10 +39,8 @@ import com.restify.http.spring.contract.SpringWebContractReader;
 import com.restify.http.spring.contract.metadata.SpelDynamicParameterExpressionResolver;
 import com.restify.http.spring.contract.metadata.SpringDynamicParameterExpressionResolver;
 import com.restify.spring.autoconfigure.RestifyAutoConfiguration.RestifyAutoConfigurationRegistrar;
-import com.restify.spring.autoconfigure.RestifyProperties.RestifyApiClient;
-import com.restify.spring.configure.RestifyProxyBeanBuilder;
+import com.restify.spring.configure.BaseRestifyConfigurationRegistrar;
 import com.restify.spring.configure.RestifyProxyFactoryBean;
-import com.restify.spring.configure.RestifyableType;
 import com.restify.spring.configure.RestifyableTypeScanner;
 
 @Configuration
@@ -148,56 +139,13 @@ public class RestifyAutoConfiguration {
 		}
 	}
 
-	protected static class RestifyAutoConfigurationRegistrar implements ImportBeanDefinitionRegistrar, BeanFactoryAware, EnvironmentAware {
-
-		private static final Logger log = LoggerFactory.getLogger(RestifyAutoConfigurationRegistrar.class);
-
-		private BeanFactory beanFactory;
-
-		private RestifyProperties restifyProperties;
+	protected static class RestifyAutoConfigurationRegistrar extends BaseRestifyConfigurationRegistrar {
 
 		private RestifyableTypeScanner scanner = new RestifyableTypeScanner();
 
 		@Override
 		public void registerBeanDefinitions(AnnotationMetadata metadata, BeanDefinitionRegistry registry) {
-			AutoConfigurationPackages.get(beanFactory).forEach(p -> scan(p, registry));
-		}
-
-		private void scan(String packageName, BeanDefinitionRegistry registry) {
-			scanner.findCandidateComponents(packageName)
-				.stream()
-					.map(candidate -> new RestifyableType(candidate.getBeanClassName()))
-						.forEach(type -> create(type, registry));
-		}
-
-		private void create(RestifyableType type, BeanDefinitionRegistry registry) {
-			RestifyApiClient restifyApiClient = restifyProperties.client(type);
-
-			String endpoint = type.endpoint().map(e -> resolve(e)).orElseGet(restifyApiClient::getEndpoint);
-
-			RestifyProxyBeanBuilder builder = new RestifyProxyBeanBuilder()
-					.objectType(type.objectType())
-						.endpoint(endpoint)
-							.asyncExecutorServiceName("restifyAsyncExecutorService");
-
-			registry.registerBeanDefinition(type.name(), builder.build());
-
-			log.info("Create @Restifyable bean -> {} (API [{}] metadata: Description: [{}], and endpoint: [{}])",
-					type.objectType(), type.name(), type.description(), endpoint);
-		}
-
-		private String resolve(String expression) {
-			return restifyProperties.resolve(expression);
-		}
-
-		@Override
-		public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
-			this.beanFactory = beanFactory;
-		}
-
-		@Override
-		public void setEnvironment(Environment environment) {
-			this.restifyProperties = new RestifyProperties(environment);
+			doScan(AutoConfigurationPackages.get(beanFactory), scanner, registry);
 		}
 	}
 }

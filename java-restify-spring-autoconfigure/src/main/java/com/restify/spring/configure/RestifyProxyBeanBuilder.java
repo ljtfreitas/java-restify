@@ -4,11 +4,13 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 
-public class RestifyProxyBeanBuilder {
+import com.restify.http.client.authentication.Authentication;
+
+class RestifyProxyBeanBuilder {
 
 	private final BeanDefinitionBuilder builder;
 
-	public RestifyProxyBeanBuilder() {
+	RestifyProxyBeanBuilder() {
 		this.builder = BeanDefinitionBuilder.genericBeanDefinition(RestifyProxyFactoryBean.class);
 	}
 
@@ -24,6 +26,13 @@ public class RestifyProxyBeanBuilder {
 
 	public RestifyProxyBeanBuilder asyncExecutorServiceName(String executorServiceName) {
 		builder.addPropertyReference("asyncExecutorService", executorServiceName);
+		return this;
+	}
+
+	public RestifyProxyBeanBuilder authentication(Authentication authentication) {
+		if (authentication != null) {
+			builder.addPropertyValue("authentication", authentication);
+		}
 		return this;
 	}
 

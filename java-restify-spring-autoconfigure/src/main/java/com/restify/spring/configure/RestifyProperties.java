@@ -1,11 +1,9 @@
-package com.restify.spring.autoconfigure;
+package com.restify.spring.configure;
 
 import org.springframework.boot.bind.PropertySourcesPropertyValues;
 import org.springframework.boot.bind.RelaxedDataBinder;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.Environment;
-
-import com.restify.spring.configure.RestifyableType;
 
 class RestifyProperties {
 
@@ -15,7 +13,7 @@ class RestifyProperties {
 		this.environment = environment;
 	}
 
-	RestifyApiClient client(RestifyableType type) {
+	public RestifyApiClient client(RestifyableType type) {
 		RestifyApiClient restifyApiClient = new RestifyApiClient();
 
 		RelaxedDataBinder dataBinder = new RelaxedDataBinder(restifyApiClient, "restify." + type.name());
@@ -26,20 +24,7 @@ class RestifyProperties {
 		return restifyApiClient;
 	}
 
-	String resolve(String expression) {
+	public String resolve(String expression) {
 		return ((ConfigurableEnvironment) environment).resolvePlaceholders(expression);
-	}
-
-	class RestifyApiClient {
-
-		private String endpoint;
-
-		public String getEndpoint() {
-			return endpoint;
-		}
-
-		public void setEndpoint(String endpoint) {
-			this.endpoint = endpoint;
-		}
 	}
 }

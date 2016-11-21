@@ -7,16 +7,8 @@ import java.util.Map;
 import java.util.Set;
 import java.util.regex.Pattern;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeansException;
-import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.BeanFactoryAware;
-import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
-import org.springframework.context.ResourceLoaderAware;
 import org.springframework.context.annotation.FilterType;
-import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
 import org.springframework.core.annotation.AnnotationAttributes;
 import org.springframework.core.io.ResourceLoader;
 import org.springframework.core.type.AnnotationMetadata;
@@ -28,11 +20,7 @@ import org.springframework.core.type.filter.TypeFilter;
 
 import com.restify.http.util.Tryable;
 
-class RestifyConfigurationRegistrar implements ImportBeanDefinitionRegistrar, BeanFactoryAware, ResourceLoaderAware {
-
-	private static final Logger log = LoggerFactory.getLogger(RestifyConfigurationRegistrar.class);
-
-	private BeanFactory beanFactory;
+class RestifyConfigurationRegistrar extends BaseRestifyConfigurationRegistrar {
 
 	private ResourceLoader resourceLoader;
 
@@ -45,30 +33,7 @@ class RestifyConfigurationRegistrar implements ImportBeanDefinitionRegistrar, Be
 
 		String[] packages = attributes.packages().length == 0 ? new String[] {packageOf(metadata.getClassName())} : attributes.packages();
 
-		Arrays.stream(packages).forEach(p -> {
-			scanner.findCandidateComponents(p)
-				.stream()
-					.map(candidate -> new RestifyableType(candidate.getBeanClassName()))
-						.forEach(type -> create(type, registry));
-		});
-	}
-
-	private void create(RestifyableType type, BeanDefinitionRegistry registry) {
-		String endpoint = type.endpoint().map(e -> resolve(e)).orElse(null);
-
-		RestifyProxyBeanBuilder builder = new RestifyProxyBeanBuilder()
-				.objectType(type.objectType())
-					.endpoint(endpoint)
-						.asyncExecutorServiceName("restifyAsyncExecutorService");
-
-		registry.registerBeanDefinition(type.name(), builder.build());
-
-		log.info("Create @Restifyable bean -> {} (API [{}] metadata: Description: [{}], and endpoint: [{}])",
-				type.objectType(), type.name(), type.description(), endpoint);
-	}
-
-	private String resolve(String expression) {
-		return ((ConfigurableBeanFactory) beanFactory).resolveEmbeddedValue(expression);
+		doScan(Arrays.asList(packages), scanner, registry);
 	}
 
 	private String packageOf(String className) {
@@ -118,16 +83,6 @@ class RestifyConfigurationRegistrar implements ImportBeanDefinitionRegistrar, Be
 		});
 
 		return typeFilters;
-	}
-
-	@Override
-	public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
-		this.beanFactory = beanFactory;
-	}
-
-	@Override
-	public void setResourceLoader(ResourceLoader resourceLoader) {
-		this.resourceLoader = resourceLoader;
 	}
 
 	private class EnableRestifyAnnotationAttributes {

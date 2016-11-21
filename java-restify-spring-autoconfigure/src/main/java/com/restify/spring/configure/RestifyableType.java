@@ -4,12 +4,12 @@ import static org.springframework.core.annotation.AnnotationUtils.findAnnotation
 
 import java.util.Optional;
 
-public class RestifyableType {
+class RestifyableType {
 
 	private final Class<?> objectType;
 	private final Restifyable restifyable;
 
-	public RestifyableType(String objectTypeName) {
+	RestifyableType(String objectTypeName) {
 		try {
 			this.objectType = Class.forName(objectTypeName);
 		} catch (ClassNotFoundException e) {

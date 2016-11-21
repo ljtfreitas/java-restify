@@ -16,30 +16,30 @@ public class HttpMessageConverters {
 		this.converters = new ArrayList<>(converters);
 	}
 
-	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@SuppressWarnings("unchecked")
 	public <T> Optional<HttpMessageReader<T>> readerOf(ContentType contentType, Type type) {
 		return converters.stream()
 				.filter(c -> c instanceof HttpMessageReader)
-					.map(c -> (HttpMessageReader) c)
+					.map(c -> (HttpMessageReader<T>) c)
 						.filter(c -> contentType.is(c.contentType()) && c.canRead(type))
 							.map(c -> ((HttpMessageReader<T>) c))
 								.findFirst();
 	}
 
-	@SuppressWarnings("rawtypes")
+	@SuppressWarnings("unchecked")
 	public <T> Collection<HttpMessageReader<T>> readersOf(Type type) {
 		return converters.stream()
 				.filter(c -> c instanceof HttpMessageReader)
-					.map(c -> (HttpMessageReader) c)
+					.map(c -> (HttpMessageReader<T>) c)
 						.filter(c -> c.canRead(type))
 							.collect(Collectors.toList());
 	}
 
-	@SuppressWarnings({ "rawtypes", "unchecked" })
+	@SuppressWarnings("unchecked")
 	public <T> Optional<HttpMessageWriter<T>> writerOf(ContentType contentType, Class<?> type) {
 		return converters.stream()
 				.filter(c -> c instanceof HttpMessageWriter)
-					.map(c -> (HttpMessageWriter) c)
+					.map(c -> (HttpMessageWriter<T>) c)
 						.filter(c -> contentType.is(c.contentType()) && c.canWrite(type))
 							.map(c -> (HttpMessageWriter<T>) c)
 								.findFirst();
