@@ -124,7 +124,7 @@ class RestifyConfigurationRegistrar extends BaseRestifyConfigurationRegistrar {
 
 		RestifyExcludeFilter[] exclude() {
 			return Arrays.stream((AnnotationAttributes[]) attributes.get("exclude"))
-						.map(RestifyExcludeFilter::new)
+						.map(a -> new RestifyExcludeFilter(a))
 							.toArray(RestifyExcludeFilter[]::new);
 		}
 	}
