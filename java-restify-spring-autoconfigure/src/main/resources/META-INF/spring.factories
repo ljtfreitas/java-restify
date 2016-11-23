@@ -1,2 +1,2 @@
 org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
-com.restify.spring.autoconfigure.RestifyAutoConfiguration
+com.github.ljtfreitas.restify.spring.autoconfigure.RestifyAutoConfiguration

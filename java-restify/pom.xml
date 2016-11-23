@@ -3,13 +3,13 @@
 
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-		<groupId>com.restify</groupId>
+		<groupId>com.github.ljtfreitas</groupId>
 		<artifactId>java-restify-group</artifactId>
 		<version>0.0.1-SNAPSHOT</version>
 	</parent>
-
 	<artifactId>java-restify</artifactId>
-	<name>Java Restify</name>
+
+	<name>java-restify</name>
 	<description>Java Restify Project</description>
 
 	<dependencies>

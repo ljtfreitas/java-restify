@@ -2,11 +2,15 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
-		<groupId>com.restify</groupId>
+		<groupId>com.github.ljtfreitas</groupId>
 		<artifactId>java-restify-group</artifactId>
 		<version>0.0.1-SNAPSHOT</version>
 	</parent>
 	<artifactId>java-restify-spring-starter</artifactId>
+
+	<name>java-restify-spring-starter</name>
+	<description>Java Restify Spring Boot Starter</description>
+
 	<dependencies>
 		<dependency>
 			<groupId>${project.groupId}</groupId>

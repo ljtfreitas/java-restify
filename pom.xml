@@ -2,20 +2,26 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>com.restify</groupId>
+	<groupId>com.github.ljtfreitas</groupId>
 	<artifactId>java-restify-group</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 
 	<packaging>pom</packaging>
 
-	<name>Java Restify Group</name>
-	<description>Java Restify Maven Group</description>
+	<name>java-restify-group</name>
+	<description>Java Restify Maven Group (Parent)</description>
+	<url>https://github.com/ljtfreitas/java-restify</url>
+
+	<developers>
+		<developer>
+			<name>Tiago de Freitas Lima</name>
+			<email>ljtfreitas@gmail.com</email>
+		</developer>
+	</developers>
 
 	<modules>
 		<module>java-restify</module>
-		<module>java-restify-sample</module>
 		<module>java-restify-spring</module>
-		<module>java-restify-spring-sample</module>
 		<module>java-restify-spring-autoconfigure</module>
 		<module>java-restify-spring-starter</module>
 	</modules>
@@ -60,6 +66,68 @@
 					<compilerArgument>-parameters</compilerArgument>
 				</configuration>
 			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-source-plugin</artifactId>
+				<version>2.0.4</version>
+				<executions>
+					<execution>
+						<id>attach-sources</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-javadoc-plugin</artifactId>
+				<version>2.3</version>
+				<configuration>
+					<stylesheet>maven</stylesheet>
+					<stylesheetfile>${project.parent.basedir}/javadoc/stylesheet.css</stylesheetfile>
+				</configuration>
+				<executions>
+					<execution>
+						<id>attach-javadocs</id>
+						<goals>
+							<goal>jar</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-gpg-plugin</artifactId>
+				<version>1.5</version>
+				<executions>
+					<execution>
+						<id>sign-artifacts</id>
+						<phase>verify</phase>
+						<goals>
+							<goal>sign</goal>
+						</goals>
+					</execution>
+				</executions>
+			</plugin>
 		</plugins>
 	</build>
+
+	<scm>
+		<connection>scm:git:git://github.com/ljtfreitas/java-restify.git</connection>
+		<developerConnection>scm:git:git://github.com/ljtfreitas/java-restify.git</developerConnection>
+		<url>scm:git:git://github.com/ljtfreitas/java-restify.git</url>
+	</scm>
+
+	<issueManagement>
+		<system>Github Issues</system>
+		<url>https://github.com/ljtfreitas/java-restify/issues</url>
+	</issueManagement>
+
+	<licenses>
+		<license>
+			<name>MIT License</name>
+			<url>http://www.opensource.org/licenses/mit-license.php</url>
+		</license>
+	</licenses>
 </project>
