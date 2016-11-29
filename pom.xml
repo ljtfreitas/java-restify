@@ -3,7 +3,7 @@
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>com.github.ljtfreitas</groupId>
 	<artifactId>java-restify-group</artifactId>
-	<version>1.0.0</version>
+	<version>1.0.1-SNAPSHOT</version>
 
 	<packaging>pom</packaging>
 
@@ -148,7 +148,7 @@
 		<connection>scm:git:git@github.com:ljtfreitas/java-restify.git</connection>
 		<developerConnection>scm:git:git@github.com:ljtfreitas/java-restify.git</developerConnection>
 		<url>https://github.com/ljtfreitas/java-restify</url>
-	  <tag>java-restify-group-1.0.0</tag>
+	  <tag>HEAD</tag>
   </scm>
 
 	<issueManagement>
