@@ -39,7 +39,7 @@ public class EndpointQueryParameterResolver {
 
 	public String resolve(Object[] args) {
 		String query = parameters.stream().filter(p -> p.query())
-			.map(p -> p.resolve(args[p.position()]))
+			.map(p -> Optional.ofNullable(args[p.position()]).map(a -> p.resolve(a)).orElse(""))
 				.filter(p -> !"".equals(p))
 					.collect(Collectors.joining("&"));
 

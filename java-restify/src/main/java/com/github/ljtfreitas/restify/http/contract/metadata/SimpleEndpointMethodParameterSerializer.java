@@ -31,7 +31,7 @@ public class SimpleEndpointMethodParameterSerializer implements EndpointMethodPa
 
 	@Override
 	public String serialize(String name, Type type, Object source) {
-		return source.toString();
+		return source == null ? null : source.toString();
 	}
 
 }

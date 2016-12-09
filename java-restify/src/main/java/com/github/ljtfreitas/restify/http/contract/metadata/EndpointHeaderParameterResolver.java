@@ -25,6 +25,7 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.contract.metadata;
 
+import java.util.Optional;
 import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
 
@@ -50,7 +51,8 @@ public class EndpointHeaderParameterResolver {
 
 			parameters.find(name)
 				.filter(p -> p.header())
-					.ifPresent(p -> matcher.appendReplacement(builder, p.resolve(args[p.position()])));
+					.ifPresent(p -> matcher.appendReplacement(builder,
+							Optional.ofNullable(args[p.position()]).map(a -> p.resolve(a)).orElse("")));
 		}
 
 		matcher.appendTail(builder);

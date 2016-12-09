@@ -33,7 +33,20 @@ public class EndpointHeaderParameterResolverTest {
 	}
 
 	@Test
-	public void shouldResolveStaticHeaderArgumentOn() {
+	public void shouldResolveToEmptyWhenDynamicHeaderArgumentValueIsNull() {
+		parameters.put(new EndpointMethodParameter(0, "contentType", String.class, EndpointMethodParameterType.HEADER));
+
+		EndpointHeaderParameterResolver resolver = new EndpointHeaderParameterResolver("{contentType}", parameters);
+
+		Object[] args = new Object[] { null };
+
+		String value = resolver.resolve(args);
+
+		assertEquals("", value);
+	}
+
+	@Test
+	public void shouldResolveStaticHeaderArgument() {
 		parameters.put(new EndpointMethodParameter(0, "any", String.class, EndpointMethodParameterType.PATH));
 
 		EndpointHeaderParameterResolver resolver = new EndpointHeaderParameterResolver("application/json", parameters);

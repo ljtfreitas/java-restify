@@ -1,13 +1,12 @@
 package com.github.ljtfreitas.restify.http.contract.metadata;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 
 import java.util.ArrayList;
 import java.util.Collection;
 
 import org.junit.Test;
-
-import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethodQueryParameterSerializer;
 
 public class EndpointMethodQueryParameterSerializerTest {
 
@@ -32,6 +31,15 @@ public class EndpointMethodQueryParameterSerializerTest {
 		String result = serializer.serialize("parameter", String.class, value);
 
 		assertEquals("parameter=value1", result);
+	}
+
+	@Test
+	public void shouldReturnNullWhenStringSourceIsNull() {
+		String value = null;
+
+		String result = serializer.serialize("parameter", String.class, value);
+
+		assertNull(result);
 	}
 
 }

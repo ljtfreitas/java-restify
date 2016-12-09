@@ -36,7 +36,10 @@ public class EndpointMethodFormObjectParameterSerializer implements EndpointMeth
 
 	@Override
 	public String serialize(String name, Type type, Object source) {
-		if (isFormObject(source)) {
+		if (source == null) {
+			return null;
+
+		} else if (isFormObject(source)) {
 			return doSerialize(source);
 		} else {
 			throw new IllegalArgumentException("EndpointMethodFormObjectParameterSerializer cannot serialize an object without annotation @Form.");
