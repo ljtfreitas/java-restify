@@ -34,12 +34,23 @@ import com.github.ljtfreitas.restify.http.contract.Parameters;
 
 public class EndpointMethodQueryParametersSerializer implements EndpointMethodParameterSerializer {
 
-	private EndpointMethodFormObjectParameterSerializer formObjectSerializer = new EndpointMethodFormObjectParameterSerializer();
+	private final EndpointMethodFormObjectParameterSerializer formObjectSerializer;
+
+	public EndpointMethodQueryParametersSerializer() {
+		this(new EndpointMethodFormObjectParameterSerializer());
+	}
+
+	public EndpointMethodQueryParametersSerializer(EndpointMethodFormObjectParameterSerializer formObjectSerializer) {
+		this.formObjectSerializer = formObjectSerializer;
+	}
 
 	@SuppressWarnings("rawtypes")
 	@Override
 	public String serialize(String name, Type type, Object source) {
-		if (supported(type, source)) {
+		if (source == null) {
+			return null;
+
+		} else if (supported(type, source)) {
 			if (isParameters(source)) {
 				return serializeAsParameters((Parameters) source);
 

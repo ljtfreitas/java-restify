@@ -24,7 +24,7 @@ public class EndpointPathParameterResolverTest {
 
 		EndpointPathParameterResolver resolver = new EndpointPathParameterResolver("/method/{first}", parameters);
 
-		Object[] args = new Object[] { "arg" };
+		Object[] args = { "arg" };
 
 		String endpoint = resolver.resolve(args);
 
@@ -45,6 +45,17 @@ public class EndpointPathParameterResolverTest {
 		assertEquals("/method/firstArg/secondArg", endpoint);
 	}
 
+	@Test(expected = IllegalArgumentException.class)
+	public void shouldThrowExceptionWhenPathArgumentIsNull() {
+		parameters.put(new EndpointMethodParameter(0, "first", String.class));
+
+		EndpointPathParameterResolver resolver = new EndpointPathParameterResolver("/method/{first}", parameters);
+
+		Object[] args = { null };
+
+		resolver.resolve(args);
+	}
+
 	@Test
 	public void shouldResolvePathWithoutDynamicArguments() {
 		EndpointPathParameterResolver resolver = new EndpointPathParameterResolver("/method/static/path", parameters);
@@ -55,4 +66,5 @@ public class EndpointPathParameterResolverTest {
 
 		assertEquals("/method/static/path", endpoint);
 	}
+
 }

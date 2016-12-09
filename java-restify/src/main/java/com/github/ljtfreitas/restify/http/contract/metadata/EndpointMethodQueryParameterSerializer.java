@@ -35,7 +35,10 @@ public class EndpointMethodQueryParameterSerializer implements EndpointMethodPar
 	@SuppressWarnings("rawtypes")
 	@Override
 	public String serialize(String name, Type type, Object source) {
-		if (source instanceof Iterable) {
+		if (source == null) {
+			return null;
+
+		} else if (source instanceof Iterable) {
 			return serializeAsIterable(name, (Iterable) source);
 
 		} else {
