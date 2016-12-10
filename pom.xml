@@ -23,6 +23,7 @@
 		<module>java-restify-spring</module>
 		<module>java-restify-spring-autoconfigure</module>
 		<module>java-restify-spring-starter</module>
+		<module>java-restify-netflix</module>
 	</modules>
 
 	<dependencies>

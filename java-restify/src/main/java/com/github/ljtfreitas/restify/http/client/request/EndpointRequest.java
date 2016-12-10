@@ -104,6 +104,10 @@ public class EndpointRequest {
 		}
 	}
 
+	public EndpointRequest replace(URI endpoint) {
+		return new EndpointRequest(endpoint, method, headers, body, responseType);
+	}
+
 	@Override
 	public String toString() {
 		StringBuilder report = new StringBuilder();
