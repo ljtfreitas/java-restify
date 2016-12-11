@@ -23,41 +23,58 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.http.util;
+package com.github.ljtfreitas.restify.http.netflix.client.request;
 
-import java.util.function.Supplier;
+import java.io.IOException;
+import java.net.URI;
+import java.util.Map;
+import java.util.stream.Collectors;
 
-public interface Tryable {
+import com.github.ljtfreitas.restify.http.client.Header;
+import com.github.ljtfreitas.restify.http.client.response.HttpResponseMessage;
+import com.netflix.client.ClientException;
+import com.netflix.client.IResponse;
 
-	public static <T> T of(TryableSupplier<T> supplier) {
-		try {
-			return supplier.get();
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
+class RibbonResponse implements IResponse {
+
+	private final HttpResponseMessage source;
+
+	public RibbonResponse(HttpResponseMessage source) {
+		this.source = source;
 	}
 
-	public static <X extends Throwable, T> T of(TryableSupplier<T> supplier, Supplier<? extends X> exception) throws X {
-		try {
-			return supplier.get();
-		} catch (Exception e) {
-			throw exception.get();
-		}
+	@Override
+	public void close() throws IOException {
+		source.close();
 	}
 
-	public static void run(TryableExpression expression) {
-		try {
-			expression.run();
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
+	@Override
+	public Object getPayload() throws ClientException {
+		return null;
 	}
 
-	public interface TryableSupplier<T> {
-		T get() throws Exception;
+	@Override
+	public boolean hasPayload() {
+		return source.isReadable();
 	}
 
-	public interface TryableExpression {
-		void run() throws Exception;
+	@Override
+	public boolean isSuccess() {
+		return source.code().isSucess();
+	}
+
+	@Override
+	public URI getRequestedURI() {
+		return null;
+	}
+
+	@Override
+	public Map<String, ?> getHeaders() {
+		return source.headers().all().stream()
+				.collect(Collectors.groupingBy(Header::name));
+	}
+
+	public HttpResponseMessage unwrap() {
+		return source;
 	}
 }

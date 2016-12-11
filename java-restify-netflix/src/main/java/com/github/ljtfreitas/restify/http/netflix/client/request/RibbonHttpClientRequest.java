@@ -23,11 +23,10 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.http.netflix.client.request.ribbon;
+package com.github.ljtfreitas.restify.http.netflix.client.request;
 
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.OutputStream;
 import java.net.URI;
 import java.nio.charset.Charset;
@@ -37,6 +36,7 @@ import com.github.ljtfreitas.restify.http.client.Headers;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
 import com.github.ljtfreitas.restify.http.client.request.HttpClientRequest;
 import com.github.ljtfreitas.restify.http.client.response.HttpResponseMessage;
+import com.github.ljtfreitas.restify.http.util.Tryable;
 import com.netflix.client.ClientException;
 
 class RibbonHttpClientRequest implements HttpClientRequest {
@@ -94,9 +94,8 @@ class RibbonHttpClientRequest implements HttpClientRequest {
 		return endpointRequest.method().equalsIgnoreCase("GET");
 	}
 
-	public void writeTo(HttpClientRequest httpRequestMessage) throws IOException {
-		if (endpointRequest.body().isPresent()) {
-			byteArrayOutputStream.writeTo(httpRequestMessage.output());
-		}
+	public void writeTo(HttpClientRequest httpRequestMessage) {
+		endpointRequest.body()
+			.ifPresent(b -> Tryable.run(() -> byteArrayOutputStream.writeTo(httpRequestMessage.output())));
 	}
 }

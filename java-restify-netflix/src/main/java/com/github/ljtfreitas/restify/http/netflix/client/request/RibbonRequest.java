@@ -23,58 +23,30 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.http.netflix.client.request.ribbon;
+package com.github.ljtfreitas.restify.http.netflix.client.request;
 
-import java.io.IOException;
-import java.net.URI;
-import java.util.Map;
-import java.util.stream.Collectors;
+import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
+import com.github.ljtfreitas.restify.http.client.request.HttpClientRequest;
+import com.netflix.client.ClientRequest;
 
-import com.github.ljtfreitas.restify.http.client.Header;
-import com.github.ljtfreitas.restify.http.client.response.HttpResponseMessage;
-import com.netflix.client.ClientException;
-import com.netflix.client.IResponse;
+class RibbonRequest extends ClientRequest {
 
-class RibbonResponse implements IResponse {
+	private final RibbonHttpClientRequest source;
 
-	private final HttpResponseMessage source;
-
-	public RibbonResponse(HttpResponseMessage source) {
+	public RibbonRequest(RibbonHttpClientRequest source) {
+		super(source.ribbonEndpoint());
 		this.source = source;
 	}
 
-	@Override
-	public void close() throws IOException {
-		source.close();
+	public EndpointRequest replaceUri() {
+		return source.replace(super.getUri());
 	}
 
-	@Override
-	public Object getPayload() throws ClientException {
-		return null;
+	public boolean isGet() {
+		return source.isGet();
 	}
 
-	@Override
-	public boolean hasPayload() {
-		return source.isReadable();
-	}
-
-	@Override
-	public boolean isSuccess() {
-		return source.code().isSucess();
-	}
-
-	@Override
-	public URI getRequestedURI() {
-		return null;
-	}
-
-	@Override
-	public Map<String, ?> getHeaders() {
-		return source.headers().all().stream()
-				.collect(Collectors.groupingBy(Header::name));
-	}
-
-	public HttpResponseMessage unwrap() {
-		return source;
+	public void writeTo(HttpClientRequest httpRequestMessage) {
+		source.writeTo(httpRequestMessage);
 	}
 }

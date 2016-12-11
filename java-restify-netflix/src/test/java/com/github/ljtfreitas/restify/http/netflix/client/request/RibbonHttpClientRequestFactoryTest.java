@@ -1,4 +1,4 @@
-package com.github.ljtfreitas.restify.http.netflix.client.request.ribbon;
+package com.github.ljtfreitas.restify.http.netflix.client.request;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockserver.model.HttpRequest.request;
@@ -27,6 +27,7 @@ import com.github.ljtfreitas.restify.http.contract.Get;
 import com.github.ljtfreitas.restify.http.contract.Header;
 import com.github.ljtfreitas.restify.http.contract.Path;
 import com.github.ljtfreitas.restify.http.contract.Post;
+import com.github.ljtfreitas.restify.http.netflix.client.request.RibbonHttpClientRequestFactory;
 import com.netflix.client.config.DefaultClientConfigImpl;
 import com.netflix.client.config.IClientConfig;
 import com.netflix.loadbalancer.BaseLoadBalancer;

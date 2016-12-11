@@ -23,7 +23,7 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.http.netflix.client.request.ribbon;
+package com.github.ljtfreitas.restify.http.netflix.client.request;
 
 import java.nio.charset.Charset;
 
@@ -49,7 +49,15 @@ public class RibbonHttpClientRequestFactory implements HttpClientRequestFactory 
 	}
 
 	public RibbonHttpClientRequestFactory(HttpClientRequestFactory delegate, ILoadBalancer loadBalancer, IClientConfig clientConfig, Charset charset) {
-		this.ribbonLoadBalancedClient = new RibbonLoadBalancedClient(loadBalancer, clientConfig, delegate);
+		this(new RibbonLoadBalancedClient(loadBalancer, clientConfig, delegate), charset);
+	}
+
+	public RibbonHttpClientRequestFactory(RibbonLoadBalancedClient ribbonLoadBalancedClient) {
+		this(ribbonLoadBalancedClient, Encoding.UTF_8.charset());
+	}
+
+	public RibbonHttpClientRequestFactory(RibbonLoadBalancedClient ribbonLoadBalancedClient, Charset charset) {
+		this.ribbonLoadBalancedClient = ribbonLoadBalancedClient;
 		this.charset = charset;
 	}
 

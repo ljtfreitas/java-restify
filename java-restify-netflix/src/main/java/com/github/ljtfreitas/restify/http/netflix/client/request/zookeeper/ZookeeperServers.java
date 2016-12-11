@@ -23,41 +23,48 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.http.util;
+package com.github.ljtfreitas.restify.http.netflix.client.request.zookeeper;
 
-import java.util.function.Supplier;
+import java.util.List;
+import java.util.stream.Collectors;
 
-public interface Tryable {
+import com.netflix.client.config.IClientConfig;
+import com.netflix.loadbalancer.AbstractServerList;
+import com.netflix.loadbalancer.Server;
 
-	public static <T> T of(TryableSupplier<T> supplier) {
+public class ZookeeperServers extends AbstractServerList<Server> {
+
+	private final String serviceName;
+	private final ZookeeperServiceDiscovery zookeeperServiceDiscovery;
+
+	public ZookeeperServers(String serviceName, ZookeeperServiceDiscovery zookeeperServiceDiscovery) {
+		this.serviceName = serviceName;
+		this.zookeeperServiceDiscovery = zookeeperServiceDiscovery;
+	}
+
+	@Override
+	public List<Server> getInitialListOfServers() {
+		return allServers();
+	}
+
+	@Override
+	public List<Server> getUpdatedListOfServers() {
+		return allServers();
+	}
+
+	private List<Server> allServers() {
 		try {
-			return supplier.get();
+			return zookeeperServiceDiscovery.queryForInstances(serviceName)
+					.stream()
+						.map(instance -> new ZookeeperServer(instance))
+							.collect(Collectors.toList());
+
 		} catch (Exception e) {
 			throw new RuntimeException(e);
 		}
 	}
 
-	public static <X extends Throwable, T> T of(TryableSupplier<T> supplier, Supplier<? extends X> exception) throws X {
-		try {
-			return supplier.get();
-		} catch (Exception e) {
-			throw exception.get();
-		}
-	}
-
-	public static void run(TryableExpression expression) {
-		try {
-			expression.run();
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
-	}
-
-	public interface TryableSupplier<T> {
-		T get() throws Exception;
-	}
-
-	public interface TryableExpression {
-		void run() throws Exception;
+	@Override
+	public void initWithNiwsConfig(IClientConfig clientConfig) {
 	}
 }

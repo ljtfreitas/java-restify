@@ -23,41 +23,50 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.http.util;
+package com.github.ljtfreitas.restify.http.netflix.client.request.zookeeper;
 
-import java.util.function.Supplier;
+import java.util.Collections;
+import java.util.Map;
 
-public interface Tryable {
+import org.codehaus.jackson.annotate.JsonCreator;
+import org.codehaus.jackson.annotate.JsonProperty;
 
-	public static <T> T of(TryableSupplier<T> supplier) {
-		try {
-			return supplier.get();
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
+public class ZookeeperInstance {
+
+	@JsonProperty
+	private String name;
+
+	@JsonProperty
+	private int port;
+
+	@JsonProperty
+	private String address;
+
+	@JsonProperty
+	private Map<String, String> metadata;
+
+	@JsonCreator
+	public ZookeeperInstance(@JsonProperty("name") String name, @JsonProperty("address") String address,
+			@JsonProperty("port") int port, @JsonProperty("metadata") Map<String, String> metadata) {
+		this.name = name;
+		this.address = address;
+		this.port = port;
+		this.metadata = metadata;
 	}
 
-	public static <X extends Throwable, T> T of(TryableSupplier<T> supplier, Supplier<? extends X> exception) throws X {
-		try {
-			return supplier.get();
-		} catch (Exception e) {
-			throw exception.get();
-		}
+	public String name() {
+		return name;
 	}
 
-	public static void run(TryableExpression expression) {
-		try {
-			expression.run();
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
+	public int port() {
+		return port;
 	}
 
-	public interface TryableSupplier<T> {
-		T get() throws Exception;
+	public String address() {
+		return address;
 	}
 
-	public interface TryableExpression {
-		void run() throws Exception;
+	public Map<String, String> metadata() {
+		return Collections.unmodifiableMap(metadata);
 	}
 }

@@ -23,7 +23,7 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.http.netflix.client.request.ribbon;
+package com.github.ljtfreitas.restify.http.netflix.client.request;
 
 import java.util.Optional;
 
@@ -38,7 +38,7 @@ import com.netflix.client.config.IClientConfig;
 import com.netflix.client.config.IClientConfigKey;
 import com.netflix.loadbalancer.ILoadBalancer;
 
-class RibbonLoadBalancedClient extends AbstractLoadBalancerAwareClient<RibbonRequest, RibbonResponse> {
+public class RibbonLoadBalancedClient extends AbstractLoadBalancerAwareClient<RibbonRequest, RibbonResponse> {
 
 	private final IClientConfig clientConfig;
 	private final HttpClientRequestFactory httpClientRequestFactory;

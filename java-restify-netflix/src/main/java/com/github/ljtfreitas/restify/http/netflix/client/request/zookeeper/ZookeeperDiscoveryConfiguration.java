@@ -23,32 +23,29 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.http.netflix.client.request.ribbon;
+package com.github.ljtfreitas.restify.http.netflix.client.request.zookeeper;
 
-import java.io.IOException;
+public class ZookeeperDiscoveryConfiguration {
 
-import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
-import com.github.ljtfreitas.restify.http.client.request.HttpClientRequest;
-import com.netflix.client.ClientRequest;
+	private String serviceName;
 
-class RibbonRequest extends ClientRequest {
+	private String root;
 
-	private final RibbonHttpClientRequest source;
-
-	public RibbonRequest(RibbonHttpClientRequest source) {
-		super(source.ribbonEndpoint());
-		this.source = source;
+	public String root() {
+		return root;
 	}
 
-	public EndpointRequest replaceUri() {
-		return source.replace(super.getUri());
+	public ZookeeperDiscoveryConfiguration root(String root) {
+		this.root = root;
+		return this;
 	}
 
-	public boolean isGet() {
-		return source.isGet();
+	public String serviceName() {
+		return serviceName;
 	}
 
-	public void writeTo(HttpClientRequest httpRequestMessage) throws IOException {
-		source.writeTo(httpRequestMessage);
+	public ZookeeperDiscoveryConfiguration serviceName(String serviceName) {
+		this.serviceName = serviceName;
+		return this;
 	}
 }
