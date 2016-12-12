@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import com.github.ljtfreitas.restify.http.client.Headers;
+import com.github.ljtfreitas.restify.http.client.request.HttpRequestMessage;
 import com.github.ljtfreitas.restify.http.client.response.BaseHttpResponseMessage;
 import com.github.ljtfreitas.restify.http.client.response.HttpResponseMessage;
 import com.github.ljtfreitas.restify.http.client.response.StatusCode;
@@ -30,7 +31,7 @@ public class SimpleHttpResponseMessage implements HttpResponseMessage {
 	}
 
 	public SimpleHttpResponseMessage(StatusCode code, Headers headers, InputStream input) {
-		this.delegate = new BaseHttpResponseMessage(code, headers, input) {
+		this.delegate = new BaseHttpResponseMessage(code, headers, input, null) {
 			@Override
 			public void close() throws IOException {
 				input.close();
@@ -61,5 +62,10 @@ public class SimpleHttpResponseMessage implements HttpResponseMessage {
 	@Override
 	public boolean isReadable() {
 		return delegate.isReadable();
+	}
+
+	@Override
+	public HttpRequestMessage request() {
+		return delegate.request();
 	}
 }

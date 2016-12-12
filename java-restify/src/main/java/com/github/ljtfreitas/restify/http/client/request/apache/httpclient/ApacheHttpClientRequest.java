@@ -25,6 +25,7 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.request.apache.httpclient;
 
+import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -43,6 +44,7 @@ import org.apache.http.protocol.HttpContext;
 
 import com.github.ljtfreitas.restify.http.RestifyHttpException;
 import com.github.ljtfreitas.restify.http.client.Headers;
+import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
 import com.github.ljtfreitas.restify.http.client.request.HttpClientRequest;
 import com.github.ljtfreitas.restify.http.client.response.HttpResponseMessage;
 import com.github.ljtfreitas.restify.http.client.response.StatusCode;
@@ -54,15 +56,19 @@ public class ApacheHttpClientRequest implements HttpClientRequest {
 	private final HttpContext httpContext;
 	private final Charset charset;
 	private final Headers headers;
+	private final EndpointRequest source;
 
-	private final ByteArrayOutputStream outputStream = new ByteArrayOutputStream(1024);
+	private final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream(1024 * 100);
+	private final BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(byteArrayOutputStream);
 
-	public ApacheHttpClientRequest(HttpClient httpClient, HttpUriRequest httpRequest, HttpContext httpContext, Charset charset, Headers headers) {
+	public ApacheHttpClientRequest(HttpClient httpClient, HttpUriRequest httpRequest, HttpContext httpContext, Charset charset,
+			Headers headers, EndpointRequest source) {
 		this.httpClient = httpClient;
 		this.httpRequest = httpRequest;
 		this.httpContext = httpContext;
 		this.charset = charset;
 		this.headers = headers;
+		this.source = source;
 	}
 
 	@Override
@@ -71,7 +77,7 @@ public class ApacheHttpClientRequest implements HttpClientRequest {
 
 		if (httpRequest instanceof HttpEntityEnclosingRequest) {
 			HttpEntityEnclosingRequest entityEnclosingRequest = (HttpEntityEnclosingRequest) httpRequest;
-			HttpEntity requestEntity = new ByteArrayEntity(outputStream.toByteArray());
+			HttpEntity requestEntity = new ByteArrayEntity(byteArrayOutputStream.toByteArray());
 			entityEnclosingRequest.setEntity(requestEntity);
 		}
 
@@ -98,12 +104,12 @@ public class ApacheHttpClientRequest implements HttpClientRequest {
 		InputStream stream = entity != null ? entity.getContent()
 				: new ByteArrayInputStream(new byte[0]);
 
-		return new ApacheHttpClientResponse(statusCode, headers, stream, entity, httpResponse);
+		return new ApacheHttpClientResponse(statusCode, headers, stream, entity, httpResponse, this);
 	}
 
 	@Override
 	public OutputStream output() {
-		return outputStream;
+		return bufferedOutputStream;
 	}
 
 	@Override
@@ -114,5 +120,10 @@ public class ApacheHttpClientRequest implements HttpClientRequest {
 	@Override
 	public Headers headers() {
 		return headers;
+	}
+
+	@Override
+	public EndpointRequest source() {
+		return source;
 	}
 }

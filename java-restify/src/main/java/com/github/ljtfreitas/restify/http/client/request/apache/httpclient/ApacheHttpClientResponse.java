@@ -34,6 +34,7 @@ import org.apache.http.HttpResponse;
 import org.apache.http.util.EntityUtils;
 
 import com.github.ljtfreitas.restify.http.client.Headers;
+import com.github.ljtfreitas.restify.http.client.request.HttpRequestMessage;
 import com.github.ljtfreitas.restify.http.client.response.BaseHttpResponseMessage;
 import com.github.ljtfreitas.restify.http.client.response.StatusCode;
 
@@ -43,8 +44,8 @@ class ApacheHttpClientResponse extends BaseHttpResponseMessage {
 	private final HttpResponse httpResponse;
 
 	ApacheHttpClientResponse(StatusCode statusCode, Headers headers, InputStream body,
-			HttpEntity entity, HttpResponse httpResponse) {
-		super(statusCode, headers, body);
+			HttpEntity entity, HttpResponse httpResponse, HttpRequestMessage httpRequest) {
+		super(statusCode, headers, body, httpRequest);
 		this.entity = entity;
 		this.httpResponse = httpResponse;
 	}

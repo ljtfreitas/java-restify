@@ -69,11 +69,11 @@ public class BaseHttpResponseMessageTest {
 	private class StubHttpResponseMessage extends BaseHttpResponseMessage {
 
 		public StubHttpResponseMessage(StatusCode statusCode) {
-			super(statusCode, new Headers(), null);
+			super(statusCode, new Headers(), null, null);
 		}
 
 		public StubHttpResponseMessage(StatusCode statusCode, Headers headers) {
-			super(statusCode, headers, null);
+			super(statusCode, headers, null, null);
 		}
 
 		@Override

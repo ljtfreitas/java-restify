@@ -29,6 +29,7 @@ import java.io.IOException;
 import java.io.InputStream;
 
 import com.github.ljtfreitas.restify.http.client.Headers;
+import com.github.ljtfreitas.restify.http.client.request.HttpRequestMessage;
 import com.github.ljtfreitas.restify.http.client.response.BaseHttpResponseMessage;
 import com.github.ljtfreitas.restify.http.client.response.StatusCode;
 
@@ -38,8 +39,8 @@ class OkHttpClientResponse extends BaseHttpResponseMessage {
 
 	private final Response response;
 
-	OkHttpClientResponse(StatusCode statusCode, Headers headers, InputStream body, Response response) {
-		super(statusCode, headers, body);
+	OkHttpClientResponse(StatusCode statusCode, Headers headers, InputStream body, Response response, HttpRequestMessage httpRequest) {
+		super(statusCode, headers, body, httpRequest);
 		this.response = response;
 	}
 

@@ -30,19 +30,27 @@ import static com.github.ljtfreitas.restify.http.client.Headers.CONTENT_LENGTH;
 import java.io.InputStream;
 
 import com.github.ljtfreitas.restify.http.client.Headers;
+import com.github.ljtfreitas.restify.http.client.request.HttpRequestMessage;
 
 public abstract class BaseHttpResponseMessage implements HttpResponseMessage {
 
 	private final StatusCode statusCode;
 	private final Headers headers;
 	private final InputStream body;
+	private final HttpRequestMessage httpRequest;
 
-	protected BaseHttpResponseMessage(StatusCode statusCode, Headers headers, InputStream body) {
+	protected BaseHttpResponseMessage(StatusCode statusCode, Headers headers, InputStream body, HttpRequestMessage httpRequest) {
 		this.statusCode = statusCode;
 		this.headers = headers;
 		this.body = body;
+		this.httpRequest = httpRequest;
 	}
-	
+
+	@Override
+	public HttpRequestMessage request() {
+		return httpRequest;
+	}
+
 	@Override
 	public StatusCode code() {
 		return statusCode;

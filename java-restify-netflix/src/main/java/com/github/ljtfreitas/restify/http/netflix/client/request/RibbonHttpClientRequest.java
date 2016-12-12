@@ -70,6 +70,11 @@ class RibbonHttpClientRequest implements HttpClientRequest {
 	}
 
 	@Override
+	public EndpointRequest source() {
+		return endpointRequest;
+	}
+
+	@Override
 	public HttpResponseMessage execute() throws RestifyHttpException {
 		try {
 			RibbonResponse response = ribbonLoadBalancedClient.executeWithLoadBalancer(new RibbonRequest(this));

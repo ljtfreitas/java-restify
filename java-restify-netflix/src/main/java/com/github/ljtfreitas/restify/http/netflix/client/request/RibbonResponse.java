@@ -37,44 +37,44 @@ import com.netflix.client.IResponse;
 
 class RibbonResponse implements IResponse {
 
-	private final HttpResponseMessage source;
+	private final HttpResponseMessage response;
 
-	public RibbonResponse(HttpResponseMessage source) {
-		this.source = source;
+	public RibbonResponse(HttpResponseMessage response) {
+		this.response = response;
 	}
 
 	@Override
 	public void close() throws IOException {
-		source.close();
+		response.close();
 	}
 
 	@Override
 	public Object getPayload() throws ClientException {
-		return null;
+		return response.request().source().body().orElse(null);
 	}
 
 	@Override
 	public boolean hasPayload() {
-		return source.isReadable();
+		return response.isReadable();
 	}
 
 	@Override
 	public boolean isSuccess() {
-		return source.code().isSucess();
+		return response.code().isSucess();
 	}
 
 	@Override
 	public URI getRequestedURI() {
-		return null;
+		return response.request().source().endpoint();
 	}
 
 	@Override
 	public Map<String, ?> getHeaders() {
-		return source.headers().all().stream()
+		return response.headers().all().stream()
 				.collect(Collectors.groupingBy(Header::name));
 	}
 
 	public HttpResponseMessage unwrap() {
-		return source;
+		return response;
 	}
 }

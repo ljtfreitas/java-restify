@@ -25,6 +25,11 @@
 		</dependency>
 		<dependency>
 			<groupId>com.netflix.ribbon</groupId>
+			<artifactId>ribbon-loadbalancer</artifactId>
+			<version>${netflix.ribbon.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.netflix.ribbon</groupId>
 			<artifactId>ribbon-httpclient</artifactId>
 			<version>${netflix.ribbon.version}</version>
 		</dependency>

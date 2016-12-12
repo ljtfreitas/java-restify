@@ -30,6 +30,7 @@ import java.io.InputStream;
 import java.net.HttpURLConnection;
 
 import com.github.ljtfreitas.restify.http.client.Headers;
+import com.github.ljtfreitas.restify.http.client.request.HttpRequestMessage;
 import com.github.ljtfreitas.restify.http.client.response.BaseHttpResponseMessage;
 import com.github.ljtfreitas.restify.http.client.response.StatusCode;
 
@@ -37,8 +38,8 @@ class JdkHttpClientResponse extends BaseHttpResponseMessage {
 
 	private final HttpURLConnection connection;
 
-	JdkHttpClientResponse(StatusCode statusCode, Headers headers, InputStream body, HttpURLConnection connection) {
-		super(statusCode, headers, body);
+	JdkHttpClientResponse(StatusCode statusCode, Headers headers, InputStream body, HttpURLConnection connection, HttpRequestMessage httpRequest) {
+		super(statusCode, headers, body, httpRequest);
 		this.connection = connection;
 	}
 
