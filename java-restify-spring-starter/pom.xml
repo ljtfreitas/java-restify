@@ -3,7 +3,7 @@
 	<parent>
 		<groupId>com.github.ljtfreitas</groupId>
 		<artifactId>java-restify-group</artifactId>
-		<version>1.0.1-SNAPSHOT</version>
+		<version>1.1.1-SNAPSHOT</version>
 	</parent>
 	<artifactId>java-restify-spring-starter</artifactId>
 
@@ -17,4 +17,5 @@
 			<version>${project.version}</version>
 		</dependency>
 	</dependencies>
+	<packaging>ear</packaging>
 </project>
