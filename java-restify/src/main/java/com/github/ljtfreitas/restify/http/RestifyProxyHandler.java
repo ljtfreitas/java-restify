@@ -40,12 +40,10 @@ public class RestifyProxyHandler implements InvocationHandler {
 
 	private final EndpointType endpointType;
 	private final EndpointMethodExecutor endpointMethodExecutor;
-	private final JavaDefaultMethodExecutor javaDefaultMethodExecutor;
 
 	public RestifyProxyHandler(EndpointType endpointType, EndpointMethodExecutor endpointMethodExecutor) {
 		this.endpointType = endpointType;
 		this.endpointMethodExecutor = endpointMethodExecutor;
-		this.javaDefaultMethodExecutor = new JavaDefaultMethodExecutor();
 	}
 
 	@Override
@@ -60,7 +58,7 @@ public class RestifyProxyHandler implements InvocationHandler {
 
 	private Object executeProxyMethod(Method method, Object proxy, Object[] args) {
 		try {
-			return javaDefaultMethodExecutor.execute(method, proxy, args);
+			return JavaDefaultMethodExecutor.execute(method, proxy, args);
 		} catch (Throwable e) {
 			throw new RestifyProxyMethodException("Error on execution method [" + method + "], "
 					+ "on proxy object type [" + proxy.getClass() + "], with method args " + Arrays.toString(args), e);
