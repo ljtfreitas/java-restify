@@ -25,53 +25,47 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.netflix.client.request.zookeeper;
 
-import java.util.Collections;
-import java.util.Map;
+import com.github.ljtfreitas.restify.http.netflix.client.request.RibbonRequest;
 
-import org.codehaus.jackson.annotate.JsonProperty;
+import java.net.SocketException;
 
-public class ZookeeperInstance {
+import com.github.ljtfreitas.restify.http.netflix.client.request.RibbonExceptionHandler;
 
-	@JsonProperty
-	private String name;
+public class RibbonZookeeperExceptionHandler implements RibbonExceptionHandler {
 
-	@JsonProperty
-	private int port;
+	private final ZookeeperServiceDiscovery zookeeperServiceDiscovery;
 
-	@JsonProperty
-	private String address;
-
-	@JsonProperty
-	private Map<String, String> metadata;
-
-	@Deprecated
-	ZookeeperInstance() {
+	public RibbonZookeeperExceptionHandler(ZookeeperServiceDiscovery zookeeperServiceDiscovery) {
+		this.zookeeperServiceDiscovery = zookeeperServiceDiscovery;
 	}
 
-	public ZookeeperInstance(String name, String address, int port) {
-		this(name, address, port, Collections.emptyMap());
+	@Override
+	public void onException(RibbonRequest request, Throwable cause) {
+		if (isSocketException(cause)) {
+			String name = request.serviceName();
+			String host = request.getUri().getHost();
+			int port = request.getUri().getPort();
+
+			zookeeperServiceDiscovery.unregister(new ZookeeperInstance(name, host, port));
+		}
 	}
 
-	public ZookeeperInstance(String name, String address, int port, Map<String, String> metadata) {
-		this.name = name;
-		this.address = address;
-		this.port = port;
-		this.metadata = metadata;
-	}
+	private boolean isSocketException(Throwable cause) {
+		Throwable throwable = cause;
 
-	public String name() {
-		return name;
-	}
+		boolean isSocketException = false;
 
-	public int port() {
-		return port;
-	}
+		while (throwable != null) {
+			isSocketException = (throwable instanceof SocketException);
 
-	public String address() {
-		return address;
-	}
+			if (isSocketException) {
+				break;
 
-	public Map<String, String> metadata() {
-		return Collections.unmodifiableMap(metadata);
+			} else {
+				throwable = throwable.getCause();
+			}
+		}
+
+		return isSocketException;
 	}
 }

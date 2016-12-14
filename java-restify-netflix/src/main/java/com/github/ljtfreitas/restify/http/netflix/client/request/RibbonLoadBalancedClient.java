@@ -42,22 +42,34 @@ public class RibbonLoadBalancedClient extends AbstractLoadBalancerAwareClient<Ri
 
 	private final IClientConfig clientConfig;
 	private final HttpClientRequestFactory httpClientRequestFactory;
+	private final RibbonExceptionHandler ribbonExceptionHandler;
 
 	public RibbonLoadBalancedClient(ILoadBalancer loadBalancer, IClientConfig clientConfig, HttpClientRequestFactory httpClientRequestFactory) {
+		this(loadBalancer, clientConfig, httpClientRequestFactory, new SimpleRibbonExceptionHandler());
+	}
+
+	public RibbonLoadBalancedClient(ILoadBalancer loadBalancer, IClientConfig clientConfig, HttpClientRequestFactory httpClientRequestFactory, RibbonExceptionHandler ribbonRequestExceptionObserver) {
 		super(loadBalancer, clientConfig);
 		this.clientConfig = clientConfig;
 		this.httpClientRequestFactory = httpClientRequestFactory;
+		this.ribbonExceptionHandler = ribbonRequestExceptionObserver;
 	}
 
 	@Override
 	public RibbonResponse execute(RibbonRequest request, IClientConfig requestConfig) throws Exception {
-		HttpClientRequest ribbonHttpRequestMessage = httpClientRequestFactory.createOf(request.replaceUri());
+		try {
+			HttpClientRequest ribbonHttpRequestMessage = httpClientRequestFactory.createOf(request.replaceUri());
 
-		request.writeTo(ribbonHttpRequestMessage);
+			request.writeTo(ribbonHttpRequestMessage);
 
-		HttpResponseMessage httpResponse = ribbonHttpRequestMessage.execute();
+			HttpResponseMessage httpResponse = ribbonHttpRequestMessage.execute();
 
-		return new RibbonResponse(httpResponse);
+			return new RibbonResponse(httpResponse);
+
+		} catch (Exception e) {
+			ribbonExceptionHandler.onException(request, e);
+			throw e;
+		}
 	}
 
 	@Override

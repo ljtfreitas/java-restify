@@ -39,7 +39,7 @@ import com.github.ljtfreitas.restify.http.client.response.HttpResponseMessage;
 import com.github.ljtfreitas.restify.http.util.Tryable;
 import com.netflix.client.ClientException;
 
-class RibbonHttpClientRequest implements HttpClientRequest {
+public class RibbonHttpClientRequest implements HttpClientRequest {
 
 	private final EndpointRequest endpointRequest;
 	private final RibbonLoadBalancedClient ribbonLoadBalancedClient;
@@ -102,5 +102,9 @@ class RibbonHttpClientRequest implements HttpClientRequest {
 	public void writeTo(HttpClientRequest httpRequestMessage) {
 		endpointRequest.body()
 			.ifPresent(b -> Tryable.run(() -> byteArrayOutputStream.writeTo(httpRequestMessage.output())));
+	}
+
+	public String serviceName() {
+		return endpointRequest.endpoint().getHost();
 	}
 }

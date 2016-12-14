@@ -35,7 +35,7 @@ import com.github.ljtfreitas.restify.http.client.response.HttpResponseMessage;
 import com.netflix.client.ClientException;
 import com.netflix.client.IResponse;
 
-class RibbonResponse implements IResponse {
+public class RibbonResponse implements IResponse {
 
 	private final HttpResponseMessage response;
 

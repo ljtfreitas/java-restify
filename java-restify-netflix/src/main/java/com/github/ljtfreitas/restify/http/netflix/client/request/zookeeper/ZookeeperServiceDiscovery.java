@@ -26,6 +26,7 @@
 package com.github.ljtfreitas.restify.http.netflix.client.request.zookeeper;
 
 import java.util.Collection;
+import java.util.Optional;
 
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.x.discovery.ServiceDiscovery;
@@ -40,10 +41,12 @@ import com.github.ljtfreitas.restify.http.util.Tryable;
 public class ZookeeperServiceDiscovery {
 
 	private final ServiceDiscovery<ZookeeperInstance> serviceDiscovery;
+	private final CuratorFramework curator;
 
 	public ZookeeperServiceDiscovery(ZookeeperDiscoveryConfiguration configuration, CuratorFramework curator,
 			InstanceSerializer<ZookeeperInstance> serializer) {
 		this.serviceDiscovery = buildServiceDiscoveryWith(configuration, curator, serializer);
+		this.curator = curator;
 	}
 
 	private ServiceDiscovery<ZookeeperInstance> buildServiceDiscoveryWith(ZookeeperDiscoveryConfiguration configuration, CuratorFramework curator,
@@ -65,6 +68,10 @@ public class ZookeeperServiceDiscovery {
 	}
 
 	public Collection<ServiceInstance<ZookeeperInstance>> queryForInstances(String serviceName) {
+		return queryByName(serviceName);
+	}
+
+	private Collection<ServiceInstance<ZookeeperInstance>> queryByName(String serviceName) {
 		return Tryable.of(() -> serviceDiscovery.queryForInstances(serviceName));
 	}
 
@@ -74,8 +81,8 @@ public class ZookeeperServiceDiscovery {
 
 			ServiceInstance<ZookeeperInstance> instance = builder.name(zookeeperInstance.name())
 				.payload(zookeeperInstance)
-				.port(zookeeperInstance.port())
 				.address(zookeeperInstance.address())
+				.port(zookeeperInstance.port())
 				.uriSpec(new UriSpec("{scheme}://{address}:{port}"))
 				.build();
 
@@ -86,7 +93,25 @@ public class ZookeeperServiceDiscovery {
 		}
 	}
 
+	public void unregister(ZookeeperInstance zookeeperInstance) {
+		try {
+			queryByExample(zookeeperInstance)
+				.ifPresent(instance -> Tryable.run(() -> serviceDiscovery.unregisterService(instance)));
+
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
+	private Optional<ServiceInstance<ZookeeperInstance>> queryByExample(ZookeeperInstance zookeeperInstance) {
+		return Tryable.of(() -> serviceDiscovery.queryForInstances(zookeeperInstance.name()))
+				.stream()
+					.filter(i -> i.getAddress().equals(zookeeperInstance.address()) && i.getPort().equals(zookeeperInstance.port()))
+						.findFirst();
+	}
+
 	public void close() {
 		Tryable.run(serviceDiscovery::close);
+		Tryable.run(curator::close);
 	}
 }

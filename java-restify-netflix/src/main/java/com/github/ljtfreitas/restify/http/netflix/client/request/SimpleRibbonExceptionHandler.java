@@ -23,55 +23,18 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.http.netflix.client.request.zookeeper;
+package com.github.ljtfreitas.restify.http.netflix.client.request;
 
-import java.util.Collections;
-import java.util.Map;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
-import org.codehaus.jackson.annotate.JsonProperty;
+class SimpleRibbonExceptionHandler implements RibbonExceptionHandler {
 
-public class ZookeeperInstance {
+	private static final Logger log = LoggerFactory.getLogger(SimpleRibbonExceptionHandler.class);
 
-	@JsonProperty
-	private String name;
-
-	@JsonProperty
-	private int port;
-
-	@JsonProperty
-	private String address;
-
-	@JsonProperty
-	private Map<String, String> metadata;
-
-	@Deprecated
-	ZookeeperInstance() {
+	@Override
+	public void onException(RibbonRequest request, Throwable cause) {
+		log.error("Error on execute HTTP request against endpoint: {}", request.getUri(), cause);
 	}
 
-	public ZookeeperInstance(String name, String address, int port) {
-		this(name, address, port, Collections.emptyMap());
-	}
-
-	public ZookeeperInstance(String name, String address, int port, Map<String, String> metadata) {
-		this.name = name;
-		this.address = address;
-		this.port = port;
-		this.metadata = metadata;
-	}
-
-	public String name() {
-		return name;
-	}
-
-	public int port() {
-		return port;
-	}
-
-	public String address() {
-		return address;
-	}
-
-	public Map<String, String> metadata() {
-		return Collections.unmodifiableMap(metadata);
-	}
 }

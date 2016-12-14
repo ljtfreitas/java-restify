@@ -29,7 +29,7 @@ import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
 import com.github.ljtfreitas.restify.http.client.request.HttpClientRequest;
 import com.netflix.client.ClientRequest;
 
-class RibbonRequest extends ClientRequest {
+public class RibbonRequest extends ClientRequest {
 
 	private final RibbonHttpClientRequest source;
 
@@ -48,5 +48,9 @@ class RibbonRequest extends ClientRequest {
 
 	public void writeTo(HttpClientRequest httpRequestMessage) {
 		source.writeTo(httpRequestMessage);
+	}
+
+	public String serviceName() {
+		return source.serviceName();
 	}
 }

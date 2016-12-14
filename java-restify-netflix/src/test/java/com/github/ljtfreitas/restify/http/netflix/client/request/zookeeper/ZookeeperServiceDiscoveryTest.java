@@ -12,6 +12,7 @@ import java.util.Collections;
 import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.framework.CuratorFrameworkFactory;
 import org.apache.curator.retry.RetryNTimes;
+import org.apache.curator.test.TestingServer;
 import org.apache.curator.x.discovery.details.InstanceSerializer;
 import org.apache.curator.x.discovery.details.JsonInstanceSerializer;
 import org.junit.After;
@@ -29,6 +30,7 @@ import com.github.ljtfreitas.restify.http.contract.Get;
 import com.github.ljtfreitas.restify.http.contract.Header;
 import com.github.ljtfreitas.restify.http.contract.Path;
 import com.github.ljtfreitas.restify.http.contract.Post;
+import com.github.ljtfreitas.restify.http.netflix.client.request.RibbonExceptionHandler;
 import com.github.ljtfreitas.restify.http.netflix.client.request.RibbonHttpClientRequestFactory;
 import com.github.ljtfreitas.restify.http.netflix.client.request.RibbonLoadBalancedClient;
 import com.netflix.client.config.DefaultClientConfigImpl;
@@ -43,7 +45,9 @@ import com.netflix.loadbalancer.ZoneAwareLoadBalancer;
 public class ZookeeperServiceDiscoveryTest {
 
 	@Rule
-	public MockServerRule mockServerRule = new MockServerRule(this, 7080, 7081, 7082);
+	public MockServerRule mockApiServerRule = new MockServerRule(this, 7080, 7081, 7082);
+
+	private TestingServer zookeeperServer;
 
 	private MyApi myApi;
 
@@ -53,8 +57,10 @@ public class ZookeeperServiceDiscoveryTest {
 
 	@Before
 	public void setup() throws Exception {
+		zookeeperServer = new TestingServer(2181, true);
+
 		DefaultClientConfigImpl ribbonLoadBalacerConfiguration = new DefaultClientConfigImpl();
-		ribbonLoadBalacerConfiguration.setClientName("myApp");
+		ribbonLoadBalacerConfiguration.setClientName("myApi");
 
 		ZoneAvoidanceRule rule = new ZoneAvoidanceRule();
 		rule.initWithNiwsConfig(ribbonLoadBalacerConfiguration);
@@ -64,7 +70,7 @@ public class ZookeeperServiceDiscoveryTest {
 		IPing ping = new PingUrl();
 
 		ZookeeperDiscoveryConfiguration zookeeperDiscoveryConfiguration = new ZookeeperDiscoveryConfiguration();
-		zookeeperDiscoveryConfiguration.root("/services").serviceName("myApp");
+		zookeeperDiscoveryConfiguration.root("/services").serviceName("myApi");
 
 		CuratorFramework curator = CuratorFrameworkFactory.builder()
 				.connectString("localhost:2181")
@@ -75,11 +81,11 @@ public class ZookeeperServiceDiscoveryTest {
 		InstanceSerializer<ZookeeperInstance> serializer = new JsonInstanceSerializer<>(ZookeeperInstance.class);
 
 		zookeeperServiceDiscovery = new ZookeeperServiceDiscovery(zookeeperDiscoveryConfiguration, curator, serializer);
-		zookeeperServiceDiscovery.register(new ZookeeperInstance("myApp", "localhost", 7080, Collections.emptyMap()));
-		zookeeperServiceDiscovery.register(new ZookeeperInstance("myApp", "localhost", 7081, Collections.emptyMap()));
-		zookeeperServiceDiscovery.register(new ZookeeperInstance("myApp", "localhost", 7082, Collections.emptyMap()));
+		zookeeperServiceDiscovery.register(new ZookeeperInstance("myApi", "localhost", 7080, Collections.emptyMap()));
+		zookeeperServiceDiscovery.register(new ZookeeperInstance("myApi", "localhost", 7081, Collections.emptyMap()));
+		zookeeperServiceDiscovery.register(new ZookeeperInstance("myApi", "localhost", 7082, Collections.emptyMap()));
 
-		ZookeeperServers zookeeperServers = new ZookeeperServers("myApp", zookeeperServiceDiscovery);
+		ZookeeperServers zookeeperServers = new ZookeeperServers("myApi", zookeeperServiceDiscovery);
 
 		ZoneAwareLoadBalancer<Server> loadBalancer = LoadBalancerBuilder.newBuilder()
 				.withClientConfig(ribbonLoadBalacerConfiguration)
@@ -91,7 +97,10 @@ public class ZookeeperServiceDiscoveryTest {
 
 		JdkHttpClientRequestFactory delegate = new JdkHttpClientRequestFactory();
 
-		RibbonLoadBalancedClient ribbonLoadBalancedClient = new RibbonLoadBalancedClient(loadBalancer, ribbonLoadBalacerConfiguration, delegate);
+		RibbonExceptionHandler ribbonExceptionHandler = new RibbonZookeeperExceptionHandler(zookeeperServiceDiscovery);
+
+		RibbonLoadBalancedClient ribbonLoadBalancedClient = new RibbonLoadBalancedClient(loadBalancer, ribbonLoadBalacerConfiguration,
+				delegate, ribbonExceptionHandler);
 
 		RibbonHttpClientRequestFactory ribbonHttpClientRequestFactory = new RibbonHttpClientRequestFactory(ribbonLoadBalancedClient);
 
@@ -102,8 +111,9 @@ public class ZookeeperServiceDiscoveryTest {
 	}
 
 	@After
-	public void after() {
+	public void after() throws Exception {
 		zookeeperServiceDiscovery.close();
+		zookeeperServer.close();
 	}
 
 	@Test
