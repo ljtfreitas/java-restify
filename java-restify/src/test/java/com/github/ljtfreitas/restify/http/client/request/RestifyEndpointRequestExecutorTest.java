@@ -23,11 +23,6 @@ import org.mockito.runners.MockitoJUnitRunner;
 import com.github.ljtfreitas.restify.http.RestifyHttpException;
 import com.github.ljtfreitas.restify.http.client.Headers;
 import com.github.ljtfreitas.restify.http.client.charset.Encoding;
-import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
-import com.github.ljtfreitas.restify.http.client.request.EndpointRequestWriter;
-import com.github.ljtfreitas.restify.http.client.request.HttpClientRequest;
-import com.github.ljtfreitas.restify.http.client.request.HttpClientRequestFactory;
-import com.github.ljtfreitas.restify.http.client.request.RestifyEndpointRequestExecutor;
 import com.github.ljtfreitas.restify.http.client.request.interceptor.EndpointRequestInterceptorStack;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponseReader;
@@ -74,7 +69,7 @@ public class RestifyEndpointRequestExecutorTest {
 		EndpointRequest endpointRequest = new EndpointRequest(new URI("http://my.api.com/path"), "GET", String.class);
 
 		when(httpClientRequestFactoryMock.createOf(endpointRequest))
-			.thenReturn(new SimpleHttpClientRequest(response));
+			.thenReturn(new SimpleHttpClientRequest(endpointRequest, response));
 
 		Object result = endpointRequestExecutor.execute(endpointRequest);
 
@@ -91,7 +86,7 @@ public class RestifyEndpointRequestExecutorTest {
 		EndpointRequest endpointRequest = new EndpointRequest(new URI("http://my.api.com/path"), "POST", new Headers(),
 				body, String.class);
 
-		SimpleHttpClientRequest request = new SimpleHttpClientRequest(response);
+		SimpleHttpClientRequest request = new SimpleHttpClientRequest(endpointRequest, response);
 
 		when(httpClientRequestFactoryMock.createOf(endpointRequest))
 			.thenReturn(request);
@@ -106,12 +101,13 @@ public class RestifyEndpointRequestExecutorTest {
 
 	private class SimpleHttpClientRequest implements HttpClientRequest {
 
+		private final EndpointRequest source;
 		private final HttpResponseMessage response;
 
 		private final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-		private final Headers headers = new Headers();
 
-		public SimpleHttpClientRequest(HttpResponseMessage response) {
+		public SimpleHttpClientRequest(EndpointRequest source, HttpResponseMessage response) {
+			this.source = source;
 			this.response = response;
 		}
 
@@ -132,7 +128,12 @@ public class RestifyEndpointRequestExecutorTest {
 
 		@Override
 		public Headers headers() {
-			return headers;
+			return source.headers();
+		}
+
+		@Override
+		public EndpointRequest source() {
+			return source;
 		}
 	}
 

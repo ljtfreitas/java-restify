@@ -38,4 +38,6 @@ public interface HttpRequestMessage {
 
 	public Charset charset();
 
+	public EndpointRequest source();
+
 }

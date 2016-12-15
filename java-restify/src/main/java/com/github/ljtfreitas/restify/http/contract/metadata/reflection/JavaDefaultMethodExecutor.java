@@ -38,16 +38,16 @@ import com.github.ljtfreitas.restify.http.RestifyProxyMethodException;
 
 public class JavaDefaultMethodExecutor {
 
-	private final Map<Method, MethodHandle> cache = new ConcurrentHashMap<>();
+	private static final Map<Method, MethodHandle> cache = new ConcurrentHashMap<>();
 
-	public Object execute(Method method, Object target, Object[] args) throws Throwable {
+	public static Object execute(Method method, Object target, Object[] args) throws Throwable {
 		MethodHandle handle = cache.compute(method,
 				(m, h) -> Optional.ofNullable(h).orElseGet(() -> bind(method, target)));
 
 		return handle.invokeWithArguments(args);
 	}
 
-	private MethodHandle bind(Method method, Object target) {
+	private static MethodHandle bind(Method method, Object target) {
 		try {
 			Constructor<Lookup> constructor = Lookup.class.getDeclaredConstructor(Class.class, int.class);
 			constructor.setAccessible(true);

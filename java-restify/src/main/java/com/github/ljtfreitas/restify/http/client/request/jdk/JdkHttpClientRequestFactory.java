@@ -54,7 +54,7 @@ public class JdkHttpClientRequestFactory implements HttpClientRequestFactory {
 			connection.setDoOutput(true);
 			connection.setRequestMethod(request.method());
 
-			return new JdkHttpClientRequest(connection, charset, request.headers());
+			return new JdkHttpClientRequest(connection, charset, request.headers(), request);
 
 		} catch (IOException e) {
 			throw new RestifyHttpException(e);

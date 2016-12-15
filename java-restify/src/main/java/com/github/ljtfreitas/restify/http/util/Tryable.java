@@ -45,7 +45,19 @@ public interface Tryable {
 		}
 	}
 
+	public static void run(TryableExpression expression) {
+		try {
+			expression.run();
+		} catch (Exception e) {
+			throw new RuntimeException(e);
+		}
+	}
+
 	public interface TryableSupplier<T> {
 		T get() throws Exception;
+	}
+
+	public interface TryableExpression {
+		void run() throws Exception;
 	}
 }

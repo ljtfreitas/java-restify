@@ -34,6 +34,7 @@ import java.util.Collection;
 
 import com.github.ljtfreitas.restify.http.RestifyHttpException;
 import com.github.ljtfreitas.restify.http.client.Headers;
+import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
 import com.github.ljtfreitas.restify.http.client.request.HttpClientRequest;
 import com.github.ljtfreitas.restify.http.client.response.HttpResponseMessage;
 import com.github.ljtfreitas.restify.http.client.response.StatusCode;
@@ -43,11 +44,13 @@ public class JdkHttpClientRequest implements HttpClientRequest {
 	private final HttpURLConnection connection;
 	private final Charset charset;
 	private final Headers headers;
+	private final EndpointRequest source;
 
-	public JdkHttpClientRequest(HttpURLConnection connection, Charset charset, Headers headers) {
+	public JdkHttpClientRequest(HttpURLConnection connection, Charset charset, Headers headers, EndpointRequest source) {
 		this.connection = connection;
 		this.charset = charset;
 		this.headers = new JdkHttpClientHeadersDecorator(connection, headers);
+		this.source = source;
 	}
 
 	@Override
@@ -73,7 +76,7 @@ public class JdkHttpClientRequest implements HttpClientRequest {
 
 		InputStream stream = connection.getErrorStream() == null ? connection.getInputStream() : connection.getErrorStream();
 
-		return new JdkHttpClientResponse(statusCode, headers, stream, connection);
+		return new JdkHttpClientResponse(statusCode, headers, stream, connection, this);
 	}
 
 	@Override
@@ -93,6 +96,11 @@ public class JdkHttpClientRequest implements HttpClientRequest {
 	@Override
 	public Headers headers() {
 		return headers;
+	}
+
+	@Override
+	public EndpointRequest source() {
+		return source;
 	}
 
 	private class JdkHttpClientHeadersDecorator extends Headers {

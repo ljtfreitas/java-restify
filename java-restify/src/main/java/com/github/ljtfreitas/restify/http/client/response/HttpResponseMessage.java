@@ -29,6 +29,7 @@ import java.io.Closeable;
 import java.io.InputStream;
 
 import com.github.ljtfreitas.restify.http.client.Headers;
+import com.github.ljtfreitas.restify.http.client.request.HttpRequestMessage;
 
 public interface HttpResponseMessage extends Closeable {
 
@@ -39,4 +40,6 @@ public interface HttpResponseMessage extends Closeable {
 	public InputStream body();
 
 	public boolean isReadable();
+
+	public HttpRequestMessage request();
 }

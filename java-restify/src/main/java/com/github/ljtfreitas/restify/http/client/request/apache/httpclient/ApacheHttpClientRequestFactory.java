@@ -70,7 +70,7 @@ public class ApacheHttpClientRequestFactory implements HttpClientRequestFactory 
 
 		HttpContext context = contextOf(httpRequest);
 
-		return new ApacheHttpClientRequest(httpClient, httpRequest, context, charset, endpointRequest.headers());
+		return new ApacheHttpClientRequest(httpClient, httpRequest, context, charset, endpointRequest.headers(), endpointRequest);
 	}
 
 	private HttpContext contextOf(HttpUriRequest httpRequest) {

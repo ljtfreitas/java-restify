@@ -49,7 +49,7 @@ public class EndpointRequestWriterTest {
 		EndpointRequest endpointRequest = new EndpointRequest(new URI("http://my.api.com/path"), "POST", headers, body,
 				String.class);
 
-		SimpleHttpRequestMessage httpRequestMessage = new SimpleHttpRequestMessage(headers);
+		SimpleHttpRequestMessage httpRequestMessage = new SimpleHttpRequestMessage(endpointRequest);
 
 		endpointRequestWriter.write(endpointRequest, httpRequestMessage);
 
@@ -61,7 +61,7 @@ public class EndpointRequestWriterTest {
 	public void shouldThrowExceptionWhenHttpRequestMessageHasNoBody() throws Exception {
 		EndpointRequest endpointRequest = new EndpointRequest(new URI("http://my.api.com/path"), "POST");
 
-		endpointRequestWriter.write(endpointRequest, new SimpleHttpRequestMessage());
+		endpointRequestWriter.write(endpointRequest, new SimpleHttpRequestMessage(endpointRequest));
 	}
 
 	@Test
@@ -73,7 +73,7 @@ public class EndpointRequestWriterTest {
 		EndpointRequest endpointRequest = new EndpointRequest(new URI("http://my.api.com/path"), "POST", headers, body,
 				String.class);
 
-		SimpleHttpRequestMessage httpRequestMessage = new SimpleHttpRequestMessage(headers);
+		SimpleHttpRequestMessage httpRequestMessage = new SimpleHttpRequestMessage(endpointRequest);
 
 		endpointRequestWriter.write(endpointRequest, httpRequestMessage);
 
