@@ -62,7 +62,8 @@ class RestifyProxyBeanBuilder {
 	}
 
 	public BeanDefinition build() {
-		builder.setAutowireMode(AbstractBeanDefinition.AUTOWIRE_BY_TYPE);
-		return builder.getBeanDefinition();
+		return builder.setAutowireMode(AbstractBeanDefinition.AUTOWIRE_BY_TYPE)
+						.setLazyInit(true)
+							.getBeanDefinition();
 	}
 }

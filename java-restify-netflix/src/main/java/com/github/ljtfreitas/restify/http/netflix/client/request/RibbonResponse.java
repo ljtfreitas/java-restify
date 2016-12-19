@@ -50,7 +50,7 @@ public class RibbonResponse implements IResponse {
 
 	@Override
 	public Object getPayload() throws ClientException {
-		return response.request().source().body().orElse(null);
+		return null;
 	}
 
 	@Override

@@ -1,0 +1,2 @@
+org.springframework.boot.autoconfigure.EnableAutoConfiguration=\
+com.github.ljtfreitas.restify.spring.netflix.autoconfigure.ribbon.RestifyRibbonAutoConfiguration
