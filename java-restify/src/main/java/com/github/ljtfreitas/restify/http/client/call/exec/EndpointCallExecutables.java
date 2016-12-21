@@ -42,8 +42,20 @@ public class EndpointCallExecutables {
 	}
 
 	public <M, T> EndpointCallExecutable<M, T> of(EndpointMethod endpointMethod) {
-		EndpointCallExecutableProvider provider = providerTo(endpointMethod);
+		return search(endpointMethod, null);
+	}
+
+	private <M, T> EndpointCallExecutable<M, T> search(EndpointMethod endpointMethod, EndpointCallExecutableProvider exclude) {
+		EndpointCallExecutableProvider provider = doSearch(endpointMethod, exclude);
 		return decorator(provider) ? decorate(endpointMethod, provider) : create(endpointMethod, provider);
+	}
+
+	private EndpointCallExecutableProvider doSearch(EndpointMethod endpointMethod, EndpointCallExecutableProvider exclude) {
+		return providers.stream()
+				.filter(f -> (exclude == null) || (f != exclude))
+					.filter(f -> f.supports(endpointMethod))
+						.findFirst()
+							.orElseGet(() -> DEFAULT_EXECUTABLE_FACTORY);
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
@@ -55,17 +67,10 @@ public class EndpointCallExecutables {
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private <M, T, O> EndpointCallExecutable<M, O> decorate(EndpointMethod endpointMethod, EndpointCallExecutableProvider provider) {
 		EndpointCallExecutableDecoratorFactory<M, T, O> decorator = (EndpointCallExecutableDecoratorFactory) provider;
-		return decorator.create(endpointMethod, of(endpointMethod.with(decorator.returnType(endpointMethod))));
+		return decorator.create(endpointMethod, search(endpointMethod.with(decorator.returnType(endpointMethod)), decorator));
 	}
 
 	private boolean decorator(EndpointCallExecutableProvider provider) {
 		return provider instanceof EndpointCallExecutableDecoratorFactory;
-	}
-
-	private EndpointCallExecutableProvider providerTo(EndpointMethod endpointMethod) {
-		return providers.stream()
-					.filter(f -> f.supports(endpointMethod))
-						.findFirst()
-							.orElseGet(() -> DEFAULT_EXECUTABLE_FACTORY);
 	}
 }

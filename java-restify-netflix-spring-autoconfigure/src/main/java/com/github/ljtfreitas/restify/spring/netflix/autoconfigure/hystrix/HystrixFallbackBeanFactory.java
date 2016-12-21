@@ -23,19 +23,47 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.http.netflix.client.call.exec;
+package com.github.ljtfreitas.restify.spring.netflix.autoconfigure.hystrix;
 
-import static com.github.ljtfreitas.restify.http.util.Preconditions.nonNull;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 
-import com.netflix.hystrix.HystrixCommand;
+import org.springframework.beans.factory.BeanFactory;
+import org.springframework.beans.factory.NoSuchBeanDefinitionException;
+import org.springframework.beans.factory.annotation.BeanFactoryAnnotationUtils;
 
-public class HystrixCircuitBreakerFallbackEndpointCallExecutableFactory<T, O, F> extends BaseHystrixCircuitBreakerEndpointCallExecutableFactory<T, O> {
+class HystrixFallbackBeanFactory {
 
-	public HystrixCircuitBreakerFallbackEndpointCallExecutableFactory(F fallback) {
-		super();
+	static final String QUALIFIER_NAME = "fallback";
+
+	private static final Map<Class<?>, Object> cache = new HashMap<>();
+
+	private final BeanFactory beanFactory;
+
+	public HystrixFallbackBeanFactory(BeanFactory beanFactory) {
+		this.beanFactory = beanFactory;
 	}
 
-	public HystrixCircuitBreakerFallbackEndpointCallExecutableFactory(HystrixCommand.Setter hystrixMetadata, F fallback) {
-		super(hystrixMetadata, nonNull(fallback, "Your fallback cannot be null!"));
+	@SuppressWarnings("unchecked")
+	public <T> T get(Class<? extends T> classType) {
+		return (T) cached(classType).orElseGet(() -> put(classType, search(classType)));
+	}
+
+	private Optional<Object> cached(Class<?> classType) {
+		return Optional.ofNullable(cache.get(classType));
+	}
+
+	private Object put(Class<?> classType, Object bean) {
+		cache.put(classType, bean);
+		return bean;
+	}
+
+	private Object search(Class<?> classType) {
+		try {
+			return BeanFactoryAnnotationUtils.qualifiedBeanOfType(beanFactory, classType, QUALIFIER_NAME);
+		} catch (NoSuchBeanDefinitionException e) {
+			return null;
+		}
 	}
 }

@@ -25,49 +25,15 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.netflix.client.call.exec;
 
-import java.lang.reflect.Method;
+import com.netflix.hystrix.HystrixCommand.Setter;
 
-import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutable;
-import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutableDecoratorFactory;
-import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethod;
-import com.github.ljtfreitas.restify.http.contract.metadata.reflection.JavaAnnotationScanner;
-import com.github.ljtfreitas.restify.http.contract.metadata.reflection.JavaType;
-import com.github.ljtfreitas.restify.http.netflix.hystrix.OnCircuitBreaker;
-import com.netflix.hystrix.HystrixCommand;
-
-public class HystrixCircuitBreakerEndpointCallExecutableFactory<T, O> implements EndpointCallExecutableDecoratorFactory<T, T, O> {
-
-	private final HystrixCommand.Setter hystrixMetadata;
+public class HystrixCircuitBreakerEndpointCallExecutableFactory<T, O> extends BaseHystrixCircuitBreakerEndpointCallExecutableFactory<T, O> {
 
 	public HystrixCircuitBreakerEndpointCallExecutableFactory() {
-		this.hystrixMetadata = null;
+		super();
 	}
 
-	public HystrixCircuitBreakerEndpointCallExecutableFactory(HystrixCommand.Setter hystrixMetadata) {
-		this.hystrixMetadata = hystrixMetadata;
-	}
-
-	@Override
-	public boolean supports(EndpointMethod endpointMethod) {
-		Method javaMethod = endpointMethod.javaMethod();
-		return methodOnCircuitBreaker(javaMethod) || classOnCircuitBreaker(javaMethod.getDeclaringClass());
-	}
-
-	private boolean methodOnCircuitBreaker(Method javaMethod) {
-		return new JavaAnnotationScanner(javaMethod).contains(OnCircuitBreaker.class);
-	}
-
-	private boolean classOnCircuitBreaker(Class<?> classType) {
-		return new JavaAnnotationScanner(classType).contains(OnCircuitBreaker.class);
-	}
-
-	@Override
-	public JavaType returnType(EndpointMethod endpointMethod) {
-		return endpointMethod.returnType();
-	}
-
-	@Override
-	public EndpointCallExecutable<T, O> create(EndpointMethod endpointMethod, EndpointCallExecutable<T, O> delegate) {
-		return new HystrixCircuitBreakerEndpointCallExecutable<>(hystrixMetadata, endpointMethod, delegate);
+	public HystrixCircuitBreakerEndpointCallExecutableFactory(Setter hystrixMetadata) {
+		super(hystrixMetadata);
 	}
 }

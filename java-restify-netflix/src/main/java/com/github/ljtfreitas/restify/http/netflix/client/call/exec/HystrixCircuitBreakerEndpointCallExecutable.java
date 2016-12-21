@@ -110,11 +110,11 @@ class HystrixCircuitBreakerEndpointCallExecutable<T, O> implements EndpointCallE
 		}
 
 		private HystrixCommandGroupKey groupKey() {
-			return HystrixCommandGroupKey.Factory.asKey(endpointMethod.javaMethod().getDeclaringClass().getCanonicalName());
+			return HystrixCommandGroupKey.Factory.asKey(endpointMethod.javaMethod().getDeclaringClass().getSimpleName());
 		}
 
 		private HystrixCommandKey commandKey() {
-			return HystrixCommandKey.Factory.asKey(endpointMethod.javaMethod().toGenericString());
+			return HystrixCommandKey.Factory.asKey(endpointMethod.javaMethod().getName());
 		}
 	}
 }

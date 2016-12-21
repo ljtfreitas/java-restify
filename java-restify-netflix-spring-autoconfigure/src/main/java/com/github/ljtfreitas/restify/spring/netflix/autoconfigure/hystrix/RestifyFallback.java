@@ -23,19 +23,17 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.http.netflix.client.call.exec;
+package com.github.ljtfreitas.restify.spring.netflix.autoconfigure.hystrix;
 
-import static com.github.ljtfreitas.restify.http.util.Preconditions.nonNull;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-import com.netflix.hystrix.HystrixCommand;
+import org.springframework.beans.factory.annotation.Qualifier;
 
-public class HystrixCircuitBreakerFallbackEndpointCallExecutableFactory<T, O, F> extends BaseHystrixCircuitBreakerEndpointCallExecutableFactory<T, O> {
-
-	public HystrixCircuitBreakerFallbackEndpointCallExecutableFactory(F fallback) {
-		super();
-	}
-
-	public HystrixCircuitBreakerFallbackEndpointCallExecutableFactory(HystrixCommand.Setter hystrixMetadata, F fallback) {
-		super(hystrixMetadata, nonNull(fallback, "Your fallback cannot be null!"));
-	}
+@Target({ElementType.TYPE, ElementType.FIELD, ElementType.PARAMETER, ElementType.METHOD})
+@Retention(RetentionPolicy.RUNTIME)
+@Qualifier(HystrixFallbackBeanFactory.QUALIFIER_NAME)
+public @interface RestifyFallback {
 }

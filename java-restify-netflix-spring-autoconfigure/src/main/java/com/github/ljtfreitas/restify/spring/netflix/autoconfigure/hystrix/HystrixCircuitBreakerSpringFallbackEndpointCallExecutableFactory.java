@@ -23,19 +23,21 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.http.netflix.client.call.exec;
+package com.github.ljtfreitas.restify.spring.netflix.autoconfigure.hystrix;
 
-import static com.github.ljtfreitas.restify.http.util.Preconditions.nonNull;
+import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethod;
+import com.github.ljtfreitas.restify.http.netflix.client.call.exec.BaseHystrixCircuitBreakerEndpointCallExecutableFactory;
 
-import com.netflix.hystrix.HystrixCommand;
+class HystrixCircuitBreakerSpringFallbackEndpointCallExecutableFactory extends BaseHystrixCircuitBreakerEndpointCallExecutableFactory<Object, Object> {
 
-public class HystrixCircuitBreakerFallbackEndpointCallExecutableFactory<T, O, F> extends BaseHystrixCircuitBreakerEndpointCallExecutableFactory<T, O> {
+	private final HystrixFallbackBeanFactory fallbackBeanFactory;
 
-	public HystrixCircuitBreakerFallbackEndpointCallExecutableFactory(F fallback) {
-		super();
+	public HystrixCircuitBreakerSpringFallbackEndpointCallExecutableFactory(HystrixFallbackBeanFactory fallbackObjectFactory) {
+		this.fallbackBeanFactory = fallbackObjectFactory;
 	}
 
-	public HystrixCircuitBreakerFallbackEndpointCallExecutableFactory(HystrixCommand.Setter hystrixMetadata, F fallback) {
-		super(hystrixMetadata, nonNull(fallback, "Your fallback cannot be null!"));
+	@Override
+	protected Object fallbackTo(EndpointMethod endpointMethod) {
+		return fallbackBeanFactory.get(endpointMethod.javaMethod().getDeclaringClass());
 	}
 }
