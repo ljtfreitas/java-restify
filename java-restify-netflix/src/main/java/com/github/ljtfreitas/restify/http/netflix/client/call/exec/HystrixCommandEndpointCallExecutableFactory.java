@@ -30,7 +30,7 @@ import com.netflix.hystrix.HystrixCommand.Setter;
 public class HystrixCommandEndpointCallExecutableFactory<T, O> extends BaseHystrixCommandEndpointCallExecutableFactory<T, O> {
 
 	public HystrixCommandEndpointCallExecutableFactory() {
-		this(null);
+		super();
 	}
 
 	public HystrixCommandEndpointCallExecutableFactory(Setter hystrixMetadata) {

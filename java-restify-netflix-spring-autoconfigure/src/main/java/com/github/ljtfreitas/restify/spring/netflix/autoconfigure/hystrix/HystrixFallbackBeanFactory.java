@@ -27,7 +27,6 @@ package com.github.ljtfreitas.restify.spring.netflix.autoconfigure.hystrix;
 
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.NoSuchBeanDefinitionException;
@@ -47,19 +46,19 @@ class HystrixFallbackBeanFactory {
 
 	@SuppressWarnings("unchecked")
 	public <T> T get(Class<? extends T> classType) {
-		return (T) cached(classType).orElseGet(() -> put(classType, search(classType)));
-	}
-
-	private Optional<Object> cached(Class<?> classType) {
-		return Optional.ofNullable(cache.get(classType));
-	}
-
-	private Object put(Class<?> classType, Object bean) {
-		cache.put(classType, bean);
-		return bean;
+		T fallback = (T) (cache.containsKey(classType) ? cache.get(classType) : search(classType));
+		return fallback;
 	}
 
 	private Object search(Class<?> classType) {
+		Object bean = doSearch(classType);
+
+		cache.put(classType, bean);
+
+		return bean;
+	}
+
+	private Object doSearch(Class<?> classType) {
 		try {
 			return BeanFactoryAnnotationUtils.qualifiedBeanOfType(beanFactory, classType, QUALIFIER_NAME);
 		} catch (NoSuchBeanDefinitionException e) {

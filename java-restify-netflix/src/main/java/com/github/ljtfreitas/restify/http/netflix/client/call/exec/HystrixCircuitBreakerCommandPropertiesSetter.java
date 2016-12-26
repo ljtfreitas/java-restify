@@ -91,7 +91,8 @@ class HystrixCircuitBreakerCommandPropertiesSetter {
 		HYSTRIX_COMMAND_PROPERTIES_SETTERS.put(FALLBACK_ISOLATION_SEMAPHORE_MAX_CONCURRENT_REQUESTS,
 				(s, v) -> s.withFallbackIsolationSemaphoreMaxConcurrentRequests(Integer.valueOf(v)));
 
-		HYSTRIX_COMMAND_PROPERTIES_SETTERS.put(FALLBACK_ENABLED, (s, v) -> s.withFallbackEnabled(Boolean.valueOf(v)));
+		HYSTRIX_COMMAND_PROPERTIES_SETTERS.put(FALLBACK_ENABLED,
+				(s, v) -> s.withFallbackEnabled(Boolean.valueOf(v)));
 
 		HYSTRIX_COMMAND_PROPERTIES_SETTERS.put(CIRCUIT_BREAKER_ENABLED,
 				(s, v) -> s.withCircuitBreakerEnabled(Boolean.valueOf(v)));
