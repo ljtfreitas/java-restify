@@ -16,7 +16,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import com.github.ljtfreitas.restify.http.client.call.EndpointCall;
 import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutable;
-import com.github.ljtfreitas.restify.http.netflix.hystrix.OnCircuitBreaker;
+import com.github.ljtfreitas.restify.http.netflix.client.request.circuitbreaker.OnCircuitBreaker;
 
 @RunWith(MockitoJUnitRunner.class)
 public class HystrixCircuitBreakerEndpointCallExecutableFactoryTest {

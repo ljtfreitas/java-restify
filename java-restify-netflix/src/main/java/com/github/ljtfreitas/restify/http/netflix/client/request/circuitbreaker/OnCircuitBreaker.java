@@ -23,7 +23,7 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.http.netflix.hystrix;
+package com.github.ljtfreitas.restify.http.netflix.client.request.circuitbreaker;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;
@@ -36,4 +36,11 @@ import java.lang.annotation.Target;
 @Inherited
 public @interface OnCircuitBreaker {
 
+	String groupKey() default "";
+
+	String commandKey() default "";
+
+	String threadPoolKey() default "";
+
+	CircuitBreakerProperties[] properties() default {};
 }

@@ -90,9 +90,10 @@ public class RestifyAutoConfiguration {
 		@ConditionalOnMissingBean
 		@Bean
 		public EndpointRequestExecutor endpointRequestExecutor() {
-			RestOperations restOperations = Optional.ofNullable(restTemplateBuilder)
-					.map(b -> b.build())
-						.orElseGet(() -> Optional.ofNullable(restTemplate).orElseGet(() -> new RestTemplate()));
+			RestOperations restOperations = Optional.ofNullable(restTemplate)
+					.orElseGet(() -> Optional.ofNullable(restTemplateBuilder)
+							.map(b -> b.build())
+								.orElseGet(() -> new RestTemplate()));
 
 			return new RestOperationsEndpointRequestExecutor(restOperations);
 		}

@@ -33,8 +33,6 @@ import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethod;
 import com.github.ljtfreitas.restify.http.contract.metadata.reflection.JavaType;
 import com.github.ljtfreitas.restify.http.util.Tryable;
 import com.netflix.hystrix.HystrixCommand;
-import com.netflix.hystrix.HystrixCommandGroupKey;
-import com.netflix.hystrix.HystrixCommandKey;
 
 class HystrixCircuitBreakerEndpointCallExecutable<T, O> implements EndpointCallExecutable<T, O> {
 
@@ -106,15 +104,11 @@ class HystrixCircuitBreakerEndpointCallExecutable<T, O> implements EndpointCallE
 
 		private HystrixCommand.Setter hystrixMetadata() {
 			return Optional.ofNullable(hystrixMetadata)
-					.orElseGet(() ->  HystrixCommand.Setter.withGroupKey(groupKey()).andCommandKey(commandKey()));
+					.orElseGet(() -> buildHystrixMetadata());
 		}
 
-		private HystrixCommandGroupKey groupKey() {
-			return HystrixCommandGroupKey.Factory.asKey(endpointMethod.javaMethod().getDeclaringClass().getSimpleName());
-		}
-
-		private HystrixCommandKey commandKey() {
-			return HystrixCommandKey.Factory.asKey(endpointMethod.javaMethod().getName());
+		private HystrixCommand.Setter buildHystrixMetadata() {
+			return new HystrixCommandMetadataFactory(endpointMethod).create();
 		}
 	}
 }

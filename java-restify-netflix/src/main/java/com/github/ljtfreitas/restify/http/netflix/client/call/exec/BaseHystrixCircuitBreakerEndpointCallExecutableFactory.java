@@ -25,14 +25,13 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.netflix.client.call.exec;
 
-import java.lang.reflect.Method;
+import java.util.Optional;
 
 import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutable;
 import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutableDecoratorFactory;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethod;
-import com.github.ljtfreitas.restify.http.contract.metadata.reflection.JavaAnnotationScanner;
 import com.github.ljtfreitas.restify.http.contract.metadata.reflection.JavaType;
-import com.github.ljtfreitas.restify.http.netflix.hystrix.OnCircuitBreaker;
+import com.github.ljtfreitas.restify.http.netflix.client.request.circuitbreaker.OnCircuitBreaker;
 import com.netflix.hystrix.HystrixCommand;
 import com.netflix.hystrix.HystrixCommand.Setter;
 
@@ -62,7 +61,8 @@ public abstract class BaseHystrixCircuitBreakerEndpointCallExecutableFactory<T, 
 	@Override
 	public final boolean supports(EndpointMethod endpointMethod) {
 		return onCircuitBreaker(endpointMethod)
-				&& (fallback == null || sameTypeOfFallback(endpointMethod.javaMethod().getDeclaringClass()));
+				&& !returnHystrixCommand(endpointMethod)
+					&& (fallback == null || sameTypeOfFallback(endpointMethod.javaMethod().getDeclaringClass()));
 	}
 
 	private boolean sameTypeOfFallback(Class<?> classType) {
@@ -70,20 +70,24 @@ public abstract class BaseHystrixCircuitBreakerEndpointCallExecutableFactory<T, 
 	}
 
 	private boolean onCircuitBreaker(EndpointMethod endpointMethod) {
-		return methodOnCircuitBreaker(endpointMethod.javaMethod()) || classOnCircuitBreaker(endpointMethod.javaMethod().getDeclaringClass());
+		return endpointMethod.annotations().contains(OnCircuitBreaker.class);
 	}
 
-	private boolean methodOnCircuitBreaker(Method javaMethod) {
-		return new JavaAnnotationScanner(javaMethod).contains(OnCircuitBreaker.class);
-	}
-
-	private boolean classOnCircuitBreaker(Class<?> classType) {
-		return new JavaAnnotationScanner(classType).contains(OnCircuitBreaker.class);
+	private boolean returnHystrixCommand(EndpointMethod endpointMethod) {
+		return endpointMethod.returnType().is(HystrixCommand.class);
 	}
 
 	@Override
 	public EndpointCallExecutable<T, O> create(EndpointMethod endpointMethod, EndpointCallExecutable<T, O> delegate) {
-		return new HystrixCircuitBreakerEndpointCallExecutable<T, O>(hystrixMetadata, endpointMethod, delegate, fallback(endpointMethod));
+		return new HystrixCircuitBreakerEndpointCallExecutable<T, O>(hystrixMetadata(endpointMethod), endpointMethod, delegate, fallback(endpointMethod));
+	}
+
+	private HystrixCommand.Setter hystrixMetadata(EndpointMethod endpointMethod) {
+		return Optional.ofNullable(hystrixMetadata).orElseGet(() -> buildHystrixMetadata(endpointMethod));
+	}
+
+	private HystrixCommand.Setter buildHystrixMetadata(EndpointMethod endpointMethod) {
+		return new HystrixCommandMetadataFactory(endpointMethod).create();
 	}
 
 	private Object fallback(EndpointMethod endpointMethod) {
