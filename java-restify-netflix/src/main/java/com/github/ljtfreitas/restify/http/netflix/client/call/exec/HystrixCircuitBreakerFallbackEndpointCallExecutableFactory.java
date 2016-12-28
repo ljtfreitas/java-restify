@@ -32,7 +32,7 @@ import com.netflix.hystrix.HystrixCommand;
 public class HystrixCircuitBreakerFallbackEndpointCallExecutableFactory<T, O, F> extends BaseHystrixCircuitBreakerEndpointCallExecutableFactory<T, O> {
 
 	public HystrixCircuitBreakerFallbackEndpointCallExecutableFactory(F fallback) {
-		super();
+		this(null, fallback);
 	}
 
 	public HystrixCircuitBreakerFallbackEndpointCallExecutableFactory(HystrixCommand.Setter hystrixMetadata, F fallback) {
