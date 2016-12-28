@@ -37,7 +37,6 @@ import java.util.concurrent.Executors;
 import com.github.ljtfreitas.restify.http.client.EndpointMethodExecutor;
 import com.github.ljtfreitas.restify.http.client.authentication.Authentication;
 import com.github.ljtfreitas.restify.http.client.call.EndpointCallFactory;
-import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutableFactory;
 import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutableProvider;
 import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutables;
 import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallObjectExecutableFactory;
@@ -138,8 +137,8 @@ public class RestifyProxyBuilder {
 		return this.endpointMethodExecutablesBuilder;
 	}
 
-	public RestifyProxyBuilder executables(EndpointCallExecutableFactory<?, ?>...factories) {
-		this.endpointMethodExecutablesBuilder.add(factories);
+	public RestifyProxyBuilder executables(EndpointCallExecutableProvider providers) {
+		this.endpointMethodExecutablesBuilder.add(providers);
 		return this;
 	}
 
