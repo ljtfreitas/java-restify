@@ -319,15 +319,16 @@ public class RestifyProxyBuilder {
 		private final RestifyProxyBuilder context;
 		private final AsyncEndpointCallExecutablesBuilder async = new AsyncEndpointCallExecutablesBuilder();
 
+		private final Collection<EndpointCallExecutableProvider> built = new ArrayList<>();
 		private final Collection<EndpointCallExecutableProvider> providers = new ArrayList<>();
 
 		private EndpointCallExecutablesBuilder(RestifyProxyBuilder context) {
 			this.context = context;
-			this.providers.add(new OptionalEndpointCallExecutableFactory<Object>());
-			this.providers.add(new CallableEndpointCallExecutableFactory<Object, Object>());
-			this.providers.add(new RunnableEndpointCallExecutableFactory());
-			this.providers.add(new EndpointCallObjectExecutableFactory<Object, Object>());
-			this.providers.add(new HeadersEndpointCallExecutableFactory());
+			this.built.add(new OptionalEndpointCallExecutableFactory<Object>());
+			this.built.add(new CallableEndpointCallExecutableFactory<Object, Object>());
+			this.built.add(new RunnableEndpointCallExecutableFactory());
+			this.built.add(new EndpointCallObjectExecutableFactory<Object, Object>());
+			this.built.add(new HeadersEndpointCallExecutableFactory());
 		}
 
 		public EndpointCallExecutablesBuilder async() {
@@ -360,8 +361,9 @@ public class RestifyProxyBuilder {
 		}
 
 		private EndpointCallExecutables build() {
-			providers.addAll(async.build());
-			return new EndpointCallExecutables(providers);
+			built.addAll(async.build());
+			built.addAll(providers);
+			return new EndpointCallExecutables(built);
 		}
 	}
 
