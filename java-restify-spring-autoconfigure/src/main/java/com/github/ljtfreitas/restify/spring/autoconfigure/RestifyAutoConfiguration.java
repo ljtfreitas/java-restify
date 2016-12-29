@@ -25,9 +25,11 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.spring.autoconfigure;
 
+import java.util.Optional;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -47,6 +49,8 @@ import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.core.task.support.ExecutorServiceAdapter;
 import org.springframework.core.type.AnnotationMetadata;
+import org.springframework.web.client.RestOperations;
+import org.springframework.web.client.RestTemplate;
 
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequestExecutor;
 import com.github.ljtfreitas.restify.http.client.request.HttpClientRequestFactory;
@@ -77,10 +81,21 @@ public class RestifyAutoConfiguration {
 	@Configuration
 	protected static class RestifySpringConfiguration {
 
+		@Autowired(required = false)
+		private RestTemplateBuilder restTemplateBuilder;
+
+		@Autowired(required = false)
+		private RestTemplate restTemplate;
+
 		@ConditionalOnMissingBean
 		@Bean
-		public EndpointRequestExecutor endpointRequestExecutor(RestTemplateBuilder restTemplateBuilder) {
-			return new RestOperationsEndpointRequestExecutor(restTemplateBuilder.build());
+		public EndpointRequestExecutor endpointRequestExecutor() {
+			RestOperations restOperations = Optional.ofNullable(restTemplate)
+					.orElseGet(() -> Optional.ofNullable(restTemplateBuilder)
+							.map(b -> b.build())
+								.orElseGet(() -> new RestTemplate()));
+
+			return new RestOperationsEndpointRequestExecutor(restOperations);
 		}
 
 		@ConditionalOnMissingBean

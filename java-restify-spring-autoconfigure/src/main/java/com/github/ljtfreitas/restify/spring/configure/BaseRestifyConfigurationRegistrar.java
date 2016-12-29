@@ -72,7 +72,7 @@ public abstract class BaseRestifyConfigurationRegistrar implements ImportBeanDef
 						.asyncExecutorServiceName("restifyAsyncExecutorService")
 							.authentication(apiAuthentication(restifyApiClient.getAuthentication()));
 
-		registry.registerBeanDefinition(type.name(), builder.build());
+		registry.registerBeanDefinition(type.beanName(), builder.build());
 
 		log.info("Create @Restifyable bean -> {} (API [{}] metadata: Description: [{}], and endpoint: [{}])",
 				type.objectType(), type.name(), type.description(), endpoint);

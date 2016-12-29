@@ -48,6 +48,10 @@ class RestifyableType {
 	}
 
 	public String name() {
+		return doName();
+	}
+
+	private String doName() {
 		return Optional.ofNullable(restifyable.name())
 				.filter(n -> !n.isEmpty())
 					.orElseGet(() -> objectType.getSimpleName());
@@ -55,6 +59,10 @@ class RestifyableType {
 
 	public String description() {
 		return restifyable.description();
+	}
+
+	public String beanName() {
+		return objectType.getSimpleName() + "." + doName();
 	}
 
 	public Optional<String> endpoint() {

@@ -17,5 +17,4 @@
 			<version>${project.version}</version>
 		</dependency>
 	</dependencies>
-	<packaging>ear</packaging>
 </project>

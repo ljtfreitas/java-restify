@@ -27,58 +27,15 @@ package com.github.ljtfreitas.restify.http.netflix.client.call.exec;
 
 import static com.github.ljtfreitas.restify.http.util.Preconditions.nonNull;
 
-import java.lang.reflect.Method;
-
-import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutable;
-import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutableDecoratorFactory;
-import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethod;
-import com.github.ljtfreitas.restify.http.contract.metadata.reflection.JavaAnnotationScanner;
-import com.github.ljtfreitas.restify.http.contract.metadata.reflection.JavaType;
-import com.github.ljtfreitas.restify.http.netflix.hystrix.OnCircuitBreaker;
 import com.netflix.hystrix.HystrixCommand;
 
-public class HystrixCircuitBreakerFallbackEndpointCallExecutableFactory<T, O, F> implements EndpointCallExecutableDecoratorFactory<T, T, O> {
-
-	private final HystrixCommand.Setter hystrixMetadata;
-	private final F fallback;
+public class HystrixCircuitBreakerFallbackEndpointCallExecutableFactory<T, O, F> extends BaseHystrixCircuitBreakerEndpointCallExecutableFactory<T, O> {
 
 	public HystrixCircuitBreakerFallbackEndpointCallExecutableFactory(F fallback) {
 		this(null, fallback);
 	}
 
 	public HystrixCircuitBreakerFallbackEndpointCallExecutableFactory(HystrixCommand.Setter hystrixMetadata, F fallback) {
-		this.hystrixMetadata = hystrixMetadata;
-		this.fallback = nonNull(fallback, "Your fallback cannot be null!");
-	}
-
-	@Override
-	public boolean supports(EndpointMethod endpointMethod) {
-		Method javaMethod = endpointMethod.javaMethod();
-		Class<?> classType = javaMethod.getDeclaringClass();
-
-		return sameTypeOfFallback(classType)
-				&& (methodOnCircuitBreaker(javaMethod) || classOnCircuitBreaker(classType));
-	}
-
-	private boolean methodOnCircuitBreaker(Method javaMethod) {
-		return new JavaAnnotationScanner(javaMethod).contains(OnCircuitBreaker.class);
-	}
-
-	private boolean classOnCircuitBreaker(Class<?> classType) {
-		return new JavaAnnotationScanner(classType).contains(OnCircuitBreaker.class);
-	}
-
-	private boolean sameTypeOfFallback(Class<?> classType) {
-		return classType.isAssignableFrom(fallback.getClass());
-	}
-
-	@Override
-	public JavaType returnType(EndpointMethod endpointMethod) {
-		return endpointMethod.returnType();
-	}
-
-	@Override
-	public EndpointCallExecutable<T, O> create(EndpointMethod endpointMethod, EndpointCallExecutable<T, O> delegate) {
-		return new HystrixCircuitBreakerEndpointCallExecutable<T, O>(hystrixMetadata, endpointMethod, delegate, fallback);
+		super(hystrixMetadata, nonNull(fallback, "Your fallback cannot be null!"));
 	}
 }

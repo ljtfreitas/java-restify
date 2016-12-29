@@ -37,7 +37,6 @@ import java.util.concurrent.Executors;
 import com.github.ljtfreitas.restify.http.client.EndpointMethodExecutor;
 import com.github.ljtfreitas.restify.http.client.authentication.Authentication;
 import com.github.ljtfreitas.restify.http.client.call.EndpointCallFactory;
-import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutableFactory;
 import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutableProvider;
 import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutables;
 import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallObjectExecutableFactory;
@@ -138,8 +137,8 @@ public class RestifyProxyBuilder {
 		return this.endpointMethodExecutablesBuilder;
 	}
 
-	public RestifyProxyBuilder executables(EndpointCallExecutableFactory<?, ?>...factories) {
-		this.endpointMethodExecutablesBuilder.add(factories);
+	public RestifyProxyBuilder executables(EndpointCallExecutableProvider providers) {
+		this.endpointMethodExecutablesBuilder.add(providers);
 		return this;
 	}
 
@@ -320,15 +319,16 @@ public class RestifyProxyBuilder {
 		private final RestifyProxyBuilder context;
 		private final AsyncEndpointCallExecutablesBuilder async = new AsyncEndpointCallExecutablesBuilder();
 
+		private final Collection<EndpointCallExecutableProvider> built = new ArrayList<>();
 		private final Collection<EndpointCallExecutableProvider> providers = new ArrayList<>();
 
 		private EndpointCallExecutablesBuilder(RestifyProxyBuilder context) {
 			this.context = context;
-			this.providers.add(new OptionalEndpointCallExecutableFactory<Object>());
-			this.providers.add(new CallableEndpointCallExecutableFactory<Object, Object>());
-			this.providers.add(new RunnableEndpointCallExecutableFactory());
-			this.providers.add(new EndpointCallObjectExecutableFactory<Object, Object>());
-			this.providers.add(new HeadersEndpointCallExecutableFactory());
+			this.built.add(new OptionalEndpointCallExecutableFactory<Object>());
+			this.built.add(new CallableEndpointCallExecutableFactory<Object, Object>());
+			this.built.add(new RunnableEndpointCallExecutableFactory());
+			this.built.add(new EndpointCallObjectExecutableFactory<Object, Object>());
+			this.built.add(new HeadersEndpointCallExecutableFactory());
 		}
 
 		public EndpointCallExecutablesBuilder async() {
@@ -361,8 +361,9 @@ public class RestifyProxyBuilder {
 		}
 
 		private EndpointCallExecutables build() {
-			providers.addAll(async.build());
-			return new EndpointCallExecutables(providers);
+			built.addAll(async.build());
+			built.addAll(providers);
+			return new EndpointCallExecutables(built);
 		}
 	}
 

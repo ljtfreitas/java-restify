@@ -27,52 +27,15 @@ package com.github.ljtfreitas.restify.http.netflix.client.call.exec;
 
 import static com.github.ljtfreitas.restify.http.util.Preconditions.nonNull;
 
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-
-import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutable;
-import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutableDecoratorFactory;
-import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethod;
-import com.github.ljtfreitas.restify.http.contract.metadata.reflection.JavaType;
 import com.netflix.hystrix.HystrixCommand;
 
-public class HystrixCommandFallbackEndpointCallExecutableFactory<T, O, F> implements EndpointCallExecutableDecoratorFactory<HystrixCommand<T>, T, O> {
-
-	private final HystrixCommand.Setter hystrixMetadata;
-	private final F fallback;
+public class HystrixCommandFallbackEndpointCallExecutableFactory<T, O, F> extends BaseHystrixCommandEndpointCallExecutableFactory<T, O> {
 
 	public HystrixCommandFallbackEndpointCallExecutableFactory(F fallback) {
 		this(null, fallback);
 	}
 
 	public HystrixCommandFallbackEndpointCallExecutableFactory(HystrixCommand.Setter hystrixMetadata, F fallback) {
-		this.hystrixMetadata = hystrixMetadata;
-		this.fallback = nonNull(fallback, "Your fallback cannot be null!");
-	}
-
-	@Override
-	public boolean supports(EndpointMethod endpointMethod) {
-		return endpointMethod.returnType().is(HystrixCommand.class)
-				&& sameTypeOfFallback(endpointMethod.javaMethod().getDeclaringClass());
-	}
-
-	private boolean sameTypeOfFallback(Class<?> classType) {
-		return classType.isAssignableFrom(fallback.getClass());
-	}
-
-	@Override
-	public JavaType returnType(EndpointMethod endpointMethod) {
-		return JavaType.of(unwrap(endpointMethod.returnType()));
-	}
-
-	private Type unwrap(JavaType declaredReturnType) {
-		return declaredReturnType.parameterized() ?
-				declaredReturnType.as(ParameterizedType.class).getActualTypeArguments()[0] :
-					Object.class;
-	}
-
-	@Override
-	public EndpointCallExecutable<HystrixCommand<T>, O> create(EndpointMethod endpointMethod, EndpointCallExecutable<T, O> delegate) {
-		return new HystrixCommandEndpointCallExecutable<T, O>(hystrixMetadata, endpointMethod, delegate, fallback);
+		super(hystrixMetadata, nonNull(fallback, "Your fallback cannot be null!"));
 	}
 }
