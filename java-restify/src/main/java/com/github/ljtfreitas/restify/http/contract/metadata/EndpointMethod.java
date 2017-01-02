@@ -32,6 +32,7 @@ import java.lang.reflect.Type;
 import java.util.Objects;
 import java.util.Optional;
 
+import com.github.ljtfreitas.restify.http.contract.metadata.reflection.JavaMethodAnnotations;
 import com.github.ljtfreitas.restify.http.contract.metadata.reflection.JavaType;
 
 public class EndpointMethod {
@@ -42,7 +43,7 @@ public class EndpointMethod {
 	private final EndpointMethodParameters parameters;
 	private final EndpointHeaders headers;
 	private final JavaType returnType;
-	private final EndpointMethodAnnotations annotations;
+	private final JavaMethodAnnotations annotations;
 
 	public EndpointMethod(Method javaMethod, String path, String httpMethod) {
 		this(javaMethod, path, httpMethod, new EndpointMethodParameters());
@@ -70,7 +71,7 @@ public class EndpointMethod {
 		this.parameters = nonNull(parameters, "EndpointMethod needs a parameters collection.");
 		this.headers = nonNull(headers, "EndpointMethod needs a HTTP headers collection.");
 		this.returnType = returnType;
-		this.annotations = new EndpointMethodAnnotations(javaMethod);
+		this.annotations = new JavaMethodAnnotations(javaMethod);
 	}
 
 	public String path() {
@@ -101,7 +102,7 @@ public class EndpointMethod {
 		return returnType.voidType() && !parameters.callbacks().isEmpty();
 	}
 
-	public EndpointMethodAnnotations annotations() {
+	public JavaMethodAnnotations annotations() {
 		return annotations;
 	}
 
