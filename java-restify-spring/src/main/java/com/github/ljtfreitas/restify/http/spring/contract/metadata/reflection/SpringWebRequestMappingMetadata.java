@@ -33,6 +33,7 @@ import java.util.Collections;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
@@ -73,27 +74,27 @@ public class SpringWebRequestMappingMetadata {
 					.orElseGet(() -> new String[0]);
 	}
 
-	private Optional<String> consumes() {
+	private Optional<String> produces() {
 		return Optional.ofNullable(mapping)
-			.map(m -> m.consumes())
+			.map(m -> m.produces())
 				.filter(c -> c.length >= 1)
 					.map(h -> Arrays.stream(h)
 							.filter(c -> c != null && !c.isEmpty())
 								.collect(Collectors.joining(", ")))
-				.map(c -> "Accept=".concat(c));
+				.map(c -> HttpHeaders.ACCEPT + "=" + c);
 	}
 
-	private Optional<String> produces() {
+	private Optional<String> consumes() {
 		String[] produces = Optional.ofNullable(mapping)
-			.map(m -> m.produces())
+			.map(m -> m.consumes())
 				.filter(p -> p.length <= 1)
-					.orElseThrow(() -> new IllegalArgumentException("[produces] parameter (of @RequestMapping annotation) "
+					.orElseThrow(() -> new IllegalArgumentException("[consumes] parameter (of @RequestMapping annotation) "
 							+ "must have only single value."));
 
 		return (produces.length == 0) ? Optional.empty()
 				: Optional.ofNullable(produces[0])
 					.filter(p -> !p.isEmpty())
-						.map(p -> "Content-Type=".concat(p));
+						.map(p -> HttpHeaders.CONTENT_TYPE + "=" + p);
 	}
 
 	@Override

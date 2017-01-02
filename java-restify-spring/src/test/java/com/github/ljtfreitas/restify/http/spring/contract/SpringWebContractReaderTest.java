@@ -1,6 +1,7 @@
 package com.github.ljtfreitas.restify.http.spring.contract;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.Matchers.anyString;
@@ -119,6 +120,10 @@ public class SpringWebContractReaderTest {
 		assertTrue(bodyParameter.isPresent());
 		assertEquals("body", bodyParameter.get().name());
 		assertTrue(bodyParameter.get().body());
+
+		EndpointHeader acceptHeader = endpointMethod.headers().first("Accept").orElse(null);
+		assertNotNull(acceptHeader);
+		assertEquals("{contentType}", acceptHeader.value());
 	}
 
 	@Test
@@ -175,6 +180,10 @@ public class SpringWebContractReaderTest {
 		assertTrue(headerParameter.isPresent());
 		assertEquals("customArgumentContentType", headerParameter.get().name());
 		assertTrue(headerParameter.get().header());
+
+		EndpointHeader acceptHeader = endpointMethod.headers().first("Accept").get();
+		assertNotNull(acceptHeader);
+		assertEquals("{customArgumentContentType}", acceptHeader.value());
 	}
 
 	@Test
@@ -328,8 +337,8 @@ public class SpringWebContractReaderTest {
 		@RequestMapping(path = "path", method = RequestMethod.GET)
 		public String pathWithoutSlash();
 
-		@RequestMapping(path = "/mergeHeaders", method = RequestMethod.GET, produces = "application/json",
-				consumes = {"application/json", "application/xml" }, headers = "User-Agent=Spring-Restify-Agent")
+		@RequestMapping(path = "/mergeHeaders", method = RequestMethod.GET, produces = {"application/json", "application/xml"},
+				consumes = "application/json", headers = "User-Agent=Spring-Restify-Agent")
 		public String mergeHeaders();
 
 		@RequestMapping(value = "/{customArgumentPath}", method = RequestMethod.GET,
