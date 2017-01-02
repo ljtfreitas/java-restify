@@ -23,7 +23,7 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.http.contract.metadata;
+package com.github.ljtfreitas.restify.http.contract.metadata.reflection;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
@@ -31,12 +31,12 @@ import java.util.Optional;
 
 import com.github.ljtfreitas.restify.http.contract.metadata.reflection.JavaAnnotationScanner;
 
-public class EndpointMethodAnnotations {
+public class JavaMethodAnnotations {
 
 	private final Method javaMethod;
 	private final Class<?> javaType;
 
-	public EndpointMethodAnnotations(Method javaMethod) {
+	public JavaMethodAnnotations(Method javaMethod) {
 		this.javaMethod = javaMethod;
 		this.javaType = javaMethod.getDeclaringClass();
 	}
