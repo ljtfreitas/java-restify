@@ -67,4 +67,29 @@ public class EndpointPathParameterResolverTest {
 		assertEquals("/method/static/path", endpoint);
 	}
 
+	@Test
+	public void shouldResolveDynamicArgumentWithHyphen() {
+		parameters.put(new EndpointMethodParameter(0, "first-argument", String.class));
+
+		EndpointPathParameterResolver resolver = new EndpointPathParameterResolver("/method/{first-argument}", parameters);
+
+		Object[] args = { "arg" };
+
+		String endpoint = resolver.resolve(args);
+
+		assertEquals("/method/arg", endpoint);
+	}
+
+	@Test
+	public void shouldResolveDynamicArgumentWithUnderline() {
+		parameters.put(new EndpointMethodParameter(0, "first_argument", String.class));
+
+		EndpointPathParameterResolver resolver = new EndpointPathParameterResolver("/method/{first_argument}", parameters);
+
+		Object[] args = { "arg" };
+
+		String endpoint = resolver.resolve(args);
+
+		assertEquals("/method/arg", endpoint);
+	}
 }

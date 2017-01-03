@@ -30,7 +30,7 @@ import java.util.regex.Pattern;
 
 public class DynamicParameterMatcher {
 
-	private static final Pattern DYNAMIC_PARAMETER_PATTERN = Pattern.compile("\\{([a-zA-Z]+)\\}");
+	private static final Pattern DYNAMIC_PARAMETER_PATTERN = Pattern.compile("\\{([a-zA-Z\\-\\_]+)\\}");
 
 	public static Matcher matches(String source) {
 		return DYNAMIC_PARAMETER_PATTERN.matcher(source);
