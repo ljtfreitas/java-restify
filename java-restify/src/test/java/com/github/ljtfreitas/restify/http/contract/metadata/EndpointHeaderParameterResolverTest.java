@@ -33,6 +33,32 @@ public class EndpointHeaderParameterResolverTest {
 	}
 
 	@Test
+	public void shouldResolveDynamicHeaderArgumentWithHyphen() {
+		parameters.put(new EndpointMethodParameter(0, "content-type", String.class, EndpointMethodParameterType.HEADER));
+
+		EndpointHeaderParameterResolver resolver = new EndpointHeaderParameterResolver("{content-type}", parameters);
+
+		Object[] args = new Object[] { "application/json" };
+
+		String value = resolver.resolve(args);
+
+		assertEquals(args[0], value);
+	}
+
+	@Test
+	public void shouldResolveDynamicHeaderArgumentWithUnderline() {
+		parameters.put(new EndpointMethodParameter(0, "content_type", String.class, EndpointMethodParameterType.HEADER));
+
+		EndpointHeaderParameterResolver resolver = new EndpointHeaderParameterResolver("{content_type}", parameters);
+
+		Object[] args = new Object[] { "application/json" };
+
+		String value = resolver.resolve(args);
+
+		assertEquals(args[0], value);
+	}
+
+	@Test
 	public void shouldResolveToEmptyWhenDynamicHeaderArgumentValueIsNull() {
 		parameters.put(new EndpointMethodParameter(0, "contentType", String.class, EndpointMethodParameterType.HEADER));
 

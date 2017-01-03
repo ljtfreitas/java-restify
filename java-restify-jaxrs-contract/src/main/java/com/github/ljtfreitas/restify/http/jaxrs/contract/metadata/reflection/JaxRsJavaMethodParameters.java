@@ -23,16 +23,40 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.http.contract.metadata;
+package com.github.ljtfreitas.restify.http.jaxrs.contract.metadata.reflection;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
-public class DynamicParameterMatcher {
+import javax.ws.rs.HeaderParam;
 
-	private static final Pattern DYNAMIC_PARAMETER_PATTERN = Pattern.compile("\\{([a-zA-Z\\-\\_]+)\\}");
+import com.github.ljtfreitas.restify.http.jaxrs.contract.metadata.JaxRsEndpointHeader;
 
-	public static Matcher matches(String source) {
-		return DYNAMIC_PARAMETER_PATTERN.matcher(source);
+public class JaxRsJavaMethodParameters {
+
+	private final List<JaxRsJavaMethodParameterMetadata> parameters;
+
+	public JaxRsJavaMethodParameters(Method javaMethod, Class<?> javaType) {
+		this.parameters = Arrays.stream(javaMethod.getParameters())
+				.map(p -> new JaxRsJavaMethodParameterMetadata(p, javaType))
+					.collect(Collectors.toList());
+	}
+
+	public int size() {
+		return parameters.size();
+	}
+
+	public JaxRsJavaMethodParameterMetadata get(int position) {
+		return parameters.get(position);
+	}
+
+	public JaxRsEndpointHeader[] headers() {
+		return parameters.stream().filter(p -> p.header())
+			.map(p -> p.annotation(HeaderParam.class))
+				.filter(a -> a.value() != null && !"".equals(a.value()))
+					.map(a -> new JaxRsEndpointHeader(a.value(), "{" + a.value() + "}"))
+						.toArray(s -> new JaxRsEndpointHeader[s]);
 	}
 }

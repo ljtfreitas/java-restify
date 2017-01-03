@@ -23,16 +23,39 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.http.contract.metadata;
+package com.github.ljtfreitas.restify.http.jaxrs.contract.metadata;
 
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
+import java.util.Objects;
 
-public class DynamicParameterMatcher {
+public class JaxRsEndpointHeader {
 
-	private static final Pattern DYNAMIC_PARAMETER_PATTERN = Pattern.compile("\\{([a-zA-Z\\-\\_]+)\\}");
+	private final String name;
+	private final String value;
 
-	public static Matcher matches(String source) {
-		return DYNAMIC_PARAMETER_PATTERN.matcher(source);
+	public JaxRsEndpointHeader(String name, String value) {
+		this.name = name;
+		this.value = value;
+	}
+
+	public String name() {
+		return name;
+	}
+
+	public String value() {
+		return value;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (obj instanceof JaxRsEndpointHeader) {
+			JaxRsEndpointHeader that = (JaxRsEndpointHeader) obj;
+			return name.equals(that.name);
+
+		} else return false;
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(name);
 	}
 }
