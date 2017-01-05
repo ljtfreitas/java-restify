@@ -40,27 +40,27 @@ import com.github.ljtfreitas.restify.http.contract.metadata.EndpointHeader;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointHeaders;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethod;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethodParameter;
+import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethodParameter.EndpointMethodParameterType;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethodParameterSerializer;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethodParameters;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointTarget;
+import com.github.ljtfreitas.restify.http.contract.metadata.RestifyContractExpressionResolver;
 import com.github.ljtfreitas.restify.http.contract.metadata.RestifyContractReader;
-import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethodParameter.EndpointMethodParameterType;
-import com.github.ljtfreitas.restify.http.spring.contract.metadata.SimpleSpringDynamicParameterExpressionResolver;
-import com.github.ljtfreitas.restify.http.spring.contract.metadata.SpringDynamicParameterExpressionResolver;
+import com.github.ljtfreitas.restify.http.contract.metadata.SimpleRestifyContractExpressionResolver;
 import com.github.ljtfreitas.restify.http.spring.contract.metadata.reflection.SpringWebJavaMethodMetadata;
 import com.github.ljtfreitas.restify.http.spring.contract.metadata.reflection.SpringWebJavaMethodParameterMetadata;
 import com.github.ljtfreitas.restify.http.spring.contract.metadata.reflection.SpringWebJavaTypeMetadata;
 
 public class SpringWebContractReader implements RestifyContractReader {
 
-	private final SpringDynamicParameterExpressionResolver resolver;
+	private final RestifyContractExpressionResolver expressionsolver;
 
 	public SpringWebContractReader() {
-		this(new SimpleSpringDynamicParameterExpressionResolver());
+		this(new SimpleRestifyContractExpressionResolver());
 	}
 
-	public SpringWebContractReader(SpringDynamicParameterExpressionResolver resolver) {
-		this.resolver = resolver;
+	public SpringWebContractReader(RestifyContractExpressionResolver expressionResolver) {
+		this.expressionsolver = expressionResolver;
 	}
 
 	@Override
@@ -69,7 +69,7 @@ public class SpringWebContractReader implements RestifyContractReader {
 
 		SpringWebJavaMethodMetadata javaMethodMetadata = new SpringWebJavaMethodMetadata(javaMethod);
 
-		String endpointPath = resolver.resolve(endpointTarget(target) + endpointTypePath(javaTypeMetadata)
+		String endpointPath = expressionsolver.resolve(endpointTarget(target) + endpointTypePath(javaTypeMetadata)
 				+ endpointMethodPath(javaMethodMetadata));
 
 		String endpointHttpMethod = javaMethodMetadata.httpMethod().name();
@@ -140,7 +140,7 @@ public class SpringWebContractReader implements RestifyContractReader {
 					Stream.concat(Arrays.stream(javaTypeMetadata.headers()), Arrays.stream(javaMethodMetadata.headers()))
 						.map(h -> h.split("="))
 							.filter(h -> h.length == 2)
-								.map(h -> new EndpointHeader(h[0], resolver.resolve(h[1])))
+								.map(h -> new EndpointHeader(h[0], expressionsolver.resolve(h[1])))
 									.collect(Collectors.toCollection(LinkedHashSet::new));
 
 			return new EndpointHeaders(headers);

@@ -13,9 +13,6 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.TestPropertySource;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 
-import com.github.ljtfreitas.restify.http.spring.contract.metadata.SpelDynamicParameterExpressionResolver;
-import com.github.ljtfreitas.restify.http.spring.contract.metadata.SpringDynamicParameterExpressionResolver;
-
 @RunWith(SpringJUnit4ClassRunner.class)
 @ContextConfiguration
 @TestPropertySource("classpath:spring-restify.properties")
@@ -24,7 +21,7 @@ public class SpelDynamicParameterExpressionResolverTest {
 	@Autowired
 	private ConfigurableBeanFactory beanFactory;
 
-	private SpringDynamicParameterExpressionResolver resolver;
+	private SpelDynamicParameterExpressionResolver resolver;
 
 	@Before
 	public void setup() {

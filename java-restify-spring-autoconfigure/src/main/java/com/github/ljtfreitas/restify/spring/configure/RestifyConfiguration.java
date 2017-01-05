@@ -46,6 +46,7 @@ import org.springframework.web.client.RestTemplate;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequestExecutor;
 import com.github.ljtfreitas.restify.http.client.request.HttpClientRequestFactory;
 import com.github.ljtfreitas.restify.http.client.request.jdk.JdkHttpClientRequestFactory;
+import com.github.ljtfreitas.restify.http.contract.metadata.RestifyContractExpressionResolver;
 import com.github.ljtfreitas.restify.http.contract.metadata.RestifyContractReader;
 import com.github.ljtfreitas.restify.http.spring.client.call.exec.AsyncResultEndpointCallExecutableFactory;
 import com.github.ljtfreitas.restify.http.spring.client.call.exec.DeferredResultEndpointCallExecutableFactory;
@@ -57,7 +58,6 @@ import com.github.ljtfreitas.restify.http.spring.client.call.exec.WebAsyncTaskEn
 import com.github.ljtfreitas.restify.http.spring.client.request.RestOperationsEndpointRequestExecutor;
 import com.github.ljtfreitas.restify.http.spring.contract.SpringWebContractReader;
 import com.github.ljtfreitas.restify.http.spring.contract.metadata.SpelDynamicParameterExpressionResolver;
-import com.github.ljtfreitas.restify.http.spring.contract.metadata.SpringDynamicParameterExpressionResolver;
 
 @Configuration
 class RestifyConfiguration {
@@ -71,12 +71,12 @@ class RestifyConfiguration {
 		}
 
 		@Bean
-		public RestifyContractReader restifyContractReader(SpringDynamicParameterExpressionResolver expressionResolver) {
+		public RestifyContractReader restifyContractReader(RestifyContractExpressionResolver expressionResolver) {
 			return new SpringWebContractReader(expressionResolver);
 		}
 
 		@Bean
-		public SpringDynamicParameterExpressionResolver expressionResolver(ConfigurableBeanFactory beanFactory) {
+		public RestifyContractExpressionResolver expressionResolver(ConfigurableBeanFactory beanFactory) {
 			return new SpelDynamicParameterExpressionResolver(beanFactory);
 		}
 
