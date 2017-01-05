@@ -27,6 +27,7 @@
 		<module>java-restify-netflix-spring-autoconfigure</module>
 		<module>java-restify-netflix-spring-starter</module>
 		<module>java-restify-jaxrs-contract</module>
+		<module>java-restify-cdi</module>
 	</modules>
 
 	<dependencies>
