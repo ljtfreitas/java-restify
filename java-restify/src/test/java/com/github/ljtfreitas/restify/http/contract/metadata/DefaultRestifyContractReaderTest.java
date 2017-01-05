@@ -9,6 +9,9 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.Properties;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -30,11 +33,6 @@ import com.github.ljtfreitas.restify.http.contract.PathParameter;
 import com.github.ljtfreitas.restify.http.contract.Post;
 import com.github.ljtfreitas.restify.http.contract.Put;
 import com.github.ljtfreitas.restify.http.contract.QueryParameters;
-import com.github.ljtfreitas.restify.http.contract.metadata.DefaultRestifyContractReader;
-import com.github.ljtfreitas.restify.http.contract.metadata.EndpointHeader;
-import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethod;
-import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethodParameter;
-import com.github.ljtfreitas.restify.http.contract.metadata.EndpointTarget;
 import com.github.ljtfreitas.restify.http.contract.metadata.reflection.SimpleGenericArrayType;
 import com.github.ljtfreitas.restify.http.contract.metadata.reflection.SimpleParameterizedType;
 import com.github.ljtfreitas.restify.http.contract.metadata.reflection.SimpleWildcardType;
@@ -384,6 +382,28 @@ public class DefaultRestifyContractReaderTest {
 		assertEquals("http://my.api.com/context/any", endpointMethod.path());
 	}
 
+	@Test
+	public void shouldCreateEndpointMethodWhenInterfaceHasDynamicPath() throws Exception {
+		restifyContractReader = new DefaultRestifyContractReader(new DynamicExpressionResolver());
+
+		EndpointTarget dynamicApiTarget = new EndpointTarget(MyDynamicApi.class);
+
+		EndpointMethod endpointMethod = restifyContractReader.read(dynamicApiTarget, MyDynamicApi.class.getMethod("method"));
+
+		assertEquals("http://localhost:8080/any", endpointMethod.path());
+	}
+
+	@Test
+	public void shouldCreateEndpointMethodWhenTargetEndpointIsDynamic() throws Exception {
+		restifyContractReader = new DefaultRestifyContractReader(new DynamicExpressionResolver());
+
+		EndpointTarget dynamicApiTarget = new EndpointTarget(OtherDynamicApi.class, "@{api.endpoint}");
+
+		EndpointMethod endpointMethod = restifyContractReader.read(dynamicApiTarget, OtherDynamicApi.class.getMethod("method"));
+
+		assertEquals("http://localhost:8080/context/any", endpointMethod.path());
+	}
+
 	@Path("http://my.api.com")
 	@Header(name = "X-My-Type", value = "MyApiType")
 	interface MyApiType {
@@ -520,6 +540,49 @@ public class DefaultRestifyContractReaderTest {
 		public String method();
 	}
 
+	@Path("@{api.endpoint}")
+	interface MyDynamicApi {
+
+		@Path("/any")
+		@Get
+		public String method();
+	}
+
+	@Path("/context")
+	interface OtherDynamicApi {
+
+		@Path("/any")
+		@Get
+		public String method();
+	}
+
 	class MyModel {
+	}
+
+	private class DynamicExpressionResolver implements RestifyContractExpressionResolver {
+
+		private final Pattern dynamicPattern = Pattern.compile("\\@\\{([a-zA-Z\\.]+)\\}");
+
+		private final Properties properties = new Properties();
+
+		private DynamicExpressionResolver() {
+			properties.put("api.endpoint", "http://localhost:8080/");
+		}
+
+		@Override
+		public String resolve(String expression) {
+			Matcher matcher = dynamicPattern.matcher(expression);
+
+			if (matcher.find()) {
+				StringBuffer builder = new StringBuffer();
+
+				matcher.appendReplacement(builder, properties.getProperty(matcher.group(1)));
+
+				return builder.toString();
+
+			} else {
+				return expression;
+			}
+		}
 	}
 }

@@ -43,13 +43,23 @@ import com.github.ljtfreitas.restify.http.contract.metadata.reflection.JavaTypeM
 
 public class DefaultRestifyContractReader implements RestifyContractReader {
 
+	private final RestifyContractExpressionResolver expressionResolver;
+
+	public DefaultRestifyContractReader() {
+		this(new SimpleRestifyContractExpressionResolver());
+	}
+
+	public DefaultRestifyContractReader(RestifyContractExpressionResolver expressionResolver) {
+		this.expressionResolver = expressionResolver;
+	}
+
 	@Override
 	public EndpointMethod read(EndpointTarget target, java.lang.reflect.Method javaMethod) {
 		JavaTypeMetadata javaTypeMetadata = new JavaTypeMetadata(target.type());
 
 		JavaMethodMetadata javaMethodMetadata = new JavaMethodMetadata(javaMethod);
 
-		String endpointPath = endpointTarget(target) + endpointTypePath(javaTypeMetadata) + endpointMethodPath(javaMethodMetadata);
+		String endpointPath = endpointPath(target, javaTypeMetadata, javaMethodMetadata);
 
 		String endpointHttpMethod = javaMethodMetadata.httpMethod().value().toUpperCase();
 
@@ -62,15 +72,21 @@ public class DefaultRestifyContractReader implements RestifyContractReader {
 		return new EndpointMethod(javaMethod, endpointPath, endpointHttpMethod, parameters, headers, returnType);
 	}
 
+	private String endpointPath(EndpointTarget target, JavaTypeMetadata javaTypeMetadata, JavaMethodMetadata javaMethodMetadata) {
+		return endpointTarget(target) + endpointTypePath(javaTypeMetadata) + endpointMethodPath(javaMethodMetadata);
+	}
+
 	private String endpointTarget(EndpointTarget target) {
-		return target.endpoint().orElse("");
+		String endpoint = expressionResolver.resolve(target.endpoint().orElse(""));
+		return endpoint.endsWith("/") ? endpoint.substring(0, endpoint.length() - 1) : endpoint;
 	}
 
 	private String endpointTypePath(JavaTypeMetadata javaTypeMetadata) {
 		return Arrays.stream(javaTypeMetadata.paths())
 				.map(Path::value)
-					.map(p -> p.endsWith("/") ? p.substring(0, p.length() - 1) : p)
-						.collect(Collectors.joining());
+					.map(p -> expressionResolver.resolve(p))
+						.map(p -> p.endsWith("/") ? p.substring(0, p.length() - 1) : p)
+							.collect(Collectors.joining());
 	}
 
 	private String endpointMethodPath(JavaMethodMetadata javaMethodMetadata) {
