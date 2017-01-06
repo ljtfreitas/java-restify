@@ -46,7 +46,7 @@ import com.github.ljtfreitas.restify.http.client.request.HttpClientRequestFactor
 import com.github.ljtfreitas.restify.http.client.request.interceptor.EndpointRequestInterceptor;
 import com.github.ljtfreitas.restify.http.client.request.jdk.JdkHttpClientRequestFactory;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponseErrorFallback;
-import com.github.ljtfreitas.restify.http.contract.metadata.DefaultRestifyContractReader;
+import com.github.ljtfreitas.restify.http.contract.metadata.RestifyContractExpressionResolver;
 import com.github.ljtfreitas.restify.http.contract.metadata.RestifyContractReader;
 
 class RestifyProxyCdiBeanFactory {
@@ -67,6 +67,7 @@ class RestifyProxyCdiBeanFactory {
 
 		builder.client(httpClientRequestFactory())
 			.contract(contractReader())
+			.expression(expressionResolver())
 			.executor(endpointRequestExecutor())
 			.executables()
 				.add(executables())
@@ -104,7 +105,11 @@ class RestifyProxyCdiBeanFactory {
 	}
 
 	private RestifyContractReader contractReader() {
-		return get(RestifyContractReader.class, () -> new DefaultRestifyContractReader());
+		return get(RestifyContractReader.class, () -> null);
+	}
+
+	private RestifyContractExpressionResolver expressionResolver() {
+		return get(RestifyContractExpressionResolver.class, () -> null);
 	}
 
 	private HttpClientRequestFactory httpClientRequestFactory() {
