@@ -25,8 +25,6 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.cdi;
 
-import static com.github.ljtfreitas.restify.http.util.Preconditions.isTrue;
-
 import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -60,9 +58,6 @@ class RestifyProxyCdiBeanFactory {
 	}
 
 	public Object create() {
-		isTrue(restifyable.endpoint() != null && !"".equals(restifyable.endpoint()),
-				"The [endpoint] attribute of the @Restifyable annotation is required.");
-
 		RestifyProxyBuilder builder = new RestifyProxyBuilder();
 
 		builder.client(httpClientRequestFactory())
