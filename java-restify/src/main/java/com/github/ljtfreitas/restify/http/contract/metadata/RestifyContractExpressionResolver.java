@@ -23,10 +23,9 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.http.spring.contract.metadata;
+package com.github.ljtfreitas.restify.http.contract.metadata;
 
-public interface SpringDynamicParameterExpressionResolver {
+public interface RestifyContractExpressionResolver {
 
-	String resolve(String expression);
-
+	public String resolve(String expression);
 }

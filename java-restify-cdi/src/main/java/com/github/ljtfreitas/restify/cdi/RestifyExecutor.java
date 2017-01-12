@@ -23,13 +23,17 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.http.spring.contract.metadata;
+package com.github.ljtfreitas.restify.cdi;
 
-public class SimpleSpringDynamicParameterExpressionResolver implements SpringDynamicParameterExpressionResolver {
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-	@Override
-	public String resolve(String expression) {
-		return expression;
-	}
+import javax.inject.Qualifier;
 
+@Target({ElementType.TYPE, ElementType.METHOD})
+@Retention(RetentionPolicy.RUNTIME)
+@Qualifier
+public @interface RestifyExecutor {
 }

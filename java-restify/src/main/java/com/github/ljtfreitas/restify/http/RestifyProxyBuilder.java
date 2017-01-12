@@ -82,11 +82,15 @@ import com.github.ljtfreitas.restify.http.contract.DefaultRestifyContract;
 import com.github.ljtfreitas.restify.http.contract.RestifyContract;
 import com.github.ljtfreitas.restify.http.contract.metadata.DefaultRestifyContractReader;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointTarget;
+import com.github.ljtfreitas.restify.http.contract.metadata.RestifyContractExpressionResolver;
 import com.github.ljtfreitas.restify.http.contract.metadata.RestifyContractReader;
+import com.github.ljtfreitas.restify.http.contract.metadata.SimpleRestifyContractExpressionResolver;
 
 public class RestifyProxyBuilder {
 
 	private RestifyContractReader contractReader;
+
+	private RestifyContractExpressionResolver expressionResolver;
 
 	private HttpClientRequestFactory httpClientRequestFactory;
 
@@ -107,6 +111,11 @@ public class RestifyProxyBuilder {
 
 	public RestifyProxyBuilder contract(RestifyContractReader contract) {
 		this.contractReader = contract;
+		return this;
+	}
+
+	public RestifyProxyBuilder expression(RestifyContractExpressionResolver expression) {
+		this.expressionResolver = expression;
 		return this;
 	}
 
@@ -217,7 +226,12 @@ public class RestifyProxyBuilder {
 		private RestifyContract contract() {
 			return Optional.ofNullable(contractReader)
 					.map(c -> new DefaultRestifyContract(c))
-					.orElseGet(() -> new DefaultRestifyContract(new DefaultRestifyContractReader()));
+					.orElseGet(() -> new DefaultRestifyContract(new DefaultRestifyContractReader(expressionResolver())));
+		}
+
+		private RestifyContractExpressionResolver expressionResolver() {
+			return Optional.ofNullable(expressionResolver)
+					.orElseGet(() -> new SimpleRestifyContractExpressionResolver());
 		}
 	}
 
