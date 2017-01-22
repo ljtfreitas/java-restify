@@ -26,10 +26,13 @@
 package com.github.ljtfreitas.restify.http.jaxrs.contract;
 
 import java.lang.reflect.Type;
+import java.net.URL;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashSet;
 import java.util.stream.Collectors;
+
+import javax.ws.rs.Path;
 
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointHeader;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointHeaders;
@@ -45,6 +48,7 @@ import com.github.ljtfreitas.restify.http.jaxrs.contract.metadata.reflection.Jax
 import com.github.ljtfreitas.restify.http.jaxrs.contract.metadata.reflection.JaxRsJavaMethodParameterMetadata;
 import com.github.ljtfreitas.restify.http.jaxrs.contract.metadata.reflection.JaxRsJavaMethodParameters;
 import com.github.ljtfreitas.restify.http.jaxrs.contract.metadata.reflection.JaxRsJavaTypeMetadata;
+import com.github.ljtfreitas.restify.http.util.Tryable;
 
 
 public class JaxRsContractReader implements RestifyContractReader {
@@ -57,7 +61,7 @@ public class JaxRsContractReader implements RestifyContractReader {
 
 		JaxRsJavaMethodParameters javaMethodParameters = new JaxRsJavaMethodParameters(javaMethod, target.type());
 
-		String endpointPath = endpointTarget(target) + endpointTypePath(javaTypeMetadata) + endpointMethodPath(javaMethodMetadata);
+		String endpointPath = endpointPath(target, javaTypeMetadata, javaMethodMetadata);
 
 		String endpointHttpMethod = javaMethodMetadata.httpMethod().value().toUpperCase();
 
@@ -68,6 +72,12 @@ public class JaxRsContractReader implements RestifyContractReader {
 		Type returnType = javaMethodMetadata.returnType(target.type());
 
 		return new EndpointMethod(javaMethod, endpointPath, endpointHttpMethod, parameters, headers, returnType);
+	}
+
+	private String endpointPath(EndpointTarget target, JaxRsJavaTypeMetadata javaTypeMetadata, JaxRsJavaMethodMetadata javaMethodMetadata) {
+		String endpoint = endpointTarget(target) + endpointTypePath(javaTypeMetadata) + endpointMethodPath(javaMethodMetadata);
+
+		return Tryable.of(() -> new URL(endpoint)).toString();
 	}
 
 	private String endpointTarget(EndpointTarget target) {
@@ -81,8 +91,8 @@ public class JaxRsContractReader implements RestifyContractReader {
 	}
 
 	private String endpointMethodPath(JaxRsJavaMethodMetadata javaMethodMetadata) {
-		String endpointMethodPath = javaMethodMetadata.path().value();
-		return (endpointMethodPath.startsWith("/") ? endpointMethodPath : "/" + endpointMethodPath);
+		String endpointMethodPath = javaMethodMetadata.path().map(Path::value).orElse("");
+		return (endpointMethodPath.isEmpty() || endpointMethodPath.startsWith("/") ? endpointMethodPath : "/" + endpointMethodPath);
 	}
 
 	private EndpointMethodParameters endpointMethodParameters(JaxRsJavaMethodParameters javaMethodParameters) {
