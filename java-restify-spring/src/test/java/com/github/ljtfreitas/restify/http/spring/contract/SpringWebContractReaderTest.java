@@ -19,6 +19,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -50,6 +51,8 @@ public class SpringWebContractReaderTest {
 
 	private EndpointTarget myContextApiTarget;
 
+	private EndpointTarget mySimpleCrudApiTarget;
+
 	@Mock
 	private RestifyContractExpressionResolver expressionResolverMock;
 
@@ -65,6 +68,8 @@ public class SpringWebContractReaderTest {
 		myGenericSpecificApiTarget = new EndpointTarget(MySpecificApi.class);
 
 		myContextApiTarget = new EndpointTarget(MyContextApi.class, "http://my.api.com");
+
+		mySimpleCrudApiTarget = new EndpointTarget(MySimpleCrudApi.class, "http://my.api.com");
 
 		when(expressionResolverMock.resolve(anyString()))
 			.then(returnsFirstArg());
@@ -321,6 +326,15 @@ public class SpringWebContractReaderTest {
 		assertEquals("http://my.api.com/context/any", endpointMethod.path());
 	}
 
+	@Test
+	public void shouldCreateEndpointMethodWhenJavaMethodHasNoPathOnRequestMappingAnnotation() throws Exception {
+		EndpointMethod endpointMethod = springMvcContractReader.read(mySimpleCrudApiTarget,
+				MySimpleCrudApi.class.getMethod("post", MyModel.class));
+
+		assertEquals("http://my.api.com/context", endpointMethod.path());
+		assertEquals("POST", endpointMethod.httpMethod());
+	}
+
 	@RequestMapping(path = "http://my.api.com", headers = "X-My-Type=MyApiType")
 	interface MyApiType {
 
@@ -411,6 +425,22 @@ public class SpringWebContractReaderTest {
 
 		@GetMapping("/any")
 		public String method();
+	}
+
+	@RequestMapping("/context")
+	interface MySimpleCrudApi {
+
+		@PostMapping
+		public void post(@RequestBody MyModel myModel);
+
+		@GetMapping
+		public MyModel get();
+
+		@PutMapping
+		public void put(@RequestBody MyModel myModel);
+
+		@DeleteMapping
+		public void delete();
 	}
 
 	class MyModel {
