@@ -38,9 +38,10 @@ public abstract class JsonMessageConverter<T> implements HttpMessageReader<T>, H
 		return APPLICATION_JSON;
 	}
 
-	public static JsonMessageConverter<Object> available() {
-		return JavaClassDiscovery.present("com.fasterxml.jackson.databind.ObjectMapper") ? new JacksonMessageConverter<>()
-			: JavaClassDiscovery.present("com.google.gson.Gson") ? new GsonMessageConverter<>()
-				:  new FallbackJsonMessageConverter<>();
+	public static JsonMessageConverter<?> available() {
+		return  JavaClassDiscovery.present("com.google.gson.Gson") ? new GsonMessageConverter<>()
+					: JavaClassDiscovery.present("com.fasterxml.jackson.databind.ObjectMapper") ? new JacksonMessageConverter<>()
+						: JavaClassDiscovery.present("javax.json.Json") ? new JsonpMessageConverter()
+								:  new FallbackJsonMessageConverter<>();
 	}
 }
