@@ -1,6 +1,8 @@
 package com.github.ljtfreitas.restify.http.client.message.converter.json;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -43,12 +45,22 @@ public class JsonpMessageConverterTest {
 	}
 
 	@Test
+	public void shouldCanWriteJsonObject() {
+		assertTrue(converter.canWrite(JsonObject.class));
+	}
+
+	@Test
 	public void shouldWriteJsonObject() {
 		ByteArrayOutputStream output = new ByteArrayOutputStream();
 
 		converter.write(jsonObject, new SimpleHttpRequestMessage(output));
 
 		assertEquals(jsonObject.toString(), output.toString());
+	}
+
+	@Test
+	public void shouldCanReadJsonObject() {
+		assertTrue(converter.canRead(JsonObject.class));
 	}
 
 	@Test
@@ -62,12 +74,22 @@ public class JsonpMessageConverterTest {
 	}
 
 	@Test
+	public void shouldCanWriteJsonArray() {
+		assertTrue(converter.canWrite(JsonArray.class));
+	}
+
+	@Test
 	public void shouldWriteJsonArray() {
 		ByteArrayOutputStream output = new ByteArrayOutputStream();
 
 		converter.write(jsonArray, new SimpleHttpRequestMessage(output));
 
 		assertEquals(jsonArray.toString(), output.toString());
+	}
+
+	@Test
+	public void shouldCanReadJsonArray() {
+		assertTrue(converter.canRead(JsonArray.class));
 	}
 
 	@Test
@@ -85,5 +107,15 @@ public class JsonpMessageConverterTest {
 		jsonArrayElement = response.getJsonObject(1);
 		assertEquals("Tiago de Freitas Lima 2", jsonArrayElement.getString("name"));
 		assertEquals(32, jsonArrayElement.getInt("age"));
+	}
+
+	@Test
+	public void shouldNotCanWriteWhenTypeIsNotJsonObjectOrJsonArray() {
+		assertFalse(converter.canWrite(String.class));
+	}
+
+	@Test
+	public void shouldNotCanReadWhenTypeIsNotJsonObjectOrJsonArray() {
+		assertFalse(converter.canRead(String.class));
 	}
 }
