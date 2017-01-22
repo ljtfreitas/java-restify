@@ -22,6 +22,7 @@ import com.github.ljtfreitas.restify.http.client.request.async.EndpointCallSucce
 import com.github.ljtfreitas.restify.http.contract.AcceptJson;
 import com.github.ljtfreitas.restify.http.contract.BodyParameter;
 import com.github.ljtfreitas.restify.http.contract.CallbackParameter;
+import com.github.ljtfreitas.restify.http.contract.Delete;
 import com.github.ljtfreitas.restify.http.contract.Get;
 import com.github.ljtfreitas.restify.http.contract.Header;
 import com.github.ljtfreitas.restify.http.contract.HeaderParameter;
@@ -47,6 +48,8 @@ public class DefaultRestifyContractReaderTest {
 
 	private EndpointTarget myContextApiTarget;
 
+	private EndpointTarget mySimpleCrudApiTarget;
+
 	private DefaultRestifyContractReader restifyContractReader;
 
 	@Before
@@ -58,6 +61,8 @@ public class DefaultRestifyContractReaderTest {
 		myGenericSpecificApiTarget = new EndpointTarget(MySpecificApi.class);
 
 		myContextApiTarget = new EndpointTarget(MyContextApi.class, "http://my.api.com");
+
+		mySimpleCrudApiTarget = new EndpointTarget(MySimpleCrudApi.class, "http://my.api.com");
 
 		restifyContractReader = new DefaultRestifyContractReader();
 	}
@@ -383,6 +388,13 @@ public class DefaultRestifyContractReaderTest {
 	}
 
 	@Test
+	public void shouldCreateEndpointMethodWhenJavaMethodHasNotPathAnnotation() throws Exception {
+		EndpointMethod endpointMethod = restifyContractReader.read(mySimpleCrudApiTarget, MySimpleCrudApi.class.getMethod("post", MyModel.class));
+
+		assertEquals("http://my.api.com/context", endpointMethod.path());
+	}
+
+	@Test
 	public void shouldCreateEndpointMethodWhenInterfaceHasDynamicPath() throws Exception {
 		restifyContractReader = new DefaultRestifyContractReader(new DynamicExpressionResolver());
 
@@ -538,6 +550,22 @@ public class DefaultRestifyContractReaderTest {
 		@Path("/any")
 		@Method("GET")
 		public String method();
+	}
+
+	@Path("/context")
+	interface MySimpleCrudApi {
+
+		@Post
+		public void post(MyModel model);
+
+		@Get
+		public MyModel get();
+
+		@Put
+		public void put(MyModel model);
+
+		@Delete
+		public void delete();
 	}
 
 	@Path("@{api.endpoint}")

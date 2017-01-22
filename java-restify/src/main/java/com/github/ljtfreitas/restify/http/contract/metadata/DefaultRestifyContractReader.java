@@ -30,6 +30,7 @@ import static com.github.ljtfreitas.restify.http.util.Preconditions.isTrue;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.lang.reflect.Type;
+import java.net.URL;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -40,6 +41,7 @@ import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethodParame
 import com.github.ljtfreitas.restify.http.contract.metadata.reflection.JavaMethodMetadata;
 import com.github.ljtfreitas.restify.http.contract.metadata.reflection.JavaMethodParameterMetadata;
 import com.github.ljtfreitas.restify.http.contract.metadata.reflection.JavaTypeMetadata;
+import com.github.ljtfreitas.restify.http.util.Tryable;
 
 public class DefaultRestifyContractReader implements RestifyContractReader {
 
@@ -73,7 +75,9 @@ public class DefaultRestifyContractReader implements RestifyContractReader {
 	}
 
 	private String endpointPath(EndpointTarget target, JavaTypeMetadata javaTypeMetadata, JavaMethodMetadata javaMethodMetadata) {
-		return endpointTarget(target) + endpointTypePath(javaTypeMetadata) + endpointMethodPath(javaMethodMetadata);
+		String endpoint = endpointTarget(target) + endpointTypePath(javaTypeMetadata) + endpointMethodPath(javaMethodMetadata);
+
+		return Tryable.of(() -> new URL(endpoint)).toString();
 	}
 
 	private String endpointTarget(EndpointTarget target) {
@@ -90,8 +94,8 @@ public class DefaultRestifyContractReader implements RestifyContractReader {
 	}
 
 	private String endpointMethodPath(JavaMethodMetadata javaMethodMetadata) {
-		String endpointMethodPath = javaMethodMetadata.path().value();
-		return (endpointMethodPath.startsWith("/") ? endpointMethodPath : "/" + endpointMethodPath);
+		String endpointMethodPath = javaMethodMetadata.path().map(Path::value).orElse("");
+		return (endpointMethodPath.startsWith("/") || endpointMethodPath.isEmpty() ? endpointMethodPath : "/" + endpointMethodPath);
 	}
 
 	private EndpointMethodParameters endpointMethodParameters(Method javaMethod, EndpointTarget target) {
