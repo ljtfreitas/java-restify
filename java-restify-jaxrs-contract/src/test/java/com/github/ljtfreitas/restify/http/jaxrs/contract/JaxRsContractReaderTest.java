@@ -12,6 +12,7 @@ import java.util.Optional;
 
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.POST;
@@ -43,6 +44,8 @@ public class JaxRsContractReaderTest {
 
 	private EndpointTarget myContextApiTarget;
 
+	private EndpointTarget mySimpleCrudApiTarget;
+
 	private JaxRsContractReader jaxRsContractReader;
 
 	@Before
@@ -54,6 +57,8 @@ public class JaxRsContractReaderTest {
 		myGenericSpecificApiTarget = new EndpointTarget(MySpecificApi.class);
 
 		myContextApiTarget = new EndpointTarget(MyContextApi.class, "http://my.api.com");
+
+		mySimpleCrudApiTarget = new EndpointTarget(MySimpleCrudApi.class, "http://my.api.com");
 
 		jaxRsContractReader = new JaxRsContractReader();
 	}
@@ -389,6 +394,14 @@ public class JaxRsContractReaderTest {
 		assertEquals("http://my.api.com/context/any", endpointMethod.path());
 	}
 
+	@Test
+	public void shouldCreateEndpointMethodWhenJavaMethodHasNotPathAnnotation() throws Exception {
+		EndpointMethod endpointMethod = jaxRsContractReader.read(mySimpleCrudApiTarget, MySimpleCrudApi.class.getMethod("post", MyModel.class));
+
+		assertEquals("http://my.api.com/context", endpointMethod.path());
+		assertEquals("POST", endpointMethod.httpMethod());
+	}
+
 	@Test(expected = IllegalArgumentException.class)
 	public void shouldThrowExceptionWhenInterfaceTypeIsAnnotatedWithApplicationPathAndPathAnnotations() throws Exception {
 		jaxRsContractReader.read(new EndpointTarget(MyWrongApi.class),
@@ -530,6 +543,22 @@ public class JaxRsContractReaderTest {
 		@Path("/any")
 		@GET
 		public String method();
+	}
+
+	@Path("/context")
+	interface MySimpleCrudApi {
+
+		@POST
+		public void post(MyModel myModel);
+
+		@GET
+		public MyModel get();
+
+		@PUT
+		public void put(MyModel myModel);
+
+		@DELETE
+		public void delete();
 	}
 
 	@ApplicationPath("http://wrong")

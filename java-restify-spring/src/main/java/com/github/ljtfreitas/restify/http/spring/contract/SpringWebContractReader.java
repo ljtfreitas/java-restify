@@ -30,6 +30,7 @@ import static com.github.ljtfreitas.restify.http.util.Preconditions.nonNull;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.lang.reflect.Type;
+import java.net.URL;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashSet;
@@ -50,6 +51,7 @@ import com.github.ljtfreitas.restify.http.contract.metadata.SimpleRestifyContrac
 import com.github.ljtfreitas.restify.http.spring.contract.metadata.reflection.SpringWebJavaMethodMetadata;
 import com.github.ljtfreitas.restify.http.spring.contract.metadata.reflection.SpringWebJavaMethodParameterMetadata;
 import com.github.ljtfreitas.restify.http.spring.contract.metadata.reflection.SpringWebJavaTypeMetadata;
+import com.github.ljtfreitas.restify.http.util.Tryable;
 
 public class SpringWebContractReader implements RestifyContractReader {
 
@@ -69,8 +71,7 @@ public class SpringWebContractReader implements RestifyContractReader {
 
 		SpringWebJavaMethodMetadata javaMethodMetadata = new SpringWebJavaMethodMetadata(javaMethod);
 
-		String endpointPath = expressionsolver.resolve(endpointTarget(target) + endpointTypePath(javaTypeMetadata)
-				+ endpointMethodPath(javaMethodMetadata));
+		String endpointPath = endpointPath(target, javaTypeMetadata, javaMethodMetadata);
 
 		String endpointHttpMethod = javaMethodMetadata.httpMethod().name();
 
@@ -81,6 +82,13 @@ public class SpringWebContractReader implements RestifyContractReader {
 		Type returnType = javaMethodMetadata.returnType(target.type());
 
 		return new EndpointMethod(javaMethod, endpointPath, endpointHttpMethod, parameters, headers, returnType);
+	}
+
+	private String endpointPath(EndpointTarget target, SpringWebJavaTypeMetadata javaTypeMetadata, SpringWebJavaMethodMetadata javaMethodMetadata) {
+		String endpoint = expressionsolver.resolve(endpointTarget(target) + endpointTypePath(javaTypeMetadata) + 
+				endpointMethodPath(javaMethodMetadata));
+
+		return Tryable.of(() -> new URL(endpoint)).toString();
 	}
 
 	private String endpointTarget(EndpointTarget target) {

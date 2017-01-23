@@ -1,15 +1,16 @@
 package com.github.ljtfreitas.restify.http.contract.metadata.reflection;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 
 import org.junit.Test;
 
+import com.github.ljtfreitas.restify.http.contract.Get;
 import com.github.ljtfreitas.restify.http.contract.Header;
 import com.github.ljtfreitas.restify.http.contract.Headers;
 import com.github.ljtfreitas.restify.http.contract.Method;
 import com.github.ljtfreitas.restify.http.contract.Path;
 import com.github.ljtfreitas.restify.http.contract.Post;
-import com.github.ljtfreitas.restify.http.contract.metadata.reflection.JavaMethodMetadata;
 
 public class JavaMethodMetadataTest {
 
@@ -19,7 +20,7 @@ public class JavaMethodMetadataTest {
 
 		JavaMethodMetadata javaMethodMetadata = new JavaMethodMetadata(javaMethod);
 
-		assertEquals("/path", javaMethodMetadata.path().value());
+		assertEquals("/path", javaMethodMetadata.path().get().value());
 		assertEquals("GET", javaMethodMetadata.httpMethod().value());
 
 		assertEquals(1, javaMethodMetadata.headers().length);
@@ -33,7 +34,7 @@ public class JavaMethodMetadataTest {
 
 		JavaMethodMetadata javaMethodMetadata = new JavaMethodMetadata(javaMethod);
 
-		assertEquals("/path", javaMethodMetadata.path().value());
+		assertEquals("/path", javaMethodMetadata.path().get().value());
 		assertEquals("POST", javaMethodMetadata.httpMethod().value());
 
 		assertEquals(0, javaMethodMetadata.headers().length);
@@ -45,7 +46,7 @@ public class JavaMethodMetadataTest {
 
 		JavaMethodMetadata javaMethodMetadata = new JavaMethodMetadata(javaMethod);
 
-		assertEquals("/path", javaMethodMetadata.path().value());
+		assertEquals("/path", javaMethodMetadata.path().get().value());
 		assertEquals("GET", javaMethodMetadata.httpMethod().value());
 
 		assertEquals(2, javaMethodMetadata.headers().length);
@@ -57,11 +58,14 @@ public class JavaMethodMetadataTest {
 		assertEquals("MyHeader2", javaMethodMetadata.headers()[1].value());
 	}
 
-	@Test(expected = IllegalArgumentException.class)
-	public void shouldThrowExceptionWhenMethodHasNoPathAnnotation() throws Exception {
+	@Test
+	public void shouldReturnEmptyPathWhenMethodHasNoPathAnnotation() throws Exception {
 		java.lang.reflect.Method javaMethod = MyApiType.class.getMethod("methodWithoutPathAnnotation");
 
-		new JavaMethodMetadata(javaMethod);
+		JavaMethodMetadata javaMethodMetadata = new JavaMethodMetadata(javaMethod);
+
+		assertFalse(javaMethodMetadata.path().isPresent());
+		assertEquals("GET", javaMethodMetadata.httpMethod().value());
 	}
 
 	@Test(expected = IllegalArgumentException.class)
@@ -89,6 +93,7 @@ public class JavaMethodMetadataTest {
 			@Header(name = "X-My-Header-2", value = "MyHeader2")})
 		public String methodWithArrayOfHeaders();
 
+		@Get
 		public String methodWithoutPathAnnotation();
 
 		@Path("/path")

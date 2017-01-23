@@ -43,8 +43,7 @@ public class JavaMethodMetadata {
 	public JavaMethodMetadata(java.lang.reflect.Method javaMethod) {
 		this.javaMethod = javaMethod;
 
-		this.path = Optional.ofNullable(javaMethod.getAnnotation(Path.class))
-				.orElseThrow(() -> new IllegalArgumentException("Method " + javaMethod + " does not have a @Path annotation"));
+		this.path = javaMethod.getAnnotation(Path.class);
 
 		this.httpMethod = Optional.ofNullable(new JavaAnnotationScanner(javaMethod).scan(Method.class))
 				.orElseThrow(() -> new IllegalArgumentException("Method " + javaMethod + " does not have a @Method annotation"));
@@ -54,8 +53,8 @@ public class JavaMethodMetadata {
 					.orElseGet(() -> new JavaAnnotationScanner(javaMethod).scanAll(Header.class));
 	}
 
-	public Path path() {
-		return path;
+	public Optional<Path> path() {
+		return Optional.ofNullable(path);
 	}
 
 	public Method httpMethod() {
