@@ -21,13 +21,11 @@ import org.mockserver.junit.MockServerRule;
 import org.mockserver.model.HttpRequest;
 
 import com.github.ljtfreitas.restify.http.RestifyProxyBuilder;
-import com.github.ljtfreitas.restify.http.client.request.jdk.JdkHttpClientRequestFactory;
 import com.github.ljtfreitas.restify.http.contract.BodyParameter;
 import com.github.ljtfreitas.restify.http.contract.Get;
 import com.github.ljtfreitas.restify.http.contract.Header;
 import com.github.ljtfreitas.restify.http.contract.Path;
 import com.github.ljtfreitas.restify.http.contract.Post;
-import com.github.ljtfreitas.restify.http.netflix.client.request.RibbonHttpClientRequestFactory;
 import com.netflix.client.config.DefaultClientConfigImpl;
 import com.netflix.client.config.IClientConfig;
 import com.netflix.loadbalancer.BaseLoadBalancer;
@@ -45,8 +43,6 @@ public class RibbonHttpClientRequestFactoryTest {
 
 	@Before
 	public void setup() {
-		JdkHttpClientRequestFactory delegate = new JdkHttpClientRequestFactory();
-
 		ILoadBalancer loadBalancer = new BaseLoadBalancer();
 		loadBalancer.addServers(Arrays.asList(new Server("localhost", 7080)));
 		loadBalancer.addServers(Arrays.asList(new Server("localhost", 7081)));
@@ -54,7 +50,7 @@ public class RibbonHttpClientRequestFactoryTest {
 
 		IClientConfig clientConfig = new DefaultClientConfigImpl();
 
-		RibbonHttpClientRequestFactory ribbonHttpClientRequestFactory = new RibbonHttpClientRequestFactory(delegate, loadBalancer, clientConfig);
+		RibbonHttpClientRequestFactory ribbonHttpClientRequestFactory = new RibbonHttpClientRequestFactory(loadBalancer, clientConfig);
 
 		myApi = new RestifyProxyBuilder()
 				.client(ribbonHttpClientRequestFactory)

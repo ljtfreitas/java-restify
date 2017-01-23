@@ -31,6 +31,7 @@ import com.github.ljtfreitas.restify.http.client.charset.Encoding;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
 import com.github.ljtfreitas.restify.http.client.request.HttpClientRequest;
 import com.github.ljtfreitas.restify.http.client.request.HttpClientRequestFactory;
+import com.github.ljtfreitas.restify.http.client.request.jdk.JdkHttpClientRequestFactory;
 import com.netflix.client.config.DefaultClientConfigImpl;
 import com.netflix.client.config.IClientConfig;
 import com.netflix.loadbalancer.ILoadBalancer;
@@ -40,15 +41,19 @@ public class RibbonHttpClientRequestFactory implements HttpClientRequestFactory 
 	private final RibbonLoadBalancedClient ribbonLoadBalancedClient;
 	private final Charset charset;
 
-	public RibbonHttpClientRequestFactory(HttpClientRequestFactory delegate, ILoadBalancer loadBalancer) {
-		this(delegate, loadBalancer, new DefaultClientConfigImpl(), Encoding.UTF_8.charset());
+	public RibbonHttpClientRequestFactory(ILoadBalancer loadBalancer) {
+		this(loadBalancer, new DefaultClientConfigImpl());
 	}
 
-	public RibbonHttpClientRequestFactory(HttpClientRequestFactory delegate, ILoadBalancer loadBalancer, IClientConfig clientConfig) {
-		this(delegate, loadBalancer, clientConfig, Encoding.UTF_8.charset());
+	public RibbonHttpClientRequestFactory(ILoadBalancer loadBalancer, IClientConfig clientConfig) {
+		this(loadBalancer, clientConfig, new JdkHttpClientRequestFactory());
 	}
 
-	public RibbonHttpClientRequestFactory(HttpClientRequestFactory delegate, ILoadBalancer loadBalancer, IClientConfig clientConfig, Charset charset) {
+	public RibbonHttpClientRequestFactory(ILoadBalancer loadBalancer, IClientConfig clientConfig, HttpClientRequestFactory delegate) {
+		this(loadBalancer, clientConfig, delegate, Encoding.UTF_8.charset());
+	}
+
+	public RibbonHttpClientRequestFactory(ILoadBalancer loadBalancer, IClientConfig clientConfig, HttpClientRequestFactory delegate, Charset charset) {
 		this(new RibbonLoadBalancedClient(loadBalancer, clientConfig, delegate), charset);
 	}
 
