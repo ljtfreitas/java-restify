@@ -40,9 +40,9 @@ public class DefaultEndpointResponseErrorFallbackTest {
 		HttpResponseMessage response = new SimpleHttpResponseMessage(StatusCode.internalServerError(), new Headers(), new ByteArrayInputStream(body.getBytes()));
 
 		expectedException.expect(RestifyEndpointResponseException.class);
-		expectedException.expectMessage(allOf(startsWith("HTTP Status Code: " + response.code()), endsWith(body)));
+		expectedException.expectMessage(allOf(startsWith("HTTP Status Code: " + response.statusCode()), endsWith(body)));
 
-		expectedException.expect(method(e -> e.statusCode(), is(response.code())));
+		expectedException.expect(method(e -> e.statusCode(), is(response.statusCode())));
 		expectedException.expect(method(e -> e.headers(), sameInstance(response.headers())));
 		expectedException.expect(method(e -> e.bodyAsString(), is(body)));
 
@@ -56,9 +56,9 @@ public class DefaultEndpointResponseErrorFallbackTest {
 		HttpResponseMessage response = new SimpleHttpResponseMessage(StatusCode.notFound(), new Headers(), new ByteArrayInputStream(body.getBytes()));
 
 		expectedException.expect(RestifyEndpointResponseException.class);
-		expectedException.expectMessage(allOf(startsWith("HTTP Status Code: " + response.code()), endsWith(body)));
+		expectedException.expectMessage(allOf(startsWith("HTTP Status Code: " + response.statusCode()), endsWith(body)));
 
-		expectedException.expect(method(e -> e.statusCode(), is(response.code())));
+		expectedException.expect(method(e -> e.statusCode(), is(response.statusCode())));
 		expectedException.expect(method(e -> e.headers(), sameInstance(response.headers())));
 		expectedException.expect(method(e -> e.bodyAsString(), is(body)));
 
@@ -75,7 +75,7 @@ public class DefaultEndpointResponseErrorFallbackTest {
 
 		EndpointResponse<Object> newEndpointResponse = fallback.onError(response);
 
-		assertEquals(response.code(), newEndpointResponse.code());
+		assertEquals(response.statusCode(), newEndpointResponse.code());
 		assertSame(response.headers(), newEndpointResponse.headers());
 		assertNull(newEndpointResponse.body());
 	}

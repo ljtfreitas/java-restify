@@ -35,9 +35,9 @@ class EndpointResponseExceptionFactory {
 	RestifyEndpointResponseException create(HttpResponseMessage response) {
 		String bodyAsString = TEXT_ERROR_RESPONSE_MESSAGE_CONVERTER.read(response, String.class);
 
-		String message = "HTTP Status Code: " + response.code() + "\n" + bodyAsString;
+		String message = "HTTP Status Code: " + response.statusCode() + "\n" + bodyAsString;
 
-		StatusCode statusCode = response.code();
+		StatusCode statusCode = response.statusCode();
 
 		if (statusCode.isBadRequest()) {
 			return onBadRequest(message, response.headers(), bodyAsString);
@@ -109,7 +109,7 @@ class EndpointResponseExceptionFactory {
 			return onHttpVersionNotSupported(message, response.headers(), bodyAsString);
 
 		} else {
-			return unhandled(message, response.code(), response.headers(), bodyAsString);
+			return unhandled(message, response.statusCode(), response.headers(), bodyAsString);
 		}
 	}
 

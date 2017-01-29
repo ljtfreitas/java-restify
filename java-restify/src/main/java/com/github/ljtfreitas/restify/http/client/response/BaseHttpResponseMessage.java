@@ -52,7 +52,7 @@ public abstract class BaseHttpResponseMessage implements HttpResponseMessage {
 	}
 
 	@Override
-	public StatusCode code() {
+	public StatusCode statusCode() {
 		return statusCode;
 	}
 	
@@ -68,9 +68,13 @@ public abstract class BaseHttpResponseMessage implements HttpResponseMessage {
 	
 	@Override
 	public boolean isReadable() {
-		return isReadableStatus() && hasContentLength();
+		return isReadableStatus() && httpMethodShouldContainResponseBody() && hasContentLength();
 	}
 	
+	private boolean httpMethodShouldContainResponseBody() {
+		return !(httpRequest.source().method().equals("HEAD") || (httpRequest.source().method().equals("TRACE")));
+	}
+
 	private boolean isReadableStatus() {
 		return !(statusCode.isInformational() || statusCode.isNoContent() || statusCode.isNotModified());
 	}

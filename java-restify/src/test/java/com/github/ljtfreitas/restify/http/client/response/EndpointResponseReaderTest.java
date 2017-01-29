@@ -8,6 +8,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayInputStream;
+import java.net.URI;
 import java.util.Optional;
 
 import org.junit.Before;
@@ -19,11 +20,9 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import com.github.ljtfreitas.restify.http.client.message.HttpMessageConverters;
 import com.github.ljtfreitas.restify.http.client.message.HttpMessageReader;
-import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
-import com.github.ljtfreitas.restify.http.client.response.EndpointResponseErrorFallback;
-import com.github.ljtfreitas.restify.http.client.response.EndpointResponseReader;
-import com.github.ljtfreitas.restify.http.client.response.HttpResponseMessage;
-import com.github.ljtfreitas.restify.http.client.response.StatusCode;
+import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
+import com.github.ljtfreitas.restify.http.client.request.HttpRequestMessage;
+import com.github.ljtfreitas.restify.http.client.request.SimpleHttpRequestMessage;
 import com.github.ljtfreitas.restify.http.contract.ContentType;
 import com.github.ljtfreitas.restify.http.contract.metadata.reflection.JavaType;
 
@@ -42,10 +41,14 @@ public class EndpointResponseReaderTest {
 	@InjectMocks
 	private EndpointResponseReader endpointResponseReader;
 
+	private HttpRequestMessage httpRequestMessage;
+
 	private String endpointResult;
 
 	@Before
 	public void setup() {
+		httpRequestMessage = new SimpleHttpRequestMessage(new EndpointRequest(URI.create("http://any.api"), "GET"));
+
 		endpointResult = "expected result";
 
 		when(httpMessageConvertersMock.readerOf(ContentType.of("text/plain"), String.class))
@@ -56,7 +59,7 @@ public class EndpointResponseReaderTest {
 
 	@Test
 	public void shouldReadSuccessResponse() {
-		HttpResponseMessage httpResponseMessage = new SimpleHttpResponseMessage(new ByteArrayInputStream(endpointResult.getBytes()));
+		HttpResponseMessage httpResponseMessage = new SimpleHttpResponseMessage(new ByteArrayInputStream(endpointResult.getBytes()), httpRequestMessage);
 
 		EndpointResponse<String> response = endpointResponseReader.read(httpResponseMessage, JavaType.of(String.class));
 
@@ -64,8 +67,8 @@ public class EndpointResponseReaderTest {
 	}
 
 	@Test
-	public void shouldCallEndpointResponseErorHandlerWhenResponseStatusCodeIsError() {
-		HttpResponseMessage httpResponseMessage = new SimpleHttpResponseMessage(StatusCode.internalServerError());
+	public void shouldCallEndpointResponseErrorFallbackWhenResponseStatusCodeIsError() {
+		HttpResponseMessage httpResponseMessage = new SimpleHttpResponseMessage(StatusCode.internalServerError(), httpRequestMessage);
 
 		endpointResponseReader.read(httpResponseMessage, JavaType.of(String.class));
 
@@ -84,7 +87,7 @@ public class EndpointResponseReaderTest {
 
 	@Test
 	public void shouldReturnEmptyResponseWhenHttpResponseCodeIsNotReadable() {
-		HttpResponseMessage httpResponseMessage = new SimpleHttpResponseMessage(StatusCode.noContent());
+		HttpResponseMessage httpResponseMessage = new SimpleHttpResponseMessage(StatusCode.noContent(), httpRequestMessage);
 
 		EndpointResponse<String> response = endpointResponseReader.read(httpResponseMessage, JavaType.of(String.class));
 
