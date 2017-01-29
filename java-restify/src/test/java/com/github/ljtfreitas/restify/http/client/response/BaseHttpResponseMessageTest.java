@@ -46,7 +46,7 @@ public class BaseHttpResponseMessageTest {
 	@SuppressWarnings("resource")
 	@Test
 	public void shouldNotBeReadableWhenStatusCodeIsInformational() {
-		BaseHttpResponseMessage httpResponseMessage = new StubHttpResponseMessage(StatusCode.contine());
+		BaseHttpResponseMessage httpResponseMessage = new StubHttpResponseMessage(StatusCode.of(StatusCode.HTTP_STATUS_CODE_CONTINUE));
 		assertFalse(httpResponseMessage.isReadable());
 	}
 

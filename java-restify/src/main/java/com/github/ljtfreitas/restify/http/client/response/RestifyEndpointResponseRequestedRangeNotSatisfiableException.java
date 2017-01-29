@@ -23,58 +23,16 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.http.netflix.client.request;
+package com.github.ljtfreitas.restify.http.client.response;
 
-import java.io.IOException;
-import java.net.URI;
-import java.util.Map;
-import java.util.stream.Collectors;
+import com.github.ljtfreitas.restify.http.client.Headers;
 
-import com.github.ljtfreitas.restify.http.client.Header;
-import com.github.ljtfreitas.restify.http.client.response.HttpResponseMessage;
-import com.netflix.client.ClientException;
-import com.netflix.client.IResponse;
+public class RestifyEndpointResponseRequestedRangeNotSatisfiableException extends RestifyEndpointResponseException {
 
-public class RibbonResponse implements IResponse {
+	private static final long serialVersionUID = 1L;
 
-	private final HttpResponseMessage response;
-
-	public RibbonResponse(HttpResponseMessage response) {
-		this.response = response;
+	public RestifyEndpointResponseRequestedRangeNotSatisfiableException(String message, Headers headers, String body) {
+		super(message, StatusCode.requestedRangeNotSatisfiable(), headers, body);
 	}
 
-	@Override
-	public void close() throws IOException {
-		response.close();
-	}
-
-	@Override
-	public Object getPayload() throws ClientException {
-		return null;
-	}
-
-	@Override
-	public boolean hasPayload() {
-		return response.isReadable();
-	}
-
-	@Override
-	public boolean isSuccess() {
-		return response.code().isSucessful();
-	}
-
-	@Override
-	public URI getRequestedURI() {
-		return response.request().source().endpoint();
-	}
-
-	@Override
-	public Map<String, ?> getHeaders() {
-		return response.headers().all().stream()
-				.collect(Collectors.groupingBy(Header::name));
-	}
-
-	public HttpResponseMessage unwrap() {
-		return response;
-	}
 }

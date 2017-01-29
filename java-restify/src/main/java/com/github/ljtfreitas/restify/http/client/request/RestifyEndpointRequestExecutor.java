@@ -49,6 +49,9 @@ public class RestifyEndpointRequestExecutor implements EndpointRequestExecutor {
 		try (HttpResponseMessage response = doExecute(endpointRequest)) {
 			return responseOf(response, endpointRequest.responseType());
 
+		} catch (RestifyHttpException e) {
+			throw e;
+
 		} catch (Exception e) {
 			throw new RestifyHttpException(e);
 		}

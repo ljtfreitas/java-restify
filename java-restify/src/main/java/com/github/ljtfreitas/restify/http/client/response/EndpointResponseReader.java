@@ -46,8 +46,12 @@ public class EndpointResponseReader {
 	}
 
 	public <T> EndpointResponse<T> read(HttpResponseMessage response, JavaType responseType) {
-		if (readableType(responseType) && response.isReadable()) {
+		if (response.code().isError()) {
+			return endpointResponseErrorFallback.onError(response);
+
+		} else if (readableType(responseType) && (response.isReadable())) {
 			return doRead(response, responseType);
+
 		} else {
 			return EndpointResponse.empty(response.code(), response.headers());
 		}
@@ -61,10 +65,15 @@ public class EndpointResponseReader {
 		return new EndpointResponseContentReader<T>().read(response, responseType);
 	}
 
-	class EndpointResponseContentReader<T> {
+	private class EndpointResponseContentReader<T> {
 		private EndpointResponse<T> read(HttpResponseMessage response, JavaType responseType) {
-			if (response.code().isSucess()) {
+			StatusCode responseStatusCode = response.code();
+
+			if (responseStatusCode.isSucessful()) {
 				return doRead(response, responseType.unwrap());
+
+			} else if (responseStatusCode.isRedirection()) {
+				return EndpointResponse.empty(responseStatusCode, response.headers());
 
 			} else {
 				return endpointResponseErrorFallback.onError(response);

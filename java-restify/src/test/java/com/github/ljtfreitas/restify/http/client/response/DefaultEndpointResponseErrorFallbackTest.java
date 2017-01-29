@@ -5,24 +5,21 @@ import static org.hamcrest.CoreMatchers.endsWith;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.sameInstance;
 import static org.hamcrest.CoreMatchers.startsWith;
-import static org.hamcrest.beans.HasPropertyWithValue.hasProperty;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertSame;
 
 import java.io.ByteArrayInputStream;
+import java.util.function.Function;
 
+import org.hamcrest.FeatureMatcher;
+import org.hamcrest.Matcher;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
 import com.github.ljtfreitas.restify.http.client.Headers;
-import com.github.ljtfreitas.restify.http.client.response.DefaultEndpointResponseErrorFallback;
-import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
-import com.github.ljtfreitas.restify.http.client.response.HttpResponseMessage;
-import com.github.ljtfreitas.restify.http.client.response.RestifyEndpointResponseException;
-import com.github.ljtfreitas.restify.http.client.response.StatusCode;
 
 public class DefaultEndpointResponseErrorFallbackTest {
 
@@ -45,9 +42,9 @@ public class DefaultEndpointResponseErrorFallbackTest {
 		expectedException.expect(RestifyEndpointResponseException.class);
 		expectedException.expectMessage(allOf(startsWith("HTTP Status Code: " + response.code()), endsWith(body)));
 
-		expectedException.expect(hasProperty("statusCode", is(response.code())));
-		expectedException.expect(hasProperty("headers", sameInstance(response.headers())));
-		expectedException.expect(hasProperty("body", is(body)));
+		expectedException.expect(method(e -> e.statusCode(), is(response.code())));
+		expectedException.expect(method(e -> e.headers(), sameInstance(response.headers())));
+		expectedException.expect(method(e -> e.bodyAsString(), is(body)));
 
 		fallback.onError(response);
 	}
@@ -61,9 +58,9 @@ public class DefaultEndpointResponseErrorFallbackTest {
 		expectedException.expect(RestifyEndpointResponseException.class);
 		expectedException.expectMessage(allOf(startsWith("HTTP Status Code: " + response.code()), endsWith(body)));
 
-		expectedException.expect(hasProperty("statusCode", is(response.code())));
-		expectedException.expect(hasProperty("headers", sameInstance(response.headers())));
-		expectedException.expect(hasProperty("body", is(body)));
+		expectedException.expect(method(e -> e.statusCode(), is(response.code())));
+		expectedException.expect(method(e -> e.headers(), sameInstance(response.headers())));
+		expectedException.expect(method(e -> e.bodyAsString(), is(body)));
 
 		fallback.onError(response);
 	}
@@ -81,5 +78,14 @@ public class DefaultEndpointResponseErrorFallbackTest {
 		assertEquals(response.code(), newEndpointResponse.code());
 		assertSame(response.headers(), newEndpointResponse.headers());
 		assertNull(newEndpointResponse.body());
+	}
+
+	private <T> FeatureMatcher<RestifyEndpointResponseException, T> method(Function<RestifyEndpointResponseException, T> function, Matcher<T> matcher) {
+		return new FeatureMatcher<RestifyEndpointResponseException, T>(matcher, "method", "value") {
+			@Override
+			protected T featureValueOf(RestifyEndpointResponseException actual) {
+				return function.apply(actual);
+			}
+		};
 	}
 }

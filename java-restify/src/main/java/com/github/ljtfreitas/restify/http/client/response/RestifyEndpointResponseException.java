@@ -31,26 +31,31 @@ public class RestifyEndpointResponseException extends RestifyHttpMessageReadExce
 
 	private static final long serialVersionUID = 1L;
 
-	private final StatusCode statusCode;
-	private final Headers headers;
-	private final String body;
+	private final EndpointResponse<String> response;
+
+	public RestifyEndpointResponseException(String message, EndpointResponse<String> response) {
+		super(message);
+		this.response = response;
+	}
 
 	public RestifyEndpointResponseException(String message, StatusCode statusCode, Headers headers, String body) {
 		super(message);
-		this.statusCode = statusCode;
-		this.headers = headers;
-		this.body = body;
+		this.response = new EndpointResponse<>(statusCode, headers, body);
 	}
 
-	public StatusCode getStatusCode() {
-		return statusCode;
+	public StatusCode statusCode() {
+		return response.code();
 	}
 
-	public Headers getHeaders() {
-		return headers;
+	public Headers headers() {
+		return response.headers();
 	}
 
-	public String getBody() {
-		return body;
+	public String bodyAsString() {
+		return response.body();
+	}
+
+	public EndpointResponse<String> response() {
+		return response;
 	}
 }

@@ -25,13 +25,11 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.response;
 
-import com.github.ljtfreitas.restify.http.client.message.converter.text.TextPlainMessageConverter;
-
 public class DefaultEndpointResponseErrorFallback implements EndpointResponseErrorFallback {
 
-	private static final TextPlainMessageConverter ERROR_RESPONSE_MESSAGE_CONVERTER = new TextPlainMessageConverter();
-
 	private final boolean emptyOnNotFound;
+
+	private final EndpointResponseExceptionFactory endpointResponseExceptionFactory = new EndpointResponseExceptionFactory();
 
 	public DefaultEndpointResponseErrorFallback() {
 		this.emptyOnNotFound = false;
@@ -52,11 +50,7 @@ public class DefaultEndpointResponseErrorFallback implements EndpointResponseErr
 	}
 
 	private RestifyEndpointResponseException exception(HttpResponseMessage response) {
-		String body = ERROR_RESPONSE_MESSAGE_CONVERTER.read(response, String.class);
-
-		String message = "HTTP Status Code: " + response.code() + "\n" + body;
-
-		throw new RestifyEndpointResponseException(message, response.code(), response.headers(), body);
+		return endpointResponseExceptionFactory.create(response);
 	}
 
 	public static DefaultEndpointResponseErrorFallback emptyOnNotFound() {
