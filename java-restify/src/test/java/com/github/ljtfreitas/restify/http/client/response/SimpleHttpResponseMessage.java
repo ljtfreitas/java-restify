@@ -6,9 +6,6 @@ import java.io.InputStream;
 
 import com.github.ljtfreitas.restify.http.client.Headers;
 import com.github.ljtfreitas.restify.http.client.request.HttpRequestMessage;
-import com.github.ljtfreitas.restify.http.client.response.BaseHttpResponseMessage;
-import com.github.ljtfreitas.restify.http.client.response.HttpResponseMessage;
-import com.github.ljtfreitas.restify.http.client.response.StatusCode;
 
 public class SimpleHttpResponseMessage implements HttpResponseMessage {
 
@@ -19,11 +16,19 @@ public class SimpleHttpResponseMessage implements HttpResponseMessage {
 	}
 
 	public SimpleHttpResponseMessage(InputStream input) {
-		this(StatusCode.ok(), new Headers(), input);
+		this(input, null);
+	}
+
+	public SimpleHttpResponseMessage(InputStream input, HttpRequestMessage source) {
+		this(StatusCode.ok(), new Headers(), input, source);
 	}
 
 	public SimpleHttpResponseMessage(StatusCode statusCode) {
-		this(statusCode, new Headers(), new ByteArrayInputStream(new byte[0]));
+		this(statusCode, null);
+	}
+
+	public SimpleHttpResponseMessage(StatusCode statusCode, HttpRequestMessage source) {
+		this(statusCode, new Headers(), new ByteArrayInputStream(new byte[0]), source);
 	}
 
 	public SimpleHttpResponseMessage(Headers headers) {
@@ -31,7 +36,11 @@ public class SimpleHttpResponseMessage implements HttpResponseMessage {
 	}
 
 	public SimpleHttpResponseMessage(StatusCode code, Headers headers, InputStream input) {
-		this.delegate = new BaseHttpResponseMessage(code, headers, input, null) {
+		this(code, headers, input, null);
+	}
+
+	public SimpleHttpResponseMessage(StatusCode code, Headers headers, InputStream input, HttpRequestMessage source) {
+		this.delegate = new BaseHttpResponseMessage(code, headers, input, source) {
 			@Override
 			public void close() throws IOException {
 				input.close();
@@ -45,8 +54,8 @@ public class SimpleHttpResponseMessage implements HttpResponseMessage {
 	}
 
 	@Override
-	public StatusCode code() {
-		return delegate.code();
+	public StatusCode statusCode() {
+		return delegate.statusCode();
 	}
 
 	@Override

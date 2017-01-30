@@ -23,23 +23,7 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.http.client.response;
+package com.github.ljtfreitas.restify.http.client.request.async;
 
-import java.io.Closeable;
-import java.io.InputStream;
-
-import com.github.ljtfreitas.restify.http.client.Headers;
-import com.github.ljtfreitas.restify.http.client.request.HttpRequestMessage;
-
-public interface HttpResponseMessage extends Closeable {
-
-	public StatusCode statusCode();
-
-	public Headers headers();
-
-	public InputStream body();
-
-	public boolean isReadable();
-
-	public HttpRequestMessage request();
+public abstract class EndpointResponseCallback<T> extends EndpointResponseFailureCallback implements EndpointCallSuccessCallback<T> {
 }

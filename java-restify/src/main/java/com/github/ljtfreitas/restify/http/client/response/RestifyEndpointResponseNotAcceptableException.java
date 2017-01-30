@@ -25,21 +25,14 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.response;
 
-import java.io.Closeable;
-import java.io.InputStream;
-
 import com.github.ljtfreitas.restify.http.client.Headers;
-import com.github.ljtfreitas.restify.http.client.request.HttpRequestMessage;
 
-public interface HttpResponseMessage extends Closeable {
+public class RestifyEndpointResponseNotAcceptableException extends RestifyEndpointResponseException {
 
-	public StatusCode statusCode();
+	private static final long serialVersionUID = 1L;
 
-	public Headers headers();
+	public RestifyEndpointResponseNotAcceptableException(String message, Headers headers, String body) {
+		super(message, StatusCode.notAcceptable(), headers, body);
+	}
 
-	public InputStream body();
-
-	public boolean isReadable();
-
-	public HttpRequestMessage request();
 }
