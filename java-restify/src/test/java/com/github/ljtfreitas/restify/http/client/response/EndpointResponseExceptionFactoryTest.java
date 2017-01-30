@@ -294,6 +294,19 @@ public class EndpointResponseExceptionFactoryTest {
 	}
 
 	@Test
+	public void shouldThrowExceptionWhenStatusCodeIsHttpVersionNotSupported() {
+		HttpResponseMessage response = new SimpleHttpResponseMessage(StatusCode.httpVersionNotSupported(), headers,
+				responseBody);
+
+		RestifyEndpointResponseException exception = exceptionFactory.create(response);
+
+		assertThat(exception, instanceOf(RestifyEndpointResponseHttpVersionNotSupportedException.class));
+		assertThat(exception.statusCode(), equalTo(response.statusCode()));
+		assertThat(exception.headers(), sameInstance(response.headers()));
+		assertThat(exception.bodyAsString(), isEmptyString());
+	}
+
+	@Test
 	public void shouldThrowExceptionWhenStatusCodeIsUnhandled() {
 		HttpResponseMessage response = new SimpleHttpResponseMessage(StatusCode.of(999), headers, responseBody);
 
