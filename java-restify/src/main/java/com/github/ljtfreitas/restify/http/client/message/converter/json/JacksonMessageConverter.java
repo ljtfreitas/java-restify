@@ -29,13 +29,9 @@ import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.Arrays;
 
-import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.fasterxml.jackson.annotation.PropertyAccessor;
 import com.fasterxml.jackson.core.JsonEncoding;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.github.ljtfreitas.restify.http.client.request.HttpRequestMessage;
 import com.github.ljtfreitas.restify.http.client.request.RestifyHttpMessageWriteException;
@@ -47,12 +43,7 @@ public class JacksonMessageConverter<T> extends JsonMessageConverter<T> {
 	private final ObjectMapper objectMapper;
 
 	public JacksonMessageConverter() {
-		this(new ObjectMapper()
-				.setSerializationInclusion(Include.NON_NULL)
-				.configure(SerializationFeature.INDENT_OUTPUT, false));
-
-		this.objectMapper.setVisibility(PropertyAccessor.ALL, Visibility.NONE);
-		this.objectMapper.setVisibility(PropertyAccessor.FIELD, Visibility.ANY);
+		this(new ObjectMapper());
 	}
 
 	public JacksonMessageConverter(ObjectMapper objectMapper) {
