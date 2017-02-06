@@ -23,6 +23,7 @@ import org.mockserver.client.server.MockServerClient;
 import org.mockserver.junit.MockServerRule;
 import org.mockserver.model.HttpRequest;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.github.ljtfreitas.restify.http.RestifyProxyBuilder;
 import com.github.ljtfreitas.restify.http.client.request.jdk.JdkHttpClientRequestFactory;
 import com.github.ljtfreitas.restify.http.contract.BodyParameter;
@@ -169,7 +170,10 @@ public class ZookeeperServiceDiscoveryTest {
 
 	public static class MyModel {
 
+		@JsonProperty
 		String name;
+
+		@JsonProperty
 		int age;
 
 		public MyModel() {
