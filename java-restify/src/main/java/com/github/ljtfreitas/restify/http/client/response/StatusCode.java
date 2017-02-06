@@ -29,10 +29,16 @@ public class StatusCode {
 
 	// Informational 1xx
 	public static final int HTTP_STATUS_CODE_CONTINUE = 100;
+	public static final int HTTP_STATUS_CODE_SWITCHING_PROTOCOLS = 101;
 
 	// Successful 2xx
 	public static final int HTTP_STATUS_CODE_OK = 200;
+	public static final int HTTP_STATUS_CODE_CREATED = 201;
+	public static final int HTTP_STATUS_CODE_ACCEPTED = 202;
+	public static final int HTTP_STATUS_CODE_NON_AUTHORITATIVE_INFORMATION = 203;
 	public static final int HTTP_STATUS_CODE_NO_CONTENT = 204;
+	public static final int HTTP_STATUS_CODE_RESET_CONTENT = 205;
+	public static final int HTTP_STATUS_CODE_PARTIAL_CONTENT = 206;
 
 	// Redirection 3xx
 	public static final int HTTP_STATUS_CODE_NOT_MODIFIED = 304;
@@ -98,8 +104,40 @@ public class StatusCode {
 		return isClientError() || isServerError();
 	}
 
+	public boolean isContinue() {
+		return code == HTTP_STATUS_CODE_CONTINUE;
+	}
+
+	public boolean isSwitchingProtocols() {
+		return code == HTTP_STATUS_CODE_SWITCHING_PROTOCOLS;
+	}
+
+	public boolean isOK() {
+		return code == HTTP_STATUS_CODE_OK;
+	}
+
+	public boolean isCreated() {
+		return code == HTTP_STATUS_CODE_CREATED;
+	}
+
+	public boolean isAccepted() {
+		return code == HTTP_STATUS_CODE_ACCEPTED;
+	}
+
+	public boolean isNonAuthoritativeInformation() {
+		return code == HTTP_STATUS_CODE_NON_AUTHORITATIVE_INFORMATION;
+	}
+
 	public boolean isNoContent() {
 		return code == HTTP_STATUS_CODE_NO_CONTENT;
+	}
+
+	public boolean isResetContent() {
+		return code == HTTP_STATUS_CODE_RESET_CONTENT;
+	}
+
+	public boolean isPartialContent() {
+		return code == HTTP_STATUS_CODE_PARTIAL_CONTENT;
 	}
 
 	public boolean isNotModified() {
