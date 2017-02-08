@@ -26,6 +26,7 @@
 package com.github.ljtfreitas.restify.http;
 
 import java.lang.reflect.Proxy;
+import java.nio.charset.Charset;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -73,6 +74,7 @@ import com.github.ljtfreitas.restify.http.client.request.interceptor.AcceptHeade
 import com.github.ljtfreitas.restify.http.client.request.interceptor.EndpointRequestInterceptor;
 import com.github.ljtfreitas.restify.http.client.request.interceptor.EndpointRequestInterceptorStack;
 import com.github.ljtfreitas.restify.http.client.request.interceptor.authentication.AuthenticationEndpoinRequestInterceptor;
+import com.github.ljtfreitas.restify.http.client.request.jdk.HttpClientRequestConfiguration;
 import com.github.ljtfreitas.restify.http.client.request.jdk.JdkHttpClientRequestFactory;
 import com.github.ljtfreitas.restify.http.client.response.DefaultEndpointResponseErrorFallback;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponseErrorFallback;
@@ -104,9 +106,15 @@ public class RestifyProxyBuilder {
 
 	private EndpointResponseErrorFallbackBuilder endpointResponseErrorFallbackBuilder = new EndpointResponseErrorFallbackBuilder(this);
 
+	private HttpClientRequestConfigurationBuilder httpClientRequestConfigurationBuilder = new HttpClientRequestConfigurationBuilder(this);
+
 	public RestifyProxyBuilder client(HttpClientRequestFactory httpClientRequestFactory) {
 		this.httpClientRequestFactory = httpClientRequestFactory;
 		return this;
+	}
+
+	public HttpClientRequestConfigurationBuilder client() {
+		return httpClientRequestConfigurationBuilder;
 	}
 
 	public RestifyProxyBuilder contract(RestifyContractReader contract) {
@@ -220,7 +228,11 @@ public class RestifyProxyBuilder {
 
 		private HttpClientRequestFactory httpClientRequestFactory() {
 			return Optional.ofNullable(httpClientRequestFactory)
-					.orElseGet(() -> new JdkHttpClientRequestFactory());
+					.orElseGet(() -> new JdkHttpClientRequestFactory(httpClientRequestConfiguration()));
+		}
+
+		private HttpClientRequestConfiguration httpClientRequestConfiguration() {
+			return httpClientRequestConfigurationBuilder.build();
 		}
 
 		private RestifyContract contract() {
@@ -439,6 +451,46 @@ public class RestifyProxyBuilder {
 		private EndpointResponseErrorFallback build() {
 			return Optional.ofNullable(fallback)
 					.orElseGet(() -> emptyOnNotFound ? DefaultEndpointResponseErrorFallback.emptyOnNotFound() : new DefaultEndpointResponseErrorFallback());
+		}
+	}
+
+	public class HttpClientRequestConfigurationBuilder {
+
+		private final RestifyProxyBuilder context;
+		private final HttpClientRequestConfiguration.Builder builder = new HttpClientRequestConfiguration.Builder();
+
+		private HttpClientRequestConfiguration httpClientRequestConfiguration = null;
+
+		private HttpClientRequestConfigurationBuilder(RestifyProxyBuilder context) {
+			this.context = context;
+		}
+
+		public HttpClientRequestConfigurationBuilder connectionTimeout(int connectionTimeout) {
+			builder.connectionTimeout(connectionTimeout);
+			return this;
+		}
+
+		public HttpClientRequestConfigurationBuilder readTimeout(int readTimeout) {
+			builder.readTimeout(readTimeout);
+			return this;
+		}
+
+		public HttpClientRequestConfigurationBuilder charset(Charset charset) {
+			builder.charset(charset);
+			return this;
+		}
+
+		public RestifyProxyBuilder using(HttpClientRequestConfiguration httpClientRequestConfiguration) {
+			this.httpClientRequestConfiguration = httpClientRequestConfiguration;
+			return context;
+		}
+
+		public RestifyProxyBuilder and() {
+			return context;
+		}
+
+		private HttpClientRequestConfiguration build() {
+			return Optional.ofNullable(httpClientRequestConfiguration).orElseGet(() -> builder.build());
 		}
 	}
 }

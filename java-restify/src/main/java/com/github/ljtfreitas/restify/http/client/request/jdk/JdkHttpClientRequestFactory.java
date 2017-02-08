@@ -36,14 +36,24 @@ import com.github.ljtfreitas.restify.http.client.request.HttpClientRequestFactor
 
 public class JdkHttpClientRequestFactory implements HttpClientRequestFactory {
 
+	private final HttpClientRequestConfiguration httpClientRequestConfiguration;
 	private final Charset charset;
 
 	public JdkHttpClientRequestFactory() {
-		this(Encoding.UTF_8.charset());
+		this(Encoding.UTF_8.charset(), HttpClientRequestConfiguration.useDefault());
 	}
 
 	public JdkHttpClientRequestFactory(Charset charset) {
+		this(charset, HttpClientRequestConfiguration.useDefault());
+	}
+
+	public JdkHttpClientRequestFactory(HttpClientRequestConfiguration httpClientRequestConfiguration) {
+		this(httpClientRequestConfiguration.charset(), httpClientRequestConfiguration);
+	}
+
+	public JdkHttpClientRequestFactory(Charset charset, HttpClientRequestConfiguration httpClientRequestConfiguration) {
 		this.charset = charset;
+		this.httpClientRequestConfiguration = httpClientRequestConfiguration;
 	}
 
 	@Override
@@ -51,7 +61,11 @@ public class JdkHttpClientRequestFactory implements HttpClientRequestFactory {
 		try {
 			HttpURLConnection connection = (HttpURLConnection) request.endpoint().toURL().openConnection();
 
+			connection.setConnectTimeout(httpClientRequestConfiguration.connectionTimeout());
+			connection.setReadTimeout(httpClientRequestConfiguration.readTimeout());
+
 			connection.setDoOutput(true);
+			connection.setAllowUserInteraction(false);
 			connection.setRequestMethod(request.method());
 
 			return new JdkHttpClientRequest(connection, charset, request.headers(), request);
