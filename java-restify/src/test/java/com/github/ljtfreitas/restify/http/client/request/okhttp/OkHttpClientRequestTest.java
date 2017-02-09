@@ -1,11 +1,15 @@
 package com.github.ljtfreitas.restify.http.client.request.okhttp;
 
+import static org.hamcrest.Matchers.isA;
 import static org.junit.Assert.assertEquals;
 import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
 import static org.mockserver.model.JsonBody.json;
 import static org.mockserver.model.StringBody.exact;
 import static org.mockserver.verify.VerificationTimes.once;
+
+import java.net.SocketTimeoutException;
+import java.util.concurrent.TimeUnit;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -14,22 +18,28 @@ import javax.xml.bind.annotation.XmlRootElement;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.mockserver.client.server.MockServerClient;
 import org.mockserver.junit.MockServerRule;
 import org.mockserver.model.HttpRequest;
 
+import com.github.ljtfreitas.restify.http.RestifyHttpException;
 import com.github.ljtfreitas.restify.http.RestifyProxyBuilder;
-import com.github.ljtfreitas.restify.http.client.request.okhttp.OkHttpClientRequestFactory;
 import com.github.ljtfreitas.restify.http.contract.BodyParameter;
 import com.github.ljtfreitas.restify.http.contract.Get;
 import com.github.ljtfreitas.restify.http.contract.Header;
 import com.github.ljtfreitas.restify.http.contract.Path;
 import com.github.ljtfreitas.restify.http.contract.Post;
 
+import okhttp3.OkHttpClient;
+
 public class OkHttpClientRequestTest {
 
 	@Rule
 	public MockServerRule mockServerRule = new MockServerRule(this, 7080);
+
+	@Rule
+	public ExpectedException expectedException = ExpectedException.none();
 
 	private MyApi myApi;
 
@@ -39,8 +49,14 @@ public class OkHttpClientRequestTest {
 	public void setup() {
 		mockServerClient = new MockServerClient("localhost", 7080);
 
+		OkHttpClient okHttpClient = new OkHttpClient.Builder()
+				.readTimeout(2000, TimeUnit.MILLISECONDS)
+					.build();
+
+		OkHttpClientRequestFactory okHttpClientRequestFactory = new OkHttpClientRequestFactory(okHttpClient);
+
 		myApi = new RestifyProxyBuilder()
-				.client(new OkHttpClientRequestFactory())
+				.client(okHttpClientRequestFactory)
 				.target(MyApi.class, "http://localhost:7080")
 				.build();
 	}
@@ -119,6 +135,21 @@ public class OkHttpClientRequestTest {
 		mockServerClient.verify(httpRequest, once());
 	}
 
+	@Test
+	public void shouldThrowExceptionOnTimeout() {
+		mockServerClient
+			.when(request()
+				.withMethod("GET")
+				.withPath("/json"))
+			.respond(response()
+				.withDelay(TimeUnit.MILLISECONDS, 3000));
+
+		expectedException.expect(isA(RestifyHttpException.class));
+		expectedException.expectCause(isA(SocketTimeoutException.class));
+
+		myApi.json();
+	}
+
 	interface MyApi {
 
 		@Path("/json") @Get
@@ -150,6 +181,5 @@ public class OkHttpClientRequestTest {
 			this.name = name;
 			this.age = age;
 		}
-
 	}
 }

@@ -46,6 +46,10 @@ public class OkHttpClientRequestFactory implements HttpClientRequestFactory {
 		this(okHttpClient, Encoding.UTF_8.charset());
 	}
 
+	public OkHttpClientRequestFactory(Charset charset) {
+		this(new OkHttpClient(), charset);
+	}
+
 	public OkHttpClientRequestFactory(OkHttpClient okHttpClient, Charset charset) {
 		this.okHttpClient = okHttpClient;
 		this.charset = charset;
