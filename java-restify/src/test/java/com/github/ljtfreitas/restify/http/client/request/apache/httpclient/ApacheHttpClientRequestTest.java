@@ -1,5 +1,6 @@
 package com.github.ljtfreitas.restify.http.client.request.apache.httpclient;
 
+import static org.hamcrest.Matchers.isA;
 import static org.junit.Assert.assertEquals;
 import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
@@ -7,17 +8,23 @@ import static org.mockserver.model.JsonBody.json;
 import static org.mockserver.model.StringBody.exact;
 import static org.mockserver.verify.VerificationTimes.once;
 
+import java.net.SocketTimeoutException;
+import java.util.concurrent.TimeUnit;
+
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import org.apache.http.client.config.RequestConfig;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.mockserver.client.server.MockServerClient;
 import org.mockserver.junit.MockServerRule;
 import org.mockserver.model.HttpRequest;
 
+import com.github.ljtfreitas.restify.http.RestifyHttpException;
 import com.github.ljtfreitas.restify.http.RestifyProxyBuilder;
 import com.github.ljtfreitas.restify.http.client.request.apache.httpclient.ApacheHttpClientRequestFactory;
 import com.github.ljtfreitas.restify.http.contract.BodyParameter;
@@ -31,6 +38,9 @@ public class ApacheHttpClientRequestTest {
 	@Rule
 	public MockServerRule mockServerRule = new MockServerRule(this, 7080);
 
+	@Rule
+	public ExpectedException expectedException = ExpectedException.none();
+
 	private MyApi myApi;
 
 	private MockServerClient mockServerClient;
@@ -39,8 +49,14 @@ public class ApacheHttpClientRequestTest {
 	public void setup() {
 		mockServerClient = new MockServerClient("localhost", 7080);
 
+		RequestConfig configuration = RequestConfig.custom()
+				.setSocketTimeout(2000)
+					.build();
+
+		ApacheHttpClientRequestFactory apacheHttpClientRequestFactory = new ApacheHttpClientRequestFactory(configuration);
+
 		myApi = new RestifyProxyBuilder()
-				.client(new ApacheHttpClientRequestFactory())
+				.client(apacheHttpClientRequestFactory)
 				.target(MyApi.class, "http://localhost:7080")
 				.build();
 	}
@@ -117,6 +133,21 @@ public class ApacheHttpClientRequestTest {
 		myApi.xml(new MyModel("Tiago de Freitas Lima", 31));
 
 		mockServerClient.verify(httpRequest, once());
+	}
+
+	@Test
+	public void shouldThrowExceptionOnTimeout() {
+		mockServerClient
+			.when(request()
+				.withMethod("GET")
+				.withPath("/json"))
+			.respond(response()
+				.withDelay(TimeUnit.MILLISECONDS, 3000));
+
+		expectedException.expect(isA(RestifyHttpException.class));
+		expectedException.expectCause(isA(SocketTimeoutException.class));
+
+		myApi.json();
 	}
 
 	interface MyApi {
