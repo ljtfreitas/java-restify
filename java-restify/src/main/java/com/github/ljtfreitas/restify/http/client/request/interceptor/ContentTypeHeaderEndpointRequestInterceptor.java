@@ -25,41 +25,33 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.request.interceptor;
 
-import static com.github.ljtfreitas.restify.http.client.Headers.ACCEPT;
+import static com.github.ljtfreitas.restify.http.client.Headers.CONTENT_TYPE;
 
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.LinkedHashSet;
 import java.util.Optional;
-import java.util.stream.Collectors;
 
 import com.github.ljtfreitas.restify.http.client.Header;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
 import com.github.ljtfreitas.restify.http.contract.ContentType;
 
-public class AcceptHeaderEndpointRequestInterceptor implements EndpointRequestInterceptor {
+public class ContentTypeHeaderEndpointRequestInterceptor implements EndpointRequestInterceptor {
 
-	private final Collection<ContentType> contentTypes;
+	private final ContentType contentType;
 
-	public AcceptHeaderEndpointRequestInterceptor(String... contentTypes) {
-		this(Arrays.stream(contentTypes).map(ContentType::of).collect(Collectors.toSet()));
+	public ContentTypeHeaderEndpointRequestInterceptor(String contentType) {
+		this.contentType = ContentType.of(contentType);
 	}
 
-	public AcceptHeaderEndpointRequestInterceptor(ContentType... contentTypes) {
-		this(Arrays.stream(contentTypes).collect(Collectors.toSet()));
-	}
-
-	public AcceptHeaderEndpointRequestInterceptor(Collection<ContentType> contentTypes) {
-		this.contentTypes = new LinkedHashSet<>(contentTypes);
+	public ContentTypeHeaderEndpointRequestInterceptor(ContentType contentType) {
+		this.contentType = contentType;
 	}
 
 	@Override
 	public EndpointRequest intercepts(EndpointRequest endpointRequest) {
-		Optional<Header> accept = endpointRequest.headers().get(ACCEPT);
+		Optional<Header> contentType = endpointRequest.headers().get(CONTENT_TYPE);
+		boolean hasBody = endpointRequest.body().isPresent();
 
-		if (!accept.isPresent()) {
-			String acceptTypes = contentTypes.stream().map(ContentType::name).collect(Collectors.joining(", "));
-			endpointRequest.headers().add(new Header(ACCEPT, acceptTypes));
+		if (!contentType.isPresent() && hasBody) {
+			endpointRequest.headers().add(new Header(CONTENT_TYPE, this.contentType.toString()));
 		}
 
 		return endpointRequest;

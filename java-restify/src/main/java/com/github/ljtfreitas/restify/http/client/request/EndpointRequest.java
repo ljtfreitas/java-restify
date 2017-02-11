@@ -54,6 +54,10 @@ public class EndpointRequest {
 		this(endpoint, method, headers, null, responseType);
 	}
 
+	public EndpointRequest(URI endpoint, String method, Headers headers, Object body) {
+		this(endpoint, method, headers, body, void.class);
+	}
+
 	public EndpointRequest(URI endpoint, String method, Headers headers, Object body, Type responseType) {
 		this(endpoint, method, headers, body, JavaType.of(responseType));
 	}
