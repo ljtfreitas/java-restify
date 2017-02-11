@@ -23,41 +23,59 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.http.client.request.okhttp;
+package com.github.ljtfreitas.restify.http.client.request.jdk;
 
 import java.nio.charset.Charset;
 
 import com.github.ljtfreitas.restify.http.client.charset.Encoding;
-import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
-import com.github.ljtfreitas.restify.http.client.request.HttpClientRequestFactory;
 
-import okhttp3.OkHttpClient;
+public class HttpClientRequestConfiguration {
 
-public class OkHttpClientRequestFactory implements HttpClientRequestFactory {
+	private int connectionTimeout = 0;
+	private int readTimeout = 0;
 
-	private final OkHttpClient okHttpClient;
-	private final Charset charset;
+	private Charset charset = Encoding.UTF_8.charset();
 
-	public OkHttpClientRequestFactory() {
-		this(new OkHttpClient());
+	private HttpClientRequestConfiguration() {
 	}
 
-	public OkHttpClientRequestFactory(OkHttpClient okHttpClient) {
-		this(okHttpClient, Encoding.UTF_8.charset());
+	public int connectionTimeout() {
+		return connectionTimeout;
 	}
 
-	public OkHttpClientRequestFactory(Charset charset) {
-		this(new OkHttpClient(), charset);
+	public int readTimeout() {
+		return readTimeout;
 	}
 
-	public OkHttpClientRequestFactory(OkHttpClient okHttpClient, Charset charset) {
-		this.okHttpClient = okHttpClient;
-		this.charset = charset;
+	public Charset charset() {
+		return charset;
 	}
 
-	@Override
-	public OkHttpClientRequest createOf(EndpointRequest endpointRequest) {
-		return new OkHttpClientRequest(okHttpClient, endpointRequest, charset);
+	public static HttpClientRequestConfiguration useDefault() {
+		return new HttpClientRequestConfiguration();
 	}
 
+	public static class Builder {
+
+		private HttpClientRequestConfiguration configuration = new HttpClientRequestConfiguration();
+
+		public Builder connectionTimeout(int connectionTimeout) {
+			configuration.connectionTimeout = connectionTimeout;
+			return this;
+		}
+
+		public Builder readTimeout(int readTimeout) {
+			configuration.readTimeout = readTimeout;
+			return this;
+		}
+
+		public Builder charset(Charset charset) {
+			configuration.charset = charset;
+			return this;
+		}
+
+		public HttpClientRequestConfiguration build() {
+			return configuration;
+		}
+	}
 }

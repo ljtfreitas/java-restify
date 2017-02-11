@@ -31,7 +31,6 @@ import java.util.Optional;
 
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
-import org.apache.http.client.methods.Configurable;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpHead;
@@ -52,15 +51,43 @@ import com.github.ljtfreitas.restify.http.client.request.HttpClientRequestFactor
 public class ApacheHttpClientRequestFactory implements HttpClientRequestFactory {
 
 	private final HttpClient httpClient;
+	private final RequestConfig requestConfig;
+	private final HttpContext httpContext;
 	private final Charset charset;
 
 	public ApacheHttpClientRequestFactory() {
-		this(HttpClients.createSystem());
+		this(HttpClients.createSystem(), null);
 	}
 
 	public ApacheHttpClientRequestFactory(HttpClient httpClient) {
+		this(httpClient, null);
+	}
+
+	public ApacheHttpClientRequestFactory(RequestConfig requestConfig) {
+		this(HttpClients.createSystem(), requestConfig);
+	}
+
+	public ApacheHttpClientRequestFactory(HttpContext httpContext) {
+		this(HttpClients.createSystem(), null, httpContext);
+	}
+
+	public ApacheHttpClientRequestFactory(Charset charset) {
+		this(HttpClients.createSystem(), null, HttpClientContext.create(), charset);
+	}
+
+	public ApacheHttpClientRequestFactory(HttpClient httpClient, RequestConfig requestConfig) {
+		this(httpClient, requestConfig, HttpClientContext.create());
+	}
+
+	public ApacheHttpClientRequestFactory(HttpClient httpClient, RequestConfig requestConfig, HttpContext httpContext) {
+		this(httpClient, requestConfig, httpContext, Encoding.UTF_8.charset());
+	}
+
+	public ApacheHttpClientRequestFactory(HttpClient httpClient, RequestConfig requestConfig, HttpContext httpContext, Charset charset) {
 		this.httpClient = httpClient;
-		this.charset = Encoding.UTF_8.charset();
+		this.requestConfig = requestConfig;
+		this.httpContext = httpContext;
+		this.charset = charset;
 	}
 
 	@Override
@@ -68,27 +95,26 @@ public class ApacheHttpClientRequestFactory implements HttpClientRequestFactory 
 		HttpUriRequest httpRequest = HttpUriRequestStrategy.of(endpointRequest.method())
 				.create(endpointRequest.endpoint().toString());
 
-		HttpContext context = contextOf(httpRequest);
+		HttpContext context = configure(httpRequest);
 
 		return new ApacheHttpClientRequest(httpClient, httpRequest, context, charset, endpointRequest.headers(), endpointRequest);
 	}
 
-	private HttpContext contextOf(HttpUriRequest httpRequest) {
-		HttpContext context = HttpClientContext.create();
+	private HttpContext configure(HttpUriRequest httpRequest) {
+		if (httpContext.getAttribute(HttpClientContext.REQUEST_CONFIG) == null) {
+			RequestConfig configuration = Optional.ofNullable(requestConfig)
+					.orElseGet(() -> buildNewConfiguration());
 
-		RequestConfig configuration = Optional.ofNullable(((Configurable) httpRequest).getConfig())
-				.orElseGet(() -> configuration());
+			httpContext.setAttribute(HttpClientContext.REQUEST_CONFIG, configuration);
+		}
 
-		context.setAttribute(HttpClientContext.REQUEST_CONFIG, configuration);
-
-		return context;
-
+		return httpContext;
 	}
 
-	private RequestConfig configuration() {
-		return RequestConfig.custom()
-				.setAuthenticationEnabled(true)
-					.build();
+	private RequestConfig buildNewConfiguration() {
+		 return RequestConfig.custom()
+			.setAuthenticationEnabled(true)
+				.build();
 	}
 
 	private enum HttpUriRequestStrategy {
