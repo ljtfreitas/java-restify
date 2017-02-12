@@ -71,6 +71,7 @@ import com.github.ljtfreitas.restify.http.client.request.EndpointRequestWriter;
 import com.github.ljtfreitas.restify.http.client.request.HttpClientRequestFactory;
 import com.github.ljtfreitas.restify.http.client.request.RestifyEndpointRequestExecutor;
 import com.github.ljtfreitas.restify.http.client.request.interceptor.AcceptHeaderEndpointRequestInterceptor;
+import com.github.ljtfreitas.restify.http.client.request.interceptor.ContentTypeHeaderEndpointRequestInterceptor;
 import com.github.ljtfreitas.restify.http.client.request.interceptor.EndpointRequestInterceptor;
 import com.github.ljtfreitas.restify.http.client.request.interceptor.EndpointRequestInterceptorStack;
 import com.github.ljtfreitas.restify.http.client.request.interceptor.authentication.AuthenticationEndpoinRequestInterceptor;
@@ -323,6 +324,16 @@ public class RestifyProxyBuilder {
 
 		public EndpointRequestInterceptorsBuilder accept(ContentType... contentTypes) {
 			interceptors.add(new AcceptHeaderEndpointRequestInterceptor(contentTypes));
+			return this;
+		}
+
+		public EndpointRequestInterceptorsBuilder contentType(String contentType) {
+			interceptors.add(new ContentTypeHeaderEndpointRequestInterceptor(contentType));
+			return this;
+		}
+
+		public EndpointRequestInterceptorsBuilder contentType(ContentType contentType) {
+			interceptors.add(new ContentTypeHeaderEndpointRequestInterceptor(contentType));
 			return this;
 		}
 
