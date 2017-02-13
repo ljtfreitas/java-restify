@@ -21,7 +21,7 @@ Restify foi projetado para conectar facilmente seu código às API's que desejar
 ##### Gradle
 ```groovy
 dependencies {
-    compile("com.github.ljtfreitas:java-restiy:{version}")
+    compile("com.github.ljtfreitas:java-restify:{version}")
 }
 ```
 > A princípio, **nenhuma** dependência adicional será incluída no seu classpath; um princípio de implementação do Restify é utilizar por padrão apenas as classes disponíveis no JDK. Dependências adicionais devem ser incluídas explicitamente. Por exemplo, se você desejar utilizar o [Gson](https://github.com/google/gson) para manipulação de json, você deve adicionar essa dependência no seu projeto.
