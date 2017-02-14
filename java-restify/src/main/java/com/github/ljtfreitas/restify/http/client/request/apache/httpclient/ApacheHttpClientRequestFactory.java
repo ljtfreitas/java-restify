@@ -25,6 +25,8 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.request.apache.httpclient;
 
+import java.io.Closeable;
+import java.io.IOException;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.Optional;
@@ -48,7 +50,7 @@ import com.github.ljtfreitas.restify.http.client.charset.Encoding;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
 import com.github.ljtfreitas.restify.http.client.request.HttpClientRequestFactory;
 
-public class ApacheHttpClientRequestFactory implements HttpClientRequestFactory {
+public class ApacheHttpClientRequestFactory implements HttpClientRequestFactory, Closeable {
 
 	private final HttpClient httpClient;
 	private final RequestConfig requestConfig;
@@ -167,6 +169,13 @@ public class ApacheHttpClientRequestFactory implements HttpClientRequestFactory 
 					.filter(m -> m.name().equals(method))
 						.findFirst()
 							.orElseThrow(() -> new IllegalArgumentException("Unsupported http method: " + method));
+		}
+	}
+
+	@Override
+	public void close() throws IOException {
+		if (httpClient instanceof Closeable) {
+			((Closeable) this.httpClient).close();
 		}
 	}
 }

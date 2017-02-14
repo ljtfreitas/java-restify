@@ -25,6 +25,8 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.request.okhttp;
 
+import java.io.Closeable;
+import java.io.IOException;
 import java.nio.charset.Charset;
 
 import com.github.ljtfreitas.restify.http.client.charset.Encoding;
@@ -33,7 +35,7 @@ import com.github.ljtfreitas.restify.http.client.request.HttpClientRequestFactor
 
 import okhttp3.OkHttpClient;
 
-public class OkHttpClientRequestFactory implements HttpClientRequestFactory {
+public class OkHttpClientRequestFactory implements HttpClientRequestFactory, Closeable {
 
 	private final OkHttpClient okHttpClient;
 	private final Charset charset;
@@ -60,4 +62,12 @@ public class OkHttpClientRequestFactory implements HttpClientRequestFactory {
 		return new OkHttpClientRequest(okHttpClient, endpointRequest, charset);
 	}
 
+	@Override
+	public void close() throws IOException {
+		if (okHttpClient.cache() != null) {
+			okHttpClient.cache().close();
+		}
+
+		okHttpClient.dispatcher().executorService().shutdown();
+	}
 }
