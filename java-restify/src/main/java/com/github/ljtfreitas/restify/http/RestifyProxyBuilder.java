@@ -27,6 +27,7 @@ package com.github.ljtfreitas.restify.http;
 
 import java.lang.reflect.Proxy;
 import java.nio.charset.Charset;
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -481,7 +482,17 @@ public class RestifyProxyBuilder {
 			return this;
 		}
 
+		public HttpClientRequestConfigurationBuilder connectionTimeout(Duration connectionTimeout) {
+			builder.connectionTimeout(connectionTimeout);
+			return this;
+		}
+
 		public HttpClientRequestConfigurationBuilder readTimeout(int readTimeout) {
+			builder.readTimeout(readTimeout);
+			return this;
+		}
+
+		public HttpClientRequestConfigurationBuilder readTimeout(Duration readTimeout) {
 			builder.readTimeout(readTimeout);
 			return this;
 		}

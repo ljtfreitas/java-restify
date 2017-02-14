@@ -26,6 +26,7 @@
 package com.github.ljtfreitas.restify.http.client.request.jdk;
 
 import java.nio.charset.Charset;
+import java.time.Duration;
 
 import com.github.ljtfreitas.restify.http.client.charset.Encoding;
 
@@ -64,8 +65,18 @@ public class HttpClientRequestConfiguration {
 			return this;
 		}
 
+		public Builder connectionTimeout(Duration duration) {
+			configuration.connectionTimeout = (int) duration.toMillis();
+			return this;
+		}
+
 		public Builder readTimeout(int readTimeout) {
 			configuration.readTimeout = readTimeout;
+			return this;
+		}
+
+		public Builder readTimeout(Duration duration) {
+			configuration.readTimeout = (int) duration.toMillis();
 			return this;
 		}
 
