@@ -85,14 +85,14 @@ public class SpringWebRequestMappingMetadata {
 	}
 
 	private Optional<String> consumes() {
-		String[] produces = Optional.ofNullable(mapping)
+		String[] consumes = Optional.ofNullable(mapping)
 			.map(m -> m.consumes())
 				.filter(p -> p.length <= 1)
 					.orElseThrow(() -> new IllegalArgumentException("[consumes] parameter (of @RequestMapping annotation) "
 							+ "must have only single value."));
 
-		return (produces.length == 0) ? Optional.empty()
-				: Optional.ofNullable(produces[0])
+		return (consumes.length == 0) ? Optional.empty()
+				: Optional.ofNullable(consumes[0])
 					.filter(p -> !p.isEmpty())
 						.map(p -> HttpHeaders.CONTENT_TYPE + "=" + p);
 	}
