@@ -85,7 +85,7 @@ public class RestifyAutoConfiguration {
 		private RestTemplateBuilder restTemplateBuilder;
 
 		@Autowired(required = false)
-		private RestTemplate restTemplate;
+		private RestOperations restTemplate;
 
 		@ConditionalOnMissingBean
 		@Bean
