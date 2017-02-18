@@ -41,11 +41,14 @@ import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
 import org.springframework.core.task.TaskExecutor;
 import org.springframework.core.task.support.ExecutorServiceAdapter;
+import org.springframework.web.client.RestOperations;
 import org.springframework.web.client.RestTemplate;
 
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequestExecutor;
 import com.github.ljtfreitas.restify.http.client.request.HttpClientRequestFactory;
 import com.github.ljtfreitas.restify.http.client.request.jdk.JdkHttpClientRequestFactory;
+import com.github.ljtfreitas.restify.http.client.response.DefaultEndpointResponseErrorFallback;
+import com.github.ljtfreitas.restify.http.client.response.EndpointResponseErrorFallback;
 import com.github.ljtfreitas.restify.http.contract.metadata.RestifyContractExpressionResolver;
 import com.github.ljtfreitas.restify.http.contract.metadata.RestifyContractReader;
 import com.github.ljtfreitas.restify.http.spring.client.call.exec.AsyncResultEndpointCallExecutableFactory;
@@ -58,16 +61,37 @@ import com.github.ljtfreitas.restify.http.spring.client.call.exec.WebAsyncTaskEn
 import com.github.ljtfreitas.restify.http.spring.client.request.RestOperationsEndpointRequestExecutor;
 import com.github.ljtfreitas.restify.http.spring.contract.SpringWebContractReader;
 import com.github.ljtfreitas.restify.http.spring.contract.metadata.SpelDynamicParameterExpressionResolver;
+import com.github.ljtfreitas.restify.spring.autoconfigure.RestifyErrorHandler;
 
 @Configuration
 class RestifyConfiguration {
 
 	@Configuration
 	protected static class RestifySpringConfiguration {
+
+		@Value("${restify.error.emptyOnNotFound:false}")
+		private boolean emptyOnNotFound;
+
 		@Bean
-		public EndpointRequestExecutor endpointRequestExecutor(ObjectProvider<RestTemplate> restTemplate) {
+		public EndpointRequestExecutor endpointRequestExecutor(ObjectProvider<RestOperations> restOperations) {
 			return new RestOperationsEndpointRequestExecutor(
-					Optional.ofNullable(restTemplate.getIfAvailable()).orElseGet(() -> new RestTemplate()));
+					Optional.ofNullable(restOperations.getIfAvailable()).orElseGet(() -> buildRestTemplate()));
+		}
+
+		private RestTemplate buildRestTemplate() {
+			RestTemplate restTemplate = new RestTemplate();
+			restTemplate.setErrorHandler(restifyErrorHandler());
+			return restTemplate;
+		}
+
+		@Bean
+		public RestifyErrorHandler restifyErrorHandler() {
+			return new RestifyErrorHandler(endpointResponseErrorFallback());
+		}
+
+		@Bean
+		public EndpointResponseErrorFallback endpointResponseErrorFallback() {
+			return emptyOnNotFound ? DefaultEndpointResponseErrorFallback.emptyOnNotFound() : new DefaultEndpointResponseErrorFallback();
 		}
 
 		@Bean

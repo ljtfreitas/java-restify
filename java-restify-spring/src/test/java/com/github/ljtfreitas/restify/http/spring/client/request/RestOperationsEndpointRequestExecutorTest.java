@@ -1,6 +1,8 @@
 package com.github.ljtfreitas.restify.http.spring.client.request;
 
+import static org.hamcrest.CoreMatchers.isA;
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.argThat;
 import static org.mockito.Matchers.notNull;
 import static org.mockito.Matchers.same;
@@ -11,7 +13,9 @@ import java.lang.reflect.Type;
 import java.net.URI;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
+import org.junit.rules.ExpectedException;
 import org.junit.runner.RunWith;
 import org.mockito.ArgumentMatcher;
 import org.mockito.InjectMocks;
@@ -22,8 +26,10 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestOperations;
 
+import com.github.ljtfreitas.restify.http.RestifyHttpException;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
 import com.github.ljtfreitas.restify.http.client.response.StatusCode;
@@ -46,6 +52,9 @@ public class RestOperationsEndpointRequestExecutorTest {
 
 	@InjectMocks
 	private RestOperationsEndpointRequestExecutor executor;
+
+	@Rule
+	public ExpectedException expectedException = ExpectedException.none();
 
 	private URI endpointUri;
 
@@ -86,6 +95,18 @@ public class RestOperationsEndpointRequestExecutorTest {
 
 		verify(responseEntityConverterMock)
 			.convert(argThat(responseOf(responseEntity, JavaType.of(String.class))));
+	}
+
+	@SuppressWarnings("unchecked")
+	@Test
+	public void shouldThrowRestifyHttpExceptionWhenRestTemplateThrowRestClientException() {
+		when(restOperationsMock.exchange(any(RequestEntity.class), any(ParameterizedTypeReference.class)))
+			.thenThrow(new RestClientException("Spring RestClientException"));
+
+		expectedException.expect(RestifyHttpException.class);
+		expectedException.expectCause(isA(RestClientException.class));
+
+		executor.execute(new EndpointRequest(endpointUri, "GET", String.class));
 	}
 
 	private ArgumentMatcher<ParameterizedTypeReference<Object>> typeOf(Type expectedType) {

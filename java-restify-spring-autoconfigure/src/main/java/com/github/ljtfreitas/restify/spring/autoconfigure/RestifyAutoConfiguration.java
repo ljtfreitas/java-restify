@@ -55,6 +55,8 @@ import org.springframework.web.client.RestTemplate;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequestExecutor;
 import com.github.ljtfreitas.restify.http.client.request.HttpClientRequestFactory;
 import com.github.ljtfreitas.restify.http.client.request.jdk.JdkHttpClientRequestFactory;
+import com.github.ljtfreitas.restify.http.client.response.DefaultEndpointResponseErrorFallback;
+import com.github.ljtfreitas.restify.http.client.response.EndpointResponseErrorFallback;
 import com.github.ljtfreitas.restify.http.contract.metadata.RestifyContractExpressionResolver;
 import com.github.ljtfreitas.restify.http.contract.metadata.RestifyContractReader;
 import com.github.ljtfreitas.restify.http.spring.client.call.exec.AsyncResultEndpointCallExecutableFactory;
@@ -87,15 +89,30 @@ public class RestifyAutoConfiguration {
 		@Autowired(required = false)
 		private RestOperations restTemplate;
 
+		@Value("${restify.error.emptyOnNotFound:false}")
+		private boolean emptyOnNotFound;
+
 		@ConditionalOnMissingBean
 		@Bean
 		public EndpointRequestExecutor endpointRequestExecutor() {
 			RestOperations restOperations = Optional.ofNullable(restTemplate)
 					.orElseGet(() -> Optional.ofNullable(restTemplateBuilder)
-							.map(b -> b.build())
+							.map(b -> b.errorHandler(restifyErrorHandler()).build())
 								.orElseGet(() -> new RestTemplate()));
 
 			return new RestOperationsEndpointRequestExecutor(restOperations);
+		}
+
+		@ConditionalOnMissingBean
+		@Bean
+		public RestifyErrorHandler restifyErrorHandler() {
+			return new RestifyErrorHandler(endpointResponseErrorFallback());
+		}
+
+		@ConditionalOnMissingBean
+		@Bean
+		public EndpointResponseErrorFallback endpointResponseErrorFallback() {
+			return emptyOnNotFound ? DefaultEndpointResponseErrorFallback.emptyOnNotFound() : new DefaultEndpointResponseErrorFallback();
 		}
 
 		@ConditionalOnMissingBean

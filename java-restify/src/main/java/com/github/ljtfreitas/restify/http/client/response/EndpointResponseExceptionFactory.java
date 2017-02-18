@@ -35,7 +35,9 @@ class EndpointResponseExceptionFactory {
 	RestifyEndpointResponseException create(HttpResponseMessage response) {
 		String bodyAsString = TEXT_ERROR_RESPONSE_MESSAGE_CONVERTER.read(response, String.class);
 
-		String message = "HTTP Status Code: " + response.statusCode() + "\n" + bodyAsString;
+		String responseBody = (bodyAsString != null && !bodyAsString.isEmpty()) ? "\n" + bodyAsString : "(empty)";
+
+		String message = "HTTP Status Code: " + response.statusCode() + ". Response body: " + responseBody;
 
 		StatusCode statusCode = response.statusCode();
 

@@ -37,6 +37,14 @@ public interface Tryable {
 		}
 	}
 
+	public static <T> T or(TryableSupplier<T> supplier, T onError) {
+		try {
+			return supplier.get();
+		} catch (Exception e) {
+			return onError;
+		}
+	}
+
 	public static <X extends Throwable, T> T of(TryableSupplier<T> supplier, Supplier<? extends X> exception) throws X {
 		try {
 			return supplier.get();
