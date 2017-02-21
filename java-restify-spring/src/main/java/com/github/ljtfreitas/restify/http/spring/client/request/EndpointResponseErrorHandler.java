@@ -23,7 +23,7 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.spring.autoconfigure;
+package com.github.ljtfreitas.restify.http.spring.client.request;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -35,16 +35,21 @@ import org.springframework.web.client.DefaultResponseErrorHandler;
 
 import com.github.ljtfreitas.restify.http.client.Headers;
 import com.github.ljtfreitas.restify.http.client.response.BaseHttpResponseMessage;
+import com.github.ljtfreitas.restify.http.client.response.DefaultEndpointResponseErrorFallback;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponseErrorFallback;
 import com.github.ljtfreitas.restify.http.client.response.HttpResponseMessage;
 import com.github.ljtfreitas.restify.http.client.response.StatusCode;
 import com.github.ljtfreitas.restify.http.util.Tryable;
 
-public class RestifyErrorHandler extends DefaultResponseErrorHandler {
+public class EndpointResponseErrorHandler extends DefaultResponseErrorHandler {
 
 	private final EndpointResponseErrorFallback endpointResponseErrorFallback;
 
-	public RestifyErrorHandler(EndpointResponseErrorFallback endpointResponseErrorFallback) {
+	public EndpointResponseErrorHandler() {
+		this.endpointResponseErrorFallback = new DefaultEndpointResponseErrorFallback();
+	}
+
+	public EndpointResponseErrorHandler(EndpointResponseErrorFallback endpointResponseErrorFallback) {
 		this.endpointResponseErrorFallback = endpointResponseErrorFallback;
 	}
 

@@ -26,7 +26,6 @@
 package com.github.ljtfreitas.restify.spring.autoconfigure;
 
 import java.util.Optional;
-import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 
@@ -41,6 +40,7 @@ import org.springframework.boot.autoconfigure.condition.AllNestedConditions;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.web.WebClientAutoConfiguration;
 import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.boot.web.client.RestTemplateCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
@@ -48,7 +48,6 @@ import org.springframework.context.annotation.Import;
 import org.springframework.core.task.AsyncListenableTaskExecutor;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
-import org.springframework.core.task.TaskExecutor;
 import org.springframework.core.task.support.ExecutorServiceAdapter;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.scheduling.SchedulingTaskExecutor;
@@ -70,6 +69,7 @@ import com.github.ljtfreitas.restify.http.spring.client.call.exec.ListenableFutu
 import com.github.ljtfreitas.restify.http.spring.client.call.exec.ListenableFutureTaskEndpointCallExecutableFactory;
 import com.github.ljtfreitas.restify.http.spring.client.call.exec.ResponseEntityEndpointCallExecutableFactory;
 import com.github.ljtfreitas.restify.http.spring.client.call.exec.WebAsyncTaskEndpointCallExecutableFactory;
+import com.github.ljtfreitas.restify.http.spring.client.request.EndpointResponseErrorHandler;
 import com.github.ljtfreitas.restify.http.spring.client.request.RestOperationsEndpointRequestExecutor;
 import com.github.ljtfreitas.restify.http.spring.contract.SpringWebContractReader;
 import com.github.ljtfreitas.restify.http.spring.contract.metadata.SpelDynamicParameterExpressionResolver;
@@ -101,16 +101,21 @@ public class RestifyAutoConfiguration {
 		public EndpointRequestExecutor endpointRequestExecutor() {
 			RestOperations restOperations = Optional.ofNullable(restTemplate)
 					.orElseGet(() -> Optional.ofNullable(restTemplateBuilder)
-							.map(b -> b.errorHandler(restifyErrorHandler()).build())
+							.map(b -> b.errorHandler(endpointResponseErrorHandler()).build())
 								.orElseGet(() -> new RestTemplate()));
 
 			return new RestOperationsEndpointRequestExecutor(restOperations);
 		}
 
+		@Bean
+		public RestTemplateCustomizer restifyResponseErrorCustomizer() {
+			return (restTemplate) -> restTemplate.setErrorHandler(endpointResponseErrorHandler());
+		}
+
 		@ConditionalOnMissingBean
 		@Bean
-		public RestifyErrorHandler restifyErrorHandler() {
-			return new RestifyErrorHandler(endpointResponseErrorFallback());
+		public EndpointResponseErrorHandler endpointResponseErrorHandler() {
+			return new EndpointResponseErrorHandler(endpointResponseErrorFallback());
 		}
 
 		@ConditionalOnMissingBean
@@ -164,7 +169,7 @@ public class RestifyAutoConfiguration {
 
 		@Conditional(RestifyAsyncExecutorServiceCondition.class)
 		@Bean
-		public ExecutorService restifyAsyncExecutorService(@Qualifier("restifyAsyncTaskExecutor") TaskExecutor executor) {
+		public ExecutorService restifyAsyncExecutorService(@Qualifier("restifyAsyncTaskExecutor") AsyncTaskExecutor executor) {
 			return new ExecutorServiceAdapter(executor);
 		}
 
@@ -177,7 +182,7 @@ public class RestifyAutoConfiguration {
 		@ConditionalOnMissingBean
 		@Bean
 		public DeferredResultEndpointCallExecutableFactory<Object, Object> deferredResultEndpointCallExecutableFactory(
-				@Qualifier("restifyAsyncTaskExecutor") Executor executor) {
+				@Qualifier("restifyAsyncTaskExecutor") AsyncTaskExecutor executor) {
 			return new DeferredResultEndpointCallExecutableFactory<>(asyncTimeout, executor);
 		}
 

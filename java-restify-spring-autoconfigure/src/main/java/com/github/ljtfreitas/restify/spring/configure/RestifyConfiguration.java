@@ -59,9 +59,9 @@ import com.github.ljtfreitas.restify.http.spring.client.call.exec.ListenableFutu
 import com.github.ljtfreitas.restify.http.spring.client.call.exec.ResponseEntityEndpointCallExecutableFactory;
 import com.github.ljtfreitas.restify.http.spring.client.call.exec.WebAsyncTaskEndpointCallExecutableFactory;
 import com.github.ljtfreitas.restify.http.spring.client.request.RestOperationsEndpointRequestExecutor;
+import com.github.ljtfreitas.restify.http.spring.client.request.EndpointResponseErrorHandler;
 import com.github.ljtfreitas.restify.http.spring.contract.SpringWebContractReader;
 import com.github.ljtfreitas.restify.http.spring.contract.metadata.SpelDynamicParameterExpressionResolver;
-import com.github.ljtfreitas.restify.spring.autoconfigure.RestifyErrorHandler;
 
 @Configuration
 class RestifyConfiguration {
@@ -80,13 +80,13 @@ class RestifyConfiguration {
 
 		private RestTemplate buildRestTemplate() {
 			RestTemplate restTemplate = new RestTemplate();
-			restTemplate.setErrorHandler(restifyErrorHandler());
+			restTemplate.setErrorHandler(endpointResponseErrorHandler());
 			return restTemplate;
 		}
 
 		@Bean
-		public RestifyErrorHandler restifyErrorHandler() {
-			return new RestifyErrorHandler(endpointResponseErrorFallback());
+		public EndpointResponseErrorHandler endpointResponseErrorHandler() {
+			return new EndpointResponseErrorHandler(endpointResponseErrorFallback());
 		}
 
 		@Bean
