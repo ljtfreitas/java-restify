@@ -26,8 +26,8 @@
 package com.github.ljtfreitas.restify.spring.autoconfigure;
 
 import java.util.Optional;
-import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.ScheduledExecutorService;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
@@ -36,25 +36,30 @@ import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.boot.autoconfigure.AutoConfigurationPackages;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
+import org.springframework.boot.autoconfigure.condition.AllNestedConditions;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.web.WebClientAutoConfiguration;
 import org.springframework.boot.web.client.RestTemplateBuilder;
+import org.springframework.boot.web.client.RestTemplateCustomizer;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
-import org.springframework.core.env.Environment;
 import org.springframework.core.task.AsyncListenableTaskExecutor;
 import org.springframework.core.task.AsyncTaskExecutor;
 import org.springframework.core.task.SimpleAsyncTaskExecutor;
-import org.springframework.core.task.TaskExecutor;
 import org.springframework.core.task.support.ExecutorServiceAdapter;
 import org.springframework.core.type.AnnotationMetadata;
+import org.springframework.scheduling.SchedulingTaskExecutor;
+import org.springframework.scheduling.TaskScheduler;
 import org.springframework.web.client.RestOperations;
 import org.springframework.web.client.RestTemplate;
 
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequestExecutor;
 import com.github.ljtfreitas.restify.http.client.request.HttpClientRequestFactory;
 import com.github.ljtfreitas.restify.http.client.request.jdk.JdkHttpClientRequestFactory;
+import com.github.ljtfreitas.restify.http.client.response.DefaultEndpointResponseErrorFallback;
+import com.github.ljtfreitas.restify.http.client.response.EndpointResponseErrorFallback;
 import com.github.ljtfreitas.restify.http.contract.metadata.RestifyContractExpressionResolver;
 import com.github.ljtfreitas.restify.http.contract.metadata.RestifyContractReader;
 import com.github.ljtfreitas.restify.http.spring.client.call.exec.AsyncResultEndpointCallExecutableFactory;
@@ -64,6 +69,7 @@ import com.github.ljtfreitas.restify.http.spring.client.call.exec.ListenableFutu
 import com.github.ljtfreitas.restify.http.spring.client.call.exec.ListenableFutureTaskEndpointCallExecutableFactory;
 import com.github.ljtfreitas.restify.http.spring.client.call.exec.ResponseEntityEndpointCallExecutableFactory;
 import com.github.ljtfreitas.restify.http.spring.client.call.exec.WebAsyncTaskEndpointCallExecutableFactory;
+import com.github.ljtfreitas.restify.http.spring.client.request.EndpointResponseErrorHandler;
 import com.github.ljtfreitas.restify.http.spring.client.request.RestOperationsEndpointRequestExecutor;
 import com.github.ljtfreitas.restify.http.spring.contract.SpringWebContractReader;
 import com.github.ljtfreitas.restify.http.spring.contract.metadata.SpelDynamicParameterExpressionResolver;
@@ -85,17 +91,37 @@ public class RestifyAutoConfiguration {
 		private RestTemplateBuilder restTemplateBuilder;
 
 		@Autowired(required = false)
-		private RestTemplate restTemplate;
+		private RestOperations restTemplate;
+
+		@Value("${restify.error.emptyOnNotFound:false}")
+		private boolean emptyOnNotFound;
 
 		@ConditionalOnMissingBean
 		@Bean
 		public EndpointRequestExecutor endpointRequestExecutor() {
 			RestOperations restOperations = Optional.ofNullable(restTemplate)
 					.orElseGet(() -> Optional.ofNullable(restTemplateBuilder)
-							.map(b -> b.build())
+							.map(b -> b.errorHandler(endpointResponseErrorHandler()).build())
 								.orElseGet(() -> new RestTemplate()));
 
 			return new RestOperationsEndpointRequestExecutor(restOperations);
+		}
+
+		@Bean
+		public RestTemplateCustomizer restifyResponseErrorCustomizer() {
+			return (restTemplate) -> restTemplate.setErrorHandler(endpointResponseErrorHandler());
+		}
+
+		@ConditionalOnMissingBean
+		@Bean
+		public EndpointResponseErrorHandler endpointResponseErrorHandler() {
+			return new EndpointResponseErrorHandler(endpointResponseErrorFallback());
+		}
+
+		@ConditionalOnMissingBean
+		@Bean
+		public EndpointResponseErrorFallback endpointResponseErrorFallback() {
+			return emptyOnNotFound ? DefaultEndpointResponseErrorFallback.emptyOnNotFound() : new DefaultEndpointResponseErrorFallback();
 		}
 
 		@ConditionalOnMissingBean
@@ -135,15 +161,15 @@ public class RestifyAutoConfiguration {
 		@Value("${restify.async.timeout:}")
 		private Long asyncTimeout;
 
-		@ConditionalOnMissingBean(name = "restifyAsyncTaskExecutor", value = AsyncListenableTaskExecutor.class)
+		@Conditional(RestifyAsyncTaskExecutorCondition.class)
 		@Bean
 		public AsyncListenableTaskExecutor restifyAsyncTaskExecutor() {
 			return new SimpleAsyncTaskExecutor("RestifyAsyncTaskExecutor");
 		}
 
-		@ConditionalOnMissingBean(name = "restifyAsyncExecutorService", value = ExecutorService.class)
+		@Conditional(RestifyAsyncExecutorServiceCondition.class)
 		@Bean
-		public ExecutorService restifyAsyncExecutorService(@Qualifier("restifyAsyncTaskExecutor") TaskExecutor executor) {
+		public ExecutorService restifyAsyncExecutorService(@Qualifier("restifyAsyncTaskExecutor") AsyncTaskExecutor executor) {
 			return new ExecutorServiceAdapter(executor);
 		}
 
@@ -155,14 +181,15 @@ public class RestifyAutoConfiguration {
 
 		@ConditionalOnMissingBean
 		@Bean
-		public DeferredResultEndpointCallExecutableFactory<Object, Object> deferredResultEndpointCallExecutableFactory(Environment environment, 
-				@Qualifier("restifyAsyncTaskExecutor") Executor executor) {
+		public DeferredResultEndpointCallExecutableFactory<Object, Object> deferredResultEndpointCallExecutableFactory(
+				@Qualifier("restifyAsyncTaskExecutor") AsyncTaskExecutor executor) {
 			return new DeferredResultEndpointCallExecutableFactory<>(asyncTimeout, executor);
 		}
 
 		@ConditionalOnMissingBean
 		@Bean
-		public ListenableFutureEndpointCallExecutableFactory<Object, Object> listenableFutureEndpointCallExecutableFactory(@Qualifier("restifyAsyncTaskExecutor") AsyncListenableTaskExecutor executor) {
+		public ListenableFutureEndpointCallExecutableFactory<Object, Object> listenableFutureEndpointCallExecutableFactory(
+				@Qualifier("restifyAsyncTaskExecutor") AsyncListenableTaskExecutor executor) {
 			return new ListenableFutureEndpointCallExecutableFactory<>(executor);
 		}
 
@@ -176,6 +203,38 @@ public class RestifyAutoConfiguration {
 		@Bean
 		public WebAsyncTaskEndpointCallExecutableFactory<Object, Object> webAsyncTaskEndpointCallExecutableFactory(@Qualifier("restifyAsyncTaskExecutor") AsyncTaskExecutor executor) {
 			return new WebAsyncTaskEndpointCallExecutableFactory<>(asyncTimeout, executor);
+		}
+
+		static class RestifyAsyncTaskExecutorCondition extends AllNestedConditions {
+
+			RestifyAsyncTaskExecutorCondition() {
+				super(ConfigurationPhase.REGISTER_BEAN);
+			}
+
+			@ConditionalOnMissingBean(name = "restifyAsyncTaskExecutor")
+			static class OnRestifyAsyncTaskExecutorMissing {
+			}
+
+			@ConditionalOnMissingBean(value = AsyncListenableTaskExecutor.class, ignored = {
+					SchedulingTaskExecutor.class, TaskScheduler.class, ScheduledExecutorService.class })
+			static class OnAsyncListenableTaskExecutorMissing {
+			}
+		}
+
+		static class RestifyAsyncExecutorServiceCondition extends AllNestedConditions {
+
+			RestifyAsyncExecutorServiceCondition() {
+				super(ConfigurationPhase.REGISTER_BEAN);
+			}
+
+			@ConditionalOnMissingBean(name = "restifyAsyncExecutorService")
+			static class OnRestifyAsyncExecutorServiceMissing {
+			}
+
+			@ConditionalOnMissingBean(value = ExecutorService.class, ignored = { SchedulingTaskExecutor.class,
+					TaskScheduler.class, ScheduledExecutorService.class })
+			static class OnExecutorServiceMissing {
+			}
 		}
 	}
 

@@ -25,6 +25,7 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.request.jdk;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
@@ -38,6 +39,7 @@ import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
 import com.github.ljtfreitas.restify.http.client.request.HttpClientRequest;
 import com.github.ljtfreitas.restify.http.client.response.HttpResponseMessage;
 import com.github.ljtfreitas.restify.http.client.response.StatusCode;
+import com.github.ljtfreitas.restify.http.util.Tryable;
 
 public class JdkHttpClientRequest implements HttpClientRequest {
 
@@ -74,7 +76,8 @@ public class JdkHttpClientRequest implements HttpClientRequest {
 			.filter(e -> e.getKey() != null && !e.getKey().equals(""))
 				.forEach(e -> headers.put(e.getKey(), e.getValue()));
 
-		InputStream stream = connection.getErrorStream() == null ? connection.getInputStream() : connection.getErrorStream();
+		InputStream stream = Tryable.or(() -> connection.getErrorStream() == null ? connection.getInputStream() : connection.getErrorStream(),
+				new ByteArrayInputStream(new byte[0]));
 
 		return new JdkHttpClientResponse(statusCode, headers, stream, connection, this);
 	}

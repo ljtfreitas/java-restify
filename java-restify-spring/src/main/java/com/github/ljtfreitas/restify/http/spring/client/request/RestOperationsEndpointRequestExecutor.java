@@ -30,11 +30,14 @@ import java.lang.reflect.Type;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestOperations;
 
+import com.github.ljtfreitas.restify.http.RestifyHttpException;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequestExecutor;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
+import com.github.ljtfreitas.restify.http.client.response.RestifyEndpointResponseException;
 import com.github.ljtfreitas.restify.http.contract.metadata.reflection.JavaType;
 
 public class RestOperationsEndpointRequestExecutor implements EndpointRequestExecutor {
@@ -59,9 +62,20 @@ public class RestOperationsEndpointRequestExecutor implements EndpointRequestExe
 	public <T> EndpointResponse<T> execute(EndpointRequest endpointRequest) {
 		RequestEntity<Object> request = requestEntityConverter.convert(endpointRequest);
 
-		ResponseEntity<Object> response = rest.exchange(request, new JavaTypeReference(endpointRequest.responseType()));
+		try {
+			ResponseEntity<Object> response = rest.exchange(request, new JavaTypeReference(endpointRequest.responseType()));
 
-		return (EndpointResponse<T>) responseEntityConverter.convert(response);
+			return (EndpointResponse<T>) responseEntityConverter.convert(response);
+
+		} catch (RestifyEndpointResponseException e) {
+			throw e;
+
+		} catch (RestClientException e) {
+			throw new RestifyHttpException("Spring RestTemplate exception", e);
+
+		} catch (Exception e) {
+			throw new RestifyHttpException(e);
+		}
 	}
 
 	private class JavaTypeReference extends ParameterizedTypeReference<Object> {
