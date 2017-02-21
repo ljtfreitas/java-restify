@@ -3,7 +3,7 @@
 	<parent>
 		<groupId>com.github.ljtfreitas</groupId>
 		<artifactId>java-restify-group</artifactId>
-		<version>1.4.1-SNAPSHOT</version>
+		<version>1.4.1</version>
 	</parent>
 	<artifactId>java-restify-cdi</artifactId>
 
