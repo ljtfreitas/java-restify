@@ -25,6 +25,7 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.util;
 
+import java.util.function.Function;
 import java.util.function.Supplier;
 
 public interface Tryable {
@@ -50,6 +51,14 @@ public interface Tryable {
 			return supplier.get();
 		} catch (Exception e) {
 			throw exception.get();
+		}
+	}
+
+	public static <X extends Throwable, T> T of(TryableSupplier<T> supplier, Function<? super Exception, ? extends X> exception) throws X {
+		try {
+			return supplier.get();
+		} catch (Exception e) {
+			throw exception.apply(e);
 		}
 	}
 
