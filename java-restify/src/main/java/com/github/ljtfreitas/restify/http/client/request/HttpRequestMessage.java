@@ -26,18 +26,21 @@
 package com.github.ljtfreitas.restify.http.client.request;
 
 import java.io.OutputStream;
+import java.net.URI;
 import java.nio.charset.Charset;
 
 import com.github.ljtfreitas.restify.http.client.Headers;
 
 public interface HttpRequestMessage {
 
+	public URI uri();
+
+	public String method();
+
 	public OutputStream output();
 
 	public Headers headers();
 
 	public Charset charset();
-
-	public EndpointRequest source();
 
 }

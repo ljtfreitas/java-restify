@@ -39,7 +39,7 @@ import com.github.ljtfreitas.restify.http.client.response.HttpResponseMessage;
 import com.github.ljtfreitas.restify.http.util.Tryable;
 import com.netflix.client.ClientException;
 
-public class RibbonHttpClientRequest implements HttpClientRequest {
+class RibbonHttpClientRequest implements HttpClientRequest {
 
 	private final EndpointRequest endpointRequest;
 	private final RibbonLoadBalancedClient ribbonLoadBalancedClient;
@@ -55,6 +55,16 @@ public class RibbonHttpClientRequest implements HttpClientRequest {
 	}
 
 	@Override
+	public URI uri() {
+		return endpointRequest.endpoint();
+	}
+
+	@Override
+	public String method() {
+		return endpointRequest.method();
+	}
+
+	@Override
 	public OutputStream output() {
 		return bufferedOutputStream;
 	}
@@ -67,11 +77,6 @@ public class RibbonHttpClientRequest implements HttpClientRequest {
 	@Override
 	public Charset charset() {
 		return charset;
-	}
-
-	@Override
-	public EndpointRequest source() {
-		return endpointRequest;
 	}
 
 	@Override

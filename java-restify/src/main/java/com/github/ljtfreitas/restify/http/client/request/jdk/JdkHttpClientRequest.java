@@ -30,29 +30,27 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.HttpURLConnection;
+import java.net.URI;
 import java.nio.charset.Charset;
 import java.util.Collection;
 
 import com.github.ljtfreitas.restify.http.RestifyHttpException;
 import com.github.ljtfreitas.restify.http.client.Headers;
-import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
 import com.github.ljtfreitas.restify.http.client.request.HttpClientRequest;
 import com.github.ljtfreitas.restify.http.client.response.HttpResponseMessage;
 import com.github.ljtfreitas.restify.http.client.response.StatusCode;
 import com.github.ljtfreitas.restify.http.util.Tryable;
 
-public class JdkHttpClientRequest implements HttpClientRequest {
+class JdkHttpClientRequest implements HttpClientRequest {
 
 	private final HttpURLConnection connection;
 	private final Charset charset;
 	private final Headers headers;
-	private final EndpointRequest source;
 
-	public JdkHttpClientRequest(HttpURLConnection connection, Charset charset, Headers headers, EndpointRequest source) {
+	public JdkHttpClientRequest(HttpURLConnection connection, Charset charset, Headers headers) {
 		this.connection = connection;
 		this.charset = charset;
 		this.headers = new JdkHttpClientHeadersDecorator(connection, headers);
-		this.source = source;
 	}
 
 	@Override
@@ -68,7 +66,7 @@ public class JdkHttpClientRequest implements HttpClientRequest {
 	}
 
 	private JdkHttpClientResponse responseOf(HttpURLConnection connection) throws IOException {
-		StatusCode statusCode = StatusCode.of(connection.getResponseCode());
+		StatusCode statusCode = StatusCode.of(connection.getResponseCode(), connection.getResponseMessage());
 
 		Headers headers = new Headers();
 
@@ -83,12 +81,18 @@ public class JdkHttpClientRequest implements HttpClientRequest {
 	}
 
 	@Override
+	public URI uri() {
+		return Tryable.of(() -> connection.getURL().toURI());
+	}
+
+	@Override
+	public String method() {
+		return connection.getRequestMethod();
+	}
+
+	@Override
 	public OutputStream output() {
-		try {
-			return connection.getOutputStream();
-		} catch (IOException e) {
-			throw new RestifyHttpException(e);
-		}
+		return Tryable.of(() -> connection.getOutputStream());
 	}
 
 	@Override
@@ -99,11 +103,6 @@ public class JdkHttpClientRequest implements HttpClientRequest {
 	@Override
 	public Headers headers() {
 		return headers;
-	}
-
-	@Override
-	public EndpointRequest source() {
-		return source;
 	}
 
 	private class JdkHttpClientHeadersDecorator extends Headers {

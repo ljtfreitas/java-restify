@@ -31,44 +31,44 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URI;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpEntityEnclosingRequest;
 import org.apache.http.HttpResponse;
+import org.apache.http.StatusLine;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.protocol.HttpContext;
 
 import com.github.ljtfreitas.restify.http.RestifyHttpException;
+import com.github.ljtfreitas.restify.http.client.Header;
 import com.github.ljtfreitas.restify.http.client.Headers;
-import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
 import com.github.ljtfreitas.restify.http.client.request.HttpClientRequest;
 import com.github.ljtfreitas.restify.http.client.response.HttpResponseMessage;
 import com.github.ljtfreitas.restify.http.client.response.StatusCode;
 
-public class ApacheHttpClientRequest implements HttpClientRequest {
+class ApacheHttpClientRequest implements HttpClientRequest {
 
 	private final HttpClient httpClient;
 	private final HttpUriRequest httpRequest;
 	private final HttpContext httpContext;
 	private final Charset charset;
 	private final Headers headers;
-	private final EndpointRequest source;
 
 	private final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream(1024 * 100);
 	private final BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(byteArrayOutputStream);
 
 	public ApacheHttpClientRequest(HttpClient httpClient, HttpUriRequest httpRequest, HttpContext httpContext, Charset charset,
-			Headers headers, EndpointRequest source) {
+			Headers headers) {
 		this.httpClient = httpClient;
 		this.httpRequest = httpRequest;
 		this.httpContext = httpContext;
 		this.charset = charset;
 		this.headers = headers;
-		this.source = source;
 	}
 
 	@Override
@@ -93,18 +93,29 @@ public class ApacheHttpClientRequest implements HttpClientRequest {
 	}
 
 	private ApacheHttpClientResponse responseOf(HttpResponse httpResponse) throws IOException {
-		StatusCode statusCode = StatusCode.of(httpResponse.getStatusLine().getStatusCode());
+		StatusLine statusLine = httpResponse.getStatusLine();
+
+		StatusCode statusCode = StatusCode.of(statusLine.getStatusCode(), statusLine.getReasonPhrase());
 
 		Headers headers = new Headers();
 		Arrays.stream(httpResponse.getAllHeaders())
-			.forEach(h -> headers.add(new com.github.ljtfreitas.restify.http.client.Header(h.getName(), h.getValue())));
+			.forEach(h -> headers.add(new Header(h.getName(), h.getValue())));
 
 		HttpEntity entity = httpResponse.getEntity();
 
-		InputStream stream = entity != null ? entity.getContent()
-				: new ByteArrayInputStream(new byte[0]);
+		InputStream stream = entity != null ? entity.getContent() : new ByteArrayInputStream(new byte[0]);
 
 		return new ApacheHttpClientResponse(statusCode, headers, stream, entity, httpResponse, this);
+	}
+
+	@Override
+	public URI uri() {
+		return httpRequest.getURI();
+	}
+
+	@Override
+	public String method() {
+		return httpRequest.getMethod();
 	}
 
 	@Override
@@ -120,10 +131,5 @@ public class ApacheHttpClientRequest implements HttpClientRequest {
 	@Override
 	public Headers headers() {
 		return headers;
-	}
-
-	@Override
-	public EndpointRequest source() {
-		return source;
 	}
 }

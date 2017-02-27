@@ -29,6 +29,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URI;
 import java.nio.charset.Charset;
 
 import com.github.ljtfreitas.restify.http.RestifyHttpException;
@@ -44,7 +45,7 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
-public class OkHttpClientRequest implements HttpClientRequest {
+class OkHttpClientRequest implements HttpClientRequest {
 
 	private final OkHttpClient okHttpClient;
 	private final EndpointRequest endpointRequest;
@@ -56,6 +57,16 @@ public class OkHttpClientRequest implements HttpClientRequest {
 		this.okHttpClient = okHttpClient;
 		this.endpointRequest = endpointRequest;
 		this.charset = charset;
+	}
+
+	@Override
+	public URI uri() {
+		return endpointRequest.endpoint();
+	}
+
+	@Override
+	public String method() {
+		return endpointRequest.method();
 	}
 
 	@Override
@@ -71,11 +82,6 @@ public class OkHttpClientRequest implements HttpClientRequest {
 	@Override
 	public Headers headers() {
 		return endpointRequest.headers();
-	}
-
-	@Override
-	public EndpointRequest source() {
-		return endpointRequest;
 	}
 
 	@Override
@@ -105,7 +111,7 @@ public class OkHttpClientRequest implements HttpClientRequest {
 	}
 
 	private OkHttpClientResponse responseOf(Response response) {
-		StatusCode statusCode = StatusCode.of(response.code());
+		StatusCode statusCode = StatusCode.of(response.code(), response.message());
 
 		Headers headers = new Headers();
 		response.headers().names().forEach(name -> headers.put(name, response.headers(name)));

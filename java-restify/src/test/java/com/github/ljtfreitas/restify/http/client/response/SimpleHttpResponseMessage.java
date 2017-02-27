@@ -6,6 +6,7 @@ import java.io.InputStream;
 
 import com.github.ljtfreitas.restify.http.client.Headers;
 import com.github.ljtfreitas.restify.http.client.request.HttpRequestMessage;
+import com.github.ljtfreitas.restify.http.client.request.SimpleHttpRequestMessage;
 
 public class SimpleHttpResponseMessage implements HttpResponseMessage {
 
@@ -36,7 +37,7 @@ public class SimpleHttpResponseMessage implements HttpResponseMessage {
 	}
 
 	public SimpleHttpResponseMessage(StatusCode code, Headers headers, InputStream input) {
-		this(code, headers, input, null);
+		this(code, headers, input, SimpleHttpRequestMessage.some());
 	}
 
 	public SimpleHttpResponseMessage(StatusCode code, Headers headers, InputStream input, HttpRequestMessage source) {
