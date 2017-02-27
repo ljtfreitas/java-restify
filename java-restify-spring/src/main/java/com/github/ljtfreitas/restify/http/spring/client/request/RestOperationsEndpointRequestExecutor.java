@@ -30,31 +30,39 @@ import java.lang.reflect.Type;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.RequestEntity;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.client.RestClientException;
+import org.springframework.web.client.ResourceAccessException;
+import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestOperations;
 
 import com.github.ljtfreitas.restify.http.RestifyHttpException;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequestExecutor;
+import com.github.ljtfreitas.restify.http.client.response.DefaultEndpointResponseErrorFallback;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
-import com.github.ljtfreitas.restify.http.client.response.RestifyEndpointResponseException;
+import com.github.ljtfreitas.restify.http.client.response.EndpointResponseErrorFallback;
 import com.github.ljtfreitas.restify.http.contract.metadata.reflection.JavaType;
 
 public class RestOperationsEndpointRequestExecutor implements EndpointRequestExecutor {
 
 	private final RestOperations rest;
+	private final EndpointResponseErrorFallback endpointResponseErrorFallback;
 	private final RequestEntityConverter requestEntityConverter;
 	private final EndpointResponseConverter responseEntityConverter;
 
 	public RestOperationsEndpointRequestExecutor(RestOperations rest) {
-		this(rest, new RequestEntityConverter(), new EndpointResponseConverter());
+		this(rest, new DefaultEndpointResponseErrorFallback());
+	}
+
+	public RestOperationsEndpointRequestExecutor(RestOperations rest, EndpointResponseErrorFallback endpointResponseErrorFallback) {
+		this(rest, new RequestEntityConverter(), new EndpointResponseConverter(), endpointResponseErrorFallback);
 	}
 
 	public RestOperationsEndpointRequestExecutor(RestOperations rest, RequestEntityConverter requestEntityConverter,
-			EndpointResponseConverter responseEntityConverter) {
+			EndpointResponseConverter responseEntityConverter, EndpointResponseErrorFallback endpointResponseErrorFallback) {
 		this.rest = rest;
 		this.requestEntityConverter = requestEntityConverter;
 		this.responseEntityConverter = responseEntityConverter;
+		this.endpointResponseErrorFallback = endpointResponseErrorFallback;
 	}
 
 	@SuppressWarnings("unchecked")
@@ -67,10 +75,10 @@ public class RestOperationsEndpointRequestExecutor implements EndpointRequestExe
 
 			return (EndpointResponse<T>) responseEntityConverter.convert(response);
 
-		} catch (RestifyEndpointResponseException e) {
-			throw e;
+		} catch (RestClientResponseException e) {
+			return endpointResponseErrorFallback.onError(ErrorHttpResponseMessage.from(request, e), endpointRequest.responseType());
 
-		} catch (RestClientException e) {
+		} catch (ResourceAccessException e) {
 			throw new RestifyHttpException("Spring RestTemplate exception", e);
 
 		} catch (Exception e) {

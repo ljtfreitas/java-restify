@@ -40,7 +40,6 @@ import org.springframework.boot.autoconfigure.condition.AllNestedConditions;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.web.WebClientAutoConfiguration;
 import org.springframework.boot.web.client.RestTemplateBuilder;
-import org.springframework.boot.web.client.RestTemplateCustomizer;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
@@ -69,7 +68,6 @@ import com.github.ljtfreitas.restify.http.spring.client.call.exec.ListenableFutu
 import com.github.ljtfreitas.restify.http.spring.client.call.exec.ListenableFutureTaskEndpointCallExecutableFactory;
 import com.github.ljtfreitas.restify.http.spring.client.call.exec.ResponseEntityEndpointCallExecutableFactory;
 import com.github.ljtfreitas.restify.http.spring.client.call.exec.WebAsyncTaskEndpointCallExecutableFactory;
-import com.github.ljtfreitas.restify.http.spring.client.request.EndpointResponseErrorHandler;
 import com.github.ljtfreitas.restify.http.spring.client.request.RestOperationsEndpointRequestExecutor;
 import com.github.ljtfreitas.restify.http.spring.contract.SpringWebContractReader;
 import com.github.ljtfreitas.restify.http.spring.contract.metadata.SpelDynamicParameterExpressionResolver;
@@ -98,24 +96,13 @@ public class RestifyAutoConfiguration {
 
 		@ConditionalOnMissingBean
 		@Bean
-		public EndpointRequestExecutor endpointRequestExecutor() {
+		public EndpointRequestExecutor endpointRequestExecutor(EndpointResponseErrorFallback endpointResponseErrorFallback) {
 			RestOperations restOperations = Optional.ofNullable(restTemplate)
 					.orElseGet(() -> Optional.ofNullable(restTemplateBuilder)
-							.map(b -> b.errorHandler(endpointResponseErrorHandler()).build())
-								.orElseGet(() -> new RestTemplate()));
+						.map(builder -> builder.build())
+							.orElseGet(() -> new RestTemplate()));
 
-			return new RestOperationsEndpointRequestExecutor(restOperations);
-		}
-
-		@Bean
-		public RestTemplateCustomizer restifyResponseErrorCustomizer() {
-			return (restTemplate) -> restTemplate.setErrorHandler(endpointResponseErrorHandler());
-		}
-
-		@ConditionalOnMissingBean
-		@Bean
-		public EndpointResponseErrorHandler endpointResponseErrorHandler() {
-			return new EndpointResponseErrorHandler(endpointResponseErrorFallback());
+			return new RestOperationsEndpointRequestExecutor(restOperations, endpointResponseErrorFallback);
 		}
 
 		@ConditionalOnMissingBean

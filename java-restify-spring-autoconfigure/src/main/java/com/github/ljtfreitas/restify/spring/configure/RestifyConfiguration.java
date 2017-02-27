@@ -59,7 +59,6 @@ import com.github.ljtfreitas.restify.http.spring.client.call.exec.ListenableFutu
 import com.github.ljtfreitas.restify.http.spring.client.call.exec.ResponseEntityEndpointCallExecutableFactory;
 import com.github.ljtfreitas.restify.http.spring.client.call.exec.WebAsyncTaskEndpointCallExecutableFactory;
 import com.github.ljtfreitas.restify.http.spring.client.request.RestOperationsEndpointRequestExecutor;
-import com.github.ljtfreitas.restify.http.spring.client.request.EndpointResponseErrorHandler;
 import com.github.ljtfreitas.restify.http.spring.contract.SpringWebContractReader;
 import com.github.ljtfreitas.restify.http.spring.contract.metadata.SpelDynamicParameterExpressionResolver;
 
@@ -73,20 +72,13 @@ class RestifyConfiguration {
 		private boolean emptyOnNotFound;
 
 		@Bean
-		public EndpointRequestExecutor endpointRequestExecutor(ObjectProvider<RestOperations> restOperations) {
-			return new RestOperationsEndpointRequestExecutor(
-					Optional.ofNullable(restOperations.getIfAvailable()).orElseGet(() -> buildRestTemplate()));
-		}
+		public EndpointRequestExecutor endpointRequestExecutor(ObjectProvider<RestOperations> restOperations,
+				ObjectProvider<EndpointResponseErrorFallback> endpointResponseErrorFallback) {
 
-		private RestTemplate buildRestTemplate() {
-			RestTemplate restTemplate = new RestTemplate();
-			restTemplate.setErrorHandler(endpointResponseErrorHandler());
-			return restTemplate;
-		}
+			RestOperations rest = Optional.ofNullable(restOperations.getIfAvailable()).orElseGet(() -> new RestTemplate());
+			EndpointResponseErrorFallback fallback = Optional.ofNullable(endpointResponseErrorFallback.getIfAvailable()).orElseGet(() -> endpointResponseErrorFallback());
 
-		@Bean
-		public EndpointResponseErrorHandler endpointResponseErrorHandler() {
-			return new EndpointResponseErrorHandler(endpointResponseErrorFallback());
+			return new RestOperationsEndpointRequestExecutor(rest, fallback);
 		}
 
 		@Bean

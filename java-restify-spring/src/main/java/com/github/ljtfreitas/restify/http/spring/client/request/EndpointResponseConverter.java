@@ -37,7 +37,7 @@ class EndpointResponseConverter implements Converter<ResponseEntity<Object>, End
 
 	@Override
 	public EndpointResponse<Object> convert(ResponseEntity<Object> source) {
-		StatusCode status = StatusCode.of(source.getStatusCodeValue());
+		StatusCode status = StatusCode.of(source.getStatusCodeValue(), source.getStatusCode().getReasonPhrase());
 		Headers headers = headersOf(source.getHeaders());
 		return new EndpointResponse<>(status, headers, source.getBody());
 	}
