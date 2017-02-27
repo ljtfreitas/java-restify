@@ -25,58 +25,65 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.response;
 
+import static com.github.ljtfreitas.restify.http.client.response.HttpStatusCode.ACCEPTED;
+import static com.github.ljtfreitas.restify.http.client.response.HttpStatusCode.BAD_GATEWAY;
+import static com.github.ljtfreitas.restify.http.client.response.HttpStatusCode.BAD_REQUEST;
+import static com.github.ljtfreitas.restify.http.client.response.HttpStatusCode.CONFLICT;
+import static com.github.ljtfreitas.restify.http.client.response.HttpStatusCode.CONTINUE;
+import static com.github.ljtfreitas.restify.http.client.response.HttpStatusCode.CREATED;
+import static com.github.ljtfreitas.restify.http.client.response.HttpStatusCode.EXPECTIATION_FAILED;
+import static com.github.ljtfreitas.restify.http.client.response.HttpStatusCode.FORBIDDEN;
+import static com.github.ljtfreitas.restify.http.client.response.HttpStatusCode.GATEWAY_TIMEOUT;
+import static com.github.ljtfreitas.restify.http.client.response.HttpStatusCode.GONE;
+import static com.github.ljtfreitas.restify.http.client.response.HttpStatusCode.HTTP_VERSION_NOT_SUPPORTED;
+import static com.github.ljtfreitas.restify.http.client.response.HttpStatusCode.INTERNAL_SERVER_ERROR;
+import static com.github.ljtfreitas.restify.http.client.response.HttpStatusCode.LENGHT_REQUIRED;
+import static com.github.ljtfreitas.restify.http.client.response.HttpStatusCode.METHOD_NOT_ALLOWED;
+import static com.github.ljtfreitas.restify.http.client.response.HttpStatusCode.NON_AUTHORITATIVE_INFORMATION;
+import static com.github.ljtfreitas.restify.http.client.response.HttpStatusCode.NOT_ACCEPTABLE;
+import static com.github.ljtfreitas.restify.http.client.response.HttpStatusCode.NOT_FOUND;
+import static com.github.ljtfreitas.restify.http.client.response.HttpStatusCode.NOT_IMPLEMENTED;
+import static com.github.ljtfreitas.restify.http.client.response.HttpStatusCode.NOT_MODIFIED;
+import static com.github.ljtfreitas.restify.http.client.response.HttpStatusCode.NO_CONTENT;
+import static com.github.ljtfreitas.restify.http.client.response.HttpStatusCode.OK;
+import static com.github.ljtfreitas.restify.http.client.response.HttpStatusCode.PARTIAL_CONTENT;
+import static com.github.ljtfreitas.restify.http.client.response.HttpStatusCode.PRECONDITION_FAILED;
+import static com.github.ljtfreitas.restify.http.client.response.HttpStatusCode.PROXY_AUTHENTATION_REQUIRED;
+import static com.github.ljtfreitas.restify.http.client.response.HttpStatusCode.REQUESTED_RANGE_NOT_SATISFIABLE;
+import static com.github.ljtfreitas.restify.http.client.response.HttpStatusCode.REQUEST_ENTITY_TOO_LARGE;
+import static com.github.ljtfreitas.restify.http.client.response.HttpStatusCode.REQUEST_TIMEOUT;
+import static com.github.ljtfreitas.restify.http.client.response.HttpStatusCode.REQUEST_URI_TOO_LONG;
+import static com.github.ljtfreitas.restify.http.client.response.HttpStatusCode.RESET_CONTENT;
+import static com.github.ljtfreitas.restify.http.client.response.HttpStatusCode.SERVICE_UNAVAILABLE;
+import static com.github.ljtfreitas.restify.http.client.response.HttpStatusCode.SWITCHING_PROTOCOLS;
+import static com.github.ljtfreitas.restify.http.client.response.HttpStatusCode.UNAUTHORIZED;
+import static com.github.ljtfreitas.restify.http.client.response.HttpStatusCode.UNSUPPORTED_MEDIA_TYPE;
+
+import java.util.Optional;
+
 public class StatusCode {
 
-	// Informational 1xx
-	public static final int HTTP_STATUS_CODE_CONTINUE = 100;
-	public static final int HTTP_STATUS_CODE_SWITCHING_PROTOCOLS = 101;
-
-	// Successful 2xx
-	public static final int HTTP_STATUS_CODE_OK = 200;
-	public static final int HTTP_STATUS_CODE_CREATED = 201;
-	public static final int HTTP_STATUS_CODE_ACCEPTED = 202;
-	public static final int HTTP_STATUS_CODE_NON_AUTHORITATIVE_INFORMATION = 203;
-	public static final int HTTP_STATUS_CODE_NO_CONTENT = 204;
-	public static final int HTTP_STATUS_CODE_RESET_CONTENT = 205;
-	public static final int HTTP_STATUS_CODE_PARTIAL_CONTENT = 206;
-
-	// Redirection 3xx
-	public static final int HTTP_STATUS_CODE_NOT_MODIFIED = 304;
-
-	// Client Error 4xx
-	public static final int HTTP_STATUS_CODE_BAD_REQUEST = 400;
-	public static final int HTTP_STATUS_CODE_UNAUTHORIZED = 401;
-	public static final int HTTP_STATUS_CODE_FORBIDDEN = 403;
-	public static final int HTTP_STATUS_CODE_NOT_FOUND = 404;
-	public static final int HTTP_STATUS_CODE_METHOD_NOT_ALLOWED = 405;
-	public static final int HTTP_STATUS_CODE_NOT_ACCEPTABLE = 406;
-	public static final int HTTP_STATUS_CODE_PROXY_AUTHENTATION_REQUIRED = 407;
-	public static final int HTTP_STATUS_CODE_REQUEST_TIMEOUT = 408;
-	public static final int HTTP_STATUS_CODE_CONFLICT = 409;
-	public static final int HTTP_STATUS_CODE_GONE = 410;
-	public static final int HTTP_STATUS_CODE_LENGHT_REQUIRED = 411;
-	public static final int HTTP_STATUS_CODE_PRECONDITION_FAILED = 412;
-	public static final int HTTP_STATUS_CODE_REQUEST_ENTITY_TOO_LARGE = 413;
-	public static final int HTTP_STATUS_CODE_REQUEST_URI_TOO_LONG = 414;
-	public static final int HTTP_STATUS_CODE_UNSUPPORTED_MEDIA_TYPE = 415;
-	public static final int HTTP_STATUS_CODE_REQUESTED_RANGE_NOT_SATISFIABLE = 416;
-	public static final int HTTP_STATUS_CODE_EXPECTIATION_FAILED = 417;
-
-	// Server Error 5xx
-	public static final int HTTP_STATUS_CODE_INTERNAL_SERVER_ERROR = 500;
-	public static final int HTTP_STATUS_CODE_NOT_IMPLEMENTED = 501;
-	public static final int HTTP_STATUS_CODE_BAD_GATEWAY = 502;
-	public static final int HTTP_STATUS_CODE_SERVICE_UNAVAILABLE = 503;
-	public static final int HTTP_STATUS_CODE_GATEWAY_TIMEOUT = 504;
-	public static final int HTTP_STATUS_CODE_HTTP_VERSION_NOT_SUPPORTED = 505;
-
 	private final int code;
+	private final String message;
 
 	private StatusCode(int code) {
+		this(code, "(Empty)");
+	}
+
+	private StatusCode(HttpStatusCode httpStatusCode) {
+		this(httpStatusCode.value(), httpStatusCode.message());
+	}
+
+	private StatusCode(int code, String message) {
 		this.code = code;
+		this.message = message;
 	}
 
 	public int value() {
+		return code;
+	}
+
+	public int message() {
 		return code;
 	}
 
@@ -105,135 +112,135 @@ public class StatusCode {
 	}
 
 	public boolean isContinue() {
-		return code == HTTP_STATUS_CODE_CONTINUE;
+		return code == CONTINUE.value();
 	}
 
 	public boolean isSwitchingProtocols() {
-		return code == HTTP_STATUS_CODE_SWITCHING_PROTOCOLS;
+		return code == SWITCHING_PROTOCOLS.value();
 	}
 
 	public boolean isOK() {
-		return code == HTTP_STATUS_CODE_OK;
+		return code == OK.value();
 	}
 
 	public boolean isCreated() {
-		return code == HTTP_STATUS_CODE_CREATED;
+		return code == CREATED.value();
 	}
 
 	public boolean isAccepted() {
-		return code == HTTP_STATUS_CODE_ACCEPTED;
+		return code == ACCEPTED.value();
 	}
 
 	public boolean isNonAuthoritativeInformation() {
-		return code == HTTP_STATUS_CODE_NON_AUTHORITATIVE_INFORMATION;
+		return code == NON_AUTHORITATIVE_INFORMATION.value();
 	}
 
 	public boolean isNoContent() {
-		return code == HTTP_STATUS_CODE_NO_CONTENT;
+		return code == NO_CONTENT.value();
 	}
 
 	public boolean isResetContent() {
-		return code == HTTP_STATUS_CODE_RESET_CONTENT;
+		return code == RESET_CONTENT.value();
 	}
 
 	public boolean isPartialContent() {
-		return code == HTTP_STATUS_CODE_PARTIAL_CONTENT;
+		return code == PARTIAL_CONTENT.value();
 	}
 
 	public boolean isNotModified() {
-		return code == HTTP_STATUS_CODE_NOT_MODIFIED;
+		return code == NOT_MODIFIED.value();
 	}
 
 	public boolean isBadRequest() {
-		return code == HTTP_STATUS_CODE_BAD_REQUEST;
+		return code == BAD_REQUEST.value();
 	}
 
 	public boolean isUnauthorized() {
-		return code == HTTP_STATUS_CODE_UNAUTHORIZED;
+		return code == UNAUTHORIZED.value();
 	}
 
 	public boolean isForbidden() {
-		return code == HTTP_STATUS_CODE_FORBIDDEN;
+		return code == FORBIDDEN.value();
 	}
 
 	public boolean isNotFound() {
-		return code == HTTP_STATUS_CODE_NOT_FOUND;
+		return code == NOT_FOUND.value();
 	}
 
 	public boolean isMethodNotAllowed() {
-		return code == HTTP_STATUS_CODE_METHOD_NOT_ALLOWED;
+		return code == METHOD_NOT_ALLOWED.value();
 	}
 
 	public boolean isNotAcceptable() {
-		return code == HTTP_STATUS_CODE_NOT_ACCEPTABLE;
+		return code == NOT_ACCEPTABLE.value();
 	}
 
 	public boolean isProxyAuthenticationRequired() {
-		return code == HTTP_STATUS_CODE_PROXY_AUTHENTATION_REQUIRED;
+		return code == PROXY_AUTHENTATION_REQUIRED.value();
 	}
 
 	public boolean isRequestTimeout() {
-		return code == HTTP_STATUS_CODE_REQUEST_TIMEOUT;
+		return code == REQUEST_TIMEOUT.value();
 	}
 
 	public boolean isConflict() {
-		return code == HTTP_STATUS_CODE_CONFLICT;
+		return code == CONFLICT.value();
 	}
 
 	public boolean isGone() {
-		return code == HTTP_STATUS_CODE_GONE;
+		return code == GONE.value();
 	}
 
 	public boolean isLengthRequired() {
-		return code == HTTP_STATUS_CODE_LENGHT_REQUIRED;
+		return code == LENGHT_REQUIRED.value();
 	}
 
 	public boolean isPreconditionFailed() {
-		return code == HTTP_STATUS_CODE_PRECONDITION_FAILED;
+		return code == PRECONDITION_FAILED.value();
 	}
 
 	public boolean isRequestEntityTooLarge() {
-		return code == HTTP_STATUS_CODE_REQUEST_ENTITY_TOO_LARGE;
+		return code == REQUEST_ENTITY_TOO_LARGE.value();
 	}
 
 	public boolean isRequestUriTooLong() {
-		return code == HTTP_STATUS_CODE_REQUEST_URI_TOO_LONG;
+		return code == REQUEST_URI_TOO_LONG.value();
 	}
 
 	public boolean isUnsupportedMediaType() {
-		return code == HTTP_STATUS_CODE_UNSUPPORTED_MEDIA_TYPE;
+		return code == UNSUPPORTED_MEDIA_TYPE.value();
 	}
 
 	public boolean isRequestedRangeNotSatisfiable() {
-		return code == HTTP_STATUS_CODE_REQUESTED_RANGE_NOT_SATISFIABLE;
+		return code == REQUESTED_RANGE_NOT_SATISFIABLE.value();
 	}
 
 	public boolean isExpectationFailed() {
-		return code == HTTP_STATUS_CODE_EXPECTIATION_FAILED;
+		return code == EXPECTIATION_FAILED.value();
 	}
 
 	public boolean isInternalServerError() {
-		return code == HTTP_STATUS_CODE_INTERNAL_SERVER_ERROR;
+		return code == INTERNAL_SERVER_ERROR.value();
 	}
 
 	public boolean isNotImplemented() {
-		return code == HTTP_STATUS_CODE_NOT_IMPLEMENTED;
+		return code == NOT_IMPLEMENTED.value();
 	}
 
 	public boolean isBadGateway() {
-		return code == HTTP_STATUS_CODE_BAD_GATEWAY;
+		return code == BAD_GATEWAY.value();
 	}
 
 	public boolean isServiceUnavailable() {
-		return code == HTTP_STATUS_CODE_SERVICE_UNAVAILABLE;
+		return code == SERVICE_UNAVAILABLE.value();
 	}
 
 	public boolean isGatewayTimeout() {
-		return code == HTTP_STATUS_CODE_GATEWAY_TIMEOUT;
+		return code == GATEWAY_TIMEOUT.value();
 	}
 
 	public boolean isHttpVersionNotSupported() {
-		return code == HTTP_STATUS_CODE_HTTP_VERSION_NOT_SUPPORTED;
+		return code == HTTP_VERSION_NOT_SUPPORTED.value();
 	}
 
 	@Override
@@ -249,115 +256,125 @@ public class StatusCode {
 
 	@Override
 	public String toString() {
-		return Integer.toString(code);
+		return Integer.toString(code) + " " + message;
 	}
 
 	public static StatusCode of(int code) {
-		return new StatusCode(code);
+		Optional<HttpStatusCode> httpStatusCode = HttpStatusCode.of(code);
+		return httpStatusCode.isPresent() ? new StatusCode(httpStatusCode.get()) : new StatusCode(code);
+	}
+
+	public static StatusCode of(int code, String message) {
+		Optional<HttpStatusCode> httpStatusCode = HttpStatusCode.of(code);
+		return httpStatusCode.isPresent() ? new StatusCode(httpStatusCode.get()) : new StatusCode(code, message);
+	}
+
+	public static StatusCode of(HttpStatusCode httpStatusCode) {
+		return new StatusCode(httpStatusCode);
 	}
 
 	public static StatusCode ok() {
-		return new StatusCode(HTTP_STATUS_CODE_OK);
+		return new StatusCode(OK);
 	}
 
 	public static StatusCode noContent() {
-		return new StatusCode(HTTP_STATUS_CODE_NO_CONTENT);
+		return new StatusCode(NO_CONTENT);
 	}
 
 	public static StatusCode notModified() {
-		return new StatusCode(HTTP_STATUS_CODE_NOT_MODIFIED);
+		return new StatusCode(NOT_MODIFIED);
 	}
 
 	public static StatusCode badRequest() {
-		return new StatusCode(HTTP_STATUS_CODE_BAD_REQUEST);
+		return new StatusCode(BAD_REQUEST);
 	}
 
 	public static StatusCode unauthorized() {
-		return new StatusCode(HTTP_STATUS_CODE_UNAUTHORIZED);
+		return new StatusCode(UNAUTHORIZED);
 	}
 
 	public static StatusCode forbidden() {
-		return new StatusCode(HTTP_STATUS_CODE_FORBIDDEN);
+		return new StatusCode(FORBIDDEN);
 	}
 
 	public static StatusCode notFound() {
-		return new StatusCode(HTTP_STATUS_CODE_NOT_FOUND);
+		return new StatusCode(NOT_FOUND);
 	}
 
 	public static StatusCode methodNotAllowed() {
-		return new StatusCode(HTTP_STATUS_CODE_METHOD_NOT_ALLOWED);
+		return new StatusCode(METHOD_NOT_ALLOWED);
 	}
 
 	public static StatusCode notAcceptable() {
-		return new StatusCode(HTTP_STATUS_CODE_NOT_ACCEPTABLE);
+		return new StatusCode(NOT_ACCEPTABLE);
 	}
 
 	public static StatusCode proxyAuthenticationRequired() {
-		return new StatusCode(HTTP_STATUS_CODE_PROXY_AUTHENTATION_REQUIRED);
+		return new StatusCode(PROXY_AUTHENTATION_REQUIRED);
 	}
 
 	public static StatusCode conflict() {
-		return new StatusCode(HTTP_STATUS_CODE_CONFLICT);
+		return new StatusCode(CONFLICT);
 	}
 
 	public static StatusCode gone() {
-		return new StatusCode(HTTP_STATUS_CODE_GONE);
+		return new StatusCode(GONE);
 	}
 
 	public static StatusCode lengthRequired() {
-		return new StatusCode(HTTP_STATUS_CODE_LENGHT_REQUIRED);
+		return new StatusCode(LENGHT_REQUIRED);
 	}
 
 	public static StatusCode preconditionFailed() {
-		return new StatusCode(HTTP_STATUS_CODE_PRECONDITION_FAILED);
+		return new StatusCode(PRECONDITION_FAILED);
 	}
 
 	public static StatusCode requestEntityTooLarge() {
-		return new StatusCode(HTTP_STATUS_CODE_REQUEST_ENTITY_TOO_LARGE);
+		return new StatusCode(REQUEST_ENTITY_TOO_LARGE);
 	}
 
 	public static StatusCode requestUriTooLong() {
-		return new StatusCode(HTTP_STATUS_CODE_REQUEST_URI_TOO_LONG);
+		return new StatusCode(REQUEST_URI_TOO_LONG);
 	}
 
 	public static StatusCode unsupportedMediaType() {
-		return new StatusCode(HTTP_STATUS_CODE_UNSUPPORTED_MEDIA_TYPE);
+		return new StatusCode(UNSUPPORTED_MEDIA_TYPE);
 	}
 
 	public static StatusCode requestedRangeNotSatisfiable() {
-		return new StatusCode(HTTP_STATUS_CODE_REQUESTED_RANGE_NOT_SATISFIABLE);
+		return new StatusCode(REQUESTED_RANGE_NOT_SATISFIABLE);
 	}
 
 	public static StatusCode expectationFailed() {
-		return new StatusCode(HTTP_STATUS_CODE_EXPECTIATION_FAILED);
+		return new StatusCode(EXPECTIATION_FAILED);
 	}
 
 	public static StatusCode internalServerError() {
-		return new StatusCode(HTTP_STATUS_CODE_INTERNAL_SERVER_ERROR);
+		return new StatusCode(INTERNAL_SERVER_ERROR);
 	}
 
 	public static StatusCode notImplemented() {
-		return new StatusCode(HTTP_STATUS_CODE_NOT_IMPLEMENTED);
+		return new StatusCode(NOT_IMPLEMENTED);
 	}
 
 	public static StatusCode badGateway() {
-		return new StatusCode(HTTP_STATUS_CODE_BAD_GATEWAY);
+		return new StatusCode(BAD_GATEWAY);
 	}
 
 	public static StatusCode serviceUnavailable() {
-		return new StatusCode(HTTP_STATUS_CODE_SERVICE_UNAVAILABLE);
+		return new StatusCode(SERVICE_UNAVAILABLE);
 	}
 
 	public static StatusCode gatewayTimeout() {
-		return new StatusCode(HTTP_STATUS_CODE_GATEWAY_TIMEOUT);
+		return new StatusCode(GATEWAY_TIMEOUT);
 	}
 
 	public static StatusCode httpVersionNotSupported() {
-		return new StatusCode(HTTP_STATUS_CODE_HTTP_VERSION_NOT_SUPPORTED);
+		return new StatusCode(HTTP_VERSION_NOT_SUPPORTED);
 	}
 
 	public static StatusCode requestTimeout() {
-		return new StatusCode(HTTP_STATUS_CODE_REQUEST_TIMEOUT);
+		return new StatusCode(REQUEST_TIMEOUT);
 	}
 
 }
