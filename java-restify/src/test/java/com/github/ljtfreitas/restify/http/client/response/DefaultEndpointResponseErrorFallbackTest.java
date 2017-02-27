@@ -46,7 +46,7 @@ public class DefaultEndpointResponseErrorFallbackTest {
 		expectedException.expect(method(e -> e.headers(), sameInstance(response.headers())));
 		expectedException.expect(method(e -> e.bodyAsString(), is(body)));
 
-		fallback.onError(response);
+		fallback.onError(response, null);
 	}
 
 	@Test
@@ -62,7 +62,7 @@ public class DefaultEndpointResponseErrorFallbackTest {
 		expectedException.expect(method(e -> e.headers(), sameInstance(response.headers())));
 		expectedException.expect(method(e -> e.bodyAsString(), is(body)));
 
-		fallback.onError(response);
+		fallback.onError(response, null);
 	}
 
 	@Test
@@ -73,7 +73,7 @@ public class DefaultEndpointResponseErrorFallbackTest {
 
 		fallback = DefaultEndpointResponseErrorFallback.emptyOnNotFound();
 
-		EndpointResponse<Object> newEndpointResponse = fallback.onError(response);
+		EndpointResponse<Object> newEndpointResponse = fallback.onError(response, null);
 
 		assertEquals(response.statusCode(), newEndpointResponse.code());
 		assertSame(response.headers(), newEndpointResponse.headers());
