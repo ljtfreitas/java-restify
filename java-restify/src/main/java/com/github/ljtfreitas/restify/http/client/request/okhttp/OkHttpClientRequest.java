@@ -30,6 +30,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
+import java.net.URL;
 import java.nio.charset.Charset;
 
 import com.github.ljtfreitas.restify.http.RestifyHttpException;
@@ -38,6 +39,7 @@ import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
 import com.github.ljtfreitas.restify.http.client.request.HttpClientRequest;
 import com.github.ljtfreitas.restify.http.client.response.HttpResponseMessage;
 import com.github.ljtfreitas.restify.http.client.response.StatusCode;
+import com.github.ljtfreitas.restify.http.util.Tryable;
 
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -91,22 +93,25 @@ class OkHttpClientRequest implements HttpClientRequest {
 
 		byte[] content = outputStream.toByteArray();
 
-		try {
-			RequestBody body = (content.length > 0 ? RequestBody.create(contentType, content) : null);
+		RequestBody body = (content.length > 0 ? RequestBody.create(contentType, content) : null);
 
-			Request.Builder builder = new Request.Builder();
+		URL url = Tryable.of(() -> endpointRequest.endpoint().toURL());
 
-			builder.url(endpointRequest.endpoint().toURL())
+		Request.Builder builder = new Request.Builder();
+
+		builder.url(url)
 				.method(endpointRequest.method(), body);
 
-			endpointRequest.headers().all().forEach(h -> builder.addHeader(h.name(), h.value()));
+		endpointRequest.headers().all().forEach(h -> builder.addHeader(h.name(), h.value()));
 
-			Request request = builder.build();
+		Request request = builder.build();
 
+		try {
 			return responseOf(okHttpClient.newCall(request).execute());
 
 		} catch (IOException e) {
-			throw new RestifyHttpException(e);
+			throw new RestifyHttpException("I/O error on HTTP request: [" + request.method() + " " +
+					request.url() + "]", e);
 		}
 	}
 

@@ -61,7 +61,8 @@ class JdkHttpClientRequest implements HttpClientRequest {
 			return responseOf(connection);
 
 		} catch (IOException e) {
-			throw new RestifyHttpException(e);
+			throw new RestifyHttpException("I/O error on HTTP request: [" + connection.getRequestMethod() + " " +
+					connection.getURL() + "]", e);
 		}
 	}
 

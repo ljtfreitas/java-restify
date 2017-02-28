@@ -67,7 +67,7 @@ public class StatusCode {
 	private final String message;
 
 	private StatusCode(int code) {
-		this(code, "(Empty)");
+		this(code, "");
 	}
 
 	private StatusCode(HttpStatusCode httpStatusCode) {

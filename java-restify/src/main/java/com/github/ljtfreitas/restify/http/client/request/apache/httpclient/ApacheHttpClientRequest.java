@@ -87,7 +87,8 @@ class ApacheHttpClientRequest implements HttpClientRequest {
 			return responseOf(httpResponse);
 
 		} catch (IOException e) {
-			throw new RestifyHttpException(e);
+			throw new RestifyHttpException("I/O error on HTTP request: [" + httpRequest.getMethod() + " " +
+					httpRequest.getURI() + "]", e);
 		}
 
 	}

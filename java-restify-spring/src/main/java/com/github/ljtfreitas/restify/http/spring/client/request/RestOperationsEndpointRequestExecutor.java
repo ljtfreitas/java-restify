@@ -79,10 +79,10 @@ public class RestOperationsEndpointRequestExecutor implements EndpointRequestExe
 			return endpointResponseErrorFallback.onError(ErrorHttpResponseMessage.from(request, e), endpointRequest.responseType());
 
 		} catch (ResourceAccessException e) {
-			throw new RestifyHttpException("Spring RestTemplate exception", e);
+			throw new RestifyHttpException("I/O error on HTTP request: [" + request.getMethod() + " " + request.getUrl() + "]", e);
 
 		} catch (Exception e) {
-			throw new RestifyHttpException(e);
+			throw new RestifyHttpException("Error on HTTP request: [" + request.getMethod() + " " + request.getUrl() + "]", e);
 		}
 	}
 

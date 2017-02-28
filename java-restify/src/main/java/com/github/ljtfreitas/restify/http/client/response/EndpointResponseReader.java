@@ -97,7 +97,7 @@ public class EndpointResponseReader {
 
 			} catch (IOException e) {
 				throw new RestifyHttpMessageReadException(
-						"Error on try read http response body of type [" + contentType + "]", e);
+						"Error on read HTTP response body of type [" + contentType + "]", e);
 			}
 		}
 	}

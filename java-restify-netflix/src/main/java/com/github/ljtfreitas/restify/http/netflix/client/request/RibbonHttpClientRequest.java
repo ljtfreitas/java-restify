@@ -87,7 +87,8 @@ class RibbonHttpClientRequest implements HttpClientRequest {
 			return response.unwrap();
 
 		} catch (ClientException e) {
-			throw new RestifyHttpException(e);
+			throw new RestifyHttpException("Error on HTTP request: [" + endpointRequest.method() + " " +
+					endpointRequest.endpoint() + "]", e);
 		}
 	}
 
