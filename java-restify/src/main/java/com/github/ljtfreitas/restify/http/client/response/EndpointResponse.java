@@ -25,6 +25,8 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.response;
 
+import static com.github.ljtfreitas.restify.http.util.Preconditions.isTrue;
+
 import com.github.ljtfreitas.restify.http.client.Headers;
 
 public class EndpointResponse<T> {
@@ -72,5 +74,26 @@ public class EndpointResponse<T> {
 
 	public static <T> EndpointResponse<T> empty(StatusCode statusCode, Headers headers) {
 		return new EndpointResponse<T>(statusCode, headers, null);
+	}
+
+	public static <T> EndpointResponse<T> error(StatusCode statusCode, Headers headers, String body) {
+		isTrue(statusCode.isError(), "StatusCode [" + statusCode + "] is not a HTTP error!");
+
+		return new EndpointResponse<T>(statusCode, headers, null) {
+			@Override
+			public T body() {
+				String message = new StringBuilder("HTTP response is a error of type ")
+						.append("[")
+							.append(statusCode)
+						.append("].")
+							.append("\n")
+						.append("Raw response body is:")
+							.append("\n")
+						.append(body)
+							.toString();
+
+				throw new RestifyEndpointResponseException(message, statusCode, headers, body);
+			}
+		};
 	}
 }
