@@ -112,6 +112,16 @@ public class RestifyEndpointRequestExecutorTest {
 		}
 
 		@Override
+		public URI uri() {
+			return source.endpoint();
+		}
+
+		@Override
+		public String method() {
+			return source.method();
+		}
+
+		@Override
 		public OutputStream output() {
 			return outputStream;
 		}
@@ -129,11 +139,6 @@ public class RestifyEndpointRequestExecutorTest {
 		@Override
 		public Headers headers() {
 			return source.headers();
-		}
-
-		@Override
-		public EndpointRequest source() {
-			return source;
 		}
 	}
 

@@ -39,7 +39,7 @@ import com.github.ljtfreitas.restify.http.client.response.HttpResponseMessage;
 import com.github.ljtfreitas.restify.http.util.Tryable;
 import com.netflix.client.ClientException;
 
-public class RibbonHttpClientRequest implements HttpClientRequest {
+class RibbonHttpClientRequest implements HttpClientRequest {
 
 	private final EndpointRequest endpointRequest;
 	private final RibbonLoadBalancedClient ribbonLoadBalancedClient;
@@ -52,6 +52,16 @@ public class RibbonHttpClientRequest implements HttpClientRequest {
 		this.endpointRequest = endpointRequest;
 		this.ribbonLoadBalancedClient = ribbonLoadBalancedClient;
 		this.charset = charset;
+	}
+
+	@Override
+	public URI uri() {
+		return endpointRequest.endpoint();
+	}
+
+	@Override
+	public String method() {
+		return endpointRequest.method();
 	}
 
 	@Override
@@ -70,11 +80,6 @@ public class RibbonHttpClientRequest implements HttpClientRequest {
 	}
 
 	@Override
-	public EndpointRequest source() {
-		return endpointRequest;
-	}
-
-	@Override
 	public HttpResponseMessage execute() throws RestifyHttpException {
 		try {
 			RibbonResponse response = ribbonLoadBalancedClient.executeWithLoadBalancer(new RibbonRequest(this));
@@ -82,7 +87,8 @@ public class RibbonHttpClientRequest implements HttpClientRequest {
 			return response.unwrap();
 
 		} catch (ClientException e) {
-			throw new RestifyHttpException(e);
+			throw new RestifyHttpException("Error on HTTP request: [" + endpointRequest.method() + " " +
+					endpointRequest.endpoint() + "]", e);
 		}
 	}
 

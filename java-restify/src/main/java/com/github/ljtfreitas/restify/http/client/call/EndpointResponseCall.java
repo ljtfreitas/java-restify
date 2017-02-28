@@ -28,6 +28,7 @@ package com.github.ljtfreitas.restify.http.client.call;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequestExecutor;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
+import com.github.ljtfreitas.restify.http.client.response.RestifyEndpointResponseException;
 
 class EndpointResponseCall<T> implements EndpointCall<EndpointResponse<T>> {
 
@@ -41,6 +42,10 @@ class EndpointResponseCall<T> implements EndpointCall<EndpointResponse<T>> {
 
 	@Override
 	public EndpointResponse<T> execute() {
-		return endpointRequestExecutor.execute(endpointRequest);
+		try {
+			return endpointRequestExecutor.execute(endpointRequest);
+		} catch (RestifyEndpointResponseException e) {
+			return EndpointResponse.error(e.statusCode(), e.headers(), e.bodyAsString());
+		}
 	}
 }

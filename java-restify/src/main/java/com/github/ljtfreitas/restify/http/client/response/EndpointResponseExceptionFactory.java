@@ -25,6 +25,9 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.response;
 
+import java.util.stream.Collectors;
+
+import com.github.ljtfreitas.restify.http.client.Header;
 import com.github.ljtfreitas.restify.http.client.Headers;
 import com.github.ljtfreitas.restify.http.client.message.converter.text.TextPlainMessageConverter;
 
@@ -35,9 +38,33 @@ class EndpointResponseExceptionFactory {
 	RestifyEndpointResponseException create(HttpResponseMessage response) {
 		String bodyAsString = TEXT_ERROR_RESPONSE_MESSAGE_CONVERTER.read(response, String.class);
 
-		String responseBody = (bodyAsString != null && !bodyAsString.isEmpty()) ? "\n" + bodyAsString : "(empty)";
+		String responseBody = (bodyAsString != null && !bodyAsString.isEmpty()) ? bodyAsString : "(empty)";
 
-		String message = "HTTP Status Code: " + response.statusCode() + ". Response body: " + responseBody;
+		String message = new StringBuilder()
+				.append("HTTP request: ")
+					.append("[")
+						.append(response.request().method())
+							.append(" ")
+							.append(response.request().uri())
+					.append("]")
+						.append("\n")
+					.append("Headers: ")
+						.append(response.request().headers().all().stream()
+							.map(Header::toString)
+								.collect(Collectors.joining(",", "[", "]")))
+						.append("\n")
+				.append("HTTP response: ")
+					.append("[")
+						.append(response.statusCode())
+					.append("]")
+						.append("\n")
+					.append("Headers: ")
+						.append(response.headers().all().stream()
+							.map(Header::toString)
+								.collect(Collectors.joining(", ", "[", "]")))
+						.append("\n")
+				.append(responseBody)
+			.toString();
 
 		StatusCode statusCode = response.statusCode();
 

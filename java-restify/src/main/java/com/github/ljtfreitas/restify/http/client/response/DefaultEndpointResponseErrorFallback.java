@@ -25,6 +25,8 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.response;
 
+import com.github.ljtfreitas.restify.http.contract.metadata.reflection.JavaType;
+
 public class DefaultEndpointResponseErrorFallback implements EndpointResponseErrorFallback {
 
 	private final boolean emptyOnNotFound;
@@ -40,7 +42,7 @@ public class DefaultEndpointResponseErrorFallback implements EndpointResponseErr
 	}
 
 	@Override
-	public <T> EndpointResponse<T> onError(HttpResponseMessage response) {
+	public <T> EndpointResponse<T> onError(HttpResponseMessage response, JavaType responseType) {
 		if (response.statusCode().isNotFound() && emptyOnNotFound) {
 			return EndpointResponse.empty(response.statusCode(), response.headers());
 

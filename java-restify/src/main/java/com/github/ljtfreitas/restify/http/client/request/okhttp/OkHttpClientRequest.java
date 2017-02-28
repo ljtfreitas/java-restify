@@ -29,6 +29,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.URI;
+import java.net.URL;
 import java.nio.charset.Charset;
 
 import com.github.ljtfreitas.restify.http.RestifyHttpException;
@@ -37,6 +39,7 @@ import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
 import com.github.ljtfreitas.restify.http.client.request.HttpClientRequest;
 import com.github.ljtfreitas.restify.http.client.response.HttpResponseMessage;
 import com.github.ljtfreitas.restify.http.client.response.StatusCode;
+import com.github.ljtfreitas.restify.http.util.Tryable;
 
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
@@ -44,7 +47,7 @@ import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
-public class OkHttpClientRequest implements HttpClientRequest {
+class OkHttpClientRequest implements HttpClientRequest {
 
 	private final OkHttpClient okHttpClient;
 	private final EndpointRequest endpointRequest;
@@ -56,6 +59,16 @@ public class OkHttpClientRequest implements HttpClientRequest {
 		this.okHttpClient = okHttpClient;
 		this.endpointRequest = endpointRequest;
 		this.charset = charset;
+	}
+
+	@Override
+	public URI uri() {
+		return endpointRequest.endpoint();
+	}
+
+	@Override
+	public String method() {
+		return endpointRequest.method();
 	}
 
 	@Override
@@ -74,38 +87,36 @@ public class OkHttpClientRequest implements HttpClientRequest {
 	}
 
 	@Override
-	public EndpointRequest source() {
-		return endpointRequest;
-	}
-
-	@Override
 	public HttpResponseMessage execute() throws RestifyHttpException {
 		MediaType contentType = endpointRequest.headers().get("Content-Type").map(header -> MediaType.parse(header.value()))
 				.orElse(null);
 
 		byte[] content = outputStream.toByteArray();
 
-		try {
-			RequestBody body = (content.length > 0 ? RequestBody.create(contentType, content) : null);
+		RequestBody body = (content.length > 0 ? RequestBody.create(contentType, content) : null);
 
-			Request.Builder builder = new Request.Builder();
+		URL url = Tryable.of(() -> endpointRequest.endpoint().toURL());
 
-			builder.url(endpointRequest.endpoint().toURL())
+		Request.Builder builder = new Request.Builder();
+
+		builder.url(url)
 				.method(endpointRequest.method(), body);
 
-			endpointRequest.headers().all().forEach(h -> builder.addHeader(h.name(), h.value()));
+		endpointRequest.headers().all().forEach(h -> builder.addHeader(h.name(), h.value()));
 
-			Request request = builder.build();
+		Request request = builder.build();
 
+		try {
 			return responseOf(okHttpClient.newCall(request).execute());
 
 		} catch (IOException e) {
-			throw new RestifyHttpException(e);
+			throw new RestifyHttpException("I/O error on HTTP request: [" + request.method() + " " +
+					request.url() + "]", e);
 		}
 	}
 
 	private OkHttpClientResponse responseOf(Response response) {
-		StatusCode statusCode = StatusCode.of(response.code());
+		StatusCode statusCode = StatusCode.of(response.code(), response.message());
 
 		Headers headers = new Headers();
 		response.headers().names().forEach(name -> headers.put(name, response.headers(name)));

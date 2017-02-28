@@ -70,10 +70,12 @@ public class EndpointResponseReaderTest {
 	public void shouldCallEndpointResponseErrorFallbackWhenResponseStatusCodeIsError() {
 		HttpResponseMessage httpResponseMessage = new SimpleHttpResponseMessage(StatusCode.internalServerError(), httpRequestMessage);
 
-		endpointResponseReader.read(httpResponseMessage, JavaType.of(String.class));
+		JavaType responseType = JavaType.of(String.class);
+
+		endpointResponseReader.read(httpResponseMessage, responseType);
 
 		verify(endpointResponseErrorFallbackMock)
-			.onError(httpResponseMessage);
+			.onError(httpResponseMessage, responseType);
 	}
 
 	@Test

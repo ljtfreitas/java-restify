@@ -63,17 +63,6 @@ public class Header {
 
 	@Override
 	public String toString() {
-		StringBuilder report = new StringBuilder();
-
-		report
-			.append("Header: [")
-				.append("Name: ")
-					.append(name)
-				.append(", ")
-				.append("Value: ")
-					.append(value)
-			.append("]");
-
-		return report.toString();
+		return name + ": " + value;
 	}
 }

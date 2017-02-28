@@ -47,7 +47,7 @@ public class EndpointResponseReader {
 
 	public <T> EndpointResponse<T> read(HttpResponseMessage response, JavaType responseType) {
 		if (response.statusCode().isError()) {
-			return endpointResponseErrorFallback.onError(response);
+			return endpointResponseErrorFallback.onError(response, responseType);
 
 		} else if (readableType(responseType) && response.isReadable()) {
 			return doRead(response, responseType);
@@ -76,7 +76,7 @@ public class EndpointResponseReader {
 				return EndpointResponse.empty(responseStatusCode, response.headers());
 
 			} else {
-				return endpointResponseErrorFallback.onError(response);
+				return endpointResponseErrorFallback.onError(response, null);
 			}
 		}
 
@@ -91,14 +91,13 @@ public class EndpointResponseReader {
 
 			try {
 				T responseObject = (T) converter.read(response, responseType);
-
 				response.body().close();
 
 				return new EndpointResponse<>(response.statusCode(), response.headers(), responseObject);
 
 			} catch (IOException e) {
 				throw new RestifyHttpMessageReadException(
-						"Error on try read http response body of type [" + contentType + "]", e);
+						"Error on read HTTP response body of type [" + contentType + "]", e);
 			}
 		}
 	}

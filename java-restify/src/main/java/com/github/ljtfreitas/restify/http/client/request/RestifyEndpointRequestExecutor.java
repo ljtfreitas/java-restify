@@ -25,6 +25,8 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.request;
 
+import java.io.IOException;
+
 import com.github.ljtfreitas.restify.http.RestifyHttpException;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponseReader;
@@ -52,8 +54,13 @@ public class RestifyEndpointRequestExecutor implements EndpointRequestExecutor {
 		} catch (RestifyHttpException e) {
 			throw e;
 
+		} catch (IOException e) {
+			throw new RestifyHttpException("I/O error on HTTP request: [" + endpointRequest.method() + " " +
+					endpointRequest.endpoint() + "]", e);
+
 		} catch (Exception e) {
-			throw new RestifyHttpException(e);
+			throw new RestifyHttpException("Error on HTTP request: [" + endpointRequest.method() + " " +
+					endpointRequest.endpoint() + "]", e);
 		}
 	}
 

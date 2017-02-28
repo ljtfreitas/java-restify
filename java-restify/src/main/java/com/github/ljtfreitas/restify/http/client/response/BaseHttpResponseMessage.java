@@ -72,7 +72,7 @@ public abstract class BaseHttpResponseMessage implements HttpResponseMessage {
 	}
 	
 	private boolean httpMethodShouldContainResponseBody() {
-		return !(httpRequest.source().method().equals("HEAD") || (httpRequest.source().method().equals("TRACE")));
+		return !(httpRequest.method().equals("HEAD") || httpRequest.method().equals("TRACE"));
 	}
 
 	private boolean isReadableStatus() {

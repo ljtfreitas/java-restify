@@ -1,6 +1,7 @@
 package com.github.ljtfreitas.restify.http.client.request;
 
 import java.io.OutputStream;
+import java.net.URI;
 import java.nio.charset.Charset;
 
 import org.apache.commons.io.output.ByteArrayOutputStream;
@@ -37,6 +38,16 @@ public class SimpleHttpRequestMessage implements HttpRequestMessage {
 	}
 
 	@Override
+	public URI uri() {
+		return source.endpoint();
+	}
+
+	@Override
+	public String method() {
+		return source.method();
+	}
+
+	@Override
 	public OutputStream output() {
 		return output;
 	}
@@ -51,8 +62,7 @@ public class SimpleHttpRequestMessage implements HttpRequestMessage {
 		return headers;
 	}
 
-	@Override
-	public EndpointRequest source() {
-		return source;
+	public static SimpleHttpRequestMessage some() {
+		return new SimpleHttpRequestMessage(new EndpointRequest(URI.create("http://some.api"), "GET"));
 	}
 }

@@ -65,7 +65,7 @@ public class RibbonResponse implements IResponse {
 
 	@Override
 	public URI getRequestedURI() {
-		return response.request().source().endpoint();
+		return response.request().uri();
 	}
 
 	@Override
