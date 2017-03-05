@@ -34,10 +34,14 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface Form {
 
+	String value() default "";
+
 	@Target({ElementType.FIELD})
 	@Retention(RetentionPolicy.RUNTIME)
 	public @interface Field {
 
 		String value() default "";
+
+		boolean indexed() default false;
 	}
 }
