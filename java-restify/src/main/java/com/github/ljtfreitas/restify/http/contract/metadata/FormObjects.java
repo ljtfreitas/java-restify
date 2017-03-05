@@ -55,12 +55,14 @@ public class FormObjects {
 		FormObject formObjectMetadata = new FormObject(formObjectType);
 
 		Arrays.stream(formObjectType.getDeclaredFields())
-			.filter(f -> f.isAnnotationPresent(Field.class))
-			.forEach(f -> {
-				Field annotation = f.getAnnotation(Field.class);
-				String name = annotation.value().isEmpty() ? f.getName() : annotation.value();
+			.filter(field -> field.isAnnotationPresent(Field.class))
+			.forEach(field -> {
+				Field annotation = field.getAnnotation(Field.class);
 
-				formObjectMetadata.put(name, f);
+				String name = annotation.value().isEmpty() ? field.getName() : annotation.value();
+				boolean indexed = annotation.indexed();
+
+				formObjectMetadata.put(name, indexed, field);
 		});
 
 		cache.put(formObjectType, formObjectMetadata);
@@ -79,11 +81,16 @@ public class FormObjects {
 	public static class FormObject {
 
 		private final Class<?> type;
+		private final String name;
 		private final Map<String, FormObjectField> fields = new LinkedHashMap<>();
 
 		private FormObject(Class<?> type) {
 			isTrue(type.isAnnotationPresent(Form.class), "Your form class type must be annotated with @Form.");
 			this.type = type;
+			this.name = Optional.ofNullable(type.getAnnotation(Form.class).value())
+					.filter(value -> !value.isEmpty())
+						.map(value -> value.endsWith(".") ? value : value + ".")
+							.orElse("");
 		}
 
 		public Optional<FormObjectField> fieldBy(String name) {
@@ -91,47 +98,88 @@ public class FormObjects {
 		}
 
 		public String serialize(Object source) {
-			Parameters parameters = new Parameters();
+			isTrue(type.isInstance(source), "This FormObject can only serialize objects of class type [" + type + "]");
+			return serializeAsParameters(source, name).queryString();
+		}
+
+		private Parameters serializeAsParameters(Object source, String name) {
+			String prefix = name.isEmpty() || name.endsWith(".") ? name : name + ".";
+
+			Parameters parameters = new Parameters(prefix);
 
 			fields.values().forEach(field -> {
 				try {
-					field.applyOn(parameters, source);
+					field.serialize(source, parameters);
 				} catch (Exception e) {
 					throw new UnsupportedOperationException(e);
 				}
 			});
 
-			return parameters.queryString();
+			return parameters;
 		}
 
-		private void put(String name, java.lang.reflect.Field field) {
+		private void put(String name, boolean indexed, java.lang.reflect.Field field) {
 			isFalse(fields.containsKey(name), "Duplicate field [" + name + " on @Form object: " + type);
-			fields.put(name, new FormObjectField(name, field));
+			fields.put(name, new FormObjectField(name, indexed, field));
 		}
 
 		public class FormObjectField {
 
 			private final String name;
+			private final boolean indexed;
 			private final java.lang.reflect.Field field;
 
-			FormObjectField(String name, java.lang.reflect.Field field) {
+			FormObjectField(String name, boolean indexed, java.lang.reflect.Field field) {
 				this.name = name;
+				this.indexed = indexed;
 				this.field = field;
 			}
 
-			@SuppressWarnings("rawtypes")
-			public void applyOn(Parameters parameters, Object source) throws Exception {
+			private void serialize(Object source, Parameters parameters) throws Exception {
 				field.setAccessible(true);
 
-				if (Iterable.class.isAssignableFrom(field.getType())) {
-					Iterable iterable = (Iterable) field.get(source);
+				Object value = field.get(source);
 
-					for (Object element : iterable) {
-						parameters.put(name, element.toString());
+				apply(name, value, parameters);
+			}
+
+			private void apply(String name, Object value, Parameters parameters) throws Exception {
+				if (value != null) {
+					if (value.getClass().isAnnotationPresent(Form.class)) {
+						serializeNested(name, value, parameters);
+
+					} else if (Iterable.class.isAssignableFrom(value.getClass())) {
+						serializeIterable(name, value, parameters);
+
+					} else {
+						parameters.put(name, value.toString());
 					}
-				} else {
-					parameters.put(name, field.get(source).toString());
 				}
+			}
+
+			@SuppressWarnings("rawtypes")
+			private void serializeIterable(String name, Object value, Parameters parameters) throws Exception {
+				Iterable iterable = (Iterable) value;
+
+				int position = 0;
+
+				for (Object element : iterable) {
+					String newName = indexed ? name + "[" + position + "]" : name;
+
+					apply(newName, element, parameters);
+
+					position++;
+				}
+			}
+
+			private void serializeNested(String name, Object value, Parameters parameters) {
+				FormObject formObject = FormObjects.cache().of(value.getClass());
+
+				String appendedName = name + (formObject.name.isEmpty() ? "" : "." + formObject.name);
+
+				Parameters nestedParameters = formObject.serializeAsParameters(value, appendedName);
+
+				parameters.putAll(nestedParameters);
 			}
 
 			public void applyTo(Object object, Object value) {

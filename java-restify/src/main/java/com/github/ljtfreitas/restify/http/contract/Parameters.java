@@ -38,11 +38,31 @@ import com.github.ljtfreitas.restify.http.client.charset.Encoding;
 
 public class Parameters {
 
-	private Map<String, List<String>> parameters = new LinkedHashMap<>();
+	private static final String DEFAULT_PREFIX = "";
+
+	private final String prefix;
+	private final Map<String, List<String>> parameters = new LinkedHashMap<>();
+
+	public Parameters() {
+		this(DEFAULT_PREFIX);
+	}
+
+	public Parameters(String prefix) {
+		this.prefix = prefix;
+	}
 
 	public void put(String name, String value) {
-		parameters.compute(name, (k, v) -> Optional.ofNullable(v).orElseGet(() -> new ArrayList<>()))
+		parameters.compute(prefix + name, (k, v) -> Optional.ofNullable(v).orElseGet(() -> new ArrayList<>()))
 			.add(value);
+	}
+
+	public void put(String name, Collection<String> values) {
+		parameters.compute(prefix + name, (k, v) -> Optional.ofNullable(v).orElseGet(() -> new ArrayList<>()))
+			.addAll(values);
+	}
+
+	public void putAll(Parameters other) {
+		other.parameters.forEach(this::put);
 	}
 
 	public Optional<String> first(String name) {
@@ -60,7 +80,7 @@ public class Parameters {
 		StringJoiner joiner = new StringJoiner("&");
 
 		parameters.forEach((name, values) -> {
-			values.forEach(v -> joiner.add(encode(name) + "=" + encode(v)));
+			values.forEach(v -> joiner.add(name + "=" + encode(v)));
 		});
 
 		return joiner.toString();
