@@ -72,7 +72,8 @@ public class JavaMethodParameterMetadata {
 							.orElseGet(() -> Optional.ofNullable(queryParameter)
 								.map(QueryParameter::value).filter(s -> !s.trim().isEmpty())
 									.orElseGet(() -> Optional.ofNullable(javaMethodParameter.getName())
-											.orElseThrow(() -> new IllegalStateException("Could not get the name of the parameter " + javaMethodParameter)))));
+											.filter(name -> javaMethodParameter.isNamePresent() && !name.isEmpty())
+												.orElseThrow(() -> new IllegalStateException("Could not get the name of the parameter " + javaMethodParameter)))));
 
 		this.serializerType = pathParameter != null ? pathParameter.serializer()
 				: queryParameter != null ? queryParameter.serializer()
