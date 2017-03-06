@@ -3,7 +3,7 @@
 	<parent>
 		<groupId>com.github.ljtfreitas</groupId>
 		<artifactId>java-restify-group</artifactId>
-		<version>1.4.2-SNAPSHOT</version>
+		<version>1.4.2</version>
 	</parent>
 	<artifactId>java-restify-netflix-spring-starter</artifactId>
 
