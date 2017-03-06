@@ -33,7 +33,6 @@ import java.util.concurrent.ExecutionException;
 
 import com.github.ljtfreitas.restify.http.RestifyHttpException;
 import com.github.ljtfreitas.restify.http.client.Headers;
-import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
 import com.github.ljtfreitas.restify.http.client.request.HttpClientRequest;
 import com.github.ljtfreitas.restify.http.client.response.HttpResponseMessage;
 
@@ -57,15 +56,29 @@ class NettyHttpClientRequest implements HttpClientRequest {
 	private static final int HTTPS_SCHEME_PORT = 443;
 	
 	private final Bootstrap bootstrap;
-	private final EndpointRequest endpointRequest;
+	private final URI uri;
+	private final Headers headers;
+	private final String method;
 	private final Charset charset;
 	private final ByteBufOutputStream body;
 
-	public NettyHttpClientRequest(Bootstrap bootstrap, EndpointRequest endpointRequest, Charset charset) {
+	public NettyHttpClientRequest(Bootstrap bootstrap, URI uri, Headers headers, String method, Charset charset) {
 		this.bootstrap = bootstrap;
-		this.endpointRequest = endpointRequest;
+		this.uri = uri;
+		this.headers = headers;
+		this.method = method;
 		this.charset = charset;
 		this.body = new ByteBufOutputStream(Unpooled.buffer());
+	}
+
+	@Override
+	public URI uri() {
+		return uri;
+	}
+
+	@Override
+	public String method() {
+		return method;
 	}
 
 	@Override
@@ -75,17 +88,12 @@ class NettyHttpClientRequest implements HttpClientRequest {
 
 	@Override
 	public Headers headers() {
-		return endpointRequest.headers();
+		return headers;
 	}
 
 	@Override
 	public Charset charset() {
 		return charset;
-	}
-
-	@Override
-	public EndpointRequest source() {
-		return endpointRequest;
 	}
 
 	@Override
@@ -96,25 +104,25 @@ class NettyHttpClientRequest implements HttpClientRequest {
 
 		ChannelFutureListener connectionListener = new NettyChannelFutureListener(nettyHttpRequest(), nettyRequestExecuteHandler);
 
-		bootstrap.connect(endpointRequest.endpoint().getHost(), port(endpointRequest.endpoint()))
+		bootstrap.connect(uri.getHost(), port())
 				.addListener(connectionListener);
 
 		try {
 			return responseOnFuture.get();
 
 		} catch (InterruptedException | ExecutionException e) {
-			throw new RestifyHttpException("Error on Netty HTTP request to endpoint [" + endpointRequest.endpoint() + "]", e);
+			throw new RestifyHttpException("I/O error on HTTP request: [" + method + " " + uri + "]", e);
 		}
 	}
 
-	private int port(URI endpoint) {
-		int port = endpoint.getPort();
+	private int port() {
+		int port = uri.getPort();
 
 		if (port == -1) {
-			if (HTTP_SCHEME.equalsIgnoreCase(endpoint.getScheme())) {
+			if (HTTP_SCHEME.equalsIgnoreCase(uri.getScheme())) {
 				port = HTTP_SCHEME_PORT;
 
-			} else if (HTTPS_SCHEME.equalsIgnoreCase(endpoint.getScheme())) {
+			} else if (HTTPS_SCHEME.equalsIgnoreCase(uri.getScheme())) {
 				port = HTTPS_SCHEME_PORT;
 			}
 		}
@@ -123,21 +131,21 @@ class NettyHttpClientRequest implements HttpClientRequest {
 	}
 
 	private HttpRequest nettyHttpRequest() {
-		HttpMethod nettyMethod = HttpMethod.valueOf(endpointRequest.method());
+		HttpMethod nettyMethod = HttpMethod.valueOf(method);
 
 		ByteBuf bodyBuffer = body.buffer();
 
 		FullHttpRequest nettyRequest = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, nettyMethod,
-				endpointRequest.endpoint().toString(), bodyBuffer);
+				uri.toString(), bodyBuffer);
 
-		nettyRequest.headers().set(Headers.HOST, endpointRequest.endpoint().getHost());
+		nettyRequest.headers().set(Headers.HOST, uri.getHost());
 		nettyRequest.headers().set(Headers.CONNECTION, "close");
 
 		if (bodyBuffer.readableBytes() != 0) {
 			nettyRequest.headers().set(Headers.CONTENT_LENGTH, bodyBuffer.readableBytes());
 		}
 
-		endpointRequest.headers().all().forEach(header -> nettyRequest.headers().add(header.name(), header.value()));
+		headers.all().forEach(header -> nettyRequest.headers().add(header.name(), header.value()));
 
 		return nettyRequest;
 	}

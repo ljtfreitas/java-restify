@@ -61,7 +61,8 @@ public class NettyHttpClientRequestFactory implements HttpClientRequestFactory, 
 
 	@Override
 	public HttpClientRequest createOf(EndpointRequest endpointRequest) {
-		return new NettyHttpClientRequest(bootstrap, endpointRequest, nettyHttpClientRequestConfiguration.charset());
+		return new NettyHttpClientRequest(bootstrap, endpointRequest.endpoint(), endpointRequest.headers(), endpointRequest.method(),
+				nettyHttpClientRequestConfiguration.charset());
 	}
 
 	@Override
