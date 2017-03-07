@@ -65,6 +65,8 @@ public class JavaMethodParameterMetadata {
 				.filter(a -> a.annotationType().isAnnotationPresent(Parameter.class))
 					.count() <= 1, "Parameter " + javaMethodParameter + " has more than one annotation.");
 
+		this.annotationParameter = new JavaAnnotationScanner(javaMethodParameter).with(Parameter.class);
+
 		this.name = Optional.ofNullable(pathParameter)
 				.map(PathParameter::value).filter(s -> !s.trim().isEmpty())
 					.orElseGet(() -> Optional.ofNullable(headerParameter)
@@ -73,15 +75,13 @@ public class JavaMethodParameterMetadata {
 								.map(QueryParameter::value).filter(s -> !s.trim().isEmpty())
 									.orElseGet(() -> Optional.ofNullable(javaMethodParameter.getName())
 											.filter(name -> javaMethodParameter.isNamePresent() && !name.isEmpty())
-												.orElseThrow(() -> new IllegalStateException("Could not get the name of the parameter " + javaMethodParameter)))));
+												.orElseGet(() -> "unknown"))));
 
 		this.serializerType = pathParameter != null ? pathParameter.serializer()
 				: queryParameter != null ? queryParameter.serializer()
 						: queryParameters != null ? queryParameters.serializer()
 								: callbackParameter != null ? null
 										: SimpleEndpointMethodParameterSerializer.class;
-
-		this.annotationParameter = new JavaAnnotationScanner(javaMethodParameter).with(Parameter.class);
 	}
 
 	public String name() {

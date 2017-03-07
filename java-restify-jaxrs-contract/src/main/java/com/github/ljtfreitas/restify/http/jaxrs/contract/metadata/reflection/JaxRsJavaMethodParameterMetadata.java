@@ -68,7 +68,7 @@ public class JaxRsJavaMethodParameterMetadata {
 								.map(QueryParam::value).filter(s -> !s.trim().isEmpty())
 									.orElseGet(() -> Optional.ofNullable(javaMethodParameter.getName())
 											.filter(name -> javaMethodParameter.isNamePresent() && !name.isEmpty())
-												.orElseThrow(() -> new IllegalStateException("Could not get the name of the parameter " + javaMethodParameter)))));
+												.orElseGet(() -> "unknown"))));
 
 		this.serializer = (queryParameter != null) ? new EndpointMethodQueryParameterSerializer()
 				: new SimpleEndpointMethodParameterSerializer();
