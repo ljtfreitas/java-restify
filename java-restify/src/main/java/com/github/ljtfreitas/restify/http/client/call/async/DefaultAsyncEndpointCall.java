@@ -26,6 +26,7 @@
 package com.github.ljtfreitas.restify.http.client.call.async;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.Executor;
 
 import com.github.ljtfreitas.restify.http.client.call.EndpointCall;
@@ -62,7 +63,17 @@ class DefaultAsyncEndpointCall<T> implements AsyncEndpointCall<T> {
 			successCallback.onSuccess(value);
 
 		} else if (throwable != null && failureCallback != null) {
-			failureCallback.onFailure(throwable);
+			Throwable cause = deepCause(throwable);
+
+			failureCallback.onFailure(cause);
+		}
+	}
+
+	private Throwable deepCause(Throwable throwable) {
+		if (throwable instanceof CompletionException) {
+			return deepCause(throwable.getCause());
+		} else {
+			return throwable;
 		}
 	}
 }

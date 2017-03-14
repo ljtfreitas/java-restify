@@ -38,13 +38,15 @@ public abstract class EndpointResponseFailureCallback implements EndpointCallFai
 			RestifyEndpointResponseException exception = (RestifyEndpointResponseException) throwable;
 			onResponseFailure(exception);
 
-		} else if (throwable instanceof RestifyHttpException) {
-			throw (RestifyHttpException) throwable;
-
 		} else {
-			throw new RestifyHttpException(throwable);
-
+			onException(throwable);
 		}
+	}
+
+	protected void onException(Throwable throwable) {
+		RestifyHttpException newException = (throwable instanceof RestifyHttpException) ?
+				(RestifyHttpException) throwable : new RestifyHttpException(throwable);
+		throw newException;
 	}
 
 	protected void onResponseFailure(RestifyEndpointResponseException exception) {
