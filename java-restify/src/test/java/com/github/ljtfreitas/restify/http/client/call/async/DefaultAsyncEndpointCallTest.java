@@ -51,7 +51,7 @@ public class DefaultAsyncEndpointCallTest {
 
 		verify(callback).onFailure(throwableCaptor.capture());
 
-		assertSame(exception, throwableCaptor.getValue().getCause());
+		assertSame(exception, throwableCaptor.getValue());
 	}
 
 	@Test
@@ -73,7 +73,7 @@ public class DefaultAsyncEndpointCallTest {
 
 		verify(failureCallback).onFailure(throwableCaptor.capture());
 
-		assertSame(exception, throwableCaptor.getValue().getCause());
+		assertSame(exception, throwableCaptor.getValue());
 	}
 
 }
