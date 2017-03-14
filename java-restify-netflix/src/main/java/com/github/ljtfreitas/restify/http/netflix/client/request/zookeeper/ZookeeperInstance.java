@@ -27,10 +27,16 @@ package com.github.ljtfreitas.restify.http.netflix.client.request.zookeeper;
 
 import java.util.Collections;
 import java.util.Map;
+import java.util.UUID;
 
+import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class ZookeeperInstance {
+
+	@JsonProperty
+	private String id;
 
 	@JsonProperty
 	private String name;
@@ -40,6 +46,9 @@ public class ZookeeperInstance {
 
 	@JsonProperty
 	private String address;
+
+	@JsonProperty
+	private boolean secure;
 
 	@JsonProperty
 	private Map<String, String> metadata;
@@ -53,10 +62,15 @@ public class ZookeeperInstance {
 	}
 
 	public ZookeeperInstance(String name, String address, int port, Map<String, String> metadata) {
+		this.id = UUID.randomUUID().toString();
 		this.name = name;
 		this.address = address;
 		this.port = port;
 		this.metadata = metadata;
+	}
+
+	public String id() {
+		return id;
 	}
 
 	public String name() {
@@ -69,6 +83,10 @@ public class ZookeeperInstance {
 
 	public String address() {
 		return address;
+	}
+
+	public boolean secure() {
+		return secure;
 	}
 
 	public Map<String, String> metadata() {
