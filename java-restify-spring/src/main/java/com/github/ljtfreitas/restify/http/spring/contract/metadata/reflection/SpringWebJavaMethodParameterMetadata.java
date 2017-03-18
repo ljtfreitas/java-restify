@@ -25,6 +25,8 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.spring.contract.metadata.reflection;
 
+import static com.github.ljtfreitas.restify.http.util.Preconditions.isFalse;
+
 import java.util.Optional;
 
 import org.springframework.core.annotation.AnnotationUtils;
@@ -67,17 +69,25 @@ public class SpringWebJavaMethodParameterMetadata {
 		this.queryParameter = AnnotationUtils.synthesizeAnnotation(javaMethodParameter.getAnnotation(RequestParam.class),
 				javaMethodParameter);
 
-		this.name = Optional.ofNullable(pathParameter)
+		String name = Optional.ofNullable(pathParameter)
 				.map(PathVariable::value).filter(s -> !s.trim().isEmpty())
 					.orElseGet(() -> Optional.ofNullable(headerParameter)
 						.map(RequestHeader::value).filter(s -> !s.trim().isEmpty())
 							.orElseGet(() -> Optional.ofNullable(queryParameter)
 								.map(RequestParam::value).filter(s -> !s.trim().isEmpty())
 									.orElseGet(() -> Optional.ofNullable(javaMethodParameter.getName())
-											.filter(name -> javaMethodParameter.isNamePresent() && !name.isEmpty())
-												.orElseGet(() -> "unknown"))));
+											.filter(n -> javaMethodParameter.isNamePresent() && !n.isEmpty())
+												.orElse(null))));
+
+		isFalse(needName() && name == null, "Could not get the name of the parameter [" + javaMethodParameter + "], "
+				+ "from method [" + javaMethodParameter.getDeclaringExecutable() + "]");
+		this.name = name;
 
 		this.serializerType = SpringWebEndpointMethodParameterSerializer.of(this);
+	}
+
+	private boolean needName() {
+		return pathParameter != null || queryParameter != null || headerParameter != null;
 	}
 
 	public String name() {
