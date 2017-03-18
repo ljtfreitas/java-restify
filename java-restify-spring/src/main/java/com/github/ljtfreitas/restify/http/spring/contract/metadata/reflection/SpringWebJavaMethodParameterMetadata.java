@@ -28,6 +28,7 @@ package com.github.ljtfreitas.restify.http.spring.contract.metadata.reflection;
 import static com.github.ljtfreitas.restify.http.util.Preconditions.isFalse;
 
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import org.springframework.core.annotation.AnnotationUtils;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -68,6 +69,10 @@ public class SpringWebJavaMethodParameterMetadata {
 
 		this.queryParameter = AnnotationUtils.synthesizeAnnotation(javaMethodParameter.getAnnotation(RequestParam.class),
 				javaMethodParameter);
+
+		isFalse(Stream.of(pathParameter, headerParameter, bodyParameter, queryParameter).allMatch(a -> a == null),
+				"The parameter [" + javaMethodParameter.getName() + "] of method [" + javaMethodParameter.getDeclaringExecutable() + "] is not annotated with "
+						+ "@PathVariable, @RequestHeader, @RequestBody or @RequestParam");
 
 		String name = Optional.ofNullable(pathParameter)
 				.map(PathVariable::value).filter(s -> !s.trim().isEmpty())

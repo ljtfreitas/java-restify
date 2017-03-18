@@ -64,7 +64,8 @@ public class JavaMethodParameterMetadata {
 
 		isTrue(Stream.of(javaMethodParameter.getAnnotations())
 				.filter(a -> a.annotationType().isAnnotationPresent(Parameter.class))
-					.count() <= 1, "Parameter " + javaMethodParameter + " has more than one annotation.");
+					.count() <= 1, "Parameter [" + javaMethodParameter + "], of method [" + javaMethodParameter.getDeclaringExecutable() + "] "
+							+ "has more than one annotation.");
 
 		this.annotationParameter = new JavaAnnotationScanner(javaMethodParameter).with(Parameter.class);
 
@@ -79,7 +80,7 @@ public class JavaMethodParameterMetadata {
 												.orElse(null))));
 
 		isFalse(needName() && name == null, "Could not get the name of the parameter [" + javaMethodParameter + "], "
-				+ "from method [" + javaMethodParameter.getDeclaringExecutable() + "]");
+				+ "of method [" + javaMethodParameter.getDeclaringExecutable() + "]");
 		this.name = name;
 
 		this.serializerType = pathParameter != null ? pathParameter.serializer()
