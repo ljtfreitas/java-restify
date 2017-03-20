@@ -33,6 +33,8 @@ import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.env.Environment;
@@ -46,7 +48,9 @@ import org.springframework.web.client.RestTemplate;
 
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequestExecutor;
 import com.github.ljtfreitas.restify.http.client.request.HttpClientRequestFactory;
+import com.github.ljtfreitas.restify.http.client.request.apache.httpclient.ApacheHttpClientRequestFactory;
 import com.github.ljtfreitas.restify.http.client.request.jdk.JdkHttpClientRequestFactory;
+import com.github.ljtfreitas.restify.http.client.request.okhttp.OkHttpClientRequestFactory;
 import com.github.ljtfreitas.restify.http.client.response.DefaultEndpointResponseErrorFallback;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponseErrorFallback;
 import com.github.ljtfreitas.restify.http.contract.metadata.RestifyContractExpressionResolver;
@@ -65,25 +69,57 @@ import com.github.ljtfreitas.restify.http.spring.contract.metadata.SpelDynamicPa
 @Configuration
 class RestifyConfiguration {
 
-	@Configuration
-	protected static class RestifySpringConfiguration {
+	@Value("${restify.error.emptyOnNotFound:false}")
+	private boolean emptyOnNotFound;
 
-		@Value("${restify.error.emptyOnNotFound:false}")
-		private boolean emptyOnNotFound;
+	@Bean
+	public EndpointResponseErrorFallback endpointResponseErrorFallback() {
+		return emptyOnNotFound ? DefaultEndpointResponseErrorFallback.emptyOnNotFound() : new DefaultEndpointResponseErrorFallback();
+	}
+
+	@ConditionalOnMissingBean
+	@ConditionalOnProperty(name = "restify.http.client", havingValue = "jdk", matchIfMissing = true)
+	@Bean
+	public HttpClientRequestFactory jdkHttpClientRequestFactory() {
+		return new JdkHttpClientRequestFactory();
+	}
+
+	@ConditionalOnMissingBean
+	@ConditionalOnProperty(name = "restify.http.client", havingValue = "http-client")
+	@Bean
+	public HttpClientRequestFactory apacheHttpClientRequestFactory() {
+		return new ApacheHttpClientRequestFactory();
+	}
+
+	@ConditionalOnMissingBean
+	@ConditionalOnProperty(name = "restify.http.client", havingValue = "ok-http")
+	@Bean
+	public HttpClientRequestFactory okHttpClientRequestFactory() {
+		return new OkHttpClientRequestFactory();
+	}
+
+	@Bean
+	public HttpHeadersEndpointCallExecutableFactory httpHeadersEndpointCallExecutableFactory() {
+		return new HttpHeadersEndpointCallExecutableFactory();
+	}
+
+	@Bean
+	public ResponseEntityEndpointCallExecutableFactory<Object> responseEntityEndpointCallExecutableFactory() {
+		return new ResponseEntityEndpointCallExecutableFactory<>();
+	}
+
+	@Configuration
+	@ConditionalOnProperty(name = "restify.contract", havingValue = "spring-mvc", matchIfMissing = true)
+	protected static class RestifySpringConfiguration {
 
 		@Bean
 		public EndpointRequestExecutor endpointRequestExecutor(ObjectProvider<RestOperations> restOperations,
 				ObjectProvider<EndpointResponseErrorFallback> endpointResponseErrorFallback) {
 
 			RestOperations rest = Optional.ofNullable(restOperations.getIfAvailable()).orElseGet(() -> new RestTemplate());
-			EndpointResponseErrorFallback fallback = Optional.ofNullable(endpointResponseErrorFallback.getIfAvailable()).orElseGet(() -> endpointResponseErrorFallback());
+			EndpointResponseErrorFallback fallback = Optional.ofNullable(endpointResponseErrorFallback.getIfAvailable()).orElseGet(() -> new DefaultEndpointResponseErrorFallback());
 
 			return new RestOperationsEndpointRequestExecutor(rest, fallback);
-		}
-
-		@Bean
-		public EndpointResponseErrorFallback endpointResponseErrorFallback() {
-			return emptyOnNotFound ? DefaultEndpointResponseErrorFallback.emptyOnNotFound() : new DefaultEndpointResponseErrorFallback();
 		}
 
 		@Bean
@@ -96,20 +132,6 @@ class RestifyConfiguration {
 			return new SpelDynamicParameterExpressionResolver(beanFactory);
 		}
 
-		@Bean
-		public HttpClientRequestFactory httpClientRequestFactory() {
-			return new JdkHttpClientRequestFactory();
-		}
-
-		@Bean
-		public HttpHeadersEndpointCallExecutableFactory httpHeadersEndpointCallExecutableFactory() {
-			return new HttpHeadersEndpointCallExecutableFactory();
-		}
-
-		@Bean
-		public ResponseEntityEndpointCallExecutableFactory<Object> responseEntityEndpointCallExecutableFactory() {
-			return new ResponseEntityEndpointCallExecutableFactory<>();
-		}
 	}
 
 	@Configuration

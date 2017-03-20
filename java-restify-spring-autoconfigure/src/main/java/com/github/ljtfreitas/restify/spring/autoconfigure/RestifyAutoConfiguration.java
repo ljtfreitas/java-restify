@@ -38,6 +38,7 @@ import org.springframework.boot.autoconfigure.AutoConfigurationPackages;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.AllNestedConditions;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.autoconfigure.web.WebClientAutoConfiguration;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
@@ -56,7 +57,9 @@ import org.springframework.web.client.RestTemplate;
 
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequestExecutor;
 import com.github.ljtfreitas.restify.http.client.request.HttpClientRequestFactory;
+import com.github.ljtfreitas.restify.http.client.request.apache.httpclient.ApacheHttpClientRequestFactory;
 import com.github.ljtfreitas.restify.http.client.request.jdk.JdkHttpClientRequestFactory;
+import com.github.ljtfreitas.restify.http.client.request.okhttp.OkHttpClientRequestFactory;
 import com.github.ljtfreitas.restify.http.client.response.DefaultEndpointResponseErrorFallback;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponseErrorFallback;
 import com.github.ljtfreitas.restify.http.contract.metadata.RestifyContractExpressionResolver;
@@ -82,7 +85,50 @@ import com.github.ljtfreitas.restify.spring.configure.RestifyableTypeScanner;
 @AutoConfigureAfter(WebClientAutoConfiguration.class)
 public class RestifyAutoConfiguration {
 
+	@Value("${restify.error.emptyOnNotFound:false}")
+	private boolean emptyOnNotFound;
+
+	@ConditionalOnMissingBean
+	@ConditionalOnProperty(name = "restify.http.client", havingValue = "jdk", matchIfMissing = true)
+	@Bean
+	public HttpClientRequestFactory jdkHttpClientRequestFactory() {
+		return new JdkHttpClientRequestFactory();
+	}
+
+	@ConditionalOnMissingBean
+	@ConditionalOnProperty(name = "restify.http.client", havingValue = "http-client")
+	@Bean
+	public HttpClientRequestFactory apacheHttpClientRequestFactory() {
+		return new ApacheHttpClientRequestFactory();
+	}
+
+	@ConditionalOnMissingBean
+	@ConditionalOnProperty(name = "restify.http.client", havingValue = "ok-http")
+	@Bean
+	public HttpClientRequestFactory okHttpClientRequestFactory() {
+		return new OkHttpClientRequestFactory();
+	}
+
+	@ConditionalOnMissingBean
+	@Bean
+	public HttpHeadersEndpointCallExecutableFactory httpHeadersEndpointCallExecutableFactory() {
+		return new HttpHeadersEndpointCallExecutableFactory();
+	}
+
+	@ConditionalOnMissingBean
+	@Bean
+	public ResponseEntityEndpointCallExecutableFactory<Object> responseEntityEndpointCallExecutableFactory() {
+		return new ResponseEntityEndpointCallExecutableFactory<>();
+	}
+
+	@ConditionalOnMissingBean
+	@Bean
+	public EndpointResponseErrorFallback endpointResponseErrorFallback() {
+		return emptyOnNotFound ? DefaultEndpointResponseErrorFallback.emptyOnNotFound() : new DefaultEndpointResponseErrorFallback();
+	}
+
 	@Configuration
+	@ConditionalOnProperty(name = "restify.contract", havingValue = "spring-web", matchIfMissing = true)
 	protected static class RestifySpringConfiguration {
 
 		@Autowired(required = false)
@@ -90,9 +136,6 @@ public class RestifyAutoConfiguration {
 
 		@Autowired(required = false)
 		private RestOperations restTemplate;
-
-		@Value("${restify.error.emptyOnNotFound:false}")
-		private boolean emptyOnNotFound;
 
 		@ConditionalOnMissingBean
 		@Bean
@@ -107,12 +150,6 @@ public class RestifyAutoConfiguration {
 
 		@ConditionalOnMissingBean
 		@Bean
-		public EndpointResponseErrorFallback endpointResponseErrorFallback() {
-			return emptyOnNotFound ? DefaultEndpointResponseErrorFallback.emptyOnNotFound() : new DefaultEndpointResponseErrorFallback();
-		}
-
-		@ConditionalOnMissingBean
-		@Bean
 		public RestifyContractReader restifyContractReader(RestifyContractExpressionResolver expressionResolver) {
 			return new SpringWebContractReader(expressionResolver);
 		}
@@ -121,24 +158,6 @@ public class RestifyAutoConfiguration {
 		@Bean
 		public RestifyContractExpressionResolver expressionResolver(ConfigurableBeanFactory beanFactory) {
 			return new SpelDynamicParameterExpressionResolver(beanFactory);
-		}
-
-		@ConditionalOnMissingBean
-		@Bean
-		public HttpClientRequestFactory httpClientRequestFactory() {
-			return new JdkHttpClientRequestFactory();
-		}
-
-		@ConditionalOnMissingBean
-		@Bean
-		public HttpHeadersEndpointCallExecutableFactory httpHeadersEndpointCallExecutableFactory() {
-			return new HttpHeadersEndpointCallExecutableFactory();
-		}
-
-		@ConditionalOnMissingBean
-		@Bean
-		public ResponseEntityEndpointCallExecutableFactory<Object> responseEntityEndpointCallExecutableFactory() {
-			return new ResponseEntityEndpointCallExecutableFactory<>();
 		}
 	}
 

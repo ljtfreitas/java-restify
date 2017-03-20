@@ -5,6 +5,45 @@
 			"type": "java.util.Map<String, Object>",
 			"description": "Restify API configurations",
 			"sourceType": "com.github.ljtfreitas.restify.spring.configure.RestifyApiClient"
+		},
+		{
+			"name": "restify.http.client",
+			"type": "java.lang.String",
+			"description": "Restify HTTP client"
+		},
+		{
+			"name": "restify.async.timeout",
+			"type": "java.lang.Long",
+			"description": "Restify async tasks timeout"
+		},
+		{
+			"name": "restify.error.emptyOnNotFound",
+			"type": "java.lang.Boolean",
+			"description": "HTTP status code 404 (Not Found) should return empty/null?"
+		},
+		{
+			"name": "restify.contract",
+			"type": "java.lang.String",
+			"description": "Restify contract definition",
+			"defaultValue": "spring-web"
+		}
+	],
+	"hints":[
+		{
+			"name": "restify.http.client",
+			"values": [
+				{"value": "jdk", "description": "JDK HttpUrlConnection (JdkHttpClientRequestFactory)"},
+				{"value": "http-client", "description": "Apache HttpClient (ApacheHttpClientRequestFactory)"},
+				{"value": "ok-http", "description": "OkHttp (OkHttpClientRequestFactory)"}
+			]
+		},
+		{
+			"name": "restify.contract",
+			"values": [
+				{"value": "spring-web", "description": "Spring Web annotations"},
+				{"value": "restify", "description": "Restify annotations"},
+				{"value": "jax-rs", "description": "Jax-RS annotations"}
+			]
 		}
 	]
 }
