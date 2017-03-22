@@ -1,4 +1,4 @@
-package com.github.ljtfreitas.restify.spring.configure;
+package com.github.ljtfreitas.restify.spring.whatever;
 
 import com.github.ljtfreitas.restify.spring.configure.Restifyable;
 

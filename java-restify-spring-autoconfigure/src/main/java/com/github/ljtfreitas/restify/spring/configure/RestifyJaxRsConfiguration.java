@@ -25,29 +25,21 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.spring.configure;
 
-import static java.lang.annotation.ElementType.TYPE;
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
+import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
-import java.lang.annotation.Inherited;
-import java.lang.annotation.Retention;
-import java.lang.annotation.Target;
+import com.github.ljtfreitas.restify.http.contract.metadata.RestifyContractReader;
+import com.github.ljtfreitas.restify.http.jaxrs.contract.JaxRsContractReader;
 
-import org.springframework.context.annotation.ComponentScan.Filter;
-import org.springframework.context.annotation.Import;
-import org.springframework.core.annotation.AliasFor;
+@Configuration
+@ConditionalOnProperty(name = "restify.contract", havingValue = "jax-rs")
+public class RestifyJaxRsConfiguration {
 
-@Retention(RUNTIME)
-@Target(TYPE)
-@Inherited
-@Import({RestifyDefaultConfiguration.class, RestifySpringWebConfiguration.class, RestifyAsyncConfiguration.class,
-	RestifyJaxRsConfiguration.class, RestifyConfigurationRegistrar.class})
-public @interface EnableRestify {
-
-	@AliasFor("packages")
-	String[] value() default {};
-
-	@AliasFor("value")
-	String[] packages() default {};
-
-	Filter[] exclude() default {};
+	@ConditionalOnMissingBean
+	@Bean
+	public RestifyContractReader restifyContractReader() {
+		return new JaxRsContractReader();
+	}
 }
