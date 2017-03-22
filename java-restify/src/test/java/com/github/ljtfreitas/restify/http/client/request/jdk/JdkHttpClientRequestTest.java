@@ -24,6 +24,7 @@ import org.mockserver.client.server.MockServerClient;
 import org.mockserver.junit.MockServerRule;
 import org.mockserver.model.HttpRequest;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.github.ljtfreitas.restify.http.RestifyHttpException;
 import com.github.ljtfreitas.restify.http.RestifyProxyBuilder;
 import com.github.ljtfreitas.restify.http.contract.BodyParameter;
@@ -209,13 +210,16 @@ public class JdkHttpClientRequestTest {
 	@XmlAccessorType(XmlAccessType.FIELD)
 	public static class MyModel {
 
+		@JsonProperty
 		String name;
+
+		@JsonProperty
 		int age;
 
 		public MyModel() {
 		}
 
-		public MyModel(String name, int age) {
+		public MyModel(@JsonProperty String name, @JsonProperty int age) {
 			this.name = name;
 			this.age = age;
 		}
