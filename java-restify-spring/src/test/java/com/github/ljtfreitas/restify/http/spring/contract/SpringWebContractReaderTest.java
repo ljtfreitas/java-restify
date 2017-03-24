@@ -221,6 +221,12 @@ public class SpringWebContractReaderTest {
 				MyApiType.class.getMethod("methodWithTwoBodyParameters", new Class[] { Object.class, Object.class }));
 	}
 
+	@Test(expected = IllegalArgumentException.class)
+	public void shouldThrowExceptionWhenMethodParameterHasNoAnnotations() throws Exception {
+		springMvcContractReader.read(myApiTypeTarget,
+				MyApiType.class.getMethod("withoutAnnotation", new Class[] { String.class }));
+	}
+
 	@Test
 	public void shouldCreateEndpointMethodWhenInterfaceHasAInheritance() throws Exception {
 		EndpointMethod endpointMethod = springMvcContractReader.read(myInheritanceApiTarget,
@@ -367,6 +373,9 @@ public class SpringWebContractReaderTest {
 
 		@RequestMapping("/twoBodyParameters")
 		public String methodWithTwoBodyParameters(@RequestBody Object first, @RequestBody Object second);
+
+		@RequestMapping(path = "/{path}", method = RequestMethod.GET)
+		public String withoutAnnotation(String path);
 	}
 
 	@RequestMapping("http://my.api.com")

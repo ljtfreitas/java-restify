@@ -25,6 +25,7 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.jaxrs.contract.metadata.reflection;
 
+import static com.github.ljtfreitas.restify.http.util.Preconditions.isFalse;
 import static com.github.ljtfreitas.restify.http.util.Preconditions.isTrue;
 
 import java.lang.annotation.Annotation;
@@ -60,18 +61,28 @@ public class JaxRsJavaMethodParameterMetadata {
 		this.annotationParameter = Arrays.asList(pathParameter, headerParameter, queryParameter)
 				.stream().filter(a -> a != null).findFirst().orElse(null);
 
-		this.name = Optional.ofNullable(pathParameter)
+		String name = Optional.ofNullable(pathParameter)
 				.map(PathParam::value).filter(s -> !s.trim().isEmpty())
 					.orElseGet(() -> Optional.ofNullable(headerParameter)
 						.map(HeaderParam::value).filter(s -> !s.trim().isEmpty())
 							.orElseGet(() -> Optional.ofNullable(queryParameter)
 								.map(QueryParam::value).filter(s -> !s.trim().isEmpty())
 									.orElseGet(() -> Optional.ofNullable(javaMethodParameter.getName())
-											.filter(name -> javaMethodParameter.isNamePresent() && !name.isEmpty())
+											.filter(n -> javaMethodParameter.isNamePresent() && !n.isEmpty())
 												.orElseGet(() -> "unknown"))));
+
+		isFalse(needName() && name == null, "Could not get the name of the parameter [" + javaMethodParameter + "], "
+				+ "from method [" + javaMethodParameter.getDeclaringExecutable() + "]");
+		this.name = name;
 
 		this.serializer = (queryParameter != null) ? new EndpointMethodQueryParameterSerializer()
 				: new SimpleEndpointMethodParameterSerializer();
+	}
+
+	private boolean needName() {
+		return annotationParameter instanceof PathParam
+			|| annotationParameter instanceof QueryParam
+			|| annotationParameter instanceof HeaderParam;
 	}
 
 	public String name() {

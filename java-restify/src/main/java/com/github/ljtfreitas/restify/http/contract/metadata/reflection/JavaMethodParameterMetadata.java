@@ -25,6 +25,7 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.contract.metadata.reflection;
 
+import static com.github.ljtfreitas.restify.http.util.Preconditions.isFalse;
 import static com.github.ljtfreitas.restify.http.util.Preconditions.isTrue;
 
 import java.lang.annotation.Annotation;
@@ -63,25 +64,36 @@ public class JavaMethodParameterMetadata {
 
 		isTrue(Stream.of(javaMethodParameter.getAnnotations())
 				.filter(a -> a.annotationType().isAnnotationPresent(Parameter.class))
-					.count() <= 1, "Parameter " + javaMethodParameter + " has more than one annotation.");
+					.count() <= 1, "Parameter [" + javaMethodParameter + "], of method [" + javaMethodParameter.getDeclaringExecutable() + "] "
+							+ "has more than one annotation.");
 
 		this.annotationParameter = new JavaAnnotationScanner(javaMethodParameter).with(Parameter.class);
 
-		this.name = Optional.ofNullable(pathParameter)
+		String name = Optional.ofNullable(pathParameter)
 				.map(PathParameter::value).filter(s -> !s.trim().isEmpty())
 					.orElseGet(() -> Optional.ofNullable(headerParameter)
 						.map(HeaderParameter::value).filter(s -> !s.trim().isEmpty())
 							.orElseGet(() -> Optional.ofNullable(queryParameter)
 								.map(QueryParameter::value).filter(s -> !s.trim().isEmpty())
 									.orElseGet(() -> Optional.ofNullable(javaMethodParameter.getName())
-											.filter(name -> javaMethodParameter.isNamePresent() && !name.isEmpty())
-												.orElseGet(() -> "unknown"))));
+											.filter(n -> javaMethodParameter.isNamePresent() && !n.isEmpty())
+												.orElse(null))));
+
+		isFalse(needName() && name == null, "Could not get the name of the parameter [" + javaMethodParameter + "], "
+				+ "of method [" + javaMethodParameter.getDeclaringExecutable() + "]");
+		this.name = name;
 
 		this.serializerType = pathParameter != null ? pathParameter.serializer()
 				: queryParameter != null ? queryParameter.serializer()
 						: queryParameters != null ? queryParameters.serializer()
 								: callbackParameter != null ? null
 										: SimpleEndpointMethodParameterSerializer.class;
+	}
+
+	private boolean needName() {
+		return (annotationParameter instanceof PathParameter || annotationParameter == null)
+			|| annotationParameter instanceof QueryParameter
+			|| annotationParameter instanceof HeaderParameter;
 	}
 
 	public String name() {
