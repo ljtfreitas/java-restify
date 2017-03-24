@@ -23,42 +23,57 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.http.client.request.jdk;
+package com.github.ljtfreitas.restify.http.client.request.netty;
 
 import java.nio.charset.Charset;
 import java.time.Duration;
+import java.util.Optional;
 
 import com.github.ljtfreitas.restify.http.client.charset.Encoding;
 
-public class HttpClientRequestConfiguration {
+import io.netty.handler.ssl.SslContext;
+
+public class NettyHttpClientRequestConfiguration {
+
+	private static final int DEFAULT_MAX_RESPONSE_SIZE = 1024 * 1024 * 10;
 
 	private int connectionTimeout = 0;
 	private int readTimeout = 0;
+	private int maxResponseSize = DEFAULT_MAX_RESPONSE_SIZE;
 
+	private SslContext sslContext = null;
 	private Charset charset = Encoding.UTF_8.charset();
 
-	private HttpClientRequestConfiguration() {
+	private NettyHttpClientRequestConfiguration() {
 	}
 
 	public int connectionTimeout() {
 		return connectionTimeout;
 	}
 
-	public int readTimeout() {
+	public long readTimeout() {
 		return readTimeout;
+	}
+
+	public int maxResponseSize() {
+		return maxResponseSize;
+	}
+
+	public Optional<SslContext> sslContext() {
+		return Optional.ofNullable(sslContext);
 	}
 
 	public Charset charset() {
 		return charset;
 	}
 
-	public static HttpClientRequestConfiguration useDefault() {
-		return new HttpClientRequestConfiguration();
+	public static NettyHttpClientRequestConfiguration useDefault() {
+		return new NettyHttpClientRequestConfiguration();
 	}
 
 	public static class Builder {
 
-		private HttpClientRequestConfiguration configuration = new HttpClientRequestConfiguration();
+		private NettyHttpClientRequestConfiguration configuration = new NettyHttpClientRequestConfiguration();
 
 		public Builder connectionTimeout(int connectionTimeout) {
 			configuration.connectionTimeout = connectionTimeout;
@@ -80,12 +95,22 @@ public class HttpClientRequestConfiguration {
 			return this;
 		}
 
+		public Builder maxResponseSize(int maxResponseSize) {
+			configuration.maxResponseSize = maxResponseSize;
+			return this;
+		}
+
+		public Builder sslContext(SslContext sslContext) {
+			configuration.sslContext = sslContext;
+			return this;
+		}
+
 		public Builder charset(Charset charset) {
 			configuration.charset = charset;
 			return this;
 		}
 
-		public HttpClientRequestConfiguration build() {
+		public NettyHttpClientRequestConfiguration build() {
 			return configuration;
 		}
 	}

@@ -23,51 +23,51 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.http.client.request.okhttp;
+package com.github.ljtfreitas.restify.http.client.request.netty;
 
 import java.io.Closeable;
 import java.io.IOException;
-import java.nio.charset.Charset;
 
-import com.github.ljtfreitas.restify.http.client.charset.Encoding;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
+import com.github.ljtfreitas.restify.http.client.request.HttpClientRequest;
 import com.github.ljtfreitas.restify.http.client.request.HttpClientRequestFactory;
 
-import okhttp3.OkHttpClient;
+import io.netty.bootstrap.Bootstrap;
+import io.netty.channel.EventLoopGroup;
 
-public class OkHttpClientRequestFactory implements HttpClientRequestFactory, Closeable {
+public class NettyHttpClientRequestFactory implements HttpClientRequestFactory, Closeable {
 
-	private final OkHttpClient okHttpClient;
-	private final Charset charset;
+	private final Bootstrap bootstrap;
+	private final EventLoopGroup eventLoopGroup;
+	private NettyHttpClientRequestConfiguration nettyHttpClientRequestConfiguration;
 
-	public OkHttpClientRequestFactory() {
-		this(new OkHttpClient());
+	public NettyHttpClientRequestFactory() {
+		this(new NettyEventLoopGroupFactory().create());
 	}
 
-	public OkHttpClientRequestFactory(OkHttpClient okHttpClient) {
-		this(okHttpClient, Encoding.UTF_8.charset());
+	public NettyHttpClientRequestFactory(EventLoopGroup eventLoopGroup) {
+		this(eventLoopGroup, NettyHttpClientRequestConfiguration.useDefault());
 	}
 
-	public OkHttpClientRequestFactory(Charset charset) {
-		this(new OkHttpClient(), charset);
+	public NettyHttpClientRequestFactory(NettyHttpClientRequestConfiguration nettyHttpClientRequestConfiguration) {
+		this(new NettyEventLoopGroupFactory().create(), nettyHttpClientRequestConfiguration);
 	}
 
-	public OkHttpClientRequestFactory(OkHttpClient okHttpClient, Charset charset) {
-		this.okHttpClient = okHttpClient;
-		this.charset = charset;
+	public NettyHttpClientRequestFactory(EventLoopGroup eventLoopGroup, NettyHttpClientRequestConfiguration nettyHttpClientRequestConfiguration) {
+		this.eventLoopGroup = eventLoopGroup;
+		this.nettyHttpClientRequestConfiguration = nettyHttpClientRequestConfiguration;
+		this.bootstrap = new NettyBootstrapFactory(eventLoopGroup, nettyHttpClientRequestConfiguration).create();
 	}
 
 	@Override
-	public OkHttpClientRequest createOf(EndpointRequest endpointRequest) {
-		return new OkHttpClientRequest(okHttpClient, endpointRequest, charset);
+	public HttpClientRequest createOf(EndpointRequest endpointRequest) {
+		return new NettyHttpClientRequest(bootstrap, endpointRequest.endpoint(), endpointRequest.headers(), endpointRequest.method(),
+				nettyHttpClientRequestConfiguration.charset());
 	}
 
 	@Override
 	public void close() throws IOException {
-		if (okHttpClient.cache() != null) {
-			okHttpClient.cache().close();
-		}
-
-		okHttpClient.dispatcher().executorService().shutdown();
+		eventLoopGroup.shutdownGracefully().syncUninterruptibly();
 	}
+
 }

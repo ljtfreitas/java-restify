@@ -23,51 +23,34 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.http.client.request.okhttp;
+package com.github.ljtfreitas.restify.http.client.request.netty;
 
-import java.io.Closeable;
-import java.io.IOException;
-import java.nio.charset.Charset;
+import io.netty.channel.Channel;
+import io.netty.channel.ChannelFuture;
+import io.netty.channel.ChannelFutureListener;
+import io.netty.handler.codec.http.HttpRequest;
 
-import com.github.ljtfreitas.restify.http.client.charset.Encoding;
-import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
-import com.github.ljtfreitas.restify.http.client.request.HttpClientRequestFactory;
+class NettyChannelFutureListener implements ChannelFutureListener {
 
-import okhttp3.OkHttpClient;
+	private final HttpRequest nettyHttpRequest;
+	private final NettyRequestExecuteHandler nettyRequestExecuteHandler;
 
-public class OkHttpClientRequestFactory implements HttpClientRequestFactory, Closeable {
-
-	private final OkHttpClient okHttpClient;
-	private final Charset charset;
-
-	public OkHttpClientRequestFactory() {
-		this(new OkHttpClient());
-	}
-
-	public OkHttpClientRequestFactory(OkHttpClient okHttpClient) {
-		this(okHttpClient, Encoding.UTF_8.charset());
-	}
-
-	public OkHttpClientRequestFactory(Charset charset) {
-		this(new OkHttpClient(), charset);
-	}
-
-	public OkHttpClientRequestFactory(OkHttpClient okHttpClient, Charset charset) {
-		this.okHttpClient = okHttpClient;
-		this.charset = charset;
+	public NettyChannelFutureListener(HttpRequest nettyHttpRequest, NettyRequestExecuteHandler nettyRequestExecuteHandler) {
+		this.nettyHttpRequest = nettyHttpRequest;
+		this.nettyRequestExecuteHandler = nettyRequestExecuteHandler;
 	}
 
 	@Override
-	public OkHttpClientRequest createOf(EndpointRequest endpointRequest) {
-		return new OkHttpClientRequest(okHttpClient, endpointRequest, charset);
-	}
+	public void operationComplete(ChannelFuture channelFuture) throws Exception {
+		if (channelFuture.isSuccess()) {
+			Channel channel = channelFuture.channel();
+			channel.pipeline().addLast(nettyRequestExecuteHandler);
 
-	@Override
-	public void close() throws IOException {
-		if (okHttpClient.cache() != null) {
-			okHttpClient.cache().close();
+			channel.writeAndFlush(nettyHttpRequest);
+
+		} else {
+			nettyRequestExecuteHandler.exceptionCaught(null, channelFuture.cause());
 		}
-
-		okHttpClient.dispatcher().executorService().shutdown();
 	}
+
 }

@@ -23,51 +23,35 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.http.client.request.okhttp;
+package com.github.ljtfreitas.restify.http.client.request.netty;
 
-import java.io.Closeable;
 import java.io.IOException;
-import java.nio.charset.Charset;
+import java.io.InputStream;
 
-import com.github.ljtfreitas.restify.http.client.charset.Encoding;
-import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
-import com.github.ljtfreitas.restify.http.client.request.HttpClientRequestFactory;
+import com.github.ljtfreitas.restify.http.client.Headers;
+import com.github.ljtfreitas.restify.http.client.request.HttpRequestMessage;
+import com.github.ljtfreitas.restify.http.client.response.BaseHttpResponseMessage;
+import com.github.ljtfreitas.restify.http.client.response.StatusCode;
 
-import okhttp3.OkHttpClient;
+import io.netty.channel.ChannelHandlerContext;
+import io.netty.handler.codec.http.FullHttpResponse;
 
-public class OkHttpClientRequestFactory implements HttpClientRequestFactory, Closeable {
+class NettyHttpClientResponse extends BaseHttpResponseMessage {
 
-	private final OkHttpClient okHttpClient;
-	private final Charset charset;
+	private final ChannelHandlerContext context;
+	private final FullHttpResponse nettyResponse;
 
-	public OkHttpClientRequestFactory() {
-		this(new OkHttpClient());
-	}
-
-	public OkHttpClientRequestFactory(OkHttpClient okHttpClient) {
-		this(okHttpClient, Encoding.UTF_8.charset());
-	}
-
-	public OkHttpClientRequestFactory(Charset charset) {
-		this(new OkHttpClient(), charset);
-	}
-
-	public OkHttpClientRequestFactory(OkHttpClient okHttpClient, Charset charset) {
-		this.okHttpClient = okHttpClient;
-		this.charset = charset;
-	}
-
-	@Override
-	public OkHttpClientRequest createOf(EndpointRequest endpointRequest) {
-		return new OkHttpClientRequest(okHttpClient, endpointRequest, charset);
+	public NettyHttpClientResponse(StatusCode statusCode, Headers headers, InputStream body, HttpRequestMessage httpRequest, 
+			ChannelHandlerContext context, FullHttpResponse nettyResponse) {
+		super(statusCode, headers, body, httpRequest);
+		this.context = context;
+		this.nettyResponse = nettyResponse;
 	}
 
 	@Override
 	public void close() throws IOException {
-		if (okHttpClient.cache() != null) {
-			okHttpClient.cache().close();
-		}
-
-		okHttpClient.dispatcher().executorService().shutdown();
+		context.close();
+		nettyResponse.release();
 	}
+
 }
