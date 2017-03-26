@@ -33,6 +33,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
+import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.context.EnvironmentAware;
@@ -48,7 +49,7 @@ public abstract class BaseRestifyConfigurationRegistrar implements ImportBeanDef
 
 	private static final Logger log = LoggerFactory.getLogger(RestifyConfigurationRegistrar.class);
 
-	private RestifyProperties restifyProperties;
+	private RestifyApiClientProperties properties;
 
 	protected BeanFactory beanFactory;
 
@@ -62,7 +63,7 @@ public abstract class BaseRestifyConfigurationRegistrar implements ImportBeanDef
 	}
 
 	private void create(RestifyableType type, BeanDefinitionRegistry registry) {
-		RestifyApiClient restifyApiClient = restifyProperties.client(type);
+		RestifyApiClient restifyApiClient = properties.client(type);
 
 		String endpoint = type.endpoint().map(e -> resolve(e)).orElseGet(restifyApiClient::getEndpoint);
 
@@ -72,14 +73,16 @@ public abstract class BaseRestifyConfigurationRegistrar implements ImportBeanDef
 						.asyncExecutorServiceName("restifyAsyncExecutorService")
 							.authentication(apiAuthentication(restifyApiClient.getAuthentication()));
 
-		registry.registerBeanDefinition(type.beanName(), builder.build());
+		BeanDefinition bean = builder.build();
+
+		registry.registerBeanDefinition(type.name(), bean);
 
 		log.info("Create @Restifyable bean -> {} (API [{}] metadata: Description: [{}], and endpoint: [{}])",
 				type.objectType(), type.name(), type.description(), endpoint);
 	}
 
 	private String resolve(String expression) {
-		return Optional.ofNullable(restifyProperties.resolve(expression))
+		return Optional.ofNullable(properties.resolve(expression))
 				.orElseGet(() -> ((ConfigurableBeanFactory) beanFactory).resolveEmbeddedValue(expression));
 	}
 
@@ -95,7 +98,7 @@ public abstract class BaseRestifyConfigurationRegistrar implements ImportBeanDef
 
 	@Override
 	public void setEnvironment(Environment environment) {
-		this.restifyProperties = new RestifyProperties(environment);
+		this.properties = new RestifyApiClientProperties(environment);
 	}
 
 	@Override

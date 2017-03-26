@@ -29,7 +29,6 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.ScheduledExecutorService;
 
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.AllNestedConditions;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
@@ -50,9 +49,6 @@ import com.github.ljtfreitas.restify.http.spring.client.call.exec.WebAsyncTaskEn
 
 @Configuration
 public class RestifyAsyncConfiguration {
-
-	@Value("${restify.async.timeout:}")
-	private Long asyncTimeout;
 
 	@Conditional(RestifyAsyncConfiguration.RestifyAsyncTaskExecutorCondition.class)
 	@Bean
@@ -75,8 +71,8 @@ public class RestifyAsyncConfiguration {
 	@ConditionalOnMissingBean
 	@Bean
 	public DeferredResultEndpointCallExecutableFactory<Object, Object> deferredResultEndpointCallExecutableFactory(
-			@Qualifier("restifyAsyncTaskExecutor") AsyncTaskExecutor executor) {
-		return new DeferredResultEndpointCallExecutableFactory<>(asyncTimeout, executor);
+			@Qualifier("restifyAsyncTaskExecutor") AsyncTaskExecutor executor, RestifyConfigurationProperties properties) {
+		return new DeferredResultEndpointCallExecutableFactory<>(properties.getAsync().getTimeout(), executor);
 	}
 
 	@ConditionalOnMissingBean
@@ -88,14 +84,16 @@ public class RestifyAsyncConfiguration {
 
 	@ConditionalOnMissingBean
 	@Bean
-	public ListenableFutureTaskEndpointCallExecutableFactory<Object, Object> listenableFutureTaskEndpointCallExecutableFactory(@Qualifier("restifyAsyncTaskExecutor") AsyncListenableTaskExecutor executor) {
+	public ListenableFutureTaskEndpointCallExecutableFactory<Object, Object> listenableFutureTaskEndpointCallExecutableFactory(
+			@Qualifier("restifyAsyncTaskExecutor") AsyncListenableTaskExecutor executor) {
 		return new ListenableFutureTaskEndpointCallExecutableFactory<>(executor);
 	}
 
 	@ConditionalOnMissingBean
 	@Bean
-	public WebAsyncTaskEndpointCallExecutableFactory<Object, Object> webAsyncTaskEndpointCallExecutableFactory(@Qualifier("restifyAsyncTaskExecutor") AsyncTaskExecutor executor) {
-		return new WebAsyncTaskEndpointCallExecutableFactory<>(asyncTimeout, executor);
+	public WebAsyncTaskEndpointCallExecutableFactory<Object, Object> webAsyncTaskEndpointCallExecutableFactory(
+			@Qualifier("restifyAsyncTaskExecutor") AsyncTaskExecutor executor, RestifyConfigurationProperties properties) {
+		return new WebAsyncTaskEndpointCallExecutableFactory<>(properties.getAsync().getTimeout(), executor);
 	}
 
 	static class RestifyAsyncTaskExecutorCondition extends AllNestedConditions {

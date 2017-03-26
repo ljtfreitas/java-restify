@@ -27,6 +27,7 @@ package com.github.ljtfreitas.restify.spring.configure;
 
 import static org.springframework.core.annotation.AnnotationUtils.findAnnotation;
 
+import java.beans.Introspector;
 import java.util.Optional;
 
 class RestifyableType {
@@ -54,15 +55,11 @@ class RestifyableType {
 	private String doName() {
 		return Optional.ofNullable(restifyable.name())
 				.filter(n -> !n.isEmpty())
-					.orElseGet(() -> objectType.getSimpleName());
+					.orElseGet(() -> Introspector.decapitalize(objectType.getSimpleName()));
 	}
 
 	public String description() {
 		return restifyable.description();
-	}
-
-	public String beanName() {
-		return objectType.getSimpleName() + "." + doName();
 	}
 
 	public Optional<String> endpoint() {

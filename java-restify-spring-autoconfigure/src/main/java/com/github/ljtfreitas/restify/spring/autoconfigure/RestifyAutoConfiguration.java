@@ -30,6 +30,7 @@ import org.springframework.boot.autoconfigure.AutoConfigurationPackages;
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.web.WebClientAutoConfiguration;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.core.type.AnnotationMetadata;
@@ -37,6 +38,7 @@ import org.springframework.core.type.AnnotationMetadata;
 import com.github.ljtfreitas.restify.spring.autoconfigure.RestifyAutoConfiguration.RestifyAutoConfigurationRegistrar;
 import com.github.ljtfreitas.restify.spring.configure.BaseRestifyConfigurationRegistrar;
 import com.github.ljtfreitas.restify.spring.configure.RestifyAsyncConfiguration;
+import com.github.ljtfreitas.restify.spring.configure.RestifyConfigurationProperties;
 import com.github.ljtfreitas.restify.spring.configure.RestifyDefaultConfiguration;
 import com.github.ljtfreitas.restify.spring.configure.RestifyJaxRsConfiguration;
 import com.github.ljtfreitas.restify.spring.configure.RestifyProxyFactoryBean;
@@ -44,6 +46,7 @@ import com.github.ljtfreitas.restify.spring.configure.RestifySpringWebConfigurat
 import com.github.ljtfreitas.restify.spring.configure.RestifyableTypeScanner;
 
 @Configuration
+@EnableConfigurationProperties(RestifyConfigurationProperties.class)
 @Import({RestifyDefaultConfiguration.class, RestifySpringWebConfiguration.class, RestifyAsyncConfiguration.class,
 	RestifyJaxRsConfiguration.class, RestifyAutoConfigurationRegistrar.class})
 @ConditionalOnMissingBean(RestifyProxyFactoryBean.class)

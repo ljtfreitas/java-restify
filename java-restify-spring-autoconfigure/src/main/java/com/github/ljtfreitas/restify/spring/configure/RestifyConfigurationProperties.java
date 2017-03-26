@@ -25,31 +25,56 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.spring.configure;
 
-import org.springframework.boot.bind.PropertySourcesPropertyValues;
-import org.springframework.boot.bind.RelaxedDataBinder;
-import org.springframework.core.env.ConfigurableEnvironment;
-import org.springframework.core.env.Environment;
+import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.stereotype.Component;
 
-class RestifyProperties {
+@Component
+@ConfigurationProperties("restify")
+public class RestifyConfigurationProperties {
 
-	private final Environment environment;
+	private RestifyErrorProperties error = new RestifyErrorProperties();
 
-	RestifyProperties(Environment environment) {
-		this.environment = environment;
+	private RestifyAsyncProperties async = new RestifyAsyncProperties();
+
+	public void setError(RestifyErrorProperties error) {
+		this.error = error;
 	}
 
-	public RestifyApiClient client(RestifyableType type) {
-		RestifyApiClient restifyApiClient = new RestifyApiClient();
-
-		RelaxedDataBinder dataBinder = new RelaxedDataBinder(restifyApiClient, "restify." + type.name());
-
-		ConfigurableEnvironment configurableEnvironment = (ConfigurableEnvironment) environment;
-		dataBinder.bind(new PropertySourcesPropertyValues(configurableEnvironment.getPropertySources()));
-
-		return restifyApiClient;
+	public RestifyErrorProperties getError() {
+		return error;
 	}
 
-	public String resolve(String expression) {
-		return ((ConfigurableEnvironment) environment).resolvePlaceholders(expression);
+	public void setAsync(RestifyAsyncProperties async) {
+		this.async = async;
+	}
+
+	public RestifyAsyncProperties getAsync() {
+		return async;
+	}
+
+	public static class RestifyErrorProperties {
+
+		private boolean emptyOnNotFound = false;
+
+		public void setEmptyOnNotFound(boolean emptyOnNotFound) {
+			this.emptyOnNotFound = emptyOnNotFound;
+		}
+
+		public boolean isEmptyOnNotFound() {
+			return emptyOnNotFound;
+		}
+	}
+
+	public static class RestifyAsyncProperties {
+
+		private Long timeout = null;
+
+		public void setTimeout(Long timeout) {
+			this.timeout = timeout;
+		}
+
+		public Long getTimeout() {
+			return timeout;
+		}
 	}
 }

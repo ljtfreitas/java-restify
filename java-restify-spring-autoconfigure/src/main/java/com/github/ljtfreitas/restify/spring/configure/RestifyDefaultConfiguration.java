@@ -25,10 +25,10 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.spring.configure;
 
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Configuration;
 
 import com.github.ljtfreitas.restify.http.client.request.HttpClientRequestFactory;
 import com.github.ljtfreitas.restify.http.client.request.apache.httpclient.ApacheHttpClientRequestFactory;
@@ -39,10 +39,8 @@ import com.github.ljtfreitas.restify.http.client.response.EndpointResponseErrorF
 import com.github.ljtfreitas.restify.http.spring.client.call.exec.HttpHeadersEndpointCallExecutableFactory;
 import com.github.ljtfreitas.restify.http.spring.client.call.exec.ResponseEntityEndpointCallExecutableFactory;
 
+@Configuration
 public class RestifyDefaultConfiguration {
-
-	@Value("${restify.error.emptyOnNotFound:false}")
-	private boolean emptyOnNotFound;
 
 	@ConditionalOnMissingBean
 	@ConditionalOnProperty(name = "restify.http.client", havingValue = "jdk", matchIfMissing = true)
@@ -79,8 +77,9 @@ public class RestifyDefaultConfiguration {
 
 	@ConditionalOnMissingBean
 	@Bean
-	public EndpointResponseErrorFallback endpointResponseErrorFallback() {
-		return emptyOnNotFound ? DefaultEndpointResponseErrorFallback.emptyOnNotFound() : new DefaultEndpointResponseErrorFallback();
+	public EndpointResponseErrorFallback endpointResponseErrorFallback(RestifyConfigurationProperties properties) {
+		return properties.getError().isEmptyOnNotFound() ?
+				DefaultEndpointResponseErrorFallback.emptyOnNotFound() : new DefaultEndpointResponseErrorFallback();
 	}
 
 }
