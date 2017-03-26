@@ -25,31 +25,31 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.spring.configure;
 
-import static java.lang.annotation.ElementType.TYPE;
-import static java.lang.annotation.RetentionPolicy.RUNTIME;
+import org.springframework.boot.bind.PropertySourcesPropertyValues;
+import org.springframework.boot.bind.RelaxedDataBinder;
+import org.springframework.core.env.ConfigurableEnvironment;
+import org.springframework.core.env.Environment;
 
-import java.lang.annotation.Inherited;
-import java.lang.annotation.Retention;
-import java.lang.annotation.Target;
+class RestifyApiClientProperties {
 
-import org.springframework.context.annotation.ComponentScan.Filter;
-import org.springframework.boot.context.properties.EnableConfigurationProperties;
-import org.springframework.context.annotation.Import;
-import org.springframework.core.annotation.AliasFor;
+	private final Environment environment;
 
-@Retention(RUNTIME)
-@Target(TYPE)
-@Inherited
-@EnableConfigurationProperties(RestifyConfigurationProperties.class)
-@Import({RestifyDefaultConfiguration.class, RestifySpringWebConfiguration.class, RestifyAsyncConfiguration.class,
-	RestifyJaxRsConfiguration.class, RestifyConfigurationRegistrar.class})
-public @interface EnableRestify {
+	RestifyApiClientProperties(Environment environment) {
+		this.environment = environment;
+	}
 
-	@AliasFor("packages")
-	String[] value() default {};
+	public RestifyApiClient client(RestifyableType type) {
+		RestifyApiClient restifyApiClient = new RestifyApiClient();
 
-	@AliasFor("value")
-	String[] packages() default {};
+		RelaxedDataBinder dataBinder = new RelaxedDataBinder(restifyApiClient, "restify." + type.name());
 
-	Filter[] exclude() default {};
+		ConfigurableEnvironment configurableEnvironment = (ConfigurableEnvironment) environment;
+		dataBinder.bind(new PropertySourcesPropertyValues(configurableEnvironment.getPropertySources()));
+
+		return restifyApiClient;
+	}
+
+	public String resolve(String expression) {
+		return ((ConfigurableEnvironment) environment).resolvePlaceholders(expression);
+	}
 }
