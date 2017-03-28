@@ -48,9 +48,6 @@ public class ZookeeperInstance {
 	private String address;
 
 	@JsonProperty
-	private boolean secure;
-
-	@JsonProperty
 	private Map<String, String> metadata;
 
 	@Deprecated
@@ -85,11 +82,32 @@ public class ZookeeperInstance {
 		return address;
 	}
 
-	public boolean secure() {
-		return secure;
-	}
-
 	public Map<String, String> metadata() {
 		return Collections.unmodifiableMap(metadata);
+	}
+
+	@Override
+	public String toString() {
+		StringBuilder report = new StringBuilder();
+
+		report
+			.append("ZookeeperInstance: [")
+				.append("Id: ")
+					.append(id)
+				.append(", ")
+				.append("Name: ")
+					.append(name)
+				.append(", ")
+				.append("Address: ")
+					.append(address)
+				.append(", ")
+				.append("Port: ")
+					.append(port)
+				.append(", ")
+				.append("Metadata: ")
+					.append(metadata)
+			.append("]");
+
+		return report.toString();
 	}
 }

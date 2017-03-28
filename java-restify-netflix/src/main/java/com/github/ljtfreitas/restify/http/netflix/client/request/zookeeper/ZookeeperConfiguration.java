@@ -25,41 +25,35 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.netflix.client.request.zookeeper;
 
-import java.util.List;
-import java.util.stream.Collectors;
+import static com.github.ljtfreitas.restify.http.util.Preconditions.nonNull;
 
-import com.netflix.client.config.IClientConfig;
-import com.netflix.loadbalancer.AbstractServerList;
-import com.netflix.loadbalancer.Server;
+public class ZookeeperConfiguration {
 
-public class ZookeeperServers extends AbstractServerList<Server> {
+	private final String address;
+	private final Integer port;
+	private final String root;
 
-	private final String serviceName;
-	private final ZookeeperServiceDiscovery zookeeperServiceDiscovery;
-
-	public ZookeeperServers(String serviceName, ZookeeperServiceDiscovery zookeeperServiceDiscovery) {
-		this.serviceName = serviceName;
-		this.zookeeperServiceDiscovery = zookeeperServiceDiscovery;
+	public ZookeeperConfiguration(String root) {
+		this(null, 2181, root);
 	}
 
-	@Override
-	public List<Server> getInitialListOfServers() {
-		return allServers();
+	public ZookeeperConfiguration(String address, int port) {
+		this(address, port, "/");
 	}
 
-	@Override
-	public List<Server> getUpdatedListOfServers() {
-		return allServers();
+	public ZookeeperConfiguration(String address, int port, String root) {
+		this.address = address;
+		this.port = port;
+		this.root = root;
 	}
 
-	private List<Server> allServers() {
-		return zookeeperServiceDiscovery.queryForInstances(serviceName)
-				.stream()
-					.map(instance -> new ZookeeperServer(instance))
-						.collect(Collectors.toList());
+	public String root() {
+		return root;
 	}
 
-	@Override
-	public void initWithNiwsConfig(IClientConfig clientConfig) {
+	public String connectionString() {
+		nonNull(address, "Zookeeper address cannot be null.");
+		nonNull(port, "Zookeeper port cannot be null.");
+		return address + ":" + port;
 	}
 }

@@ -28,7 +28,11 @@ package com.github.ljtfreitas.restify.http.netflix.client.request.zookeeper;
 import java.util.Collection;
 import java.util.Optional;
 
+import org.apache.curator.RetryPolicy;
+import org.apache.curator.RetrySleeper;
 import org.apache.curator.framework.CuratorFramework;
+import org.apache.curator.framework.CuratorFrameworkFactory;
+import org.apache.curator.framework.imps.CuratorFrameworkState;
 import org.apache.curator.x.discovery.ServiceDiscovery;
 import org.apache.curator.x.discovery.ServiceDiscoveryBuilder;
 import org.apache.curator.x.discovery.ServiceInstance;
@@ -43,27 +47,47 @@ public class ZookeeperServiceDiscovery {
 	private final ServiceDiscovery<ZookeeperInstance> serviceDiscovery;
 	private final CuratorFramework curator;
 
-	public ZookeeperServiceDiscovery(ZookeeperDiscoveryConfiguration configuration, CuratorFramework curator,
-			InstanceSerializer<ZookeeperInstance> serializer) {
+	public ZookeeperServiceDiscovery(ZookeeperConfiguration configuration) {
+		CuratorFramework curator = buildCuratorWith(configuration);
+		this.serviceDiscovery = buildServiceDiscoveryWith(configuration, curator, new ZookeeperInstanceSerializer());
+		this.curator = curator;
+	}
+
+	public ZookeeperServiceDiscovery(ZookeeperConfiguration configuration, CuratorFramework curator) {
+		this(configuration, curator, new ZookeeperInstanceSerializer());
+	}
+
+	public ZookeeperServiceDiscovery(ZookeeperConfiguration configuration, CuratorFramework curator, InstanceSerializer<ZookeeperInstance> serializer) {
 		this.serviceDiscovery = buildServiceDiscoveryWith(configuration, curator, serializer);
 		this.curator = curator;
 	}
 
-	private ServiceDiscovery<ZookeeperInstance> buildServiceDiscoveryWith(ZookeeperDiscoveryConfiguration configuration, CuratorFramework curator,
+	private CuratorFramework buildCuratorWith(ZookeeperConfiguration configuration) {
+		return CuratorFrameworkFactory.builder()
+				.connectString(configuration.connectionString())
+				.retryPolicy(new RetryNever())
+					.build();
+	}
+
+	private ServiceDiscovery<ZookeeperInstance> buildServiceDiscoveryWith(ZookeeperConfiguration configuration, CuratorFramework curator,
 			InstanceSerializer<ZookeeperInstance> serializer) {
 
-		ServiceDiscovery<ZookeeperInstance> serviceDiscovery = ServiceDiscoveryBuilder.builder(ZookeeperInstance.class)
+		try {
+			if (!CuratorFrameworkState.STARTED.equals(curator.getState())) {
+				curator.start();
+			}
+
+			ServiceDiscovery<ZookeeperInstance> serviceDiscovery = ServiceDiscoveryBuilder.builder(ZookeeperInstance.class)
 					.client(curator)
 						.basePath(configuration.root())
 						.serializer(serializer)
 							.build();
 
-		try {
 			serviceDiscovery.start();
 
 			return serviceDiscovery;
 		} catch (Exception e) {
-			throw new RuntimeException(e);
+			throw new ZookeeperServiceDiscoveryException("Error on create Zookeeper ServiceDiscovery", e);
 		}
 	}
 
@@ -89,7 +113,7 @@ public class ZookeeperServiceDiscovery {
 			serviceDiscovery.registerService(instance);
 
 		} catch (Exception e) {
-			throw new RuntimeException(e);
+			throw new ZookeeperServiceDiscoveryException("Exception on register Zookeeper service instance [" + zookeeperInstance + "]" , e);
 		}
 	}
 
@@ -99,11 +123,11 @@ public class ZookeeperServiceDiscovery {
 				.ifPresent(instance -> Tryable.run(() -> serviceDiscovery.unregisterService(instance)));
 
 		} catch (Exception e) {
-			throw new RuntimeException(e);
+			throw new ZookeeperServiceDiscoveryException("Exception on unregister Zookeeper service instance [" + zookeeperInstance + "]" , e);
 		}
 	}
 
-	private Optional<ServiceInstance<ZookeeperInstance>> queryByExample(ZookeeperInstance zookeeperInstance) {
+	public Optional<ServiceInstance<ZookeeperInstance>> queryByExample(ZookeeperInstance zookeeperInstance) {
 		return Tryable.of(() -> serviceDiscovery.queryForInstances(zookeeperInstance.name()))
 				.stream()
 					.filter(i -> i.getAddress().equals(zookeeperInstance.address()) && i.getPort().equals(zookeeperInstance.port()))
@@ -113,5 +137,14 @@ public class ZookeeperServiceDiscovery {
 	public void close() {
 		Tryable.run(serviceDiscovery::close);
 		Tryable.run(curator::close);
+	}
+
+	private class RetryNever implements RetryPolicy {
+
+		@Override
+		public boolean allowRetry(int retryCount, long elapsedTimeMs, RetrySleeper sleeper) {
+			return false;
+		}
+
 	}
 }
