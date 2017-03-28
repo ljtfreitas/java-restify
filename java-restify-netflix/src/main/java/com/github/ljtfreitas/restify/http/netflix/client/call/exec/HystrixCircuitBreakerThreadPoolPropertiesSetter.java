@@ -25,19 +25,20 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.netflix.client.call.exec;
 
-import static com.github.ljtfreitas.restify.http.netflix.client.request.circuitbreaker.CircuitBreakerProperties.CORE_SIZE;
-import static com.github.ljtfreitas.restify.http.netflix.client.request.circuitbreaker.CircuitBreakerProperties.KEEP_ALIVE_TIME_MINUTES;
-import static com.github.ljtfreitas.restify.http.netflix.client.request.circuitbreaker.CircuitBreakerProperties.MAX_QUEUE_SIZE;
-import static com.github.ljtfreitas.restify.http.netflix.client.request.circuitbreaker.CircuitBreakerProperties.METRICS_ROLLING_STATS_NUM_BUCKETS;
-import static com.github.ljtfreitas.restify.http.netflix.client.request.circuitbreaker.CircuitBreakerProperties.METRICS_ROLLING_STATS_TIME_IN_MILLISECONDS;
-import static com.github.ljtfreitas.restify.http.netflix.client.request.circuitbreaker.CircuitBreakerProperties.QUEUE_SIZE_REJECTION_THRESHOLD;
+import static com.github.ljtfreitas.restify.http.netflix.client.request.circuitbreaker.CircuitBreakerProperty.THREAD_POOL_ALLOW_MAXIMUM_SIZE_TO_DIVERGE_FROM_CORE_SIZE;
+import static com.github.ljtfreitas.restify.http.netflix.client.request.circuitbreaker.CircuitBreakerProperty.THREAD_POOL_CORE_SIZE;
+import static com.github.ljtfreitas.restify.http.netflix.client.request.circuitbreaker.CircuitBreakerProperty.THREAD_POOL_KEEP_ALIVE_TIME_MINUTES;
+import static com.github.ljtfreitas.restify.http.netflix.client.request.circuitbreaker.CircuitBreakerProperty.THREAD_POOL_MAX_QUEUE_SIZE;
+import static com.github.ljtfreitas.restify.http.netflix.client.request.circuitbreaker.CircuitBreakerProperty.THREAD_POOL_METRICS_ROLLING_STATS_NUM_BUCKETS;
+import static com.github.ljtfreitas.restify.http.netflix.client.request.circuitbreaker.CircuitBreakerProperty.THREAD_POOL_METRICS_ROLLING_STATS_TIME_IN_MILLISECONDS;
+import static com.github.ljtfreitas.restify.http.netflix.client.request.circuitbreaker.CircuitBreakerProperty.THREAD_POOL_QUEUE_SIZE_REJECTION_THRESHOLD;
 
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import com.github.ljtfreitas.restify.http.netflix.client.request.circuitbreaker.CircuitBreakerProperties;
+import com.github.ljtfreitas.restify.http.netflix.client.request.circuitbreaker.CircuitBreakerProperty;
 import com.netflix.hystrix.HystrixThreadPoolProperties;
 
 class HystrixCircuitBreakerThreadPoolPropertiesSetter {
@@ -45,9 +46,9 @@ class HystrixCircuitBreakerThreadPoolPropertiesSetter {
 	private static final Map<String, HystrixCircuitBreakerPropertiesSetter<HystrixThreadPoolProperties.Setter>> HYSTRIX_THREAD_POOL_PROPERTIES_SETTERS
 		= new LinkedHashMap<>();
 
-	private final CircuitBreakerProperties[] properties;
+	private final CircuitBreakerProperty[] properties;
 
-	public HystrixCircuitBreakerThreadPoolPropertiesSetter(CircuitBreakerProperties[] properties) {
+	public HystrixCircuitBreakerThreadPoolPropertiesSetter(CircuitBreakerProperty[] properties) {
 		this.properties = properties;
 	}
 
@@ -58,22 +59,25 @@ class HystrixCircuitBreakerThreadPoolPropertiesSetter {
 	}
 
 	static {
-		HYSTRIX_THREAD_POOL_PROPERTIES_SETTERS.put(MAX_QUEUE_SIZE,
+		HYSTRIX_THREAD_POOL_PROPERTIES_SETTERS.put(THREAD_POOL_MAX_QUEUE_SIZE,
 				(s, v) -> s.withMaxQueueSize(Integer.valueOf(v)));
 
-		HYSTRIX_THREAD_POOL_PROPERTIES_SETTERS.put(CORE_SIZE,
+		HYSTRIX_THREAD_POOL_PROPERTIES_SETTERS.put(THREAD_POOL_CORE_SIZE,
 				(s, v) -> s.withCoreSize(Integer.valueOf(v)));
 
-		HYSTRIX_THREAD_POOL_PROPERTIES_SETTERS.put(KEEP_ALIVE_TIME_MINUTES,
+		HYSTRIX_THREAD_POOL_PROPERTIES_SETTERS.put(THREAD_POOL_KEEP_ALIVE_TIME_MINUTES,
 				(s, v) -> s.withKeepAliveTimeMinutes(Integer.valueOf(v)));
 
-		HYSTRIX_THREAD_POOL_PROPERTIES_SETTERS.put(QUEUE_SIZE_REJECTION_THRESHOLD,
+		HYSTRIX_THREAD_POOL_PROPERTIES_SETTERS.put(THREAD_POOL_QUEUE_SIZE_REJECTION_THRESHOLD,
 				(s, v) -> s.withQueueSizeRejectionThreshold(Integer.valueOf(v)));
 
-		HYSTRIX_THREAD_POOL_PROPERTIES_SETTERS.put(METRICS_ROLLING_STATS_NUM_BUCKETS,
+		HYSTRIX_THREAD_POOL_PROPERTIES_SETTERS.put(THREAD_POOL_ALLOW_MAXIMUM_SIZE_TO_DIVERGE_FROM_CORE_SIZE,
+				(s, v) -> s.withAllowMaximumSizeToDivergeFromCoreSize(Boolean.valueOf(v)));
+
+		HYSTRIX_THREAD_POOL_PROPERTIES_SETTERS.put(THREAD_POOL_METRICS_ROLLING_STATS_NUM_BUCKETS,
 				(s, v) -> s.withMetricsRollingStatisticalWindowBuckets(Integer.valueOf(v)));
 
-		HYSTRIX_THREAD_POOL_PROPERTIES_SETTERS.put(METRICS_ROLLING_STATS_TIME_IN_MILLISECONDS,
+		HYSTRIX_THREAD_POOL_PROPERTIES_SETTERS.put(THREAD_POOL_METRICS_ROLLING_STATS_TIME_IN_MILLISECONDS,
 				(s, v) -> s.withMetricsRollingStatisticalWindowInMilliseconds(Integer.valueOf(v)));
 	}
 }

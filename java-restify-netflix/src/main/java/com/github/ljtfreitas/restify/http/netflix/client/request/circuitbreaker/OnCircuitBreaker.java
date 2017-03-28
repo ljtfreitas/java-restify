@@ -42,5 +42,5 @@ public @interface OnCircuitBreaker {
 
 	String threadPoolKey() default "";
 
-	CircuitBreakerProperties[] properties() default {};
+	CircuitBreakerProperty[] properties() default {};
 }
