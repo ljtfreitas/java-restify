@@ -45,11 +45,17 @@ import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallObjectExe
 import com.github.ljtfreitas.restify.http.client.call.exec.HeadersEndpointCallExecutableFactory;
 import com.github.ljtfreitas.restify.http.client.call.exec.async.AsyncCallbackEndpointCallExecutableFactory;
 import com.github.ljtfreitas.restify.http.client.call.exec.async.AsyncEndpointCallExecutableFactory;
+import com.github.ljtfreitas.restify.http.client.call.exec.jdk.ArrayEndpointCallExecutableFactory;
 import com.github.ljtfreitas.restify.http.client.call.exec.jdk.CallableEndpointCallExecutableFactory;
+import com.github.ljtfreitas.restify.http.client.call.exec.jdk.CollectionEndpointCallExecutableFactory;
 import com.github.ljtfreitas.restify.http.client.call.exec.jdk.CompletableFutureCallbackEndpointCallExecutableFactory;
 import com.github.ljtfreitas.restify.http.client.call.exec.jdk.CompletableFutureEndpointCallExecutableFactory;
+import com.github.ljtfreitas.restify.http.client.call.exec.jdk.EnumerationEndpointCallExecutableFactory;
 import com.github.ljtfreitas.restify.http.client.call.exec.jdk.FutureEndpointCallExecutableFactory;
 import com.github.ljtfreitas.restify.http.client.call.exec.jdk.FutureTaskEndpointCallExecutableFactory;
+import com.github.ljtfreitas.restify.http.client.call.exec.jdk.IterableEndpointCallExecutableFactory;
+import com.github.ljtfreitas.restify.http.client.call.exec.jdk.IteratorEndpointCallExecutableFactory;
+import com.github.ljtfreitas.restify.http.client.call.exec.jdk.ListIteratorEndpointCallExecutableFactory;
 import com.github.ljtfreitas.restify.http.client.call.exec.jdk.OptionalEndpointCallExecutableFactory;
 import com.github.ljtfreitas.restify.http.client.call.exec.jdk.RunnableEndpointCallExecutableFactory;
 import com.github.ljtfreitas.restify.http.client.message.HttpMessageConverter;
@@ -365,6 +371,12 @@ public class RestifyProxyBuilder {
 			this.built.add(new OptionalEndpointCallExecutableFactory<Object>());
 			this.built.add(new CallableEndpointCallExecutableFactory<Object, Object>());
 			this.built.add(new RunnableEndpointCallExecutableFactory());
+			this.built.add(new CollectionEndpointCallExecutableFactory<>());
+			this.built.add(new ArrayEndpointCallExecutableFactory<>());
+			this.built.add(new EnumerationEndpointCallExecutableFactory<>());
+			this.built.add(new IteratorEndpointCallExecutableFactory<>());
+			this.built.add(new ListIteratorEndpointCallExecutableFactory<>());
+			this.built.add(new IterableEndpointCallExecutableFactory<>());
 			this.built.add(new EndpointCallObjectExecutableFactory<Object, Object>());
 			this.built.add(new HeadersEndpointCallExecutableFactory());
 		}

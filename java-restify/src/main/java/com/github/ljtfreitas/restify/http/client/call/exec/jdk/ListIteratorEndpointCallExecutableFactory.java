@@ -23,40 +23,50 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.http.client.call.exec;
+package com.github.ljtfreitas.restify.http.client.call.exec.jdk;
 
-import com.github.ljtfreitas.restify.http.client.Headers;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.Collections;
+import java.util.List;
+import java.util.ListIterator;
+import java.util.Optional;
+
 import com.github.ljtfreitas.restify.http.client.call.EndpointCall;
-import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
+import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutable;
+import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutableDecoratorFactory;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethod;
 import com.github.ljtfreitas.restify.http.contract.metadata.reflection.JavaType;
 import com.github.ljtfreitas.restify.http.contract.metadata.reflection.SimpleParameterizedType;
 
-public class HeadersEndpointCallExecutableFactory implements EndpointCallExecutableDecoratorFactory<Headers, EndpointResponse<Void>, Void> {
-
-	private static final JavaType DEFAULT_RETURN_TYPE = JavaType.of(new SimpleParameterizedType(EndpointResponse.class, null, Void.class));
+public class ListIteratorEndpointCallExecutableFactory<T> implements EndpointCallExecutableDecoratorFactory<ListIterator<T>, List<T>, List<T>> {
 
 	@Override
 	public boolean supports(EndpointMethod endpointMethod) {
-		return endpointMethod.returnType().is(Headers.class);
+		return endpointMethod.returnType().is(ListIterator.class);
 	}
 
 	@Override
 	public JavaType returnType(EndpointMethod endpointMethod) {
-		return DEFAULT_RETURN_TYPE;
+		return listTypeOf(endpointMethod.returnType());
+	}
+
+	private JavaType listTypeOf(JavaType type) {
+		Type responseType = type.parameterized() ? type.as(ParameterizedType.class).getActualTypeArguments()[0] : Object.class;
+		return JavaType.of(new SimpleParameterizedType(List.class, null, responseType));
 	}
 
 	@Override
-	public EndpointCallExecutable<Headers, Void> create(EndpointMethod endpointMethod, EndpointCallExecutable<EndpointResponse<Void>, Void> executable) {
-		return new HeadersEndpointCallExecutable(executable);
+	public EndpointCallExecutable<ListIterator<T>, List<T>> create(EndpointMethod endpointMethod, EndpointCallExecutable<List<T>, List<T>> delegate) {
+		return new ListIteratorEndpointCallExecutable(delegate);
 	}
 
-	private class HeadersEndpointCallExecutable implements EndpointCallExecutable<Headers, Void> {
+	private class ListIteratorEndpointCallExecutable implements EndpointCallExecutable<ListIterator<T>, List<T>> {
 
-		private final EndpointCallExecutable<EndpointResponse<Void>, Void> delegate;
+		private final EndpointCallExecutable<List<T>, List<T>> delegate;
 
-		public HeadersEndpointCallExecutable(EndpointCallExecutable<EndpointResponse<Void>, Void> executable) {
-			this.delegate = executable;
+		public ListIteratorEndpointCallExecutable(EndpointCallExecutable<List<T>, List<T>> delegate) {
+			this.delegate = delegate;
 		}
 
 		@Override
@@ -65,8 +75,10 @@ public class HeadersEndpointCallExecutableFactory implements EndpointCallExecuta
 		}
 
 		@Override
-		public Headers execute(EndpointCall<Void> call, Object[] args) {
-			return delegate.execute(call, args).headers();
+		public ListIterator<T> execute(EndpointCall<List<T>> call, Object[] args) {
+			return Optional.ofNullable(delegate.execute(call, args))
+				.map(c -> c.listIterator())
+					.orElseGet(Collections::emptyListIterator);
 		}
 	}
 }

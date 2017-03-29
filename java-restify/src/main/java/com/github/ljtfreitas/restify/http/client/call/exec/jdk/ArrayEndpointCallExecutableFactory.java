@@ -23,50 +23,49 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.http.client.call.exec;
+package com.github.ljtfreitas.restify.http.client.call.exec.jdk;
 
-import com.github.ljtfreitas.restify.http.client.Headers;
+import java.util.Optional;
+
 import com.github.ljtfreitas.restify.http.client.call.EndpointCall;
-import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
+import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutable;
+import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutableFactory;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethod;
 import com.github.ljtfreitas.restify.http.contract.metadata.reflection.JavaType;
-import com.github.ljtfreitas.restify.http.contract.metadata.reflection.SimpleParameterizedType;
 
-public class HeadersEndpointCallExecutableFactory implements EndpointCallExecutableDecoratorFactory<Headers, EndpointResponse<Void>, Void> {
-
-	private static final JavaType DEFAULT_RETURN_TYPE = JavaType.of(new SimpleParameterizedType(EndpointResponse.class, null, Void.class));
+public class ArrayEndpointCallExecutableFactory<T> implements EndpointCallExecutableFactory<T[], T[]> {
 
 	@Override
 	public boolean supports(EndpointMethod endpointMethod) {
-		return endpointMethod.returnType().is(Headers.class);
+		return endpointMethod.returnType().arrayType();
 	}
 
 	@Override
-	public JavaType returnType(EndpointMethod endpointMethod) {
-		return DEFAULT_RETURN_TYPE;
+	public EndpointCallExecutable<T[], T[]> create(EndpointMethod endpointMethod) {
+		return new ArrayEndpointCallExecutable(endpointMethod.returnType());
 	}
 
-	@Override
-	public EndpointCallExecutable<Headers, Void> create(EndpointMethod endpointMethod, EndpointCallExecutable<EndpointResponse<Void>, Void> executable) {
-		return new HeadersEndpointCallExecutable(executable);
-	}
+	private class ArrayEndpointCallExecutable implements EndpointCallExecutable<T[], T[]> {
 
-	private class HeadersEndpointCallExecutable implements EndpointCallExecutable<Headers, Void> {
+		private final JavaType returnType;
 
-		private final EndpointCallExecutable<EndpointResponse<Void>, Void> delegate;
-
-		public HeadersEndpointCallExecutable(EndpointCallExecutable<EndpointResponse<Void>, Void> executable) {
-			this.delegate = executable;
+		public ArrayEndpointCallExecutable(JavaType returnType) {
+			this.returnType = returnType;
 		}
 
 		@Override
 		public JavaType returnType() {
-			return delegate.returnType();
+			return returnType;
 		}
 
 		@Override
-		public Headers execute(EndpointCall<Void> call, Object[] args) {
-			return delegate.execute(call, args).headers();
+		public T[] execute(EndpointCall<T[]> call, Object[] args) {
+			return Optional.ofNullable(call.execute()).orElseGet(() -> empty());
+		}
+
+		@SuppressWarnings("unchecked")
+		private T[] empty() {
+			return (T[]) new Object[0];
 		}
 	}
 }

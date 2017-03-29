@@ -51,9 +51,9 @@ public class OptionalEndpointCallExecutableFactoryTest {
 		when(endpointCall.execute())
 			.thenReturn(result);
 
-		Optional<String> future = executable.execute(endpointCall, null);
+		Optional<String> optional = executable.execute(endpointCall, null);
 
-		assertEquals(result, future.get());
+		assertEquals(result, optional.get());
 		assertEquals(JavaType.of(String.class), executable.returnType());
 	}
 
@@ -63,7 +63,7 @@ public class OptionalEndpointCallExecutableFactoryTest {
 		assertEquals(JavaType.of(Object.class), executable.returnType());
 	}
 
-	interface SomeType {
+	private interface SomeType {
 
 		Optional<String> optional();
 
