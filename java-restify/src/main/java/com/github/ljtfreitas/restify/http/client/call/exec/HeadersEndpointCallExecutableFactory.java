@@ -51,7 +51,7 @@ public class HeadersEndpointCallExecutableFactory implements EndpointCallExecuta
 		return new HeadersEndpointCallExecutable(executable);
 	}
 
-	public class HeadersEndpointCallExecutable implements EndpointCallExecutable<Headers, Void> {
+	private class HeadersEndpointCallExecutable implements EndpointCallExecutable<Headers, Void> {
 
 		private final EndpointCallExecutable<EndpointResponse<Void>, Void> delegate;
 

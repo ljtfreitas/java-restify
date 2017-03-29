@@ -51,7 +51,6 @@ public class CallableEndpointCallExecutableFactoryTest {
 		assertFalse(factory.supports(new SimpleEndpointMethod(SomeType.class.getMethod("string"))));
 	}
 
-
 	@Test
 	public void shouldReturnArgumentTypeOfCallable() throws Exception {
 		assertEquals(JavaType.of(String.class), factory.returnType(new SimpleEndpointMethod(SomeType.class.getMethod("callable"))));

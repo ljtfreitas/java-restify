@@ -28,7 +28,9 @@ package com.github.ljtfreitas.restify.http.client.call.exec.jdk;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Iterator;
+import java.util.Optional;
 
 import com.github.ljtfreitas.restify.http.client.call.EndpointCall;
 import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutable;
@@ -74,8 +76,9 @@ public class IteratorEndpointCallExecutableFactory<T> implements EndpointCallExe
 
 		@Override
 		public Iterator<T> execute(EndpointCall<Collection<T>> call, Object[] args) {
-			Collection<T> collection = delegate.execute(call, args);
-			return collection.iterator();
+			return Optional.ofNullable(delegate.execute(call, args))
+				.map(c -> c.iterator())
+					.orElseGet(Collections::emptyIterator);
 		}
 	}
 }
