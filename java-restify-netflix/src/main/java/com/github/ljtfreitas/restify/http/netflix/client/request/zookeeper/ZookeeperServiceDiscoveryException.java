@@ -25,41 +25,19 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.netflix.client.request.zookeeper;
 
-import java.util.List;
-import java.util.stream.Collectors;
+public class ZookeeperServiceDiscoveryException extends RuntimeException {
 
-import com.netflix.client.config.IClientConfig;
-import com.netflix.loadbalancer.AbstractServerList;
-import com.netflix.loadbalancer.Server;
+	private static final long serialVersionUID = 1L;
 
-public class ZookeeperServers extends AbstractServerList<Server> {
-
-	private final String serviceName;
-	private final ZookeeperServiceDiscovery zookeeperServiceDiscovery;
-
-	public ZookeeperServers(String serviceName, ZookeeperServiceDiscovery zookeeperServiceDiscovery) {
-		this.serviceName = serviceName;
-		this.zookeeperServiceDiscovery = zookeeperServiceDiscovery;
+	public ZookeeperServiceDiscoveryException(String message, Throwable cause) {
+		super(message, cause);
 	}
 
-	@Override
-	public List<Server> getInitialListOfServers() {
-		return allServers();
+	public ZookeeperServiceDiscoveryException(String message) {
+		super(message);
 	}
 
-	@Override
-	public List<Server> getUpdatedListOfServers() {
-		return allServers();
-	}
-
-	private List<Server> allServers() {
-		return zookeeperServiceDiscovery.queryForInstances(serviceName)
-				.stream()
-					.map(instance -> new ZookeeperServer(instance))
-						.collect(Collectors.toList());
-	}
-
-	@Override
-	public void initWithNiwsConfig(IClientConfig clientConfig) {
+	public ZookeeperServiceDiscoveryException(Throwable cause) {
+		super(cause);
 	}
 }

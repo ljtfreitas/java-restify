@@ -29,6 +29,7 @@ import java.util.Optional;
 
 import com.github.ljtfreitas.restify.http.client.request.HttpClientRequest;
 import com.github.ljtfreitas.restify.http.client.request.HttpClientRequestFactory;
+import com.github.ljtfreitas.restify.http.client.request.jdk.JdkHttpClientRequestFactory;
 import com.github.ljtfreitas.restify.http.client.response.HttpResponseMessage;
 import com.netflix.client.AbstractLoadBalancerAwareClient;
 import com.netflix.client.RequestSpecificRetryHandler;
@@ -44,15 +45,36 @@ public class RibbonLoadBalancedClient extends AbstractLoadBalancerAwareClient<Ri
 	private final HttpClientRequestFactory httpClientRequestFactory;
 	private final RibbonExceptionHandler ribbonExceptionHandler;
 
+	public RibbonLoadBalancedClient(ILoadBalancer loadBalancer) {
+		this(loadBalancer, new DefaultClientConfigImpl(), new JdkHttpClientRequestFactory(), new SimpleRibbonExceptionHandler());
+	}
+
+	public RibbonLoadBalancedClient(ILoadBalancer loadBalancer, IClientConfig clientConfig) {
+		this(loadBalancer, clientConfig, new JdkHttpClientRequestFactory(), new SimpleRibbonExceptionHandler());
+	}
+
 	public RibbonLoadBalancedClient(ILoadBalancer loadBalancer, IClientConfig clientConfig, HttpClientRequestFactory httpClientRequestFactory) {
 		this(loadBalancer, clientConfig, httpClientRequestFactory, new SimpleRibbonExceptionHandler());
 	}
 
-	public RibbonLoadBalancedClient(ILoadBalancer loadBalancer, IClientConfig clientConfig, HttpClientRequestFactory httpClientRequestFactory, RibbonExceptionHandler ribbonRequestExceptionObserver) {
+	public RibbonLoadBalancedClient(ILoadBalancer loadBalancer, HttpClientRequestFactory httpClientRequestFactory) {
+		this(loadBalancer, new DefaultClientConfigImpl(), httpClientRequestFactory, new SimpleRibbonExceptionHandler());
+	}
+
+	public RibbonLoadBalancedClient(ILoadBalancer loadBalancer, RibbonExceptionHandler ribbonExceptionHandler) {
+		this(loadBalancer, new DefaultClientConfigImpl(), new JdkHttpClientRequestFactory(), ribbonExceptionHandler);
+	}
+
+	public RibbonLoadBalancedClient(ILoadBalancer loadBalancer, IClientConfig clientConfig, RibbonExceptionHandler ribbonExceptionHandler) {
+		this(loadBalancer, clientConfig, new JdkHttpClientRequestFactory(), ribbonExceptionHandler);
+	}
+
+	public RibbonLoadBalancedClient(ILoadBalancer loadBalancer, IClientConfig clientConfig, HttpClientRequestFactory httpClientRequestFactory,
+			RibbonExceptionHandler ribbonExceptionHandler) {
 		super(loadBalancer, clientConfig);
 		this.clientConfig = clientConfig;
 		this.httpClientRequestFactory = httpClientRequestFactory;
-		this.ribbonExceptionHandler = ribbonRequestExceptionObserver;
+		this.ribbonExceptionHandler = ribbonExceptionHandler;
 	}
 
 	@Override

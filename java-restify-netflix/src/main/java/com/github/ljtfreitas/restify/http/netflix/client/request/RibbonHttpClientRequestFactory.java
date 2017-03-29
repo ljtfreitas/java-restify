@@ -49,11 +49,38 @@ public class RibbonHttpClientRequestFactory implements HttpClientRequestFactory 
 		this(loadBalancer, clientConfig, new JdkHttpClientRequestFactory());
 	}
 
+	public RibbonHttpClientRequestFactory(ILoadBalancer loadBalancer, HttpClientRequestFactory delegate) {
+		this(loadBalancer, new DefaultClientConfigImpl(), delegate);
+	}
+
 	public RibbonHttpClientRequestFactory(ILoadBalancer loadBalancer, IClientConfig clientConfig, HttpClientRequestFactory delegate) {
 		this(loadBalancer, clientConfig, delegate, Encoding.UTF_8.charset());
 	}
 
+	public RibbonHttpClientRequestFactory(ILoadBalancer loadBalancer, RibbonExceptionHandler ribbonExceptionHandler) {
+		this(loadBalancer, new DefaultClientConfigImpl(), ribbonExceptionHandler);
+	}
+
+	public RibbonHttpClientRequestFactory(ILoadBalancer loadBalancer, IClientConfig clientConfig, RibbonExceptionHandler ribbonExceptionHandler) {
+		this(loadBalancer, clientConfig, new JdkHttpClientRequestFactory(), ribbonExceptionHandler);
+	}
+
+	public RibbonHttpClientRequestFactory(ILoadBalancer loadBalancer, IClientConfig clientConfig, HttpClientRequestFactory delegate,
+			RibbonExceptionHandler ribbonExceptionHandler) {
+		this(new RibbonLoadBalancedClient(loadBalancer, clientConfig, delegate, ribbonExceptionHandler), Encoding.UTF_8.charset());
+	}
+
+	public RibbonHttpClientRequestFactory(ILoadBalancer loadBalancer, IClientConfig clientConfig, RibbonExceptionHandler ribbonExceptionHandler,
+			Charset charset) {
+		this(loadBalancer, clientConfig, new JdkHttpClientRequestFactory(), ribbonExceptionHandler, charset);
+	}
+
 	public RibbonHttpClientRequestFactory(ILoadBalancer loadBalancer, IClientConfig clientConfig, HttpClientRequestFactory delegate, Charset charset) {
+		this(new RibbonLoadBalancedClient(loadBalancer, clientConfig, delegate), charset);
+	}
+
+	public RibbonHttpClientRequestFactory(ILoadBalancer loadBalancer, IClientConfig clientConfig, HttpClientRequestFactory delegate,
+			RibbonExceptionHandler ribbonExceptionHandler, Charset charset) {
 		this(new RibbonLoadBalancedClient(loadBalancer, clientConfig, delegate), charset);
 	}
 
