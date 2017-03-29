@@ -53,6 +53,11 @@ public class JavaType {
 		return rawClassType.equals(Void.class) || rawClassType.equals(Void.TYPE);
 	}
 
+	public boolean arrayType() {
+		Class<?> rawClassType = rawClassType();
+		return rawClassType.isArray();
+	}
+
 	public boolean is(Class<?> classType) {
 		return rawClassType().equals(classType);
 	}
