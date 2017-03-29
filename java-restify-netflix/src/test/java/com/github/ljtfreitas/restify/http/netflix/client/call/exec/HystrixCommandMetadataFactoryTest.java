@@ -1,13 +1,13 @@
 package com.github.ljtfreitas.restify.http.netflix.client.call.exec;
 
-import static com.github.ljtfreitas.restify.http.netflix.client.request.circuitbreaker.CircuitBreakerProperties.CORE_SIZE;
-import static com.github.ljtfreitas.restify.http.netflix.client.request.circuitbreaker.CircuitBreakerProperties.EXECUTION_ISOLATION_STRATEGY;
-import static com.github.ljtfreitas.restify.http.netflix.client.request.circuitbreaker.CircuitBreakerProperties.EXECUTION_ISOLATION_THREAD_TIMEOUT_IN_MILLISECONDS;
+import static com.github.ljtfreitas.restify.http.netflix.client.request.circuitbreaker.CircuitBreakerProperty.THREAD_POOL_CORE_SIZE;
+import static com.github.ljtfreitas.restify.http.netflix.client.request.circuitbreaker.CircuitBreakerProperty.EXECUTION_ISOLATION_STRATEGY;
+import static com.github.ljtfreitas.restify.http.netflix.client.request.circuitbreaker.CircuitBreakerProperty.EXECUTION_ISOLATION_THREAD_TIMEOUT_IN_MILLISECONDS;
 import static org.junit.Assert.assertEquals;
 
 import org.junit.Test;
 
-import com.github.ljtfreitas.restify.http.netflix.client.request.circuitbreaker.CircuitBreakerProperties;
+import com.github.ljtfreitas.restify.http.netflix.client.request.circuitbreaker.CircuitBreakerProperty;
 import com.github.ljtfreitas.restify.http.netflix.client.request.circuitbreaker.OnCircuitBreaker;
 import com.netflix.hystrix.HystrixCommand;
 import com.netflix.hystrix.HystrixCommandProperties.ExecutionIsolationStrategy;
@@ -79,9 +79,9 @@ public class HystrixCommandMetadataFactoryTest {
 		String customizedKeys();
 
 		@OnCircuitBreaker(properties = {
-				@CircuitBreakerProperties(name = EXECUTION_ISOLATION_STRATEGY, value = "SEMAPHORE"),
-				@CircuitBreakerProperties(name = EXECUTION_ISOLATION_THREAD_TIMEOUT_IN_MILLISECONDS, value = "2500"),
-				@CircuitBreakerProperties(name = CORE_SIZE, value = "50")})
+				@CircuitBreakerProperty(name = EXECUTION_ISOLATION_STRATEGY, value = "SEMAPHORE"),
+				@CircuitBreakerProperty(name = EXECUTION_ISOLATION_THREAD_TIMEOUT_IN_MILLISECONDS, value = "2500"),
+				@CircuitBreakerProperty(name = THREAD_POOL_CORE_SIZE, value = "50")})
 		String customizedProperties();
 	}
 }

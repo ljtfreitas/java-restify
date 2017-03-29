@@ -34,21 +34,25 @@ import java.lang.annotation.Target;
 @Target({ElementType.TYPE, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
-public @interface CircuitBreakerProperties {
+public @interface CircuitBreakerProperty {
 
 	String name();
 
 	String value();
 
+	// Execution
 	public static final String EXECUTION_ISOLATION_STRATEGY = "execution.isolation.strategy";
 	public static final String EXECUTION_ISOLATION_THREAD_TIMEOUT_IN_MILLISECONDS = "execution.isolation.thread.timeoutInMilliseconds";
 	public static final String EXECUTION_TIMEOUT_ENABLED = "execution.timeout.enabled";
 	public static final String EXECUTION_ISOLATION_THREAD_INTERRUPT_ON_TIMEOUT = "execution.isolation.thread.interruptOnTimeout";
+	public static final String EXECUTION_ISOLATION_THREAD_INTERRUPT_ON_CANCEL = "execution.isolation.thread.interruptOnCancel";
 	public static final String EXECUTION_ISOLATION_SEMAPHORE_MAX_CONCURRENT_REQUESTS = "execution.isolation.semaphore.maxConcurrentRequests";
 
+	// Fallback
 	public static final String FALLBACK_ISOLATION_SEMAPHORE_MAX_CONCURRENT_REQUESTS = "fallback.isolation.semaphore.maxConcurrentRequests";
 	public static final String FALLBACK_ENABLED = "fallback.enabled";
 
+	// Circuit breaker
 	public static final String CIRCUIT_BREAKER_ENABLED = "circuitBreaker.enabled";
 	public static final String CIRCUIT_BREAKER_REQUEST_VOLUME_THRESHOLD = "circuitBreaker.requestVolumeThreshold";
 	public static final String CIRCUIT_BREAKER_SLEEP_WINDOW_IN_MILLISECONDS = "circuitBreaker.sleepWindowInMilliseconds";
@@ -56,16 +60,21 @@ public @interface CircuitBreakerProperties {
 	public static final String CIRCUIT_BREAKER_FORCE_OPEN = "circuitBreaker.forceOpen";
 	public static final String CIRCUIT_BREAKER_FORCE_CLOSED = "circuitBreaker.forceClosed";
 
+	// Metrics
+	public static final String METRICS_ROLLING_STATS_TIME_IN_MILLISECONDS = "metrics.rollingStats.timeInMilliseconds";
+	public static final String METRICS_ROLLING_STATS_NUM_BUCKETS = "metrics.rollingStats.numBuckets";
 	public static final String METRICS_ROLLING_PERCENTILE_ENABLED = "metrics.rollingPercentile.enabled";
 	public static final String METRICS_ROLLING_PERCENTILE_TIME_IN_MILLISECONDS = "metrics.rollingPercentile.timeInMilliseconds";
 	public static final String METRICS_ROLLING_PERCENTILE_NUM_BUCKETS = "metrics.rollingPercentile.numBuckets";
 	public static final String METRICS_ROLLING_PERCENTILE_BUCKET_SIZE = "metrics.rollingPercentile.bucketSize";
 	public static final String METRICS_HEALTH_SNAPSHOT_INTERVAL_IN_MILLISECONDS = "metrics.healthSnapshot.intervalInMilliseconds";
 
-	public static final String MAX_QUEUE_SIZE = "maxQueueSize";
-	public static final String CORE_SIZE = "coreSize";
-	public static final String KEEP_ALIVE_TIME_MINUTES = "keepAliveTimeMinutes";
-	public static final String QUEUE_SIZE_REJECTION_THRESHOLD = "queueSizeRejectionThreshold";
-	public static final String METRICS_ROLLING_STATS_NUM_BUCKETS = "metrics.rollingStats.numBuckets";
-	public static final String METRICS_ROLLING_STATS_TIME_IN_MILLISECONDS = "metrics.rollingStats.timeInMilliseconds";
+	// Thread pool
+	public static final String THREAD_POOL_MAX_QUEUE_SIZE = "threadpool.default.maxQueueSize";
+	public static final String THREAD_POOL_CORE_SIZE = "threadpool.default.coreSize";
+	public static final String THREAD_POOL_KEEP_ALIVE_TIME_MINUTES = "threadpool.default.keepAliveTimeMinutes";
+	public static final String THREAD_POOL_QUEUE_SIZE_REJECTION_THRESHOLD = "threadpool.default.queueSizeRejectionThreshold";
+	public static final String THREAD_POOL_ALLOW_MAXIMUM_SIZE_TO_DIVERGE_FROM_CORE_SIZE = "threadpool.default.allowMaximumSizeToDivergeFromCoreSize";
+	public static final String THREAD_POOL_METRICS_ROLLING_STATS_TIME_IN_MILLISECONDS = "threadpool.default.metrics.rollingStats.timeInMilliseconds";
+	public static final String THREAD_POOL_METRICS_ROLLING_STATS_NUM_BUCKETS = "threadpool.default.metrics.rollingStats.numBuckets";
 }

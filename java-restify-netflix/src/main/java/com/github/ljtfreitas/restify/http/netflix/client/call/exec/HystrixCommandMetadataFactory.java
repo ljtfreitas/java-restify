@@ -28,7 +28,7 @@ package com.github.ljtfreitas.restify.http.netflix.client.call.exec;
 import java.util.Optional;
 
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethod;
-import com.github.ljtfreitas.restify.http.netflix.client.request.circuitbreaker.CircuitBreakerProperties;
+import com.github.ljtfreitas.restify.http.netflix.client.request.circuitbreaker.CircuitBreakerProperty;
 import com.github.ljtfreitas.restify.http.netflix.client.request.circuitbreaker.OnCircuitBreaker;
 import com.netflix.hystrix.HystrixCommand;
 import com.netflix.hystrix.HystrixCommandGroupKey;
@@ -84,8 +84,8 @@ class HystrixCommandMetadataFactory {
 	}
 
 	private HystrixCommandProperties.Setter commandProperties() {
-		CircuitBreakerProperties[] properties = onCircuitBreaker.map(a -> a.properties())
-				.orElseGet(() -> new CircuitBreakerProperties[0]);
+		CircuitBreakerProperty[] properties = onCircuitBreaker.map(a -> a.properties())
+				.orElseGet(() -> new CircuitBreakerProperty[0]);
 
 		HystrixCommandProperties.Setter hystrixCommandProperties = HystrixCommandProperties.defaultSetter();
 
@@ -96,8 +96,8 @@ class HystrixCommandMetadataFactory {
 	}
 
 	private HystrixThreadPoolProperties.Setter threadPoolProperties() {
-		CircuitBreakerProperties[] properties = onCircuitBreaker.map(a -> a.properties())
-				.orElseGet(() -> new CircuitBreakerProperties[0]);
+		CircuitBreakerProperty[] properties = onCircuitBreaker.map(a -> a.properties())
+				.orElseGet(() -> new CircuitBreakerProperty[0]);
 
 		HystrixThreadPoolProperties.Setter hystrixThreadPoolProperties = HystrixThreadPoolProperties.defaultSetter();
 

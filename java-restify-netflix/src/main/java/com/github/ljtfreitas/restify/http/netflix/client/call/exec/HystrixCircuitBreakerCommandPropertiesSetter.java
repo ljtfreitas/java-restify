@@ -25,33 +25,34 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.netflix.client.call.exec;
 
-import static com.github.ljtfreitas.restify.http.netflix.client.request.circuitbreaker.CircuitBreakerProperties.CIRCUIT_BREAKER_ENABLED;
-import static com.github.ljtfreitas.restify.http.netflix.client.request.circuitbreaker.CircuitBreakerProperties.CIRCUIT_BREAKER_ERROR_THRESHOLD_PERCENTAGE;
-import static com.github.ljtfreitas.restify.http.netflix.client.request.circuitbreaker.CircuitBreakerProperties.CIRCUIT_BREAKER_FORCE_CLOSED;
-import static com.github.ljtfreitas.restify.http.netflix.client.request.circuitbreaker.CircuitBreakerProperties.CIRCUIT_BREAKER_FORCE_OPEN;
-import static com.github.ljtfreitas.restify.http.netflix.client.request.circuitbreaker.CircuitBreakerProperties.CIRCUIT_BREAKER_REQUEST_VOLUME_THRESHOLD;
-import static com.github.ljtfreitas.restify.http.netflix.client.request.circuitbreaker.CircuitBreakerProperties.CIRCUIT_BREAKER_SLEEP_WINDOW_IN_MILLISECONDS;
-import static com.github.ljtfreitas.restify.http.netflix.client.request.circuitbreaker.CircuitBreakerProperties.EXECUTION_ISOLATION_SEMAPHORE_MAX_CONCURRENT_REQUESTS;
-import static com.github.ljtfreitas.restify.http.netflix.client.request.circuitbreaker.CircuitBreakerProperties.EXECUTION_ISOLATION_STRATEGY;
-import static com.github.ljtfreitas.restify.http.netflix.client.request.circuitbreaker.CircuitBreakerProperties.EXECUTION_ISOLATION_THREAD_INTERRUPT_ON_TIMEOUT;
-import static com.github.ljtfreitas.restify.http.netflix.client.request.circuitbreaker.CircuitBreakerProperties.EXECUTION_ISOLATION_THREAD_TIMEOUT_IN_MILLISECONDS;
-import static com.github.ljtfreitas.restify.http.netflix.client.request.circuitbreaker.CircuitBreakerProperties.EXECUTION_TIMEOUT_ENABLED;
-import static com.github.ljtfreitas.restify.http.netflix.client.request.circuitbreaker.CircuitBreakerProperties.FALLBACK_ENABLED;
-import static com.github.ljtfreitas.restify.http.netflix.client.request.circuitbreaker.CircuitBreakerProperties.FALLBACK_ISOLATION_SEMAPHORE_MAX_CONCURRENT_REQUESTS;
-import static com.github.ljtfreitas.restify.http.netflix.client.request.circuitbreaker.CircuitBreakerProperties.METRICS_HEALTH_SNAPSHOT_INTERVAL_IN_MILLISECONDS;
-import static com.github.ljtfreitas.restify.http.netflix.client.request.circuitbreaker.CircuitBreakerProperties.METRICS_ROLLING_PERCENTILE_BUCKET_SIZE;
-import static com.github.ljtfreitas.restify.http.netflix.client.request.circuitbreaker.CircuitBreakerProperties.METRICS_ROLLING_PERCENTILE_ENABLED;
-import static com.github.ljtfreitas.restify.http.netflix.client.request.circuitbreaker.CircuitBreakerProperties.METRICS_ROLLING_PERCENTILE_NUM_BUCKETS;
-import static com.github.ljtfreitas.restify.http.netflix.client.request.circuitbreaker.CircuitBreakerProperties.METRICS_ROLLING_PERCENTILE_TIME_IN_MILLISECONDS;
-import static com.github.ljtfreitas.restify.http.netflix.client.request.circuitbreaker.CircuitBreakerProperties.METRICS_ROLLING_STATS_NUM_BUCKETS;
-import static com.github.ljtfreitas.restify.http.netflix.client.request.circuitbreaker.CircuitBreakerProperties.METRICS_ROLLING_STATS_TIME_IN_MILLISECONDS;
+import static com.github.ljtfreitas.restify.http.netflix.client.request.circuitbreaker.CircuitBreakerProperty.CIRCUIT_BREAKER_ENABLED;
+import static com.github.ljtfreitas.restify.http.netflix.client.request.circuitbreaker.CircuitBreakerProperty.CIRCUIT_BREAKER_ERROR_THRESHOLD_PERCENTAGE;
+import static com.github.ljtfreitas.restify.http.netflix.client.request.circuitbreaker.CircuitBreakerProperty.CIRCUIT_BREAKER_FORCE_CLOSED;
+import static com.github.ljtfreitas.restify.http.netflix.client.request.circuitbreaker.CircuitBreakerProperty.CIRCUIT_BREAKER_FORCE_OPEN;
+import static com.github.ljtfreitas.restify.http.netflix.client.request.circuitbreaker.CircuitBreakerProperty.CIRCUIT_BREAKER_REQUEST_VOLUME_THRESHOLD;
+import static com.github.ljtfreitas.restify.http.netflix.client.request.circuitbreaker.CircuitBreakerProperty.CIRCUIT_BREAKER_SLEEP_WINDOW_IN_MILLISECONDS;
+import static com.github.ljtfreitas.restify.http.netflix.client.request.circuitbreaker.CircuitBreakerProperty.EXECUTION_ISOLATION_SEMAPHORE_MAX_CONCURRENT_REQUESTS;
+import static com.github.ljtfreitas.restify.http.netflix.client.request.circuitbreaker.CircuitBreakerProperty.EXECUTION_ISOLATION_STRATEGY;
+import static com.github.ljtfreitas.restify.http.netflix.client.request.circuitbreaker.CircuitBreakerProperty.EXECUTION_ISOLATION_THREAD_INTERRUPT_ON_CANCEL;
+import static com.github.ljtfreitas.restify.http.netflix.client.request.circuitbreaker.CircuitBreakerProperty.EXECUTION_ISOLATION_THREAD_INTERRUPT_ON_TIMEOUT;
+import static com.github.ljtfreitas.restify.http.netflix.client.request.circuitbreaker.CircuitBreakerProperty.EXECUTION_ISOLATION_THREAD_TIMEOUT_IN_MILLISECONDS;
+import static com.github.ljtfreitas.restify.http.netflix.client.request.circuitbreaker.CircuitBreakerProperty.EXECUTION_TIMEOUT_ENABLED;
+import static com.github.ljtfreitas.restify.http.netflix.client.request.circuitbreaker.CircuitBreakerProperty.FALLBACK_ENABLED;
+import static com.github.ljtfreitas.restify.http.netflix.client.request.circuitbreaker.CircuitBreakerProperty.FALLBACK_ISOLATION_SEMAPHORE_MAX_CONCURRENT_REQUESTS;
+import static com.github.ljtfreitas.restify.http.netflix.client.request.circuitbreaker.CircuitBreakerProperty.METRICS_HEALTH_SNAPSHOT_INTERVAL_IN_MILLISECONDS;
+import static com.github.ljtfreitas.restify.http.netflix.client.request.circuitbreaker.CircuitBreakerProperty.METRICS_ROLLING_PERCENTILE_BUCKET_SIZE;
+import static com.github.ljtfreitas.restify.http.netflix.client.request.circuitbreaker.CircuitBreakerProperty.METRICS_ROLLING_PERCENTILE_ENABLED;
+import static com.github.ljtfreitas.restify.http.netflix.client.request.circuitbreaker.CircuitBreakerProperty.METRICS_ROLLING_PERCENTILE_NUM_BUCKETS;
+import static com.github.ljtfreitas.restify.http.netflix.client.request.circuitbreaker.CircuitBreakerProperty.METRICS_ROLLING_PERCENTILE_TIME_IN_MILLISECONDS;
+import static com.github.ljtfreitas.restify.http.netflix.client.request.circuitbreaker.CircuitBreakerProperty.METRICS_ROLLING_STATS_NUM_BUCKETS;
+import static com.github.ljtfreitas.restify.http.netflix.client.request.circuitbreaker.CircuitBreakerProperty.METRICS_ROLLING_STATS_TIME_IN_MILLISECONDS;
 
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import com.github.ljtfreitas.restify.http.netflix.client.request.circuitbreaker.CircuitBreakerProperties;
+import com.github.ljtfreitas.restify.http.netflix.client.request.circuitbreaker.CircuitBreakerProperty;
 import com.netflix.hystrix.HystrixCommandProperties;
 import com.netflix.hystrix.HystrixCommandProperties.ExecutionIsolationStrategy;
 
@@ -60,9 +61,9 @@ class HystrixCircuitBreakerCommandPropertiesSetter {
 	private static final Map<String, HystrixCircuitBreakerPropertiesSetter<HystrixCommandProperties.Setter>> HYSTRIX_COMMAND_PROPERTIES_SETTERS
 		= new LinkedHashMap<>();
 
-	private final CircuitBreakerProperties[] properties;
+	private final CircuitBreakerProperty[] properties;
 
-	public HystrixCircuitBreakerCommandPropertiesSetter(CircuitBreakerProperties[] properties) {
+	public HystrixCircuitBreakerCommandPropertiesSetter(CircuitBreakerProperty[] properties) {
 		this.properties = properties;
 	}
 
@@ -73,6 +74,7 @@ class HystrixCircuitBreakerCommandPropertiesSetter {
 	}
 
 	static {
+		// Execution
 		HYSTRIX_COMMAND_PROPERTIES_SETTERS.put(EXECUTION_ISOLATION_STRATEGY,
 				(s, v) -> s.withExecutionIsolationStrategy(ExecutionIsolationStrategy.valueOf(v)));
 
@@ -85,15 +87,20 @@ class HystrixCircuitBreakerCommandPropertiesSetter {
 		HYSTRIX_COMMAND_PROPERTIES_SETTERS.put(EXECUTION_ISOLATION_THREAD_INTERRUPT_ON_TIMEOUT,
 				(s, v) -> s.withExecutionIsolationThreadInterruptOnTimeout(Boolean.valueOf(v)));
 
+		HYSTRIX_COMMAND_PROPERTIES_SETTERS.put(EXECUTION_ISOLATION_THREAD_INTERRUPT_ON_CANCEL,
+				(s, v) -> s.withExecutionIsolationThreadInterruptOnFutureCancel(Boolean.valueOf(v)));
+
 		HYSTRIX_COMMAND_PROPERTIES_SETTERS.put(EXECUTION_ISOLATION_SEMAPHORE_MAX_CONCURRENT_REQUESTS,
 				(s, v) -> s.withExecutionIsolationSemaphoreMaxConcurrentRequests(Integer.valueOf(v)));
 
+		// Fallback
 		HYSTRIX_COMMAND_PROPERTIES_SETTERS.put(FALLBACK_ISOLATION_SEMAPHORE_MAX_CONCURRENT_REQUESTS,
 				(s, v) -> s.withFallbackIsolationSemaphoreMaxConcurrentRequests(Integer.valueOf(v)));
 
 		HYSTRIX_COMMAND_PROPERTIES_SETTERS.put(FALLBACK_ENABLED,
 				(s, v) -> s.withFallbackEnabled(Boolean.valueOf(v)));
 
+		// Circuit breaker
 		HYSTRIX_COMMAND_PROPERTIES_SETTERS.put(CIRCUIT_BREAKER_ENABLED,
 				(s, v) -> s.withCircuitBreakerEnabled(Boolean.valueOf(v)));
 
@@ -112,6 +119,7 @@ class HystrixCircuitBreakerCommandPropertiesSetter {
 		HYSTRIX_COMMAND_PROPERTIES_SETTERS.put(CIRCUIT_BREAKER_FORCE_CLOSED,
 				(s, v) -> s.withCircuitBreakerForceClosed(Boolean.valueOf(v)));
 
+		// Metrics
 		HYSTRIX_COMMAND_PROPERTIES_SETTERS.put(METRICS_ROLLING_STATS_TIME_IN_MILLISECONDS,
 				(s, v) -> s.withMetricsRollingStatisticalWindowInMilliseconds(Integer.valueOf(v)));
 
