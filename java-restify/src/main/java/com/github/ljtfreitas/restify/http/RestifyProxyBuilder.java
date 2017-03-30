@@ -411,9 +411,9 @@ public class RestifyProxyBuilder {
 		}
 
 		private EndpointCallExecutables build() {
-			built.addAll(async.build());
-			built.addAll(providers);
-			return new EndpointCallExecutables(built);
+			providers.addAll(built);
+			providers.addAll(async.build());
+			return new EndpointCallExecutables(providers);
 		}
 	}
 
