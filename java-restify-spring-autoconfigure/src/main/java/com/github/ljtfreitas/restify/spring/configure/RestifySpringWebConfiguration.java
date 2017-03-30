@@ -46,7 +46,6 @@ import com.github.ljtfreitas.restify.http.spring.contract.SpringWebContractReade
 import com.github.ljtfreitas.restify.http.spring.contract.metadata.SpelDynamicParameterExpressionResolver;
 
 @Configuration
-@ConditionalOnProperty(name = "restify.contract", havingValue = "spring-web", matchIfMissing = true)
 public class RestifySpringWebConfiguration {
 
 	@Autowired(required = false)
@@ -66,15 +65,20 @@ public class RestifySpringWebConfiguration {
 		return new RestOperationsEndpointRequestExecutor(restOperations, endpointResponseErrorFallback);
 	}
 
-	@ConditionalOnMissingBean
-	@Bean
-	public RestifyContractReader restifyContractReader(RestifyContractExpressionResolver expressionResolver) {
-		return new SpringWebContractReader(expressionResolver);
-	}
+	@Configuration
+	@ConditionalOnProperty(name = "restify.contract", havingValue = "spring-web", matchIfMissing = true)
+	public static class RestifySpringWebContractConfiguration {
 
-	@ConditionalOnMissingBean
-	@Bean
-	public RestifyContractExpressionResolver expressionResolver(ConfigurableBeanFactory beanFactory) {
-		return new SpelDynamicParameterExpressionResolver(beanFactory);
+		@ConditionalOnMissingBean
+		@Bean
+		public RestifyContractReader restifyContractReader(RestifyContractExpressionResolver expressionResolver) {
+			return new SpringWebContractReader(expressionResolver);
+		}
+
+		@ConditionalOnMissingBean
+		@Bean
+		public RestifyContractExpressionResolver expressionResolver(ConfigurableBeanFactory beanFactory) {
+			return new SpelDynamicParameterExpressionResolver(beanFactory);
+		}
 	}
 }
