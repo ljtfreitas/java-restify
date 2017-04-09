@@ -37,6 +37,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.github.ljtfreitas.restify.http.contract.Path;
+import com.github.ljtfreitas.restify.http.contract.Version;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethodParameter.EndpointMethodParameterType;
 import com.github.ljtfreitas.restify.http.contract.metadata.reflection.JavaMethodMetadata;
 import com.github.ljtfreitas.restify.http.contract.metadata.reflection.JavaMethodParameterMetadata;
@@ -75,7 +76,12 @@ public class DefaultRestifyContractReader implements RestifyContractReader {
 	}
 
 	private String endpointPath(EndpointTarget target, JavaTypeMetadata javaTypeMetadata, JavaMethodMetadata javaMethodMetadata) {
-		String endpoint = endpointTarget(target) + endpointTypePath(javaTypeMetadata) + endpointMethodPath(javaMethodMetadata);
+		String endpoint = new StringBuilder()
+				.append(endpointTarget(target))
+				.append(endpointTypePath(javaTypeMetadata))
+				.append(endpointVersion(javaTypeMetadata, javaMethodMetadata))
+				.append(endpointMethodPath(javaMethodMetadata))
+				.toString();
 
 		return Tryable.of(() -> new URL(endpoint)).toString();
 	}
@@ -91,6 +97,17 @@ public class DefaultRestifyContractReader implements RestifyContractReader {
 					.map(p -> expressionResolver.resolve(p))
 						.map(p -> p.endsWith("/") ? p.substring(0, p.length() - 1) : p)
 							.collect(Collectors.joining());
+	}
+
+	private String endpointVersion(JavaTypeMetadata javaTypeMetadata, JavaMethodMetadata javaMethodMetadata) {
+		Version version = javaMethodMetadata.version()
+			.orElseGet(() -> javaTypeMetadata.version().orElse(null));
+
+		return Optional.ofNullable(version)
+			.map(Version::value)
+				.map(v -> v.endsWith("/") ? v.substring(0, v.length() - 1) : v)
+					.map(v -> v.startsWith("/") || v.isEmpty() ? v : "/" + v)
+						.orElse("");
 	}
 
 	private String endpointMethodPath(JavaMethodMetadata javaMethodMetadata) {

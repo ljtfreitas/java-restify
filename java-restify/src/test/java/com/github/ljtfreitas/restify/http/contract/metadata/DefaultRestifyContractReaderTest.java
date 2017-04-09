@@ -34,6 +34,7 @@ import com.github.ljtfreitas.restify.http.contract.PathParameter;
 import com.github.ljtfreitas.restify.http.contract.Post;
 import com.github.ljtfreitas.restify.http.contract.Put;
 import com.github.ljtfreitas.restify.http.contract.QueryParameters;
+import com.github.ljtfreitas.restify.http.contract.Version;
 import com.github.ljtfreitas.restify.http.contract.metadata.reflection.SimpleGenericArrayType;
 import com.github.ljtfreitas.restify.http.contract.metadata.reflection.SimpleParameterizedType;
 import com.github.ljtfreitas.restify.http.contract.metadata.reflection.SimpleWildcardType;
@@ -50,6 +51,8 @@ public class DefaultRestifyContractReaderTest {
 
 	private EndpointTarget mySimpleCrudApiTarget;
 
+	private EndpointTarget myVersionedApiTarget;
+
 	private DefaultRestifyContractReader restifyContractReader;
 
 	@Before
@@ -63,6 +66,8 @@ public class DefaultRestifyContractReaderTest {
 		myContextApiTarget = new EndpointTarget(MyContextApi.class, "http://my.api.com");
 
 		mySimpleCrudApiTarget = new EndpointTarget(MySimpleCrudApi.class, "http://my.api.com");
+
+		myVersionedApiTarget = new EndpointTarget(MyVersionedApi.class);
 
 		restifyContractReader = new DefaultRestifyContractReader();
 	}
@@ -416,6 +421,22 @@ public class DefaultRestifyContractReaderTest {
 		assertEquals("http://localhost:8080/context/any", endpointMethod.path());
 	}
 
+	@Test
+	public void shouldCreateEndpointMethodWithVersionWhenTypeIsVersioned() throws Exception {
+		EndpointMethod endpointMethod = restifyContractReader.read(myVersionedApiTarget,
+				MyVersionedApi.class.getMethod("versionOne"));
+
+		assertEquals("http://my.api.com/v1/model", endpointMethod.path());
+	}
+
+	@Test
+	public void shouldCreateEndpointMethodWithMethodVersionWhenVersionAnnotationIsPresentOnMethod() throws Exception {
+		EndpointMethod endpointMethod = restifyContractReader.read(myVersionedApiTarget,
+				MyVersionedApi.class.getMethod("versionTwo"));
+
+		assertEquals("http://my.api.com/v2/model", endpointMethod.path());
+	}
+
 	@Path("http://my.api.com")
 	@Header(name = "X-My-Type", value = "MyApiType")
 	interface MyApiType {
@@ -582,6 +603,20 @@ public class DefaultRestifyContractReaderTest {
 		@Path("/any")
 		@Get
 		public String method();
+	}
+
+	@Path("http://my.api.com")
+	@Version("v1")
+	interface MyVersionedApi {
+
+		@Path("/model")
+		@Get
+		public MyModel versionOne();
+
+		@Path("/model")
+		@Get
+		@Version("v2")
+		public MyModel versionTwo();
 	}
 
 	class MyModel {
