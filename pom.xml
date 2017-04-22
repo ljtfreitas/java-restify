@@ -29,6 +29,7 @@
 		<module>java-restify-jaxrs-contract</module>
 		<module>java-restify-cdi</module>
 		<module>java-restify-jaxrs-http-client</module>
+		<module>java-restify-oauth2-authentication</module>
 	</modules>
 
 	<dependencies>
