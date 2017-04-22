@@ -63,6 +63,9 @@ public class JdkHttpClientRequestFactory implements HttpClientRequestFactory {
 
 			connection.setConnectTimeout(httpClientRequestConfiguration.connectionTimeout());
 			connection.setReadTimeout(httpClientRequestConfiguration.readTimeout());
+			connection.setReadTimeout(httpClientRequestConfiguration.readTimeout());
+			connection.setInstanceFollowRedirects(httpClientRequestConfiguration.followRedirects());
+			connection.setUseCaches(httpClientRequestConfiguration.useCaches());
 
 			connection.setDoOutput(true);
 			connection.setAllowUserInteraction(false);
