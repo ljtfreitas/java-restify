@@ -25,7 +25,9 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.contract;
 
+import java.net.URI;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.List;
@@ -66,8 +68,16 @@ public class Parameters {
 	}
 
 	public Optional<String> first(String name) {
+		return doFirst(name);
+	}
+
+	private Optional<String> doFirst(String name) {
 		return Optional.ofNullable(parameters.get(name))
 			.flatMap(values -> values.stream().findFirst());
+	}
+
+	public Optional<String> get(String name) {
+		return doFirst(name);
 	}
 
 	public Collection<Parameter> all() {
@@ -107,6 +117,16 @@ public class Parameters {
 		public Collection<String> values() {
 			return values;
 		}
+	}
 
+	public static Parameters from(URI source) {
+		Parameters parameters = new Parameters();
+
+		Arrays.stream(source.getQuery().split("&"))
+				.map(p -> p.split("="))
+					.filter(p -> p.length == 2)
+						.forEach(p -> parameters.put(p[0], p[1]));
+
+		return parameters;
 	}
 }

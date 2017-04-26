@@ -31,11 +31,11 @@ import com.github.ljtfreitas.restify.http.client.Header;
 import com.github.ljtfreitas.restify.http.client.Headers;
 import com.github.ljtfreitas.restify.http.client.message.converter.text.TextPlainMessageConverter;
 
-class EndpointResponseExceptionFactory {
+public class EndpointResponseExceptionFactory {
 
-	static final TextPlainMessageConverter TEXT_ERROR_RESPONSE_MESSAGE_CONVERTER = new TextPlainMessageConverter();
+	private static final TextPlainMessageConverter TEXT_ERROR_RESPONSE_MESSAGE_CONVERTER = new TextPlainMessageConverter();
 
-	RestifyEndpointResponseException create(HttpResponseMessage response) {
+	public RestifyEndpointResponseException create(HttpResponseMessage response) {
 		String bodyAsString = TEXT_ERROR_RESPONSE_MESSAGE_CONVERTER.read(response, String.class);
 
 		String responseBody = (bodyAsString != null && !bodyAsString.isEmpty()) ? bodyAsString : "(empty)";
