@@ -25,25 +25,22 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.authentication.oauth2;
 
-import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
+public class OAuth2ResourceOwner {
 
-abstract class BaseOAuthAccessTokenProvider implements OAuth2AccessTokenProvider {
+	private final String username;
+	private final String password;
 
-	private final OAuth2EndpointRequestExecutor executor;
-
-	protected BaseOAuthAccessTokenProvider() {
-		this.executor = new DefaultOAuth2EndpointRequestExecutor();
+	public OAuth2ResourceOwner(String username, String password) {
+		super();
+		this.username = username;
+		this.password = password;
 	}
 
-	protected BaseOAuthAccessTokenProvider(OAuth2EndpointRequestExecutor executor) {
-		this.executor = executor;
+	public String username() {
+		return username;
 	}
 
-	@Override
-	public OAuth2AccessToken get() {
-		EndpointResponse<OAuth2AccessToken> response = executor.requireToken(buildAccessTokenRequest());
-		return response.body();
+	public String password() {
+		return password;
 	}
-
-	protected abstract OAuth2AccessTokenRequest buildAccessTokenRequest();
 }

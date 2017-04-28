@@ -16,14 +16,14 @@ import org.mockserver.junit.MockServerRule;
 import org.mockserver.model.Parameter;
 
 @RunWith(MockitoJUnitRunner.class)
-public class ClientCredentialsAccessTokenProviderTest {
+public class ResourceOwnerPasswordAccessTokenProviderTest {
 
 	@Rule
 	public MockServerRule mockServerRule = new MockServerRule(this, 8088);
 
 	private MockServerClient mockServerClient;
 
-	private ClientCredentialsAcessTokenProvider provider;
+	private ResourceOwnerPasswordAcessTokenProvider provider;
 
 	private String authorizationCredentials;
 
@@ -31,13 +31,14 @@ public class ClientCredentialsAccessTokenProviderTest {
 	public void setup() {
 		mockServerClient = new MockServerClient("localhost", 8088);
 
-		OAuth2Configuration configuration = new OAuth2Configuration.Builder()
+		OAuth2ResourceOwnerConfiguration configuration = new OAuth2ResourceOwnerConfiguration.Builder()
 				.accessTokenUri("http://localhost:8088/oauth/token")
 				.credentials(new OAuth2ClientCredentials("client-id", "client-secret"))
 				.scopes("read", "write")
+				.resourceOwner("my-username", "my-password")
 				.build();
 
-		provider = new ClientCredentialsAcessTokenProvider(configuration);
+		provider = new ResourceOwnerPasswordAcessTokenProvider(configuration);
 
 		authorizationCredentials = "Y2xpZW50LWlkOmNsaWVudC1zZWNyZXQ="; //(base64(client_id:client_secret))
 	}
@@ -48,8 +49,10 @@ public class ClientCredentialsAccessTokenProviderTest {
 			.when(request()
 					.withMethod("POST")
 					.withPath("/oauth/token")
-					.withBody(params(new Parameter("grant_type", "client_credentials"),
-									 new Parameter("scope", "read write")))
+					.withBody(params(new Parameter("grant_type", "password"),
+									 new Parameter("scope", "read write"),
+									 new Parameter("username", "my-username"),
+									 new Parameter("password", "my-password")))
 					.withHeader("Authorization", "Basic " + authorizationCredentials))
 				.respond(response()
 					.withStatusCode(200)

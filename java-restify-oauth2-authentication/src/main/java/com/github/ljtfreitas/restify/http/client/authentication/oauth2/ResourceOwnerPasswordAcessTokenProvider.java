@@ -25,24 +25,29 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.authentication.oauth2;
 
-public class ClientCredentialsAcessTokenProvider extends BaseOAuth2AccessTokenProvider {
+import static com.github.ljtfreitas.restify.http.util.Preconditions.nonNull;
 
-	private final OAuth2Configuration configuration;
+public class ResourceOwnerPasswordAcessTokenProvider extends BaseOAuth2AccessTokenProvider {
 
-	public ClientCredentialsAcessTokenProvider(OAuth2Configuration configuration) {
+	private final OAuth2ResourceOwnerConfiguration configuration;
+
+	public ResourceOwnerPasswordAcessTokenProvider(OAuth2ResourceOwnerConfiguration configuration) {
 		this.configuration = configuration;
 	}
 
-	public ClientCredentialsAcessTokenProvider(OAuth2Configuration configuration, OAuth2EndpointRequestExecutor executor) {
+	public ResourceOwnerPasswordAcessTokenProvider(OAuth2ResourceOwnerConfiguration configuration, OAuth2EndpointRequestExecutor executor) {
 		super(executor);
 		this.configuration = configuration;
 	}
 
 	@Override
 	protected OAuth2AccessTokenRequest buildAccessTokenRequest() {
-		OAuth2AccessTokenRequest.Builder builder = OAuth2AccessTokenRequest.clientCredentials(configuration.credentials());
+		nonNull(configuration.resourceOwner(), "Your resource owner credentials are required.");
+
+		OAuth2AccessTokenRequest.Builder builder = OAuth2AccessTokenRequest.resourceOwner(configuration.resourceOwner());
 
 		return builder.accessTokenUri(configuration.accessTokenUri())
+					  .credentials(configuration.credentials())
 					  .put("scope", configuration.scope())
 					  .build();
 	}

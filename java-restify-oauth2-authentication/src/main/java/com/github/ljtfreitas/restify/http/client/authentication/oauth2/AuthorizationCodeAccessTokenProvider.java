@@ -25,7 +25,7 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.authentication.oauth2;
 
-public class AuthorizationCodeAccessTokenProvider extends BaseOAuthAccessTokenProvider {
+public class AuthorizationCodeAccessTokenProvider extends BaseOAuth2AccessTokenProvider {
 
 	private final OAuth2AuthorizationConfiguration configuration;
 	private final OAuth2AuthorizationCodeProvider authorizationCodeProvider;

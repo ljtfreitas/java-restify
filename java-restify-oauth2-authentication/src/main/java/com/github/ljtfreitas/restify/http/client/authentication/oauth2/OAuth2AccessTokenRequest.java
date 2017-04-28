@@ -69,6 +69,15 @@ public class OAuth2AccessTokenRequest {
 		return builder;
 	}
 
+	public static Builder resourceOwner(OAuth2ResourceOwner resourceOwner) {
+		Builder builder = new OAuth2AccessTokenRequest.Builder("password");
+
+		builder.put("username", resourceOwner.username())
+			   .put("password", resourceOwner.password());
+
+		return builder;
+	}
+
 	public static class Builder {
 
 		private URI accessTokenUri = null;
