@@ -25,21 +25,12 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.authentication.oauth2;
 
-import com.github.ljtfreitas.restify.http.RestifyHttpException;
+import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
 
-public class OAuth2Exception extends RestifyHttpException {
+public interface OAuth2EndpointRequestExecutor {
 
-	private static final long serialVersionUID = 1L;
+	public EndpointResponse<String> authorize(OAuth2AuthorizationConfiguration configuration);
 
-	public OAuth2Exception(String message, Throwable cause) {
-		super(message, cause);
-	}
+	public EndpointResponse<OAuth2AccessToken> requireToken(OAuth2AccessTokenRequest request);
 
-	public OAuth2Exception(String message) {
-		super(message);
-	}
-
-	public OAuth2Exception(Throwable cause) {
-		super(cause);
-	}
 }

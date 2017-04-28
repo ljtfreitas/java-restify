@@ -43,8 +43,8 @@ public class OAuth2AuthorizationConfiguration extends OAuth2Configuration {
 		return authorizationUri;
 	}
 
-	public URI redirectUri() {
-		return redirectUri;
+	public Optional<URI> redirectUri() {
+		return Optional.ofNullable(redirectUri);
 	}
 
 	public static class Builder {

@@ -35,6 +35,14 @@ public class OAuth2AccessToken {
 		this.token = token;
 	}
 
+	public OAuth2AccessTokenType type() {
+		return tokenType;
+	}
+
+	public String token() {
+		return token;
+	}
+
 	@Override
 	public String toString() {
 		return tokenType + " " + token;
