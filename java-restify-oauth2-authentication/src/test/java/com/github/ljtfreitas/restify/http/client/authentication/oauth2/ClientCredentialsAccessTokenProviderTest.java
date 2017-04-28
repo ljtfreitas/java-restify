@@ -10,39 +10,36 @@ import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.mockserver.client.server.MockServerClient;
 import org.mockserver.junit.MockServerRule;
 import org.mockserver.model.Parameter;
 
 @RunWith(MockitoJUnitRunner.class)
-public class DefaultAuthorizationCodeAccessTokenProviderTest {
+public class ClientCredentialsAccessTokenProviderTest {
 
 	@Rule
 	public MockServerRule mockServerRule = new MockServerRule(this, 8088);
 
 	private MockServerClient mockServerClient;
 
-	@Mock
-	private DefaultAuthorizationCodeProvider authorizationCodeProvider;
+	private ClientCredentialsAcessTokenProvider provider;
 
-	private DefaultAuthorizationCodeAccessTokenProvider provider;
+	private String authorizationCredentials;
 
 	@Before
 	public void setup() {
 		mockServerClient = new MockServerClient("localhost", 8088);
 
-		OAuth2AuthorizationConfiguration configuration = new OAuth2AuthorizationConfiguration.Builder()
-				.authorizationUri("http://localhost:8088/oauth/authorize")
+		OAuth2Configuration configuration = new OAuth2Configuration.Builder()
 				.accessTokenUri("http://localhost:8088/oauth/token")
 				.credentials(new OAuth2ClientCredentials("client-id", "client-secret"))
-				.redirectUri("http://my.web.app/oauth/callback")
 				.scopes("read", "write")
-				.authorizationCode("abc1234")
 				.build();
 
-		provider = new DefaultAuthorizationCodeAccessTokenProvider(configuration);
+		provider = new ClientCredentialsAcessTokenProvider(configuration);
+
+		authorizationCredentials = "Y2xpZW50LWlkOmNsaWVudC1zZWNyZXQ="; //(base64(client_id:client_secret))
 	}
 
 	@Test
@@ -51,9 +48,8 @@ public class DefaultAuthorizationCodeAccessTokenProviderTest {
 			.when(request()
 					.withMethod("POST")
 					.withPath("/oauth/token")
-					.withBody(params(new Parameter("grant_type", "authorization_code"),
-									 new Parameter("code", "abc1234"),
-									 new Parameter("redirect_uri", "http://my.web.app/oauth/callback"))))
+					.withBody(params(new Parameter("grant_type", "client_credentials")))
+					.withHeader("Authorization", "Basic " + authorizationCredentials))
 				.respond(response()
 					.withStatusCode(200)
 					.withHeader("Content-Type", "application/json")

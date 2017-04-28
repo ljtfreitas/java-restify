@@ -62,6 +62,13 @@ public class OAuth2AccessTokenRequest {
 		return builder;
 	}
 
+	public static OAuth2AccessTokenRequest.Builder clientCredentials(OAuth2ClientCredentials credentials) {
+		Builder builder = new OAuth2AccessTokenRequest.Builder("client_credentials");
+		builder.credentials(credentials);
+
+		return builder;
+	}
+
 	public static class Builder {
 
 		private URI accessTokenUri = null;

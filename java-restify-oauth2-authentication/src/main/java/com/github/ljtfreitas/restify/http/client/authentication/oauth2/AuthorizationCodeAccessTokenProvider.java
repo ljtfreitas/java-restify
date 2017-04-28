@@ -25,49 +25,37 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.authentication.oauth2;
 
-import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
-
-public class DefaultAuthorizationCodeAccessTokenProvider implements OAuth2AccessTokenProvider {
+public class AuthorizationCodeAccessTokenProvider extends BaseOAuthAccessTokenProvider {
 
 	private final OAuth2AuthorizationConfiguration configuration;
 	private final OAuth2AuthorizationCodeProvider authorizationCodeProvider;
-	private final OAuth2EndpointRequestExecutor executor;
 
-	public DefaultAuthorizationCodeAccessTokenProvider(OAuth2AuthorizationConfiguration configuration) {
+	public AuthorizationCodeAccessTokenProvider(OAuth2AuthorizationConfiguration configuration) {
 		this(configuration, new DefaultOAuth2EndpointRequestExecutor());
 	}
 
-	public DefaultAuthorizationCodeAccessTokenProvider(OAuth2AuthorizationConfiguration configuration,
+	public AuthorizationCodeAccessTokenProvider(OAuth2AuthorizationConfiguration configuration,
 			OAuth2AuthorizationCodeProvider authorizationCodeProvider) {
 		this(configuration, authorizationCodeProvider, new DefaultOAuth2EndpointRequestExecutor());
 	}
 
-	public DefaultAuthorizationCodeAccessTokenProvider(OAuth2AuthorizationConfiguration configuration,
+	public AuthorizationCodeAccessTokenProvider(OAuth2AuthorizationConfiguration configuration,
 			OAuth2EndpointRequestExecutor executor) {
 		this(configuration, new DefaultAuthorizationCodeProvider(configuration, executor), executor);
 	}
 
-	public DefaultAuthorizationCodeAccessTokenProvider(OAuth2AuthorizationConfiguration configuration,
+	public AuthorizationCodeAccessTokenProvider(OAuth2AuthorizationConfiguration configuration,
 			OAuth2AuthorizationCodeProvider authorizationCodeProvider, OAuth2EndpointRequestExecutor executor) {
+		super(executor);
 		this.configuration = configuration;
 		this.authorizationCodeProvider = authorizationCodeProvider;
-		this.executor = executor;
 	}
 
 	@Override
-	public OAuth2AccessToken get() {
+	protected OAuth2AccessTokenRequest buildAccessTokenRequest() {
 		String authorizationCode = configuration.authorizationCode()
 				.orElseGet(() -> authorizationCodeProvider.get());
 
-		return execute(buildAccessTokenRequest(authorizationCode));
-	}
-
-	private OAuth2AccessToken execute(OAuth2AccessTokenRequest request) {
-		EndpointResponse<OAuth2AccessToken> response = executor.requireToken(request);
-		return response.body();
-	}
-
-	private OAuth2AccessTokenRequest buildAccessTokenRequest(String authorizationCode) {
 		OAuth2AccessTokenRequest.Builder builder = OAuth2AccessTokenRequest.authorizationCode(authorizationCode);
 
 		if (configuration.redirectUri().isPresent()) {
