@@ -25,7 +25,6 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.contract;
 
-import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
@@ -119,10 +118,10 @@ public class Parameters {
 		}
 	}
 
-	public static Parameters from(URI source) {
+	public static Parameters parse(String source) {
 		Parameters parameters = new Parameters();
 
-		Arrays.stream(source.getQuery().split("&"))
+		Arrays.stream(source.split("&"))
 				.map(p -> p.split("="))
 					.filter(p -> p.length == 2)
 						.forEach(p -> parameters.put(p[0], p[1]));

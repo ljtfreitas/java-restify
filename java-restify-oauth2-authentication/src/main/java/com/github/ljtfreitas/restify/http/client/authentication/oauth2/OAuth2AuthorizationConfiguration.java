@@ -34,6 +34,7 @@ public class OAuth2AuthorizationConfiguration extends OAuth2Configuration {
 	private String authorizationCode;
 	private URI authorizationUri;
 	private URI redirectUri;
+	private String responseType;
 
 	public Optional<String> authorizationCode() {
 		return Optional.ofNullable(authorizationCode);
@@ -45,6 +46,10 @@ public class OAuth2AuthorizationConfiguration extends OAuth2Configuration {
 
 	public Optional<URI> redirectUri() {
 		return Optional.ofNullable(redirectUri);
+	}
+
+	public String responseType() {
+		return responseType;
 	}
 
 	public static class Builder {
@@ -104,6 +109,11 @@ public class OAuth2AuthorizationConfiguration extends OAuth2Configuration {
 
 		public Builder redirectUri(String redirectUri) {
 			configuration.redirectUri = URI.create(redirectUri);
+			return this;
+		}
+
+		public Builder responseType(String responseType) {
+			configuration.responseType = responseType;
 			return this;
 		}
 

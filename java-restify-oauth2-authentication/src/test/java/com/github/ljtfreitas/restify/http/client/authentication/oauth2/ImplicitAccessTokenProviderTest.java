@@ -12,14 +12,14 @@ import org.mockserver.client.server.MockServerClient;
 import org.mockserver.junit.MockServerRule;
 import org.mockserver.model.Parameter;
 
-public class DefaultAuthorizationCodeProviderTest {
+public class ImplicitAccessTokenProviderTest {
 
 	@Rule
 	public MockServerRule mockServerRule = new MockServerRule(this, 8088);
 
 	private MockServerClient mockServerClient;
 
-	private DefaultAuthorizationCodeProvider provider;
+	private ImplicitAccessTokenProvider provider;
 
 	@Before
 	public void setup() {
@@ -30,10 +30,10 @@ public class DefaultAuthorizationCodeProviderTest {
 				.clientId("client-id")
 				.redirectUri("http://my.web.app/oauth/callback")
 				.scopes("read", "write")
-				.responseType("code")
+				.responseType("token")
 				.build();
 
-		provider = new DefaultAuthorizationCodeProvider(configuration);
+		provider = new ImplicitAccessTokenProvider(configuration);
 	}
 
 	@Test
@@ -42,16 +42,18 @@ public class DefaultAuthorizationCodeProviderTest {
 			.when(request()
 				.withMethod("GET")
 				.withPath("/oauth/authorize")
-				.withQueryStringParameters(new Parameter("response_type", "code"),
+				.withQueryStringParameters(new Parameter("response_type", "token"),
 										   new Parameter("client_id", "client-id"),
 										   new Parameter("redirect_uri", "http://my.web.app/oauth/callback"),
 										   new Parameter("scope", "read write")))
 			.respond(response()
 				.withStatusCode(302)
 				.withHeader("Content-Type", "application/x-www-form-urlencoded")
-				.withHeader("Location", "http://my.web.app/oauth/callback?code=abc1234"));
+				.withHeader("Location", "http://my.web.app/oauth/callback#access_token=abc1234&token_type=bearer"));
 
-		assertEquals("abc1234", provider.get());
+		OAuth2AccessToken accessToken = provider.get();
+
+		assertEquals("abc1234", accessToken.token());
 	}
 
 	@Test(expected = OAuth2UserApprovalRequiredException.class)
@@ -60,7 +62,7 @@ public class DefaultAuthorizationCodeProviderTest {
 			.when(request()
 				.withMethod("GET")
 				.withPath("/oauth/authorize")
-				.withQueryStringParameters(new Parameter("response_type", "code"),
+				.withQueryStringParameters(new Parameter("response_type", "token"),
 										   new Parameter("client_id", "client-id"),
 										   new Parameter("redirect_uri", "http://my.web.app/oauth/callback"),
 										   new Parameter("scope", "read write")))
@@ -76,7 +78,7 @@ public class DefaultAuthorizationCodeProviderTest {
 			.when(request()
 				.withMethod("GET")
 				.withPath("/oauth/authorize")
-				.withQueryStringParameters(new Parameter("response_type", "code"),
+				.withQueryStringParameters(new Parameter("response_type", "token"),
 										   new Parameter("client_id", "client-id"),
 										   new Parameter("redirect_uri", "http://my.web.app/oauth/callback"),
 										   new Parameter("scope", "read write")))

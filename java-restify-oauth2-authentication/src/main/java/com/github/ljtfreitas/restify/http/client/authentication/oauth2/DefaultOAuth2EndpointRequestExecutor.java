@@ -108,9 +108,10 @@ public class DefaultOAuth2EndpointRequestExecutor implements OAuth2EndpointReque
 	public EndpointResponse<String> authorize(OAuth2AuthorizationConfiguration configuration) {
 		nonNull(configuration.credentials().clientId(), "Your Client ID is required.");
 		nonNull(configuration.authorizationUri(), "The authorization URI of authorization server is required.");
+		nonNull(configuration.responseType(), "The response_type parameter is required.");
 
 		Parameters parameters = new Parameters();
-		parameters.put("response_type", "code");
+		parameters.put("response_type", configuration.responseType());
 		parameters.put("client_id", configuration.credentials().clientId());
 		parameters.put("scope", configuration.scope());
 

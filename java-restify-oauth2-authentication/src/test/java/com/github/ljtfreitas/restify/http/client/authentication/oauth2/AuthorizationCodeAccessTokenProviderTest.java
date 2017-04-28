@@ -1,6 +1,8 @@
 package com.github.ljtfreitas.restify.http.client.authentication.oauth2;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
 import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
 import static org.mockserver.model.JsonBody.json;
@@ -41,10 +43,11 @@ public class AuthorizationCodeAccessTokenProviderTest {
 				.credentials(new OAuth2ClientCredentials("client-id", "client-secret"))
 				.redirectUri("http://my.web.app/oauth/callback")
 				.scopes("read", "write")
-				.authorizationCode("abc1234")
 				.build();
 
-		provider = new AuthorizationCodeAccessTokenProvider(configuration);
+		when(authorizationCodeProvider.get()).thenReturn("abc1234");
+
+		provider = new AuthorizationCodeAccessTokenProvider(configuration, authorizationCodeProvider);
 
 		authorizationCredentials = "Y2xpZW50LWlkOmNsaWVudC1zZWNyZXQ="; //(base64(client_id:client_secret))
 	}
@@ -68,5 +71,7 @@ public class AuthorizationCodeAccessTokenProviderTest {
 
 		assertEquals(OAuth2AccessTokenType.BEARER, accessToken.type());
 		assertEquals("aaa111", accessToken.token());
+
+		verify(authorizationCodeProvider).get();
 	}
 }

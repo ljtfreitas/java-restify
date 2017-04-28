@@ -31,24 +31,24 @@ import com.github.ljtfreitas.restify.http.client.Header;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
 import com.github.ljtfreitas.restify.http.client.response.StatusCode;
 import com.github.ljtfreitas.restify.http.contract.Parameters;
+import com.github.ljtfreitas.restify.http.util.Tryable;
 
-public class DefaultAuthorizationCodeProvider implements OAuth2AuthorizationCodeProvider {
+public class ImplicitAccessTokenProvider implements OAuth2AccessTokenProvider {
 
 	private final OAuth2AuthorizationConfiguration configuration;
 	private final OAuth2EndpointRequestExecutor executor;
 
-	public DefaultAuthorizationCodeProvider(OAuth2AuthorizationConfiguration configuration, OAuth2EndpointRequestExecutor executor) {
+	public ImplicitAccessTokenProvider(OAuth2AuthorizationConfiguration configuration) {
+		this(configuration, new DefaultOAuth2EndpointRequestExecutor());
+	}
+
+	public ImplicitAccessTokenProvider(OAuth2AuthorizationConfiguration configuration, OAuth2EndpointRequestExecutor executor) {
 		this.configuration = configuration;
 		this.executor = executor;
 	}
 
-	public DefaultAuthorizationCodeProvider(OAuth2AuthorizationConfiguration configuration) {
-		this.configuration = configuration;
-		this.executor = new DefaultOAuth2EndpointRequestExecutor();
-	}
-
 	@Override
-	public String get() {
+	public OAuth2AccessToken get() {
 		EndpointResponse<String> authorizationResponse = executor.authorize(configuration);
 
 		StatusCode status = authorizationResponse.code();
@@ -63,10 +63,19 @@ public class DefaultAuthorizationCodeProvider implements OAuth2AuthorizationCode
 			Header location = authorizationResponse.headers().get("Location")
 					.orElseThrow(() -> new IllegalStateException("Location header must be present on Authorization redirect!"));
 
-			Parameters parameters = Parameters.parse(URI.create(location.value()).getQuery());
+			Parameters parameters = Parameters.parse(URI.create(location.value()).getFragment());
 
-			return parameters.get("code")
-					.orElseThrow(() -> new IllegalStateException("Authorization code parameter must be present on Authorization redirect!"));
+			return buildAccessToken(parameters);
 		}
+	}
+
+	private OAuth2AccessToken buildAccessToken(Parameters parameters) {
+		String token = parameters.get("access_token")
+				.orElseThrow(() -> new IllegalStateException("Authorization code parameter must be present on Authorization redirect!"));
+
+		OAuth2AccessTokenType tokenType = Tryable.or(() -> OAuth2AccessTokenType.of(parameters.get("token_type").orElse(null)),
+				OAuth2AccessTokenType.BEARER);
+
+		return new OAuth2AccessToken(tokenType, token);
 	}
 }
