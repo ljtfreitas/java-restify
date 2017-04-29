@@ -119,15 +119,23 @@ public class DefaultOAuth2EndpointRequestExecutor implements OAuth2EndpointReque
 			parameters.put("redirect_uri", configuration.redirectUri().get().toString());
 		}
 
+		Headers headers = new Headers();
+
+		if (configuration.cookie().isPresent()) {
+			headers.put("Cookie", configuration.cookie().get());
+		}
+
 		URI authorizationUri = URI.create(configuration.authorizationUri().toString() + "?" + parameters.queryString());
 
-		return delegate.execute(new EndpointRequest(authorizationUri, "GET", String.class));
+		return delegate.execute(new EndpointRequest(authorizationUri, "GET", headers, String.class));
 	}
 
 	@Override
 	public EndpointResponse<OAuth2AccessToken> requireToken(OAuth2AccessTokenRequest request) {
 		Header contentType = new Header(CONTENT_TYPE, "application/x-www-form-urlencoded");
+
 		Headers headers = new Headers(contentType, authorization(request.credentials()));
+		headers.putAll(request.headers());
 
 		Parameters body = request.parameters();
 

@@ -43,15 +43,19 @@ public class Headers {
 	private final Collection<Header> headers;
 
 	public Headers() {
-		this.headers = new LinkedHashSet<>();
+		this(new LinkedHashSet<>());
 	}
 
 	public Headers(Header... headers) {
-		this.headers = new LinkedHashSet<>(Arrays.asList(headers));
+		this(new LinkedHashSet<>(Arrays.asList(headers)));
 	}
 
 	public Headers(Headers source) {
-		this.headers = new LinkedHashSet<>(source.headers);
+		this(new LinkedHashSet<>(source.headers));
+	}
+
+	private Headers(Collection<Header> headers) {
+		this.headers = headers;
 	}
 
 	public void add(Header header) {
@@ -64,6 +68,14 @@ public class Headers {
 
 	public void put(String name, Collection<String> values) {
 		values.forEach(value -> headers.add(new Header(name, value)));
+	}
+
+	public void put(Header header) {
+		headers.add(header);
+	}
+
+	public void putAll(Headers headers) {
+		this.headers.addAll(headers.all());
 	}
 
 	public void replace(String name, String value) {
@@ -83,5 +95,9 @@ public class Headers {
 	@Override
 	public String toString() {
 		return headers.toString();
+	}
+
+	public static Headers empty() {
+		return new Headers(Collections.emptySet());
 	}
 }

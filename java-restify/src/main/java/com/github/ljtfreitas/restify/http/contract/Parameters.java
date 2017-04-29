@@ -25,9 +25,12 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.contract;
 
+import static com.github.ljtfreitas.restify.http.util.Preconditions.nonNull;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
@@ -109,6 +112,11 @@ public class Parameters {
 			this.values = values;
 		}
 
+		public Parameter(String name, String value) {
+			this.name = name;
+			this.values = Collections.singleton(nonNull(value));
+		}
+
 		public String name() {
 			return name;
 		}
@@ -116,12 +124,18 @@ public class Parameters {
 		public Collection<String> values() {
 			return values;
 		}
+
+		public String value() {
+			return values.stream().findFirst().orElse(null);
+		}
 	}
 
 	public static Parameters parse(String source) {
 		Parameters parameters = new Parameters();
 
-		Arrays.stream(source.split("&"))
+		String safe = Optional.ofNullable(source).orElse("");
+
+		Arrays.stream(safe.split("&"))
 				.map(p -> p.split("="))
 					.filter(p -> p.length == 2)
 						.forEach(p -> parameters.put(p[0], p[1]));

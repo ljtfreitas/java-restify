@@ -43,7 +43,7 @@ public class ClientCredentialsAcessTokenProvider extends BaseOAuth2AccessTokenPr
 		OAuth2AccessTokenRequest.Builder builder = OAuth2AccessTokenRequest.clientCredentials(configuration.credentials());
 
 		return builder.accessTokenUri(configuration.accessTokenUri())
-					  .put("scope", configuration.scope())
+					  .parameter("scope", configuration.scope())
 					  .build();
 	}
 }

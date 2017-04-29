@@ -33,6 +33,10 @@ public class Preconditions {
 		return Objects.requireNonNull(value, message);
 	}
 
+	public static <T> T nonNull(T value) {
+		return Objects.requireNonNull(value);
+	}
+
 	public static boolean isTrue(boolean value, String message) {
 		if (!value) throw new IllegalArgumentException(message);
 		return value;
@@ -42,5 +46,4 @@ public class Preconditions {
 		if (value) throw new IllegalArgumentException(message);
 		return value;
 	}
-
 }

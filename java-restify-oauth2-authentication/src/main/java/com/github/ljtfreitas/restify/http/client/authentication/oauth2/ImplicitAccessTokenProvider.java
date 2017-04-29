@@ -71,7 +71,7 @@ public class ImplicitAccessTokenProvider implements OAuth2AccessTokenProvider {
 
 	private OAuth2AccessToken buildAccessToken(Parameters parameters) {
 		String token = parameters.get("access_token")
-				.orElseThrow(() -> new IllegalStateException("Authorization code parameter must be present on Authorization redirect!"));
+				.orElseThrow(() -> new IllegalStateException("Access token parameter must be present on Authorization redirect!"));
 
 		OAuth2AccessTokenType tokenType = Tryable.or(() -> OAuth2AccessTokenType.of(parameters.get("token_type").orElse(null)),
 				OAuth2AccessTokenType.BEARER);

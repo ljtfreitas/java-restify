@@ -51,7 +51,7 @@ public class DefaultAuthorizationCodeProviderTest {
 				.withHeader("Content-Type", "application/x-www-form-urlencoded")
 				.withHeader("Location", "http://my.web.app/oauth/callback?code=abc1234"));
 
-		assertEquals("abc1234", provider.get());
+		assertEquals("abc1234", provider.get().code());
 	}
 
 	@Test(expected = OAuth2UserApprovalRequiredException.class)

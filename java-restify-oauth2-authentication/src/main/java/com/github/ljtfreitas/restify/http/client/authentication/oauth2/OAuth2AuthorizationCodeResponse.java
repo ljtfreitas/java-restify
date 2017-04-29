@@ -25,7 +25,27 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.authentication.oauth2;
 
-public interface OAuth2AuthorizationCodeProvider {
+import com.github.ljtfreitas.restify.http.client.Headers;
 
-	public OAuth2AuthorizationCodeResponse get();
+public class OAuth2AuthorizationCodeResponse {
+
+	private final String code;
+	private final Headers headers;
+
+	public OAuth2AuthorizationCodeResponse(String code) {
+		this(code, Headers.empty());
+	}
+
+	public OAuth2AuthorizationCodeResponse(String code, Headers headers) {
+		this.code = code;
+		this.headers = headers;
+	}
+
+	public String code() {
+		return code;
+	}
+
+	public Headers headers() {
+		return headers;
+	}
 }

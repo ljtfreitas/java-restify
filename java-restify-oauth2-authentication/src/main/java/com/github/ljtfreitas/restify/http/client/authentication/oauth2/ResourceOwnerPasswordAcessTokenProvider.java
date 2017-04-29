@@ -48,7 +48,7 @@ public class ResourceOwnerPasswordAcessTokenProvider extends BaseOAuth2AccessTok
 
 		return builder.accessTokenUri(configuration.accessTokenUri())
 					  .credentials(configuration.credentials())
-					  .put("scope", configuration.scope())
+					  .parameter("scope", configuration.scope())
 					  .build();
 	}
 }

@@ -23,9 +23,28 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.http.client.authentication.oauth2;
+package com.github.ljtfreitas.restify.http.contract;
 
-public interface OAuth2AuthorizationCodeProvider {
+public class Cookie {
 
-	public OAuth2AuthorizationCodeResponse get();
+	private final String name;
+	private final String value;
+
+	public Cookie(String name, String value) {
+		this.name = name;
+		this.value = value;
+	}
+
+	public String name() {
+		return name;
+	}
+
+	public String value() {
+		return value;
+	}
+
+	@Override
+	public String toString() {
+		return name + "=" + value;
+	}
 }

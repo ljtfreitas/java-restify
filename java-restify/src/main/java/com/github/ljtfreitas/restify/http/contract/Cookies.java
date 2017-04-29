@@ -45,19 +45,8 @@ public class Cookies {
 	@Override
 	public String toString() {
 		String content = cookies.values().stream()
-			.map(c -> c.name + "=" + c.value)
+			.map(c -> c.toString())
 				.collect(Collectors.joining("; "));
 		return content;
-	}
-
-	private class Cookie {
-
-		private final String name;
-		private final String value;
-
-		public Cookie(String name, String value) {
-			this.name = name;
-			this.value = value;
-		}
 	}
 }

@@ -25,7 +25,12 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.authentication.oauth2;
 
-public interface OAuth2AuthorizationCodeProvider {
+public class OAuth2UserRedirectRequiredException extends OAuth2Exception {
 
-	public OAuth2AuthorizationCodeResponse get();
+	private static final long serialVersionUID = 1L;
+
+	public OAuth2UserRedirectRequiredException(String message) {
+		super(message);
+	}
+
 }

@@ -48,7 +48,7 @@ public class DefaultAuthorizationCodeProvider implements OAuth2AuthorizationCode
 	}
 
 	@Override
-	public String get() {
+	public OAuth2AuthorizationCodeResponse get() {
 		EndpointResponse<String> authorizationResponse = executor.authorize(configuration);
 
 		StatusCode status = authorizationResponse.code();
@@ -63,10 +63,14 @@ public class DefaultAuthorizationCodeProvider implements OAuth2AuthorizationCode
 			Header location = authorizationResponse.headers().get("Location")
 					.orElseThrow(() -> new IllegalStateException("Location header must be present on Authorization redirect!"));
 
-			Parameters parameters = Parameters.parse(URI.create(location.value()).getQuery());
+			URI redirectUri = URI.create(location.value());
 
-			return parameters.get("code")
-					.orElseThrow(() -> new IllegalStateException("Authorization code parameter must be present on Authorization redirect!"));
+			Parameters parameters = Parameters.parse(redirectUri.getQuery());
+
+			String code = parameters.get("code")
+							.orElseThrow(() -> new OAuth2UserRedirectRequiredException("A redirect to [" + redirectUri + "] is required!"));
+
+			return new OAuth2AuthorizationCodeResponse(code, authorizationResponse.headers());
 		}
 	}
 }

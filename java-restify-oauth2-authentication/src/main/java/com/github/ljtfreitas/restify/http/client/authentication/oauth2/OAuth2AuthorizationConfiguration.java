@@ -29,12 +29,16 @@ import java.net.URI;
 import java.util.Collection;
 import java.util.Optional;
 
+import com.github.ljtfreitas.restify.http.contract.Cookie;
+import com.github.ljtfreitas.restify.http.contract.Cookies;
+
 public class OAuth2AuthorizationConfiguration extends OAuth2Configuration {
 
 	private String authorizationCode;
 	private URI authorizationUri;
 	private URI redirectUri;
 	private String responseType;
+	private String cookie;
 
 	public Optional<String> authorizationCode() {
 		return Optional.ofNullable(authorizationCode);
@@ -50,6 +54,10 @@ public class OAuth2AuthorizationConfiguration extends OAuth2Configuration {
 
 	public String responseType() {
 		return responseType;
+	}
+
+	public Optional<String> cookie() {
+		return Optional.ofNullable(cookie);
 	}
 
 	public static class Builder {
@@ -114,6 +122,26 @@ public class OAuth2AuthorizationConfiguration extends OAuth2Configuration {
 
 		public Builder responseType(String responseType) {
 			configuration.responseType = responseType;
+			return this;
+		}
+
+		public Builder cookie(String cookie) {
+			configuration.cookie = cookie;
+			return this;
+		}
+
+		public Builder cookie(Cookie cookie) {
+			configuration.cookie = cookie.toString();
+			return this;
+		}
+
+		public Builder cookie(String name, String value) {
+			configuration.cookie = new Cookie(name, value).toString();
+			return this;
+		}
+
+		public Builder cookies(Cookies cookies) {
+			configuration.cookie = cookies.toString();
 			return this;
 		}
 
