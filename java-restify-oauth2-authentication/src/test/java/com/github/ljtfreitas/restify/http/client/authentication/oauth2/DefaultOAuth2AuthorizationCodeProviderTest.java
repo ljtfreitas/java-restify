@@ -12,14 +12,14 @@ import org.mockserver.client.server.MockServerClient;
 import org.mockserver.junit.MockServerRule;
 import org.mockserver.model.Parameter;
 
-public class DefaultAuthorizationCodeProviderTest {
+public class DefaultOAuth2AuthorizationCodeProviderTest {
 
 	@Rule
 	public MockServerRule mockServerRule = new MockServerRule(this, 8088);
 
 	private MockServerClient mockServerClient;
 
-	private DefaultAuthorizationCodeProvider provider;
+	private DefaultOAuth2AuthorizationCodeProvider provider;
 
 	@Before
 	public void setup() {
@@ -31,9 +31,10 @@ public class DefaultAuthorizationCodeProviderTest {
 				.redirectUri("http://my.web.app/oauth/callback")
 				.scopes("read", "write")
 				.responseType("code")
+				.state("current-state")
 				.build();
 
-		provider = new DefaultAuthorizationCodeProvider(configuration);
+		provider = new DefaultOAuth2AuthorizationCodeProvider(configuration);
 	}
 
 	@Test
@@ -45,13 +46,14 @@ public class DefaultAuthorizationCodeProviderTest {
 				.withQueryStringParameters(new Parameter("response_type", "code"),
 										   new Parameter("client_id", "client-id"),
 										   new Parameter("redirect_uri", "http://my.web.app/oauth/callback"),
-										   new Parameter("scope", "read write")))
+										   new Parameter("scope", "read write"),
+										   new Parameter("state", "current-state")))
 			.respond(response()
 				.withStatusCode(302)
 				.withHeader("Content-Type", "application/x-www-form-urlencoded")
-				.withHeader("Location", "http://my.web.app/oauth/callback?code=abc1234"));
+				.withHeader("Location", "http://my.web.app/oauth/callback?code=abc1234&state=current-state"));
 
-		assertEquals("abc1234", provider.get().code());
+		assertEquals("abc1234", provider.get());
 	}
 
 	@Test(expected = OAuth2UserApprovalRequiredException.class)

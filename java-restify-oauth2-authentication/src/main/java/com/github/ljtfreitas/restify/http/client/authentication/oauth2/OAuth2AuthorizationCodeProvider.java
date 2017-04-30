@@ -27,5 +27,5 @@ package com.github.ljtfreitas.restify.http.client.authentication.oauth2;
 
 public interface OAuth2AuthorizationCodeProvider {
 
-	public OAuth2AuthorizationCodeResponse get();
+	public String get();
 }

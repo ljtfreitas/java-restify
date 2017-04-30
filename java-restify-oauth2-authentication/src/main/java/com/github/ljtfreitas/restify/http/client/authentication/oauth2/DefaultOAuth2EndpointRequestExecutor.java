@@ -119,6 +119,10 @@ public class DefaultOAuth2EndpointRequestExecutor implements OAuth2EndpointReque
 			parameters.put("redirect_uri", configuration.redirectUri().get().toString());
 		}
 
+		if (configuration.state().isPresent()) {
+			parameters.put("state", configuration.state().get());
+		}
+
 		Headers headers = new Headers();
 
 		if (configuration.cookie().isPresent()) {
@@ -149,7 +153,8 @@ public class DefaultOAuth2EndpointRequestExecutor implements OAuth2EndpointReque
 		Map<String, String> body = accessTokenResponse.body();
 
 		String token = body.get("access_token");
-		OAuth2AccessTokenType tokenType = Tryable.or(() -> OAuth2AccessTokenType.of(body.get("token_type")), OAuth2AccessTokenType.BEARER);
+		OAuth2AccessTokenType tokenType = Tryable.or(() -> OAuth2AccessTokenType.of(body.get("token_type")),
+				OAuth2AccessTokenType.BEARER);
 
 		OAuth2AccessToken accessToken = new OAuth2AccessToken(tokenType, token) ;
 

@@ -25,10 +25,6 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.authentication.oauth2;
 
-import java.util.Optional;
-
-import com.github.ljtfreitas.restify.http.client.Header;
-
 public class AuthorizationCodeAccessTokenProvider extends BaseOAuth2AccessTokenProvider {
 
 	private final OAuth2AuthorizationConfiguration configuration;
@@ -45,7 +41,7 @@ public class AuthorizationCodeAccessTokenProvider extends BaseOAuth2AccessTokenP
 
 	public AuthorizationCodeAccessTokenProvider(OAuth2AuthorizationConfiguration configuration,
 			OAuth2EndpointRequestExecutor executor) {
-		this(configuration, new DefaultAuthorizationCodeProvider(configuration, executor), executor);
+		this(configuration, new DefaultOAuth2AuthorizationCodeProvider(configuration, executor), executor);
 	}
 
 	public AuthorizationCodeAccessTokenProvider(OAuth2AuthorizationConfiguration configuration,
@@ -57,19 +53,13 @@ public class AuthorizationCodeAccessTokenProvider extends BaseOAuth2AccessTokenP
 
 	@Override
 	protected OAuth2AccessTokenRequest buildAccessTokenRequest() {
-		OAuth2AuthorizationCodeResponse authorizationResponse = configuration.authorizationCode()
-				.map(code -> new OAuth2AuthorizationCodeResponse(code))
+		String authorizationCode = configuration.authorizationCode()
 					.orElseGet(() -> authorizationCodeProvider.get());
 
-		OAuth2AccessTokenRequest.Builder builder = OAuth2AccessTokenRequest.authorizationCode(authorizationResponse.code());
+		OAuth2AccessTokenRequest.Builder builder = OAuth2AccessTokenRequest.authorizationCode(authorizationCode);
 
 		if (configuration.redirectUri().isPresent()) {
 			builder.parameter("redirect_uri", configuration.redirectUri().get().toString());
-		}
-
-		Optional<Header> cookie = authorizationResponse.headers().get("Set-Cookie");
-		if (cookie.isPresent()) {
-			builder.header("Cookie", cookie.get().value());
 		}
 
 		return builder.credentials(configuration.credentials())

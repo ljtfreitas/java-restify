@@ -31,6 +31,7 @@ public class ImplicitAccessTokenProviderTest {
 				.redirectUri("http://my.web.app/oauth/callback")
 				.scopes("read", "write")
 				.responseType("token")
+				.state("current-state")
 				.build();
 
 		provider = new ImplicitAccessTokenProvider(configuration);
@@ -49,7 +50,7 @@ public class ImplicitAccessTokenProviderTest {
 			.respond(response()
 				.withStatusCode(302)
 				.withHeader("Content-Type", "application/x-www-form-urlencoded")
-				.withHeader("Location", "http://my.web.app/oauth/callback#access_token=abc1234&token_type=bearer"));
+				.withHeader("Location", "http://my.web.app/oauth/callback#access_token=abc1234&token_type=bearer&state=current-state"));
 
 		OAuth2AccessToken accessToken = provider.get();
 

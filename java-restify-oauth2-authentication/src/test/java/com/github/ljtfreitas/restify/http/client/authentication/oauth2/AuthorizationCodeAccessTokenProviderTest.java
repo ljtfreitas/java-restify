@@ -27,7 +27,7 @@ public class AuthorizationCodeAccessTokenProviderTest {
 	private MockServerClient mockServerClient;
 
 	@Mock
-	private DefaultAuthorizationCodeProvider authorizationCodeProvider;
+	private DefaultOAuth2AuthorizationCodeProvider authorizationCodeProvider;
 
 	private AuthorizationCodeAccessTokenProvider provider;
 
@@ -45,7 +45,7 @@ public class AuthorizationCodeAccessTokenProviderTest {
 				.scopes("read", "write")
 				.build();
 
-		when(authorizationCodeProvider.get()).thenReturn(new OAuth2AuthorizationCodeResponse("abc1234"));
+		when(authorizationCodeProvider.get()).thenReturn("abc1234");
 
 		provider = new AuthorizationCodeAccessTokenProvider(configuration, authorizationCodeProvider);
 

@@ -25,6 +25,8 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.authentication.oauth2;
 
+import static com.github.ljtfreitas.restify.http.util.Preconditions.isTrue;
+
 import java.net.URI;
 
 import com.github.ljtfreitas.restify.http.client.Header;
@@ -32,30 +34,30 @@ import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
 import com.github.ljtfreitas.restify.http.client.response.StatusCode;
 import com.github.ljtfreitas.restify.http.contract.Parameters;
 
-public class DefaultAuthorizationCodeProvider implements OAuth2AuthorizationCodeProvider {
+public class DefaultOAuth2AuthorizationCodeProvider implements OAuth2AuthorizationCodeProvider {
 
 	private final OAuth2AuthorizationConfiguration configuration;
 	private final OAuth2EndpointRequestExecutor executor;
 
-	public DefaultAuthorizationCodeProvider(OAuth2AuthorizationConfiguration configuration, OAuth2EndpointRequestExecutor executor) {
+	public DefaultOAuth2AuthorizationCodeProvider(OAuth2AuthorizationConfiguration configuration, OAuth2EndpointRequestExecutor executor) {
 		this.configuration = configuration;
 		this.executor = executor;
 	}
 
-	public DefaultAuthorizationCodeProvider(OAuth2AuthorizationConfiguration configuration) {
+	public DefaultOAuth2AuthorizationCodeProvider(OAuth2AuthorizationConfiguration configuration) {
 		this.configuration = configuration;
 		this.executor = new DefaultOAuth2EndpointRequestExecutor();
 	}
 
 	@Override
-	public OAuth2AuthorizationCodeResponse get() {
+	public String get() {
 		EndpointResponse<String> authorizationResponse = executor.authorize(configuration);
 
 		StatusCode status = authorizationResponse.code();
 
 		if (status.isOK()) {
 			String message = "Do you approve the client [" + configuration.credentials().clientId() + "] to access your resources "
-				+ "with scopes [" + configuration.scopes() + "]";
+				+ "with scopes [" + configuration.scopes() + "].";
 
 			throw new OAuth2UserApprovalRequiredException(message);
 
@@ -67,10 +69,13 @@ public class DefaultAuthorizationCodeProvider implements OAuth2AuthorizationCode
 
 			Parameters parameters = Parameters.parse(redirectUri.getQuery());
 
-			String code = parameters.get("code")
-							.orElseThrow(() -> new OAuth2UserRedirectRequiredException("A redirect to [" + redirectUri + "] is required!"));
+			isTrue(configuration.state().orElse("").equals(parameters.get("state").orElse("")),
+					"Possible CSRF attack? [state] parameter returned by the authorization server is not the same of the authorization request.");
 
-			return new OAuth2AuthorizationCodeResponse(code, authorizationResponse.headers());
+			String code = parameters.get("code")
+					.orElseThrow(() -> new OAuth2UserRedirectRequiredException("A redirect to [" + redirectUri + "] is required!"));
+
+			return code;
 		}
 	}
 }

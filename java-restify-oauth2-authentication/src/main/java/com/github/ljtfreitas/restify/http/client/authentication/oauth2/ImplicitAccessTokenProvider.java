@@ -25,6 +25,8 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.authentication.oauth2;
 
+import static com.github.ljtfreitas.restify.http.util.Preconditions.isTrue;
+
 import java.net.URI;
 
 import com.github.ljtfreitas.restify.http.client.Header;
@@ -64,6 +66,9 @@ public class ImplicitAccessTokenProvider implements OAuth2AccessTokenProvider {
 					.orElseThrow(() -> new IllegalStateException("Location header must be present on Authorization redirect!"));
 
 			Parameters parameters = Parameters.parse(URI.create(location.value()).getFragment());
+
+			isTrue(configuration.state().orElse("").equals(parameters.get("state").orElse("")),
+					"Possible CSRF attack? [state] parameter returned by the authorization server is not the same of the authorization request.");
 
 			return buildAccessToken(parameters);
 		}

@@ -39,6 +39,7 @@ public class OAuth2AuthorizationConfiguration extends OAuth2Configuration {
 	private URI redirectUri;
 	private String responseType;
 	private String cookie;
+	private String state;
 
 	public Optional<String> authorizationCode() {
 		return Optional.ofNullable(authorizationCode);
@@ -58,6 +59,10 @@ public class OAuth2AuthorizationConfiguration extends OAuth2Configuration {
 
 	public Optional<String> cookie() {
 		return Optional.ofNullable(cookie);
+	}
+
+	public Optional<String> state() {
+		return Optional.ofNullable(state);
 	}
 
 	public static class Builder {
@@ -142,6 +147,11 @@ public class OAuth2AuthorizationConfiguration extends OAuth2Configuration {
 
 		public Builder cookies(Cookies cookies) {
 			configuration.cookie = cookies.toString();
+			return this;
+		}
+
+		public Builder state(String state) {
+			configuration.state = state;
 			return this;
 		}
 
