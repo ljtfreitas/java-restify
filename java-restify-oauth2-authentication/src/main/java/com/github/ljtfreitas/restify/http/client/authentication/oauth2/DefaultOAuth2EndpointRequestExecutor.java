@@ -56,6 +56,8 @@ import com.github.ljtfreitas.restify.http.util.Tryable;
 
 public class DefaultOAuth2EndpointRequestExecutor implements OAuth2EndpointRequestExecutor {
 
+	private static final String FORM_URLENCODED_CONTENT_TYPE = "application/x-www-form-urlencoded";
+
 	private final EndpointRequestExecutor delegate;
 
 	public DefaultOAuth2EndpointRequestExecutor(EndpointRequestExecutor endpointRequestExecutor) {
@@ -136,7 +138,7 @@ public class DefaultOAuth2EndpointRequestExecutor implements OAuth2EndpointReque
 
 	@Override
 	public EndpointResponse<OAuth2AccessToken> requireToken(OAuth2AccessTokenRequest request) {
-		Header contentType = new Header(CONTENT_TYPE, "application/x-www-form-urlencoded");
+		Header contentType = new Header(CONTENT_TYPE, FORM_URLENCODED_CONTENT_TYPE);
 
 		Headers headers = new Headers(contentType, authorization(request.credentials()));
 		headers.putAll(request.headers());
@@ -162,6 +164,7 @@ public class DefaultOAuth2EndpointRequestExecutor implements OAuth2EndpointReque
 	}
 
 	private Header authorization(OAuth2ClientCredentials credentials) {
-		return new Header(AUTHORIZATION, new BasicAuthentication(credentials.clientId(), credentials.clientSecret()).content());
+		BasicAuthentication basic = new BasicAuthentication(credentials.clientId(), credentials.clientSecret());
+		return new Header(AUTHORIZATION, basic.content());
 	}
 }

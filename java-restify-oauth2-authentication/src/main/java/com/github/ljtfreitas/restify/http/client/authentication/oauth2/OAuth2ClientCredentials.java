@@ -32,7 +32,7 @@ public class OAuth2ClientCredentials {
 
 	public OAuth2ClientCredentials(String clientId, String clientSecret) {
 		this.clientId = clientId;
-		this.clientSecret = clientSecret;
+		this.clientSecret = clientSecret == null ? "" : clientSecret;
 	}
 
 	public String clientId() {
@@ -44,6 +44,6 @@ public class OAuth2ClientCredentials {
 	}
 
 	public static OAuth2ClientCredentials clientId(String clientId) {
-		return new OAuth2ClientCredentials(clientId, null);
-}
+		return new OAuth2ClientCredentials(clientId, "");
+	}
 }
