@@ -52,7 +52,6 @@ import com.github.ljtfreitas.restify.http.client.request.jdk.JdkHttpClientReques
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponseReader;
 import com.github.ljtfreitas.restify.http.contract.Parameters;
-import com.github.ljtfreitas.restify.http.util.Tryable;
 
 public class DefaultOAuth2EndpointRequestExecutor implements OAuth2EndpointRequestExecutor {
 
@@ -145,20 +144,16 @@ public class DefaultOAuth2EndpointRequestExecutor implements OAuth2EndpointReque
 
 		Parameters body = request.parameters();
 
-		EndpointResponse<Map<String, String>> accessTokenResponse = delegate
+		EndpointResponse<Map<String, Object>> accessTokenResponse = delegate
 				.execute(new EndpointRequest(request.uri(), "POST", headers, body, Map.class));
 
 		return buildAccessToken(accessTokenResponse);
 	}
 
-	private EndpointResponse<OAuth2AccessToken> buildAccessToken(EndpointResponse<Map<String, String>> accessTokenResponse) {
-		Map<String, String> body = accessTokenResponse.body();
+	private EndpointResponse<OAuth2AccessToken> buildAccessToken(EndpointResponse<Map<String, Object>> accessTokenResponse) {
+		Parameters parameters = Parameters.of(accessTokenResponse.body());
 
-		String token = body.get("access_token");
-		OAuth2AccessTokenType tokenType = Tryable.or(() -> OAuth2AccessTokenType.of(body.get("token_type")),
-				OAuth2AccessTokenType.BEARER);
-
-		OAuth2AccessToken accessToken = new OAuth2AccessToken(tokenType, token) ;
+		OAuth2AccessToken accessToken = OAuth2AccessToken.create(parameters);
 
 		return new EndpointResponse<>(accessTokenResponse.code(), accessTokenResponse.headers(), accessToken);
 	}

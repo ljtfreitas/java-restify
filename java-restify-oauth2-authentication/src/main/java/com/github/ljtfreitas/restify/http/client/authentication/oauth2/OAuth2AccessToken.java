@@ -25,10 +25,28 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.authentication.oauth2;
 
+import java.time.Duration;
+import java.time.LocalDateTime;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import com.github.ljtfreitas.restify.http.contract.Parameters;
+import com.github.ljtfreitas.restify.http.util.Tryable;
+
 public class OAuth2AccessToken {
+
+	private static final String ACCESS_TOKEN_FIELD = "access_token";
+	private static final String TOKEN_TYPE_FIELD = "token_type";
+	private static final String EXPIRES_IN_FIELD = "expires_in";
+	private static final String SCOPE_FIELD = "scope";
 
 	private final OAuth2AccessTokenType tokenType;
 	private final String token;
+
+	private LocalDateTime expiration = null;
+	private Set<String> scopes = Collections.emptySet();
 
 	public OAuth2AccessToken(OAuth2AccessTokenType tokenType, String token) {
 		this.tokenType = tokenType;
@@ -48,7 +66,65 @@ public class OAuth2AccessToken {
 		return tokenType + " " + token;
 	}
 
+	public OAuth2AccessToken expiration(long seconds) {
+		this.expiration = LocalDateTime.now().plusSeconds(seconds);
+		return this;
+	}
+
+	public OAuth2AccessToken expiration(Duration seconds) {
+		this.expiration = LocalDateTime.now().plus(seconds);
+		return this;
+	}
+
+	public LocalDateTime expiration() {
+		return expiration;
+	}
+
+	public boolean expired() {
+		return expiration != null && expiration.isBefore(LocalDateTime.now());
+	}
+
+	public OAuth2AccessToken scope(String scope) {
+		this.scopes = Arrays.stream(scope.split(" ")).collect(Collectors.toSet());
+		return this;
+	}
+
+	public OAuth2AccessToken scopes(String... scopes) {
+		this.scopes = Arrays.stream(scopes).collect(Collectors.toSet());
+		return this;
+	}
+
+	public OAuth2AccessToken scopes(Set<String> scopes) {
+		this.scopes = Collections.unmodifiableSet(scopes);
+		return this;
+	}
+
+	public Set<String> scopes() {
+		return scopes;
+	}
+
+	public String scope() {
+		return scopes.stream().collect(Collectors.joining(" "));
+	}
+
 	public static OAuth2AccessToken bearer(String token) {
 		return new OAuth2AccessToken(OAuth2AccessTokenType.BEARER, token);
+	}
+
+	public static OAuth2AccessToken create(Parameters parameters) {
+		String token = parameters.get(ACCESS_TOKEN_FIELD).orElseThrow(() -> new IllegalStateException("Access token cannot be null!"));
+
+		OAuth2AccessTokenType tokenType = Tryable.or(() -> OAuth2AccessTokenType.of(parameters.get(TOKEN_TYPE_FIELD).orElse(null)),
+				OAuth2AccessTokenType.BEARER);
+
+		OAuth2AccessToken accessToken = new OAuth2AccessToken(tokenType, token);
+
+		parameters.get(EXPIRES_IN_FIELD)
+			.ifPresent(expires -> accessToken.expiration(Duration.ofSeconds(Long.valueOf(expires))));
+
+		parameters.get(SCOPE_FIELD)
+			.ifPresent(scope -> accessToken.scope(scope.toString()));
+
+		return accessToken;
 	}
 }

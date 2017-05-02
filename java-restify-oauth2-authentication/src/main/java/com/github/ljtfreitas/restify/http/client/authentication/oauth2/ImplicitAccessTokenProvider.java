@@ -33,7 +33,6 @@ import com.github.ljtfreitas.restify.http.client.Header;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
 import com.github.ljtfreitas.restify.http.client.response.StatusCode;
 import com.github.ljtfreitas.restify.http.contract.Parameters;
-import com.github.ljtfreitas.restify.http.util.Tryable;
 
 public class ImplicitAccessTokenProvider implements OAuth2AccessTokenProvider {
 
@@ -70,17 +69,7 @@ public class ImplicitAccessTokenProvider implements OAuth2AccessTokenProvider {
 			isTrue(configuration.state().orElse("").equals(parameters.get("state").orElse("")),
 					"Possible CSRF attack? [state] parameter returned by the authorization server is not the same of the authorization request.");
 
-			return buildAccessToken(parameters);
+			return OAuth2AccessToken.create(parameters);
 		}
-	}
-
-	private OAuth2AccessToken buildAccessToken(Parameters parameters) {
-		String token = parameters.get("access_token")
-				.orElseThrow(() -> new IllegalStateException("Access token parameter must be present on Authorization redirect!"));
-
-		OAuth2AccessTokenType tokenType = Tryable.or(() -> OAuth2AccessTokenType.of(parameters.get("token_type").orElse(null)),
-				OAuth2AccessTokenType.BEARER);
-
-		return new OAuth2AccessToken(tokenType, token);
 	}
 }

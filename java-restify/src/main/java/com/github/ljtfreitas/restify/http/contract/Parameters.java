@@ -36,6 +36,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.StringJoiner;
+import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
 import com.github.ljtfreitas.restify.http.client.charset.Encoding;
@@ -139,6 +140,23 @@ public class Parameters {
 				.map(p -> p.split("="))
 					.filter(p -> p.length == 2)
 						.forEach(p -> parameters.put(p[0], p[1]));
+
+		return parameters;
+	}
+
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public static Parameters of(Map<String, ?> source) {
+		Parameters parameters = new Parameters();
+
+		BiConsumer<String, Object> applier = (name, value) -> parameters.put(name, value.toString());
+
+		source.forEach((key, value) -> {
+			if (value instanceof Iterable) {
+				((Iterable) value).forEach(e -> applier.accept(key, e));
+			} else {
+				applier.accept(key, value);
+			}
+		});
 
 		return parameters;
 	}

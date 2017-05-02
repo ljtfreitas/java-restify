@@ -5,6 +5,9 @@ import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
 import static org.mockserver.model.JsonBody.json;
 
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -50,11 +53,17 @@ public class ImplicitAccessTokenProviderTest {
 			.respond(response()
 				.withStatusCode(302)
 				.withHeader("Content-Type", "application/x-www-form-urlencoded")
-				.withHeader("Location", "http://my.web.app/oauth/callback#access_token=abc1234&token_type=bearer&state=current-state"));
+				.withHeader("Location", "http://my.web.app/oauth/callback#access_token=abc1234&token_type=bearer&state=current-state&expires_in=3600&scope=read%20write"));
 
 		OAuth2AccessToken accessToken = provider.get();
 
+		assertEquals(OAuth2AccessTokenType.BEARER, accessToken.type());
 		assertEquals("abc1234", accessToken.token());
+
+		assertEquals("read write", accessToken.scope());
+
+		LocalDateTime expectedExpiration = LocalDateTime.now().plusSeconds(3600);
+		assertEquals(expectedExpiration.truncatedTo(ChronoUnit.SECONDS), accessToken.expiration().truncatedTo(ChronoUnit.SECONDS));
 	}
 
 	@Test(expected = OAuth2UserApprovalRequiredException.class)

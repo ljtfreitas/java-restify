@@ -6,6 +6,9 @@ import static org.mockserver.model.HttpResponse.response;
 import static org.mockserver.model.JsonBody.json;
 import static org.mockserver.model.ParameterBody.params;
 
+import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
+
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -54,11 +57,16 @@ public class ClientCredentialsAccessTokenProviderTest {
 				.respond(response()
 					.withStatusCode(200)
 					.withHeader("Content-Type", "application/json")
-					.withBody(json("{\"access_token\":\"aaa111\",\"token_type\":\"bearer\"}")));
+					.withBody(json("{\"access_token\":\"aaa111\",\"token_type\":\"bearer\",\"expires_in\":3600,\"scope\":\"read write\"}")));
 
 		OAuth2AccessToken accessToken = provider.get();
 
 		assertEquals(OAuth2AccessTokenType.BEARER, accessToken.type());
 		assertEquals("aaa111", accessToken.token());
+
+		assertEquals("read write", accessToken.scope());
+
+		LocalDateTime expectedExpiration = LocalDateTime.now().plusSeconds(3600);
+		assertEquals(expectedExpiration.truncatedTo(ChronoUnit.SECONDS), accessToken.expiration().truncatedTo(ChronoUnit.SECONDS));
 	}
 }
