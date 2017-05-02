@@ -26,7 +26,7 @@ public class ClientCredentialsAccessTokenProviderTest {
 
 	private MockServerClient mockServerClient;
 
-	private ClientCredentialsAcessTokenProvider provider;
+	private ClientCredentialsAccessTokenProvider provider;
 
 	private String authorizationCredentials;
 
@@ -40,7 +40,7 @@ public class ClientCredentialsAccessTokenProviderTest {
 				.scopes("read", "write")
 				.build();
 
-		provider = new ClientCredentialsAcessTokenProvider(configuration);
+		provider = new ClientCredentialsAccessTokenProvider(configuration);
 
 		authorizationCredentials = "Y2xpZW50LWlkOmNsaWVudC1zZWNyZXQ="; //(base64(client_id:client_secret))
 	}
