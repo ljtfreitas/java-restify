@@ -31,22 +31,22 @@ public class AuthorizationCodeAccessTokenProvider extends BaseOAuth2AccessTokenP
 	private final OAuth2AuthorizationCodeProvider authorizationCodeProvider;
 
 	public AuthorizationCodeAccessTokenProvider(OAuth2AuthorizationConfiguration configuration) {
-		this(configuration, new DefaultOAuth2EndpointRequestExecutor());
+		this(configuration, new DefaultOAuth2AuthorizationServer());
 	}
 
 	public AuthorizationCodeAccessTokenProvider(OAuth2AuthorizationConfiguration configuration,
 			OAuth2AuthorizationCodeProvider authorizationCodeProvider) {
-		this(configuration, authorizationCodeProvider, new DefaultOAuth2EndpointRequestExecutor());
+		this(configuration, authorizationCodeProvider, new DefaultOAuth2AuthorizationServer());
 	}
 
 	public AuthorizationCodeAccessTokenProvider(OAuth2AuthorizationConfiguration configuration,
-			OAuth2EndpointRequestExecutor executor) {
-		this(configuration, new DefaultOAuth2AuthorizationCodeProvider(configuration, executor), executor);
+			OAuth2AuthorizationServer authorizationServer) {
+		this(configuration, new DefaultOAuth2AuthorizationCodeProvider(configuration, authorizationServer), authorizationServer);
 	}
 
 	public AuthorizationCodeAccessTokenProvider(OAuth2AuthorizationConfiguration configuration,
-			OAuth2AuthorizationCodeProvider authorizationCodeProvider, OAuth2EndpointRequestExecutor executor) {
-		super(executor);
+			OAuth2AuthorizationCodeProvider authorizationCodeProvider, OAuth2AuthorizationServer authorizationServer) {
+		super(authorizationServer);
 		this.configuration = configuration;
 		this.authorizationCodeProvider = authorizationCodeProvider;
 	}
@@ -54,7 +54,7 @@ public class AuthorizationCodeAccessTokenProvider extends BaseOAuth2AccessTokenP
 	@Override
 	protected OAuth2AccessTokenRequest buildAccessTokenRequest() {
 		String authorizationCode = configuration.authorizationCode()
-					.orElseGet(() -> authorizationCodeProvider.get());
+					.orElseGet(() -> authorizationCodeProvider.provides());
 
 		OAuth2AccessTokenRequest.Builder builder = OAuth2AccessTokenRequest.authorizationCode(authorizationCode);
 

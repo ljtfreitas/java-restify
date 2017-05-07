@@ -55,7 +55,7 @@ public class ImplicitAccessTokenProviderTest {
 				.withHeader("Content-Type", "application/x-www-form-urlencoded")
 				.withHeader("Location", "http://my.web.app/oauth/callback#access_token=abc1234&token_type=bearer&state=current-state&expires_in=3600&scope=read%20write"));
 
-		OAuth2AccessToken accessToken = provider.get();
+		OAuth2AccessToken accessToken = provider.provides();
 
 		assertEquals(OAuth2AccessTokenType.BEARER, accessToken.type());
 		assertEquals("abc1234", accessToken.token());
@@ -79,7 +79,7 @@ public class ImplicitAccessTokenProviderTest {
 			.respond(response()
 				.withStatusCode(200));
 
-		provider.get();
+		provider.provides();
 	}
 
 	@Test(expected = OAuth2Exception.class)
@@ -96,6 +96,6 @@ public class ImplicitAccessTokenProviderTest {
 				.withStatusCode(400)
 				.withBody(json("{\"error\":\"invalid_client\",\"error_description\":\"client_id unauthorized\"}")));
 
-		provider.get();
+		provider.provides();
 	}
 }

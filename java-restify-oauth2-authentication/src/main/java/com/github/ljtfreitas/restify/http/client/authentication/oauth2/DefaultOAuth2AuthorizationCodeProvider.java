@@ -34,24 +34,24 @@ import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
 import com.github.ljtfreitas.restify.http.client.response.StatusCode;
 import com.github.ljtfreitas.restify.http.contract.Parameters;
 
-public class DefaultOAuth2AuthorizationCodeProvider implements OAuth2AuthorizationCodeProvider {
+class DefaultOAuth2AuthorizationCodeProvider implements OAuth2AuthorizationCodeProvider {
 
 	private final OAuth2AuthorizationConfiguration configuration;
-	private final OAuth2EndpointRequestExecutor executor;
+	private final OAuth2AuthorizationServer authorizationServer;
 
-	public DefaultOAuth2AuthorizationCodeProvider(OAuth2AuthorizationConfiguration configuration, OAuth2EndpointRequestExecutor executor) {
+	public DefaultOAuth2AuthorizationCodeProvider(OAuth2AuthorizationConfiguration configuration, OAuth2AuthorizationServer authorizationServer) {
 		this.configuration = configuration;
-		this.executor = executor;
+		this.authorizationServer = authorizationServer;
 	}
 
 	public DefaultOAuth2AuthorizationCodeProvider(OAuth2AuthorizationConfiguration configuration) {
 		this.configuration = configuration;
-		this.executor = new DefaultOAuth2EndpointRequestExecutor();
+		this.authorizationServer = new DefaultOAuth2AuthorizationServer();
 	}
 
 	@Override
-	public String get() {
-		EndpointResponse<String> authorizationResponse = executor.authorize(configuration);
+	public String provides() {
+		EndpointResponse<String> authorizationResponse = authorizationServer.authorize(configuration);
 
 		StatusCode status = authorizationResponse.code();
 

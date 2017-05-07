@@ -53,7 +53,7 @@ public class DefaultOAuth2AuthorizationCodeProviderTest {
 				.withHeader("Content-Type", "application/x-www-form-urlencoded")
 				.withHeader("Location", "http://my.web.app/oauth/callback?code=abc1234&state=current-state"));
 
-		assertEquals("abc1234", provider.get());
+		assertEquals("abc1234", provider.provides());
 	}
 
 	@Test(expected = OAuth2UserApprovalRequiredException.class)
@@ -69,7 +69,7 @@ public class DefaultOAuth2AuthorizationCodeProviderTest {
 			.respond(response()
 				.withStatusCode(200));
 
-		provider.get();
+		provider.provides();
 	}
 
 	@Test(expected = OAuth2Exception.class)
@@ -86,6 +86,6 @@ public class DefaultOAuth2AuthorizationCodeProviderTest {
 				.withStatusCode(400)
 				.withBody(json("{\"error\":\"invalid_client\",\"error_description\":\"client_id unauthorized\"}")));
 
-		provider.get();
+		provider.provides();
 	}
 }

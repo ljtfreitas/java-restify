@@ -37,20 +37,20 @@ import com.github.ljtfreitas.restify.http.contract.Parameters;
 public class ImplicitAccessTokenProvider implements OAuth2AccessTokenProvider {
 
 	private final OAuth2AuthorizationConfiguration configuration;
-	private final OAuth2EndpointRequestExecutor executor;
+	private final OAuth2AuthorizationServer authorizationServer;
 
 	public ImplicitAccessTokenProvider(OAuth2AuthorizationConfiguration configuration) {
-		this(configuration, new DefaultOAuth2EndpointRequestExecutor());
+		this(configuration, new DefaultOAuth2AuthorizationServer());
 	}
 
-	public ImplicitAccessTokenProvider(OAuth2AuthorizationConfiguration configuration, OAuth2EndpointRequestExecutor executor) {
+	public ImplicitAccessTokenProvider(OAuth2AuthorizationConfiguration configuration, OAuth2AuthorizationServer authorizationServer) {
 		this.configuration = configuration;
-		this.executor = executor;
+		this.authorizationServer = authorizationServer;
 	}
 
 	@Override
-	public OAuth2AccessToken get() {
-		EndpointResponse<String> authorizationResponse = executor.authorize(configuration);
+	public OAuth2AccessToken provides() {
+		EndpointResponse<String> authorizationResponse = authorizationServer.authorize(configuration);
 
 		StatusCode status = authorizationResponse.code();
 

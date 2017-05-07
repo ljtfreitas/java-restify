@@ -62,7 +62,7 @@ public class ResourceOwnerPasswordAccessTokenProviderTest {
 					.withHeader("Content-Type", "application/json")
 					.withBody(json("{\"access_token\":\"aaa111\",\"token_type\":\"bearer\",\"expires_in\":3600,\"scope\":\"read write\"}")));
 
-		OAuth2AccessToken accessToken = provider.get();
+		OAuth2AccessToken accessToken = provider.provides();
 
 		assertEquals(OAuth2AccessTokenType.BEARER, accessToken.type());
 		assertEquals("aaa111", accessToken.token());

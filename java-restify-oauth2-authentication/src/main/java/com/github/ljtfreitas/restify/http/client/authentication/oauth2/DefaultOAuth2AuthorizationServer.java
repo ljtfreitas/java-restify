@@ -53,28 +53,28 @@ import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponseReader;
 import com.github.ljtfreitas.restify.http.contract.Parameters;
 
-public class DefaultOAuth2EndpointRequestExecutor implements OAuth2EndpointRequestExecutor {
+class DefaultOAuth2AuthorizationServer implements OAuth2AuthorizationServer {
 
 	private static final String FORM_URLENCODED_CONTENT_TYPE = "application/x-www-form-urlencoded";
 
 	private final EndpointRequestExecutor delegate;
 
-	public DefaultOAuth2EndpointRequestExecutor(EndpointRequestExecutor endpointRequestExecutor) {
+	public DefaultOAuth2AuthorizationServer(EndpointRequestExecutor endpointRequestExecutor) {
 		this.delegate = endpointRequestExecutor;
 	}
 
-	public DefaultOAuth2EndpointRequestExecutor(HttpMessageConverters converters) {
+	public DefaultOAuth2AuthorizationServer(HttpMessageConverters converters) {
 		this.delegate = new RestifyEndpointRequestExecutor(httpClientRequestFactory(), endpointRequestWriter(converters),
 				endpointResponseReader(converters));
 	}
 
-	public DefaultOAuth2EndpointRequestExecutor(HttpClientRequestFactory httpClientRequestFactory) {
+	public DefaultOAuth2AuthorizationServer(HttpClientRequestFactory httpClientRequestFactory) {
 		HttpMessageConverters converters = converters();
 		this.delegate = new RestifyEndpointRequestExecutor(httpClientRequestFactory, endpointRequestWriter(converters),
 				endpointResponseReader(converters));
 	}
 
-	public DefaultOAuth2EndpointRequestExecutor() {
+	public DefaultOAuth2AuthorizationServer() {
 		HttpMessageConverters converters = converters();
 		this.delegate = new RestifyEndpointRequestExecutor(httpClientRequestFactory(), endpointRequestWriter(converters),
 				endpointResponseReader(converters));

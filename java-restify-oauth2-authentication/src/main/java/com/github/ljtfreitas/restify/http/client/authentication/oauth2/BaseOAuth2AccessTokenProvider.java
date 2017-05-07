@@ -29,19 +29,19 @@ import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
 
 abstract class BaseOAuth2AccessTokenProvider implements OAuth2AccessTokenProvider {
 
-	private final OAuth2EndpointRequestExecutor executor;
+	private final OAuth2AuthorizationServer authorizationServer;
 
 	protected BaseOAuth2AccessTokenProvider() {
-		this.executor = new DefaultOAuth2EndpointRequestExecutor();
+		this.authorizationServer = new DefaultOAuth2AuthorizationServer();
 	}
 
-	protected BaseOAuth2AccessTokenProvider(OAuth2EndpointRequestExecutor executor) {
-		this.executor = executor;
+	protected BaseOAuth2AccessTokenProvider(OAuth2AuthorizationServer authorizationServer) {
+		this.authorizationServer = authorizationServer;
 	}
 
 	@Override
-	public OAuth2AccessToken get() {
-		EndpointResponse<OAuth2AccessToken> response = executor.requireToken(buildAccessTokenRequest());
+	public OAuth2AccessToken provides() {
+		EndpointResponse<OAuth2AccessToken> response = authorizationServer.requireToken(buildAccessTokenRequest());
 		return response.body();
 	}
 

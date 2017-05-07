@@ -29,13 +29,19 @@ import java.net.URI;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class OAuth2Configuration {
 
+	private String resourceKey;
 	private URI accessTokenUri;
 	private OAuth2ClientCredentials credentials;
 	private Collection<String> scopes = Collections.emptyList();
+
+	public Optional<String> resourceKey() {
+		return Optional.ofNullable(resourceKey);
+	}
 
 	public OAuth2ClientCredentials credentials() {
 		return credentials;
@@ -63,6 +69,11 @@ public class OAuth2Configuration {
 
 		public Builder(OAuth2Configuration configuration) {
 			this.configuration = configuration;
+		}
+
+		public Builder resourceKey(String resourceKey) {
+			configuration.resourceKey = resourceKey;
+			return this;
 		}
 
 		public Builder accessTokenUri(String accessTokenUri) {

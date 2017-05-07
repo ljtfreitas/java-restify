@@ -25,25 +25,8 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.authentication.oauth2;
 
-public class ClientCredentialsAccessTokenProvider extends BaseOAuth2AccessTokenProvider {
+public interface OAuth2AccessTokenRepository {
 
-	private final OAuth2Configuration configuration;
+	OAuth2AccessToken findBy(OAuth2DelegateUser user, OAuth2Configuration configuration);
 
-	public ClientCredentialsAccessTokenProvider(OAuth2Configuration configuration) {
-		this.configuration = configuration;
-	}
-
-	public ClientCredentialsAccessTokenProvider(OAuth2Configuration configuration, OAuth2AuthorizationServer authorizationServer) {
-		super(authorizationServer);
-		this.configuration = configuration;
-	}
-
-	@Override
-	protected OAuth2AccessTokenRequest buildAccessTokenRequest() {
-		OAuth2AccessTokenRequest.Builder builder = OAuth2AccessTokenRequest.clientCredentials(configuration.credentials());
-
-		return builder.accessTokenUri(configuration.accessTokenUri())
-					  .parameter("scope", configuration.scope())
-					  .build();
-	}
 }

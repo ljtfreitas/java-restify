@@ -68,35 +68,40 @@ public class OAuth2AuthorizationConfiguration extends OAuth2Configuration {
 	public static class Builder {
 
 		private final OAuth2AuthorizationConfiguration configuration = new OAuth2AuthorizationConfiguration();
-		private final OAuth2Configuration.Builder authenticationConfigurationBuilder = new OAuth2Configuration.Builder(configuration);
+		private final OAuth2Configuration.Builder delegate = new OAuth2Configuration.Builder(configuration);
+
+		public Builder resourceKey(String resourceKey) {
+			delegate.resourceKey(resourceKey);
+			return this;
+		}
 
 		public Builder accessTokenUri(String accessTokenUri) {
-			authenticationConfigurationBuilder.accessTokenUri(accessTokenUri);
+			delegate.accessTokenUri(accessTokenUri);
 			return this;
 		}
 
 		public Builder accessTokenUri(URI accessTokenUri) {
-			authenticationConfigurationBuilder.accessTokenUri(accessTokenUri);
+			delegate.accessTokenUri(accessTokenUri);
 			return this;
 		}
 
 		public Builder clientId(String clientId) {
-			authenticationConfigurationBuilder.clientId(clientId);
+			delegate.clientId(clientId);
 			return this;
 		}
 
 		public Builder credentials(OAuth2ClientCredentials credentials) {
-			authenticationConfigurationBuilder.credentials(credentials);
+			delegate.credentials(credentials);
 			return this;
 		}
 
 		public Builder scopes(Collection<String> scopes) {
-			authenticationConfigurationBuilder.scopes(scopes);
+			delegate.scopes(scopes);
 			return this;
 		}
 
 		public Builder scopes(String... scopes) {
-			authenticationConfigurationBuilder.scopes(scopes);
+			delegate.scopes(scopes);
 			return this;
 		}
 

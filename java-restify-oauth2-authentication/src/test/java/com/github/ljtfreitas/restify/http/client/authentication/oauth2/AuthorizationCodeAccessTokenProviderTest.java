@@ -48,7 +48,7 @@ public class AuthorizationCodeAccessTokenProviderTest {
 				.scopes("read", "write")
 				.build();
 
-		when(authorizationCodeProvider.get()).thenReturn("abc1234");
+		when(authorizationCodeProvider.provides()).thenReturn("abc1234");
 
 		provider = new AuthorizationCodeAccessTokenProvider(configuration, authorizationCodeProvider);
 
@@ -70,7 +70,7 @@ public class AuthorizationCodeAccessTokenProviderTest {
 					.withHeader("Content-Type", "application/json")
 					.withBody(json("{\"access_token\":\"aaa111\",\"token_type\":\"bearer\",\"expires_in\":3600,\"scope\":\"read write\"}")));
 
-		OAuth2AccessToken accessToken = provider.get();
+		OAuth2AccessToken accessToken = provider.provides();
 
 		assertEquals(OAuth2AccessTokenType.BEARER, accessToken.type());
 		assertEquals("aaa111", accessToken.token());
@@ -80,6 +80,6 @@ public class AuthorizationCodeAccessTokenProviderTest {
 		LocalDateTime expectedExpiration = LocalDateTime.now().plusSeconds(3600);
 		assertEquals(expectedExpiration.truncatedTo(ChronoUnit.SECONDS), accessToken.expiration().truncatedTo(ChronoUnit.SECONDS));
 
-		verify(authorizationCodeProvider).get();
+		verify(authorizationCodeProvider).provides();
 	}
 }

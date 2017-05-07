@@ -31,7 +31,6 @@ public class OAuth2ResourceOwner {
 	private final String password;
 
 	public OAuth2ResourceOwner(String username, String password) {
-		super();
 		this.username = username;
 		this.password = password;
 	}

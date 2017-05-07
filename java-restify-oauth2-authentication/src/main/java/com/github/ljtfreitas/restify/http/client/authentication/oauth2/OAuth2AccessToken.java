@@ -53,6 +53,15 @@ public class OAuth2AccessToken {
 		this.token = token;
 	}
 
+	public OAuth2AccessToken(OAuth2AccessTokenType tokenType, String token, Duration seconds) {
+		this(tokenType, token);
+		this.expiration = expirationTo(seconds);
+	}
+
+	private LocalDateTime expirationTo(Duration seconds) {
+		return LocalDateTime.now().plus(seconds);
+	}
+
 	public OAuth2AccessTokenType type() {
 		return tokenType;
 	}
@@ -67,12 +76,12 @@ public class OAuth2AccessToken {
 	}
 
 	public OAuth2AccessToken expiration(long seconds) {
-		this.expiration = LocalDateTime.now().plusSeconds(seconds);
+		this.expiration = expirationTo(Duration.ofSeconds(seconds));
 		return this;
 	}
 
 	public OAuth2AccessToken expiration(Duration seconds) {
-		this.expiration = LocalDateTime.now().plus(seconds);
+		this.expiration = expirationTo(seconds);
 		return this;
 	}
 
@@ -109,6 +118,10 @@ public class OAuth2AccessToken {
 
 	public static OAuth2AccessToken bearer(String token) {
 		return new OAuth2AccessToken(OAuth2AccessTokenType.BEARER, token);
+	}
+
+	public static OAuth2AccessToken bearer(String token, Duration duration) {
+		return new OAuth2AccessToken(OAuth2AccessTokenType.BEARER, token, duration);
 	}
 
 	public static OAuth2AccessToken create(Parameters parameters) {

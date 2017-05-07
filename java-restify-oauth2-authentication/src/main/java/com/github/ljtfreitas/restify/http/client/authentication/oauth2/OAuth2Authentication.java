@@ -29,15 +29,23 @@ import com.github.ljtfreitas.restify.http.client.authentication.Authentication;
 
 public class OAuth2Authentication implements Authentication {
 
-	private final OAuth2AccessTokenProvider accessTokenProvider;
+	private final OAuth2Configuration configuration;
+	private final OAuth2AccessTokenRepository accessTokenRepository;
+	private final OAuth2DelegateUser user;
 
-	public OAuth2Authentication(OAuth2AccessTokenProvider accessTokenProvider) {
-		this.accessTokenProvider = accessTokenProvider;
+	public OAuth2Authentication(OAuth2Configuration configuration, OAuth2AccessTokenProvider accessTokenProvider) {
+		this(configuration, accessTokenProvider, null);
+	}
+
+	public OAuth2Authentication(OAuth2Configuration configuration, OAuth2AccessTokenProvider accessTokenProvider, OAuth2DelegateUser user) {
+		this.configuration = configuration;
+		this.accessTokenRepository = new DefaultOAuth2AccessTokenRepository(new OAuth2AccessTokenMemoryStore(), accessTokenProvider);
+		this.user = user;
 	}
 
 	@Override
 	public String content() {
-		OAuth2AccessToken accessToken = accessTokenProvider.get();
+		OAuth2AccessToken accessToken = accessTokenRepository.findBy(user, configuration);
 		return accessToken.toString();
 	}
 }

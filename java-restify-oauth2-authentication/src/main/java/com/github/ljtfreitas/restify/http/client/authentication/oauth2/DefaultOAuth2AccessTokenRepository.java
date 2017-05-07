@@ -25,27 +25,31 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.authentication.oauth2;
 
-import com.github.ljtfreitas.restify.http.client.Headers;
+import java.util.Optional;
 
-public class OAuth2AuthorizationCodeResponse {
+class DefaultOAuth2AccessTokenRepository implements OAuth2AccessTokenRepository {
 
-	private final String code;
-	private final Headers headers;
+	private final OAuth2AccessTokenStore accessTokenStore;
+	private final OAuth2AccessTokenProvider accessTokenProvider;
 
-	public OAuth2AuthorizationCodeResponse(String code) {
-		this(code, Headers.empty());
+	public DefaultOAuth2AccessTokenRepository(OAuth2AccessTokenStore accessTokenStore, OAuth2AccessTokenProvider accessTokenProvider) {
+		this.accessTokenStore = accessTokenStore;
+		this.accessTokenProvider = accessTokenProvider;
 	}
 
-	public OAuth2AuthorizationCodeResponse(String code, Headers headers) {
-		this.code = code;
-		this.headers = headers;
+	@Override
+	public OAuth2AccessToken findBy(OAuth2DelegateUser user, OAuth2Configuration configuration) {
+		Optional<OAuth2AccessToken> accessToken = accessTokenStore.findBy(user, configuration);
+
+		return accessToken.filter(a -> !a.expired())
+				.orElseGet(() -> newToken(user, configuration));
 	}
 
-	public String code() {
-		return code;
-	}
+	private OAuth2AccessToken newToken(OAuth2DelegateUser user, OAuth2Configuration configuration) {
+		OAuth2AccessToken newAccessToken = accessTokenProvider.provides();
 
-	public Headers headers() {
-		return headers;
+		accessTokenStore.add(user, configuration, newAccessToken);
+
+		return newAccessToken;
 	}
 }

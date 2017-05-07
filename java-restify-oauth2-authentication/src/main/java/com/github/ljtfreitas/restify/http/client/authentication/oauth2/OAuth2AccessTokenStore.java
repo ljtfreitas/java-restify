@@ -25,12 +25,12 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.authentication.oauth2;
 
-import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
+import java.util.Optional;
 
-public interface OAuth2EndpointRequestExecutor {
+public interface OAuth2AccessTokenStore {
 
-	public EndpointResponse<String> authorize(OAuth2AuthorizationConfiguration configuration);
+	Optional<OAuth2AccessToken> findBy(OAuth2DelegateUser user, OAuth2Configuration configuration);
 
-	public EndpointResponse<OAuth2AccessToken> requireToken(OAuth2AccessTokenRequest request);
+	void add(OAuth2DelegateUser user, OAuth2Configuration configuration, OAuth2AccessToken accessToken);
 
 }
