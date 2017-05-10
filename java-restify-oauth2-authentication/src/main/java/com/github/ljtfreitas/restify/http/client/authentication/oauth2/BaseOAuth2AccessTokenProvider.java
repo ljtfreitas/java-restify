@@ -25,17 +25,22 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.authentication.oauth2;
 
+import static com.github.ljtfreitas.restify.http.util.Preconditions.nonNull;
+
+import com.github.ljtfreitas.restify.http.client.authentication.oauth2.OAuth2AccessTokenRequest.Builder;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
 
 abstract class BaseOAuth2AccessTokenProvider implements OAuth2AccessTokenProvider {
 
+	private final OAuth2Configuration configuration;
 	private final OAuth2AuthorizationServer authorizationServer;
 
-	protected BaseOAuth2AccessTokenProvider() {
-		this.authorizationServer = new DefaultOAuth2AuthorizationServer();
+	protected BaseOAuth2AccessTokenProvider(OAuth2Configuration configuration) {
+		this(configuration, new DefaultOAuth2AuthorizationServer());
 	}
 
-	protected BaseOAuth2AccessTokenProvider(OAuth2AuthorizationServer authorizationServer) {
+	protected BaseOAuth2AccessTokenProvider(OAuth2Configuration configuration, OAuth2AuthorizationServer authorizationServer) {
+		this.configuration = configuration;
 		this.authorizationServer = authorizationServer;
 	}
 
@@ -43,6 +48,22 @@ abstract class BaseOAuth2AccessTokenProvider implements OAuth2AccessTokenProvide
 	public OAuth2AccessToken provides() {
 		EndpointResponse<OAuth2AccessToken> response = authorizationServer.requireToken(buildAccessTokenRequest());
 		return response.body();
+	}
+
+	@Override
+	public OAuth2AccessToken refresh(OAuth2AccessToken accessToken) {
+		EndpointResponse<OAuth2AccessToken> response = authorizationServer.requireToken(buildRefreshTokenRequest(accessToken));
+		return response.body();
+	}
+
+	protected OAuth2AccessTokenRequest buildRefreshTokenRequest(OAuth2AccessToken accessToken) {
+		nonNull(accessToken.refreshToken(), "Your access token must have a refresh token.");
+
+		Builder builder = OAuth2AccessTokenRequest.refreshToken(accessToken.refreshToken());
+
+		return builder.accessTokenUri(configuration.accessTokenUri())
+					  .credentials(configuration.credentials())
+					  .build();
 	}
 
 	protected abstract OAuth2AccessTokenRequest buildAccessTokenRequest();

@@ -82,4 +82,34 @@ public class AuthorizationCodeAccessTokenProviderTest {
 
 		verify(authorizationCodeProvider).provides();
 	}
+
+	@Test
+	public void shouldRefreshToken() {
+		mockServerClient
+			.when(request()
+					.withMethod("POST")
+					.withPath("/oauth/token")
+					.withBody(params(new Parameter("grant_type", "refresh_token"),
+									 new Parameter("refresh_token", "bbb222")))
+					.withHeader("Authorization", "Basic " + authorizationCredentials))
+				.respond(response()
+					.withStatusCode(200)
+					.withHeader("Content-Type", "application/json")
+					.withBody(json("{\"access_token\":\"ccc333\",\"token_type\":\"bearer\",\"expires_in\":3600,\"scope\":\"read write\"}")));
+
+		OAuth2AccessToken accessToken = OAuth2AccessToken.Builder
+				.bearer("aaa111")
+					.refreshToken("bbb222")
+					.build();
+
+		OAuth2AccessToken newAccessToken = provider.refresh(accessToken);
+
+		assertEquals(OAuth2AccessTokenType.BEARER, newAccessToken.type());
+		assertEquals("ccc333", newAccessToken.token());
+
+		assertEquals("read write", newAccessToken.scope());
+
+		LocalDateTime expectedExpiration = LocalDateTime.now().plusSeconds(3600);
+		assertEquals(expectedExpiration.truncatedTo(ChronoUnit.SECONDS), newAccessToken.expiration().truncatedTo(ChronoUnit.SECONDS));
+	}
 }

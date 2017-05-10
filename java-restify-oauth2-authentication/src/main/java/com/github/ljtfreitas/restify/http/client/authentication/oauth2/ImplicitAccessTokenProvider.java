@@ -72,4 +72,9 @@ public class ImplicitAccessTokenProvider implements OAuth2AccessTokenProvider {
 			return OAuth2AccessToken.create(parameters);
 		}
 	}
+
+	@Override
+	public OAuth2AccessToken refresh(OAuth2AccessToken accessToken) {
+		throw new UnsupportedOperationException("Implicit Grant does not support refresh token.");
+	}
 }

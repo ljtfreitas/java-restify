@@ -46,7 +46,7 @@ public class AuthorizationCodeAccessTokenProvider extends BaseOAuth2AccessTokenP
 
 	public AuthorizationCodeAccessTokenProvider(OAuth2AuthorizationConfiguration configuration,
 			OAuth2AuthorizationCodeProvider authorizationCodeProvider, OAuth2AuthorizationServer authorizationServer) {
-		super(authorizationServer);
+		super(configuration, authorizationServer);
 		this.configuration = configuration;
 		this.authorizationCodeProvider = authorizationCodeProvider;
 	}

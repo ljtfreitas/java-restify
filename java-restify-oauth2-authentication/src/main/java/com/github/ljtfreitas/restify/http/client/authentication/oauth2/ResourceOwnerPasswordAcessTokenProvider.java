@@ -32,11 +32,12 @@ public class ResourceOwnerPasswordAcessTokenProvider extends BaseOAuth2AccessTok
 	private final OAuth2ResourceOwnerConfiguration configuration;
 
 	public ResourceOwnerPasswordAcessTokenProvider(OAuth2ResourceOwnerConfiguration configuration) {
+		super(configuration);
 		this.configuration = configuration;
 	}
 
 	public ResourceOwnerPasswordAcessTokenProvider(OAuth2ResourceOwnerConfiguration configuration, OAuth2AuthorizationServer authorizationServer) {
-		super(authorizationServer);
+		super(configuration, authorizationServer);
 		this.configuration = configuration;
 	}
 

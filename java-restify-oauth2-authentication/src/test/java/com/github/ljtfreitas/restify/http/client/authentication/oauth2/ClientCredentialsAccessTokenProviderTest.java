@@ -69,4 +69,9 @@ public class ClientCredentialsAccessTokenProviderTest {
 		LocalDateTime expectedExpiration = LocalDateTime.now().plusSeconds(3600);
 		assertEquals(expectedExpiration.truncatedTo(ChronoUnit.SECONDS), accessToken.expiration().truncatedTo(ChronoUnit.SECONDS));
 	}
+
+	@Test(expected = UnsupportedOperationException.class)
+	public void shouldThrowExceptionOnTryRefreshToken() {
+		provider.refresh(OAuth2AccessToken.bearer("aaa111"));
+	}
 }

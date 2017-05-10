@@ -41,12 +41,14 @@ public class OAuth2AccessToken {
 	private static final String TOKEN_TYPE_FIELD = "token_type";
 	private static final String EXPIRES_IN_FIELD = "expires_in";
 	private static final String SCOPE_FIELD = "scope";
+	private static final String REFRESH_TOKEN_FIELD = "refresh_token";
 
 	private final OAuth2AccessTokenType tokenType;
 	private final String token;
 
 	private LocalDateTime expiration = null;
 	private Set<String> scopes = Collections.emptySet();
+	private String refreshToken = null;
 
 	public OAuth2AccessToken(OAuth2AccessTokenType tokenType, String token) {
 		this.tokenType = tokenType;
@@ -70,17 +72,12 @@ public class OAuth2AccessToken {
 		return token;
 	}
 
-	@Override
-	public String toString() {
-		return tokenType + " " + token;
-	}
-
-	public OAuth2AccessToken expiration(long seconds) {
+	private OAuth2AccessToken expiration(long seconds) {
 		this.expiration = expirationTo(Duration.ofSeconds(seconds));
 		return this;
 	}
 
-	public OAuth2AccessToken expiration(Duration seconds) {
+	private OAuth2AccessToken expiration(Duration seconds) {
 		this.expiration = expirationTo(seconds);
 		return this;
 	}
@@ -93,17 +90,17 @@ public class OAuth2AccessToken {
 		return expiration != null && expiration.isBefore(LocalDateTime.now());
 	}
 
-	public OAuth2AccessToken scope(String scope) {
+	private OAuth2AccessToken scope(String scope) {
 		this.scopes = Arrays.stream(scope.split(" ")).collect(Collectors.toSet());
 		return this;
 	}
 
-	public OAuth2AccessToken scopes(String... scopes) {
+	private OAuth2AccessToken scopes(String... scopes) {
 		this.scopes = Arrays.stream(scopes).collect(Collectors.toSet());
 		return this;
 	}
 
-	public OAuth2AccessToken scopes(Set<String> scopes) {
+	private OAuth2AccessToken scopes(Set<String> scopes) {
 		this.scopes = Collections.unmodifiableSet(scopes);
 		return this;
 	}
@@ -116,6 +113,19 @@ public class OAuth2AccessToken {
 		return scopes.stream().collect(Collectors.joining(" "));
 	}
 
+	private void refreshToken(String refreshToken) {
+		this.refreshToken = refreshToken;
+	}
+
+	public String refreshToken() {
+		return refreshToken;
+	}
+
+	@Override
+	public String toString() {
+		return tokenType + " " + token;
+	}
+
 	public static OAuth2AccessToken bearer(String token) {
 		return new OAuth2AccessToken(OAuth2AccessTokenType.BEARER, token);
 	}
@@ -125,19 +135,74 @@ public class OAuth2AccessToken {
 	}
 
 	public static OAuth2AccessToken create(Parameters parameters) {
-		String token = parameters.get(ACCESS_TOKEN_FIELD).orElseThrow(() -> new IllegalStateException("Access token cannot be null!"));
+		String token = parameters.get(ACCESS_TOKEN_FIELD)
+				.orElseThrow(() -> new IllegalStateException("Access token cannot be null!"));
 
 		OAuth2AccessTokenType tokenType = Tryable.or(() -> OAuth2AccessTokenType.of(parameters.get(TOKEN_TYPE_FIELD).orElse(null)),
 				OAuth2AccessTokenType.BEARER);
 
-		OAuth2AccessToken accessToken = new OAuth2AccessToken(tokenType, token);
+		OAuth2AccessToken.Builder accessTokenBuilder = OAuth2AccessToken.Builder.of(tokenType, token);
 
 		parameters.get(EXPIRES_IN_FIELD)
-			.ifPresent(expires -> accessToken.expiration(Duration.ofSeconds(Long.valueOf(expires))));
+			.ifPresent(expires -> accessTokenBuilder.expiration(Duration.ofSeconds(Long.valueOf(expires))));
 
 		parameters.get(SCOPE_FIELD)
-			.ifPresent(scope -> accessToken.scope(scope.toString()));
+			.ifPresent(scope -> accessTokenBuilder.scope(scope));
 
-		return accessToken;
+		parameters.get(REFRESH_TOKEN_FIELD)
+			.ifPresent(refreshToken -> accessTokenBuilder.refreshToken(refreshToken));
+
+		return accessTokenBuilder.build();
+	}
+
+	public static class Builder {
+
+		private final OAuth2AccessToken accessToken;
+
+		public Builder(OAuth2AccessTokenType tokenType, String token) {
+			this.accessToken = new OAuth2AccessToken(tokenType, token);
+		}
+
+		public OAuth2AccessToken.Builder expiration(long seconds) {
+			accessToken.expiration(seconds);
+			return this;
+		}
+
+		public OAuth2AccessToken.Builder expiration(Duration seconds) {
+			accessToken.expiration(seconds);
+			return this;
+		}
+
+		public OAuth2AccessToken.Builder scope(String scope) {
+			accessToken.scope(scope);
+			return this;
+		}
+
+		public OAuth2AccessToken.Builder scopes(String... scopes) {
+			accessToken.scopes(scopes);
+			return this;
+		}
+
+		public OAuth2AccessToken.Builder scopes(Set<String> scopes) {
+			accessToken.scopes(scopes);
+			return this;
+		}
+
+		public OAuth2AccessToken.Builder refreshToken(String refreshToken) {
+			accessToken.refreshToken(refreshToken);
+			return this;
+		}
+
+		public OAuth2AccessToken build() {
+			return accessToken;
+		}
+
+		public static OAuth2AccessToken.Builder bearer(String token) {
+			return new OAuth2AccessToken.Builder(OAuth2AccessTokenType.BEARER, token);
+		}
+
+		public static OAuth2AccessToken.Builder of(OAuth2AccessTokenType tokenType, String token) {
+			return new OAuth2AccessToken.Builder(tokenType, token);
+		}
 	}
 }

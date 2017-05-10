@@ -30,11 +30,12 @@ public class ClientCredentialsAccessTokenProvider extends BaseOAuth2AccessTokenP
 	private final OAuth2Configuration configuration;
 
 	public ClientCredentialsAccessTokenProvider(OAuth2Configuration configuration) {
+		super(configuration);
 		this.configuration = configuration;
 	}
 
 	public ClientCredentialsAccessTokenProvider(OAuth2Configuration configuration, OAuth2AuthorizationServer authorizationServer) {
-		super(authorizationServer);
+		super(configuration, authorizationServer);
 		this.configuration = configuration;
 	}
 
@@ -45,5 +46,10 @@ public class ClientCredentialsAccessTokenProvider extends BaseOAuth2AccessTokenP
 		return builder.accessTokenUri(configuration.accessTokenUri())
 					  .parameter("scope", configuration.scope())
 					  .build();
+	}
+
+	@Override
+	public OAuth2AccessToken refresh(OAuth2AccessToken accessToken) {
+		throw new UnsupportedOperationException("Client Credentials Grant does not support refresh token.");
 	}
 }

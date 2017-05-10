@@ -87,6 +87,14 @@ public class OAuth2AccessTokenRequest {
 		return builder;
 	}
 
+	public static OAuth2AccessTokenRequest.Builder refreshToken(String refreshToken) {
+		Builder builder = new OAuth2AccessTokenRequest.Builder("refresh_token");
+
+		builder.parameter("refresh_token", refreshToken);
+
+		return builder;
+	}
+
 	public static class Builder {
 
 		private URI accessTokenUri = null;

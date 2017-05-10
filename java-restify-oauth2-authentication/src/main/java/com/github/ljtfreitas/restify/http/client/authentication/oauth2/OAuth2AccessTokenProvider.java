@@ -29,4 +29,5 @@ public interface OAuth2AccessTokenProvider {
 
 	public OAuth2AccessToken provides();
 
+	public OAuth2AccessToken refresh(OAuth2AccessToken accessToken);
 }
