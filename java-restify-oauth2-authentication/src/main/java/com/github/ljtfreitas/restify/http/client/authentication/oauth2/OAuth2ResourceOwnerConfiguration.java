@@ -32,9 +32,9 @@ import java.util.Collection;
 
 public class OAuth2ResourceOwnerConfiguration extends OAuth2Configuration {
 
-	private OAuth2ResourceOwner resourceOwner;
+	private ResourceOwner resourceOwner;
 
-	public OAuth2ResourceOwner resourceOwner() {
+	public ResourceOwner resourceOwner() {
 		return resourceOwner;
 	}
 
@@ -63,7 +63,7 @@ public class OAuth2ResourceOwnerConfiguration extends OAuth2Configuration {
 			return this;
 		}
 
-		public Builder credentials(OAuth2ClientCredentials credentials) {
+		public Builder credentials(ClientCredentials credentials) {
 			delegate.credentials(credentials);
 			return this;
 		}
@@ -78,13 +78,13 @@ public class OAuth2ResourceOwnerConfiguration extends OAuth2Configuration {
 			return this;
 		}
 
-		public Builder resourceOwner(OAuth2ResourceOwner resourceOwner) {
+		public Builder resourceOwner(ResourceOwner resourceOwner) {
 			configuration.resourceOwner = resourceOwner;
 			return this;
 		}
 
 		public Builder resourceOwner(String username, String password) {
-			configuration.resourceOwner = new OAuth2ResourceOwner(username, password);
+			configuration.resourceOwner = new ResourceOwner(username, password);
 			return this;
 		}
 

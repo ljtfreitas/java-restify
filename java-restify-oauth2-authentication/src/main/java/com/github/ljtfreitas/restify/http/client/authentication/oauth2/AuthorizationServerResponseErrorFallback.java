@@ -26,11 +26,17 @@
 package com.github.ljtfreitas.restify.http.client.authentication.oauth2;
 
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
+import com.github.ljtfreitas.restify.http.client.response.EndpointResponseErrorFallback;
+import com.github.ljtfreitas.restify.http.client.response.EndpointResponseExceptionFactory;
+import com.github.ljtfreitas.restify.http.client.response.HttpResponseMessage;
+import com.github.ljtfreitas.restify.http.contract.metadata.reflection.JavaType;
 
-public interface OAuth2AuthorizationServer {
+class AuthorizationServerResponseErrorFallback implements EndpointResponseErrorFallback {
 
-	public EndpointResponse<String> authorize(OAuth2AuthorizationConfiguration configuration);
+	private final EndpointResponseExceptionFactory endpointResponseExceptionFactory = new EndpointResponseExceptionFactory();
 
-	public EndpointResponse<OAuth2AccessToken> requireToken(OAuth2AccessTokenRequest request);
-
+	@Override
+	public <T> EndpointResponse<T> onError(HttpResponseMessage response, JavaType responseType) {
+		throw new OAuth2Exception("OAuth response error", endpointResponseExceptionFactory.create(response));
+	}
 }

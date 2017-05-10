@@ -25,16 +25,16 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.authentication.oauth2;
 
-public class SimpleAccessTokenRepository implements OAuth2AccessTokenRepository {
+public class SimpleAccessTokenRepository implements AccessTokenRepository {
 
-	private final OAuth2AccessToken accessToken;
+	private final AccessToken accessToken;
 
-	public SimpleAccessTokenRepository(OAuth2AccessToken accessToken) {
+	public SimpleAccessTokenRepository(AccessToken accessToken) {
 		this.accessToken = accessToken;
 	}
 
 	@Override
-	public OAuth2AccessToken findBy(OAuth2DelegateUser user, OAuth2Configuration configuration) {
+	public AccessToken findBy(OAuth2DelegateUser user, OAuth2Configuration configuration) {
 		return accessToken;
 	}
 }

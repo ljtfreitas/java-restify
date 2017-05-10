@@ -25,12 +25,12 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.authentication.oauth2;
 
-public class OAuth2ResourceOwner {
+public class ResourceOwner {
 
 	private final String username;
 	private final String password;
 
-	public OAuth2ResourceOwner(String username, String password) {
+	public ResourceOwner(String username, String password) {
 		this.username = username;
 		this.password = password;
 	}

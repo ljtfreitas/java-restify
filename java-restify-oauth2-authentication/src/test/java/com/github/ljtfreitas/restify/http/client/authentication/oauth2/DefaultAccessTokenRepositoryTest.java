@@ -15,19 +15,19 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
-public class DefaultOAuth2AccessTokenRepositoryTest {
+public class DefaultAccessTokenRepositoryTest {
 
 	@Mock
 	private OAuth2Configuration configuration;
 
 	@Mock
-	private OAuth2AccessTokenStore accessTokenStore;
+	private AccessTokenStore accessTokenStore;
 
 	@Mock
-	private OAuth2AccessTokenProvider accessTokenProvider;
+	private AccessTokenProvider accessTokenProvider;
 
 	@InjectMocks
-	private DefaultOAuth2AccessTokenRepository accessTokenRepository;
+	private DefaultAccessTokenRepository accessTokenRepository;
 
 	@Mock
 	private OAuth2DelegateUser user;
@@ -39,23 +39,23 @@ public class DefaultOAuth2AccessTokenRepositoryTest {
 
 	@Test
 	public void shouldGetAccessTokenFromStore() {
-		OAuth2AccessToken accessToken = OAuth2AccessToken.bearer("access-token");
+		AccessToken accessToken = AccessToken.bearer("access-token");
 
 		when(accessTokenStore.findBy(user, configuration)).thenReturn(Optional.of(accessToken));
 
-		OAuth2AccessToken output = accessTokenRepository.findBy(user, configuration);
+		AccessToken output = accessTokenRepository.findBy(user, configuration);
 
 		assertSame(output, accessToken);
 	}
 
 	@Test
 	public void shouldGetAccessTokenFromProviderWhenStoreHasNoToken() {
-		OAuth2AccessToken accessToken = OAuth2AccessToken.bearer("access-token");
+		AccessToken accessToken = AccessToken.bearer("access-token");
 
 		when(accessTokenStore.findBy(user, configuration)).thenReturn(Optional.empty());
 		when(accessTokenProvider.provides()).thenReturn(accessToken);
 
-		OAuth2AccessToken output = accessTokenRepository.findBy(user, configuration);
+		AccessToken output = accessTokenRepository.findBy(user, configuration);
 
 		assertSame(output, accessToken);
 
@@ -65,15 +65,15 @@ public class DefaultOAuth2AccessTokenRepositoryTest {
 
 	@Test
 	public void shouldGetAccessTokenFromProviderWhenStoredTokenHasExpired() throws Exception {
-		OAuth2AccessToken expiredAccessToken = OAuth2AccessToken.bearer("access-token", Duration.ofMillis(500));
-		OAuth2AccessToken newAccessToken = OAuth2AccessToken.bearer("new-access-token");
+		AccessToken expiredAccessToken = AccessToken.bearer("access-token", Duration.ofMillis(500));
+		AccessToken newAccessToken = AccessToken.bearer("new-access-token");
 
 		when(accessTokenStore.findBy(user, configuration)).thenReturn(Optional.of(expiredAccessToken));
 		when(accessTokenProvider.provides()).thenReturn(newAccessToken);
 
 		Thread.sleep(1000);
 
-		OAuth2AccessToken output = accessTokenRepository.findBy(user, configuration);
+		AccessToken output = accessTokenRepository.findBy(user, configuration);
 
 		assertSame(output, newAccessToken);
 

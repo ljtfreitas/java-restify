@@ -34,22 +34,22 @@ import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
 import com.github.ljtfreitas.restify.http.client.response.StatusCode;
 import com.github.ljtfreitas.restify.http.contract.Parameters;
 
-public class ImplicitAccessTokenProvider implements OAuth2AccessTokenProvider {
+public class ImplicitAccessTokenProvider implements AccessTokenProvider {
 
 	private final OAuth2AuthorizationConfiguration configuration;
-	private final OAuth2AuthorizationServer authorizationServer;
+	private final AuthorizationServer authorizationServer;
 
 	public ImplicitAccessTokenProvider(OAuth2AuthorizationConfiguration configuration) {
-		this(configuration, new DefaultOAuth2AuthorizationServer());
+		this(configuration, new DefaultAuthorizationServer());
 	}
 
-	public ImplicitAccessTokenProvider(OAuth2AuthorizationConfiguration configuration, OAuth2AuthorizationServer authorizationServer) {
+	public ImplicitAccessTokenProvider(OAuth2AuthorizationConfiguration configuration, AuthorizationServer authorizationServer) {
 		this.configuration = configuration;
 		this.authorizationServer = authorizationServer;
 	}
 
 	@Override
-	public OAuth2AccessToken provides() {
+	public AccessToken provides() {
 		EndpointResponse<String> authorizationResponse = authorizationServer.authorize(configuration);
 
 		StatusCode status = authorizationResponse.code();
@@ -69,12 +69,12 @@ public class ImplicitAccessTokenProvider implements OAuth2AccessTokenProvider {
 			isTrue(configuration.state().orElse("").equals(parameters.get("state").orElse("")),
 					"Possible CSRF attack? [state] parameter returned by the authorization server is not the same of the authorization request.");
 
-			return OAuth2AccessToken.create(parameters);
+			return AccessToken.create(parameters);
 		}
 	}
 
 	@Override
-	public OAuth2AccessToken refresh(OAuth2AccessToken accessToken) {
+	public AccessToken refresh(AccessToken accessToken) {
 		throw new UnsupportedOperationException("Implicit Grant does not support refresh token.");
 	}
 }

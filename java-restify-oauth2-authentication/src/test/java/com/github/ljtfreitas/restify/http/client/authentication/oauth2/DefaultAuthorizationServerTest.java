@@ -18,20 +18,20 @@ import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
 import com.github.ljtfreitas.restify.http.client.response.HttpStatusCode;
 import com.github.ljtfreitas.restify.http.client.response.StatusCode;
 
-public class DefaultOAuth2AuthorizationServerTest {
+public class DefaultAuthorizationServerTest {
 
 	@Rule
 	public MockServerRule mockServerRule = new MockServerRule(this, 8088);
 
 	private MockServerClient mockServerClient;
 
-	private DefaultOAuth2AuthorizationServer authorizationServer;
+	private DefaultAuthorizationServer authorizationServer;
 
 	@Before
 	public void setup() {
 		mockServerClient = new MockServerClient("localhost", 8088);
 
-		authorizationServer = new DefaultOAuth2AuthorizationServer();
+		authorizationServer = new DefaultAuthorizationServer();
 	}
 
 	@Test
@@ -83,13 +83,13 @@ public class DefaultOAuth2AuthorizationServerTest {
 					.withHeader("Content-Type", "application/json")
 					.withBody(json("{\"access_token\":\"aaa111\",\"token_type\":\"bearer\",\"expires_in\":3600,\"scope\":\"read write\"}")));
 
-		OAuth2AccessTokenRequest request = OAuth2AccessTokenRequest
-				.clientCredentials(new OAuth2ClientCredentials("client-id", "client-secret"))
+		AccessTokenRequest request = AccessTokenRequest
+				.clientCredentials(new ClientCredentials("client-id", "client-secret"))
 					.accessTokenUri("http://localhost:8088/oauth/token")
 					.parameter("scope", "read write")
 					.build();
 
-		EndpointResponse<OAuth2AccessToken> tokenResponse = authorizationServer.requireToken(request);
+		EndpointResponse<AccessToken> tokenResponse = authorizationServer.requireToken(request);
 
 		assertNotNull(tokenResponse);
 		assertEquals(StatusCode.of(HttpStatusCode.OK), tokenResponse.code());

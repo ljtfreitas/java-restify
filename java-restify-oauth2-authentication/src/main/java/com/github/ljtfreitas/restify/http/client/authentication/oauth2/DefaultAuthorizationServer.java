@@ -53,28 +53,28 @@ import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponseReader;
 import com.github.ljtfreitas.restify.http.contract.Parameters;
 
-class DefaultOAuth2AuthorizationServer implements OAuth2AuthorizationServer {
+class DefaultAuthorizationServer implements AuthorizationServer {
 
 	private static final String FORM_URLENCODED_CONTENT_TYPE = "application/x-www-form-urlencoded";
 
 	private final EndpointRequestExecutor delegate;
 
-	public DefaultOAuth2AuthorizationServer(EndpointRequestExecutor endpointRequestExecutor) {
+	public DefaultAuthorizationServer(EndpointRequestExecutor endpointRequestExecutor) {
 		this.delegate = endpointRequestExecutor;
 	}
 
-	public DefaultOAuth2AuthorizationServer(HttpMessageConverters converters) {
+	public DefaultAuthorizationServer(HttpMessageConverters converters) {
 		this.delegate = new RestifyEndpointRequestExecutor(httpClientRequestFactory(), endpointRequestWriter(converters),
 				endpointResponseReader(converters));
 	}
 
-	public DefaultOAuth2AuthorizationServer(HttpClientRequestFactory httpClientRequestFactory) {
+	public DefaultAuthorizationServer(HttpClientRequestFactory httpClientRequestFactory) {
 		HttpMessageConverters converters = converters();
 		this.delegate = new RestifyEndpointRequestExecutor(httpClientRequestFactory, endpointRequestWriter(converters),
 				endpointResponseReader(converters));
 	}
 
-	public DefaultOAuth2AuthorizationServer() {
+	public DefaultAuthorizationServer() {
 		HttpMessageConverters converters = converters();
 		this.delegate = new RestifyEndpointRequestExecutor(httpClientRequestFactory(), endpointRequestWriter(converters),
 				endpointResponseReader(converters));
@@ -91,7 +91,7 @@ class DefaultOAuth2AuthorizationServer implements OAuth2AuthorizationServer {
 	}
 
 	private EndpointResponseReader endpointResponseReader(HttpMessageConverters converters) {
-		return new EndpointResponseReader(converters, new OAuth2EndpointResponseErrorFallback());
+		return new EndpointResponseReader(converters, new AuthorizationServerResponseErrorFallback());
 	}
 
 	private HttpClientRequestFactory httpClientRequestFactory() {
@@ -136,7 +136,7 @@ class DefaultOAuth2AuthorizationServer implements OAuth2AuthorizationServer {
 	}
 
 	@Override
-	public EndpointResponse<OAuth2AccessToken> requireToken(OAuth2AccessTokenRequest request) {
+	public EndpointResponse<AccessToken> requireToken(AccessTokenRequest request) {
 		Header contentType = new Header(CONTENT_TYPE, FORM_URLENCODED_CONTENT_TYPE);
 
 		Headers headers = new Headers(contentType, authorization(request.credentials()));
@@ -150,15 +150,15 @@ class DefaultOAuth2AuthorizationServer implements OAuth2AuthorizationServer {
 		return buildAccessToken(accessTokenResponse);
 	}
 
-	private EndpointResponse<OAuth2AccessToken> buildAccessToken(EndpointResponse<Map<String, Object>> accessTokenResponse) {
+	private EndpointResponse<AccessToken> buildAccessToken(EndpointResponse<Map<String, Object>> accessTokenResponse) {
 		Parameters parameters = Parameters.of(accessTokenResponse.body());
 
-		OAuth2AccessToken accessToken = OAuth2AccessToken.create(parameters);
+		AccessToken accessToken = AccessToken.create(parameters);
 
 		return new EndpointResponse<>(accessTokenResponse.code(), accessTokenResponse.headers(), accessToken);
 	}
 
-	private Header authorization(OAuth2ClientCredentials credentials) {
+	private Header authorization(ClientCredentials credentials) {
 		BasicAuthentication basic = new BasicAuthentication(credentials.clientId(), credentials.clientSecret());
 		return new Header(AUTHORIZATION, basic.content());
 	}

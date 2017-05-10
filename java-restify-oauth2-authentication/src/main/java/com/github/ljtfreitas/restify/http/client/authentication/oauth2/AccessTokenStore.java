@@ -25,24 +25,12 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.authentication.oauth2;
 
-import java.util.Arrays;
+import java.util.Optional;
 
-public enum OAuth2AccessTokenType {
-	BEARER("Bearer"), OAUTH("OAuth");
+public interface AccessTokenStore {
 
-	private final String name;
+	Optional<AccessToken> findBy(OAuth2DelegateUser user, OAuth2Configuration configuration);
 
-	private OAuth2AccessTokenType(String name) {
-		this.name = name;
-	}
+	void add(OAuth2DelegateUser user, OAuth2Configuration configuration, AccessToken accessToken);
 
-	@Override
-	public String toString() {
-		return name;
-	}
-
-	public static OAuth2AccessTokenType of(String tokenType) {
-		return Arrays.stream(values()).filter(t -> t.name.equalsIgnoreCase(tokenType)).findFirst()
-				.orElseThrow(() -> new IllegalArgumentException("Unsupported OAuth token type: " + tokenType));
-	}
 }

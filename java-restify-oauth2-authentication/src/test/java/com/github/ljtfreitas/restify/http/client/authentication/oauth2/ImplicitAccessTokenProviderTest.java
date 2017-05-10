@@ -55,9 +55,9 @@ public class ImplicitAccessTokenProviderTest {
 				.withHeader("Content-Type", "application/x-www-form-urlencoded")
 				.withHeader("Location", "http://my.web.app/oauth/callback#access_token=abc1234&token_type=bearer&state=current-state&expires_in=3600&scope=read%20write"));
 
-		OAuth2AccessToken accessToken = provider.provides();
+		AccessToken accessToken = provider.provides();
 
-		assertEquals(OAuth2AccessTokenType.BEARER, accessToken.type());
+		assertEquals(AccessTokenType.BEARER, accessToken.type());
 		assertEquals("abc1234", accessToken.token());
 
 		assertEquals("read write", accessToken.scope());

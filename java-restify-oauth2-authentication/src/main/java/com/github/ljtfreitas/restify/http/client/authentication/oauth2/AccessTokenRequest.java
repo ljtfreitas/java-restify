@@ -34,14 +34,14 @@ import com.github.ljtfreitas.restify.http.client.Headers;
 import com.github.ljtfreitas.restify.http.contract.Parameters;
 import com.github.ljtfreitas.restify.http.contract.Parameters.Parameter;
 
-public class OAuth2AccessTokenRequest {
+public class AccessTokenRequest {
 
 	private final URI uri;
-	private final OAuth2ClientCredentials credentials;
+	private final ClientCredentials credentials;
 	private final Parameters parameters;
 	private final Headers headers;
 
-	public OAuth2AccessTokenRequest(URI uri, OAuth2ClientCredentials credentials, Parameters parameters, Headers headers) {
+	public AccessTokenRequest(URI uri, ClientCredentials credentials, Parameters parameters, Headers headers) {
 		this.uri = uri;
 		this.credentials = credentials;
 		this.parameters = parameters;
@@ -52,7 +52,7 @@ public class OAuth2AccessTokenRequest {
 		return uri;
 	}
 
-	public OAuth2ClientCredentials credentials() {
+	public ClientCredentials credentials() {
 		return credentials;
 	}
 
@@ -64,22 +64,22 @@ public class OAuth2AccessTokenRequest {
 		return headers;
 	}
 
-	public static OAuth2AccessTokenRequest.Builder authorizationCode(String authorizationCode) {
-		Builder builder = new OAuth2AccessTokenRequest.Builder("authorization_code");
+	public static AccessTokenRequest.Builder authorizationCode(String authorizationCode) {
+		Builder builder = new AccessTokenRequest.Builder("authorization_code");
 		builder.parameter("code", authorizationCode);
 
 		return builder;
 	}
 
-	public static OAuth2AccessTokenRequest.Builder clientCredentials(OAuth2ClientCredentials credentials) {
-		Builder builder = new OAuth2AccessTokenRequest.Builder("client_credentials");
+	public static AccessTokenRequest.Builder clientCredentials(ClientCredentials credentials) {
+		Builder builder = new AccessTokenRequest.Builder("client_credentials");
 		builder.credentials(credentials);
 
 		return builder;
 	}
 
-	public static OAuth2AccessTokenRequest.Builder resourceOwner(OAuth2ResourceOwner resourceOwner) {
-		Builder builder = new OAuth2AccessTokenRequest.Builder("password");
+	public static AccessTokenRequest.Builder resourceOwner(ResourceOwner resourceOwner) {
+		Builder builder = new AccessTokenRequest.Builder("password");
 
 		builder.parameter("username", resourceOwner.username())
 			   .parameter("password", resourceOwner.password());
@@ -87,8 +87,8 @@ public class OAuth2AccessTokenRequest {
 		return builder;
 	}
 
-	public static OAuth2AccessTokenRequest.Builder refreshToken(String refreshToken) {
-		Builder builder = new OAuth2AccessTokenRequest.Builder("refresh_token");
+	public static AccessTokenRequest.Builder refreshToken(String refreshToken) {
+		Builder builder = new AccessTokenRequest.Builder("refresh_token");
 
 		builder.parameter("refresh_token", refreshToken);
 
@@ -98,7 +98,7 @@ public class OAuth2AccessTokenRequest {
 	public static class Builder {
 
 		private URI accessTokenUri = null;
-		private OAuth2ClientCredentials credentials = null;
+		private ClientCredentials credentials = null;
 		private Parameters parameters = new Parameters();
 		private Headers headers = new Headers();
 
@@ -116,7 +116,7 @@ public class OAuth2AccessTokenRequest {
 			return this;
 		}
 
-		public Builder credentials(OAuth2ClientCredentials credentials) {
+		public Builder credentials(ClientCredentials credentials) {
 			this.credentials = credentials;
 			return this;
 		}
@@ -141,11 +141,11 @@ public class OAuth2AccessTokenRequest {
 			return this;
 		}
 
-		public OAuth2AccessTokenRequest build() {
+		public AccessTokenRequest build() {
 			nonNull(credentials, "Your client credentials (client_id and client_secret) are required.");
 			nonNull(accessTokenUri, "The access token URI of authorization server is required.");
 
-			return new OAuth2AccessTokenRequest(accessTokenUri, credentials, parameters, headers);
+			return new AccessTokenRequest(accessTokenUri, credentials, parameters, headers);
 		}
 	}
 }

@@ -27,44 +27,44 @@ package com.github.ljtfreitas.restify.http.client.authentication.oauth2;
 
 import static com.github.ljtfreitas.restify.http.util.Preconditions.nonNull;
 
-import com.github.ljtfreitas.restify.http.client.authentication.oauth2.OAuth2AccessTokenRequest.Builder;
+import com.github.ljtfreitas.restify.http.client.authentication.oauth2.AccessTokenRequest.Builder;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
 
-abstract class BaseOAuth2AccessTokenProvider implements OAuth2AccessTokenProvider {
+abstract class BaseAccessTokenProvider implements AccessTokenProvider {
 
 	private final OAuth2Configuration configuration;
-	private final OAuth2AuthorizationServer authorizationServer;
+	private final AuthorizationServer authorizationServer;
 
-	protected BaseOAuth2AccessTokenProvider(OAuth2Configuration configuration) {
-		this(configuration, new DefaultOAuth2AuthorizationServer());
+	protected BaseAccessTokenProvider(OAuth2Configuration configuration) {
+		this(configuration, new DefaultAuthorizationServer());
 	}
 
-	protected BaseOAuth2AccessTokenProvider(OAuth2Configuration configuration, OAuth2AuthorizationServer authorizationServer) {
+	protected BaseAccessTokenProvider(OAuth2Configuration configuration, AuthorizationServer authorizationServer) {
 		this.configuration = configuration;
 		this.authorizationServer = authorizationServer;
 	}
 
 	@Override
-	public OAuth2AccessToken provides() {
-		EndpointResponse<OAuth2AccessToken> response = authorizationServer.requireToken(buildAccessTokenRequest());
+	public AccessToken provides() {
+		EndpointResponse<AccessToken> response = authorizationServer.requireToken(buildAccessTokenRequest());
 		return response.body();
 	}
 
 	@Override
-	public OAuth2AccessToken refresh(OAuth2AccessToken accessToken) {
-		EndpointResponse<OAuth2AccessToken> response = authorizationServer.requireToken(buildRefreshTokenRequest(accessToken));
+	public AccessToken refresh(AccessToken accessToken) {
+		EndpointResponse<AccessToken> response = authorizationServer.requireToken(buildRefreshTokenRequest(accessToken));
 		return response.body();
 	}
 
-	protected OAuth2AccessTokenRequest buildRefreshTokenRequest(OAuth2AccessToken accessToken) {
+	protected AccessTokenRequest buildRefreshTokenRequest(AccessToken accessToken) {
 		nonNull(accessToken.refreshToken(), "Your access token must have a refresh token.");
 
-		Builder builder = OAuth2AccessTokenRequest.refreshToken(accessToken.refreshToken());
+		Builder builder = AccessTokenRequest.refreshToken(accessToken.refreshToken());
 
 		return builder.accessTokenUri(configuration.accessTokenUri())
 					  .credentials(configuration.credentials())
 					  .build();
 	}
 
-	protected abstract OAuth2AccessTokenRequest buildAccessTokenRequest();
+	protected abstract AccessTokenRequest buildAccessTokenRequest();
 }

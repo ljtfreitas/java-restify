@@ -27,10 +27,29 @@ package com.github.ljtfreitas.restify.http.client.authentication.oauth2;
 
 import java.util.Optional;
 
-public interface OAuth2AccessTokenStore {
+class DefaultAccessTokenRepository implements AccessTokenRepository {
 
-	Optional<OAuth2AccessToken> findBy(OAuth2DelegateUser user, OAuth2Configuration configuration);
+	private final AccessTokenStore accessTokenStore;
+	private final AccessTokenProvider accessTokenProvider;
 
-	void add(OAuth2DelegateUser user, OAuth2Configuration configuration, OAuth2AccessToken accessToken);
+	public DefaultAccessTokenRepository(AccessTokenStore accessTokenStore, AccessTokenProvider accessTokenProvider) {
+		this.accessTokenStore = accessTokenStore;
+		this.accessTokenProvider = accessTokenProvider;
+	}
 
+	@Override
+	public AccessToken findBy(OAuth2DelegateUser user, OAuth2Configuration configuration) {
+		Optional<AccessToken> accessToken = accessTokenStore.findBy(user, configuration);
+
+		return accessToken.filter(a -> !a.expired())
+				.orElseGet(() -> newToken(user, configuration));
+	}
+
+	private AccessToken newToken(OAuth2DelegateUser user, OAuth2Configuration configuration) {
+		AccessToken newAccessToken = accessTokenProvider.provides();
+
+		accessTokenStore.add(user, configuration, newAccessToken);
+
+		return newAccessToken;
+	}
 }

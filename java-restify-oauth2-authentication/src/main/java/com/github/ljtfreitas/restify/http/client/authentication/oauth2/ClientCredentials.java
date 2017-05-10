@@ -25,8 +25,25 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.authentication.oauth2;
 
-public interface OAuth2AccessTokenRepository {
+public class ClientCredentials {
 
-	OAuth2AccessToken findBy(OAuth2DelegateUser user, OAuth2Configuration configuration);
+	private final String clientId;
+	private final String clientSecret;
 
+	public ClientCredentials(String clientId, String clientSecret) {
+		this.clientId = clientId;
+		this.clientSecret = clientSecret == null ? "" : clientSecret;
+	}
+
+	public String clientId() {
+		return clientId;
+	}
+
+	public String clientSecret() {
+		return clientSecret;
+	}
+
+	public static ClientCredentials clientId(String clientId) {
+		return new ClientCredentials(clientId, "");
+	}
 }

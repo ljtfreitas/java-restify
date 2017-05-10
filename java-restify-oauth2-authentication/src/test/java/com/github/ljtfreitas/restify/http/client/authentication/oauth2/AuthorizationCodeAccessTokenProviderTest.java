@@ -30,7 +30,7 @@ public class AuthorizationCodeAccessTokenProviderTest {
 	private MockServerClient mockServerClient;
 
 	@Mock
-	private DefaultOAuth2AuthorizationCodeProvider authorizationCodeProvider;
+	private DefaultAuthorizationCodeProvider authorizationCodeProvider;
 
 	private AuthorizationCodeAccessTokenProvider provider;
 
@@ -43,7 +43,7 @@ public class AuthorizationCodeAccessTokenProviderTest {
 		OAuth2AuthorizationConfiguration configuration = new OAuth2AuthorizationConfiguration.Builder()
 				.authorizationUri("http://localhost:8088/oauth/authorize")
 				.accessTokenUri("http://localhost:8088/oauth/token")
-				.credentials(new OAuth2ClientCredentials("client-id", "client-secret"))
+				.credentials(new ClientCredentials("client-id", "client-secret"))
 				.redirectUri("http://my.web.app/oauth/callback")
 				.scopes("read", "write")
 				.build();
@@ -70,9 +70,9 @@ public class AuthorizationCodeAccessTokenProviderTest {
 					.withHeader("Content-Type", "application/json")
 					.withBody(json("{\"access_token\":\"aaa111\",\"token_type\":\"bearer\",\"expires_in\":3600,\"scope\":\"read write\"}")));
 
-		OAuth2AccessToken accessToken = provider.provides();
+		AccessToken accessToken = provider.provides();
 
-		assertEquals(OAuth2AccessTokenType.BEARER, accessToken.type());
+		assertEquals(AccessTokenType.BEARER, accessToken.type());
 		assertEquals("aaa111", accessToken.token());
 
 		assertEquals("read write", accessToken.scope());
@@ -97,14 +97,14 @@ public class AuthorizationCodeAccessTokenProviderTest {
 					.withHeader("Content-Type", "application/json")
 					.withBody(json("{\"access_token\":\"ccc333\",\"token_type\":\"bearer\",\"expires_in\":3600,\"scope\":\"read write\"}")));
 
-		OAuth2AccessToken accessToken = OAuth2AccessToken.Builder
+		AccessToken accessToken = AccessToken.Builder
 				.bearer("aaa111")
 					.refreshToken("bbb222")
 					.build();
 
-		OAuth2AccessToken newAccessToken = provider.refresh(accessToken);
+		AccessToken newAccessToken = provider.refresh(accessToken);
 
-		assertEquals(OAuth2AccessTokenType.BEARER, newAccessToken.type());
+		assertEquals(AccessTokenType.BEARER, newAccessToken.type());
 		assertEquals("ccc333", newAccessToken.token());
 
 		assertEquals("read write", newAccessToken.scope());

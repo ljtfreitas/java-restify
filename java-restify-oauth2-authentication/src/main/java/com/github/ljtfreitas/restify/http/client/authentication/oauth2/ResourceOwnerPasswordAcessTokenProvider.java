@@ -27,7 +27,7 @@ package com.github.ljtfreitas.restify.http.client.authentication.oauth2;
 
 import static com.github.ljtfreitas.restify.http.util.Preconditions.nonNull;
 
-public class ResourceOwnerPasswordAcessTokenProvider extends BaseOAuth2AccessTokenProvider {
+public class ResourceOwnerPasswordAcessTokenProvider extends BaseAccessTokenProvider {
 
 	private final OAuth2ResourceOwnerConfiguration configuration;
 
@@ -36,16 +36,16 @@ public class ResourceOwnerPasswordAcessTokenProvider extends BaseOAuth2AccessTok
 		this.configuration = configuration;
 	}
 
-	public ResourceOwnerPasswordAcessTokenProvider(OAuth2ResourceOwnerConfiguration configuration, OAuth2AuthorizationServer authorizationServer) {
+	public ResourceOwnerPasswordAcessTokenProvider(OAuth2ResourceOwnerConfiguration configuration, AuthorizationServer authorizationServer) {
 		super(configuration, authorizationServer);
 		this.configuration = configuration;
 	}
 
 	@Override
-	protected OAuth2AccessTokenRequest buildAccessTokenRequest() {
+	protected AccessTokenRequest buildAccessTokenRequest() {
 		nonNull(configuration.resourceOwner(), "Your resource owner credentials are required.");
 
-		OAuth2AccessTokenRequest.Builder builder = OAuth2AccessTokenRequest.resourceOwner(configuration.resourceOwner());
+		AccessTokenRequest.Builder builder = AccessTokenRequest.resourceOwner(configuration.resourceOwner());
 
 		return builder.accessTokenUri(configuration.accessTokenUri())
 					  .credentials(configuration.credentials())

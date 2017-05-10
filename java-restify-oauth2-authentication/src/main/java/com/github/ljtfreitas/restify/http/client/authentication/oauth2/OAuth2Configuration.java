@@ -36,14 +36,14 @@ public class OAuth2Configuration {
 
 	private String resourceKey;
 	private URI accessTokenUri;
-	private OAuth2ClientCredentials credentials;
+	private ClientCredentials credentials;
 	private Collection<String> scopes = Collections.emptyList();
 
 	public Optional<String> resourceKey() {
 		return Optional.ofNullable(resourceKey);
 	}
 
-	public OAuth2ClientCredentials credentials() {
+	public ClientCredentials credentials() {
 		return credentials;
 	}
 
@@ -87,11 +87,11 @@ public class OAuth2Configuration {
 		}
 
 		public Builder clientId(String clientId) {
-			configuration.credentials = OAuth2ClientCredentials.clientId(clientId);
+			configuration.credentials = ClientCredentials.clientId(clientId);
 			return this;
 		}
 
-		public Builder credentials(OAuth2ClientCredentials credentials) {
+		public Builder credentials(ClientCredentials credentials) {
 			configuration.credentials = credentials;
 			return this;
 		}

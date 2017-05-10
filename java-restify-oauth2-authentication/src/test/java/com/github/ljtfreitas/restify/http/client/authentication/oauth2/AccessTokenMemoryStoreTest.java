@@ -6,9 +6,9 @@ import java.util.Optional;
 
 import org.junit.Test;
 
-public class OAuth2AccessTokenMemoryStoreTest {
+public class AccessTokenMemoryStoreTest {
 
-	private OAuth2AccessTokenMemoryStore acessTokenMemoryStore;
+	private AccessTokenMemoryStore acessTokenMemoryStore;
 
 	@Test
 	public void shouldSaveAccessTokenOnStore() {
@@ -16,19 +16,19 @@ public class OAuth2AccessTokenMemoryStoreTest {
 
 		OAuth2Configuration configuration = new OAuth2Configuration.Builder()
 				.resourceKey("my-resource-server")
-				.credentials(OAuth2ClientCredentials.clientId("client-id"))
+				.credentials(ClientCredentials.clientId("client-id"))
 				.scopes("read", "write")
 				.build();
 
-		acessTokenMemoryStore = new OAuth2AccessTokenMemoryStore();
+		acessTokenMemoryStore = new AccessTokenMemoryStore();
 
 		assertFalse(acessTokenMemoryStore.findBy(user, configuration).isPresent());
 
-		OAuth2AccessToken source = OAuth2AccessToken.bearer("accessToken");
+		AccessToken source = AccessToken.bearer("accessToken");
 
 		acessTokenMemoryStore.add(user, configuration, source);
 
-		Optional<OAuth2AccessToken> foundAccessToken = acessTokenMemoryStore.findBy(user, configuration);
+		Optional<AccessToken> foundAccessToken = acessTokenMemoryStore.findBy(user, configuration);
 
 		assertTrue(foundAccessToken.isPresent());
 		assertSame(source, foundAccessToken.get());

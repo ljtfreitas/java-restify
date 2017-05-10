@@ -30,17 +30,17 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
-class OAuth2AccessTokenMemoryStore implements OAuth2AccessTokenStore {
+class AccessTokenMemoryStore implements AccessTokenStore {
 
-	private final Map<OAuth2AccessTokenKey, OAuth2AccessToken> tokens = new ConcurrentHashMap<>();
+	private final Map<OAuth2AccessTokenKey, AccessToken> tokens = new ConcurrentHashMap<>();
 
 	@Override
-	public Optional<OAuth2AccessToken> findBy(OAuth2DelegateUser user, OAuth2Configuration configuration) {
+	public Optional<AccessToken> findBy(OAuth2DelegateUser user, OAuth2Configuration configuration) {
 		return Optional.ofNullable(tokens.get(key(user, configuration)));
 	}
 
 	@Override
-	public void add(OAuth2DelegateUser user, OAuth2Configuration configuration, OAuth2AccessToken accessToken) {
+	public void add(OAuth2DelegateUser user, OAuth2Configuration configuration, AccessToken accessToken) {
 		tokens.put(key(user, configuration), accessToken);
 	}
 

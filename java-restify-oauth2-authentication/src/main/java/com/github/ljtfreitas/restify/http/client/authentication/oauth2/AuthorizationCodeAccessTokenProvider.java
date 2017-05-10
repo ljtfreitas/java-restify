@@ -25,38 +25,38 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.authentication.oauth2;
 
-public class AuthorizationCodeAccessTokenProvider extends BaseOAuth2AccessTokenProvider {
+public class AuthorizationCodeAccessTokenProvider extends BaseAccessTokenProvider {
 
 	private final OAuth2AuthorizationConfiguration configuration;
-	private final OAuth2AuthorizationCodeProvider authorizationCodeProvider;
+	private final AuthorizationCodeProvider authorizationCodeProvider;
 
 	public AuthorizationCodeAccessTokenProvider(OAuth2AuthorizationConfiguration configuration) {
-		this(configuration, new DefaultOAuth2AuthorizationServer());
+		this(configuration, new DefaultAuthorizationServer());
 	}
 
 	public AuthorizationCodeAccessTokenProvider(OAuth2AuthorizationConfiguration configuration,
-			OAuth2AuthorizationCodeProvider authorizationCodeProvider) {
-		this(configuration, authorizationCodeProvider, new DefaultOAuth2AuthorizationServer());
+			AuthorizationCodeProvider authorizationCodeProvider) {
+		this(configuration, authorizationCodeProvider, new DefaultAuthorizationServer());
 	}
 
 	public AuthorizationCodeAccessTokenProvider(OAuth2AuthorizationConfiguration configuration,
-			OAuth2AuthorizationServer authorizationServer) {
-		this(configuration, new DefaultOAuth2AuthorizationCodeProvider(configuration, authorizationServer), authorizationServer);
+			AuthorizationServer authorizationServer) {
+		this(configuration, new DefaultAuthorizationCodeProvider(configuration, authorizationServer), authorizationServer);
 	}
 
 	public AuthorizationCodeAccessTokenProvider(OAuth2AuthorizationConfiguration configuration,
-			OAuth2AuthorizationCodeProvider authorizationCodeProvider, OAuth2AuthorizationServer authorizationServer) {
+			AuthorizationCodeProvider authorizationCodeProvider, AuthorizationServer authorizationServer) {
 		super(configuration, authorizationServer);
 		this.configuration = configuration;
 		this.authorizationCodeProvider = authorizationCodeProvider;
 	}
 
 	@Override
-	protected OAuth2AccessTokenRequest buildAccessTokenRequest() {
+	protected AccessTokenRequest buildAccessTokenRequest() {
 		String authorizationCode = configuration.authorizationCode()
 					.orElseGet(() -> authorizationCodeProvider.provides());
 
-		OAuth2AccessTokenRequest.Builder builder = OAuth2AccessTokenRequest.authorizationCode(authorizationCode);
+		AccessTokenRequest.Builder builder = AccessTokenRequest.authorizationCode(authorizationCode);
 
 		if (configuration.redirectUri().isPresent()) {
 			builder.parameter("redirect_uri", configuration.redirectUri().get().toString());

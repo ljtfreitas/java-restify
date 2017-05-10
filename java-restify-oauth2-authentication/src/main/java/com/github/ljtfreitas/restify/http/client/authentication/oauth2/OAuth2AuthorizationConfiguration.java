@@ -90,7 +90,7 @@ public class OAuth2AuthorizationConfiguration extends OAuth2Configuration {
 			return this;
 		}
 
-		public Builder credentials(OAuth2ClientCredentials credentials) {
+		public Builder credentials(ClientCredentials credentials) {
 			delegate.credentials(credentials);
 			return this;
 		}

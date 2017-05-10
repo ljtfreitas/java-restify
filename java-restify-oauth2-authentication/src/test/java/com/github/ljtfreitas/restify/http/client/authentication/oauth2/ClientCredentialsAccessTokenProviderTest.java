@@ -36,7 +36,7 @@ public class ClientCredentialsAccessTokenProviderTest {
 
 		OAuth2Configuration configuration = new OAuth2Configuration.Builder()
 				.accessTokenUri("http://localhost:8088/oauth/token")
-				.credentials(new OAuth2ClientCredentials("client-id", "client-secret"))
+				.credentials(new ClientCredentials("client-id", "client-secret"))
 				.scopes("read", "write")
 				.build();
 
@@ -59,9 +59,9 @@ public class ClientCredentialsAccessTokenProviderTest {
 					.withHeader("Content-Type", "application/json")
 					.withBody(json("{\"access_token\":\"aaa111\",\"token_type\":\"bearer\",\"expires_in\":3600,\"scope\":\"read write\"}")));
 
-		OAuth2AccessToken accessToken = provider.provides();
+		AccessToken accessToken = provider.provides();
 
-		assertEquals(OAuth2AccessTokenType.BEARER, accessToken.type());
+		assertEquals(AccessTokenType.BEARER, accessToken.type());
 		assertEquals("aaa111", accessToken.token());
 
 		assertEquals("read write", accessToken.scope());
@@ -72,6 +72,6 @@ public class ClientCredentialsAccessTokenProviderTest {
 
 	@Test(expected = UnsupportedOperationException.class)
 	public void shouldThrowExceptionOnTryRefreshToken() {
-		provider.refresh(OAuth2AccessToken.bearer("aaa111"));
+		provider.refresh(AccessToken.bearer("aaa111"));
 	}
 }

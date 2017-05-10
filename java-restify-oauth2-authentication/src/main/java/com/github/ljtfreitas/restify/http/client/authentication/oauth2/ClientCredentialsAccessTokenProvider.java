@@ -25,7 +25,7 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.authentication.oauth2;
 
-public class ClientCredentialsAccessTokenProvider extends BaseOAuth2AccessTokenProvider {
+public class ClientCredentialsAccessTokenProvider extends BaseAccessTokenProvider {
 
 	private final OAuth2Configuration configuration;
 
@@ -34,14 +34,14 @@ public class ClientCredentialsAccessTokenProvider extends BaseOAuth2AccessTokenP
 		this.configuration = configuration;
 	}
 
-	public ClientCredentialsAccessTokenProvider(OAuth2Configuration configuration, OAuth2AuthorizationServer authorizationServer) {
+	public ClientCredentialsAccessTokenProvider(OAuth2Configuration configuration, AuthorizationServer authorizationServer) {
 		super(configuration, authorizationServer);
 		this.configuration = configuration;
 	}
 
 	@Override
-	protected OAuth2AccessTokenRequest buildAccessTokenRequest() {
-		OAuth2AccessTokenRequest.Builder builder = OAuth2AccessTokenRequest.clientCredentials(configuration.credentials());
+	protected AccessTokenRequest buildAccessTokenRequest() {
+		AccessTokenRequest.Builder builder = AccessTokenRequest.clientCredentials(configuration.credentials());
 
 		return builder.accessTokenUri(configuration.accessTokenUri())
 					  .parameter("scope", configuration.scope())
@@ -49,7 +49,7 @@ public class ClientCredentialsAccessTokenProvider extends BaseOAuth2AccessTokenP
 	}
 
 	@Override
-	public OAuth2AccessToken refresh(OAuth2AccessToken accessToken) {
+	public AccessToken refresh(AccessToken accessToken) {
 		throw new UnsupportedOperationException("Client Credentials Grant does not support refresh token.");
 	}
 }

@@ -25,9 +25,7 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.authentication.oauth2;
 
-public interface OAuth2AccessTokenProvider {
+public interface AuthorizationCodeProvider {
 
-	public OAuth2AccessToken provides();
-
-	public OAuth2AccessToken refresh(OAuth2AccessToken accessToken);
+	public String provides();
 }

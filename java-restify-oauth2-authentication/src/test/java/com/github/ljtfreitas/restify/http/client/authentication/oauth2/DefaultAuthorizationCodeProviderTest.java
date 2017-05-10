@@ -12,14 +12,14 @@ import org.mockserver.client.server.MockServerClient;
 import org.mockserver.junit.MockServerRule;
 import org.mockserver.model.Parameter;
 
-public class DefaultOAuth2AuthorizationCodeProviderTest {
+public class DefaultAuthorizationCodeProviderTest {
 
 	@Rule
 	public MockServerRule mockServerRule = new MockServerRule(this, 8088);
 
 	private MockServerClient mockServerClient;
 
-	private DefaultOAuth2AuthorizationCodeProvider provider;
+	private DefaultAuthorizationCodeProvider provider;
 
 	@Before
 	public void setup() {
@@ -34,7 +34,7 @@ public class DefaultOAuth2AuthorizationCodeProviderTest {
 				.state("current-state")
 				.build();
 
-		provider = new DefaultOAuth2AuthorizationCodeProvider(configuration);
+		provider = new DefaultAuthorizationCodeProvider(configuration);
 	}
 
 	@Test

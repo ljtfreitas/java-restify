@@ -25,31 +25,24 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.authentication.oauth2;
 
-import java.util.Optional;
+import java.util.Arrays;
 
-class DefaultOAuth2AccessTokenRepository implements OAuth2AccessTokenRepository {
+public enum AccessTokenType {
+	BEARER("Bearer"), OAUTH("OAuth");
 
-	private final OAuth2AccessTokenStore accessTokenStore;
-	private final OAuth2AccessTokenProvider accessTokenProvider;
+	private final String name;
 
-	public DefaultOAuth2AccessTokenRepository(OAuth2AccessTokenStore accessTokenStore, OAuth2AccessTokenProvider accessTokenProvider) {
-		this.accessTokenStore = accessTokenStore;
-		this.accessTokenProvider = accessTokenProvider;
+	private AccessTokenType(String name) {
+		this.name = name;
 	}
 
 	@Override
-	public OAuth2AccessToken findBy(OAuth2DelegateUser user, OAuth2Configuration configuration) {
-		Optional<OAuth2AccessToken> accessToken = accessTokenStore.findBy(user, configuration);
-
-		return accessToken.filter(a -> !a.expired())
-				.orElseGet(() -> newToken(user, configuration));
+	public String toString() {
+		return name;
 	}
 
-	private OAuth2AccessToken newToken(OAuth2DelegateUser user, OAuth2Configuration configuration) {
-		OAuth2AccessToken newAccessToken = accessTokenProvider.provides();
-
-		accessTokenStore.add(user, configuration, newAccessToken);
-
-		return newAccessToken;
+	public static AccessTokenType of(String tokenType) {
+		return Arrays.stream(values()).filter(t -> t.name.equalsIgnoreCase(tokenType)).findFirst()
+				.orElseThrow(() -> new IllegalArgumentException("Unsupported OAuth token type: " + tokenType));
 	}
 }

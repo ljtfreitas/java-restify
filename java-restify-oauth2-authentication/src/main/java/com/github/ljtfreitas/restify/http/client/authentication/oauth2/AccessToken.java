@@ -35,7 +35,7 @@ import java.util.stream.Collectors;
 import com.github.ljtfreitas.restify.http.contract.Parameters;
 import com.github.ljtfreitas.restify.http.util.Tryable;
 
-public class OAuth2AccessToken {
+public class AccessToken {
 
 	private static final String ACCESS_TOKEN_FIELD = "access_token";
 	private static final String TOKEN_TYPE_FIELD = "token_type";
@@ -43,19 +43,19 @@ public class OAuth2AccessToken {
 	private static final String SCOPE_FIELD = "scope";
 	private static final String REFRESH_TOKEN_FIELD = "refresh_token";
 
-	private final OAuth2AccessTokenType tokenType;
+	private final AccessTokenType tokenType;
 	private final String token;
 
 	private LocalDateTime expiration = null;
 	private Set<String> scopes = Collections.emptySet();
 	private String refreshToken = null;
 
-	public OAuth2AccessToken(OAuth2AccessTokenType tokenType, String token) {
+	public AccessToken(AccessTokenType tokenType, String token) {
 		this.tokenType = tokenType;
 		this.token = token;
 	}
 
-	public OAuth2AccessToken(OAuth2AccessTokenType tokenType, String token, Duration seconds) {
+	public AccessToken(AccessTokenType tokenType, String token, Duration seconds) {
 		this(tokenType, token);
 		this.expiration = expirationTo(seconds);
 	}
@@ -64,7 +64,7 @@ public class OAuth2AccessToken {
 		return LocalDateTime.now().plus(seconds);
 	}
 
-	public OAuth2AccessTokenType type() {
+	public AccessTokenType type() {
 		return tokenType;
 	}
 
@@ -72,12 +72,12 @@ public class OAuth2AccessToken {
 		return token;
 	}
 
-	private OAuth2AccessToken expiration(long seconds) {
+	private AccessToken expiration(long seconds) {
 		this.expiration = expirationTo(Duration.ofSeconds(seconds));
 		return this;
 	}
 
-	private OAuth2AccessToken expiration(Duration seconds) {
+	private AccessToken expiration(Duration seconds) {
 		this.expiration = expirationTo(seconds);
 		return this;
 	}
@@ -90,17 +90,17 @@ public class OAuth2AccessToken {
 		return expiration != null && expiration.isBefore(LocalDateTime.now());
 	}
 
-	private OAuth2AccessToken scope(String scope) {
+	private AccessToken scope(String scope) {
 		this.scopes = Arrays.stream(scope.split(" ")).collect(Collectors.toSet());
 		return this;
 	}
 
-	private OAuth2AccessToken scopes(String... scopes) {
+	private AccessToken scopes(String... scopes) {
 		this.scopes = Arrays.stream(scopes).collect(Collectors.toSet());
 		return this;
 	}
 
-	private OAuth2AccessToken scopes(Set<String> scopes) {
+	private AccessToken scopes(Set<String> scopes) {
 		this.scopes = Collections.unmodifiableSet(scopes);
 		return this;
 	}
@@ -126,22 +126,22 @@ public class OAuth2AccessToken {
 		return tokenType + " " + token;
 	}
 
-	public static OAuth2AccessToken bearer(String token) {
-		return new OAuth2AccessToken(OAuth2AccessTokenType.BEARER, token);
+	public static AccessToken bearer(String token) {
+		return new AccessToken(AccessTokenType.BEARER, token);
 	}
 
-	public static OAuth2AccessToken bearer(String token, Duration duration) {
-		return new OAuth2AccessToken(OAuth2AccessTokenType.BEARER, token, duration);
+	public static AccessToken bearer(String token, Duration duration) {
+		return new AccessToken(AccessTokenType.BEARER, token, duration);
 	}
 
-	public static OAuth2AccessToken create(Parameters parameters) {
+	public static AccessToken create(Parameters parameters) {
 		String token = parameters.get(ACCESS_TOKEN_FIELD)
 				.orElseThrow(() -> new IllegalStateException("Access token cannot be null!"));
 
-		OAuth2AccessTokenType tokenType = Tryable.or(() -> OAuth2AccessTokenType.of(parameters.get(TOKEN_TYPE_FIELD).orElse(null)),
-				OAuth2AccessTokenType.BEARER);
+		AccessTokenType tokenType = Tryable.or(() -> AccessTokenType.of(parameters.get(TOKEN_TYPE_FIELD).orElse(null)),
+				AccessTokenType.BEARER);
 
-		OAuth2AccessToken.Builder accessTokenBuilder = OAuth2AccessToken.Builder.of(tokenType, token);
+		AccessToken.Builder accessTokenBuilder = AccessToken.Builder.of(tokenType, token);
 
 		parameters.get(EXPIRES_IN_FIELD)
 			.ifPresent(expires -> accessTokenBuilder.expiration(Duration.ofSeconds(Long.valueOf(expires))));
@@ -157,52 +157,52 @@ public class OAuth2AccessToken {
 
 	public static class Builder {
 
-		private final OAuth2AccessToken accessToken;
+		private final AccessToken accessToken;
 
-		public Builder(OAuth2AccessTokenType tokenType, String token) {
-			this.accessToken = new OAuth2AccessToken(tokenType, token);
+		public Builder(AccessTokenType tokenType, String token) {
+			this.accessToken = new AccessToken(tokenType, token);
 		}
 
-		public OAuth2AccessToken.Builder expiration(long seconds) {
+		public AccessToken.Builder expiration(long seconds) {
 			accessToken.expiration(seconds);
 			return this;
 		}
 
-		public OAuth2AccessToken.Builder expiration(Duration seconds) {
+		public AccessToken.Builder expiration(Duration seconds) {
 			accessToken.expiration(seconds);
 			return this;
 		}
 
-		public OAuth2AccessToken.Builder scope(String scope) {
+		public AccessToken.Builder scope(String scope) {
 			accessToken.scope(scope);
 			return this;
 		}
 
-		public OAuth2AccessToken.Builder scopes(String... scopes) {
+		public AccessToken.Builder scopes(String... scopes) {
 			accessToken.scopes(scopes);
 			return this;
 		}
 
-		public OAuth2AccessToken.Builder scopes(Set<String> scopes) {
+		public AccessToken.Builder scopes(Set<String> scopes) {
 			accessToken.scopes(scopes);
 			return this;
 		}
 
-		public OAuth2AccessToken.Builder refreshToken(String refreshToken) {
+		public AccessToken.Builder refreshToken(String refreshToken) {
 			accessToken.refreshToken(refreshToken);
 			return this;
 		}
 
-		public OAuth2AccessToken build() {
+		public AccessToken build() {
 			return accessToken;
 		}
 
-		public static OAuth2AccessToken.Builder bearer(String token) {
-			return new OAuth2AccessToken.Builder(OAuth2AccessTokenType.BEARER, token);
+		public static AccessToken.Builder bearer(String token) {
+			return new AccessToken.Builder(AccessTokenType.BEARER, token);
 		}
 
-		public static OAuth2AccessToken.Builder of(OAuth2AccessTokenType tokenType, String token) {
-			return new OAuth2AccessToken.Builder(tokenType, token);
+		public static AccessToken.Builder of(AccessTokenType tokenType, String token) {
+			return new AccessToken.Builder(tokenType, token);
 		}
 	}
 }
