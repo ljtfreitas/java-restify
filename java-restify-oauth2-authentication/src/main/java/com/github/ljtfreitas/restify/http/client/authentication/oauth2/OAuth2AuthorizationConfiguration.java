@@ -70,11 +70,6 @@ public class OAuth2AuthorizationConfiguration extends OAuth2Configuration {
 		private final OAuth2AuthorizationConfiguration configuration = new OAuth2AuthorizationConfiguration();
 		private final OAuth2Configuration.Builder delegate = new OAuth2Configuration.Builder(configuration);
 
-		public Builder resourceKey(String resourceKey) {
-			delegate.resourceKey(resourceKey);
-			return this;
-		}
-
 		public Builder accessTokenUri(String accessTokenUri) {
 			delegate.accessTokenUri(accessTokenUri);
 			return this;

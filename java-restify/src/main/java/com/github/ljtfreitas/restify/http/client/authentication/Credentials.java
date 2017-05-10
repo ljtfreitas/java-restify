@@ -23,9 +23,50 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.http.client.authentication.oauth2;
+package com.github.ljtfreitas.restify.http.client.authentication;
 
-public interface OAuth2DelegateUser {
+import static com.github.ljtfreitas.restify.http.util.Preconditions.nonNull;
 
-	public String identity();
+import java.util.Objects;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+public class Credentials {
+
+	private final String username;
+	private final String password;
+
+	public Credentials(String username, String password) {
+		this.username = nonNull(username, "Username is required.");
+		this.password = nonNull(password, "Password is required");
+	}
+
+	public String username() {
+		return username;
+	}
+
+	public String password() {
+		return password;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (obj instanceof Credentials) {
+			Credentials that = (Credentials) obj;
+			return this.username.equals(that.username);
+
+		} else {
+			return super.equals(obj);
+		}
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(username);
+	}
+
+	@Override
+	public String toString() {
+		return username + " : " + Stream.generate(() -> "*").limit(password.length()).collect(Collectors.joining(" "));
+	}
 }

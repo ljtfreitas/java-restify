@@ -25,6 +25,7 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.authentication.oauth2;
 
+import java.security.Principal;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -32,53 +33,49 @@ import java.util.concurrent.ConcurrentHashMap;
 
 class AccessTokenMemoryStore implements AccessTokenStore {
 
-	private final Map<OAuth2AccessTokenKey, AccessToken> tokens = new ConcurrentHashMap<>();
+	private final Map<AccessTokenKey, AccessToken> tokens = new ConcurrentHashMap<>();
 
 	@Override
-	public Optional<AccessToken> findBy(OAuth2DelegateUser user, OAuth2Configuration configuration) {
+	public Optional<AccessToken> findBy(Principal user, OAuth2Configuration configuration) {
 		return Optional.ofNullable(tokens.get(key(user, configuration)));
 	}
 
 	@Override
-	public void add(OAuth2DelegateUser user, OAuth2Configuration configuration, AccessToken accessToken) {
+	public void add(Principal user, OAuth2Configuration configuration, AccessToken accessToken) {
 		tokens.put(key(user, configuration), accessToken);
 	}
 
-	private OAuth2AccessTokenKey key(OAuth2DelegateUser user, OAuth2Configuration configuration) {
-		String userKey = Optional.ofNullable(user).map(OAuth2DelegateUser::identity).orElse(null);
-		String resourceKey = configuration.resourceKey().orElse(null);
+	private AccessTokenKey key(Principal user, OAuth2Configuration configuration) {
+		String username = Optional.ofNullable(user).map(Principal::getName).orElse(null);
 		String clientId = configuration.credentials().clientId();
 		String scope = configuration.scope();
 
-		return new OAuth2AccessTokenKey(userKey, resourceKey, clientId, scope);
+		return new AccessTokenKey(username, clientId, scope);
 	}
 
-	private class OAuth2AccessTokenKey {
+	private class AccessTokenKey {
 
-		private final String userKey;
-		private final String resourceKey;
+		private final String username;
 		private final String clientId;
 		private final String scope;
 
-		private OAuth2AccessTokenKey(String userKey, String resourceKey, String clientId, String scope) {
-			this.userKey = userKey;
-			this.resourceKey = resourceKey;
+		private AccessTokenKey(String username, String clientId, String scope) {
+			this.username = username;
 			this.clientId = clientId;
 			this.scope = scope;
 		}
 
 		@Override
 		public int hashCode() {
-			return Objects.hash(userKey, resourceKey, clientId, scope);
+			return Objects.hash(username, clientId, scope);
 		}
 
 		@Override
 		public boolean equals(Object obj) {
-			if (obj instanceof OAuth2AccessTokenKey) {
-				OAuth2AccessTokenKey that = (OAuth2AccessTokenKey) obj;
+			if (obj instanceof AccessTokenKey) {
+				AccessTokenKey that = (AccessTokenKey) obj;
 
-				return Objects.equals(this.userKey, that.userKey)
-					&& Objects.equals(this.resourceKey, that.resourceKey)
+				return Objects.equals(this.username, that.username)
 					&& Objects.equals(this.clientId, that.clientId)
 					&& Objects.equals(this.scope, that.scope);
 

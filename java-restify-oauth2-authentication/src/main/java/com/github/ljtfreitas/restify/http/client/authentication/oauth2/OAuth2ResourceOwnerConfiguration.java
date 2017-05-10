@@ -43,11 +43,6 @@ public class OAuth2ResourceOwnerConfiguration extends OAuth2Configuration {
 		private final OAuth2ResourceOwnerConfiguration configuration = new OAuth2ResourceOwnerConfiguration();
 		private final OAuth2Configuration.Builder delegate = new OAuth2Configuration.Builder(configuration);
 
-		public Builder resourceKey(String resourceKey) {
-			delegate.resourceKey(resourceKey);
-			return this;
-		}
-
 		public Builder accessTokenUri(String accessTokenUri) {
 			delegate.accessTokenUri(accessTokenUri);
 			return this;

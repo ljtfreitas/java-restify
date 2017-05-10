@@ -2,6 +2,7 @@ package com.github.ljtfreitas.restify.http.client.authentication.oauth2;
 
 import static org.junit.Assert.*;
 
+import java.security.Principal;
 import java.util.Optional;
 
 import org.junit.Test;
@@ -12,10 +13,9 @@ public class AccessTokenMemoryStoreTest {
 
 	@Test
 	public void shouldSaveAccessTokenOnStore() {
-		OAuth2DelegateUser user = () -> "user-identity-key";
+		Principal user = () -> "user-identity-key";
 
 		OAuth2Configuration configuration = new OAuth2Configuration.Builder()
-				.resourceKey("my-resource-server")
 				.credentials(ClientCredentials.clientId("client-id"))
 				.scopes("read", "write")
 				.build();

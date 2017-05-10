@@ -4,6 +4,7 @@ import static org.junit.Assert.assertSame;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.security.Principal;
 import java.time.Duration;
 import java.util.Optional;
 
@@ -30,11 +31,11 @@ public class DefaultAccessTokenRepositoryTest {
 	private DefaultAccessTokenRepository accessTokenRepository;
 
 	@Mock
-	private OAuth2DelegateUser user;
+	private Principal user;
 
 	@Before
 	public void setup() {
-		when(user.identity()).thenReturn("user-identity-key");
+		when(user.getName()).thenReturn("user-identity-key");
 	}
 
 	@Test

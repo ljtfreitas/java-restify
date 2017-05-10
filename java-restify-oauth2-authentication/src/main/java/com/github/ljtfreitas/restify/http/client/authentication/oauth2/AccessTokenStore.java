@@ -25,12 +25,13 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.authentication.oauth2;
 
+import java.security.Principal;
 import java.util.Optional;
 
 public interface AccessTokenStore {
 
-	Optional<AccessToken> findBy(OAuth2DelegateUser user, OAuth2Configuration configuration);
+	public Optional<AccessToken> findBy(Principal user, OAuth2Configuration configuration);
 
-	void add(OAuth2DelegateUser user, OAuth2Configuration configuration, AccessToken accessToken);
+	public void add(Principal user, OAuth2Configuration configuration, AccessToken accessToken);
 
 }
