@@ -15,20 +15,20 @@ public class AccessTokenMemoryStoreTest {
 	public void shouldSaveAccessTokenOnStore() {
 		Principal user = () -> "user-identity-key";
 
-		OAuth2Configuration configuration = new OAuth2Configuration.Builder()
+		Resource resource = new Resource.Builder()
 				.credentials(ClientCredentials.clientId("client-id"))
 				.scopes("read", "write")
 				.build();
 
 		acessTokenMemoryStore = new AccessTokenMemoryStore();
 
-		assertFalse(acessTokenMemoryStore.findBy(user, configuration).isPresent());
+		assertFalse(acessTokenMemoryStore.findBy(user, resource).isPresent());
 
 		AccessToken source = AccessToken.bearer("accessToken");
 
-		acessTokenMemoryStore.add(user, configuration, source);
+		acessTokenMemoryStore.add(user, resource, source);
 
-		Optional<AccessToken> foundAccessToken = acessTokenMemoryStore.findBy(user, configuration);
+		Optional<AccessToken> foundAccessToken = acessTokenMemoryStore.findBy(user, resource);
 
 		assertTrue(foundAccessToken.isPresent());
 		assertSame(source, foundAccessToken.get());

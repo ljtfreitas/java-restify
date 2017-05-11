@@ -39,17 +39,17 @@ class DefaultAccessTokenRepository implements AccessTokenRepository {
 	}
 
 	@Override
-	public AccessToken findBy(Principal user, OAuth2Configuration configuration) {
-		Optional<AccessToken> accessToken = accessTokenStore.findBy(user, configuration);
+	public AccessToken findBy(Principal user, Resource resource) {
+		Optional<AccessToken> accessToken = accessTokenStore.findBy(user, resource);
 
 		return accessToken.filter(a -> !a.expired())
-				.orElseGet(() -> newToken(user, configuration));
+				.orElseGet(() -> newToken(user, resource));
 	}
 
-	private AccessToken newToken(Principal user, OAuth2Configuration configuration) {
+	private AccessToken newToken(Principal user, Resource resource) {
 		AccessToken newAccessToken = accessTokenProvider.provides();
 
-		accessTokenStore.add(user, configuration, newAccessToken);
+		accessTokenStore.add(user, resource, newAccessToken);
 
 		return newAccessToken;
 	}

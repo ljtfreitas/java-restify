@@ -106,7 +106,7 @@ class DefaultAuthorizationServer implements AuthorizationServer {
 	}
 
 	@Override
-	public EndpointResponse<String> authorize(OAuth2AuthorizationConfiguration configuration) {
+	public EndpointResponse<String> authorize(AuthorizationResource configuration) {
 		nonNull(configuration.credentials().clientId(), "Your Client ID is required.");
 		nonNull(configuration.authorizationUri(), "The authorization URI of authorization server is required.");
 		nonNull(configuration.responseType(), "The response_type parameter is required.");

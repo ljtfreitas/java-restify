@@ -32,7 +32,7 @@ import java.util.Optional;
 import com.github.ljtfreitas.restify.http.contract.Cookie;
 import com.github.ljtfreitas.restify.http.contract.Cookies;
 
-public class OAuth2AuthorizationConfiguration extends OAuth2Configuration {
+public class AuthorizationResource extends Resource {
 
 	private String authorizationCode;
 	private URI authorizationUri;
@@ -67,8 +67,13 @@ public class OAuth2AuthorizationConfiguration extends OAuth2Configuration {
 
 	public static class Builder {
 
-		private final OAuth2AuthorizationConfiguration configuration = new OAuth2AuthorizationConfiguration();
-		private final OAuth2Configuration.Builder delegate = new OAuth2Configuration.Builder(configuration);
+		private final AuthorizationResource configuration = new AuthorizationResource();
+		private final Resource.Builder delegate = new Resource.Builder(configuration);
+
+		public Builder id(String id) {
+			delegate.id(id);
+			return this;
+		}
 
 		public Builder accessTokenUri(String accessTokenUri) {
 			delegate.accessTokenUri(accessTokenUri);
@@ -155,7 +160,7 @@ public class OAuth2AuthorizationConfiguration extends OAuth2Configuration {
 			return this;
 		}
 
-		public OAuth2AuthorizationConfiguration build() {
+		public AuthorizationResource build() {
 			return configuration;
 		}
 	}

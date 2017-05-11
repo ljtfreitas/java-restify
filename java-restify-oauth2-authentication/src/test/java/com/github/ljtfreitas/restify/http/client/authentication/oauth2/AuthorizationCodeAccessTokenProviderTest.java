@@ -40,7 +40,7 @@ public class AuthorizationCodeAccessTokenProviderTest {
 	public void setup() {
 		mockServerClient = new MockServerClient("localhost", 8088);
 
-		OAuth2AuthorizationConfiguration configuration = new OAuth2AuthorizationConfiguration.Builder()
+		AuthorizationResource configuration = new AuthorizationResource.Builder()
 				.authorizationUri("http://localhost:8088/oauth/authorize")
 				.accessTokenUri("http://localhost:8088/oauth/token")
 				.credentials(new ClientCredentials("client-id", "client-secret"))

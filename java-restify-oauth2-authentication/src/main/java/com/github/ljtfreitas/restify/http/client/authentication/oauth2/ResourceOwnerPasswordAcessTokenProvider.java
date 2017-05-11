@@ -29,14 +29,14 @@ import static com.github.ljtfreitas.restify.http.util.Preconditions.nonNull;
 
 public class ResourceOwnerPasswordAcessTokenProvider extends BaseAccessTokenProvider {
 
-	private final OAuth2ResourceOwnerConfiguration configuration;
+	private final ResourceOwnerResource configuration;
 
-	public ResourceOwnerPasswordAcessTokenProvider(OAuth2ResourceOwnerConfiguration configuration) {
+	public ResourceOwnerPasswordAcessTokenProvider(ResourceOwnerResource configuration) {
 		super(configuration);
 		this.configuration = configuration;
 	}
 
-	public ResourceOwnerPasswordAcessTokenProvider(OAuth2ResourceOwnerConfiguration configuration, AuthorizationServer authorizationServer) {
+	public ResourceOwnerPasswordAcessTokenProvider(ResourceOwnerResource configuration, AuthorizationServer authorizationServer) {
 		super(configuration, authorizationServer);
 		this.configuration = configuration;
 	}

@@ -36,19 +36,19 @@ class AccessTokenMemoryStore implements AccessTokenStore {
 	private final Map<AccessTokenKey, AccessToken> tokens = new ConcurrentHashMap<>();
 
 	@Override
-	public Optional<AccessToken> findBy(Principal user, OAuth2Configuration configuration) {
-		return Optional.ofNullable(tokens.get(key(user, configuration)));
+	public Optional<AccessToken> findBy(Principal user, Resource resource) {
+		return Optional.ofNullable(tokens.get(key(user, resource)));
 	}
 
 	@Override
-	public void add(Principal user, OAuth2Configuration configuration, AccessToken accessToken) {
-		tokens.put(key(user, configuration), accessToken);
+	public void add(Principal user, Resource resource, AccessToken accessToken) {
+		tokens.put(key(user, resource), accessToken);
 	}
 
-	private AccessTokenKey key(Principal user, OAuth2Configuration configuration) {
+	private AccessTokenKey key(Principal user, Resource resource) {
 		String username = Optional.ofNullable(user).map(Principal::getName).orElse(null);
-		String clientId = configuration.credentials().clientId();
-		String scope = configuration.scope();
+		String clientId = resource.credentials().clientId();
+		String scope = resource.scope();
 
 		return new AccessTokenKey(username, clientId, scope);
 	}

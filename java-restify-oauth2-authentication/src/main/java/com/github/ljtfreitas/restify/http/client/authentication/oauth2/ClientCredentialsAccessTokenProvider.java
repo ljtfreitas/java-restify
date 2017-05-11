@@ -27,24 +27,24 @@ package com.github.ljtfreitas.restify.http.client.authentication.oauth2;
 
 public class ClientCredentialsAccessTokenProvider extends BaseAccessTokenProvider {
 
-	private final OAuth2Configuration configuration;
+	private final Resource resource;
 
-	public ClientCredentialsAccessTokenProvider(OAuth2Configuration configuration) {
-		super(configuration);
-		this.configuration = configuration;
+	public ClientCredentialsAccessTokenProvider(Resource resource) {
+		super(resource);
+		this.resource = resource;
 	}
 
-	public ClientCredentialsAccessTokenProvider(OAuth2Configuration configuration, AuthorizationServer authorizationServer) {
-		super(configuration, authorizationServer);
-		this.configuration = configuration;
+	public ClientCredentialsAccessTokenProvider(Resource resource, AuthorizationServer authorizationServer) {
+		super(resource, authorizationServer);
+		this.resource = resource;
 	}
 
 	@Override
 	protected AccessTokenRequest buildAccessTokenRequest() {
-		AccessTokenRequest.Builder builder = AccessTokenRequest.clientCredentials(configuration.credentials());
+		AccessTokenRequest.Builder builder = AccessTokenRequest.clientCredentials(resource.credentials());
 
-		return builder.accessTokenUri(configuration.accessTokenUri())
-					  .parameter("scope", configuration.scope())
+		return builder.accessTokenUri(resource.accessTokenUri())
+					  .parameter("scope", resource.scope())
 					  .build();
 	}
 

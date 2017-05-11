@@ -36,14 +36,14 @@ import com.github.ljtfreitas.restify.http.contract.Parameters;
 
 public class ImplicitAccessTokenProvider implements AccessTokenProvider {
 
-	private final OAuth2AuthorizationConfiguration configuration;
+	private final AuthorizationResource configuration;
 	private final AuthorizationServer authorizationServer;
 
-	public ImplicitAccessTokenProvider(OAuth2AuthorizationConfiguration configuration) {
+	public ImplicitAccessTokenProvider(AuthorizationResource configuration) {
 		this(configuration, new DefaultAuthorizationServer());
 	}
 
-	public ImplicitAccessTokenProvider(OAuth2AuthorizationConfiguration configuration, AuthorizationServer authorizationServer) {
+	public ImplicitAccessTokenProvider(AuthorizationResource configuration, AuthorizationServer authorizationServer) {
 		this.configuration = configuration;
 		this.authorizationServer = authorizationServer;
 	}

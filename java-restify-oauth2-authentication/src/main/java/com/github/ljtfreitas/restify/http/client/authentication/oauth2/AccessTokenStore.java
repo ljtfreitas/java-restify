@@ -30,8 +30,8 @@ import java.util.Optional;
 
 public interface AccessTokenStore {
 
-	public Optional<AccessToken> findBy(Principal user, OAuth2Configuration configuration);
+	public Optional<AccessToken> findBy(Principal user, Resource resource);
 
-	public void add(Principal user, OAuth2Configuration configuration, AccessToken accessToken);
+	public void add(Principal user, Resource resource, AccessToken accessToken);
 
 }

@@ -32,15 +32,15 @@ import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
 
 abstract class BaseAccessTokenProvider implements AccessTokenProvider {
 
-	private final OAuth2Configuration configuration;
+	private final Resource resource;
 	private final AuthorizationServer authorizationServer;
 
-	protected BaseAccessTokenProvider(OAuth2Configuration configuration) {
-		this(configuration, new DefaultAuthorizationServer());
+	protected BaseAccessTokenProvider(Resource resource) {
+		this(resource, new DefaultAuthorizationServer());
 	}
 
-	protected BaseAccessTokenProvider(OAuth2Configuration configuration, AuthorizationServer authorizationServer) {
-		this.configuration = configuration;
+	protected BaseAccessTokenProvider(Resource resource, AuthorizationServer authorizationServer) {
+		this.resource = resource;
 		this.authorizationServer = authorizationServer;
 	}
 
@@ -61,8 +61,8 @@ abstract class BaseAccessTokenProvider implements AccessTokenProvider {
 
 		Builder builder = AccessTokenRequest.refreshToken(accessToken.refreshToken());
 
-		return builder.accessTokenUri(configuration.accessTokenUri())
-					  .credentials(configuration.credentials())
+		return builder.accessTokenUri(resource.accessTokenUri())
+					  .credentials(resource.credentials())
 					  .build();
 	}
 

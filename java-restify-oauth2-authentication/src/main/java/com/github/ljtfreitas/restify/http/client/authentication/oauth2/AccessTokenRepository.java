@@ -29,6 +29,6 @@ import java.security.Principal;
 
 public interface AccessTokenRepository {
 
-	AccessToken findBy(Principal user, OAuth2Configuration configuration);
+	AccessToken findBy(Principal user, Resource resource);
 
 }

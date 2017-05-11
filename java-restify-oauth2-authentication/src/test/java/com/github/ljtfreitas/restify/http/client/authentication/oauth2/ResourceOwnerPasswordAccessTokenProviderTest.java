@@ -34,7 +34,7 @@ public class ResourceOwnerPasswordAccessTokenProviderTest {
 	public void setup() {
 		mockServerClient = new MockServerClient("localhost", 8088);
 
-		OAuth2ResourceOwnerConfiguration configuration = new OAuth2ResourceOwnerConfiguration.Builder()
+		ResourceOwnerResource configuration = new ResourceOwnerResource.Builder()
 				.accessTokenUri("http://localhost:8088/oauth/token")
 				.credentials(new ClientCredentials("client-id", "client-secret"))
 				.scopes("read", "write")

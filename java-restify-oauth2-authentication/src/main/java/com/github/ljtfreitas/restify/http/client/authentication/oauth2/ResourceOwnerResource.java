@@ -25,77 +25,71 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.authentication.oauth2;
 
+import static com.github.ljtfreitas.restify.http.util.Preconditions.nonNull;
+
 import java.net.URI;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.stream.Collectors;
 
-public class OAuth2Configuration {
+public class ResourceOwnerResource extends Resource {
 
-	private URI accessTokenUri;
-	private ClientCredentials credentials;
-	private Collection<String> scopes = Collections.emptyList();
+	private ResourceOwner resourceOwner;
 
-	public ClientCredentials credentials() {
-		return credentials;
-	}
-
-	public Collection<String> scopes() {
-		return scopes;
-	}
-
-	public String scope() {
-		return scopes.stream().collect(Collectors.joining(" "));
-	}
-
-	public URI accessTokenUri() {
-		return accessTokenUri;
+	public ResourceOwner resourceOwner() {
+		return resourceOwner;
 	}
 
 	public static class Builder {
 
-		private final OAuth2Configuration configuration;
+		private final ResourceOwnerResource configuration = new ResourceOwnerResource();
+		private final Resource.Builder delegate = new Resource.Builder(configuration);
 
-		public Builder() {
-			this.configuration = new OAuth2Configuration();
-		}
-
-		public Builder(OAuth2Configuration configuration) {
-			this.configuration = configuration;
+		public Builder id(String id) {
+			delegate.id(id);
+			return this;
 		}
 
 		public Builder accessTokenUri(String accessTokenUri) {
-			configuration.accessTokenUri = URI.create(accessTokenUri);
+			delegate.accessTokenUri(accessTokenUri);
 			return this;
 		}
 
 		public Builder accessTokenUri(URI accessTokenUri) {
-			configuration.accessTokenUri = accessTokenUri;
+			delegate.accessTokenUri(accessTokenUri);
 			return this;
 		}
 
 		public Builder clientId(String clientId) {
-			configuration.credentials = ClientCredentials.clientId(clientId);
+			delegate.clientId(clientId);
 			return this;
 		}
 
 		public Builder credentials(ClientCredentials credentials) {
-			configuration.credentials = credentials;
+			delegate.credentials(credentials);
 			return this;
 		}
 
 		public Builder scopes(Collection<String> scopes) {
-			configuration.scopes = scopes;
+			delegate.scopes(scopes);
 			return this;
 		}
 
 		public Builder scopes(String... scopes) {
-			configuration.scopes = Arrays.asList(scopes);
+			delegate.scopes(scopes);
 			return this;
 		}
 
-		public OAuth2Configuration build() {
+		public Builder resourceOwner(ResourceOwner resourceOwner) {
+			configuration.resourceOwner = resourceOwner;
+			return this;
+		}
+
+		public Builder resourceOwner(String username, String password) {
+			configuration.resourceOwner = new ResourceOwner(username, password);
+			return this;
+		}
+
+		public ResourceOwnerResource build() {
+			nonNull(configuration.resourceOwner, "Your resource owner credentials are required.");
 			return configuration;
 		}
 	}

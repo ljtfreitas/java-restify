@@ -19,7 +19,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 public class DefaultAccessTokenRepositoryTest {
 
 	@Mock
-	private OAuth2Configuration configuration;
+	private Resource resource;
 
 	@Mock
 	private AccessTokenStore accessTokenStore;
@@ -42,9 +42,9 @@ public class DefaultAccessTokenRepositoryTest {
 	public void shouldGetAccessTokenFromStore() {
 		AccessToken accessToken = AccessToken.bearer("access-token");
 
-		when(accessTokenStore.findBy(user, configuration)).thenReturn(Optional.of(accessToken));
+		when(accessTokenStore.findBy(user, resource)).thenReturn(Optional.of(accessToken));
 
-		AccessToken output = accessTokenRepository.findBy(user, configuration);
+		AccessToken output = accessTokenRepository.findBy(user, resource);
 
 		assertSame(output, accessToken);
 	}
@@ -53,15 +53,15 @@ public class DefaultAccessTokenRepositoryTest {
 	public void shouldGetAccessTokenFromProviderWhenStoreHasNoToken() {
 		AccessToken accessToken = AccessToken.bearer("access-token");
 
-		when(accessTokenStore.findBy(user, configuration)).thenReturn(Optional.empty());
+		when(accessTokenStore.findBy(user, resource)).thenReturn(Optional.empty());
 		when(accessTokenProvider.provides()).thenReturn(accessToken);
 
-		AccessToken output = accessTokenRepository.findBy(user, configuration);
+		AccessToken output = accessTokenRepository.findBy(user, resource);
 
 		assertSame(output, accessToken);
 
 		verify(accessTokenProvider).provides();
-		verify(accessTokenStore).add(user, configuration, accessToken);
+		verify(accessTokenStore).add(user, resource, accessToken);
 	}
 
 	@Test
@@ -69,17 +69,17 @@ public class DefaultAccessTokenRepositoryTest {
 		AccessToken expiredAccessToken = AccessToken.bearer("access-token", Duration.ofMillis(500));
 		AccessToken newAccessToken = AccessToken.bearer("new-access-token");
 
-		when(accessTokenStore.findBy(user, configuration)).thenReturn(Optional.of(expiredAccessToken));
+		when(accessTokenStore.findBy(user, resource)).thenReturn(Optional.of(expiredAccessToken));
 		when(accessTokenProvider.provides()).thenReturn(newAccessToken);
 
 		Thread.sleep(1000);
 
-		AccessToken output = accessTokenRepository.findBy(user, configuration);
+		AccessToken output = accessTokenRepository.findBy(user, resource);
 
 		assertSame(output, newAccessToken);
 
-		verify(accessTokenStore).findBy(user, configuration);
+		verify(accessTokenStore).findBy(user, resource);
 		verify(accessTokenProvider).provides();
-		verify(accessTokenStore).add(user, configuration, newAccessToken);
+		verify(accessTokenStore).add(user, resource, newAccessToken);
 	}
 }

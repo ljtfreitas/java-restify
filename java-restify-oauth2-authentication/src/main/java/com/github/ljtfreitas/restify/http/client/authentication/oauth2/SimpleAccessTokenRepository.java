@@ -36,7 +36,7 @@ public class SimpleAccessTokenRepository implements AccessTokenRepository {
 	}
 
 	@Override
-	public AccessToken findBy(Principal user, OAuth2Configuration configuration) {
+	public AccessToken findBy(Principal user, Resource resource) {
 		return accessToken;
 	}
 }

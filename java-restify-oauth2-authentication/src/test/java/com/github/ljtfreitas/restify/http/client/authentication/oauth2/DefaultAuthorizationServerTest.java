@@ -36,7 +36,7 @@ public class DefaultAuthorizationServerTest {
 
 	@Test
 	public void shouldAuthorizeOnAuthorizationServer() {
-		OAuth2AuthorizationConfiguration configuration = new OAuth2AuthorizationConfiguration.Builder()
+		AuthorizationResource configuration = new AuthorizationResource.Builder()
 				.authorizationUri("http://localhost:8088/oauth/authorize")
 				.clientId("client-id")
 				.redirectUri("http://my.web.app/oauth/callback")

@@ -25,7 +25,7 @@ public class DefaultAuthorizationCodeProviderTest {
 	public void setup() {
 		mockServerClient = new MockServerClient("localhost", 8088);
 
-		OAuth2AuthorizationConfiguration configuration = new OAuth2AuthorizationConfiguration.Builder()
+		AuthorizationResource configuration = new AuthorizationResource.Builder()
 				.authorizationUri("http://localhost:8088/oauth/authorize")
 				.clientId("client-id")
 				.redirectUri("http://my.web.app/oauth/callback")
