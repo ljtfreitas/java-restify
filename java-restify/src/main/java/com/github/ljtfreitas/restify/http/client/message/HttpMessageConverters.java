@@ -46,7 +46,7 @@ public class HttpMessageConverters {
 		return converters.stream()
 				.filter(c -> c instanceof HttpMessageReader)
 					.map(c -> (HttpMessageReader<T>) c)
-						.filter(c -> contentType.is(c.contentType()) && c.canRead(type))
+						.filter(c -> contentType.compatible(c.contentType()) && c.canRead(type))
 							.map(c -> ((HttpMessageReader<T>) c))
 								.findFirst();
 	}
@@ -65,7 +65,7 @@ public class HttpMessageConverters {
 		return converters.stream()
 				.filter(c -> c instanceof HttpMessageWriter)
 					.map(c -> (HttpMessageWriter<T>) c)
-						.filter(c -> contentType.is(c.contentType()) && c.canWrite(type))
+						.filter(c -> contentType.compatible(c.contentType()) && c.canWrite(type))
 							.map(c -> (HttpMessageWriter<T>) c)
 								.findFirst();
 	}

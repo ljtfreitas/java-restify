@@ -64,4 +64,31 @@ public class ContentTypeTest {
 		assertEquals("UTF-8", newContentType.parameter("charset").get());
 		assertEquals("application/json; charset=UTF-8", newContentType.toString());
 	}
+
+	@Test
+	public void shouldBeCompatibleWithWildcardType() {
+		ContentType wildcardContentType = ContentType.of("*/*");
+
+		ContentType textPlainContentType = ContentType.of("text/plain");
+
+		assertTrue(wildcardContentType.compatible(textPlainContentType));
+	}
+
+	@Test
+	public void shouldBeCompatibleWithWildcardSpecificType() {
+		ContentType genericTextContentType = ContentType.of("text/*");
+
+		ContentType textPlainContentType = ContentType.of("text/plain");
+
+		assertTrue(genericTextContentType.compatible(textPlainContentType));
+	}
+
+	@Test
+	public void shouldBeIncompatibleBetweenDifferentContentTypes() {
+		ContentType jsonContentType = ContentType.of("application/json");
+
+		ContentType xmlContentType = ContentType.of("application/xml");
+
+		assertFalse(jsonContentType.compatible(xmlContentType));
+	}
 }

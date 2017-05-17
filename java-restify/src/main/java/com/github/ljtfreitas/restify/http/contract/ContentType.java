@@ -36,16 +36,20 @@ import java.util.stream.Collectors;
 
 public class ContentType {
 
+	private static final Object WILDCARD_TYPE = "*";
+
 	private final String type;
+	private final String subtype;
 	private final ContentTypeParameters parameters;
 
-	private ContentType(String type, ContentTypeParameters parameters) {
+	private ContentType(String type, String subtype, ContentTypeParameters parameters) {
 		this.type = type;
+		this.subtype = subtype;
 		this.parameters = parameters;
 	}
 
 	public String name() {
-		return type;
+		return type + "/" + subtype;
 	}
 
 	public Optional<String> parameter(String name) {
@@ -54,7 +58,7 @@ public class ContentType {
 
 	public ContentType newParameter(String name, String value) {
 		ContentTypeParameters newParameters = parameters.put(name, value);
-		return new ContentType(type, newParameters);
+		return new ContentType(type, subtype, newParameters);
 	}
 
 	public ContentTypeParameters parameters() {
@@ -62,7 +66,39 @@ public class ContentType {
 	}
 
 	public boolean is(String contentType) {
-		return this.type.equals(contentType) || this.type.startsWith(contentType);
+		return doEquals(ContentType.of(contentType));
+	}
+
+	public boolean is(ContentType contentType) {
+		return doEquals(contentType);
+	}
+
+	public boolean compatible(String contentType) {
+		return doCompatible(ContentType.of(contentType));
+	}
+
+	public boolean compatible(ContentType contentType) {
+		return doCompatible(contentType);
+	}
+
+	private boolean doCompatible(ContentType contentType) {
+		return doEquals(contentType)
+			|| (doCompatibleWithType(contentType.type)
+				&& doCompatibleWithSubtype(contentType.subtype));
+	}
+
+	private boolean doCompatibleWithSubtype(String subtype) {
+		return this.subtype.equals(subtype)
+			|| (isWildcard(this.subtype) || isWildcard(subtype));
+	}
+
+	private boolean doCompatibleWithType(String type) {
+		return this.type.equals(type)
+			|| (isWildcard(this.type) || isWildcard(type));
+	}
+
+	private boolean isWildcard(String type) {
+		return WILDCARD_TYPE.equals(type);
 	}
 
 	@Override
@@ -73,18 +109,24 @@ public class ContentType {
 	@Override
 	public boolean equals(Object obj) {
 		if (obj instanceof ContentType) {
-			ContentType that = (ContentType) obj;
-			return this.type.equals(that.type) || this.type.startsWith(that.type);
+			return doEquals((ContentType) obj);
 		} else {
 			return false;
 		}
+	}
+
+	private boolean doEquals(ContentType that) {
+		return this.type.equals(that.type)
+			&& this.subtype.equals(that.subtype);
 	}
 
 	@Override
 	public String toString() {
 		StringBuilder sb = new StringBuilder();
 
-		sb.append(type);
+		sb.append(type)
+		  .append("/")
+		  .append(subtype);
 
 		if (!parameters.empty()) {
 			sb.append("; ").append(parameters.toString());
@@ -93,14 +135,17 @@ public class ContentType {
 		return sb.toString();
 	}
 
-	public static ContentType of(String type) {
-		String[] parts = type.split(";");
+	public static ContentType of(String value) {
+		String[] parts = value.split(";");
 
-		isTrue(parts.length >= 1, "Your Content-Type source is invalid: " + type);
+		isTrue(parts.length >= 1, "Your Content-Type source is invalid: " + value);
 
 		String[] parameters = Arrays.copyOfRange(parts, 1, parts.length);
 
-		return new ContentType(parts[0], ContentTypeParameters.of(parameters));
+		String type = parts[0].substring(0, parts[0].indexOf("/")).toLowerCase();
+		String subtype = parts[0].substring(parts[0].indexOf("/") + 1).toLowerCase();
+
+		return new ContentType(type, subtype, ContentTypeParameters.of(parameters));
 	}
 
 	public static class ContentTypeParameters {

@@ -60,6 +60,7 @@ import com.github.ljtfreitas.restify.http.client.call.exec.jdk.OptionalEndpointC
 import com.github.ljtfreitas.restify.http.client.call.exec.jdk.RunnableEndpointCallExecutableFactory;
 import com.github.ljtfreitas.restify.http.client.message.HttpMessageConverter;
 import com.github.ljtfreitas.restify.http.client.message.HttpMessageConverters;
+import com.github.ljtfreitas.restify.http.client.message.converter.InputStreamMessageConverter;
 import com.github.ljtfreitas.restify.http.client.message.converter.json.JsonMessageConverter;
 import com.github.ljtfreitas.restify.http.client.message.converter.text.ScalarMessageConverter;
 import com.github.ljtfreitas.restify.http.client.message.converter.text.TextHtmlMessageConverter;
@@ -266,6 +267,11 @@ public class RestifyProxyBuilder {
 			this.context = context;
 		}
 
+		public HttpMessageConvertersBuilder wildcard() {
+			converters.add(new InputStreamMessageConverter());
+			return this;
+		}
+
 		public HttpMessageConvertersBuilder json() {
 			converters.add(JsonMessageConverter.available());
 			return this;
@@ -295,7 +301,7 @@ public class RestifyProxyBuilder {
 		}
 
 		public HttpMessageConvertersBuilder all() {
-			return json().xml().text().form();
+			return wildcard().json().xml().text().form();
 		}
 
 		public HttpMessageConvertersBuilder add(HttpMessageConverter...converters) {
