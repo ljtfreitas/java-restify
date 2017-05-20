@@ -25,34 +25,52 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.message.converter;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.lang.reflect.Type;
 
 import com.github.ljtfreitas.restify.http.client.response.HttpResponseMessage;
 import com.github.ljtfreitas.restify.http.client.response.RestifyHttpMessageReadException;
 
-public class InputStreamMessageConverter extends WildcardMessageConverter<InputStream> {
+public class ByteArrayMessageConverter extends WildcardMessageConverter<byte[]> {
 
-	private final ByteArrayMessageConverter byteArrayMessageConverter;
+	private static final int DEFAULT_BUFFER_SIZE = 1024;
 
-	public InputStreamMessageConverter() {
-		this.byteArrayMessageConverter = new ByteArrayMessageConverter();
+	private final int bufferSize;
+
+	public ByteArrayMessageConverter() {
+		this(DEFAULT_BUFFER_SIZE);
 	}
 
-	public InputStreamMessageConverter(int bufferSize) {
-		this.byteArrayMessageConverter = new ByteArrayMessageConverter(bufferSize);
+	public ByteArrayMessageConverter(int bufferSize) {
+		this.bufferSize= bufferSize;
 	}
 
 	@Override
 	public boolean canRead(Type type) {
-		return InputStream.class.equals(type);
+		return byte[].class.equals(type);
 	}
 
 	@Override
-	public InputStream read(HttpResponseMessage httpResponseMessage, Type expectedType)
+	public byte[] read(HttpResponseMessage httpResponseMessage, Type expectedType)
 			throws RestifyHttpMessageReadException {
 
-		return new ByteArrayInputStream(byteArrayMessageConverter.read(httpResponseMessage, expectedType));
+		try {
+			ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+
+			int len = 0;
+			byte[] data = new byte[bufferSize];
+
+			while ((len = httpResponseMessage.body().read(data, 0, data.length)) != -1) {
+				buffer.write(data, 0, len);
+			}
+
+			buffer.flush();
+
+			return buffer.toByteArray();
+
+		} catch (IOException e) {
+			throw new RestifyHttpMessageReadException(e);
+		}
 	}
 }

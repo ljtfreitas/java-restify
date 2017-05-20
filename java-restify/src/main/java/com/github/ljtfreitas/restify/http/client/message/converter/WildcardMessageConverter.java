@@ -25,34 +25,15 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.message.converter;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.lang.reflect.Type;
+import com.github.ljtfreitas.restify.http.client.message.HttpMessageReader;
 
-import com.github.ljtfreitas.restify.http.client.response.HttpResponseMessage;
-import com.github.ljtfreitas.restify.http.client.response.RestifyHttpMessageReadException;
+public abstract class WildcardMessageConverter<T> implements HttpMessageReader<T> {
 
-public class InputStreamMessageConverter extends WildcardMessageConverter<InputStream> {
-
-	private final ByteArrayMessageConverter byteArrayMessageConverter;
-
-	public InputStreamMessageConverter() {
-		this.byteArrayMessageConverter = new ByteArrayMessageConverter();
-	}
-
-	public InputStreamMessageConverter(int bufferSize) {
-		this.byteArrayMessageConverter = new ByteArrayMessageConverter(bufferSize);
-	}
+	private static final String WILDCARD_CONTENT_TYPE = "*/*";
 
 	@Override
-	public boolean canRead(Type type) {
-		return InputStream.class.equals(type);
+	public String contentType() {
+		return WILDCARD_CONTENT_TYPE;
 	}
 
-	@Override
-	public InputStream read(HttpResponseMessage httpResponseMessage, Type expectedType)
-			throws RestifyHttpMessageReadException {
-
-		return new ByteArrayInputStream(byteArrayMessageConverter.read(httpResponseMessage, expectedType));
-	}
 }

@@ -9,7 +9,6 @@ import static org.mockserver.model.StringBody.exact;
 import static org.mockserver.verify.VerificationTimes.once;
 
 import java.io.BufferedReader;
-import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.net.SocketTimeoutException;
@@ -87,7 +86,7 @@ public class JdkHttpClientRequestTest {
 	}
 
 	@Test
-	public void shouldGetResponseBodyOnStreamObject() throws IOException {
+	public void shouldGetResponseBodyOnStreamObject() {
 		String responseBodyAsJson = "{\"name\": \"Tiago de Freitas Lima\",\"age\":31}";
 
 		mockServerClient
@@ -101,11 +100,28 @@ public class JdkHttpClientRequestTest {
 
 		InputStream responseBody = myApi.jsonAsStream();
 
-		try (BufferedReader buffer = new BufferedReader(new InputStreamReader(responseBody))) {
-            String output = buffer.lines().collect(Collectors.joining("\n"));
+		BufferedReader buffer = new BufferedReader(new InputStreamReader(responseBody));
+        String output = buffer.lines().collect(Collectors.joining("\n"));
 
-            assertEquals(responseBodyAsJson, output);
-		};
+        assertEquals(responseBodyAsJson, output);
+	}
+
+	@Test
+	public void shouldGetResponseBodyOnByteArray() {
+		String responseBodyAsJson = "{\"name\": \"Tiago de Freitas Lima\",\"age\":31}";
+
+		mockServerClient
+			.when(request()
+					.withMethod("GET")
+					.withPath("/json"))
+			.respond(response()
+					.withStatusCode(200)
+					.withHeader("Content-Type", "application/json")
+					.withBody(json(responseBodyAsJson)));
+
+		byte[] responseBody = myApi.jsonAsBytes();
+
+        assertEquals(responseBodyAsJson, new String(responseBody));
 	}
 
 	@Test
@@ -234,6 +250,9 @@ public class JdkHttpClientRequestTest {
 
 		@Path("/json") @Get
 		public InputStream jsonAsStream();
+
+		@Path("/json") @Get
+		public byte[] jsonAsBytes();
 	}
 
 	@XmlRootElement(name = "model")
