@@ -25,46 +25,32 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.message.converter;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.lang.reflect.Type;
+import java.io.InputStream;
+import java.io.OutputStream;
 
-import com.github.ljtfreitas.restify.http.client.response.HttpResponseMessage;
-import com.github.ljtfreitas.restify.http.client.response.RestifyHttpMessageReadException;
+public class InputStreamContent {
 
-public class ByteArrayMessageConverter extends WildcardMessageConverter<byte[]> {
+	public static final int DEFAULT_BUFFER_SIZE = 1024;
 
+	private final InputStream source;
 	private final int bufferSize;
 
-	public ByteArrayMessageConverter() {
-		this(InputStreamContent.DEFAULT_BUFFER_SIZE);
+	public InputStreamContent(InputStream source) {
+		this(source, DEFAULT_BUFFER_SIZE);
 	}
 
-	public ByteArrayMessageConverter(int bufferSize) {
-		this.bufferSize= bufferSize;
+	public InputStreamContent(InputStream source, int bufferSize) {
+		this.source = source;
+		this.bufferSize = bufferSize;
 	}
 
-	@Override
-	public boolean canRead(Type type) {
-		return byte[].class.equals(type);
-	}
+	public void transferTo(OutputStream output) throws IOException {
+		int len = 0;
+		byte[] data = new byte[bufferSize];
 
-	@Override
-	public byte[] read(HttpResponseMessage httpResponseMessage, Type expectedType)
-			throws RestifyHttpMessageReadException {
-
-		try {
-			ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-
-			InputStreamContent bodyContent = new InputStreamContent(httpResponseMessage.body(), bufferSize);
-			bodyContent.transferTo(buffer);
-
-			buffer.flush();
-
-			return buffer.toByteArray();
-
-		} catch (IOException e) {
-			throw new RestifyHttpMessageReadException(e);
+		while ((len = source.read(data, 0, data.length)) != -1) {
+			output.write(data, 0, len);
 		}
 	}
 }

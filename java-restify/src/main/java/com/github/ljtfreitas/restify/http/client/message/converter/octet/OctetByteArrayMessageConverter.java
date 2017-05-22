@@ -23,48 +23,57 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.http.client.message.converter;
+package com.github.ljtfreitas.restify.http.client.message.converter.octet;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.lang.reflect.Type;
 
+import com.github.ljtfreitas.restify.http.client.message.converter.ByteArrayMessageConverter;
+import com.github.ljtfreitas.restify.http.client.request.HttpRequestMessage;
+import com.github.ljtfreitas.restify.http.client.request.RestifyHttpMessageWriteException;
 import com.github.ljtfreitas.restify.http.client.response.HttpResponseMessage;
 import com.github.ljtfreitas.restify.http.client.response.RestifyHttpMessageReadException;
 
-public class ByteArrayMessageConverter extends WildcardMessageConverter<byte[]> {
+public class OctetByteArrayMessageConverter extends OctetStreamMessageConverter<byte[]> {
 
-	private final int bufferSize;
+	private final ByteArrayMessageConverter byteArrayMessageConverter;
 
-	public ByteArrayMessageConverter() {
-		this(InputStreamContent.DEFAULT_BUFFER_SIZE);
+	public OctetByteArrayMessageConverter() {
+		this.byteArrayMessageConverter = new ByteArrayMessageConverter();
 	}
 
-	public ByteArrayMessageConverter(int bufferSize) {
-		this.bufferSize= bufferSize;
+	public OctetByteArrayMessageConverter(int bufferSize) {
+		this.byteArrayMessageConverter = new ByteArrayMessageConverter(bufferSize);
 	}
 
 	@Override
 	public boolean canRead(Type type) {
-		return byte[].class.equals(type);
+		return byteArrayMessageConverter.canRead(type);
 	}
 
 	@Override
 	public byte[] read(HttpResponseMessage httpResponseMessage, Type expectedType)
 			throws RestifyHttpMessageReadException {
+		return byteArrayMessageConverter.read(httpResponseMessage, expectedType);
+	}
 
+	@Override
+	public boolean canWrite(Class<?> type) {
+		return byte[].class.equals(type);
+	}
+
+	@Override
+	public void write(byte[] body, HttpRequestMessage httpRequestMessage) throws RestifyHttpMessageWriteException {
 		try {
-			ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+			OutputStream output = httpRequestMessage.output();
 
-			InputStreamContent bodyContent = new InputStreamContent(httpResponseMessage.body(), bufferSize);
-			bodyContent.transferTo(buffer);
-
-			buffer.flush();
-
-			return buffer.toByteArray();
+			output.write(body);
+			output.flush();
+			output.close();
 
 		} catch (IOException e) {
-			throw new RestifyHttpMessageReadException(e);
+			throw new RestifyHttpMessageWriteException(e);
 		}
 	}
 }

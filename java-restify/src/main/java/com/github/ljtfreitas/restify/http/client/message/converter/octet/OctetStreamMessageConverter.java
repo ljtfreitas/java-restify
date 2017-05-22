@@ -23,48 +23,17 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.http.client.message.converter;
+package com.github.ljtfreitas.restify.http.client.message.converter.octet;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.lang.reflect.Type;
+import com.github.ljtfreitas.restify.http.client.message.HttpMessageReader;
+import com.github.ljtfreitas.restify.http.client.message.HttpMessageWriter;
 
-import com.github.ljtfreitas.restify.http.client.response.HttpResponseMessage;
-import com.github.ljtfreitas.restify.http.client.response.RestifyHttpMessageReadException;
+public abstract class OctetStreamMessageConverter<T> implements HttpMessageReader<T>, HttpMessageWriter<T> {
 
-public class ByteArrayMessageConverter extends WildcardMessageConverter<byte[]> {
-
-	private final int bufferSize;
-
-	public ByteArrayMessageConverter() {
-		this(InputStreamContent.DEFAULT_BUFFER_SIZE);
-	}
-
-	public ByteArrayMessageConverter(int bufferSize) {
-		this.bufferSize= bufferSize;
-	}
+	private static final String OCTET_STREAM_MEDIA_TYPE = "application/octet-stream";
 
 	@Override
-	public boolean canRead(Type type) {
-		return byte[].class.equals(type);
-	}
-
-	@Override
-	public byte[] read(HttpResponseMessage httpResponseMessage, Type expectedType)
-			throws RestifyHttpMessageReadException {
-
-		try {
-			ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-
-			InputStreamContent bodyContent = new InputStreamContent(httpResponseMessage.body(), bufferSize);
-			bodyContent.transferTo(buffer);
-
-			buffer.flush();
-
-			return buffer.toByteArray();
-
-		} catch (IOException e) {
-			throw new RestifyHttpMessageReadException(e);
-		}
+	public final String contentType() {
+		return OCTET_STREAM_MEDIA_TYPE;
 	}
 }
