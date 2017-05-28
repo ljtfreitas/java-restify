@@ -91,4 +91,22 @@ public class ContentTypeTest {
 
 		assertFalse(jsonContentType.compatible(xmlContentType));
 	}
+
+	@Test
+	public void shouldBeCompatibleWhenSuffixTypeAreEquals() {
+		ContentType jsonVendorContentVersionOne = ContentType.of("application/vnd.bla+json;version=1");
+
+		ContentType jsonVendorContentVersionTwo = ContentType.of("application/vnd.bla+json;version=2");
+
+		assertTrue(jsonVendorContentVersionOne.compatible(jsonVendorContentVersionTwo));
+	}
+
+	@Test
+	public void shouldBeIncompatibleWhenSuffixTypeAreDifferent() {
+		ContentType xmlVendorContent = ContentType.of("application/vnd.bla+xml");
+
+		ContentType jsonVendorContent = ContentType.of("application/vnd.bla+json");
+
+		assertFalse(xmlVendorContent.compatible(jsonVendorContent));
+	}
 }
