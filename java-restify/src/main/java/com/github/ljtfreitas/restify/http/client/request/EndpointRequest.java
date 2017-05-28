@@ -41,33 +41,59 @@ public class EndpointRequest {
 	private final Headers headers;
 	private final Object body;
 	private final JavaType responseType;
+	private final EndpointVersion version;
 
 	public EndpointRequest(URI endpoint, String method) {
-		this(endpoint, method, new Headers(), null, void.class);
+		this(endpoint, method, (EndpointVersion) null);
+	}
+
+	public EndpointRequest(URI endpoint, String method, EndpointVersion version) {
+		this(endpoint, method, new Headers(), null, void.class, version);
 	}
 
 	public EndpointRequest(URI endpoint, String method, Type responseType) {
-		this(endpoint, method, new Headers(), responseType);
+		this(endpoint, method, responseType, null);
+	}
+
+	public EndpointRequest(URI endpoint, String method, Type responseType, EndpointVersion version) {
+		this(endpoint, method, new Headers(), responseType, version);
 	}
 
 	public EndpointRequest(URI endpoint, String method, Headers headers, Type responseType) {
-		this(endpoint, method, headers, null, responseType);
+		this(endpoint, method, headers, null, (EndpointVersion) null);
+	}
+
+	public EndpointRequest(URI endpoint, String method, Headers headers, Type responseType, EndpointVersion version) {
+		this(endpoint, method, headers, null, responseType, version);
 	}
 
 	public EndpointRequest(URI endpoint, String method, Headers headers, Object body) {
-		this(endpoint, method, headers, body, void.class);
+		this(endpoint, method, headers, body, (EndpointVersion) null);
+	}
+
+	public EndpointRequest(URI endpoint, String method, Headers headers, Object body, EndpointVersion version) {
+		this(endpoint, method, headers, body, void.class, version);
 	}
 
 	public EndpointRequest(URI endpoint, String method, Headers headers, Object body, Type responseType) {
-		this(endpoint, method, headers, body, JavaType.of(responseType));
+		this(endpoint, method, headers, body, responseType, null);
+	}
+
+	public EndpointRequest(URI endpoint, String method, Headers headers, Object body, Type responseType, EndpointVersion version) {
+		this(endpoint, method, headers, body, JavaType.of(responseType), version);
 	}
 
 	public EndpointRequest(URI endpoint, String method, Headers headers, Object body, JavaType responseType) {
+		this(endpoint, method, headers, body, responseType, null);
+	}
+
+	public EndpointRequest(URI endpoint, String method, Headers headers, Object body, JavaType responseType, EndpointVersion version) {
 		this.endpoint = endpoint;
 		this.method = method;
 		this.headers = headers;
 		this.body = body;
 		this.responseType = responseType;
+		this.version = version;
 	}
 
 	public URI endpoint() {
@@ -90,6 +116,10 @@ public class EndpointRequest {
 		return responseType;
 	}
 
+	public Optional<EndpointVersion> version() {
+		return Optional.ofNullable(version);
+	}
+
 	public EndpointRequest appendParameter(String name, String value) {
 		String appender = endpoint.getQuery() == null ? "" : "&";
 
@@ -102,14 +132,14 @@ public class EndpointRequest {
 			URI newURI = new URI(endpoint.getScheme(), endpoint.getRawAuthority(), endpoint.getRawPath(),
 					newQuery, endpoint.getRawFragment());
 
-			return new EndpointRequest(newURI, method, headers, body, responseType);
+			return new EndpointRequest(newURI, method, headers, body, responseType, version);
 		} catch (URISyntaxException e) {
 			throw new RestifyHttpException(e);
 		}
 	}
 
 	public EndpointRequest replace(URI endpoint) {
-		return new EndpointRequest(endpoint, method, headers, body, responseType);
+		return new EndpointRequest(endpoint, method, headers, body, responseType, version);
 	}
 
 	@Override

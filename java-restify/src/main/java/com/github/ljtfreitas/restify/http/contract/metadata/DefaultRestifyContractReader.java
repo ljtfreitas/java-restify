@@ -72,7 +72,9 @@ public class DefaultRestifyContractReader implements RestifyContractReader {
 
 		Type returnType = javaMethodMetadata.returnType(target.type());
 
-		return new EndpointMethod(javaMethod, endpointPath, endpointHttpMethod, parameters, headers, returnType);
+		String version = endpointMethodVersion(endpointVersion(javaTypeMetadata, javaMethodMetadata));
+
+		return new EndpointMethod(javaMethod, endpointPath, endpointHttpMethod, parameters, headers, returnType, version);
 	}
 
 	private String endpointPath(EndpointTarget target, JavaTypeMetadata javaTypeMetadata, JavaMethodMetadata javaMethodMetadata) {
@@ -108,6 +110,13 @@ public class DefaultRestifyContractReader implements RestifyContractReader {
 				.map(v -> v.endsWith("/") ? v.substring(0, v.length() - 1) : v)
 					.map(v -> v.startsWith("/") || v.isEmpty() ? v : "/" + v)
 						.orElse("");
+	}
+
+	private String endpointMethodVersion(String version) {
+		 return Optional.ofNullable(version)
+			.filter(v -> !v.trim().isEmpty())
+				.map(v -> v.substring(1))
+					.orElse(null);
 	}
 
 	private String endpointMethodPath(JavaMethodMetadata javaMethodMetadata) {

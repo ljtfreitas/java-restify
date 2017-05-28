@@ -65,7 +65,9 @@ public class EndpointRequestFactory {
 				.forEach(h -> headers.add(new Header(h.name(), new EndpointHeaderParameterResolver(h.value(), endpointMethod.parameters())
 						.resolve(args))));
 
-			return new EndpointRequest(endpoint, endpointMethod.httpMethod(), headers, body, responseType);
+			EndpointVersion version = endpointMethod.version().map(EndpointVersion::of).orElse(null);
+
+			return new EndpointRequest(endpoint, endpointMethod.httpMethod(), headers, body, responseType, version);
 
 		} catch (URISyntaxException e) {
 			throw new RestifyHttpException(e);

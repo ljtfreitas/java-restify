@@ -44,27 +44,52 @@ public class EndpointMethod {
 	private final EndpointHeaders headers;
 	private final JavaType returnType;
 	private final JavaMethodAnnotations annotations;
+	private final String version;
 
 	public EndpointMethod(Method javaMethod, String path, String httpMethod) {
-		this(javaMethod, path, httpMethod, new EndpointMethodParameters());
+		this(javaMethod, path, httpMethod, (String) null);
+	}
+
+	public EndpointMethod(Method javaMethod, String path, String httpMethod, String version) {
+		this(javaMethod, path, httpMethod, new EndpointMethodParameters(), version);
 	}
 
 	public EndpointMethod(Method javaMethod, String path, String httpMethod, EndpointMethodParameters parameters) {
-		this(javaMethod, path, httpMethod, parameters, new EndpointHeaders());
+		this(javaMethod, path, httpMethod, parameters, new EndpointHeaders(), (String) null);
+	}
+
+	public EndpointMethod(Method javaMethod, String path, String httpMethod, EndpointMethodParameters parameters, String version) {
+		this(javaMethod, path, httpMethod, parameters, new EndpointHeaders(), version);
 	}
 
 	public EndpointMethod(Method javaMethod, String path, String httpMethod, EndpointMethodParameters parameters,
 			EndpointHeaders headers) {
-		this(javaMethod, path, httpMethod, parameters, headers, (Type) null);
+		this(javaMethod, path, httpMethod, parameters, headers, (Type) null, (String) null);
+	}
+
+	public EndpointMethod(Method javaMethod, String path, String httpMethod, EndpointMethodParameters parameters,
+			EndpointHeaders headers, String version) {
+		this(javaMethod, path, httpMethod, parameters, headers, (Type) null, version);
 	}
 
 	public EndpointMethod(Method javaMethod, String path, String httpMethod, EndpointMethodParameters parameters,
 			EndpointHeaders headers, Type returnType) {
-		this(javaMethod, path, httpMethod, parameters, headers, JavaType.of(Optional.ofNullable(returnType).orElseGet(() -> javaMethod.getGenericReturnType())));
+		this(javaMethod, path, httpMethod, parameters, headers, returnType, (String) null);
+	}
+
+	public EndpointMethod(Method javaMethod, String path, String httpMethod, EndpointMethodParameters parameters,
+			EndpointHeaders headers, Type returnType, String version) {
+		this(javaMethod, path, httpMethod, parameters, headers, JavaType.of(Optional.ofNullable(returnType).orElseGet(() -> javaMethod.getGenericReturnType())),
+				version);
 	}
 
 	private EndpointMethod(Method javaMethod, String path, String httpMethod, EndpointMethodParameters parameters,
 			EndpointHeaders headers, JavaType returnType) {
+		this(javaMethod, path, httpMethod, parameters, headers, returnType, null);
+	}
+
+	private EndpointMethod(Method javaMethod, String path, String httpMethod, EndpointMethodParameters parameters,
+			EndpointHeaders headers, JavaType returnType, String version) {
 		this.javaMethod = nonNull(javaMethod, "EndpointMethod needs a Java method.");
 		this.path = nonNull(path, "EndpointMethod needs a endpoint path.");
 		this.httpMethod = nonNull(httpMethod, "EndpointMethod needs a HTTP method.");
@@ -72,6 +97,7 @@ public class EndpointMethod {
 		this.headers = nonNull(headers, "EndpointMethod needs a HTTP headers collection.");
 		this.returnType = returnType;
 		this.annotations = new JavaMethodAnnotations(javaMethod);
+		this.version = version;
 	}
 
 	public String path() {
@@ -104,6 +130,10 @@ public class EndpointMethod {
 
 	public JavaMethodAnnotations annotations() {
 		return annotations;
+	}
+
+	public Optional<String> version() {
+		return Optional.ofNullable(version);
 	}
 
 	public String expand(final Object[] args) {

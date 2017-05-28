@@ -308,6 +308,19 @@ public class EndpointRequestFactoryTest {
 		assertEquals(JavaType.of(String.class), endpointRequest.responseType());
 	}
 
+	@Test
+	public void shouldCreateEndpointRequestWithVersion() throws Exception {
+		EndpointMethod endpointMethod = new EndpointMethod(TargetType.class.getMethod("simple"), "http://my.api.com/some",
+				"GET", "v1");
+
+		EndpointRequest endpointRequest = endpointRequestFactory.createWith(endpointMethod, new Object[0], JavaType.of(String.class));
+
+		assertTrue(endpointRequest.version().isPresent());
+
+		EndpointVersion version = endpointRequest.version().get();
+		assertEquals("v1", version.get());
+	}
+
 	interface TargetType {
 
 		public String simple();

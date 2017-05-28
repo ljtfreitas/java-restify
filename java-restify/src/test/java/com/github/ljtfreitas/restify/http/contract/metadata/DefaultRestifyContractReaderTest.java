@@ -427,6 +427,9 @@ public class DefaultRestifyContractReaderTest {
 				MyVersionedApi.class.getMethod("versionOne"));
 
 		assertEquals("http://my.api.com/v1/model", endpointMethod.path());
+
+		assertTrue(endpointMethod.version().isPresent());
+		assertEquals("v1", endpointMethod.version().get());
 	}
 
 	@Test
@@ -435,6 +438,9 @@ public class DefaultRestifyContractReaderTest {
 				MyVersionedApi.class.getMethod("versionTwo"));
 
 		assertEquals("http://my.api.com/v2/model", endpointMethod.path());
+
+		assertTrue(endpointMethod.version().isPresent());
+		assertEquals("v2", endpointMethod.version().get());
 	}
 
 	@Path("http://my.api.com")
