@@ -23,39 +23,36 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.http.client.request;
+package com.github.ljtfreitas.restify.http.client.request.interceptor;
 
-import static com.github.ljtfreitas.restify.http.util.Preconditions.nonNull;
+import java.util.Optional;
 
-import java.util.Objects;
+import com.github.ljtfreitas.restify.http.client.Header;
+import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
+import com.github.ljtfreitas.restify.http.client.request.EndpointVersion;
 
-public class EndpointVersion {
+public class AcceptVersionHeaderEndpointRequestInterceptor implements EndpointRequestInterceptor {
 
-	private final String version;
+	private final EndpointVersion version;
 
-	public EndpointVersion(String version) {
-		this.version = nonNull(version, "Endpoint version cannot be null");
+	public AcceptVersionHeaderEndpointRequestInterceptor() {
+		this.version = null;
 	}
 
-	public String get() {
-		return version;
-	}
-
-	@Override
-	public int hashCode() {
-		return Objects.hash(version);
+	public AcceptVersionHeaderEndpointRequestInterceptor(EndpointVersion version) {
+		this.version = version;
 	}
 
 	@Override
-	public boolean equals(Object obj) {
-		if (obj instanceof EndpointVersion) {
-			return version.equals(((EndpointVersion) obj).version);
-		} else {
-			return false;
+	public EndpointRequest intercepts(EndpointRequest request) {
+		EndpointVersion version = Optional.ofNullable(this.version)
+				.orElseGet(() -> request.version().orElse(null));
+
+		if (version != null) {
+			request.headers().add(new Header("Accept-Version", version.get()));
 		}
+
+		return request;
 	}
 
-	public static EndpointVersion of(String version) {
-		return new EndpointVersion(version);
-	}
 }

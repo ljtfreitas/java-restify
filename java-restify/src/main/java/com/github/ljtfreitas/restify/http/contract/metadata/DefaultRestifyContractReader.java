@@ -72,7 +72,7 @@ public class DefaultRestifyContractReader implements RestifyContractReader {
 
 		Type returnType = javaMethodMetadata.returnType(target.type());
 
-		String version = endpointMethodVersion(endpointVersion(javaTypeMetadata, javaMethodMetadata));
+		String version = endpointMethodVersion(endpointVersion(javaTypeMetadata, javaMethodMetadata, true));
 
 		return new EndpointMethod(javaMethod, endpointPath, endpointHttpMethod, parameters, headers, returnType, version);
 	}
@@ -102,8 +102,15 @@ public class DefaultRestifyContractReader implements RestifyContractReader {
 	}
 
 	private String endpointVersion(JavaTypeMetadata javaTypeMetadata, JavaMethodMetadata javaMethodMetadata) {
+		return endpointVersion(javaTypeMetadata, javaMethodMetadata, false);
+	}
+
+	private String endpointVersion(JavaTypeMetadata javaTypeMetadata, JavaMethodMetadata javaMethodMetadata, boolean force) {
 		Version version = javaMethodMetadata.version()
-			.orElseGet(() -> javaTypeMetadata.version().orElse(null));
+			.filter(v -> v.uri() || force)
+				.orElseGet(() -> javaTypeMetadata.version()
+						.filter(v -> v.uri() || force)
+							.orElse(null));
 
 		return Optional.ofNullable(version)
 			.map(Version::value)
