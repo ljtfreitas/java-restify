@@ -28,6 +28,7 @@
 		<module>java-restify-netflix-spring-starter</module>
 		<module>java-restify-jaxrs-contract</module>
 		<module>java-restify-cdi</module>
+		<module>java-restify-jersey-http-client</module>
 	</modules>
 
 	<dependencies>
