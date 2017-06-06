@@ -32,6 +32,7 @@ import com.github.ljtfreitas.restify.http.contract.Header;
 import com.github.ljtfreitas.restify.http.contract.Headers;
 import com.github.ljtfreitas.restify.http.contract.Method;
 import com.github.ljtfreitas.restify.http.contract.Path;
+import com.github.ljtfreitas.restify.http.contract.Version;
 
 public class JavaMethodMetadata {
 
@@ -39,6 +40,7 @@ public class JavaMethodMetadata {
 	private final Path path;
 	private final Method httpMethod;
 	private final Header[] headers;
+	private final Version version;
 
 	public JavaMethodMetadata(java.lang.reflect.Method javaMethod) {
 		this.javaMethod = javaMethod;
@@ -51,6 +53,8 @@ public class JavaMethodMetadata {
 		this.headers = Optional.ofNullable(javaMethod.getAnnotation(Headers.class))
 				.map(Headers::value)
 					.orElseGet(() -> new JavaAnnotationScanner(javaMethod).scanAll(Header.class));
+
+		this.version = javaMethod.getAnnotation(Version.class);
 	}
 
 	public Optional<Path> path() {
@@ -71,5 +75,9 @@ public class JavaMethodMetadata {
 
 	public Type returnType(Class<?> rawType) {
 		return new JavaTypeResolver(rawType).returnTypeOf(javaMethod);
+	}
+
+	public Optional<Version> version() {
+		return Optional.ofNullable(version);
 	}
 }

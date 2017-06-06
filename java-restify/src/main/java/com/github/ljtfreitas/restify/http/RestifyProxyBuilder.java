@@ -75,9 +75,11 @@ import com.github.ljtfreitas.restify.http.client.message.form.multipart.Multipar
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequestExecutor;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequestFactory;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequestWriter;
+import com.github.ljtfreitas.restify.http.client.request.EndpointVersion;
 import com.github.ljtfreitas.restify.http.client.request.HttpClientRequestFactory;
 import com.github.ljtfreitas.restify.http.client.request.RestifyEndpointRequestExecutor;
 import com.github.ljtfreitas.restify.http.client.request.interceptor.AcceptHeaderEndpointRequestInterceptor;
+import com.github.ljtfreitas.restify.http.client.request.interceptor.AcceptVersionHeaderEndpointRequestInterceptor;
 import com.github.ljtfreitas.restify.http.client.request.interceptor.ContentTypeHeaderEndpointRequestInterceptor;
 import com.github.ljtfreitas.restify.http.client.request.interceptor.EndpointRequestInterceptor;
 import com.github.ljtfreitas.restify.http.client.request.interceptor.EndpointRequestInterceptorStack;
@@ -341,6 +343,21 @@ public class RestifyProxyBuilder {
 
 		public EndpointRequestInterceptorsBuilder contentType(ContentType contentType) {
 			interceptors.add(new ContentTypeHeaderEndpointRequestInterceptor(contentType));
+			return this;
+		}
+
+		public EndpointRequestInterceptorsBuilder acceptVersion() {
+			interceptors.add(new AcceptVersionHeaderEndpointRequestInterceptor());
+			return this;
+		}
+
+		public EndpointRequestInterceptorsBuilder acceptVersion(String version) {
+			interceptors.add(new AcceptVersionHeaderEndpointRequestInterceptor(EndpointVersion.of(version)));
+			return this;
+		}
+
+		public EndpointRequestInterceptorsBuilder acceptVersion(EndpointVersion version) {
+			interceptors.add(new AcceptVersionHeaderEndpointRequestInterceptor(version));
 			return this;
 		}
 

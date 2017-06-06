@@ -34,12 +34,14 @@ import java.util.Optional;
 import com.github.ljtfreitas.restify.http.contract.Header;
 import com.github.ljtfreitas.restify.http.contract.Headers;
 import com.github.ljtfreitas.restify.http.contract.Path;
+import com.github.ljtfreitas.restify.http.contract.Version;
 
 public class JavaTypeMetadata {
 
 	private final Class<?> javaType;
 	private final Path path;
 	private final Header[] headers;
+	private final Version version;
 	private final JavaTypeMetadata parent;
 
 	public JavaTypeMetadata(Class<?> javaType) {
@@ -54,6 +56,8 @@ public class JavaTypeMetadata {
 		this.headers = Optional.ofNullable(javaType.getAnnotation(Headers.class))
 				.map(Headers::value)
 					.orElseGet(() -> new JavaAnnotationScanner(javaType).scanAll(Header.class));
+
+		this.version = javaType.getAnnotation(Version.class);
 	}
 
 	public Optional<Path> path() {
@@ -91,5 +95,9 @@ public class JavaTypeMetadata {
 
 	public Optional<JavaTypeMetadata> parent() {
 		return Optional.ofNullable(parent);
+	}
+
+	public Optional<Version> version() {
+		return version == null ? Optional.ofNullable(parent).flatMap(JavaTypeMetadata::version) : Optional.of(version);
 	}
 }

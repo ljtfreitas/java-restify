@@ -37,6 +37,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.github.ljtfreitas.restify.http.contract.Path;
+import com.github.ljtfreitas.restify.http.contract.Version;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethodParameter.EndpointMethodParameterType;
 import com.github.ljtfreitas.restify.http.contract.metadata.reflection.JavaMethodMetadata;
 import com.github.ljtfreitas.restify.http.contract.metadata.reflection.JavaMethodParameterMetadata;
@@ -71,11 +72,18 @@ public class DefaultRestifyContractReader implements RestifyContractReader {
 
 		Type returnType = javaMethodMetadata.returnType(target.type());
 
-		return new EndpointMethod(javaMethod, endpointPath, endpointHttpMethod, parameters, headers, returnType);
+		String version = endpointMethodVersion(endpointVersion(javaTypeMetadata, javaMethodMetadata, true));
+
+		return new EndpointMethod(javaMethod, endpointPath, endpointHttpMethod, parameters, headers, returnType, version);
 	}
 
 	private String endpointPath(EndpointTarget target, JavaTypeMetadata javaTypeMetadata, JavaMethodMetadata javaMethodMetadata) {
-		String endpoint = endpointTarget(target) + endpointTypePath(javaTypeMetadata) + endpointMethodPath(javaMethodMetadata);
+		String endpoint = new StringBuilder()
+				.append(endpointTarget(target))
+				.append(endpointTypePath(javaTypeMetadata))
+				.append(endpointVersion(javaTypeMetadata, javaMethodMetadata))
+				.append(endpointMethodPath(javaMethodMetadata))
+				.toString();
 
 		return Tryable.of(() -> new URL(endpoint)).toString();
 	}
@@ -91,6 +99,31 @@ public class DefaultRestifyContractReader implements RestifyContractReader {
 					.map(p -> expressionResolver.resolve(p))
 						.map(p -> p.endsWith("/") ? p.substring(0, p.length() - 1) : p)
 							.collect(Collectors.joining());
+	}
+
+	private String endpointVersion(JavaTypeMetadata javaTypeMetadata, JavaMethodMetadata javaMethodMetadata) {
+		return endpointVersion(javaTypeMetadata, javaMethodMetadata, false);
+	}
+
+	private String endpointVersion(JavaTypeMetadata javaTypeMetadata, JavaMethodMetadata javaMethodMetadata, boolean force) {
+		Version version = javaMethodMetadata.version()
+			.filter(v -> v.uri() || force)
+				.orElseGet(() -> javaTypeMetadata.version()
+						.filter(v -> v.uri() || force)
+							.orElse(null));
+
+		return Optional.ofNullable(version)
+			.map(Version::value)
+				.map(v -> v.endsWith("/") ? v.substring(0, v.length() - 1) : v)
+					.map(v -> v.startsWith("/") || v.isEmpty() ? v : "/" + v)
+						.orElse("");
+	}
+
+	private String endpointMethodVersion(String version) {
+		 return Optional.ofNullable(version)
+			.filter(v -> !v.trim().isEmpty())
+				.map(v -> v.substring(1))
+					.orElse(null);
 	}
 
 	private String endpointMethodPath(JavaMethodMetadata javaMethodMetadata) {
