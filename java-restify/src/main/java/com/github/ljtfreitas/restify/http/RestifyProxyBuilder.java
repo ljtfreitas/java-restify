@@ -514,6 +514,24 @@ public class RestifyProxyBuilder {
 			return this;
 		}
 
+		public HttpClientRequestFollowRedirectsConfigurationBuilder followRedirects() {
+			return new HttpClientRequestFollowRedirectsConfigurationBuilder();
+		}
+
+		public HttpClientRequestConfigurationBuilder followRedirects(boolean enabled) {
+			builder.followRedirects(enabled);
+			return this;
+		}
+
+		public HttpClientRequestUseCachesConfigurationBuilder useCaches() {
+			return new HttpClientRequestUseCachesConfigurationBuilder();
+		}
+
+		public HttpClientRequestConfigurationBuilder useCaches(boolean enabled) {
+			builder.useCaches(enabled);
+			return this;
+		}
+
 		public RestifyProxyBuilder using(HttpClientRequestConfiguration httpClientRequestConfiguration) {
 			this.httpClientRequestConfiguration = httpClientRequestConfiguration;
 			return context;
@@ -525,6 +543,32 @@ public class RestifyProxyBuilder {
 
 		private HttpClientRequestConfiguration build() {
 			return Optional.ofNullable(httpClientRequestConfiguration).orElseGet(() -> builder.build());
+		}
+
+		public class HttpClientRequestFollowRedirectsConfigurationBuilder {
+
+			public HttpClientRequestConfigurationBuilder enabled() {
+				builder.followRedirects().enabled();
+				return HttpClientRequestConfigurationBuilder.this;
+			}
+
+			public HttpClientRequestConfigurationBuilder disabled() {
+				builder.followRedirects().disabled();
+				return HttpClientRequestConfigurationBuilder.this;
+			}
+		}
+
+		public class HttpClientRequestUseCachesConfigurationBuilder {
+
+			public HttpClientRequestConfigurationBuilder enabled() {
+				builder.useCaches().enabled();
+				return HttpClientRequestConfigurationBuilder.this;
+			}
+
+			public HttpClientRequestConfigurationBuilder disabled() {
+				builder.useCaches().disabled();
+				return HttpClientRequestConfigurationBuilder.this;
+			}
 		}
 	}
 }

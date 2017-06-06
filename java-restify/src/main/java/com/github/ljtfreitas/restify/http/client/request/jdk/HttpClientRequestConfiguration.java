@@ -34,6 +34,8 @@ public class HttpClientRequestConfiguration {
 
 	private int connectionTimeout = 0;
 	private int readTimeout = 0;
+	private boolean followRedirects = true;
+	private boolean useCaches = true;
 
 	private Charset charset = Encoding.UTF_8.charset();
 
@@ -46,6 +48,14 @@ public class HttpClientRequestConfiguration {
 
 	public int readTimeout() {
 		return readTimeout;
+	}
+
+	public boolean followRedirects() {
+		return followRedirects;
+	}
+
+	public boolean useCaches() {
+		return useCaches;
 	}
 
 	public Charset charset() {
@@ -85,8 +95,52 @@ public class HttpClientRequestConfiguration {
 			return this;
 		}
 
+		public FolllowRedirectsBuilder followRedirects() {
+			return new FolllowRedirectsBuilder();
+		}
+
+		public Builder followRedirects(boolean enabled) {
+			configuration.followRedirects = enabled;
+			return this;
+		}
+
+		public UseCachesBuilder useCaches() {
+			return new UseCachesBuilder();
+		}
+
+		public Builder useCaches(boolean enabled) {
+			configuration.useCaches = enabled;
+			return this;
+		}
+
 		public HttpClientRequestConfiguration build() {
 			return configuration;
+		}
+
+		public class FolllowRedirectsBuilder {
+
+			public Builder enabled() {
+				configuration.followRedirects = true;
+				return Builder.this;
+			}
+
+			public Builder disabled() {
+				configuration.followRedirects = false;
+				return Builder.this;
+			}
+		}
+
+		public class UseCachesBuilder {
+
+			public Builder enabled() {
+				configuration.useCaches = true;
+				return Builder.this;
+			}
+
+			public Builder disabled() {
+				configuration.followRedirects = false;
+				return Builder.this;
+			}
 		}
 	}
 }
