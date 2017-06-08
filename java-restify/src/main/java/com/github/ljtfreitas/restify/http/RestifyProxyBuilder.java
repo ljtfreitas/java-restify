@@ -273,6 +273,12 @@ public class RestifyProxyBuilder {
 			return this;
 		}
 
+		public HttpMessageConvertersBuilder wildcard(int bufferSize) {
+			converters.add(new InputStreamMessageConverter(bufferSize));
+			converters.add(new ByteArrayMessageConverter(bufferSize));
+			return this;
+		}
+
 		public HttpMessageConvertersBuilder json() {
 			converters.add(JsonMessageConverter.available());
 			return this;
