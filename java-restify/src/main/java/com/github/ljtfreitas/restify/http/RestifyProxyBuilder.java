@@ -62,6 +62,9 @@ import com.github.ljtfreitas.restify.http.client.message.HttpMessageConverters;
 import com.github.ljtfreitas.restify.http.client.message.converter.ByteArrayMessageConverter;
 import com.github.ljtfreitas.restify.http.client.message.converter.InputStreamMessageConverter;
 import com.github.ljtfreitas.restify.http.client.message.converter.json.JsonMessageConverter;
+import com.github.ljtfreitas.restify.http.client.message.converter.octet.OctetByteArrayMessageConverter;
+import com.github.ljtfreitas.restify.http.client.message.converter.octet.OctetInputStreamMessageConverter;
+import com.github.ljtfreitas.restify.http.client.message.converter.octet.OctetSerializableMessageConverter;
 import com.github.ljtfreitas.restify.http.client.message.converter.text.ScalarMessageConverter;
 import com.github.ljtfreitas.restify.http.client.message.converter.text.TextHtmlMessageConverter;
 import com.github.ljtfreitas.restify.http.client.message.converter.text.TextPlainMessageConverter;
@@ -279,6 +282,20 @@ public class RestifyProxyBuilder {
 			return this;
 		}
 
+		public HttpMessageConvertersBuilder octetStream() {
+			converters.add(new OctetInputStreamMessageConverter());
+			converters.add(new OctetByteArrayMessageConverter());
+			converters.add(new OctetSerializableMessageConverter<>());
+			return this;
+		}
+
+		public HttpMessageConvertersBuilder octetStream(int bufferSize) {
+			converters.add(new OctetInputStreamMessageConverter(bufferSize));
+			converters.add(new OctetByteArrayMessageConverter(bufferSize));
+			converters.add(new OctetSerializableMessageConverter<>());
+			return this;
+		}
+
 		public HttpMessageConvertersBuilder json() {
 			converters.add(JsonMessageConverter.available());
 			return this;
@@ -308,7 +325,7 @@ public class RestifyProxyBuilder {
 		}
 
 		public HttpMessageConvertersBuilder all() {
-			return wildcard().json().xml().text().form();
+			return wildcard().json().xml().text().form().octetStream();
 		}
 
 		public HttpMessageConvertersBuilder add(HttpMessageConverter...converters) {
