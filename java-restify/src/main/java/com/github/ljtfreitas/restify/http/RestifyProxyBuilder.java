@@ -45,7 +45,6 @@ import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallObjectExe
 import com.github.ljtfreitas.restify.http.client.call.exec.HeadersEndpointCallExecutableFactory;
 import com.github.ljtfreitas.restify.http.client.call.exec.async.AsyncCallbackEndpointCallExecutableFactory;
 import com.github.ljtfreitas.restify.http.client.call.exec.async.AsyncEndpointCallExecutableFactory;
-import com.github.ljtfreitas.restify.http.client.call.exec.jdk.ArrayEndpointCallExecutableFactory;
 import com.github.ljtfreitas.restify.http.client.call.exec.jdk.CallableEndpointCallExecutableFactory;
 import com.github.ljtfreitas.restify.http.client.call.exec.jdk.CollectionEndpointCallExecutableFactory;
 import com.github.ljtfreitas.restify.http.client.call.exec.jdk.CompletableFutureCallbackEndpointCallExecutableFactory;
@@ -60,7 +59,12 @@ import com.github.ljtfreitas.restify.http.client.call.exec.jdk.OptionalEndpointC
 import com.github.ljtfreitas.restify.http.client.call.exec.jdk.RunnableEndpointCallExecutableFactory;
 import com.github.ljtfreitas.restify.http.client.message.HttpMessageConverter;
 import com.github.ljtfreitas.restify.http.client.message.HttpMessageConverters;
+import com.github.ljtfreitas.restify.http.client.message.converter.ByteArrayMessageConverter;
+import com.github.ljtfreitas.restify.http.client.message.converter.InputStreamMessageConverter;
 import com.github.ljtfreitas.restify.http.client.message.converter.json.JsonMessageConverter;
+import com.github.ljtfreitas.restify.http.client.message.converter.octet.OctetByteArrayMessageConverter;
+import com.github.ljtfreitas.restify.http.client.message.converter.octet.OctetInputStreamMessageConverter;
+import com.github.ljtfreitas.restify.http.client.message.converter.octet.OctetSerializableMessageConverter;
 import com.github.ljtfreitas.restify.http.client.message.converter.text.ScalarMessageConverter;
 import com.github.ljtfreitas.restify.http.client.message.converter.text.TextHtmlMessageConverter;
 import com.github.ljtfreitas.restify.http.client.message.converter.text.TextPlainMessageConverter;
@@ -266,6 +270,32 @@ public class RestifyProxyBuilder {
 			this.context = context;
 		}
 
+		public HttpMessageConvertersBuilder wildcard() {
+			converters.add(new InputStreamMessageConverter());
+			converters.add(new ByteArrayMessageConverter());
+			return this;
+		}
+
+		public HttpMessageConvertersBuilder wildcard(int bufferSize) {
+			converters.add(new InputStreamMessageConverter(bufferSize));
+			converters.add(new ByteArrayMessageConverter(bufferSize));
+			return this;
+		}
+
+		public HttpMessageConvertersBuilder octetStream() {
+			converters.add(new OctetInputStreamMessageConverter());
+			converters.add(new OctetByteArrayMessageConverter());
+			converters.add(new OctetSerializableMessageConverter<>());
+			return this;
+		}
+
+		public HttpMessageConvertersBuilder octetStream(int bufferSize) {
+			converters.add(new OctetInputStreamMessageConverter(bufferSize));
+			converters.add(new OctetByteArrayMessageConverter(bufferSize));
+			converters.add(new OctetSerializableMessageConverter<>());
+			return this;
+		}
+
 		public HttpMessageConvertersBuilder json() {
 			converters.add(JsonMessageConverter.available());
 			return this;
@@ -295,7 +325,7 @@ public class RestifyProxyBuilder {
 		}
 
 		public HttpMessageConvertersBuilder all() {
-			return json().xml().text().form();
+			return wildcard().json().xml().text().form().octetStream();
 		}
 
 		public HttpMessageConvertersBuilder add(HttpMessageConverter...converters) {
@@ -389,7 +419,6 @@ public class RestifyProxyBuilder {
 			this.built.add(new CallableEndpointCallExecutableFactory<Object, Object>());
 			this.built.add(new RunnableEndpointCallExecutableFactory());
 			this.built.add(new CollectionEndpointCallExecutableFactory<>());
-			this.built.add(new ArrayEndpointCallExecutableFactory<>());
 			this.built.add(new EnumerationEndpointCallExecutableFactory<>());
 			this.built.add(new IteratorEndpointCallExecutableFactory<>());
 			this.built.add(new ListIteratorEndpointCallExecutableFactory<>());

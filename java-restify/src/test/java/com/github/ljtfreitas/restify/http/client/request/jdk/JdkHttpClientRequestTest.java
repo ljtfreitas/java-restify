@@ -8,9 +8,13 @@ import static org.mockserver.model.JsonBody.json;
 import static org.mockserver.model.StringBody.exact;
 import static org.mockserver.verify.VerificationTimes.once;
 
+import java.io.BufferedReader;
+import java.io.InputStream;
+import java.io.InputStreamReader;
 import java.net.SocketTimeoutException;
 import java.util.Collection;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -79,6 +83,45 @@ public class JdkHttpClientRequestTest {
 
 		assertEquals("Tiago de Freitas Lima", myModel.name);
 		assertEquals(31, myModel.age);
+	}
+
+	@Test
+	public void shouldGetResponseBodyOnStreamObject() {
+		String responseBodyAsJson = "{\"name\": \"Tiago de Freitas Lima\",\"age\":31}";
+
+		mockServerClient
+			.when(request()
+					.withMethod("GET")
+					.withPath("/json"))
+			.respond(response()
+					.withStatusCode(200)
+					.withHeader("Content-Type", "application/json")
+					.withBody(json(responseBodyAsJson)));
+
+		InputStream responseBody = myApi.jsonAsStream();
+
+		BufferedReader buffer = new BufferedReader(new InputStreamReader(responseBody));
+        String output = buffer.lines().collect(Collectors.joining("\n"));
+
+        assertEquals(responseBodyAsJson, output);
+	}
+
+	@Test
+	public void shouldGetResponseBodyOnByteArray() {
+		String responseBodyAsJson = "{\"name\": \"Tiago de Freitas Lima\",\"age\":31}";
+
+		mockServerClient
+			.when(request()
+					.withMethod("GET")
+					.withPath("/json"))
+			.respond(response()
+					.withStatusCode(200)
+					.withHeader("Content-Type", "application/json")
+					.withBody(json(responseBodyAsJson)));
+
+		byte[] responseBody = myApi.jsonAsBytes();
+
+        assertEquals(responseBodyAsJson, new String(responseBody));
 	}
 
 	@Test
@@ -204,6 +247,12 @@ public class JdkHttpClientRequestTest {
 		@Path("/xml") @Post
 		@Header(name = "Content-Type", value = "application/xml")
 		public void xml(@BodyParameter MyModel myModel);
+
+		@Path("/json") @Get
+		public InputStream jsonAsStream();
+
+		@Path("/json") @Get
+		public byte[] jsonAsBytes();
 	}
 
 	@XmlRootElement(name = "model")

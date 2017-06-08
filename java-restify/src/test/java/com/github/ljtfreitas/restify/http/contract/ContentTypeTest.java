@@ -64,4 +64,49 @@ public class ContentTypeTest {
 		assertEquals("UTF-8", newContentType.parameter("charset").get());
 		assertEquals("application/json; charset=UTF-8", newContentType.toString());
 	}
+
+	@Test
+	public void shouldBeCompatibleWithWildcardType() {
+		ContentType wildcardContentType = ContentType.of("*/*");
+
+		ContentType textPlainContentType = ContentType.of("text/plain");
+
+		assertTrue(wildcardContentType.compatible(textPlainContentType));
+	}
+
+	@Test
+	public void shouldBeCompatibleWithWildcardSpecificType() {
+		ContentType genericTextContentType = ContentType.of("text/*");
+
+		ContentType textPlainContentType = ContentType.of("text/plain");
+
+		assertTrue(genericTextContentType.compatible(textPlainContentType));
+	}
+
+	@Test
+	public void shouldBeIncompatibleBetweenDifferentContentTypes() {
+		ContentType jsonContentType = ContentType.of("application/json");
+
+		ContentType xmlContentType = ContentType.of("application/xml");
+
+		assertFalse(jsonContentType.compatible(xmlContentType));
+	}
+
+	@Test
+	public void shouldBeCompatibleWhenSuffixTypeAreEquals() {
+		ContentType jsonVendorContentVersionOne = ContentType.of("application/vnd.bla+json;version=1");
+
+		ContentType jsonVendorContentVersionTwo = ContentType.of("application/vnd.bla+json;version=2");
+
+		assertTrue(jsonVendorContentVersionOne.compatible(jsonVendorContentVersionTwo));
+	}
+
+	@Test
+	public void shouldBeIncompatibleWhenSuffixTypeAreDifferent() {
+		ContentType xmlVendorContent = ContentType.of("application/vnd.bla+xml");
+
+		ContentType jsonVendorContent = ContentType.of("application/vnd.bla+json");
+
+		assertFalse(xmlVendorContent.compatible(jsonVendorContent));
+	}
 }
