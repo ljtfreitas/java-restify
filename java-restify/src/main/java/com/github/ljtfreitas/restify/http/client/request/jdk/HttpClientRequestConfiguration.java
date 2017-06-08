@@ -27,6 +27,10 @@ package com.github.ljtfreitas.restify.http.client.request.jdk;
 
 import java.nio.charset.Charset;
 import java.time.Duration;
+import java.util.Optional;
+
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.SSLSocketFactory;
 
 import com.github.ljtfreitas.restify.http.client.charset.Encoding;
 
@@ -38,6 +42,9 @@ public class HttpClientRequestConfiguration {
 	private boolean useCaches = true;
 
 	private Charset charset = Encoding.UTF_8.charset();
+
+	private SSLSocketFactory sslSocketFactory;
+	private HostnameVerifier hostnameVerifier;
 
 	private HttpClientRequestConfiguration() {
 	}
@@ -60,6 +67,14 @@ public class HttpClientRequestConfiguration {
 
 	public Charset charset() {
 		return charset;
+	}
+
+	public Optional<SSLSocketFactory> sslSocketFactory() {
+		return Optional.ofNullable(sslSocketFactory);
+	}
+
+	public Optional<HostnameVerifier> hostnameVerifier() {
+		return Optional.ofNullable(hostnameVerifier);
 	}
 
 	public static HttpClientRequestConfiguration useDefault() {

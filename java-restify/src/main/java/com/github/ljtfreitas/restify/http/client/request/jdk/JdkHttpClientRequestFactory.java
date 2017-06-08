@@ -29,6 +29,8 @@ import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.nio.charset.Charset;
 
+import javax.net.ssl.HttpsURLConnection;
+
 import com.github.ljtfreitas.restify.http.RestifyHttpException;
 import com.github.ljtfreitas.restify.http.client.charset.Encoding;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
@@ -70,6 +72,16 @@ public class JdkHttpClientRequestFactory implements HttpClientRequestFactory {
 			connection.setDoOutput(true);
 			connection.setAllowUserInteraction(false);
 			connection.setRequestMethod(request.method());
+
+			if (connection instanceof HttpsURLConnection) {
+				HttpsURLConnection https = (HttpsURLConnection) connection;
+
+				httpClientRequestConfiguration.sslSocketFactory()
+						.ifPresent(sslSocketFactory -> https.setSSLSocketFactory(sslSocketFactory));
+
+				httpClientRequestConfiguration.hostnameVerifier()
+						.ifPresent(hostnameVerifier -> https.setHostnameVerifier(hostnameVerifier));
+			}
 
 			return new JdkHttpClientRequest(connection, charset, request.headers());
 
