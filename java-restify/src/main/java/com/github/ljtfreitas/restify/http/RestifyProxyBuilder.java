@@ -36,6 +36,9 @@ import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.SSLSocketFactory;
+
 import com.github.ljtfreitas.restify.http.client.EndpointMethodExecutor;
 import com.github.ljtfreitas.restify.http.client.authentication.Authentication;
 import com.github.ljtfreitas.restify.http.client.call.EndpointCallFactory;
@@ -578,6 +581,10 @@ public class RestifyProxyBuilder {
 			return this;
 		}
 
+		public HttpClientRequestSslConfigurationBuilder ssl() {
+			return new HttpClientRequestSslConfigurationBuilder();
+		}
+
 		public RestifyProxyBuilder using(HttpClientRequestConfiguration httpClientRequestConfiguration) {
 			this.httpClientRequestConfiguration = httpClientRequestConfiguration;
 			return context;
@@ -614,6 +621,23 @@ public class RestifyProxyBuilder {
 			public HttpClientRequestConfigurationBuilder disabled() {
 				builder.useCaches().disabled();
 				return HttpClientRequestConfigurationBuilder.this;
+			}
+		}
+
+		public class HttpClientRequestSslConfigurationBuilder {
+
+			public HttpClientRequestConfigurationBuilder sslSocketFactory(SSLSocketFactory sslSocketFactory) {
+				builder.ssl().sslSocketFactory(sslSocketFactory);
+				return HttpClientRequestConfigurationBuilder.this;
+			}
+
+			public HttpClientRequestConfigurationBuilder hostnameVerifier(HostnameVerifier hostnameVerifier) {
+				builder.ssl().hostnameVerifier(hostnameVerifier);
+				return HttpClientRequestConfigurationBuilder.this;
+			}
+
+			public RestifyProxyBuilder and() {
+				return context;
 			}
 		}
 	}

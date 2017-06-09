@@ -128,6 +128,10 @@ public class HttpClientRequestConfiguration {
 			return this;
 		}
 
+		public SslBuilder ssl() {
+			return new SslBuilder();
+		}
+
 		public HttpClientRequestConfiguration build() {
 			return configuration;
 		}
@@ -154,6 +158,23 @@ public class HttpClientRequestConfiguration {
 
 			public Builder disabled() {
 				configuration.followRedirects = false;
+				return Builder.this;
+			}
+		}
+
+		public class SslBuilder {
+
+			public Builder sslSocketFactory(SSLSocketFactory sslSocketFactory) {
+				configuration.sslSocketFactory = sslSocketFactory;
+				return Builder.this;
+			}
+
+			public Builder hostnameVerifier(HostnameVerifier hostnameVerifier) {
+				configuration.hostnameVerifier = hostnameVerifier;
+				return Builder.this;
+			}
+
+			public Builder and() {
 				return Builder.this;
 			}
 		}
