@@ -25,7 +25,7 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http;
 
-import java.lang.reflect.Proxy;
+import java.net.Proxy;
 import java.nio.charset.Charset;
 import java.time.Duration;
 import java.util.ArrayList;
@@ -35,6 +35,9 @@ import java.util.Optional;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.SSLSocketFactory;
 
 import com.github.ljtfreitas.restify.http.client.EndpointMethodExecutor;
 import com.github.ljtfreitas.restify.http.client.authentication.Authentication;
@@ -199,11 +202,10 @@ public class RestifyProxyBuilder {
 			this.endpoint = endpoint;
 		}
 
-		@SuppressWarnings("unchecked")
 		public T build() {
 			RestifyProxyHandler restifyProxyHandler = doBuild();
 
-			return (T) Proxy.newProxyInstance(this.getClass().getClassLoader(), new Class[]{type}, restifyProxyHandler);
+			return new ProxyFactory(restifyProxyHandler).create(type);
 		}
 
 		private RestifyProxyHandler doBuild() {
@@ -560,6 +562,11 @@ public class RestifyProxyBuilder {
 			return this;
 		}
 
+		public HttpClientRequestConfigurationBuilder proxy(Proxy proxy) {
+			builder.proxy(proxy);
+			return this;
+		}
+
 		public HttpClientRequestFollowRedirectsConfigurationBuilder followRedirects() {
 			return new HttpClientRequestFollowRedirectsConfigurationBuilder();
 		}
@@ -576,6 +583,10 @@ public class RestifyProxyBuilder {
 		public HttpClientRequestConfigurationBuilder useCaches(boolean enabled) {
 			builder.useCaches(enabled);
 			return this;
+		}
+
+		public HttpClientRequestSslConfigurationBuilder ssl() {
+			return new HttpClientRequestSslConfigurationBuilder();
 		}
 
 		public RestifyProxyBuilder using(HttpClientRequestConfiguration httpClientRequestConfiguration) {
@@ -614,6 +625,23 @@ public class RestifyProxyBuilder {
 			public HttpClientRequestConfigurationBuilder disabled() {
 				builder.useCaches().disabled();
 				return HttpClientRequestConfigurationBuilder.this;
+			}
+		}
+
+		public class HttpClientRequestSslConfigurationBuilder {
+
+			public HttpClientRequestConfigurationBuilder sslSocketFactory(SSLSocketFactory sslSocketFactory) {
+				builder.ssl().sslSocketFactory(sslSocketFactory);
+				return HttpClientRequestConfigurationBuilder.this;
+			}
+
+			public HttpClientRequestConfigurationBuilder hostnameVerifier(HostnameVerifier hostnameVerifier) {
+				builder.ssl().hostnameVerifier(hostnameVerifier);
+				return HttpClientRequestConfigurationBuilder.this;
+			}
+
+			public RestifyProxyBuilder and() {
+				return context;
 			}
 		}
 	}

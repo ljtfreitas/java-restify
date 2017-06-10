@@ -25,8 +25,13 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.request.jdk;
 
+import java.net.Proxy;
 import java.nio.charset.Charset;
 import java.time.Duration;
+import java.util.Optional;
+
+import javax.net.ssl.HostnameVerifier;
+import javax.net.ssl.SSLSocketFactory;
 
 import com.github.ljtfreitas.restify.http.client.charset.Encoding;
 
@@ -38,6 +43,9 @@ public class HttpClientRequestConfiguration {
 	private boolean useCaches = true;
 
 	private Charset charset = Encoding.UTF_8.charset();
+	private Proxy proxy = null;
+
+	private HttpClientRequestSslConfiguration ssl = new HttpClientRequestSslConfiguration();
 
 	private HttpClientRequestConfiguration() {
 	}
@@ -62,8 +70,30 @@ public class HttpClientRequestConfiguration {
 		return charset;
 	}
 
+	public Optional<Proxy> proxy() {
+		return Optional.ofNullable(proxy);
+	}
+
+	public HttpClientRequestSslConfiguration ssl() {
+		return ssl;
+	}
+
 	public static HttpClientRequestConfiguration useDefault() {
 		return new HttpClientRequestConfiguration();
+	}
+
+	public class HttpClientRequestSslConfiguration {
+
+		private SSLSocketFactory sslSocketFactory;
+		private HostnameVerifier hostnameVerifier;
+
+		public Optional<SSLSocketFactory> sslSocketFactory() {
+			return Optional.ofNullable(sslSocketFactory);
+		}
+
+		public Optional<HostnameVerifier> hostnameVerifier() {
+			return Optional.ofNullable(hostnameVerifier);
+		}
 	}
 
 	public static class Builder {
@@ -95,6 +125,11 @@ public class HttpClientRequestConfiguration {
 			return this;
 		}
 
+		public Builder proxy(Proxy proxy) {
+			configuration.proxy = proxy;
+			return this;
+		}
+
 		public FolllowRedirectsBuilder followRedirects() {
 			return new FolllowRedirectsBuilder();
 		}
@@ -111,6 +146,10 @@ public class HttpClientRequestConfiguration {
 		public Builder useCaches(boolean enabled) {
 			configuration.useCaches = enabled;
 			return this;
+		}
+
+		public SslBuilder ssl() {
+			return new SslBuilder();
 		}
 
 		public HttpClientRequestConfiguration build() {
@@ -139,6 +178,23 @@ public class HttpClientRequestConfiguration {
 
 			public Builder disabled() {
 				configuration.followRedirects = false;
+				return Builder.this;
+			}
+		}
+
+		public class SslBuilder {
+
+			public Builder sslSocketFactory(SSLSocketFactory sslSocketFactory) {
+				configuration.ssl().sslSocketFactory = sslSocketFactory;
+				return Builder.this;
+			}
+
+			public Builder hostnameVerifier(HostnameVerifier hostnameVerifier) {
+				configuration.ssl().hostnameVerifier = hostnameVerifier;
+				return Builder.this;
+			}
+
+			public Builder and() {
 				return Builder.this;
 			}
 		}

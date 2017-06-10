@@ -11,11 +11,15 @@ import static org.mockserver.verify.VerificationTimes.once;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
 import java.net.SocketTimeoutException;
 import java.util.Collection;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.SSLContext;
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
 import javax.xml.bind.annotation.XmlRootElement;
@@ -27,6 +31,7 @@ import org.junit.rules.ExpectedException;
 import org.mockserver.client.server.MockServerClient;
 import org.mockserver.junit.MockServerRule;
 import org.mockserver.model.HttpRequest;
+import org.mockserver.socket.SSLFactory;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.github.ljtfreitas.restify.http.RestifyHttpException;
@@ -40,7 +45,7 @@ import com.github.ljtfreitas.restify.http.contract.Post;
 public class JdkHttpClientRequestTest {
 
 	@Rule
-	public MockServerRule mockServerRule = new MockServerRule(this, 7080);
+	public MockServerRule mockServerRule = new MockServerRule(this, 7080, 7084);
 
 	@Rule
 	public ExpectedException expectedException = ExpectedException.none();
@@ -227,6 +232,70 @@ public class JdkHttpClientRequestTest {
 		expectedException.expectCause(isA(SocketTimeoutException.class));
 
 		myApi.json();
+	}
+
+	@Test
+	public void shouldSendSecureRequest() throws Exception {
+		mockServerClient = new MockServerClient("localhost", 7084);
+
+		char[] keyStorePassword = SSLFactory.KEY_STORE_PASSWORD.toCharArray();
+
+		KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
+		keyManagerFactory.init(SSLFactory.getInstance().buildKeyStore(), keyStorePassword);
+
+		SSLContext sslContext = SSLContext.getInstance("TLS");
+		sslContext.init(keyManagerFactory.getKeyManagers(), null, null);
+
+		myApi = new RestifyProxyBuilder()
+				.client()
+					.ssl()
+						.sslSocketFactory(sslContext.getSocketFactory())
+					.and()
+				.target(MyApi.class, "https://localhost:7084")
+				.build();
+
+		HttpRequest secureRequest = request()
+				.withMethod("GET")
+				.withPath("/json")
+				.withSecure(true);
+
+		mockServerClient
+			.when(secureRequest)
+			.respond(response()
+					.withStatusCode(200)
+					.withHeader("Content-Type", "application/json")
+					.withBody(json("{\"name\": \"Tiago de Freitas Lima\",\"age\":31}")));
+
+		MyModel myModel = myApi.json();
+
+		assertEquals("Tiago de Freitas Lima", myModel.name);
+		assertEquals(31, myModel.age);
+
+		mockServerClient.verify(secureRequest);
+	}
+
+	@Test
+	public void shouldSendRequestWithConfiguredProxy() {
+		mockServerClient
+			.when(request()
+					.withMethod("GET")
+					.withPath("/json"))
+			.respond(response()
+					.withStatusCode(200)
+					.withHeader("Content-Type", "application/json")
+					.withBody(json("{\"name\": \"Tiago de Freitas Lima\",\"age\":31}")));
+
+		myApi = new RestifyProxyBuilder()
+				.client()
+					.proxy(new Proxy(Proxy.Type.HTTP, new InetSocketAddress("localhost", 7080)))
+					.and()
+				.target(MyApi.class, "http://www.google.com")
+				.build();
+
+		MyModel myModel = myApi.json();
+
+		assertEquals("Tiago de Freitas Lima", myModel.name);
+		assertEquals(31, myModel.age);
 	}
 
 	interface MyApi {
