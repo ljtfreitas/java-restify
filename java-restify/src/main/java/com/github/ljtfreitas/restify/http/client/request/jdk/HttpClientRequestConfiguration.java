@@ -43,10 +43,9 @@ public class HttpClientRequestConfiguration {
 	private boolean useCaches = true;
 
 	private Charset charset = Encoding.UTF_8.charset();
+	private Proxy proxy = null;
 
-	private Proxy proxy;
-	private SSLSocketFactory sslSocketFactory;
-	private HostnameVerifier hostnameVerifier;
+	private HttpClientRequestSslConfiguration ssl = new HttpClientRequestSslConfiguration();
 
 	private HttpClientRequestConfiguration() {
 	}
@@ -75,16 +74,26 @@ public class HttpClientRequestConfiguration {
 		return Optional.ofNullable(proxy);
 	}
 
-	public Optional<SSLSocketFactory> sslSocketFactory() {
-		return Optional.ofNullable(sslSocketFactory);
-	}
-
-	public Optional<HostnameVerifier> hostnameVerifier() {
-		return Optional.ofNullable(hostnameVerifier);
+	public HttpClientRequestSslConfiguration ssl() {
+		return ssl;
 	}
 
 	public static HttpClientRequestConfiguration useDefault() {
 		return new HttpClientRequestConfiguration();
+	}
+
+	public class HttpClientRequestSslConfiguration {
+
+		private SSLSocketFactory sslSocketFactory;
+		private HostnameVerifier hostnameVerifier;
+
+		public Optional<SSLSocketFactory> sslSocketFactory() {
+			return Optional.ofNullable(sslSocketFactory);
+		}
+
+		public Optional<HostnameVerifier> hostnameVerifier() {
+			return Optional.ofNullable(hostnameVerifier);
+		}
 	}
 
 	public static class Builder {
@@ -176,12 +185,12 @@ public class HttpClientRequestConfiguration {
 		public class SslBuilder {
 
 			public Builder sslSocketFactory(SSLSocketFactory sslSocketFactory) {
-				configuration.sslSocketFactory = sslSocketFactory;
+				configuration.ssl().sslSocketFactory = sslSocketFactory;
 				return Builder.this;
 			}
 
 			public Builder hostnameVerifier(HostnameVerifier hostnameVerifier) {
-				configuration.hostnameVerifier = hostnameVerifier;
+				configuration.ssl().hostnameVerifier = hostnameVerifier;
 				return Builder.this;
 			}
 

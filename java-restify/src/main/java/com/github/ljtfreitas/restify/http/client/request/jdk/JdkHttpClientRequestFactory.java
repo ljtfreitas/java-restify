@@ -97,10 +97,10 @@ public class JdkHttpClientRequestFactory implements HttpClientRequestFactory {
 		if (connection instanceof HttpsURLConnection) {
 			HttpsURLConnection https = (HttpsURLConnection) connection;
 
-			httpClientRequestConfiguration.sslSocketFactory()
+			httpClientRequestConfiguration.ssl().sslSocketFactory()
 				.ifPresent(sslSocketFactory -> https.setSSLSocketFactory(sslSocketFactory));
 
-			httpClientRequestConfiguration.hostnameVerifier()
+			httpClientRequestConfiguration.ssl().hostnameVerifier()
 				.ifPresent(hostnameVerifier -> https.setHostnameVerifier(hostnameVerifier));
 		}
 	}
