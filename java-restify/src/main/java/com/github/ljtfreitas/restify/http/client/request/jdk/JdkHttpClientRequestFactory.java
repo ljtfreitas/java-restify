@@ -27,6 +27,9 @@ package com.github.ljtfreitas.restify.http.client.request.jdk;
 
 import java.io.IOException;
 import java.net.HttpURLConnection;
+import java.net.Proxy;
+import java.net.URL;
+import java.net.URLConnection;
 import java.nio.charset.Charset;
 
 import javax.net.ssl.HttpsURLConnection;
@@ -61,32 +64,44 @@ public class JdkHttpClientRequestFactory implements HttpClientRequestFactory {
 	@Override
 	public JdkHttpClientRequest createOf(EndpointRequest request) {
 		try {
-			HttpURLConnection connection = (HttpURLConnection) request.endpoint().toURL().openConnection();
+			HttpURLConnection connection = open(request.endpoint().toURL());
 
-			connection.setConnectTimeout(httpClientRequestConfiguration.connectionTimeout());
-			connection.setReadTimeout(httpClientRequestConfiguration.readTimeout());
-			connection.setReadTimeout(httpClientRequestConfiguration.readTimeout());
-			connection.setInstanceFollowRedirects(httpClientRequestConfiguration.followRedirects());
-			connection.setUseCaches(httpClientRequestConfiguration.useCaches());
-
-			connection.setDoOutput(true);
-			connection.setAllowUserInteraction(false);
-			connection.setRequestMethod(request.method());
-
-			if (connection instanceof HttpsURLConnection) {
-				HttpsURLConnection https = (HttpsURLConnection) connection;
-
-				httpClientRequestConfiguration.sslSocketFactory()
-						.ifPresent(sslSocketFactory -> https.setSSLSocketFactory(sslSocketFactory));
-
-				httpClientRequestConfiguration.hostnameVerifier()
-						.ifPresent(hostnameVerifier -> https.setHostnameVerifier(hostnameVerifier));
-			}
+			configure(request, connection);
 
 			return new JdkHttpClientRequest(connection, charset, request.headers());
 
 		} catch (IOException e) {
 			throw new RestifyHttpException(e);
+		}
+	}
+
+	private HttpURLConnection open(URL url) throws IOException {
+		Proxy proxy = httpClientRequestConfiguration.proxy().orElse(null);
+
+		URLConnection connection = proxy == null ? url.openConnection() : url.openConnection(proxy);
+
+		return (HttpURLConnection) connection;
+	}
+
+	private void configure(EndpointRequest request, HttpURLConnection connection) throws IOException {
+		connection.setConnectTimeout(httpClientRequestConfiguration.connectionTimeout());
+		connection.setReadTimeout(httpClientRequestConfiguration.readTimeout());
+		connection.setReadTimeout(httpClientRequestConfiguration.readTimeout());
+		connection.setInstanceFollowRedirects(httpClientRequestConfiguration.followRedirects());
+		connection.setUseCaches(httpClientRequestConfiguration.useCaches());
+
+		connection.setDoOutput(true);
+		connection.setAllowUserInteraction(false);
+		connection.setRequestMethod(request.method());
+
+		if (connection instanceof HttpsURLConnection) {
+			HttpsURLConnection https = (HttpsURLConnection) connection;
+
+			httpClientRequestConfiguration.sslSocketFactory()
+				.ifPresent(sslSocketFactory -> https.setSSLSocketFactory(sslSocketFactory));
+
+			httpClientRequestConfiguration.hostnameVerifier()
+				.ifPresent(hostnameVerifier -> https.setHostnameVerifier(hostnameVerifier));
 		}
 	}
 }

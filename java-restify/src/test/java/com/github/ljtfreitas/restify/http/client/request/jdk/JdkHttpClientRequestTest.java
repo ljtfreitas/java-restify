@@ -11,6 +11,8 @@ import static org.mockserver.verify.VerificationTimes.once;
 import java.io.BufferedReader;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.InetSocketAddress;
+import java.net.Proxy;
 import java.net.SocketTimeoutException;
 import java.util.Collection;
 import java.util.concurrent.TimeUnit;
@@ -236,7 +238,7 @@ public class JdkHttpClientRequestTest {
 	public void shouldSendSecureRequest() throws Exception {
 		mockServerClient = new MockServerClient("localhost", 7084);
 
-		char[] keyStorePassword = "changeit".toCharArray();
+		char[] keyStorePassword = SSLFactory.KEY_STORE_PASSWORD.toCharArray();
 
 		KeyManagerFactory keyManagerFactory = KeyManagerFactory.getInstance(KeyManagerFactory.getDefaultAlgorithm());
 		keyManagerFactory.init(SSLFactory.getInstance().buildKeyStore(), keyStorePassword);
@@ -270,6 +272,30 @@ public class JdkHttpClientRequestTest {
 		assertEquals(31, myModel.age);
 
 		mockServerClient.verify(secureRequest);
+	}
+
+	@Test
+	public void shouldSendRequestWithConfiguredProxy() {
+		mockServerClient
+			.when(request()
+					.withMethod("GET")
+					.withPath("/json"))
+			.respond(response()
+					.withStatusCode(200)
+					.withHeader("Content-Type", "application/json")
+					.withBody(json("{\"name\": \"Tiago de Freitas Lima\",\"age\":31}")));
+
+		myApi = new RestifyProxyBuilder()
+				.client()
+					.proxy(new Proxy(Proxy.Type.HTTP, new InetSocketAddress("localhost", 7080)))
+					.and()
+				.target(MyApi.class, "http://www.google.com")
+				.build();
+
+		MyModel myModel = myApi.json();
+
+		assertEquals("Tiago de Freitas Lima", myModel.name);
+		assertEquals(31, myModel.age);
 	}
 
 	interface MyApi {

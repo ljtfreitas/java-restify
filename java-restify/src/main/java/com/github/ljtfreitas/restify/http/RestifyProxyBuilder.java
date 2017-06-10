@@ -25,7 +25,7 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http;
 
-import java.lang.reflect.Proxy;
+import java.net.Proxy;
 import java.nio.charset.Charset;
 import java.time.Duration;
 import java.util.ArrayList;
@@ -202,11 +202,10 @@ public class RestifyProxyBuilder {
 			this.endpoint = endpoint;
 		}
 
-		@SuppressWarnings("unchecked")
 		public T build() {
 			RestifyProxyHandler restifyProxyHandler = doBuild();
 
-			return (T) Proxy.newProxyInstance(this.getClass().getClassLoader(), new Class[]{type}, restifyProxyHandler);
+			return new ProxyFactory(restifyProxyHandler).create(type);
 		}
 
 		private RestifyProxyHandler doBuild() {
@@ -560,6 +559,11 @@ public class RestifyProxyBuilder {
 
 		public HttpClientRequestConfigurationBuilder charset(Charset charset) {
 			builder.charset(charset);
+			return this;
+		}
+
+		public HttpClientRequestConfigurationBuilder proxy(Proxy proxy) {
+			builder.proxy(proxy);
 			return this;
 		}
 

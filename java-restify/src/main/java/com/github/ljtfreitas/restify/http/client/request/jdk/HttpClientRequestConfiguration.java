@@ -25,6 +25,7 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.request.jdk;
 
+import java.net.Proxy;
 import java.nio.charset.Charset;
 import java.time.Duration;
 import java.util.Optional;
@@ -43,6 +44,7 @@ public class HttpClientRequestConfiguration {
 
 	private Charset charset = Encoding.UTF_8.charset();
 
+	private Proxy proxy;
 	private SSLSocketFactory sslSocketFactory;
 	private HostnameVerifier hostnameVerifier;
 
@@ -67,6 +69,10 @@ public class HttpClientRequestConfiguration {
 
 	public Charset charset() {
 		return charset;
+	}
+
+	public Optional<Proxy> proxy() {
+		return Optional.ofNullable(proxy);
 	}
 
 	public Optional<SSLSocketFactory> sslSocketFactory() {
@@ -107,6 +113,11 @@ public class HttpClientRequestConfiguration {
 
 		public Builder charset(Charset charset) {
 			configuration.charset = charset;
+			return this;
+		}
+
+		public Builder proxy(Proxy proxy) {
+			configuration.proxy = proxy;
 			return this;
 		}
 
