@@ -89,5 +89,4 @@ public class JdkHttpClientRequestFactory implements HttpClientRequestFactory {
 			throw new RestifyHttpException(e);
 		}
 	}
-
 }
