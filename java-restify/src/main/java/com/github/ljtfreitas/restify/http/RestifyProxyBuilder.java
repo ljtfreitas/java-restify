@@ -26,6 +26,8 @@
 package com.github.ljtfreitas.restify.http;
 
 import java.net.Proxy;
+import java.net.URI;
+import java.net.URL;
 import java.nio.charset.Charset;
 import java.time.Duration;
 import java.util.ArrayList;
@@ -193,6 +195,14 @@ public class RestifyProxyBuilder {
 		return new RestifyProxyBuilderOnTarget<>(target, endpoint);
 	}
 
+	public <T> RestifyProxyBuilderOnTarget<T> target(Class<T> target, URL endpoint) {
+		return new RestifyProxyBuilderOnTarget<>(target, endpoint.toString());
+	}
+
+	public <T> RestifyProxyBuilderOnTarget<T> target(Class<T> target, URI endpoint) {
+		return new RestifyProxyBuilderOnTarget<>(target, endpoint.toString());
+	}
+
 	public class RestifyProxyBuilderOnTarget<T> {
 		private final Class<T> type;
 		private final String endpoint;
@@ -209,7 +219,7 @@ public class RestifyProxyBuilder {
 		}
 
 		private RestifyProxyHandler doBuild() {
-			EndpointTarget target = new EndpointTarget(type, endpoint);
+			EndpointTarget target = new EndpointTarget(type, endpoint.toString());
 
 			EndpointMethodExecutor endpointMethodExecutor = new EndpointMethodExecutor(endpointCallExecutables(), endpointMethodCallFactory()); 
 
