@@ -62,8 +62,9 @@ class InvocationConverter {
 	}
 
 	private Entity<Object> entity(Object body, Headers headers) {
-		String contentType =  headers.get(Headers.CONTENT_TYPE).map(Header::value).orElseThrow(() ->  new RestifyHttpMessageWriteException("Your request has a body, but the header [Content-Type] "
-				+ "it was not provided."));
+		String contentType =  headers.get(Headers.CONTENT_TYPE).map(Header::value)
+				.orElseThrow(() ->  new RestifyHttpMessageWriteException("Your request has a body, but the header [Content-Type] "
+						+ "it was not provided."));
 
 		return Entity.entity(body, MediaType.valueOf(contentType));
 	}

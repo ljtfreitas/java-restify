@@ -25,15 +25,20 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.request.jaxrs;
 
+import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.client.Invocation;
 import javax.ws.rs.core.Configuration;
 import javax.ws.rs.core.Response;
 
+import com.github.ljtfreitas.restify.http.RestifyHttpException;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequestExecutor;
+import com.github.ljtfreitas.restify.http.client.response.DefaultEndpointResponseErrorFallback;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
+import com.github.ljtfreitas.restify.http.client.response.EndpointResponseErrorFallback;
+import com.github.ljtfreitas.restify.http.client.response.RestifyHttpMessageReadException;
 
 public class JaxRsHttpClientEndpointRequestExecutor implements EndpointRequestExecutor {
 
@@ -44,21 +49,48 @@ public class JaxRsHttpClientEndpointRequestExecutor implements EndpointRequestEx
 		this(ClientBuilder.newClient());
 	}
 
+	public JaxRsHttpClientEndpointRequestExecutor(EndpointResponseErrorFallback endpointResponseErrorFallback) {
+		this(ClientBuilder.newClient(), endpointResponseErrorFallback);
+	}
+
 	public JaxRsHttpClientEndpointRequestExecutor(Configuration configuration) {
 		this(ClientBuilder.newClient(configuration));
 	}
 
+	public JaxRsHttpClientEndpointRequestExecutor(Configuration configuration, EndpointResponseErrorFallback endpointResponseErrorFallback) {
+		this(ClientBuilder.newClient(configuration), endpointResponseErrorFallback);
+	}
+
 	public JaxRsHttpClientEndpointRequestExecutor(Client client) {
+		this(client, DefaultEndpointResponseErrorFallback.emptyOnNotFound());
+	}
+
+	public JaxRsHttpClientEndpointRequestExecutor(Client client, EndpointResponseErrorFallback endpointResponseErrorFallback) {
 		this.invocationConverter = new InvocationConverter(client);
-		this.endpointResponseConverter = new EndpointResponseConverter();
+		this.endpointResponseConverter = new EndpointResponseConverter(endpointResponseErrorFallback);
 	}
 
 	@Override
 	public <T> EndpointResponse<T> execute(EndpointRequest endpointRequest) {
-		Invocation invocation = invocationConverter.convert(endpointRequest);
+		try {
+			Invocation invocation = invocationConverter.convert(endpointRequest);
 
-		Response response = invocation.invoke();
+			Response response = invocation.invoke();
 
-		return endpointResponseConverter.convert(response, endpointRequest.responseType());
+			EndpointResponse<T> endpointResponse = endpointResponseConverter.convert(response, endpointRequest);
+
+			response.close();
+
+			return endpointResponse;
+
+		} catch (RestifyHttpException e) {
+			throw e;
+
+		} catch (WebApplicationException e) {
+			throw new RestifyHttpMessageReadException(e);
+
+		} catch (Exception e) {
+			throw new RestifyHttpException("Error on HTTP request: [" + endpointRequest.method() + " " + endpointRequest.endpoint() + "]", e);
+		}
 	}
 }

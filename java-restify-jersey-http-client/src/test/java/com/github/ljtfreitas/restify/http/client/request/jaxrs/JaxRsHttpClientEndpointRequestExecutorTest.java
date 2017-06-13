@@ -1,6 +1,7 @@
 package com.github.ljtfreitas.restify.http.client.request.jaxrs;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
@@ -27,6 +28,7 @@ import com.github.ljtfreitas.restify.http.client.Header;
 import com.github.ljtfreitas.restify.http.client.Headers;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
+import com.github.ljtfreitas.restify.http.client.response.RestifyEndpointResponseInternalServerErrorException;
 
 public class JaxRsHttpClientEndpointRequestExecutorTest {
 
@@ -155,6 +157,37 @@ public class JaxRsHttpClientEndpointRequestExecutorTest {
 		assertEquals("OK", myModelResponse.body());
 
 		mockServerClient.verify(httpRequest, once());
+	}
+
+	@Test(expected = RestifyEndpointResponseInternalServerErrorException.class)
+	public void shouldReadServerErrorResponse() {
+		mockServerClient
+			.when(request()
+					.withMethod("GET")
+					.withPath("/json"))
+			.respond(response()
+					.withStatusCode(500));
+
+		EndpointRequest endpointRequest = new EndpointRequest(URI.create("http://localhost:7080/json"), "GET", MyModel.class);
+
+		executor.execute(endpointRequest);
+	}
+
+	@Test
+	public void shouldReturnNullBodyWhenResponseIsNotFound() {
+		mockServerClient
+			.when(request()
+					.withMethod("GET")
+					.withPath("/json"))
+			.respond(response()
+					.withStatusCode(404));
+
+		EndpointRequest endpointRequest = new EndpointRequest(URI.create("http://localhost:7080/json"), "GET", MyModel.class);
+
+		EndpointResponse<Object> endpointResponse = executor.execute(endpointRequest);
+
+		assertTrue(endpointResponse.code().isNotFound());
+		assertNull(endpointResponse.body());
 	}
 
 	@XmlRootElement(name = "model")

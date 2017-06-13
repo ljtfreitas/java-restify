@@ -27,19 +27,38 @@ package com.github.ljtfreitas.restify.http.client.request.jaxrs;
 
 import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.Response;
+import javax.ws.rs.core.Response.Status.Family;
 
 import com.github.ljtfreitas.restify.http.client.Header;
 import com.github.ljtfreitas.restify.http.client.Headers;
+import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
+import com.github.ljtfreitas.restify.http.client.response.EndpointResponseErrorFallback;
 import com.github.ljtfreitas.restify.http.client.response.StatusCode;
 import com.github.ljtfreitas.restify.http.contract.metadata.reflection.JavaType;
 
 class EndpointResponseConverter {
 
-	public <T> EndpointResponse<T> convert(Response response, JavaType responseType) {
-		T responseBody = response.hasEntity() ? entityOf(response, responseType) : null;
+	private final EndpointResponseErrorFallback endpointResponseErrorFallback;
 
-		return new EndpointResponse<T>(StatusCode.of(response.getStatus()), headersOf(response), responseBody);
+	public EndpointResponseConverter(EndpointResponseErrorFallback endpointResponseErrorFallback) {
+		this.endpointResponseErrorFallback = endpointResponseErrorFallback;
+	}
+
+	public <T> EndpointResponse<T> convert(Response response, EndpointRequest request) {
+		Family statusFamily = response.getStatusInfo().getFamily();
+
+		if (statusFamily == Family.SERVER_ERROR || statusFamily == Family.CLIENT_ERROR) {
+			return endpointResponseErrorFallback.onError(ErrorHttpResponseMessage.from(response, request), request.responseType());
+
+		} else {
+			return doConvert(response, request.responseType());
+		}
+	}
+
+	private <T> EndpointResponse<T> doConvert(Response response, JavaType responseType) {
+		T responseBody = response.hasEntity() ? entityOf(response, responseType) : null;
+		return new EndpointResponse<>(StatusCode.of(response.getStatus()), headersOf(response), responseBody);
 	}
 
 	private <T> T entityOf(Response response, JavaType responseType) {
