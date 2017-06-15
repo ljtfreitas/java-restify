@@ -60,7 +60,7 @@ public class EndpointRequest {
 	}
 
 	public EndpointRequest(URI endpoint, String method, Headers headers, Type responseType) {
-		this(endpoint, method, headers, null, (EndpointVersion) null);
+		this(endpoint, method, headers, responseType, (EndpointVersion) null);
 	}
 
 	public EndpointRequest(URI endpoint, String method, Headers headers, Type responseType, EndpointVersion version) {
