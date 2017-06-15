@@ -41,6 +41,7 @@ import com.github.ljtfreitas.restify.http.client.message.HttpMessageConverter;
 import com.github.ljtfreitas.restify.http.client.message.HttpMessageConverters;
 import com.github.ljtfreitas.restify.http.client.message.converter.json.JsonMessageConverter;
 import com.github.ljtfreitas.restify.http.client.message.converter.text.TextPlainMessageConverter;
+import com.github.ljtfreitas.restify.http.client.message.converter.xml.JaxbXmlMessageConverter;
 import com.github.ljtfreitas.restify.http.client.message.form.FormURLEncodedParametersMessageConverter;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequestExecutor;
@@ -58,51 +59,39 @@ class DefaultAuthorizationServer implements AuthorizationServer {
 	private static final String FORM_URLENCODED_CONTENT_TYPE = "application/x-www-form-urlencoded";
 
 	private final EndpointRequestExecutor delegate;
+	private final ClientAuthenticationMethod clientAuthenticationMethod;
+
+	public DefaultAuthorizationServer() {
+		this(new EndpointRequestExecutorFactory().create());
+	}
 
 	public DefaultAuthorizationServer(EndpointRequestExecutor endpointRequestExecutor) {
-		this.delegate = endpointRequestExecutor;
+		this(endpointRequestExecutor, ClientAuthenticationMethod.HEADER);
+	}
+
+	public DefaultAuthorizationServer(ClientAuthenticationMethod clientAuthenticationMethod) {
+		this(new EndpointRequestExecutorFactory().create(), clientAuthenticationMethod);
 	}
 
 	public DefaultAuthorizationServer(HttpMessageConverters converters) {
-		this.delegate = new RestifyEndpointRequestExecutor(httpClientRequestFactory(), endpointRequestWriter(converters),
-				endpointResponseReader(converters));
+		this(new EndpointRequestExecutorFactory(converters).create());
+	}
+
+	public DefaultAuthorizationServer(HttpMessageConverters converters, ClientAuthenticationMethod clientAuthenticationMethod) {
+		this(new EndpointRequestExecutorFactory(converters).create(), clientAuthenticationMethod);
 	}
 
 	public DefaultAuthorizationServer(HttpClientRequestFactory httpClientRequestFactory) {
-		HttpMessageConverters converters = converters();
-		this.delegate = new RestifyEndpointRequestExecutor(httpClientRequestFactory, endpointRequestWriter(converters),
-				endpointResponseReader(converters));
+		this(new EndpointRequestExecutorFactory(httpClientRequestFactory).create());
 	}
 
-	public DefaultAuthorizationServer() {
-		HttpMessageConverters converters = converters();
-		this.delegate = new RestifyEndpointRequestExecutor(httpClientRequestFactory(), endpointRequestWriter(converters),
-				endpointResponseReader(converters));
+	public DefaultAuthorizationServer(HttpClientRequestFactory httpClientRequestFactory, ClientAuthenticationMethod clientAuthenticationMethod) {
+		this(new EndpointRequestExecutorFactory(httpClientRequestFactory).create(), clientAuthenticationMethod);
 	}
 
-	private HttpMessageConverters converters() {
-		List<HttpMessageConverter> converters = Arrays.asList(new TextPlainMessageConverter(),
-				new FormURLEncodedParametersMessageConverter(), JsonMessageConverter.available());
-		return new HttpMessageConverters(converters);
-	}
-
-	private EndpointRequestWriter endpointRequestWriter(HttpMessageConverters converters) {
-		return new EndpointRequestWriter(converters);
-	}
-
-	private EndpointResponseReader endpointResponseReader(HttpMessageConverters converters) {
-		return new EndpointResponseReader(converters, new AuthorizationServerResponseErrorFallback());
-	}
-
-	private HttpClientRequestFactory httpClientRequestFactory() {
-		HttpClientRequestConfiguration httpClientRequestConfiguration = new HttpClientRequestConfiguration.Builder()
-				.followRedirects()
-					.disabled()
-				.useCaches()
-					.disabled()
-				.build();
-
-		return new JdkHttpClientRequestFactory(httpClientRequestConfiguration);
+	public DefaultAuthorizationServer(EndpointRequestExecutor endpointRequestExecutor, ClientAuthenticationMethod clientAuthenticationMethod) {
+		this.delegate = endpointRequestExecutor;
+		this.clientAuthenticationMethod = clientAuthenticationMethod;
 	}
 
 	@Override
@@ -137,15 +126,9 @@ class DefaultAuthorizationServer implements AuthorizationServer {
 
 	@Override
 	public EndpointResponse<AccessToken> requireToken(AccessTokenRequest request) {
-		Header contentType = new Header(CONTENT_TYPE, FORM_URLENCODED_CONTENT_TYPE);
+		EndpointRequest accessTokenEndpointRequest = new AccessTokenEndpointRequestFactory(request).create();
 
-		Headers headers = new Headers(contentType, authorization(request.credentials()));
-		headers.putAll(request.headers());
-
-		Parameters body = request.parameters();
-
-		EndpointResponse<Map<String, Object>> accessTokenResponse = delegate
-				.execute(new EndpointRequest(request.uri(), "POST", headers, body, Map.class));
+		EndpointResponse<Map<String, Object>> accessTokenResponse = delegate.execute(accessTokenEndpointRequest);
 
 		return buildAccessToken(accessTokenResponse);
 	}
@@ -158,8 +141,111 @@ class DefaultAuthorizationServer implements AuthorizationServer {
 		return new EndpointResponse<>(accessTokenResponse.code(), accessTokenResponse.headers(), accessToken);
 	}
 
-	private Header authorization(ClientCredentials credentials) {
-		BasicAuthentication basic = new BasicAuthentication(credentials.clientId(), credentials.clientSecret());
-		return new Header(AUTHORIZATION, basic.content());
+	private static class EndpointRequestExecutorFactory {
+
+		private final HttpMessageConverters converters;
+		private final HttpClientRequestFactory httpClientRequestFactory;
+
+		private EndpointRequestExecutorFactory() {
+			this.converters = converters();
+			this.httpClientRequestFactory = httpClientRequestFactory();
+		}
+
+		private EndpointRequestExecutorFactory(HttpClientRequestFactory httpClientRequestFactory) {
+			this.httpClientRequestFactory = httpClientRequestFactory();
+			this.converters = converters();
+		}
+
+		private EndpointRequestExecutorFactory(HttpMessageConverters converters) {
+			this.converters = converters;
+			this.httpClientRequestFactory = httpClientRequestFactory();
+		}
+
+		public EndpointRequestExecutor create() {
+			return new RestifyEndpointRequestExecutor(httpClientRequestFactory, endpointRequestWriter(converters),
+					endpointResponseReader(converters));
+		}
+
+		private HttpClientRequestFactory httpClientRequestFactory() {
+			HttpClientRequestConfiguration httpClientRequestConfiguration = new HttpClientRequestConfiguration.Builder()
+					.followRedirects()
+						.disabled()
+					.useCaches()
+						.disabled()
+					.build();
+
+			return new JdkHttpClientRequestFactory(httpClientRequestConfiguration);
+		}
+
+		private EndpointRequestWriter endpointRequestWriter(HttpMessageConverters converters) {
+			return new EndpointRequestWriter(converters);
+		}
+
+		private EndpointResponseReader endpointResponseReader(HttpMessageConverters converters) {
+			return new EndpointResponseReader(converters, new AuthorizationServerResponseErrorFallback());
+		}
+
+		private HttpMessageConverters converters() {
+			List<HttpMessageConverter> converters = Arrays.asList(new TextPlainMessageConverter(),
+					new FormURLEncodedParametersMessageConverter(), JsonMessageConverter.available(), new JaxbXmlMessageConverter<>());
+			return new HttpMessageConverters(converters);
+		}
 	}
+
+	private class AccessTokenEndpointRequestFactory {
+
+		private final AccessTokenRequest source;
+
+		private AccessTokenEndpointRequestFactory(AccessTokenRequest source) {
+			this.source = source;
+		}
+
+		private EndpointRequest create() {
+			Header contentType = new Header(CONTENT_TYPE, FORM_URLENCODED_CONTENT_TYPE);
+
+			Headers headers = new Headers(contentType);
+			headers.putAll(source.headers());
+
+			Parameters body = source.parameters();
+
+			return authenticated(new EndpointRequest(source.uri(), "POST", headers, body, Map.class));
+		}
+
+		private EndpointRequest authenticated(EndpointRequest endpointRequest) {
+			switch (clientAuthenticationMethod) {
+				case HEADER:
+					endpointRequest.headers().add(authorization());
+					return endpointRequest;
+
+				case FORM_PARAMETER:
+					((Parameters) endpointRequest.body().get()).putAll(parameters());
+					return endpointRequest;
+
+				case QUERY_PARAMETER:
+					return endpointRequest.append(parameters());
+			}
+
+			return endpointRequest;
+		}
+
+		private Parameters parameters() {
+			Parameters parameters = new Parameters();
+
+			ClientCredentials credentials = source.credentials();
+			parameters.put("client_id", credentials.clientId());
+
+			if (credentials.clientSecret() != null && !"".equals(credentials.clientSecret())) {
+				parameters.put("client_secret", credentials.clientSecret());
+			}
+
+			return parameters;
+		}
+
+		private Header authorization() {
+			ClientCredentials credentials = source.credentials();
+			BasicAuthentication basic = new BasicAuthentication(credentials.clientId(), credentials.clientSecret());
+			return new Header(AUTHORIZATION, basic.content());
+		}
+	}
+
 }

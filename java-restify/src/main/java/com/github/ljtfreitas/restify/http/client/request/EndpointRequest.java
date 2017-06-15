@@ -32,6 +32,7 @@ import java.util.Optional;
 
 import com.github.ljtfreitas.restify.http.RestifyHttpException;
 import com.github.ljtfreitas.restify.http.client.Headers;
+import com.github.ljtfreitas.restify.http.contract.Parameters;
 import com.github.ljtfreitas.restify.http.contract.metadata.reflection.JavaType;
 
 public class EndpointRequest {
@@ -125,15 +126,25 @@ public class EndpointRequest {
 
 	public EndpointRequestMetadata metadata() {
 		return metadata;
+
+	}
+
+	public EndpointRequest append(Parameters parameters) {
+		String query = parameters.queryString();
+		return addQueryString(query);
 	}
 
 	public EndpointRequest appendParameter(String name, String value) {
+		return addQueryString(name + "=" + value);
+	}
+
+	private EndpointRequest addQueryString(String query) {
 		String appender = endpoint.getQuery() == null ? "" : "&";
 
 		String newQuery = Optional.ofNullable(endpoint.getRawQuery())
 				.orElse("")
 					.concat(appender)
-						.concat(name + "=" + value);
+						.concat(query);
 
 		try {
 			URI newURI = new URI(endpoint.getScheme(), endpoint.getRawAuthority(), endpoint.getRawPath(),

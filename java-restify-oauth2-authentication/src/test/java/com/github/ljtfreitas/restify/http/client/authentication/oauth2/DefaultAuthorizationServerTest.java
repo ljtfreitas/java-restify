@@ -94,4 +94,62 @@ public class DefaultAuthorizationServerTest {
 		assertNotNull(tokenResponse);
 		assertEquals(StatusCode.of(HttpStatusCode.OK), tokenResponse.code());
 	}
+
+	@Test
+	public void shouldGetAccessTokenWithClientCredentialsOnFormParameter() {
+		mockServerClient
+			.when(request()
+					.withMethod("POST")
+					.withPath("/oauth/token")
+					.withBody(params(new Parameter("grant_type", "client_credentials"),
+									 new Parameter("scope", "read write"),
+									 new Parameter("client_id", "client-id"),
+									 new Parameter("client_secret", "client-secret"))))
+				.respond(response()
+					.withStatusCode(200)
+					.withHeader("Content-Type", "application/json")
+					.withBody(json("{\"access_token\":\"aaa111\",\"token_type\":\"bearer\",\"expires_in\":3600,\"scope\":\"read write\"}")));
+
+		AccessTokenRequest request = AccessTokenRequest
+				.clientCredentials(new ClientCredentials("client-id", "client-secret"))
+					.accessTokenUri("http://localhost:8088/oauth/token")
+					.parameter("scope", "read write")
+					.build();
+
+		authorizationServer = new DefaultAuthorizationServer(ClientAuthenticationMethod.FORM_PARAMETER);
+
+		EndpointResponse<AccessToken> tokenResponse = authorizationServer.requireToken(request);
+
+		assertNotNull(tokenResponse);
+		assertEquals(StatusCode.of(HttpStatusCode.OK), tokenResponse.code());
+	}
+
+	@Test
+	public void shouldGetAccessTokenWithClientCredentialsOnQueryParameter() {
+		mockServerClient
+			.when(request()
+					.withMethod("POST")
+					.withPath("/oauth/token")
+					.withQueryStringParameters(new Parameter("client_id", "client-id"),
+											   new Parameter("client_secret", "client-secret"))
+					.withBody(params(new Parameter("grant_type", "client_credentials"),
+									 new Parameter("scope", "read write"))))
+				.respond(response()
+					.withStatusCode(200)
+					.withHeader("Content-Type", "application/json")
+					.withBody(json("{\"access_token\":\"aaa111\",\"token_type\":\"bearer\",\"expires_in\":3600,\"scope\":\"read write\"}")));
+
+		AccessTokenRequest request = AccessTokenRequest
+				.clientCredentials(new ClientCredentials("client-id", "client-secret"))
+					.accessTokenUri("http://localhost:8088/oauth/token")
+					.parameter("scope", "read write")
+					.build();
+
+		authorizationServer = new DefaultAuthorizationServer(ClientAuthenticationMethod.QUERY_PARAMETER);
+
+		EndpointResponse<AccessToken> tokenResponse = authorizationServer.requireToken(request);
+
+		assertNotNull(tokenResponse);
+		assertEquals(StatusCode.of(HttpStatusCode.OK), tokenResponse.code());
+	}
 }
