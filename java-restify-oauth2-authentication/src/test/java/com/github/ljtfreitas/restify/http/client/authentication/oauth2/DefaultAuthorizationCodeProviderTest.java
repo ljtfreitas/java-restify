@@ -25,7 +25,7 @@ public class DefaultAuthorizationCodeProviderTest {
 	public void setup() {
 		mockServerClient = new MockServerClient("localhost", 8088);
 
-		AuthorizationResource configuration = new AuthorizationResource.Builder()
+		AuthorizationGrantProperties properties = new AuthorizationGrantProperties.Builder()
 				.authorizationUri("http://localhost:8088/oauth/authorize")
 				.clientId("client-id")
 				.redirectUri("http://my.web.app/oauth/callback")
@@ -34,7 +34,7 @@ public class DefaultAuthorizationCodeProviderTest {
 				.state("current-state")
 				.build();
 
-		provider = new DefaultAuthorizationCodeProvider(configuration);
+		provider = new DefaultAuthorizationCodeProvider(properties);
 	}
 
 	@Test

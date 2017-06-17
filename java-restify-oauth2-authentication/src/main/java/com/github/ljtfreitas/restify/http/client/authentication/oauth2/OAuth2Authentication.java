@@ -31,23 +31,23 @@ import com.github.ljtfreitas.restify.http.client.authentication.Authentication;
 
 public class OAuth2Authentication implements Authentication {
 
-	private final Resource resource;
+	private final GrantProperties properties;
 	private final AccessTokenRepository accessTokenRepository;
 	private final Principal user;
 
-	public OAuth2Authentication(Resource resource, AccessTokenProvider accessTokenProvider) {
+	public OAuth2Authentication(GrantProperties resource, AccessTokenProvider accessTokenProvider) {
 		this(resource, accessTokenProvider, null);
 	}
 
-	public OAuth2Authentication(Resource resource, AccessTokenProvider accessTokenProvider, Principal user) {
-		this.resource = resource;
+	public OAuth2Authentication(GrantProperties properties, AccessTokenProvider accessTokenProvider, Principal user) {
+		this.properties = properties;
 		this.accessTokenRepository = new DefaultAccessTokenRepository(new AccessTokenMemoryStore(), accessTokenProvider);
 		this.user = user;
 	}
 
 	@Override
 	public String content() {
-		AccessToken accessToken = accessTokenRepository.findBy(user, resource);
+		AccessToken accessToken = accessTokenRepository.findBy(user, properties);
 		return accessToken.toString();
 	}
 }

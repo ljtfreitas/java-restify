@@ -36,15 +36,15 @@ import com.github.ljtfreitas.restify.http.contract.Parameters;
 
 class DefaultAuthorizationCodeProvider implements AuthorizationCodeProvider {
 
-	private final AuthorizationResource configuration;
+	private final AuthorizationGrantProperties configuration;
 	private final AuthorizationServer authorizationServer;
 
-	public DefaultAuthorizationCodeProvider(AuthorizationResource configuration, AuthorizationServer authorizationServer) {
+	public DefaultAuthorizationCodeProvider(AuthorizationGrantProperties configuration, AuthorizationServer authorizationServer) {
 		this.configuration = configuration;
 		this.authorizationServer = authorizationServer;
 	}
 
-	public DefaultAuthorizationCodeProvider(AuthorizationResource configuration) {
+	public DefaultAuthorizationCodeProvider(AuthorizationGrantProperties configuration) {
 		this.configuration = configuration;
 		this.authorizationServer = new DefaultAuthorizationServer();
 	}

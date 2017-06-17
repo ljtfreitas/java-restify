@@ -26,13 +26,14 @@
 package com.github.ljtfreitas.restify.http.client.authentication.oauth2;
 
 import java.net.URI;
+import java.net.URL;
 import java.util.Collection;
 import java.util.Optional;
 
 import com.github.ljtfreitas.restify.http.contract.Cookie;
 import com.github.ljtfreitas.restify.http.contract.Cookies;
 
-public class AuthorizationResource extends Resource {
+public class AuthorizationGrantProperties extends GrantProperties {
 
 	private String authorizationCode;
 	private URI authorizationUri;
@@ -67,11 +68,21 @@ public class AuthorizationResource extends Resource {
 
 	public static class Builder {
 
-		private final AuthorizationResource configuration = new AuthorizationResource();
-		private final Resource.Builder delegate = new Resource.Builder(configuration);
+		private final AuthorizationGrantProperties properties = new AuthorizationGrantProperties();
+		private final GrantProperties.Builder delegate = new GrantProperties.Builder(properties);
 
-		public Builder id(String id) {
-			delegate.id(id);
+		public Builder resource(Resource resource) {
+			delegate.resource(resource);
+			return this;
+		}
+
+		public Builder resource(String id) {
+			delegate.resource(id);
+			return this;
+		}
+
+		public Builder resource(String id, URL url) {
+			delegate.resource(id, url);
 			return this;
 		}
 
@@ -106,62 +117,62 @@ public class AuthorizationResource extends Resource {
 		}
 
 		public Builder authorizationCode(String authorizationCode) {
-			configuration.authorizationCode = authorizationCode;
+			properties.authorizationCode = authorizationCode;
 			return this;
 		}
 
 		public Builder authorizationUri(URI authorizationUri) {
-			configuration.authorizationUri = authorizationUri;
+			properties.authorizationUri = authorizationUri;
 			return this;
 		}
 
 		public Builder authorizationUri(String authorizationUri) {
-			configuration.authorizationUri = URI.create(authorizationUri);
+			properties.authorizationUri = URI.create(authorizationUri);
 			return this;
 		}
 
 		public Builder redirectUri(URI redirectUri) {
-			configuration.redirectUri = redirectUri;
+			properties.redirectUri = redirectUri;
 			return this;
 		}
 
 		public Builder redirectUri(String redirectUri) {
-			configuration.redirectUri = URI.create(redirectUri);
+			properties.redirectUri = URI.create(redirectUri);
 			return this;
 		}
 
 		public Builder responseType(String responseType) {
-			configuration.responseType = responseType;
+			properties.responseType = responseType;
 			return this;
 		}
 
 		public Builder cookie(String cookie) {
-			configuration.cookie = cookie;
+			properties.cookie = cookie;
 			return this;
 		}
 
 		public Builder cookie(Cookie cookie) {
-			configuration.cookie = cookie.toString();
+			properties.cookie = cookie.toString();
 			return this;
 		}
 
 		public Builder cookie(String name, String value) {
-			configuration.cookie = new Cookie(name, value).toString();
+			properties.cookie = new Cookie(name, value).toString();
 			return this;
 		}
 
 		public Builder cookies(Cookies cookies) {
-			configuration.cookie = cookies.toString();
+			properties.cookie = cookies.toString();
 			return this;
 		}
 
 		public Builder state(String state) {
-			configuration.state = state;
+			properties.state = state;
 			return this;
 		}
 
-		public AuthorizationResource build() {
-			return configuration;
+		public AuthorizationGrantProperties build() {
+			return properties;
 		}
 	}
 }

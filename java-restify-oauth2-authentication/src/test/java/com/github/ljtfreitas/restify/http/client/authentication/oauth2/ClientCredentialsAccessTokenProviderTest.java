@@ -34,13 +34,13 @@ public class ClientCredentialsAccessTokenProviderTest {
 	public void setup() {
 		mockServerClient = new MockServerClient("localhost", 8088);
 
-		Resource resource = new Resource.Builder()
+		GrantProperties properties = GrantProperties.Builder.clientCredentials()
 				.accessTokenUri("http://localhost:8088/oauth/token")
 				.credentials(new ClientCredentials("client-id", "client-secret"))
 				.scopes("read", "write")
 				.build();
 
-		provider = new ClientCredentialsAccessTokenProvider(resource);
+		provider = new ClientCredentialsAccessTokenProvider(properties);
 
 		authorizationCredentials = "Y2xpZW50LWlkOmNsaWVudC1zZWNyZXQ="; //(base64(client_id:client_secret))
 	}

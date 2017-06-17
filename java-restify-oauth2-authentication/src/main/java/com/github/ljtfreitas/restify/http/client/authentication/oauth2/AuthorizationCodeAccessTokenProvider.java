@@ -27,24 +27,24 @@ package com.github.ljtfreitas.restify.http.client.authentication.oauth2;
 
 public class AuthorizationCodeAccessTokenProvider extends BaseAccessTokenProvider {
 
-	private final AuthorizationResource configuration;
+	private final AuthorizationGrantProperties configuration;
 	private final AuthorizationCodeProvider authorizationCodeProvider;
 
-	public AuthorizationCodeAccessTokenProvider(AuthorizationResource configuration) {
+	public AuthorizationCodeAccessTokenProvider(AuthorizationGrantProperties configuration) {
 		this(configuration, new DefaultAuthorizationServer());
 	}
 
-	public AuthorizationCodeAccessTokenProvider(AuthorizationResource configuration,
+	public AuthorizationCodeAccessTokenProvider(AuthorizationGrantProperties configuration,
 			AuthorizationCodeProvider authorizationCodeProvider) {
 		this(configuration, authorizationCodeProvider, new DefaultAuthorizationServer());
 	}
 
-	public AuthorizationCodeAccessTokenProvider(AuthorizationResource configuration,
+	public AuthorizationCodeAccessTokenProvider(AuthorizationGrantProperties configuration,
 			AuthorizationServer authorizationServer) {
 		this(configuration, new DefaultAuthorizationCodeProvider(configuration, authorizationServer), authorizationServer);
 	}
 
-	public AuthorizationCodeAccessTokenProvider(AuthorizationResource configuration,
+	public AuthorizationCodeAccessTokenProvider(AuthorizationGrantProperties configuration,
 			AuthorizationCodeProvider authorizationCodeProvider, AuthorizationServer authorizationServer) {
 		super(configuration, authorizationServer);
 		this.configuration = configuration;

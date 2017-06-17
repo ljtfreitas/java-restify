@@ -28,9 +28,10 @@ package com.github.ljtfreitas.restify.http.client.authentication.oauth2;
 import static com.github.ljtfreitas.restify.http.util.Preconditions.nonNull;
 
 import java.net.URI;
+import java.net.URL;
 import java.util.Collection;
 
-public class ResourceOwnerResource extends Resource {
+public class ResourceOwnerGrantProperties extends GrantProperties {
 
 	private ResourceOwner resourceOwner;
 
@@ -40,11 +41,21 @@ public class ResourceOwnerResource extends Resource {
 
 	public static class Builder {
 
-		private final ResourceOwnerResource configuration = new ResourceOwnerResource();
-		private final Resource.Builder delegate = new Resource.Builder(configuration);
+		private final ResourceOwnerGrantProperties properties = new ResourceOwnerGrantProperties();
+		private final GrantProperties.Builder delegate = new GrantProperties.Builder(properties);
 
-		public Builder id(String id) {
-			delegate.id(id);
+		public Builder resource(Resource resource) {
+			delegate.resource(resource);
+			return this;
+		}
+
+		public Builder resource(String id) {
+			delegate.resource(id);
+			return this;
+		}
+
+		public Builder resource(String id, URL url) {
+			delegate.resource(id, url);
 			return this;
 		}
 
@@ -79,18 +90,18 @@ public class ResourceOwnerResource extends Resource {
 		}
 
 		public Builder resourceOwner(ResourceOwner resourceOwner) {
-			configuration.resourceOwner = resourceOwner;
+			properties.resourceOwner = resourceOwner;
 			return this;
 		}
 
 		public Builder resourceOwner(String username, String password) {
-			configuration.resourceOwner = new ResourceOwner(username, password);
+			properties.resourceOwner = new ResourceOwner(username, password);
 			return this;
 		}
 
-		public ResourceOwnerResource build() {
-			nonNull(configuration.resourceOwner, "Your resource owner credentials are required.");
-			return configuration;
+		public ResourceOwnerGrantProperties build() {
+			nonNull(properties.resourceOwner, "Your resource owner credentials are required.");
+			return properties;
 		}
 	}
 }

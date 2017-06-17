@@ -30,8 +30,8 @@ import java.util.Optional;
 
 public interface AccessTokenStore {
 
-	public Optional<AccessToken> findBy(Principal user, Resource resource);
+	public Optional<AccessToken> findBy(Principal user, GrantProperties properties);
 
-	public void add(Principal user, Resource resource, AccessToken accessToken);
+	public void add(Principal user, GrantProperties properties, AccessToken accessToken);
 
 }

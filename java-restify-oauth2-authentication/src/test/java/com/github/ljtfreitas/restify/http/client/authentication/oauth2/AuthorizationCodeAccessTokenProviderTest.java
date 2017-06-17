@@ -40,7 +40,7 @@ public class AuthorizationCodeAccessTokenProviderTest {
 	public void setup() {
 		mockServerClient = new MockServerClient("localhost", 8088);
 
-		AuthorizationResource configuration = new AuthorizationResource.Builder()
+		AuthorizationGrantProperties properties = GrantProperties.Builder.authorization()
 				.authorizationUri("http://localhost:8088/oauth/authorize")
 				.accessTokenUri("http://localhost:8088/oauth/token")
 				.credentials(new ClientCredentials("client-id", "client-secret"))
@@ -50,7 +50,7 @@ public class AuthorizationCodeAccessTokenProviderTest {
 
 		when(authorizationCodeProvider.provides()).thenReturn("abc1234");
 
-		provider = new AuthorizationCodeAccessTokenProvider(configuration, authorizationCodeProvider);
+		provider = new AuthorizationCodeAccessTokenProvider(properties, authorizationCodeProvider);
 
 		authorizationCredentials = "Y2xpZW50LWlkOmNsaWVudC1zZWNyZXQ="; //(base64(client_id:client_secret))
 	}

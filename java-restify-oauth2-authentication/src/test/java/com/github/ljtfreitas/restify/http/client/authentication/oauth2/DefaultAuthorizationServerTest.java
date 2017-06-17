@@ -36,7 +36,7 @@ public class DefaultAuthorizationServerTest {
 
 	@Test
 	public void shouldAuthorizeOnAuthorizationServer() {
-		AuthorizationResource configuration = new AuthorizationResource.Builder()
+		AuthorizationGrantProperties properties = GrantProperties.Builder.authorization()
 				.authorizationUri("http://localhost:8088/oauth/authorize")
 				.clientId("client-id")
 				.redirectUri("http://my.web.app/oauth/callback")
@@ -59,7 +59,7 @@ public class DefaultAuthorizationServerTest {
 				.withHeader("Content-Type", "application/x-www-form-urlencoded")
 				.withHeader("Location", "http://my.web.app/oauth/callback?code=abc1234&state=current-state"));
 
-		EndpointResponse<String> authorizationResponse = authorizationServer.authorize(configuration);
+		EndpointResponse<String> authorizationResponse = authorizationServer.authorize(properties);
 
 		assertNotNull(authorizationResponse);
 		assertEquals(StatusCode.of(HttpStatusCode.FOUND), authorizationResponse.code());

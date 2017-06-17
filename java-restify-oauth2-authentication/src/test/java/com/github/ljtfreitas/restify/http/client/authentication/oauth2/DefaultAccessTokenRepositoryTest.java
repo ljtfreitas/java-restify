@@ -19,7 +19,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 public class DefaultAccessTokenRepositoryTest {
 
 	@Mock
-	private Resource resource;
+	private GrantProperties resource;
 
 	@Mock
 	private AccessTokenStore accessTokenStore;

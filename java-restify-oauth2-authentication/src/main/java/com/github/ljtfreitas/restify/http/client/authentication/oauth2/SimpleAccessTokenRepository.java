@@ -36,7 +36,7 @@ public class SimpleAccessTokenRepository implements AccessTokenRepository {
 	}
 
 	@Override
-	public AccessToken findBy(Principal user, Resource resource) {
+	public AccessToken findBy(Principal user, GrantProperties properties) {
 		return accessToken;
 	}
 }

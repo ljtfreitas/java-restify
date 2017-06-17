@@ -32,15 +32,15 @@ import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
 
 abstract class BaseAccessTokenProvider implements AccessTokenProvider {
 
-	private final Resource resource;
+	private final GrantProperties properties;
 	private final AuthorizationServer authorizationServer;
 
-	protected BaseAccessTokenProvider(Resource resource) {
-		this(resource, new DefaultAuthorizationServer());
+	protected BaseAccessTokenProvider(GrantProperties properties) {
+		this(properties, new DefaultAuthorizationServer());
 	}
 
-	protected BaseAccessTokenProvider(Resource resource, AuthorizationServer authorizationServer) {
-		this.resource = resource;
+	protected BaseAccessTokenProvider(GrantProperties properties, AuthorizationServer authorizationServer) {
+		this.properties = properties;
 		this.authorizationServer = authorizationServer;
 	}
 
@@ -61,8 +61,8 @@ abstract class BaseAccessTokenProvider implements AccessTokenProvider {
 
 		Builder builder = AccessTokenRequest.refreshToken(accessToken.refreshToken());
 
-		return builder.accessTokenUri(resource.accessTokenUri())
-					  .credentials(resource.credentials())
+		return builder.accessTokenUri(properties.accessTokenUri())
+					  .credentials(properties.credentials())
 					  .build();
 	}
 

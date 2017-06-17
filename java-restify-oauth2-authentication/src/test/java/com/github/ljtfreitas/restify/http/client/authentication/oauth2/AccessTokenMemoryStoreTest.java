@@ -15,20 +15,20 @@ public class AccessTokenMemoryStoreTest {
 	public void shouldSaveAccessTokenOnStore() {
 		Principal user = () -> "user-identity-key";
 
-		Resource resource = new Resource.Builder()
+		GrantProperties properties = new GrantProperties.Builder()
 				.credentials(ClientCredentials.clientId("client-id"))
 				.scopes("read", "write")
 				.build();
 
 		acessTokenMemoryStore = new AccessTokenMemoryStore();
 
-		assertFalse(acessTokenMemoryStore.findBy(user, resource).isPresent());
+		assertFalse(acessTokenMemoryStore.findBy(user, properties).isPresent());
 
 		AccessToken source = AccessToken.bearer("accessToken");
 
-		acessTokenMemoryStore.add(user, resource, source);
+		acessTokenMemoryStore.add(user, properties, source);
 
-		Optional<AccessToken> foundAccessToken = acessTokenMemoryStore.findBy(user, resource);
+		Optional<AccessToken> foundAccessToken = acessTokenMemoryStore.findBy(user, properties);
 
 		assertTrue(foundAccessToken.isPresent());
 		assertSame(source, foundAccessToken.get());

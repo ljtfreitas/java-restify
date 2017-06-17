@@ -25,88 +25,27 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.authentication.oauth2;
 
-import java.net.URI;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.stream.Collectors;
+import java.net.URL;
 
 public class Resource {
 
-	private String id;
-	private URI accessTokenUri;
-	private ClientCredentials credentials;
-	private Collection<String> scopes = Collections.emptyList();
+	public final String id;
+	public final URL url;
+
+	public Resource(String id) {
+		this(id, null);
+	}
+
+	public Resource(String id, URL url) {
+		this.id = id;
+		this.url = url;
+	}
 
 	public String id() {
 		return id;
 	}
 
-	public ClientCredentials credentials() {
-		return credentials;
-	}
-
-	public Collection<String> scopes() {
-		return scopes;
-	}
-
-	public String scope() {
-		return scopes.stream().collect(Collectors.joining(" "));
-	}
-
-	public URI accessTokenUri() {
-		return accessTokenUri;
-	}
-
-	public static class Builder {
-
-		private final Resource resource;
-
-		public Builder() {
-			this.resource = new Resource();
-		}
-
-		public Builder(Resource resource) {
-			this.resource = resource;
-		}
-
-		public Builder id(String id) {
-			resource.id = id;
-			return this;
-		}
-
-		public Builder accessTokenUri(String accessTokenUri) {
-			resource.accessTokenUri = URI.create(accessTokenUri);
-			return this;
-		}
-
-		public Builder accessTokenUri(URI accessTokenUri) {
-			resource.accessTokenUri = accessTokenUri;
-			return this;
-		}
-
-		public Builder clientId(String clientId) {
-			resource.credentials = ClientCredentials.clientId(clientId);
-			return this;
-		}
-
-		public Builder credentials(ClientCredentials credentials) {
-			resource.credentials = credentials;
-			return this;
-		}
-
-		public Builder scopes(Collection<String> scopes) {
-			resource.scopes = scopes;
-			return this;
-		}
-
-		public Builder scopes(String... scopes) {
-			resource.scopes = Arrays.asList(scopes);
-			return this;
-		}
-
-		public Resource build() {
-			return resource;
-		}
+	public URL url() {
+		return url;
 	}
 }

@@ -34,14 +34,14 @@ public class ResourceOwnerPasswordAccessTokenProviderTest {
 	public void setup() {
 		mockServerClient = new MockServerClient("localhost", 8088);
 
-		ResourceOwnerResource configuration = new ResourceOwnerResource.Builder()
+		ResourceOwnerGrantProperties properties = GrantProperties.Builder.resourceOwner()
 				.accessTokenUri("http://localhost:8088/oauth/token")
 				.credentials(new ClientCredentials("client-id", "client-secret"))
 				.scopes("read", "write")
 				.resourceOwner("my-username", "my-password")
 				.build();
 
-		provider = new ResourceOwnerPasswordAcessTokenProvider(configuration);
+		provider = new ResourceOwnerPasswordAcessTokenProvider(properties);
 
 		authorizationCredentials = "Y2xpZW50LWlkOmNsaWVudC1zZWNyZXQ="; //(base64(client_id:client_secret))
 	}

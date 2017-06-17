@@ -29,6 +29,6 @@ import java.security.Principal;
 
 public interface AccessTokenRepository {
 
-	AccessToken findBy(Principal user, Resource resource);
+	AccessToken findBy(Principal user, GrantProperties properties);
 
 }
