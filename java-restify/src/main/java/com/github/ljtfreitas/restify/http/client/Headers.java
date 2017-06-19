@@ -34,11 +34,41 @@ import java.util.Optional;
 public class Headers {
 
 	public static final String ACCEPT = "Accept";
+	public static final String ACCEPT_CHARSET = "Accept-Charset";
+	public static final String ACCEPT_ENCODING = "Accept-Encoding";
+	public static final String ACCEPT_LANGUAGE = "Accept-Language";
+	public static final String ACCEPT_RANGES = "Accept-Ranges";
+	public static final String ACCEPT_VERSION = "Accept-Version";
+	public static final String ACCESS_CONTROL_ALLOW_CREDENTIALS = "Access-Control-Allow-Credentials";
+	public static final String ACCESS_CONTROL_ALLOW_HEADERS = "Access-Control-Allow-Headers";
+	public static final String ACCESS_CONTROL_ALLOW_METHODS = "Access-Control-Allow-Methods";
+	public static final String ACCESS_CONTROL_ALLOW_ORIGIN = "Access-Control-Allow-Origin";
+	public static final String ACCESS_CONTROL_EXPOSE_HEADERS = "Access-Control-Expose-Headers";
+	public static final String ACCESS_CONTROL_MAX_AGE = "Access-Control-Max-Age";
+	public static final String ACCESS_CONTROL_REQUEST_HEADERS = "Access-Control-Request-Headers";
+	public static final String ACCESS_CONTROL_REQUEST_METHOD = "Access-Control-Request-Method";
+	public static final String AGE = "Age";
+	public static final String ALLOW = "Allow";
 	public static final String AUTHORIZATION = "Authorization";
+	public static final String CACHE_CONTROL = "Cache-Control";
 	public static final String CONNECTION = "Connection";
+	public static final String CONTENT_DISPOSITION = "Content-Disposition";
+	public static final String CONTENT_ENCODING = "Content-Encoding";
+	public static final String CONTENT_LANGUAGE = "Content-Language";
 	public static final String CONTENT_LENGTH = "Content-Length";
+	public static final String CONTENT_LOCATION = "Content-Location";
+	public static final String CONTENT_RANGE = "Content-Range";
 	public static final String CONTENT_TYPE = "Content-Type";
+	public static final String COOKIE = "Cookie";
+	public static final String DATE = "Date";
+	public static final String DO_NOT_TRACK = "DNT";
+	public static final String ETAG = "ETag";
+	public static final String EXPECT = "Expect";
+	public static final String EXPIRES = "Expires";
+	public static final String FORWARDED = "Forwarded";
+	public static final String FROM = "From";
 	public static final String HOST = "Host";
+	public static final String IF_MATCH = "If-Match";
 
 	private final Collection<Header> headers;
 

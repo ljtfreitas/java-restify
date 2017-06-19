@@ -58,8 +58,7 @@ public class AcceptHeaderEndpointRequestInterceptor implements EndpointRequestIn
 		Optional<Header> accept = endpointRequest.headers().get(ACCEPT);
 
 		if (!accept.isPresent()) {
-			String acceptTypes = contentTypes.stream().map(ContentType::name).collect(Collectors.joining(", "));
-			endpointRequest.headers().add(new Header(ACCEPT, acceptTypes));
+			endpointRequest.headers().add(Header.accept(contentTypes));
 		}
 
 		return endpointRequest;
