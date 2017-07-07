@@ -7,8 +7,6 @@ import static org.mockserver.model.JsonBody.json;
 import static org.mockserver.model.StringBody.exact;
 import static org.mockserver.verify.VerificationTimes.once;
 
-import java.util.Collections;
-
 import org.apache.curator.test.TestingServer;
 import org.junit.After;
 import org.junit.Before;
@@ -26,10 +24,11 @@ import com.github.ljtfreitas.restify.http.contract.Header;
 import com.github.ljtfreitas.restify.http.contract.Path;
 import com.github.ljtfreitas.restify.http.contract.Post;
 import com.github.ljtfreitas.restify.http.netflix.client.request.RibbonHttpClientRequestFactory;
+import com.github.ljtfreitas.restify.http.netflix.client.request.zookeeper.ZookeeperServiceRegister.Payload;
 import com.netflix.loadbalancer.ILoadBalancer;
 import com.netflix.loadbalancer.LoadBalancerBuilder;
 
-public class ZookeeperServiceDiscoveryTest {
+public class ZookeeperServiceProviderDiscoveryTest {
 
 	@Rule
 	public MockServerRule mockApiServerRule = new MockServerRule(this, 7080, 7081, 7082);
@@ -40,7 +39,9 @@ public class ZookeeperServiceDiscoveryTest {
 
 	private MockServerClient mockServerClient;
 
-	private ZookeeperServiceDiscovery zookeeperServiceDiscovery;
+	private ZookeeperServiceProviderDiscovery<ZookeeperServiceInstance> zookeeperServiceDiscovery;
+
+	private ZookeeperServiceRegister<ZookeeperServiceInstance> zookeeperServiceRegister;
 
 	@Before
 	public void setup() throws Exception {
@@ -48,18 +49,28 @@ public class ZookeeperServiceDiscoveryTest {
 
 		ZookeeperConfiguration zookeeperConfiguration = new ZookeeperConfiguration("localhost", 2181, "/services");
 
-		zookeeperServiceDiscovery = new ZookeeperServiceDiscovery(zookeeperConfiguration);
-		zookeeperServiceDiscovery.register(new ZookeeperInstance("myApi", "localhost", 7080, Collections.emptyMap()));
-		zookeeperServiceDiscovery.register(new ZookeeperInstance("myApi", "localhost", 7081, Collections.emptyMap()));
-		zookeeperServiceDiscovery.register(new ZookeeperInstance("myApi", "localhost", 7082, Collections.emptyMap()));
+		ZookeeperCuratorServiceDiscovery<ZookeeperServiceInstance> zookeeperCuratorServiceDiscovery = new ZookeeperCuratorServiceDiscovery<>(ZookeeperServiceInstance.class, zookeeperConfiguration, new ZookeeperInstanceSerializer());
 
-		ZookeeperServers zookeeperServers = new ZookeeperServers("myApi", zookeeperServiceDiscovery);
+		zookeeperServiceRegister = new DefaultZookeeperServiceRegister<>(zookeeperCuratorServiceDiscovery);
+
+		ZookeeperServiceInstance zookeeperServiceInstance = new ZookeeperServiceInstance("myApi", "localhost", 7080);
+		zookeeperServiceRegister.register(zookeeperServiceInstance, Payload.of(zookeeperServiceInstance));
+
+		zookeeperServiceInstance = new ZookeeperServiceInstance("myApi", "localhost", 7081);
+		zookeeperServiceRegister.register(zookeeperServiceInstance, Payload.of(zookeeperServiceInstance));
+
+		zookeeperServiceInstance = new ZookeeperServiceInstance("myApi", "localhost", 7082);
+		zookeeperServiceRegister.register(zookeeperServiceInstance, Payload.of(zookeeperServiceInstance));
+
+		zookeeperServiceDiscovery = new ZookeeperServiceProviderDiscovery<>("myApi", zookeeperCuratorServiceDiscovery);
+
+		ZookeeperServers<ZookeeperServiceInstance> zookeeperServers = new ZookeeperServers<>("myApi", zookeeperServiceDiscovery);
 
 		ILoadBalancer loadBalancer = LoadBalancerBuilder.newBuilder()
 				.withDynamicServerList(zookeeperServers)
 					.buildDynamicServerListLoadBalancer();
 
-		RibbonHttpClientRequestFactory ribbonHttpClientRequestFactory = new RibbonHttpClientRequestFactory(loadBalancer, new RibbonZookeeperExceptionHandler(zookeeperServiceDiscovery));
+		RibbonHttpClientRequestFactory ribbonHttpClientRequestFactory = new RibbonHttpClientRequestFactory(loadBalancer, new ZookeeperServiceFailureExceptionHandler(zookeeperServiceDiscovery));
 
 		myApi = new RestifyProxyBuilder()
 				.client(ribbonHttpClientRequestFactory)
@@ -70,6 +81,7 @@ public class ZookeeperServiceDiscoveryTest {
 	@After
 	public void after() throws Exception {
 		zookeeperServiceDiscovery.close();
+		zookeeperServiceRegister.close();
 		zookeeperServer.close();
 	}
 

@@ -37,7 +37,7 @@ import org.codehaus.jackson.map.ObjectMapper;
 
 import com.github.ljtfreitas.restify.http.util.Tryable;
 
-public class ZookeeperInstanceSerializer implements InstanceSerializer<ZookeeperInstance> {
+public class ZookeeperInstanceSerializer implements InstanceSerializer<ZookeeperServiceInstance> {
 
 	private final ObjectMapper mapper;
 
@@ -50,7 +50,7 @@ public class ZookeeperInstanceSerializer implements InstanceSerializer<Zookeeper
 	}
 
 	@Override
-	public ServiceInstance<ZookeeperInstance> deserialize(byte[] bytes) throws Exception {
+	public ServiceInstance<ZookeeperServiceInstance> deserialize(byte[] bytes) throws Exception {
 		JsonNode tree = mapper.readTree(bytes);
 
 		String id = tree.get("id").asText();
@@ -79,8 +79,8 @@ public class ZookeeperInstanceSerializer implements InstanceSerializer<Zookeeper
 
 		JsonNode payload = tree.get("payload");
 
-		ZookeeperInstance zookeeperInstance = Optional.ofNullable(payload)
-				.map(p -> Tryable.of(() -> mapper.readValue(p, ZookeeperInstance.class)))
+		ZookeeperServiceInstance zookeeperInstance = Optional.ofNullable(payload)
+				.map(p -> Tryable.of(() -> mapper.readValue(p, ZookeeperServiceInstance.class)))
 					.orElse(null);
 
 		return new ServiceInstance<>(name, id, address, port, sslPort, zookeeperInstance, registrationTimeUTC,
@@ -88,7 +88,7 @@ public class ZookeeperInstanceSerializer implements InstanceSerializer<Zookeeper
 	}
 
 	@Override
-	public byte[] serialize(ServiceInstance<ZookeeperInstance> instance) throws Exception {
+	public byte[] serialize(ServiceInstance<ZookeeperServiceInstance> instance) throws Exception {
 		ByteArrayOutputStream out = new ByteArrayOutputStream();
 		mapper.writeValue(out, instance);
 		return out.toByteArray();

@@ -25,55 +25,30 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.netflix.client.request.zookeeper;
 
-import java.net.SocketException;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.HashSet;
 
-import com.github.ljtfreitas.restify.http.netflix.client.request.RibbonExceptionHandler;
 import com.github.ljtfreitas.restify.http.netflix.client.request.RibbonRequest;
 
-public abstract class RibbonZookeeperExceptionHandler implements RibbonExceptionHandler {
+public class ZookeeperServiceFailureExceptionHandler extends RibbonZookeeperExceptionHandler {
 
-	private final Collection<Class<? extends Throwable>> causes;
+	private final ZookeeperServiceDiscovery<?> zookeeperServiceDiscovery;
 
-	public RibbonZookeeperExceptionHandler() {
-		this(Arrays.asList(SocketException.class));
+	public ZookeeperServiceFailureExceptionHandler(ZookeeperServiceDiscovery<?> zookeeperServiceDiscovery) {
+		this.zookeeperServiceDiscovery = zookeeperServiceDiscovery;
 	}
 
-	public RibbonZookeeperExceptionHandler(Collection<Class<? extends Throwable>> causes) {
-		this.causes = new HashSet<>(causes);
+	public ZookeeperServiceFailureExceptionHandler(ZookeeperServiceDiscovery<?> zookeeperServiceDiscovery,
+			Collection<Class<? extends Throwable>> causes) {
+		super(causes);
+		this.zookeeperServiceDiscovery = zookeeperServiceDiscovery;
 	}
 
 	@Override
-	public final void onException(RibbonRequest request, Throwable cause) {
-		if (found(cause)) {
-			onConnectionFailure(request, cause);
-		}
-	}
+	protected void onConnectionFailure(RibbonRequest request, Throwable cause) {
+		String name = request.serviceName();
+		String host = request.getUri().getHost();
+		int port = request.getUri().getPort();
 
-	protected abstract void onConnectionFailure(RibbonRequest request, Throwable cause);
-
-	private boolean found(Throwable cause) {
-		Throwable throwable = cause;
-
-		boolean found = false;
-
-		while (throwable != null) {
-			found = find(throwable);
-
-			if (found) {
-				break;
-
-			} else {
-				throwable = throwable.getCause();
-			}
-		}
-
-		return found;
-	}
-
-	private boolean find(Throwable cause) {
-		return causes.stream().anyMatch(type -> type.isInstance(cause));
+		zookeeperServiceDiscovery.onFailure(new ZookeeperServiceInstance(name, host, port));
 	}
 }

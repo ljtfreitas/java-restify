@@ -81,7 +81,7 @@ public class RibbonHttpClientRequestFactory implements HttpClientRequestFactory 
 
 	public RibbonHttpClientRequestFactory(ILoadBalancer loadBalancer, IClientConfig clientConfig, HttpClientRequestFactory delegate,
 			RibbonExceptionHandler ribbonExceptionHandler, Charset charset) {
-		this(new RibbonLoadBalancedClient(loadBalancer, clientConfig, delegate), charset);
+		this(new RibbonLoadBalancedClient(loadBalancer, clientConfig, delegate, ribbonExceptionHandler), charset);
 	}
 
 	public RibbonHttpClientRequestFactory(RibbonLoadBalancedClient ribbonLoadBalancedClient) {

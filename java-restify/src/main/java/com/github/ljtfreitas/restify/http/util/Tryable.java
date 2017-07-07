@@ -70,6 +70,13 @@ public interface Tryable {
 		}
 	}
 
+	public static void silently(TryableExpression expression) {
+		try {
+			expression.run();
+		} catch (Exception e) {
+		}
+	}
+
 	public interface TryableSupplier<T> {
 		T get() throws Exception;
 	}

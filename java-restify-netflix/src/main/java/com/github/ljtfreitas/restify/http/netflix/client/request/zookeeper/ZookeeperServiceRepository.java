@@ -25,55 +25,9 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.netflix.client.request.zookeeper;
 
-import java.net.SocketException;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
+public interface ZookeeperServiceRepository<T> {
 
-import com.github.ljtfreitas.restify.http.netflix.client.request.RibbonExceptionHandler;
-import com.github.ljtfreitas.restify.http.netflix.client.request.RibbonRequest;
+	public void register(T zookeeperInstance);
 
-public abstract class RibbonZookeeperExceptionHandler implements RibbonExceptionHandler {
-
-	private final Collection<Class<? extends Throwable>> causes;
-
-	public RibbonZookeeperExceptionHandler() {
-		this(Arrays.asList(SocketException.class));
-	}
-
-	public RibbonZookeeperExceptionHandler(Collection<Class<? extends Throwable>> causes) {
-		this.causes = new HashSet<>(causes);
-	}
-
-	@Override
-	public final void onException(RibbonRequest request, Throwable cause) {
-		if (found(cause)) {
-			onConnectionFailure(request, cause);
-		}
-	}
-
-	protected abstract void onConnectionFailure(RibbonRequest request, Throwable cause);
-
-	private boolean found(Throwable cause) {
-		Throwable throwable = cause;
-
-		boolean found = false;
-
-		while (throwable != null) {
-			found = find(throwable);
-
-			if (found) {
-				break;
-
-			} else {
-				throwable = throwable.getCause();
-			}
-		}
-
-		return found;
-	}
-
-	private boolean find(Throwable cause) {
-		return causes.stream().anyMatch(type -> type.isInstance(cause));
-	}
+	public void unregister(T zookeeperInstance);
 }

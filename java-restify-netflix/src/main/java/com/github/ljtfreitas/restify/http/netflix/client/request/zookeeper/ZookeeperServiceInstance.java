@@ -27,13 +27,14 @@ package com.github.ljtfreitas.restify.http.netflix.client.request.zookeeper;
 
 import java.util.Collections;
 import java.util.Map;
+import java.util.Optional;
 import java.util.UUID;
 
 import org.codehaus.jackson.annotate.JsonIgnoreProperties;
 import org.codehaus.jackson.annotate.JsonProperty;
 
 @JsonIgnoreProperties(ignoreUnknown = true)
-public class ZookeeperInstance {
+public class ZookeeperServiceInstance {
 
 	@JsonProperty
 	private String id;
@@ -45,24 +46,31 @@ public class ZookeeperInstance {
 	private int port;
 
 	@JsonProperty
+	private Integer sslPort;
+
+	@JsonProperty
+	private String scheme;
+
+	@JsonProperty
 	private String address;
 
 	@JsonProperty
 	private Map<String, String> metadata;
 
 	@Deprecated
-	ZookeeperInstance() {
+	ZookeeperServiceInstance() {
 	}
 
-	public ZookeeperInstance(String name, String address, int port) {
+	public ZookeeperServiceInstance(String name, String address, int port) {
 		this(name, address, port, Collections.emptyMap());
 	}
 
-	public ZookeeperInstance(String name, String address, int port, Map<String, String> metadata) {
+	public ZookeeperServiceInstance(String name, String address, int port, Map<String, String> metadata) {
 		this.id = UUID.randomUUID().toString();
 		this.name = name;
 		this.address = address;
 		this.port = port;
+		this.scheme = "http";
 		this.metadata = metadata;
 	}
 
@@ -80,6 +88,22 @@ public class ZookeeperInstance {
 
 	public String address() {
 		return address;
+	}
+
+	public Optional<Integer> sslPort() {
+		return Optional.ofNullable(sslPort);
+	}
+
+	public void sslPort(int sslPort) {
+		this.sslPort = sslPort;
+	}
+
+	public String scheme() {
+		return scheme;
+	}
+
+	public void scheme(String scheme) {
+		this.scheme = scheme;
 	}
 
 	public Map<String, String> metadata() {
@@ -103,6 +127,12 @@ public class ZookeeperInstance {
 				.append(", ")
 				.append("Port: ")
 					.append(port)
+				.append(", ")
+				.append("SSL Port: ")
+					.append(sslPort)
+				.append(", ")
+				.append("Scheme: ")
+					.append(scheme)
 				.append(", ")
 				.append("Metadata: ")
 					.append(metadata)

@@ -25,14 +25,45 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.netflix.client.request.zookeeper;
 
+import java.io.IOException;
+import java.util.Collection;
+
+import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.x.discovery.ServiceInstance;
+import org.apache.curator.x.discovery.details.InstanceSerializer;
 
-import com.netflix.loadbalancer.Server;
+import com.github.ljtfreitas.restify.http.util.Tryable;
 
-public class ZookeeperServer<T> extends Server {
+public class DefaultZookeeperServiceDiscovery<T> implements ZookeeperServiceDiscovery<T> {
 
-	public ZookeeperServer(ServiceInstance<T> instance) {
-		super(instance.getAddress(), instance.getPort());
+	private final ZookeeperCuratorServiceDiscovery<T> serviceDiscovery;
+
+	public DefaultZookeeperServiceDiscovery(Class<T> instanceType, ZookeeperConfiguration configuration,
+			InstanceSerializer<T> serializer) {
+		this(new ZookeeperCuratorServiceDiscovery<>(instanceType, configuration, serializer));
 	}
 
+	public DefaultZookeeperServiceDiscovery(Class<T> instanceType, ZookeeperConfiguration configuration,
+			InstanceSerializer<T> serializer, CuratorFramework curator) {
+		this(new ZookeeperCuratorServiceDiscovery<>(instanceType, configuration, serializer, curator));
+	}
+
+	public DefaultZookeeperServiceDiscovery(ZookeeperCuratorServiceDiscovery<T> serviceDiscovery) {
+		this.serviceDiscovery = serviceDiscovery;
+	}
+
+	@Override
+	public Collection<ServiceInstance<T>> queryForInstances(String serviceName) {
+		return Tryable.of(() -> serviceDiscovery.queryForInstances(serviceName));
+	}
+
+	@Override
+	public void onFailure(ZookeeperServiceInstance instance) {
+		Tryable.run(() -> serviceDiscovery.unregisterService(instance));
+	}
+
+	@Override
+	public void close() throws IOException {
+		serviceDiscovery.close();
+	}
 }

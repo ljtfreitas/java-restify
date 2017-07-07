@@ -32,12 +32,12 @@ import com.netflix.client.config.IClientConfig;
 import com.netflix.loadbalancer.AbstractServerList;
 import com.netflix.loadbalancer.Server;
 
-public class ZookeeperServers extends AbstractServerList<Server> {
+public class ZookeeperServers<T> extends AbstractServerList<Server> {
 
 	private final String serviceName;
-	private final ZookeeperServiceDiscovery zookeeperServiceDiscovery;
+	private final ZookeeperServiceDiscovery<T> zookeeperServiceDiscovery;
 
-	public ZookeeperServers(String serviceName, ZookeeperServiceDiscovery zookeeperServiceDiscovery) {
+	public ZookeeperServers(String serviceName, ZookeeperServiceDiscovery<T> zookeeperServiceDiscovery) {
 		this.serviceName = serviceName;
 		this.zookeeperServiceDiscovery = zookeeperServiceDiscovery;
 	}
@@ -55,7 +55,7 @@ public class ZookeeperServers extends AbstractServerList<Server> {
 	private List<Server> allServers() {
 		return zookeeperServiceDiscovery.queryForInstances(serviceName)
 				.stream()
-					.map(instance -> new ZookeeperServer(instance))
+					.map(instance -> new ZookeeperServer<>(instance))
 						.collect(Collectors.toList());
 	}
 

@@ -25,55 +25,28 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.netflix.client.request.zookeeper;
 
-import java.net.SocketException;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.HashSet;
+import java.io.Closeable;
 
-import com.github.ljtfreitas.restify.http.netflix.client.request.RibbonExceptionHandler;
-import com.github.ljtfreitas.restify.http.netflix.client.request.RibbonRequest;
+public interface ZookeeperServiceRegister<T> extends Closeable {
 
-public abstract class RibbonZookeeperExceptionHandler implements RibbonExceptionHandler {
+	public void register(ZookeeperServiceInstance instance, Payload<T> payload);
 
-	private final Collection<Class<? extends Throwable>> causes;
+	public void unregister(ZookeeperServiceInstance instance);
 
-	public RibbonZookeeperExceptionHandler() {
-		this(Arrays.asList(SocketException.class));
-	}
+	public class Payload<T> {
 
-	public RibbonZookeeperExceptionHandler(Collection<Class<? extends Throwable>> causes) {
-		this.causes = new HashSet<>(causes);
-	}
+		private final T payload;
 
-	@Override
-	public final void onException(RibbonRequest request, Throwable cause) {
-		if (found(cause)) {
-			onConnectionFailure(request, cause);
-		}
-	}
-
-	protected abstract void onConnectionFailure(RibbonRequest request, Throwable cause);
-
-	private boolean found(Throwable cause) {
-		Throwable throwable = cause;
-
-		boolean found = false;
-
-		while (throwable != null) {
-			found = find(throwable);
-
-			if (found) {
-				break;
-
-			} else {
-				throwable = throwable.getCause();
-			}
+		public Payload(T payload) {
+			this.payload = payload;
 		}
 
-		return found;
-	}
+		public T get() {
+			return payload;
+		}
 
-	private boolean find(Throwable cause) {
-		return causes.stream().anyMatch(type -> type.isInstance(cause));
+		public static <T> Payload<T> of(T payload) {
+			return new Payload<>(payload);
+		}
 	}
 }
