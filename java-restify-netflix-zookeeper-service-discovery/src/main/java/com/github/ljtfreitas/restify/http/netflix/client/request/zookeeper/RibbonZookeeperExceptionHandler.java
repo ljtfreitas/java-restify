@@ -55,22 +55,7 @@ public abstract class RibbonZookeeperExceptionHandler implements RibbonException
 	protected abstract void onConnectionFailure(RibbonRequest request, Throwable cause);
 
 	private boolean found(Throwable cause) {
-		Throwable throwable = cause;
-
-		boolean found = false;
-
-		while (throwable != null) {
-			found = find(throwable);
-
-			if (found) {
-				break;
-
-			} else {
-				throwable = throwable.getCause();
-			}
-		}
-
-		return found;
+		return cause == null ? false : find(cause) ? true : found(cause.getCause());
 	}
 
 	private boolean find(Throwable cause) {

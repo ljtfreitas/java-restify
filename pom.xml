@@ -24,6 +24,7 @@
 		<module>java-restify-spring-autoconfigure</module>
 		<module>java-restify-spring-starter</module>
 		<module>java-restify-netflix</module>
+		<module>java-restify-netflix-zookeeper-service-discovery</module>
 		<module>java-restify-netflix-spring-autoconfigure</module>
 		<module>java-restify-netflix-spring-starter</module>
 		<module>java-restify-jaxrs-contract</module>
