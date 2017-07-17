@@ -85,7 +85,7 @@ public class ZookeeperServiceCacheDiscovery<T> implements ZookeeperServiceDiscov
 
 	@Override
 	public Collection<ServiceInstance<T>> queryForInstances(String serviceName) {
-		isTrue(this.serviceName.equalsIgnoreCase(serviceName),
+		isTrue(serviceName == null || serviceName.equalsIgnoreCase(this.serviceName),
 				"ZookeeperServiceCacheDiscovery it's configured for services named [" + this.serviceName + "], "
 						+ "not [" + serviceName + "]");
 

@@ -26,6 +26,7 @@
 package com.github.ljtfreitas.restify.http.netflix.client.request.kubernetes;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import com.netflix.client.config.IClientConfig;
@@ -34,12 +35,16 @@ import com.netflix.loadbalancer.Server;
 
 public class KubernetesServers extends AbstractServerList<Server> {
 
-	private final String serviceName;
 	private final KubernetesServiceDiscovery kubernetesServiceDiscovery;
+	private String serviceName;
 
-	public KubernetesServers(String serviceName, KubernetesServiceDiscovery kubernetesServiceDiscovery) {
-		this.serviceName = serviceName;
+	public KubernetesServers(KubernetesServiceDiscovery kubernetesServiceDiscovery) {
+		this(kubernetesServiceDiscovery, null);
+	}
+
+	public KubernetesServers(KubernetesServiceDiscovery kubernetesServiceDiscovery, String serviceName) {
 		this.kubernetesServiceDiscovery = kubernetesServiceDiscovery;
+		this.serviceName = serviceName;
 	}
 
 	@Override
@@ -61,5 +66,6 @@ public class KubernetesServers extends AbstractServerList<Server> {
 
 	@Override
 	public void initWithNiwsConfig(IClientConfig clientConfig) {
+		this.serviceName = Optional.ofNullable(this.serviceName).orElseGet(clientConfig::getClientName);
 	}
 }

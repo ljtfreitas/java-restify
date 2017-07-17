@@ -64,7 +64,7 @@ public class ZookeeperServiceCacheDiscoveryTest {
 
 		zookeeperServiceDiscovery = new ZookeeperServiceCacheDiscovery<>("myApi", zookeeperCuratorServiceDiscovery);
 
-		ZookeeperServers<ZookeeperServiceInstance> zookeeperServers = new ZookeeperServers<>("myApi", zookeeperServiceDiscovery);
+		ZookeeperServers<ZookeeperServiceInstance> zookeeperServers = new ZookeeperServers<>(zookeeperServiceDiscovery);
 
 		ILoadBalancer loadBalancer = LoadBalancerBuilder.newBuilder()
 				.withDynamicServerList(zookeeperServers)

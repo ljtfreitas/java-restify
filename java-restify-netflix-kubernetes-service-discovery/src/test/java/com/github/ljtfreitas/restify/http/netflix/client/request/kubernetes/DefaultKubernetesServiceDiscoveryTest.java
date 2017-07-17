@@ -52,7 +52,7 @@ public class DefaultKubernetesServiceDiscoveryTest {
 
 		kubernetesServiceDiscovery = new DefaultKubernetesServiceDiscovery(kubernetesClient);
 
-		KubernetesServers kubernetesServers = new KubernetesServers("myApi", kubernetesServiceDiscovery);
+		KubernetesServers kubernetesServers = new KubernetesServers(kubernetesServiceDiscovery, "myApi");
 
 		kubernetesMockServer.expect()
 			.get()

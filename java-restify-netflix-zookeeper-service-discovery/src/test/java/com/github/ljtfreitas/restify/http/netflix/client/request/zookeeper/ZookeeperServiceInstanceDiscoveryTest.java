@@ -54,7 +54,7 @@ public class ZookeeperServiceInstanceDiscoveryTest {
 		zookeeperServiceDiscovery.register(new ZookeeperServiceInstance("myApi", "localhost", 7081));
 		zookeeperServiceDiscovery.register(new ZookeeperServiceInstance("myApi", "localhost", 7082));
 
-		ZookeeperServers<ZookeeperServiceInstance> zookeeperServers = new ZookeeperServers<>("myApi", zookeeperServiceDiscovery);
+		ZookeeperServers<ZookeeperServiceInstance> zookeeperServers = new ZookeeperServers<>(zookeeperServiceDiscovery, "myApi");
 
 		ILoadBalancer loadBalancer = LoadBalancerBuilder.newBuilder()
 				.withDynamicServerList(zookeeperServers)

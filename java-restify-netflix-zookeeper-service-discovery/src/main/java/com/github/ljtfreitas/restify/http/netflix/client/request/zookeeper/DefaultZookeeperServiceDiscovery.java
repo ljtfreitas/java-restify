@@ -25,6 +25,8 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.netflix.client.request.zookeeper;
 
+import static com.github.ljtfreitas.restify.http.util.Preconditions.nonNull;
+
 import java.io.IOException;
 import java.util.Collection;
 
@@ -54,6 +56,7 @@ public class DefaultZookeeperServiceDiscovery<T> implements ZookeeperServiceDisc
 
 	@Override
 	public Collection<ServiceInstance<T>> queryForInstances(String serviceName) {
+		nonNull(serviceName, "Service name must be provided!");
 		return Tryable.of(() -> serviceDiscovery.queryForInstances(serviceName));
 	}
 

@@ -25,6 +25,8 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.netflix.client.request.kubernetes;
 
+import static com.github.ljtfreitas.restify.http.util.Preconditions.nonNull;
+
 import java.io.IOException;
 import java.util.Collection;
 import java.util.Optional;
@@ -53,6 +55,7 @@ public class DefaultKubernetesServiceDiscovery implements KubernetesServiceDisco
 
 	@Override
 	public Collection<KubernetesServiceInstance> queryForInstances(String serviceName) {
+		nonNull(serviceName, "Service name must be provided!");
 		return findEndpoints(serviceName).getSubsets().stream()
 			.flatMap(subset -> subset.getPorts().stream()
 				.filter(port -> !configuration.portName().isPresent() || configuration.portName().get().endsWith(port.getName()))

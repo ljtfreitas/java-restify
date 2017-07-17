@@ -26,6 +26,7 @@
 package com.github.ljtfreitas.restify.http.netflix.client.request.zookeeper;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import com.netflix.client.config.IClientConfig;
@@ -34,12 +35,16 @@ import com.netflix.loadbalancer.Server;
 
 public class ZookeeperServers<T> extends AbstractServerList<Server> {
 
-	private final String serviceName;
 	private final ZookeeperServiceDiscovery<T> zookeeperServiceDiscovery;
+	private String serviceName;
 
-	public ZookeeperServers(String serviceName, ZookeeperServiceDiscovery<T> zookeeperServiceDiscovery) {
-		this.serviceName = serviceName;
+	public ZookeeperServers(ZookeeperServiceDiscovery<T> zookeeperServiceDiscovery) {
+		this(zookeeperServiceDiscovery, null);
+	}
+
+	public ZookeeperServers(ZookeeperServiceDiscovery<T> zookeeperServiceDiscovery, String serviceName) {
 		this.zookeeperServiceDiscovery = zookeeperServiceDiscovery;
+		this.serviceName = serviceName;
 	}
 
 	@Override
@@ -61,5 +66,6 @@ public class ZookeeperServers<T> extends AbstractServerList<Server> {
 
 	@Override
 	public void initWithNiwsConfig(IClientConfig clientConfig) {
+		this.serviceName = Optional.ofNullable(this.serviceName).orElseGet(clientConfig::getClientName);
 	}
 }
