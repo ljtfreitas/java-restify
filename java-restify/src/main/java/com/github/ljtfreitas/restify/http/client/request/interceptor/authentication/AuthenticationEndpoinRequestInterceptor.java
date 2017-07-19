@@ -41,7 +41,7 @@ public class AuthenticationEndpoinRequestInterceptor implements EndpointRequestI
 
 	@Override
 	public EndpointRequest intercepts(EndpointRequest endpointRequest) {
-		Optional.ofNullable(authentication.content())
+		Optional.ofNullable(authentication.content(endpointRequest))
 			.filter(a -> !a.isEmpty())
 				.ifPresent(a -> endpointRequest.headers().put("Authorization", a));
 

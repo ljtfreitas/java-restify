@@ -27,43 +27,43 @@ package com.github.ljtfreitas.restify.http.client.authentication.oauth2;
 
 public class AuthorizationCodeAccessTokenProvider extends BaseAccessTokenProvider {
 
-	private final AuthorizationGrantProperties configuration;
+	private final AuthorizationGrantProperties properties;
 	private final AuthorizationCodeProvider authorizationCodeProvider;
 
-	public AuthorizationCodeAccessTokenProvider(AuthorizationGrantProperties configuration) {
-		this(configuration, new DefaultAuthorizationServer());
+	public AuthorizationCodeAccessTokenProvider(AuthorizationGrantProperties properties) {
+		this(properties, new DefaultAuthorizationServer());
 	}
 
-	public AuthorizationCodeAccessTokenProvider(AuthorizationGrantProperties configuration,
+	public AuthorizationCodeAccessTokenProvider(AuthorizationGrantProperties properties,
 			AuthorizationCodeProvider authorizationCodeProvider) {
-		this(configuration, authorizationCodeProvider, new DefaultAuthorizationServer());
+		this(properties, authorizationCodeProvider, new DefaultAuthorizationServer());
 	}
 
-	public AuthorizationCodeAccessTokenProvider(AuthorizationGrantProperties configuration,
+	public AuthorizationCodeAccessTokenProvider(AuthorizationGrantProperties properties,
 			AuthorizationServer authorizationServer) {
-		this(configuration, new DefaultAuthorizationCodeProvider(configuration, authorizationServer), authorizationServer);
+		this(properties, new DefaultAuthorizationCodeProvider(properties, authorizationServer), authorizationServer);
 	}
 
-	public AuthorizationCodeAccessTokenProvider(AuthorizationGrantProperties configuration,
+	public AuthorizationCodeAccessTokenProvider(AuthorizationGrantProperties properties,
 			AuthorizationCodeProvider authorizationCodeProvider, AuthorizationServer authorizationServer) {
-		super(configuration, authorizationServer);
-		this.configuration = configuration;
+		super(properties, authorizationServer);
+		this.properties = properties;
 		this.authorizationCodeProvider = authorizationCodeProvider;
 	}
 
 	@Override
 	protected AccessTokenRequest buildAccessTokenRequest() {
-		String authorizationCode = configuration.authorizationCode()
+		String authorizationCode = properties.authorizationCode()
 					.orElseGet(() -> authorizationCodeProvider.provides());
 
 		AccessTokenRequest.Builder builder = AccessTokenRequest.authorizationCode(authorizationCode);
 
-		if (configuration.redirectUri().isPresent()) {
-			builder.parameter("redirect_uri", configuration.redirectUri().get().toString());
+		if (properties.redirectUri().isPresent()) {
+			builder.parameter("redirect_uri", properties.redirectUri().get().toString());
 		}
 
-		return builder.credentials(configuration.credentials())
-					  .accessTokenUri(configuration.accessTokenUri())
+		return builder.credentials(properties.credentials())
+					  .accessTokenUri(properties.accessTokenUri())
 					  .build();
 	}
 }

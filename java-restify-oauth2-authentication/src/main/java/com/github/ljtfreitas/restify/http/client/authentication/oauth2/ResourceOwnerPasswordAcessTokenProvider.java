@@ -29,27 +29,27 @@ import static com.github.ljtfreitas.restify.http.util.Preconditions.nonNull;
 
 public class ResourceOwnerPasswordAcessTokenProvider extends BaseAccessTokenProvider {
 
-	private final ResourceOwnerGrantProperties resource;
+	private final ResourceOwnerGrantProperties properties;
 
-	public ResourceOwnerPasswordAcessTokenProvider(ResourceOwnerGrantProperties resource) {
-		super(resource);
-		this.resource = resource;
+	public ResourceOwnerPasswordAcessTokenProvider(ResourceOwnerGrantProperties properties) {
+		super(properties);
+		this.properties = properties;
 	}
 
-	public ResourceOwnerPasswordAcessTokenProvider(ResourceOwnerGrantProperties resouce, AuthorizationServer authorizationServer) {
-		super(resouce, authorizationServer);
-		this.resource = resouce;
+	public ResourceOwnerPasswordAcessTokenProvider(ResourceOwnerGrantProperties properties, AuthorizationServer authorizationServer) {
+		super(properties, authorizationServer);
+		this.properties = properties;
 	}
 
 	@Override
 	protected AccessTokenRequest buildAccessTokenRequest() {
-		nonNull(resource.resourceOwner(), "Your resource owner credentials are required.");
+		nonNull(properties.resourceOwner(), "Your resource owner credentials are required.");
 
-		AccessTokenRequest.Builder builder = AccessTokenRequest.resourceOwner(resource.resourceOwner());
+		AccessTokenRequest.Builder builder = AccessTokenRequest.resourceOwner(properties.resourceOwner());
 
-		return builder.accessTokenUri(resource.accessTokenUri())
-					  .credentials(resource.credentials())
-					  .parameter("scope", resource.scope())
+		return builder.accessTokenUri(properties.accessTokenUri())
+					  .credentials(properties.credentials())
+					  .parameter("scope", properties.scope())
 					  .build();
 	}
 }

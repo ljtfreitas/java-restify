@@ -36,27 +36,27 @@ import com.github.ljtfreitas.restify.http.contract.Parameters;
 
 public class ImplicitAccessTokenProvider implements AccessTokenProvider {
 
-	private final AuthorizationGrantProperties configuration;
+	private final AuthorizationGrantProperties properties;
 	private final AuthorizationServer authorizationServer;
 
-	public ImplicitAccessTokenProvider(AuthorizationGrantProperties configuration) {
-		this(configuration, new DefaultAuthorizationServer());
+	public ImplicitAccessTokenProvider(AuthorizationGrantProperties properties) {
+		this(properties, new DefaultAuthorizationServer());
 	}
 
-	public ImplicitAccessTokenProvider(AuthorizationGrantProperties configuration, AuthorizationServer authorizationServer) {
-		this.configuration = configuration;
+	public ImplicitAccessTokenProvider(AuthorizationGrantProperties properties, AuthorizationServer authorizationServer) {
+		this.properties = properties;
 		this.authorizationServer = authorizationServer;
 	}
 
 	@Override
 	public AccessToken provides() {
-		EndpointResponse<String> authorizationResponse = authorizationServer.authorize(configuration);
+		EndpointResponse<String> authorizationResponse = authorizationServer.authorize(properties);
 
 		StatusCode status = authorizationResponse.code();
 
 		if (status.isOK()) {
-			String message = "Do you approve the client [" + configuration.credentials().clientId() + "] to access your resources "
-				+ "with scopes [" + configuration.scopes() + "]";
+			String message = "Do you approve the client [" + properties.credentials().clientId() + "] to access your resources "
+				+ "with scopes [" + properties.scopes() + "]";
 
 			throw new OAuth2UserApprovalRequiredException(message);
 
@@ -66,7 +66,7 @@ public class ImplicitAccessTokenProvider implements AccessTokenProvider {
 
 			Parameters parameters = Parameters.parse(URI.create(location.value()).getFragment());
 
-			isTrue(configuration.state().orElse("").equals(parameters.get("state").orElse("")),
+			isTrue(properties.state().orElse("").equals(parameters.get("state").orElse("")),
 					"Possible CSRF attack? [state] parameter returned by the authorization server is not the same of the authorization request.");
 
 			return AccessToken.create(parameters);

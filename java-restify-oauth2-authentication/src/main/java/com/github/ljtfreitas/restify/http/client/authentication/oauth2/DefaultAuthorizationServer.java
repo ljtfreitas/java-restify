@@ -244,7 +244,7 @@ class DefaultAuthorizationServer implements AuthorizationServer {
 		private Header authorization() {
 			ClientCredentials credentials = source.credentials();
 			BasicAuthentication basic = new BasicAuthentication(credentials.clientId(), credentials.clientSecret());
-			return new Header(AUTHORIZATION, basic.content());
+			return new Header(AUTHORIZATION, basic.content(null));
 		}
 	}
 

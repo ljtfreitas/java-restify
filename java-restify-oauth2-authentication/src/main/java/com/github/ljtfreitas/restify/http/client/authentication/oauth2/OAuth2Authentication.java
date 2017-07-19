@@ -28,6 +28,7 @@ package com.github.ljtfreitas.restify.http.client.authentication.oauth2;
 import java.security.Principal;
 
 import com.github.ljtfreitas.restify.http.client.authentication.Authentication;
+import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
 
 public class OAuth2Authentication implements Authentication {
 
@@ -35,18 +36,37 @@ public class OAuth2Authentication implements Authentication {
 	private final AccessTokenRepository accessTokenRepository;
 	private final Principal user;
 
-	public OAuth2Authentication(GrantProperties resource, AccessTokenProvider accessTokenProvider) {
-		this(resource, accessTokenProvider, null);
+	public OAuth2Authentication(GrantProperties properties, AccessTokenRepository accessTokenRepository) {
+		this(properties, accessTokenRepository, null);
 	}
 
-	public OAuth2Authentication(GrantProperties properties, AccessTokenProvider accessTokenProvider, Principal user) {
+	public OAuth2Authentication(GrantProperties properties, AccessTokenProvider accessTokenProvider) {
+		this(properties, accessTokenProvider, (Principal) null);
+	}
+
+	public OAuth2Authentication(GrantProperties properties, AccessTokenProvider accessTokenProvider,
+			Principal user) {
+		this(properties, accessTokenProvider, new AccessTokenMemoryStore(), user);
+	}
+
+	public OAuth2Authentication(GrantProperties properties, AccessTokenProvider accessTokenProvider,
+			AccessTokenStore accessTokenStore) {
+		this(properties, accessTokenProvider, accessTokenStore, null);
+	}
+
+	public OAuth2Authentication(GrantProperties properties, AccessTokenProvider accessTokenProvider,
+			AccessTokenStore accessTokenStore, Principal user) {
+		this(properties, new DefaultAccessTokenRepository(accessTokenProvider, accessTokenStore), null);
+	}
+
+	public OAuth2Authentication(GrantProperties properties, AccessTokenRepository accessTokenRepository, Principal user) {
 		this.properties = properties;
-		this.accessTokenRepository = new DefaultAccessTokenRepository(new AccessTokenMemoryStore(), accessTokenProvider);
+		this.accessTokenRepository = accessTokenRepository;
 		this.user = user;
 	}
 
 	@Override
-	public String content() {
+	public String content(EndpointRequest endpointRequest) {
 		AccessToken accessToken = accessTokenRepository.findBy(user, properties);
 		return accessToken.toString();
 	}

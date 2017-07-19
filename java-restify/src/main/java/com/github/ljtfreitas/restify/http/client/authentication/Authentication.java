@@ -25,7 +25,9 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.authentication;
 
+import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
+
 public interface Authentication {
 
-	public String content();
+	public String content(EndpointRequest endpointRequest);
 }

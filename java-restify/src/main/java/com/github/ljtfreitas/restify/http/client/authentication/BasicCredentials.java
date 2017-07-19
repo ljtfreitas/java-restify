@@ -27,26 +27,40 @@ package com.github.ljtfreitas.restify.http.client.authentication;
 
 import static com.github.ljtfreitas.restify.http.util.Preconditions.nonNull;
 
-import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
+import java.util.Base64;
+import java.util.Objects;
 
-public class BasicAuthentication implements Authentication {
+public class BasicCredentials {
 
-	private final BasicCredentials credentials;
+	private final Credentials credentials;
 
-	public BasicAuthentication(String username, String password) {
-		this(new BasicCredentials(username, password));
+	public BasicCredentials(String username, String password) {
+		this(new Credentials(username, password));
 	}
 
-	public BasicAuthentication(Credentials credentials) {
-		this(new BasicCredentials(credentials));
-	}
-
-	public BasicAuthentication(BasicCredentials credentials) {
-		this.credentials = nonNull(credentials, "Credentials are required.");
+	public BasicCredentials(Credentials credentials) {
+		this.credentials = nonNull(credentials, "Credentials cannot be null.");
 	}
 
 	@Override
-	public String content(EndpointRequest endpointRequest) {
-		return credentials.toString();
+	public boolean equals(Object obj) {
+		if (obj instanceof BasicCredentials) {
+			BasicCredentials that = (BasicCredentials) obj;
+			return this.credentials.equals(that.credentials);
+
+		} else {
+			return super.equals(obj);
+		}
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(credentials);
+	}
+
+	@Override
+	public String toString() {
+		String content = credentials.username() + ":" + credentials.password();
+		return "Basic " + Base64.getEncoder().encodeToString(content.getBytes());
 	}
 }

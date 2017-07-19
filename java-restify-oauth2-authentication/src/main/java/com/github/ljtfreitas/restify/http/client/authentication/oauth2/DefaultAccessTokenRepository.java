@@ -30,12 +30,12 @@ import java.util.Optional;
 
 class DefaultAccessTokenRepository implements AccessTokenRepository {
 
-	private final AccessTokenStore accessTokenStore;
 	private final AccessTokenProvider accessTokenProvider;
+	private final AccessTokenStore accessTokenStore;
 
-	public DefaultAccessTokenRepository(AccessTokenStore accessTokenStore, AccessTokenProvider accessTokenProvider) {
-		this.accessTokenStore = accessTokenStore;
+	public DefaultAccessTokenRepository(AccessTokenProvider accessTokenProvider, AccessTokenStore accessTokenStore) {
 		this.accessTokenProvider = accessTokenProvider;
+		this.accessTokenStore = accessTokenStore;
 	}
 
 	@Override
