@@ -25,10 +25,8 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.authentication.oauth2;
 
-import java.security.Principal;
-
 public interface AccessTokenRepository {
 
-	AccessToken findBy(Principal user, GrantProperties properties);
+	AccessToken findBy(OAuthAuthenticatedEndpointRequest request);
 
 }

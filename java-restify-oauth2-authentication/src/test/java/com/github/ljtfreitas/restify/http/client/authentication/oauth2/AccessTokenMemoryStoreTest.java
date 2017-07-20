@@ -2,10 +2,13 @@ package com.github.ljtfreitas.restify.http.client.authentication.oauth2;
 
 import static org.junit.Assert.*;
 
+import java.net.URI;
 import java.security.Principal;
 import java.util.Optional;
 
 import org.junit.Test;
+
+import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
 
 public class AccessTokenMemoryStoreTest {
 
@@ -20,17 +23,21 @@ public class AccessTokenMemoryStoreTest {
 				.scopes("read", "write")
 				.build();
 
+		EndpointRequest source = new EndpointRequest(URI.create("http://my.resource.server/path"), "GET");
+
+		OAuthAuthenticatedEndpointRequest request = new OAuthAuthenticatedEndpointRequest(source, properties, user);
+
 		acessTokenMemoryStore = new AccessTokenMemoryStore();
 
-		assertFalse(acessTokenMemoryStore.findBy(user, properties).isPresent());
+		assertFalse(acessTokenMemoryStore.findBy(request).isPresent());
 
-		AccessToken source = AccessToken.bearer("accessToken");
+		AccessToken accessToken = AccessToken.bearer("accessToken");
 
-		acessTokenMemoryStore.add(user, properties, source);
+		acessTokenMemoryStore.add(request, accessToken);
 
-		Optional<AccessToken> foundAccessToken = acessTokenMemoryStore.findBy(user, properties);
+		Optional<AccessToken> foundAccessToken = acessTokenMemoryStore.findBy(request);
 
 		assertTrue(foundAccessToken.isPresent());
-		assertSame(source, foundAccessToken.get());
+		assertSame(accessToken, foundAccessToken.get());
 	}
 }

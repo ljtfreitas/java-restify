@@ -36,20 +36,20 @@ import com.github.ljtfreitas.restify.http.contract.Parameters;
 
 public class ImplicitAccessTokenProvider implements AccessTokenProvider {
 
-	private final AuthorizationGrantProperties properties;
 	private final AuthorizationServer authorizationServer;
 
-	public ImplicitAccessTokenProvider(AuthorizationGrantProperties properties) {
-		this(properties, new DefaultAuthorizationServer());
+	public ImplicitAccessTokenProvider() {
+		this(new DefaultAuthorizationServer());
 	}
 
-	public ImplicitAccessTokenProvider(AuthorizationGrantProperties properties, AuthorizationServer authorizationServer) {
-		this.properties = properties;
+	public ImplicitAccessTokenProvider(AuthorizationServer authorizationServer) {
 		this.authorizationServer = authorizationServer;
 	}
 
 	@Override
-	public AccessToken provides() {
+	public AccessToken provides(OAuthAuthenticatedEndpointRequest request) {
+		AuthorizationGrantProperties properties = request.properties(AuthorizationGrantProperties.class);
+
 		EndpointResponse<String> authorizationResponse = authorizationServer.authorize(properties);
 
 		StatusCode status = authorizationResponse.code();
@@ -74,7 +74,7 @@ public class ImplicitAccessTokenProvider implements AccessTokenProvider {
 	}
 
 	@Override
-	public AccessToken refresh(AccessToken accessToken) {
+	public AccessToken refresh(AccessToken accessToken, OAuthAuthenticatedEndpointRequest request) {
 		throw new UnsupportedOperationException("Implicit Grant does not support refresh token.");
 	}
 }

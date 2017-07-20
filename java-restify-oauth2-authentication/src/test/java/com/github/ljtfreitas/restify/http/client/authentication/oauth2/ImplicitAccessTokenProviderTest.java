@@ -5,6 +5,7 @@ import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
 import static org.mockserver.model.JsonBody.json;
 
+import java.net.URI;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 
@@ -15,6 +16,8 @@ import org.mockserver.client.server.MockServerClient;
 import org.mockserver.junit.MockServerRule;
 import org.mockserver.model.Parameter;
 
+import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
+
 public class ImplicitAccessTokenProviderTest {
 
 	@Rule
@@ -24,11 +27,13 @@ public class ImplicitAccessTokenProviderTest {
 
 	private ImplicitAccessTokenProvider provider;
 
+	private OAuthAuthenticatedEndpointRequest request;
+
 	@Before
 	public void setup() {
 		mockServerClient = new MockServerClient("localhost", 8088);
 
-		AuthorizationGrantProperties configuration = GrantProperties.Builder.implicit()
+		AuthorizationGrantProperties properties = GrantProperties.Builder.implicit()
 				.authorizationUri("http://localhost:8088/oauth/authorize")
 				.clientId("client-id")
 				.redirectUri("http://my.web.app/oauth/callback")
@@ -37,7 +42,11 @@ public class ImplicitAccessTokenProviderTest {
 				.state("current-state")
 				.build();
 
-		provider = new ImplicitAccessTokenProvider(configuration);
+		EndpointRequest source = new EndpointRequest(URI.create("http://my.resource.server/path"), "GET");
+
+		request = new OAuthAuthenticatedEndpointRequest(source, properties);
+
+		provider = new ImplicitAccessTokenProvider();
 	}
 
 	@Test
@@ -55,7 +64,7 @@ public class ImplicitAccessTokenProviderTest {
 				.withHeader("Content-Type", "application/x-www-form-urlencoded")
 				.withHeader("Location", "http://my.web.app/oauth/callback#access_token=abc1234&token_type=bearer&state=current-state&expires_in=3600&scope=read%20write"));
 
-		AccessToken accessToken = provider.provides();
+		AccessToken accessToken = provider.provides(request);
 
 		assertEquals(AccessTokenType.BEARER, accessToken.type());
 		assertEquals("abc1234", accessToken.token());
@@ -79,7 +88,7 @@ public class ImplicitAccessTokenProviderTest {
 			.respond(response()
 				.withStatusCode(200));
 
-		provider.provides();
+		provider.provides(request);
 	}
 
 	@Test(expected = OAuth2Exception.class)
@@ -96,6 +105,6 @@ public class ImplicitAccessTokenProviderTest {
 				.withStatusCode(400)
 				.withBody(json("{\"error\":\"invalid_client\",\"error_description\":\"client_id unauthorized\"}")));
 
-		provider.provides();
+		provider.provides(request);
 	}
 }

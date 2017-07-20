@@ -5,12 +5,16 @@ import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
 import static org.mockserver.model.JsonBody.json;
 
+import java.net.URI;
+
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.mockserver.client.server.MockServerClient;
 import org.mockserver.junit.MockServerRule;
 import org.mockserver.model.Parameter;
+
+import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
 
 public class DefaultAuthorizationCodeProviderTest {
 
@@ -20,6 +24,8 @@ public class DefaultAuthorizationCodeProviderTest {
 	private MockServerClient mockServerClient;
 
 	private DefaultAuthorizationCodeProvider provider;
+
+	private OAuthAuthenticatedEndpointRequest request;
 
 	@Before
 	public void setup() {
@@ -34,7 +40,11 @@ public class DefaultAuthorizationCodeProviderTest {
 				.state("current-state")
 				.build();
 
-		provider = new DefaultAuthorizationCodeProvider(properties);
+		EndpointRequest source = new EndpointRequest(URI.create("http://my.resource.server/path"), "GET");
+
+		request = new OAuthAuthenticatedEndpointRequest(source, properties);
+
+		provider = new DefaultAuthorizationCodeProvider();
 	}
 
 	@Test
@@ -53,7 +63,7 @@ public class DefaultAuthorizationCodeProviderTest {
 				.withHeader("Content-Type", "application/x-www-form-urlencoded")
 				.withHeader("Location", "http://my.web.app/oauth/callback?code=abc1234&state=current-state"));
 
-		assertEquals("abc1234", provider.provides());
+		assertEquals("abc1234", provider.provides(request));
 	}
 
 	@Test(expected = OAuth2UserApprovalRequiredException.class)
@@ -69,7 +79,7 @@ public class DefaultAuthorizationCodeProviderTest {
 			.respond(response()
 				.withStatusCode(200));
 
-		provider.provides();
+		provider.provides(request);
 	}
 
 	@Test(expected = OAuth2Exception.class)
@@ -86,6 +96,6 @@ public class DefaultAuthorizationCodeProviderTest {
 				.withStatusCode(400)
 				.withBody(json("{\"error\":\"invalid_client\",\"error_description\":\"client_id unauthorized\"}")));
 
-		provider.provides();
+		provider.provides(request);
 	}
 }

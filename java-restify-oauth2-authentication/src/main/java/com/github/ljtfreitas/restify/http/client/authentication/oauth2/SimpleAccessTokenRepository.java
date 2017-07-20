@@ -25,8 +25,6 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.authentication.oauth2;
 
-import java.security.Principal;
-
 public class SimpleAccessTokenRepository implements AccessTokenRepository {
 
 	private final AccessToken accessToken;
@@ -36,7 +34,7 @@ public class SimpleAccessTokenRepository implements AccessTokenRepository {
 	}
 
 	@Override
-	public AccessToken findBy(Principal user, GrantProperties properties) {
+	public AccessToken findBy(OAuthAuthenticatedEndpointRequest request) {
 		return accessToken;
 	}
 }

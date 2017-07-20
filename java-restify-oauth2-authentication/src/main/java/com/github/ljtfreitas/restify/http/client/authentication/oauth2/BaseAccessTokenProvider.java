@@ -32,39 +32,37 @@ import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
 
 abstract class BaseAccessTokenProvider implements AccessTokenProvider {
 
-	private final GrantProperties properties;
 	private final AuthorizationServer authorizationServer;
 
-	protected BaseAccessTokenProvider(GrantProperties properties) {
-		this(properties, new DefaultAuthorizationServer());
+	protected BaseAccessTokenProvider() {
+		this(new DefaultAuthorizationServer());
 	}
 
-	protected BaseAccessTokenProvider(GrantProperties properties, AuthorizationServer authorizationServer) {
-		this.properties = properties;
+	protected BaseAccessTokenProvider(AuthorizationServer authorizationServer) {
 		this.authorizationServer = authorizationServer;
 	}
 
 	@Override
-	public AccessToken provides() {
-		EndpointResponse<AccessToken> response = authorizationServer.requireToken(buildAccessTokenRequest());
+	public AccessToken provides(OAuthAuthenticatedEndpointRequest request) {
+		EndpointResponse<AccessToken> response = authorizationServer.requireToken(buildAccessTokenRequest(request));
 		return response.body();
 	}
 
 	@Override
-	public AccessToken refresh(AccessToken accessToken) {
-		EndpointResponse<AccessToken> response = authorizationServer.requireToken(buildRefreshTokenRequest(accessToken));
+	public AccessToken refresh(AccessToken accessToken, OAuthAuthenticatedEndpointRequest request) {
+		EndpointResponse<AccessToken> response = authorizationServer.requireToken(buildRefreshTokenRequest(accessToken, request));
 		return response.body();
 	}
 
-	protected AccessTokenRequest buildRefreshTokenRequest(AccessToken accessToken) {
+	protected AccessTokenRequest buildRefreshTokenRequest(AccessToken accessToken, OAuthAuthenticatedEndpointRequest request) {
 		nonNull(accessToken.refreshToken(), "Your access token must have a refresh token.");
 
 		Builder builder = AccessTokenRequest.refreshToken(accessToken.refreshToken());
 
-		return builder.accessTokenUri(properties.accessTokenUri())
-					  .credentials(properties.credentials())
+		return builder.accessTokenUri(request.accessTokenUri())
+					  .credentials(request.credentials())
 					  .build();
 	}
 
-	protected abstract AccessTokenRequest buildAccessTokenRequest();
+	protected abstract AccessTokenRequest buildAccessTokenRequest(OAuthAuthenticatedEndpointRequest request);
 }

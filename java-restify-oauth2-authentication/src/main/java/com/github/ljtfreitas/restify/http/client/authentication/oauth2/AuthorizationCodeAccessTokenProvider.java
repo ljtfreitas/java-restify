@@ -27,34 +27,31 @@ package com.github.ljtfreitas.restify.http.client.authentication.oauth2;
 
 public class AuthorizationCodeAccessTokenProvider extends BaseAccessTokenProvider {
 
-	private final AuthorizationGrantProperties properties;
 	private final AuthorizationCodeProvider authorizationCodeProvider;
 
-	public AuthorizationCodeAccessTokenProvider(AuthorizationGrantProperties properties) {
-		this(properties, new DefaultAuthorizationServer());
+	public AuthorizationCodeAccessTokenProvider() {
+		this(new DefaultAuthorizationServer());
 	}
 
-	public AuthorizationCodeAccessTokenProvider(AuthorizationGrantProperties properties,
-			AuthorizationCodeProvider authorizationCodeProvider) {
-		this(properties, authorizationCodeProvider, new DefaultAuthorizationServer());
+	public AuthorizationCodeAccessTokenProvider(AuthorizationCodeProvider authorizationCodeProvider) {
+		this(authorizationCodeProvider, new DefaultAuthorizationServer());
 	}
 
-	public AuthorizationCodeAccessTokenProvider(AuthorizationGrantProperties properties,
-			AuthorizationServer authorizationServer) {
-		this(properties, new DefaultAuthorizationCodeProvider(properties, authorizationServer), authorizationServer);
+	public AuthorizationCodeAccessTokenProvider(AuthorizationServer authorizationServer) {
+		this(new DefaultAuthorizationCodeProvider(authorizationServer), authorizationServer);
 	}
 
-	public AuthorizationCodeAccessTokenProvider(AuthorizationGrantProperties properties,
-			AuthorizationCodeProvider authorizationCodeProvider, AuthorizationServer authorizationServer) {
-		super(properties, authorizationServer);
-		this.properties = properties;
+	public AuthorizationCodeAccessTokenProvider(AuthorizationCodeProvider authorizationCodeProvider, AuthorizationServer authorizationServer) {
+		super(authorizationServer);
 		this.authorizationCodeProvider = authorizationCodeProvider;
 	}
 
 	@Override
-	protected AccessTokenRequest buildAccessTokenRequest() {
+	protected AccessTokenRequest buildAccessTokenRequest(OAuthAuthenticatedEndpointRequest request) {
+		AuthorizationGrantProperties properties = request.properties(AuthorizationGrantProperties.class);
+
 		String authorizationCode = properties.authorizationCode()
-					.orElseGet(() -> authorizationCodeProvider.provides());
+					.orElseGet(() -> authorizationCodeProvider.provides(request));
 
 		AccessTokenRequest.Builder builder = AccessTokenRequest.authorizationCode(authorizationCode);
 

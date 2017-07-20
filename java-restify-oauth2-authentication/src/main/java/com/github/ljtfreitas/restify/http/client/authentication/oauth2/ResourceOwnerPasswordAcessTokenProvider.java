@@ -29,20 +29,18 @@ import static com.github.ljtfreitas.restify.http.util.Preconditions.nonNull;
 
 public class ResourceOwnerPasswordAcessTokenProvider extends BaseAccessTokenProvider {
 
-	private final ResourceOwnerGrantProperties properties;
-
-	public ResourceOwnerPasswordAcessTokenProvider(ResourceOwnerGrantProperties properties) {
-		super(properties);
-		this.properties = properties;
+	public ResourceOwnerPasswordAcessTokenProvider() {
+		super();
 	}
 
-	public ResourceOwnerPasswordAcessTokenProvider(ResourceOwnerGrantProperties properties, AuthorizationServer authorizationServer) {
-		super(properties, authorizationServer);
-		this.properties = properties;
+	public ResourceOwnerPasswordAcessTokenProvider(AuthorizationServer authorizationServer) {
+		super(authorizationServer);
 	}
 
 	@Override
-	protected AccessTokenRequest buildAccessTokenRequest() {
+	protected AccessTokenRequest buildAccessTokenRequest(OAuthAuthenticatedEndpointRequest request) {
+		ResourceOwnerGrantProperties properties = request.properties(ResourceOwnerGrantProperties.class);
+
 		nonNull(properties.resourceOwner(), "Your resource owner credentials are required.");
 
 		AccessTokenRequest.Builder builder = AccessTokenRequest.resourceOwner(properties.resourceOwner());

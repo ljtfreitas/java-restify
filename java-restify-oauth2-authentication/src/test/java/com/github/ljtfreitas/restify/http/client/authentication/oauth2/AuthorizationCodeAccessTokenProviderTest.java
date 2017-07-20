@@ -8,6 +8,7 @@ import static org.mockserver.model.HttpResponse.response;
 import static org.mockserver.model.JsonBody.json;
 import static org.mockserver.model.ParameterBody.params;
 
+import java.net.URI;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 
@@ -20,6 +21,8 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.mockserver.client.server.MockServerClient;
 import org.mockserver.junit.MockServerRule;
 import org.mockserver.model.Parameter;
+
+import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AuthorizationCodeAccessTokenProviderTest {
@@ -36,6 +39,8 @@ public class AuthorizationCodeAccessTokenProviderTest {
 
 	private String authorizationCredentials;
 
+	private OAuthAuthenticatedEndpointRequest request;
+
 	@Before
 	public void setup() {
 		mockServerClient = new MockServerClient("localhost", 8088);
@@ -48,9 +53,13 @@ public class AuthorizationCodeAccessTokenProviderTest {
 				.scopes("read", "write")
 				.build();
 
-		when(authorizationCodeProvider.provides()).thenReturn("abc1234");
+		EndpointRequest source = new EndpointRequest(URI.create("http://my.resource.server/path"), "GET");
 
-		provider = new AuthorizationCodeAccessTokenProvider(properties, authorizationCodeProvider);
+		request = new OAuthAuthenticatedEndpointRequest(source, properties);
+
+		when(authorizationCodeProvider.provides(request)).thenReturn("abc1234");
+
+		provider = new AuthorizationCodeAccessTokenProvider(authorizationCodeProvider);
 
 		authorizationCredentials = "Y2xpZW50LWlkOmNsaWVudC1zZWNyZXQ="; //(base64(client_id:client_secret))
 	}
@@ -70,7 +79,7 @@ public class AuthorizationCodeAccessTokenProviderTest {
 					.withHeader("Content-Type", "application/json")
 					.withBody(json("{\"access_token\":\"aaa111\",\"token_type\":\"bearer\",\"expires_in\":3600,\"scope\":\"read write\"}")));
 
-		AccessToken accessToken = provider.provides();
+		AccessToken accessToken = provider.provides(request);
 
 		assertEquals(AccessTokenType.BEARER, accessToken.type());
 		assertEquals("aaa111", accessToken.token());
@@ -80,7 +89,7 @@ public class AuthorizationCodeAccessTokenProviderTest {
 		LocalDateTime expectedExpiration = LocalDateTime.now().plusSeconds(3600);
 		assertEquals(expectedExpiration.truncatedTo(ChronoUnit.SECONDS), accessToken.expiration().truncatedTo(ChronoUnit.SECONDS));
 
-		verify(authorizationCodeProvider).provides();
+		verify(authorizationCodeProvider).provides(request);
 	}
 
 	@Test
@@ -102,7 +111,7 @@ public class AuthorizationCodeAccessTokenProviderTest {
 					.refreshToken("bbb222")
 					.build();
 
-		AccessToken newAccessToken = provider.refresh(accessToken);
+		AccessToken newAccessToken = provider.refresh(accessToken, request);
 
 		assertEquals(AccessTokenType.BEARER, newAccessToken.type());
 		assertEquals("ccc333", newAccessToken.token());

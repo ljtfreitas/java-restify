@@ -36,38 +36,41 @@ class AccessTokenMemoryStore implements AccessTokenStore {
 	private final Map<AccessTokenKey, AccessToken> tokens = new ConcurrentHashMap<>();
 
 	@Override
-	public Optional<AccessToken> findBy(Principal user, GrantProperties properties) {
-		return Optional.ofNullable(tokens.get(key(user, properties)));
+	public Optional<AccessToken> findBy(OAuthAuthenticatedEndpointRequest request) {
+		return Optional.ofNullable(tokens.get(key(request)));
 	}
 
 	@Override
-	public void add(Principal user, GrantProperties properties, AccessToken accessToken) {
-		tokens.put(key(user, properties), accessToken);
+	public void add(OAuthAuthenticatedEndpointRequest request, AccessToken accessToken) {
+		tokens.put(key(request), accessToken);
 	}
 
-	private AccessTokenKey key(Principal user, GrantProperties properties) {
-		String username = Optional.ofNullable(user).map(Principal::getName).orElse(null);
-		String clientId = properties.credentials().clientId();
-		String scope = properties.scope();
+	private AccessTokenKey key(OAuthAuthenticatedEndpointRequest request) {
+		String resourceServer = request.resourceServer();
+		String clientId = request.clientId();
+		String scope = request.scope();
+		String username = request.user().map(Principal::getName).orElse(null);
 
-		return new AccessTokenKey(username, clientId, scope);
+		return new AccessTokenKey(resourceServer, clientId, scope, username);
 	}
 
 	private class AccessTokenKey {
 
-		private final String username;
+		private final String resourceServer;
 		private final String clientId;
 		private final String scope;
+		private final String username;
 
-		private AccessTokenKey(String username, String clientId, String scope) {
-			this.username = username;
+		private AccessTokenKey(String resourceServer, String clientId, String scope, String username) {
+			this.resourceServer = resourceServer;
 			this.clientId = clientId;
 			this.scope = scope;
+			this.username = username;
 		}
 
 		@Override
 		public int hashCode() {
-			return Objects.hash(username, clientId, scope);
+			return Objects.hash(resourceServer, clientId, scope, username);
 		}
 
 		@Override
@@ -75,9 +78,10 @@ class AccessTokenMemoryStore implements AccessTokenStore {
 			if (obj instanceof AccessTokenKey) {
 				AccessTokenKey that = (AccessTokenKey) obj;
 
-				return Objects.equals(this.username, that.username)
+				return Objects.equals(this.resourceServer, that.resourceServer)
 					&& Objects.equals(this.clientId, that.clientId)
-					&& Objects.equals(this.scope, that.scope);
+					&& Objects.equals(this.scope, that.scope)
+					&& Objects.equals(this.username, that.username);
 
 			} else {
 				return false;

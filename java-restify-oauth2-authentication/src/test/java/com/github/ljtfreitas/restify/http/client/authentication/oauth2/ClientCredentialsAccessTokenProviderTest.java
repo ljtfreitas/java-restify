@@ -6,6 +6,7 @@ import static org.mockserver.model.HttpResponse.response;
 import static org.mockserver.model.JsonBody.json;
 import static org.mockserver.model.ParameterBody.params;
 
+import java.net.URI;
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
 
@@ -17,6 +18,8 @@ import org.mockito.runners.MockitoJUnitRunner;
 import org.mockserver.client.server.MockServerClient;
 import org.mockserver.junit.MockServerRule;
 import org.mockserver.model.Parameter;
+
+import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ClientCredentialsAccessTokenProviderTest {
@@ -30,6 +33,8 @@ public class ClientCredentialsAccessTokenProviderTest {
 
 	private String authorizationCredentials;
 
+	private OAuthAuthenticatedEndpointRequest request;
+
 	@Before
 	public void setup() {
 		mockServerClient = new MockServerClient("localhost", 8088);
@@ -40,7 +45,11 @@ public class ClientCredentialsAccessTokenProviderTest {
 				.scopes("read", "write")
 				.build();
 
-		provider = new ClientCredentialsAccessTokenProvider(properties);
+		EndpointRequest source = new EndpointRequest(URI.create("http://my.resource.server/path"), "GET");
+
+		request = new OAuthAuthenticatedEndpointRequest(source, properties);
+
+		provider = new ClientCredentialsAccessTokenProvider();
 
 		authorizationCredentials = "Y2xpZW50LWlkOmNsaWVudC1zZWNyZXQ="; //(base64(client_id:client_secret))
 	}
@@ -59,7 +68,7 @@ public class ClientCredentialsAccessTokenProviderTest {
 					.withHeader("Content-Type", "application/json")
 					.withBody(json("{\"access_token\":\"aaa111\",\"token_type\":\"bearer\",\"expires_in\":3600,\"scope\":\"read write\"}")));
 
-		AccessToken accessToken = provider.provides();
+		AccessToken accessToken = provider.provides(request);
 
 		assertEquals(AccessTokenType.BEARER, accessToken.type());
 		assertEquals("aaa111", accessToken.token());
@@ -72,6 +81,6 @@ public class ClientCredentialsAccessTokenProviderTest {
 
 	@Test(expected = UnsupportedOperationException.class)
 	public void shouldThrowExceptionOnTryRefreshToken() {
-		provider.refresh(AccessToken.bearer("aaa111"));
+		provider.refresh(AccessToken.bearer("aaa111"), request);
 	}
 }

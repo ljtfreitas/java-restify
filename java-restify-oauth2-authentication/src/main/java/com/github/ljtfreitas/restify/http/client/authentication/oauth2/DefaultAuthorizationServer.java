@@ -95,31 +95,31 @@ class DefaultAuthorizationServer implements AuthorizationServer {
 	}
 
 	@Override
-	public EndpointResponse<String> authorize(AuthorizationGrantProperties configuration) {
-		nonNull(configuration.credentials().clientId(), "Your Client ID is required.");
-		nonNull(configuration.authorizationUri(), "The authorization URI of authorization server is required.");
-		nonNull(configuration.responseType(), "The response_type parameter is required.");
+	public EndpointResponse<String> authorize(AuthorizationGrantProperties properties) {
+		nonNull(properties.credentials().clientId(), "Your Client ID is required.");
+		nonNull(properties.authorizationUri(), "The authorization URI of authorization server is required.");
+		nonNull(properties.responseType(), "The response_type parameter is required.");
 
 		Parameters parameters = new Parameters();
-		parameters.put("response_type", configuration.responseType());
-		parameters.put("client_id", configuration.credentials().clientId());
-		parameters.put("scope", configuration.scope());
+		parameters.put("response_type", properties.responseType());
+		parameters.put("client_id", properties.credentials().clientId());
+		parameters.put("scope", properties.scope());
 
-		if (configuration.redirectUri().isPresent()) {
-			parameters.put("redirect_uri", configuration.redirectUri().get().toString());
+		if (properties.redirectUri().isPresent()) {
+			parameters.put("redirect_uri", properties.redirectUri().get().toString());
 		}
 
-		if (configuration.state().isPresent()) {
-			parameters.put("state", configuration.state().get());
+		if (properties.state().isPresent()) {
+			parameters.put("state", properties.state().get());
 		}
 
 		Headers headers = new Headers();
 
-		if (configuration.cookie().isPresent()) {
-			headers.put("Cookie", configuration.cookie().get());
+		if (properties.cookie().isPresent()) {
+			headers.put("Cookie", properties.cookie().get());
 		}
 
-		URI authorizationUri = URI.create(configuration.authorizationUri().toString() + "?" + parameters.queryString());
+		URI authorizationUri = URI.create(properties.authorizationUri().toString() + "?" + parameters.queryString());
 
 		return delegate.execute(new EndpointRequest(authorizationUri, "GET", headers, String.class));
 	}

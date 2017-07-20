@@ -36,28 +36,27 @@ import com.github.ljtfreitas.restify.http.contract.Parameters;
 
 class DefaultAuthorizationCodeProvider implements AuthorizationCodeProvider {
 
-	private final AuthorizationGrantProperties configuration;
 	private final AuthorizationServer authorizationServer;
 
-	public DefaultAuthorizationCodeProvider(AuthorizationGrantProperties configuration, AuthorizationServer authorizationServer) {
-		this.configuration = configuration;
+	public DefaultAuthorizationCodeProvider() {
+		this(new DefaultAuthorizationServer());
+	}
+
+	public DefaultAuthorizationCodeProvider(AuthorizationServer authorizationServer) {
 		this.authorizationServer = authorizationServer;
 	}
 
-	public DefaultAuthorizationCodeProvider(AuthorizationGrantProperties configuration) {
-		this.configuration = configuration;
-		this.authorizationServer = new DefaultAuthorizationServer();
-	}
-
 	@Override
-	public String provides() {
-		EndpointResponse<String> authorizationResponse = authorizationServer.authorize(configuration);
+	public String provides(OAuthAuthenticatedEndpointRequest request) {
+		AuthorizationGrantProperties properties = request.properties(AuthorizationGrantProperties.class);
+
+		EndpointResponse<String> authorizationResponse = authorizationServer.authorize(properties);
 
 		StatusCode status = authorizationResponse.code();
 
 		if (status.isOK()) {
-			String message = "Do you approve the client [" + configuration.credentials().clientId() + "] to access your resources "
-				+ "with scopes [" + configuration.scopes() + "].";
+			String message = "Do you approve the client [" + request.clientId() + "] to access your resources "
+				+ "with scopes [" + request.scope() + "].";
 
 			throw new OAuth2UserApprovalRequiredException(message);
 
@@ -69,7 +68,7 @@ class DefaultAuthorizationCodeProvider implements AuthorizationCodeProvider {
 
 			Parameters parameters = Parameters.parse(redirectUri.getQuery());
 
-			isTrue(configuration.state().orElse("").equals(parameters.get("state").orElse("")),
+			isTrue(properties.state().orElse("").equals(parameters.get("state").orElse("")),
 					"Possible CSRF attack? [state] parameter returned by the authorization server is not the same of the authorization request.");
 
 			String code = parameters.get("code")
