@@ -25,7 +25,7 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.authentication.oauth2;
 
-import static com.github.ljtfreitas.restify.http.util.Preconditions.nonNull;
+import static com.github.ljtfreitas.restify.http.util.Preconditions.isTrue;
 
 import com.github.ljtfreitas.restify.http.client.authentication.oauth2.AccessTokenRequest.Builder;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
@@ -55,9 +55,9 @@ abstract class BaseAccessTokenProvider implements AccessTokenProvider {
 	}
 
 	protected AccessTokenRequest buildRefreshTokenRequest(AccessToken accessToken, OAuthAuthenticatedEndpointRequest request) {
-		nonNull(accessToken.refreshToken(), "Your access token must have a refresh token.");
+		isTrue(accessToken.refreshToken().isPresent(), "Your access token must have a refresh token.");
 
-		Builder builder = AccessTokenRequest.refreshToken(accessToken.refreshToken());
+		Builder builder = AccessTokenRequest.refreshToken(accessToken.refreshToken().get());
 
 		return builder.accessTokenUri(request.accessTokenUri())
 					  .credentials(request.credentials())

@@ -1,6 +1,7 @@
 package com.github.ljtfreitas.restify.http.client.authentication.oauth2;
 
 import static org.junit.Assert.assertSame;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -55,7 +56,7 @@ public class DefaultAccessTokenRepositoryTest {
 
 		AccessToken output = accessTokenRepository.findBy(request);
 
-		assertSame(output, accessToken);
+		assertSame(accessToken, output);
 	}
 
 	@Test
@@ -85,10 +86,34 @@ public class DefaultAccessTokenRepositoryTest {
 
 		AccessToken output = accessTokenRepository.findBy(request);
 
-		assertSame(output, newAccessToken);
+		assertSame(newAccessToken, output);
 
 		verify(accessTokenStore).findBy(request);
 		verify(accessTokenProvider).provides(request);
+		verify(accessTokenStore).add(request, newAccessToken);
+	}
+
+	@Test
+	public void shouldRefreshAccessTokenFromProviderWhenStoredTokenHasExpiredWithRefreshToken() throws Exception {
+		AccessToken expiredAccessToken = new AccessToken.Builder(AccessTokenType.BEARER, "access-token")
+				.expiration(Duration.ofMillis(500))
+				.refreshToken("refresh-token")
+				.build();
+
+		AccessToken newAccessToken = AccessToken.bearer("new-access-token");
+
+		when(accessTokenStore.findBy(request)).thenReturn(Optional.of(expiredAccessToken));
+		when(accessTokenProvider.refresh(expiredAccessToken, request)).thenReturn(newAccessToken);
+
+		Thread.sleep(1000);
+
+		AccessToken output = accessTokenRepository.findBy(request);
+
+		assertSame(output, newAccessToken);
+
+		verify(accessTokenStore).findBy(request);
+		verify(accessTokenProvider, never()).provides(request);
+		verify(accessTokenProvider).refresh(expiredAccessToken, request);
 		verify(accessTokenStore).add(request, newAccessToken);
 	}
 }

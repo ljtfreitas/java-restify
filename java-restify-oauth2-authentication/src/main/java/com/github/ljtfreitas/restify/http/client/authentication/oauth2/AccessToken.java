@@ -29,6 +29,9 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
@@ -49,6 +52,8 @@ public class AccessToken {
 	private LocalDateTime expiration = null;
 	private Set<String> scopes = Collections.emptySet();
 	private String refreshToken = null;
+
+	private Map<String, Object> parameters = new HashMap<>();
 
 	public AccessToken(AccessTokenType tokenType, String token) {
 		this.tokenType = tokenType;
@@ -117,8 +122,16 @@ public class AccessToken {
 		this.refreshToken = refreshToken;
 	}
 
-	public String refreshToken() {
-		return refreshToken;
+	public Optional<String> refreshToken() {
+		return Optional.ofNullable(refreshToken);
+	}
+
+	private void parameter(String name, Object value) {
+		this.parameters.put(name, value);
+	}
+
+	public Map<String, Object> parameters() {
+		return parameters;
 	}
 
 	@Override
@@ -151,6 +164,8 @@ public class AccessToken {
 
 		parameters.get(REFRESH_TOKEN_FIELD)
 			.ifPresent(refreshToken -> accessTokenBuilder.refreshToken(refreshToken));
+
+		parameters.all().forEach(p -> accessTokenBuilder.parameter(p.name(), p.value()));
 
 		return accessTokenBuilder.build();
 	}
@@ -190,6 +205,11 @@ public class AccessToken {
 
 		public AccessToken.Builder refreshToken(String refreshToken) {
 			accessToken.refreshToken(refreshToken);
+			return this;
+		}
+
+		public AccessToken.Builder parameter(String name, Object value) {
+			accessToken.parameter(name, value);
 			return this;
 		}
 

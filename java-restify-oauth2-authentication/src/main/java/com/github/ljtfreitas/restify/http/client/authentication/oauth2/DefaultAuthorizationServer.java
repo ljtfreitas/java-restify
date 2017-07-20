@@ -41,7 +41,6 @@ import com.github.ljtfreitas.restify.http.client.message.HttpMessageConverter;
 import com.github.ljtfreitas.restify.http.client.message.HttpMessageConverters;
 import com.github.ljtfreitas.restify.http.client.message.converter.json.JsonMessageConverter;
 import com.github.ljtfreitas.restify.http.client.message.converter.text.TextPlainMessageConverter;
-import com.github.ljtfreitas.restify.http.client.message.converter.xml.JaxbXmlMessageConverter;
 import com.github.ljtfreitas.restify.http.client.message.form.FormURLEncodedParametersMessageConverter;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequestExecutor;
@@ -147,12 +146,12 @@ class DefaultAuthorizationServer implements AuthorizationServer {
 		private final HttpClientRequestFactory httpClientRequestFactory;
 
 		private EndpointRequestExecutorFactory() {
-			this.converters = converters();
 			this.httpClientRequestFactory = httpClientRequestFactory();
+			this.converters = converters();
 		}
 
 		private EndpointRequestExecutorFactory(HttpClientRequestFactory httpClientRequestFactory) {
-			this.httpClientRequestFactory = httpClientRequestFactory();
+			this.httpClientRequestFactory = httpClientRequestFactory;
 			this.converters = converters();
 		}
 
@@ -187,7 +186,7 @@ class DefaultAuthorizationServer implements AuthorizationServer {
 
 		private HttpMessageConverters converters() {
 			List<HttpMessageConverter> converters = Arrays.asList(new TextPlainMessageConverter(),
-					new FormURLEncodedParametersMessageConverter(), JsonMessageConverter.available(), new JaxbXmlMessageConverter<>());
+					new FormURLEncodedParametersMessageConverter(), JsonMessageConverter.available());
 			return new HttpMessageConverters(converters);
 		}
 	}
@@ -247,5 +246,4 @@ class DefaultAuthorizationServer implements AuthorizationServer {
 			return new Header(AUTHORIZATION, basic.content(null));
 		}
 	}
-
 }
