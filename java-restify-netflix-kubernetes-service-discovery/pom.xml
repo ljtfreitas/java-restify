@@ -20,7 +20,7 @@
 		</dependency>
 		<dependency>
            <groupId>com.github.ljtfreitas</groupId>
-           <artifactId>java-restify-netflix</artifactId>
+           <artifactId>java-restify-netflix-service-discovery</artifactId>
            <version>${project.version}</version>
         </dependency>
         <dependency>

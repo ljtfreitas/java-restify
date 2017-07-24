@@ -14,7 +14,7 @@
 	<dependencies>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
-			<artifactId>java-restify-netflix</artifactId>
+			<artifactId>java-restify-netflix-service-discovery</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
