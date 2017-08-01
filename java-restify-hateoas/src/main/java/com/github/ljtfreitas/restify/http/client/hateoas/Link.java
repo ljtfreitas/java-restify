@@ -23,18 +23,45 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.http.client.message.converter.octet;
+package com.github.ljtfreitas.restify.http.client.hateoas;
 
-import com.github.ljtfreitas.restify.http.client.message.HttpMessageReader;
-import com.github.ljtfreitas.restify.http.client.message.HttpMessageWriter;
-import com.github.ljtfreitas.restify.http.contract.ContentType;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 
-public abstract class OctetStreamMessageConverter<T> implements HttpMessageReader<T>, HttpMessageWriter<T> {
+@JsonIgnoreProperties("templated")
+public class Link {
 
-	private static final ContentType OCTET_STREAM_MEDIA_TYPE = ContentType.of("application/octet-stream");
+	public static final String REL_SELF = "self";
 
-	@Override
-	public final ContentType contentType() {
-		return OCTET_STREAM_MEDIA_TYPE;
+	@JsonProperty
+	private final String href;
+
+	@JsonProperty
+	private final String rel;
+
+	public Link(@JsonProperty("href") String href) {
+		this(href, REL_SELF);
+	}
+
+	public Link(String href, String rel) {
+		this.href = href;
+		this.rel = rel;
+	}
+	
+	public Link(Link source, String rel) {
+		this.href = source.href;
+		this.rel = rel;
+	}
+
+	public String rel() {
+		return rel;
+	}
+
+	public String href() {
+		return href;
+	}
+
+	public boolean is(String rel) {
+		return this.rel.equals(rel);
 	}
 }

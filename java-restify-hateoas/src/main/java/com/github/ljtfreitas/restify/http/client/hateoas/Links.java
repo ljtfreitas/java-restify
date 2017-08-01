@@ -23,18 +23,44 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.http.client.message.converter.octet;
+package com.github.ljtfreitas.restify.http.client.hateoas;
 
-import com.github.ljtfreitas.restify.http.client.message.HttpMessageReader;
-import com.github.ljtfreitas.restify.http.client.message.HttpMessageWriter;
-import com.github.ljtfreitas.restify.http.contract.ContentType;
+import java.util.Iterator;
+import java.util.List;
+import java.util.Optional;
 
-public abstract class OctetStreamMessageConverter<T> implements HttpMessageReader<T>, HttpMessageWriter<T> {
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 
-	private static final ContentType OCTET_STREAM_MEDIA_TYPE = ContentType.of("application/octet-stream");
+public class Links implements Iterable<Link> {
+
+	@JsonProperty("_links")
+	@JsonInclude(Include.NON_EMPTY)
+	@JsonDeserialize(using = LinksDeserializer.class)
+	private List<Link> links;
+
+	public int size() {
+		return links.size();
+	}
 
 	@Override
-	public final ContentType contentType() {
-		return OCTET_STREAM_MEDIA_TYPE;
+	public Iterator<Link> iterator() {
+		return links.iterator();
+	}
+
+	public Optional<Link> self() {
+		return find(Link.REL_SELF);
+	}
+
+	public Optional<Link> get(String rel) {
+		return find(rel);
+	}
+
+	private Optional<Link> find(String rel) {
+		return links.stream()
+			.filter(link -> link.is(rel))
+				.findFirst();
 	}
 }

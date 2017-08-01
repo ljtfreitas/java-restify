@@ -37,6 +37,7 @@ import com.github.ljtfreitas.restify.http.client.request.HttpRequestMessage;
 import com.github.ljtfreitas.restify.http.client.request.RestifyHttpMessageWriteException;
 import com.github.ljtfreitas.restify.http.client.response.HttpResponseMessage;
 import com.github.ljtfreitas.restify.http.client.response.RestifyHttpMessageReadException;
+import com.github.ljtfreitas.restify.http.contract.ContentType;
 
 public class JacksonMessageConverter<T> extends JsonMessageConverter<T> {
 
@@ -50,6 +51,11 @@ public class JacksonMessageConverter<T> extends JsonMessageConverter<T> {
 		this.objectMapper = objectMapper;
 	}
 
+	@Override
+	public ContentType contentType() {
+		return ContentType.of("application", "*+json");
+	}
+	
 	@Override
 	public boolean canRead(Type type) {
 		TypeFactory typeFactory = objectMapper.getTypeFactory();

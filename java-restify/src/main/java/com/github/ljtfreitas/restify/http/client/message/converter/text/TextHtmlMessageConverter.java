@@ -25,13 +25,15 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.message.converter.text;
 
+import com.github.ljtfreitas.restify.http.contract.ContentType;
+
 public class TextHtmlMessageConverter extends TextMessageConverter {
 
-	private static final String TEXT_HTML = "text/html";
+	private static final ContentType TEXT_HTML_CONTENT_TYPE = ContentType.of("text/html");
 
 	@Override
-	public String contentType() {
-		return TEXT_HTML;
+	public ContentType contentType() {
+		return TEXT_HTML_CONTENT_TYPE;
 	}
 
 }

@@ -25,8 +25,10 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.message;
 
+import com.github.ljtfreitas.restify.http.contract.ContentType;
+
 public interface HttpMessageConverter {
 
-	public String contentType();
+	public ContentType contentType();
 
 }

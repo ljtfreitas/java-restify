@@ -26,13 +26,14 @@
 package com.github.ljtfreitas.restify.http.client.message.converter;
 
 import com.github.ljtfreitas.restify.http.client.message.HttpMessageReader;
+import com.github.ljtfreitas.restify.http.contract.ContentType;
 
 public abstract class WildcardMessageConverter<T> implements HttpMessageReader<T> {
 
-	private static final String WILDCARD_CONTENT_TYPE = "*/*";
+	private static final ContentType WILDCARD_CONTENT_TYPE = ContentType.of("*/*");
 
 	@Override
-	public String contentType() {
+	public ContentType contentType() {
 		return WILDCARD_CONTENT_TYPE;
 	}
 

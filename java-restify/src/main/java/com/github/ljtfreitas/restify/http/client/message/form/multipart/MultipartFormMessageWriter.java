@@ -39,6 +39,7 @@ import com.github.ljtfreitas.restify.http.contract.ContentType;
 abstract class MultipartFormMessageWriter<T> implements HttpMessageWriter<T> {
 
 	private static final String MULTIPART_FORM_DATA = "multipart/form-data";
+	private static final ContentType MULTIPART_FORM_DATA_CONTENT_TYPE = ContentType.of(MULTIPART_FORM_DATA);
 
 	protected final MultipartFieldSerializers serializers = new MultipartFieldSerializers();
 
@@ -53,8 +54,8 @@ abstract class MultipartFormMessageWriter<T> implements HttpMessageWriter<T> {
 	}
 
 	@Override
-	public String contentType() {
-		return MULTIPART_FORM_DATA;
+	public ContentType contentType() {
+		return MULTIPART_FORM_DATA_CONTENT_TYPE;
 	}
 
 	@Override

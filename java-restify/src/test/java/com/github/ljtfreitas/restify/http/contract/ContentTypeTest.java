@@ -109,4 +109,13 @@ public class ContentTypeTest {
 
 		assertFalse(xmlVendorContent.compatible(jsonVendorContent));
 	}
+	
+	@Test
+	public void shouldBeCompatibleWhenSuffixTypeWildcardAreEquals() {
+		ContentType halJsonContentType = ContentType.of("application/hal+json");
+
+		ContentType jsonWildcardContentType = ContentType.of("application/*+json");
+
+		assertTrue(halJsonContentType.compatible(jsonWildcardContentType));
+	}
 }

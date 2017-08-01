@@ -23,18 +23,23 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.http.client.message.converter.octet;
+package com.github.ljtfreitas.restify.http.client.hateoas;
 
-import com.github.ljtfreitas.restify.http.client.message.HttpMessageReader;
-import com.github.ljtfreitas.restify.http.client.message.HttpMessageWriter;
-import com.github.ljtfreitas.restify.http.contract.ContentType;
+import com.fasterxml.jackson.annotation.JsonUnwrapped;
 
-public abstract class OctetStreamMessageConverter<T> implements HttpMessageReader<T>, HttpMessageWriter<T> {
+public class Resource<T> {
 
-	private static final ContentType OCTET_STREAM_MEDIA_TYPE = ContentType.of("application/octet-stream");
+	@JsonUnwrapped
+	private T content;
+	
+	@JsonUnwrapped
+	private Links links;
+	
+	public T content() {
+		return content;
+	}
 
-	@Override
-	public final ContentType contentType() {
-		return OCTET_STREAM_MEDIA_TYPE;
+	public Links links() {
+		return links;
 	}
 }
