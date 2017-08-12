@@ -32,11 +32,13 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.fasterxml.jackson.core.JsonGenerationException;
 import com.fasterxml.jackson.core.JsonGenerator;
 import com.fasterxml.jackson.databind.BeanProperty;
@@ -44,6 +46,7 @@ import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonSerializer;
 import com.fasterxml.jackson.databind.SerializerProvider;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.jsontype.TypeSerializer;
 import com.fasterxml.jackson.databind.ser.ContainerSerializer;
 import com.fasterxml.jackson.databind.ser.ContextualSerializer;
@@ -92,7 +95,7 @@ class HalLinksSerializer extends ContainerSerializer<List<Link>> implements Cont
 	}
 
 	private HalLink halLink(Link link) {
-		return new HalLink(link, "");
+		return new HalLink(link, null);
 	}
 
 	@Override
@@ -208,21 +211,66 @@ class HalLinksSerializer extends ContainerSerializer<List<Link>> implements Cont
 		}
 	}
 
+	@JsonPropertyOrder(value = {"href", "templated", "type", "deprecation", "name", "profile", "title", "hreflang"})
 	private class HalLink {
 
 		private final Link link;
-
-		@JsonInclude(Include.NON_NULL)
 		private final String title;
 
-		public HalLink(Link link, String title) {
+		private HalLink(Link link, String title) {
 			this.link = link;
 			this.title = title;
 		}
 
 		@JsonProperty("href")
-		public String href() {
+		private String href() {
 			return link.href();
+		}
+
+		@JsonInclude(Include.NON_EMPTY)
+		@JsonProperty("title")
+		private String title() {
+			return Optional.ofNullable(title).orElseGet(() -> link.title().orElse(null));
+		}
+
+		@JsonInclude(Include.NON_EMPTY)
+		@JsonProperty("type")
+		public String type() {
+			return link.type().orElse(null);
+		}
+
+		@JsonInclude(Include.NON_EMPTY)
+		@JsonProperty("name")
+		public String name() {
+			return link.property("name").orElse(null);
+		}
+
+		@JsonInclude(Include.NON_EMPTY)
+		@JsonProperty("profile")
+		public String profile() {
+			return link.property("profile").orElse(null);
+		}
+
+		@JsonInclude(Include.NON_EMPTY)
+		@JsonProperty("hreflang")
+		public String hreflang() {
+			return link.property("hreflang").orElse(null);
+		}
+
+		@JsonInclude(Include.NON_EMPTY)
+		@JsonProperty("templated")
+		@JsonSerialize(using = BooleanTrueSerializer.class)
+		private boolean templated() {
+			Optional<String> templated = link.property("templated");
+			return templated.isPresent() && templated.map(Boolean::valueOf).get();
+		}
+
+		@JsonInclude(Include.NON_EMPTY)
+		@JsonProperty("deprecation")
+		@JsonSerialize(using = BooleanTrueSerializer.class)
+		private boolean deprecation() {
+			Optional<String> deprecation = link.property("deprecation");
+			return deprecation.isPresent() && deprecation.map(Boolean::valueOf).get();
 		}
 	}
 }

@@ -25,7 +25,12 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.hateoas;
 
+import static com.github.ljtfreitas.restify.http.util.Preconditions.nonNull;
+
+import java.net.URI;
+import java.net.URL;
 import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 
@@ -37,10 +42,10 @@ public class Link {
 	public static final String REL_SELF = "self";
 
 	@JsonProperty
-	private final String href;
+	private String href;
 
 	@JsonProperty
-	private final String rel;
+	private String rel;
 
 	@JsonProperty
 	private String type;
@@ -49,6 +54,10 @@ public class Link {
 	private String title;
 
 	private Map<String, String> properties = new HashMap<>();
+
+	@Deprecated
+	protected Link() {
+	}
 
 	public Link(@JsonProperty("href") String href) {
 		this(href, REL_SELF);
@@ -63,8 +72,7 @@ public class Link {
 		this.href = source.href;
 		this.type = source.type;
 		this.title = source.title;
-		this.properties = new HashMap<>(source.properties);
-
+		this.properties = new LinkedHashMap<>(source.properties);
 		this.rel = rel;
 	}
 
@@ -77,11 +85,11 @@ public class Link {
 	}
 
 	public Optional<String> title() {
-		return Optional.of(title);
+		return Optional.ofNullable(title);
 	}
 
 	public Optional<String> type() {
-		return Optional.of(type);
+		return Optional.ofNullable(type);
 	}
 
 	public boolean is(String rel) {
@@ -99,5 +107,81 @@ public class Link {
 
 	public static Link self(String href) {
 		return new Link(href, REL_SELF);
+	}
+
+	public static class Builder {
+
+		private String href;
+		private String rel;
+		private String type;
+		private String title;
+		private Map<String, String> properties = new LinkedHashMap<>();
+
+		public Builder href(String href) {
+			this.href = href;
+			return this;
+		}
+
+		public Builder href(URI href) {
+			this.href = href.toString();
+			return this;
+		}
+
+		public Builder href(URL href) {
+			this.href = href.toString();
+			return this;
+		}
+
+		public Builder rel(String rel) {
+			this.rel = rel;
+			return this;
+		}
+
+		public Builder type(String type) {
+			this.type = type;
+			return this;
+		}
+
+		public Builder title(String title) {
+			this.title = title;
+			return this;
+		}
+
+		public Builder templated() {
+			properties.put("templated", "true");
+			return this;
+		}
+
+		public Builder templated(boolean value) {
+			properties.put("templated", Boolean.toString(value));
+			return this;
+		}
+
+		public Builder name(String name) {
+			properties.put("name", name);
+			return this;
+		}
+
+		public Builder profile(String profile) {
+			properties.put("profile", profile);
+			return this;
+		}
+
+		public Builder hreflang(String hreflang) {
+			properties.put("hreflang", hreflang);
+			return this;
+		}
+
+		public Link build() {
+			nonNull(href, "'href' link can't be null.");
+			nonNull(rel, "'rel' link can't be null.");
+
+			Link link = new Link(href, rel);
+			link.title = title;
+			link.type = type;
+			link.properties = new LinkedHashMap<>(properties);
+
+			return link;
+		}
 	}
 }

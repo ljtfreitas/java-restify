@@ -2,8 +2,10 @@ package com.github.ljtfreitas.restify.http.client.hateoas.hal;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
+import java.util.Optional;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -44,6 +46,30 @@ public class HalResourceTest {
 	}
 
 	@Test
+	public void resourceMustBeSerializedToJsonOnHalFormatWithAttributes() throws IOException {
+		Resource<Model> resource = new Resource<>(new Model("Tiago de Freitas Lima"));
+		resource.addLink(Link.self("http://my.api"));
+		resource.addLink(new Link.Builder()
+				.href("http://my.api/{user}/friends")
+				.rel("friends")
+				.title("All friends for user")
+				.templated()
+				.build());
+
+		String expected = "{\"name\":\"Tiago de Freitas Lima\","
+				+ "\"_links\":{"
+					+ "\"self\":{\"href\":\"http://my.api\"},"
+					+ "\"friends\":{"
+						+ "\"href\":\"http://my.api/{user}/friends\",\"templated\":true,\"title\":\"All friends for user\""
+					+ "}"
+				+ "}}";
+
+		String output = objectMapper.writeValueAsString(resource);
+
+		assertEquals(expected, output);
+	}
+
+	@Test
 	public void resourceMustBeDeserializedFromJsonOnHalFormat() throws IOException {
 		String source = "{\"name\":\"Tiago de Freitas Lima\","
 				+ "\"_links\":{"
@@ -54,6 +80,42 @@ public class HalResourceTest {
 		Resource<Model> resource = objectMapper.readValue(source, new TypeReference<Resource<Model>>(){});
 
 		assertNotNull(resource);
+
+		assertEquals(2, resource.links().size());
+
+		Optional<Link> self = resource.links().self();
+		assertTrue(self.isPresent());
+		assertEquals("http://my.api/me", self.get().href());
+
+		Optional<Link> friends = resource.links().get("friends");
+		assertTrue(friends.isPresent());
+		assertEquals("http://my.api/me/friends", friends.get().href());
+	}
+
+
+	@Test
+	public void resourceMustBeDeserializedFromJsonOnHalFormatWithAttributes() throws IOException {
+		String source = "{\"name\":\"Tiago de Freitas Lima\","
+				+ "\"_links\":{"
+					+ "\"self\":{\"href\":\"http://my.api/tiago\"},"
+					+ "\"friends\":{\"href\":\"http://my.api/{name}/friends\",\"templated\":true,\"title\":\"All friends for user\"}"
+				+ "}}";
+
+		Resource<Model> resource = objectMapper.readValue(source, new TypeReference<Resource<Model>>(){});
+
+		assertNotNull(resource);
+
+		assertEquals(2, resource.links().size());
+
+		Optional<Link> self = resource.links().self();
+		assertTrue(self.isPresent());
+		assertEquals("http://my.api/tiago", self.get().href());
+
+		Optional<Link> friends = resource.links().get("friends");
+		assertTrue(friends.isPresent());
+		assertEquals("http://my.api/{name}/friends", friends.get().href());
+		assertEquals("All friends for user", friends.get().title().get());
+		assertEquals("true", friends.get().property("templated").get());
 	}
 
 	private static class Model {
