@@ -35,8 +35,12 @@ import java.util.Map;
 import java.util.Optional;
 
 import com.fasterxml.jackson.annotation.JsonAnySetter;
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 
+@JsonPropertyOrder(value = {"href", "rel", "type", "title"})
 public class Link {
 
 	public static final String REL_SELF = "self";
@@ -47,9 +51,11 @@ public class Link {
 	@JsonProperty
 	private String rel;
 
+	@JsonInclude(value = Include.NON_EMPTY)
 	@JsonProperty
 	private String type;
 
+	@JsonInclude(value = Include.NON_EMPTY)
 	@JsonProperty
 	private String title;
 
