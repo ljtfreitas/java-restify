@@ -1,4 +1,4 @@
-package com.github.ljtfreitas.restify.http.client.hateoas;
+package com.github.ljtfreitas.restify.http.client.hateoas.hal;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
@@ -16,8 +16,11 @@ import org.mockserver.client.server.MockServerClient;
 import org.mockserver.junit.MockServerRule;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.ljtfreitas.restify.http.RestifyProxyBuilder;
+import com.github.ljtfreitas.restify.http.client.hateoas.Link;
+import com.github.ljtfreitas.restify.http.client.hateoas.Resource;
 import com.github.ljtfreitas.restify.http.client.message.converter.json.JacksonMessageConverter;
 import com.github.ljtfreitas.restify.http.contract.Get;
 import com.github.ljtfreitas.restify.http.contract.Path;
@@ -39,29 +42,22 @@ public class JsonHateoasHalResponseTest {
 		mockServerClient = new MockServerClient("localhost", 7080);
 
 		ObjectMapper objectMapper = new ObjectMapper();
-		objectMapper.registerModule(new JacksonHateoasHalModule());
+		objectMapper.registerModule(new JacksonHypermediaHalModule());
+		objectMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
 
 		JacksonMessageConverter<Object> jacksonMessageConverter = new JacksonMessageConverter<>(objectMapper);
-		
-		myApi = new RestifyProxyBuilder()
-				.converters(jacksonMessageConverter)
-				.target(MyApi.class, "http://localhost:7080")
-				.build();
+
+		myApi = new RestifyProxyBuilder().converters(jacksonMessageConverter)
+				.target(MyApi.class, "http://localhost:7080").build();
 	}
 
 	@Test
 	public void shouldSendGetRequestWithHalLinks() {
-		mockServerClient
-			.when(request()
-					.withMethod("GET")
-					.withPath("/json"))
-			.respond(response()
-					.withStatusCode(200)
-					.withHeader("Content-Type", "application/hal+json")
-					.withBody(json("{\"name\":\"Tiago de Freitas Lima\",\"birth_date\":\"1985-07-02\","
-							+ "\"_links\":{"
-								+ "\"self\":{\"href\":\"http://localhost:8080/\"},"
-								+ "\"friends\":{\"href\":\"http://localhost:8080/{user}/friends\",\"templated\":true}}}")));
+		mockServerClient.when(request().withMethod("GET").withPath("/json")).respond(response().withStatusCode(200)
+				.withHeader("Content-Type", "application/hal+json")
+				.withBody(json("{\"name\":\"Tiago de Freitas Lima\",\"birth_date\":\"1985-07-02\"," + "\"_links\":{"
+						+ "\"self\":{\"href\":\"http://localhost:8080/\"},"
+						+ "\"friends\":{\"href\":\"http://localhost:8080/{user}/friends\",\"templated\":true}}}")));
 
 		Resource<MyModel> resource = myApi.json();
 
@@ -71,11 +67,11 @@ public class JsonHateoasHalResponseTest {
 		assertEquals("1985-07-02", myModel.birthDate);
 
 		assertEquals(2, resource.links().size());
-		
+
 		Optional<Link> self = resource.links().self();
 		assertTrue(self.isPresent());
 		assertEquals("http://localhost:8080/", self.get().href());
-		
+
 		Optional<Link> friends = resource.links().get("friends");
 		assertTrue(friends.isPresent());
 		assertEquals("http://localhost:8080/{user}/friends", friends.get().href());
@@ -83,7 +79,8 @@ public class JsonHateoasHalResponseTest {
 
 	interface MyApi {
 
-		@Path("/json") @Get
+		@Path("/json")
+		@Get
 		public Resource<MyModel> json();
 
 	}
@@ -95,9 +92,6 @@ public class JsonHateoasHalResponseTest {
 
 		@JsonProperty("birth_date")
 		String birthDate;
-
-		public MyModel() {
-		}
 
 		public MyModel(@JsonProperty("name") String name, @JsonProperty("birth_date") String birthDate) {
 			this.name = name;

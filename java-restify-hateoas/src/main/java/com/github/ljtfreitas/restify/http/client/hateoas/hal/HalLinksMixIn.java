@@ -23,11 +23,24 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.http.client.hateoas;
+package com.github.ljtfreitas.restify.http.client.hateoas.hal;
 
-import com.fasterxml.jackson.databind.module.SimpleModule;
+import java.util.ArrayList;
+import java.util.List;
 
-public class JacksonHateoasHalModule extends SimpleModule {
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.github.ljtfreitas.restify.http.client.hateoas.Link;
+import com.github.ljtfreitas.restify.http.client.hateoas.Links;
 
+abstract class HalLinksMixIn extends Links {
 
+	@JsonProperty("_links")
+	@JsonInclude(Include.NON_EMPTY)
+	@JsonDeserialize(using = HalLinksDeserializer.class)
+	@JsonSerialize(using = HalLinksSerializer.class)
+	private List<Link> links = new ArrayList<>();
 }

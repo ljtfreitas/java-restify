@@ -25,10 +25,13 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.hateoas;
 
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import java.util.HashMap;
+import java.util.Map;
+import java.util.Optional;
+
+import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
-@JsonIgnoreProperties("templated")
 public class Link {
 
 	public static final String REL_SELF = "self";
@@ -39,6 +42,14 @@ public class Link {
 	@JsonProperty
 	private final String rel;
 
+	@JsonProperty
+	private String type;
+
+	@JsonProperty
+	private String title;
+
+	private Map<String, String> properties = new HashMap<>();
+
 	public Link(@JsonProperty("href") String href) {
 		this(href, REL_SELF);
 	}
@@ -47,21 +58,46 @@ public class Link {
 		this.href = href;
 		this.rel = rel;
 	}
-	
+
 	public Link(Link source, String rel) {
 		this.href = source.href;
-		this.rel = rel;
-	}
+		this.type = source.type;
+		this.title = source.title;
+		this.properties = new HashMap<>(source.properties);
 
-	public String rel() {
-		return rel;
+		this.rel = rel;
 	}
 
 	public String href() {
 		return href;
 	}
 
+	public String rel() {
+		return rel;
+	}
+
+	public Optional<String> title() {
+		return Optional.of(title);
+	}
+
+	public Optional<String> type() {
+		return Optional.of(type);
+	}
+
 	public boolean is(String rel) {
 		return this.rel.equals(rel);
+	}
+
+	public Optional<String> property(String key) {
+		return Optional.ofNullable(properties.get(key));
+	}
+
+	@JsonAnySetter
+	private void anySetter(String name, String value) {
+		this.properties.put(name, value);
+	}
+
+	public static Link self(String href) {
+		return new Link(href, REL_SELF);
 	}
 }

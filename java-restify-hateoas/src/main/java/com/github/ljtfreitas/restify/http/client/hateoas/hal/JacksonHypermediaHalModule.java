@@ -23,41 +23,16 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.http.client.hateoas;
+package com.github.ljtfreitas.restify.http.client.hateoas.hal;
 
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Optional;
+import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.github.ljtfreitas.restify.http.client.hateoas.Links;
 
-public class Links implements Iterable<Link> {
+public class JacksonHypermediaHalModule extends SimpleModule {
 
-	private List<Link> links = new ArrayList<>();
+	private static final long serialVersionUID = 1L;
 
-	public int size() {
-		return links.size();
-	}
-
-	@Override
-	public Iterator<Link> iterator() {
-		return links.iterator();
-	}
-
-	public Optional<Link> self() {
-		return find(Link.REL_SELF);
-	}
-
-	public Optional<Link> get(String rel) {
-		return find(rel);
-	}
-
-	private Optional<Link> find(String rel) {
-		return links.stream()
-			.filter(link -> link.is(rel))
-				.findFirst();
-	}
-
-	public void add(Link link) {
-		links.add(link);
+	public JacksonHypermediaHalModule() {
+		setMixInAnnotation(Links.class, HalLinksMixIn.class);
 	}
 }

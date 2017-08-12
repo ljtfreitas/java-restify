@@ -25,21 +25,42 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.hateoas;
 
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
 
 public class Resource<T> {
 
 	@JsonUnwrapped
 	private T content;
-	
+
 	@JsonUnwrapped
-	private Links links;
-	
+	private Links links = new Links();
+
+	@Deprecated
+	Resource() {
+	}
+
+	public Resource(T content) {
+		this.content = content;
+	}
+
+	public Resource(T content, Links links) {
+		this.content = content;
+		this.links = links;
+	}
+
 	public T content() {
 		return content;
 	}
 
+	@JsonUnwrapped
+	@JsonProperty("links")
 	public Links links() {
 		return links;
+	}
+
+	public Resource<T> addLink(Link link) {
+		links.add(link);
+		return this;
 	}
 }

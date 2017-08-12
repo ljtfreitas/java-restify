@@ -23,7 +23,7 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.http.client.hateoas;
+package com.github.ljtfreitas.restify.http.client.hateoas.hal;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -38,12 +38,13 @@ import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.fasterxml.jackson.databind.deser.std.ContainerDeserializerBase;
 import com.fasterxml.jackson.databind.type.TypeFactory;
+import com.github.ljtfreitas.restify.http.client.hateoas.Link;
 
-public class LinksDeserializer extends ContainerDeserializerBase<List<Link>> {
+class HalLinksDeserializer extends ContainerDeserializerBase<List<Link>> {
 
 	private static final long serialVersionUID = 1L;
 
-	public LinksDeserializer() {
+	public HalLinksDeserializer() {
 		super(TypeFactory.defaultInstance().constructCollectionLikeType(List.class, Link.class));
 	}
 
@@ -72,17 +73,17 @@ public class LinksDeserializer extends ContainerDeserializerBase<List<Link>> {
 
 			if (JsonToken.START_ARRAY.equals(jsonParser.nextToken())) {
 				while (!JsonToken.END_ARRAY.equals(jsonParser.nextToken())) {
-					links.add(readToLink(relation, jsonParser));
+					links.add(createLink(relation, jsonParser));
 				}
 			} else {
-				links.add(readToLink(relation, jsonParser));
+				links.add(createLink(relation, jsonParser));
 			}
 		}
 
 		return links;
 	}
 	
-	private Link readToLink(String relation, JsonParser jsonParser) throws IOException {
+	private Link createLink(String relation, JsonParser jsonParser) throws IOException {
 		Link link = jsonParser.readValueAs(Link.class);
 		return new Link(link, relation);
 	}
