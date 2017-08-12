@@ -25,7 +25,16 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.hateoas.hal;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.github.ljtfreitas.restify.http.client.hateoas.Link;
 import com.github.ljtfreitas.restify.http.client.hateoas.Links;
 
 public class JacksonHypermediaHalModule extends SimpleModule {
@@ -35,4 +44,14 @@ public class JacksonHypermediaHalModule extends SimpleModule {
 	public JacksonHypermediaHalModule() {
 		setMixInAnnotation(Links.class, HalLinksMixIn.class);
 	}
+
+	abstract class HalLinksMixIn extends Links {
+
+		@JsonProperty("_links")
+		@JsonInclude(Include.NON_EMPTY)
+		@JsonDeserialize(using = HalLinksDeserializer.class)
+		@JsonSerialize(using = HalLinksSerializer.class)
+		private List<Link> links = new ArrayList<>();
+	}
+
 }

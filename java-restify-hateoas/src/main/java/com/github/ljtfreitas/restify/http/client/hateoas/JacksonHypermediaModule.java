@@ -25,8 +25,13 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.hateoas;
 
+import java.util.ArrayList;
+import java.util.List;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
+import com.fasterxml.jackson.annotation.JsonInclude.Include;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.module.SimpleModule;
-import com.github.ljtfreitas.restify.http.client.hateoas.Links;
 
 public class JacksonHypermediaModule extends SimpleModule {
 
@@ -34,5 +39,12 @@ public class JacksonHypermediaModule extends SimpleModule {
 
 	public JacksonHypermediaModule() {
 		setMixInAnnotation(Links.class, LinksMixIn.class);
+	}
+
+	abstract class LinksMixIn extends Links {
+
+		@JsonProperty("links")
+		@JsonInclude(Include.NON_EMPTY)
+		private List<Link> links = new ArrayList<>();
 	}
 }
