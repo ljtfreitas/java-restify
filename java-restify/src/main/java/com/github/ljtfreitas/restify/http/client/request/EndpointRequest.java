@@ -31,7 +31,7 @@ import java.net.URISyntaxException;
 import java.util.Optional;
 
 import com.github.ljtfreitas.restify.http.RestifyHttpException;
-import com.github.ljtfreitas.restify.http.client.Headers;
+import com.github.ljtfreitas.restify.http.client.header.Headers;
 import com.github.ljtfreitas.restify.http.contract.Parameters;
 import com.github.ljtfreitas.restify.http.contract.metadata.reflection.JavaType;
 

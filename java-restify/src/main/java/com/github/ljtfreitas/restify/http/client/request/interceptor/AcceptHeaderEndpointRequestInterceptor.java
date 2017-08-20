@@ -25,7 +25,7 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.request.interceptor;
 
-import static com.github.ljtfreitas.restify.http.client.Headers.ACCEPT;
+import static com.github.ljtfreitas.restify.http.client.header.Headers.ACCEPT;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -33,7 +33,7 @@ import java.util.LinkedHashSet;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import com.github.ljtfreitas.restify.http.client.Header;
+import com.github.ljtfreitas.restify.http.client.header.Header;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
 import com.github.ljtfreitas.restify.http.contract.ContentType;
 

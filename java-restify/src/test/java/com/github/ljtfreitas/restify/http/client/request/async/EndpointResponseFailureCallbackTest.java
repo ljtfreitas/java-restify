@@ -12,7 +12,7 @@ import org.mockito.ArgumentMatcher;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import com.github.ljtfreitas.restify.http.client.Headers;
+import com.github.ljtfreitas.restify.http.client.header.Headers;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
 import com.github.ljtfreitas.restify.http.client.response.RestifyEndpointResponseBadGatewayException;
 import com.github.ljtfreitas.restify.http.client.response.RestifyEndpointResponseBadRequestException;

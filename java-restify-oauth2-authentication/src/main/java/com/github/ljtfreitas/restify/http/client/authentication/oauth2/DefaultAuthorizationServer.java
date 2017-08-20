@@ -25,17 +25,16 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.authentication.oauth2;
 
-import static com.github.ljtfreitas.restify.http.client.Headers.AUTHORIZATION;
-import static com.github.ljtfreitas.restify.http.client.Headers.CONTENT_TYPE;
+import static com.github.ljtfreitas.restify.http.client.header.Headers.AUTHORIZATION;
 import static com.github.ljtfreitas.restify.http.util.Preconditions.nonNull;
 
 import java.net.URI;
 import java.util.Arrays;
 import java.util.List;
 
-import com.github.ljtfreitas.restify.http.client.Header;
-import com.github.ljtfreitas.restify.http.client.Headers;
 import com.github.ljtfreitas.restify.http.client.authentication.BasicAuthentication;
+import com.github.ljtfreitas.restify.http.client.header.Header;
+import com.github.ljtfreitas.restify.http.client.header.Headers;
 import com.github.ljtfreitas.restify.http.client.message.HttpMessageConverter;
 import com.github.ljtfreitas.restify.http.client.message.HttpMessageConverters;
 import com.github.ljtfreitas.restify.http.client.message.converter.json.JsonMessageConverter;
@@ -115,7 +114,7 @@ public class DefaultAuthorizationServer implements AuthorizationServer {
 		Headers headers = new Headers(properties.headers());
 
 		if (properties.cookie().isPresent()) {
-			headers.put("Cookie", properties.cookie().get());
+			headers.add("Cookie", properties.cookie().get());
 		}
 
 		URI authorizationUri = URI.create(properties.authorizationUri().toString() + "?" + parameters.queryString());
@@ -198,10 +197,8 @@ public class DefaultAuthorizationServer implements AuthorizationServer {
 		}
 
 		private EndpointRequest create() {
-			Header contentType = new Header(CONTENT_TYPE, FORM_URLENCODED_CONTENT_TYPE);
-
-			Headers headers = new Headers(contentType);
-			headers.putAll(source.headers());
+			Headers headers = new Headers(Header.contentType(FORM_URLENCODED_CONTENT_TYPE));
+			headers.addAll(source.headers());
 
 			Parameters body = source.parameters();
 

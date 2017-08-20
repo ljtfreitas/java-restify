@@ -29,8 +29,8 @@ import static com.github.ljtfreitas.restify.http.util.Preconditions.nonNull;
 
 import java.net.URI;
 
-import com.github.ljtfreitas.restify.http.client.Header;
-import com.github.ljtfreitas.restify.http.client.Headers;
+import com.github.ljtfreitas.restify.http.client.header.Header;
+import com.github.ljtfreitas.restify.http.client.header.Headers;
 import com.github.ljtfreitas.restify.http.contract.Parameters;
 import com.github.ljtfreitas.restify.http.contract.Parameters.Parameter;
 
@@ -132,12 +132,12 @@ public class AccessTokenRequest {
 		}
 
 		public Builder header(String name, String value) {
-			headers.put(name, value);
+			headers.add(name, value);
 			return this;
 		}
 
 		public Builder header(Header header) {
-			headers.put(header);
+			headers.add(header);
 			return this;
 		}
 

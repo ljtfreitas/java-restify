@@ -11,7 +11,7 @@ import java.io.ByteArrayInputStream;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.github.ljtfreitas.restify.http.client.Headers;
+import com.github.ljtfreitas.restify.http.client.header.Headers;
 
 public class EndpointResponseExceptionFactoryTest {
 

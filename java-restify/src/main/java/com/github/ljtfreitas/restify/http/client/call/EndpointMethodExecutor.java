@@ -23,16 +23,29 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.http.client.response;
+package com.github.ljtfreitas.restify.http.client.call;
 
-import com.github.ljtfreitas.restify.http.client.header.Headers;
+import com.github.ljtfreitas.restify.http.client.call.EndpointCall;
+import com.github.ljtfreitas.restify.http.client.call.EndpointCallFactory;
+import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutable;
+import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutables;
+import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethod;
 
-public class RestifyEndpointResponseProxyAuthenticationRequiredException extends RestifyEndpointResponseException {
+public class EndpointMethodExecutor {
 
-	private static final long serialVersionUID = 1L;
+	private final EndpointCallExecutables endpointCallExecutables;
+	private final EndpointCallFactory endpointCallFactory;
 
-	public RestifyEndpointResponseProxyAuthenticationRequiredException(String message, Headers headers, String body) {
-		super(message, StatusCode.proxyAuthenticationRequired(), headers, body);
+	public EndpointMethodExecutor(EndpointCallExecutables endpointCallExecutables, EndpointCallFactory endpointCallFactory) {
+		this.endpointCallExecutables = endpointCallExecutables;
+		this.endpointCallFactory = endpointCallFactory;
 	}
 
+	public Object execute(EndpointMethod endpointMethod, Object[] args) {
+		EndpointCallExecutable<Object, Object> executable = endpointCallExecutables.of(endpointMethod);
+
+		EndpointCall<Object> call = endpointCallFactory.createWith(endpointMethod, args, executable.returnType());
+
+		return executable.execute(call, args);
+	}
 }

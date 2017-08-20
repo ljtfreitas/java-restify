@@ -27,7 +27,7 @@ package com.github.ljtfreitas.restify.http.client.response;
 
 import static com.github.ljtfreitas.restify.http.util.Preconditions.isTrue;
 
-import com.github.ljtfreitas.restify.http.client.Headers;
+import com.github.ljtfreitas.restify.http.client.header.Headers;
 
 public class EndpointResponse<T> {
 

@@ -25,11 +25,11 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.request.interceptor;
 
-import static com.github.ljtfreitas.restify.http.client.Headers.CONTENT_TYPE;
+import static com.github.ljtfreitas.restify.http.client.header.Headers.CONTENT_TYPE;
 
 import java.util.Optional;
 
-import com.github.ljtfreitas.restify.http.client.Header;
+import com.github.ljtfreitas.restify.http.client.header.Header;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
 import com.github.ljtfreitas.restify.http.contract.ContentType;
 
@@ -51,7 +51,7 @@ public class ContentTypeHeaderEndpointRequestInterceptor implements EndpointRequ
 		boolean hasBody = endpointRequest.body().isPresent();
 
 		if (!contentType.isPresent() && hasBody) {
-			endpointRequest.headers().add(new Header(CONTENT_TYPE, this.contentType.toString()));
+			endpointRequest.headers().add(Header.contentType(this.contentType.toString()));
 		}
 
 		return endpointRequest;

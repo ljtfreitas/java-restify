@@ -41,9 +41,9 @@ import java.util.concurrent.Executors;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLSocketFactory;
 
-import com.github.ljtfreitas.restify.http.client.EndpointMethodExecutor;
 import com.github.ljtfreitas.restify.http.client.authentication.Authentication;
 import com.github.ljtfreitas.restify.http.client.call.EndpointCallFactory;
+import com.github.ljtfreitas.restify.http.client.call.EndpointMethodExecutor;
 import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutableProvider;
 import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutables;
 import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallObjectExecutableFactory;

@@ -27,7 +27,7 @@ package com.github.ljtfreitas.restify.http.client.request.interceptor;
 
 import java.util.Optional;
 
-import com.github.ljtfreitas.restify.http.client.Header;
+import com.github.ljtfreitas.restify.http.client.header.Header;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
 import com.github.ljtfreitas.restify.http.client.request.EndpointVersion;
 
@@ -49,7 +49,7 @@ public class AcceptVersionHeaderEndpointRequestInterceptor implements EndpointRe
 				.orElseGet(() -> request.version().orElse(null));
 
 		if (version != null) {
-			request.headers().add(new Header("Accept-Version", version.get()));
+			request.headers().add(Header.acceptVersion(version.get()));
 		}
 
 		return request;

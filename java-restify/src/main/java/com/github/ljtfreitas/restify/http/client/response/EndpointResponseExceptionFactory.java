@@ -27,8 +27,8 @@ package com.github.ljtfreitas.restify.http.client.response;
 
 import java.util.stream.Collectors;
 
-import com.github.ljtfreitas.restify.http.client.Header;
-import com.github.ljtfreitas.restify.http.client.Headers;
+import com.github.ljtfreitas.restify.http.client.header.Header;
+import com.github.ljtfreitas.restify.http.client.header.Headers;
 import com.github.ljtfreitas.restify.http.client.message.converter.text.TextPlainMessageConverter;
 
 public class EndpointResponseExceptionFactory {

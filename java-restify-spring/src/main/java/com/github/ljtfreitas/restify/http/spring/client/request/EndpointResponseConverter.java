@@ -29,7 +29,7 @@ import org.springframework.core.convert.converter.Converter;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 
-import com.github.ljtfreitas.restify.http.client.Headers;
+import com.github.ljtfreitas.restify.http.client.header.Headers;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
 import com.github.ljtfreitas.restify.http.client.response.StatusCode;
 
@@ -44,7 +44,7 @@ class EndpointResponseConverter implements Converter<ResponseEntity<Object>, End
 
 	private Headers headersOf(HttpHeaders httpHeaders) {
 		Headers headers = new Headers();
-		httpHeaders.forEach((k, v) -> headers.put(k, v));
+		httpHeaders.forEach((k, v) -> headers.add(k, v));
 		return headers;
 	}
 }

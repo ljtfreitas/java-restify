@@ -25,12 +25,12 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.message.form.multipart;
 
-import static com.github.ljtfreitas.restify.http.client.Headers.CONTENT_TYPE;
+import static com.github.ljtfreitas.restify.http.client.header.Headers.CONTENT_TYPE;
 
 import java.io.IOException;
 import java.io.OutputStream;
 
-import com.github.ljtfreitas.restify.http.client.Header;
+import com.github.ljtfreitas.restify.http.client.header.Header;
 import com.github.ljtfreitas.restify.http.client.message.HttpMessageWriter;
 import com.github.ljtfreitas.restify.http.client.request.HttpRequestMessage;
 import com.github.ljtfreitas.restify.http.client.request.RestifyHttpMessageWriteException;
@@ -82,7 +82,7 @@ abstract class MultipartFormMessageWriter<T> implements HttpMessageWriter<T> {
 
 	private void addToContentType(String boundary, HttpRequestMessage httpRequestMessage) {
 		Header contentTypeHeader = httpRequestMessage.headers().get(CONTENT_TYPE)
-				.orElseGet(() -> new Header(CONTENT_TYPE, MULTIPART_FORM_DATA));
+				.orElseGet(() -> Header.contentType(MULTIPART_FORM_DATA));
 
 		ContentType contentType = ContentType.of(contentTypeHeader.value());
 

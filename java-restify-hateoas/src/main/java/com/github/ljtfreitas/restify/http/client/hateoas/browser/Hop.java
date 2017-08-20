@@ -27,8 +27,8 @@ package com.github.ljtfreitas.restify.http.client.hateoas.browser;
 
 import java.util.Map;
 
-import com.github.ljtfreitas.restify.http.client.Header;
-import com.github.ljtfreitas.restify.http.client.Headers;
+import com.github.ljtfreitas.restify.http.client.header.Header;
+import com.github.ljtfreitas.restify.http.client.header.Headers;
 import com.github.ljtfreitas.restify.http.contract.ContentType;
 
 public class Hop {
@@ -93,7 +93,7 @@ public class Hop {
 
 	public Hop usingHeader(String name, String value) {
 		Headers headers = new Headers(this.headers);
-		headers.put(name, value);
+		headers.add(name, value);
 		return new Hop(rel, parameters, headers, method, body);
 	}
 
@@ -113,7 +113,7 @@ public class Hop {
 
 	public Hop usingPost(Object body, ContentType contentType) {
 		Headers newHeaders = new Headers(this.headers);
-		newHeaders.put(new Header(Headers.CONTENT_TYPE, contentType.toString()));
+		newHeaders.add(new Header(Headers.CONTENT_TYPE, contentType.toString()));
 		return new Hop(rel, parameters, newHeaders, "POST", body);
 	}
 
@@ -123,7 +123,7 @@ public class Hop {
 
 	public Hop usingPut(Object body, ContentType contentType) {
 		Headers newHeaders = new Headers(this.headers);
-		newHeaders.put(new Header(Headers.CONTENT_TYPE, contentType.toString()));
+		newHeaders.add(new Header(Headers.CONTENT_TYPE, contentType.toString()));
 		return new Hop(rel, parameters, headers, "PUT", body);
 	}
 
@@ -137,7 +137,7 @@ public class Hop {
 
 	public Hop usingMethod(String method, Object body, ContentType contentType) {
 		Headers newHeaders = new Headers(this.headers);
-		newHeaders.put(new Header(Headers.CONTENT_TYPE, contentType.toString()));
+		newHeaders.add(new Header(Headers.CONTENT_TYPE, contentType.toString()));
 		return new Hop(rel, parameters, newHeaders, method, body);
 	}
 

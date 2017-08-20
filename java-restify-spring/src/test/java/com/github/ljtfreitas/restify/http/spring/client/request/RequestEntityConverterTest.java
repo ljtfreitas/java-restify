@@ -11,7 +11,8 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.http.RequestEntity;
 
-import com.github.ljtfreitas.restify.http.client.Headers;
+import com.github.ljtfreitas.restify.http.client.header.Header;
+import com.github.ljtfreitas.restify.http.client.header.Headers;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
 import com.github.ljtfreitas.restify.http.spring.client.request.RequestEntityConverter;
 
@@ -24,8 +25,8 @@ public class RequestEntityConverterTest {
 		URI endpoint = URI.create("http://my.api.com/path");
 
 		Headers headers = new Headers();
-		headers.put("Content-Type", "application/json");
-		headers.put("Accept", "application/json");
+		headers.add(Header.contentType("application/json"));
+		headers.add(Header.accept("application/json"));
 
 		MyRequestModel body = new MyRequestModel();
 

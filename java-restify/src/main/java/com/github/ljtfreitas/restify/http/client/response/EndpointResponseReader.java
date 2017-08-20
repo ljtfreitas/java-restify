@@ -28,8 +28,8 @@ package com.github.ljtfreitas.restify.http.client.response;
 import java.io.IOException;
 import java.lang.reflect.Type;
 
-import com.github.ljtfreitas.restify.http.client.Header;
-import com.github.ljtfreitas.restify.http.client.Headers;
+import com.github.ljtfreitas.restify.http.client.header.Header;
+import com.github.ljtfreitas.restify.http.client.header.Headers;
 import com.github.ljtfreitas.restify.http.client.message.HttpMessageConverters;
 import com.github.ljtfreitas.restify.http.client.message.HttpMessageReader;
 import com.github.ljtfreitas.restify.http.contract.ContentType;

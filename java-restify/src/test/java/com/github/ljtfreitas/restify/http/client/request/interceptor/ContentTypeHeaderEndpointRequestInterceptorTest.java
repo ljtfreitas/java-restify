@@ -12,8 +12,8 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import com.github.ljtfreitas.restify.http.client.Header;
-import com.github.ljtfreitas.restify.http.client.Headers;
+import com.github.ljtfreitas.restify.http.client.header.Header;
+import com.github.ljtfreitas.restify.http.client.header.Headers;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -60,7 +60,7 @@ public class ContentTypeHeaderEndpointRequestInterceptorTest {
 	public void shouldNotAddContentTypeHeaderWhenRequestHasBodyAndContentTypeAlreadyIsPresent() throws Exception {
 		String body = "<field>value</field>";
 
-		headers.put(Headers.CONTENT_TYPE, "application/xml");
+		headers.add(Headers.CONTENT_TYPE, "application/xml");
 
 		EndpointRequest endpointRequest = new EndpointRequest(new URI("http://my.api.com/object"), "GET", headers, body);
 

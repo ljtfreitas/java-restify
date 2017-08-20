@@ -23,7 +23,7 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.http.client;
+package com.github.ljtfreitas.restify.http.client.header;
 
 import static com.github.ljtfreitas.restify.http.util.Preconditions.nonNull;
 

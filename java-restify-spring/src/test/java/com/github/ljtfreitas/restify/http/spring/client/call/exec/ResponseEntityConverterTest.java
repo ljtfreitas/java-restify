@@ -10,7 +10,8 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 
-import com.github.ljtfreitas.restify.http.client.Headers;
+import com.github.ljtfreitas.restify.http.client.header.Header;
+import com.github.ljtfreitas.restify.http.client.header.Headers;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
 import com.github.ljtfreitas.restify.http.client.response.StatusCode;
 import com.github.ljtfreitas.restify.http.spring.client.call.exec.ResponseEntityConverter;
@@ -24,8 +25,8 @@ public class ResponseEntityConverterTest {
 	@Before
 	public void setup() {
 		Headers headers = new Headers();
-		headers.put("Content-Type", MediaType.TEXT_PLAIN_VALUE);
-		headers.put("X-Header-Whatever", "whatever");
+		headers.add(Header.contentType(MediaType.TEXT_PLAIN_VALUE));
+		headers.add(Header.of("X-Header-Whatever", "whatever"));
 
 		endpointResponse = new EndpointResponse<>(StatusCode.ok(), headers, "expected result");
 	}

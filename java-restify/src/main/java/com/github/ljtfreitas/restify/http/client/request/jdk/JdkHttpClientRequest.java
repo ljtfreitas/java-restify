@@ -35,7 +35,7 @@ import java.nio.charset.Charset;
 import java.util.Collection;
 
 import com.github.ljtfreitas.restify.http.RestifyHttpException;
-import com.github.ljtfreitas.restify.http.client.Headers;
+import com.github.ljtfreitas.restify.http.client.header.Headers;
 import com.github.ljtfreitas.restify.http.client.request.HttpClientRequest;
 import com.github.ljtfreitas.restify.http.client.response.HttpResponseMessage;
 import com.github.ljtfreitas.restify.http.client.response.StatusCode;
@@ -73,7 +73,7 @@ class JdkHttpClientRequest implements HttpClientRequest {
 
 		connection.getHeaderFields().entrySet().stream()
 			.filter(e -> e.getKey() != null && !e.getKey().equals(""))
-				.forEach(e -> headers.put(e.getKey(), e.getValue()));
+				.forEach(e -> headers.add(e.getKey(), e.getValue()));
 
 		InputStream stream = Tryable.or(() -> connection.getErrorStream() == null ? connection.getInputStream() : connection.getErrorStream(),
 				new ByteArrayInputStream(new byte[0]));
@@ -123,14 +123,14 @@ class JdkHttpClientRequest implements HttpClientRequest {
 		}
 
 		@Override
-		public void put(String name, String value) {
-			super.put(name, value);
+		public void add(String name, String value) {
+			super.add(name, value);
 			connection.setRequestProperty(name, value);
 		}
 
 		@Override
-		public void put(String name, Collection<String> values) {
-			super.put(name, values);
+		public void add(String name, Collection<String> values) {
+			super.add(name, values);
 			values.forEach(value -> connection.setRequestProperty(name, value));
 		}
 

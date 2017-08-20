@@ -25,11 +25,11 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.request;
 
-import static com.github.ljtfreitas.restify.http.client.Headers.CONTENT_TYPE;
+import static com.github.ljtfreitas.restify.http.client.header.Headers.CONTENT_TYPE;
 
 import java.io.IOException;
 
-import com.github.ljtfreitas.restify.http.client.Header;
+import com.github.ljtfreitas.restify.http.client.header.Header;
 import com.github.ljtfreitas.restify.http.client.message.HttpMessageConverters;
 import com.github.ljtfreitas.restify.http.client.message.HttpMessageWriter;
 import com.github.ljtfreitas.restify.http.contract.ContentType;

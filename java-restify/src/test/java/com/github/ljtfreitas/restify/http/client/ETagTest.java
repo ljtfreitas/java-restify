@@ -4,6 +4,8 @@ import static org.junit.Assert.*;
 
 import org.junit.Test;
 
+import com.github.ljtfreitas.restify.http.client.header.ETag;
+
 public class ETagTest {
 
 	@Test
