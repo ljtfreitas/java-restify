@@ -41,6 +41,8 @@ import com.github.ljtfreitas.restify.http.contract.ContentType;
 
 public class JacksonMessageConverter<T> extends JsonMessageConverter<T> {
 
+	private static final ContentType APPLICATION_JSON_CONTENT_TYPE = ContentType.of("application/json");
+
 	private final ObjectMapper objectMapper;
 
 	public JacksonMessageConverter() {
@@ -53,9 +55,9 @@ public class JacksonMessageConverter<T> extends JsonMessageConverter<T> {
 
 	@Override
 	public ContentType contentType() {
-		return ContentType.of("application", "*+json");
+		return APPLICATION_JSON_CONTENT_TYPE;
 	}
-	
+
 	@Override
 	public boolean canRead(Type type) {
 		TypeFactory typeFactory = objectMapper.getTypeFactory();

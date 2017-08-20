@@ -25,6 +25,10 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.hateoas;
 
+import java.util.ArrayList;
+import java.util.Collection;
+
+import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
 
@@ -33,8 +37,9 @@ public class Resource<T> {
 	@JsonUnwrapped
 	private T content;
 
-	@JsonUnwrapped
-	private Links links = new Links();
+	@JsonProperty("links")
+	@JsonInclude(JsonInclude.Include.NON_EMPTY)
+	private Collection<Link> links = new ArrayList<>();
 
 	@Deprecated
 	Resource() {
@@ -46,17 +51,20 @@ public class Resource<T> {
 
 	public Resource(T content, Links links) {
 		this.content = content;
-		this.links = links;
+		this.links = new ArrayList<>(links.unwrap());
+	}
+
+	public Resource(T content, Collection<Link> links) {
+		this.content = content;
+		this.links = new ArrayList<>(links);
 	}
 
 	public T content() {
 		return content;
 	}
 
-	@JsonUnwrapped
-	@JsonProperty("links")
 	public Links links() {
-		return links;
+		return new Links(links);
 	}
 
 	public Resource<T> addLink(Link link) {

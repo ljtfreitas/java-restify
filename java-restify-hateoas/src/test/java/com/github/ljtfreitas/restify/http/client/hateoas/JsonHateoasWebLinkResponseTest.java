@@ -42,7 +42,6 @@ public class JsonHateoasWebLinkResponseTest {
 		mockServerClient = new MockServerClient("localhost", 7080);
 
 		ObjectMapper objectMapper = new ObjectMapper();
-		objectMapper.registerModule(new JacksonHypermediaModule());
 		objectMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
 
 		JacksonMessageConverter<Object> jacksonMessageConverter = new JacksonMessageConverter<>(objectMapper);

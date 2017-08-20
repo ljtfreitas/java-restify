@@ -23,54 +23,25 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.http.client.hateoas;
+package com.github.ljtfreitas.restify.http.client.hateoas.browser;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.Optional;
+public class LinkBrowserException extends RuntimeException {
 
-public class Links implements Iterable<Link> {
+	private static final long serialVersionUID = 1L;
 
-	private final Collection<Link> links;
-
-	public Links() {
-		this.links = new ArrayList<>();
+	public LinkBrowserException() {
+		super();
 	}
 
-	public Links(Collection<Link> links) {
-		this.links = links;
+	public LinkBrowserException(String message, Throwable cause) {
+		super(message, cause);
 	}
 
-	public int size() {
-		return links.size();
+	public LinkBrowserException(String message) {
+		super(message);
 	}
 
-	@Override
-	public Iterator<Link> iterator() {
-		return links.iterator();
-	}
-
-	public Optional<Link> self() {
-		return find(Link.REL_SELF);
-	}
-
-	public Optional<Link> get(String rel) {
-		return find(rel);
-	}
-
-	private Optional<Link> find(String rel) {
-		return links.stream()
-			.filter(link -> link.is(rel))
-				.findFirst();
-	}
-
-	public void add(Link link) {
-		links.add(link);
-	}
-
-	public Collection<Link> unwrap() {
-		return Collections.unmodifiableCollection(links);
+	public LinkBrowserException(Throwable cause) {
+		super(cause);
 	}
 }

@@ -33,19 +33,29 @@ import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.JsonToken;
+import com.fasterxml.jackson.databind.BeanProperty;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.JsonDeserializer;
+import com.fasterxml.jackson.databind.JsonMappingException;
+import com.fasterxml.jackson.databind.deser.ContextualDeserializer;
 import com.fasterxml.jackson.databind.deser.std.ContainerDeserializerBase;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.github.ljtfreitas.restify.http.client.hateoas.Link;
 
-class HalLinksDeserializer extends ContainerDeserializerBase<List<Link>> {
+class HalLinksDeserializer extends ContainerDeserializerBase<List<Link>> implements ContextualDeserializer {
 
 	private static final long serialVersionUID = 1L;
 
+	private final JsonDeserializer<Object> linkDeserializer;
+
 	public HalLinksDeserializer() {
+		this(null);
+	}
+
+	public HalLinksDeserializer(JsonDeserializer<Object> linkDeserializer) {
 		super(TypeFactory.defaultInstance().constructCollectionLikeType(List.class, Link.class));
+		this.linkDeserializer = linkDeserializer;
 	}
 
 	@Override
@@ -55,7 +65,7 @@ class HalLinksDeserializer extends ContainerDeserializerBase<List<Link>> {
 
 	@Override
 	public JsonDeserializer<Object> getContentDeserializer() {
-		return null;
+		return linkDeserializer;
 	}
 
 	@Override
@@ -86,5 +96,12 @@ class HalLinksDeserializer extends ContainerDeserializerBase<List<Link>> {
 	private Link createLink(String relation, JsonParser jsonParser) throws IOException {
 		Link link = jsonParser.readValueAs(Link.class);
 		return new Link(link, relation);
+	}
+
+	@Override
+	public JsonDeserializer<?> createContextual(DeserializationContext context, BeanProperty property)
+			throws JsonMappingException {
+		JsonDeserializer<Object> linkDeserializer = context.findNonContextualValueDeserializer(TypeFactory.defaultInstance().constructType(Link.class));
+		return new HalLinksDeserializer(linkDeserializer);
 	}
 }

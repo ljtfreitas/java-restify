@@ -84,8 +84,8 @@ public class ContentType {
 
 	private boolean doCompatible(ContentType contentType) {
 		return doEquals(contentType)
-			|| (compatibleWithType(contentType.type)
-				&& compatibleWithSubtype(contentType.subtype));
+			|| (isWildcardType(this.type) || isWildcardType(contentType.type))
+			|| (compatibleWithType(contentType.type) && compatibleWithSubtype(contentType.subtype));
 	}
 
 	private boolean compatibleWithType(String type) {

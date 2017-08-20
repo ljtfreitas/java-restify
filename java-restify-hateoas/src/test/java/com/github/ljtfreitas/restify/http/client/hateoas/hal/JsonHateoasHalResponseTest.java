@@ -28,7 +28,7 @@ import com.github.ljtfreitas.restify.http.contract.Path;
 public class JsonHateoasHalResponseTest {
 
 	@Rule
-	public MockServerRule mockServerRule = new MockServerRule(this, 7080, 7084);
+	public MockServerRule mockServerRule = new MockServerRule(this, 7080);
 
 	@Rule
 	public ExpectedException expectedException = ExpectedException.none();

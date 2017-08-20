@@ -23,54 +23,32 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.http.client.hateoas;
+package com.github.ljtfreitas.restify.http.client.hateoas.browser;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.Optional;
+import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
+import com.github.ljtfreitas.restify.http.client.request.EndpointRequestExecutor;
+import com.github.ljtfreitas.restify.http.client.request.interceptor.EndpointRequestInterceptorStack;
+import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
 
-public class Links implements Iterable<Link> {
+public class LinkRequestExecutor {
 
-	private final Collection<Link> links;
+	private final EndpointRequestExecutor endpointRequestExecutor;
+	private final EndpointRequestInterceptorStack endpointRequestInterceptorStack;
 
-	public Links() {
-		this.links = new ArrayList<>();
+	public LinkRequestExecutor(EndpointRequestExecutor endpointRequestExecutor, EndpointRequestInterceptorStack endpointRequestInterceptorStack) {
+		this.endpointRequestExecutor = endpointRequestExecutor;
+		this.endpointRequestInterceptorStack = endpointRequestInterceptorStack;
 	}
 
-	public Links(Collection<Link> links) {
-		this.links = links;
+	public <T> T execute(LinkEndpointRequest linkRequest) {
+		EndpointRequest endpointRequest = endpointRequestInterceptorStack.apply(newRequest(linkRequest));
+
+		EndpointResponse<T> response = endpointRequestExecutor.execute(endpointRequest);
+
+		return response.body();
 	}
 
-	public int size() {
-		return links.size();
-	}
-
-	@Override
-	public Iterator<Link> iterator() {
-		return links.iterator();
-	}
-
-	public Optional<Link> self() {
-		return find(Link.REL_SELF);
-	}
-
-	public Optional<Link> get(String rel) {
-		return find(rel);
-	}
-
-	private Optional<Link> find(String rel) {
-		return links.stream()
-			.filter(link -> link.is(rel))
-				.findFirst();
-	}
-
-	public void add(Link link) {
-		links.add(link);
-	}
-
-	public Collection<Link> unwrap() {
-		return Collections.unmodifiableCollection(links);
+	private EndpointRequest newRequest(LinkEndpointRequest linkRequest) {
+		return new EndpointRequest(linkRequest.expand(), "GET", linkRequest.responseType());
 	}
 }

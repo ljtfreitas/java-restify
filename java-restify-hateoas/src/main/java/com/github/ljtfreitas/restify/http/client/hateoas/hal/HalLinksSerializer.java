@@ -261,16 +261,14 @@ class HalLinksSerializer extends ContainerSerializer<List<Link>> implements Cont
 		@JsonProperty("templated")
 		@JsonSerialize(using = BooleanTrueSerializer.class)
 		private boolean templated() {
-			Optional<String> templated = link.property("templated");
-			return templated.isPresent() && templated.map(Boolean::valueOf).get();
+			return link.templated();
 		}
 
 		@JsonInclude(Include.NON_EMPTY)
 		@JsonProperty("deprecation")
 		@JsonSerialize(using = BooleanTrueSerializer.class)
 		private boolean deprecation() {
-			Optional<String> deprecation = link.property("deprecation");
-			return deprecation.isPresent() && deprecation.map(Boolean::valueOf).get();
+			return link.deprecation();
 		}
 	}
 }

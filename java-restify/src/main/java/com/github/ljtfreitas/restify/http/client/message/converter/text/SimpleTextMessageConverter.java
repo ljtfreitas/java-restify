@@ -23,54 +23,17 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.http.client.hateoas;
+package com.github.ljtfreitas.restify.http.client.message.converter.text;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.Optional;
+import com.github.ljtfreitas.restify.http.contract.ContentType;
 
-public class Links implements Iterable<Link> {
+public class SimpleTextMessageConverter extends TextMessageConverter {
 
-	private final Collection<Link> links;
-
-	public Links() {
-		this.links = new ArrayList<>();
-	}
-
-	public Links(Collection<Link> links) {
-		this.links = links;
-	}
-
-	public int size() {
-		return links.size();
-	}
+	private static final ContentType ALL_CONTENT_TYPE = ContentType.of("*/*");
 
 	@Override
-	public Iterator<Link> iterator() {
-		return links.iterator();
+	public ContentType contentType() {
+		return ALL_CONTENT_TYPE;
 	}
 
-	public Optional<Link> self() {
-		return find(Link.REL_SELF);
-	}
-
-	public Optional<Link> get(String rel) {
-		return find(rel);
-	}
-
-	private Optional<Link> find(String rel) {
-		return links.stream()
-			.filter(link -> link.is(rel))
-				.findFirst();
-	}
-
-	public void add(Link link) {
-		links.add(link);
-	}
-
-	public Collection<Link> unwrap() {
-		return Collections.unmodifiableCollection(links);
-	}
 }

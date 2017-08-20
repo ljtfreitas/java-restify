@@ -23,54 +23,47 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.http.client.hateoas;
+package com.github.ljtfreitas.restify.http.client.hateoas.browser;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Iterator;
-import java.util.Optional;
+import java.util.Map;
 
-public class Links implements Iterable<Link> {
+public class Hop {
 
-	private final Collection<Link> links;
+	private final String rel;
+	private final LinkURITemplateParameters parameters;
 
-	public Links() {
-		this.links = new ArrayList<>();
+	private Hop(String rel) {
+		this(rel, new LinkURITemplateParameters());
 	}
 
-	public Links(Collection<Link> links) {
-		this.links = links;
+	private Hop(String rel, LinkURITemplateParameters parameters) {
+		this.rel = rel;
+		this.parameters = parameters;
 	}
 
-	public int size() {
-		return links.size();
+	public String rel() {
+		return rel;
 	}
 
-	@Override
-	public Iterator<Link> iterator() {
-		return links.iterator();
+	public LinkURITemplateParameters parameters() {
+		return parameters;
 	}
 
-	public Optional<Link> self() {
-		return find(Link.REL_SELF);
+	public Hop with(String name, String value) {
+		LinkURITemplateParameters parameters = new LinkURITemplateParameters(this.parameters);
+		parameters.put(name, value);
+		return new Hop(rel, parameters);
 	}
 
-	public Optional<Link> get(String rel) {
-		return find(rel);
+	public static Hop rel(String rel) {
+		return new Hop(rel);
 	}
 
-	private Optional<Link> find(String rel) {
-		return links.stream()
-			.filter(link -> link.is(rel))
-				.findFirst();
+	public static Hop rel(String rel, Map<String, String> parameters) {
+		return new Hop(rel, new LinkURITemplateParameters(parameters));
 	}
 
-	public void add(Link link) {
-		links.add(link);
-	}
-
-	public Collection<Link> unwrap() {
-		return Collections.unmodifiableCollection(links);
+	public static Hop rel(String rel, LinkURITemplateParameters parameters) {
+		return new Hop(rel, parameters);
 	}
 }

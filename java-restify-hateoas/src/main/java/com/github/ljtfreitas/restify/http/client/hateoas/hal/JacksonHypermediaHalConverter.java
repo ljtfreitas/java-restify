@@ -23,28 +23,37 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.http.client.hateoas;
+package com.github.ljtfreitas.restify.http.client.hateoas.hal;
 
-import java.util.ArrayList;
-import java.util.List;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.ljtfreitas.restify.http.client.message.converter.json.JacksonMessageConverter;
+import com.github.ljtfreitas.restify.http.contract.ContentType;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonInclude.Include;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.module.SimpleModule;
+public class JacksonHypermediaHalConverter<T> extends JacksonMessageConverter<T> {
 
-public class JacksonHypermediaModule extends SimpleModule {
+	private static final ContentType HYPERMEDIA_JSON_CONTENT_TYPE = ContentType.of("application", "*+json");
 
-	private static final long serialVersionUID = 1L;
-
-	public JacksonHypermediaModule() {
-		setMixInAnnotation(Links.class, LinksMixIn.class);
+	public JacksonHypermediaHalConverter() {
+		super(configure());
 	}
 
-	abstract class LinksMixIn extends Links {
+	public JacksonHypermediaHalConverter(ObjectMapper objectMapper) {
+		super(configure(objectMapper));
+	}
 
-		@JsonProperty("links")
-		@JsonInclude(Include.NON_EMPTY)
-		private List<Link> links = new ArrayList<>();
+	private static ObjectMapper configure() {
+		return configure(new ObjectMapper());
+	}
+
+	private static ObjectMapper configure(ObjectMapper objectMapper) {
+		objectMapper.registerModule(new JacksonHypermediaHalModule());
+		objectMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+		return objectMapper;
+	}
+
+	@Override
+	public ContentType contentType() {
+		return HYPERMEDIA_JSON_CONTENT_TYPE;
 	}
 }

@@ -118,4 +118,13 @@ public class ContentTypeTest {
 
 		assertTrue(halJsonContentType.compatible(jsonWildcardContentType));
 	}
+
+	@Test
+	public void shouldBeCompatibleWithWildcardTypeWhenSuffixTypeIsPresent() {
+		ContentType wildcardContentType = ContentType.of("*/*");
+
+		ContentType halJsonContentType = ContentType.of("application/hal+json");
+
+		assertTrue(wildcardContentType.compatible(halJsonContentType));
+	}
 }

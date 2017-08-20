@@ -35,6 +35,7 @@ import java.util.Map;
 import java.util.Optional;
 
 import com.fasterxml.jackson.annotation.JsonAnySetter;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -61,6 +62,9 @@ public class Link {
 
 	private Map<String, String> properties = new HashMap<>();
 
+	@JsonBackReference
+	private Resource<?> owner;
+
 	@Deprecated
 	protected Link() {
 	}
@@ -72,6 +76,12 @@ public class Link {
 	public Link(String href, String rel) {
 		this.href = href;
 		this.rel = rel;
+	}
+
+	public Link(String href, String rel, Map<String, String> properties) {
+		this.href = href;
+		this.rel = rel;
+		this.properties = properties;
 	}
 
 	public Link(Link source, String rel) {
@@ -102,13 +112,31 @@ public class Link {
 		return this.rel.equals(rel);
 	}
 
+	public boolean templated() {
+		Optional<String> templated = findProperty("templated");
+		return templated.isPresent() && templated.map(Boolean::valueOf).get();
+	}
+
+	public boolean deprecation() {
+		Optional<String> deprecation = findProperty("deprecation");
+		return deprecation.isPresent() && deprecation.map(Boolean::valueOf).get();
+	}
+
 	public Optional<String> property(String key) {
+		return findProperty(key);
+	}
+
+	private Optional<String> findProperty(String key) {
 		return Optional.ofNullable(properties.get(key));
 	}
 
 	@JsonAnySetter
 	private void anySetter(String name, String value) {
 		this.properties.put(name, value);
+	}
+
+	public Object follow() {
+		return null;
 	}
 
 	public static Link self(String href) {

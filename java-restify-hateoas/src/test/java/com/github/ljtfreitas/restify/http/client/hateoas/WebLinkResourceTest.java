@@ -22,7 +22,6 @@ public class WebLinkResourceTest {
 	@Before
 	public void setup() {
 		objectMapper = new ObjectMapper();
-		objectMapper.registerModule(new JacksonHypermediaModule());
 		objectMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
 	}
 
