@@ -23,30 +23,36 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.http.client.hateoas.browser;
+package com.github.ljtfreitas.restify.http.client.hateoas.browser.discovery;
 
-import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
-import com.github.ljtfreitas.restify.http.client.request.EndpointRequestExecutor;
-import com.github.ljtfreitas.restify.http.client.request.interceptor.EndpointRequestInterceptorStack;
-import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Optional;
 
-public class LinkRequestExecutor {
+import com.github.ljtfreitas.restify.http.client.hateoas.Link;
+import com.github.ljtfreitas.restify.http.contract.ContentType;
 
-	private final EndpointRequestExecutor endpointRequestExecutor;
-	private final EndpointRequestInterceptorStack endpointRequestInterceptorStack;
+public class ResourceLinkDiscovery {
 
-	public LinkRequestExecutor(EndpointRequestExecutor endpointRequestExecutor, EndpointRequestInterceptorStack endpointRequestInterceptorStack) {
-		this.endpointRequestExecutor = endpointRequestExecutor;
-		this.endpointRequestInterceptorStack = endpointRequestInterceptorStack;
+	private final Collection<LinkDiscovery> resolvers;
+
+	public ResourceLinkDiscovery(LinkDiscovery... resolvers) {
+		this.resolvers = Arrays.asList(resolvers);
 	}
 
-	public <T> EndpointResponse<T> execute(LinkEndpointRequest linkRequest) {
-		EndpointRequest endpointRequest = endpointRequestInterceptorStack.apply(newRequest(linkRequest));
-
-		return endpointRequestExecutor.execute(endpointRequest);
+	public ResourceLinkDiscovery(Collection<LinkDiscovery> resolvers) {
+		this.resolvers = new ArrayList<>(resolvers);
 	}
 
-	private EndpointRequest newRequest(LinkEndpointRequest linkRequest) {
-		return new EndpointRequest(linkRequest.expand(), "GET", linkRequest.responseType());
+	public Optional<Link> discovery(String rel, RawResource resource, ContentType contentType) {
+		return resolvers.stream()
+			.filter(r -> r.supports(contentType))
+				.findFirst()
+					.flatMap(r -> r.find(rel, resource));
+	}
+
+	public static ResourceLinkDiscovery all() {
+		return new ResourceLinkDiscovery(new WebLinkJsonPathLinkDiscovery(), new HalJsonPathLinkDiscovery());
 	}
 }

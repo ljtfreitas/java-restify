@@ -23,30 +23,16 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.http.client.hateoas.browser;
+package com.github.ljtfreitas.restify.http.client.hateoas.browser.discovery;
 
-import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
-import com.github.ljtfreitas.restify.http.client.request.EndpointRequestExecutor;
-import com.github.ljtfreitas.restify.http.client.request.interceptor.EndpointRequestInterceptorStack;
-import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
+import com.github.ljtfreitas.restify.http.contract.ContentType;
 
-public class LinkRequestExecutor {
+public class WebLinkJsonPathLinkDiscovery extends JsonPathLinkDiscovery {
 
-	private final EndpointRequestExecutor endpointRequestExecutor;
-	private final EndpointRequestInterceptorStack endpointRequestInterceptorStack;
+	private static final String LINK_FORMAT_TEMPLATE = "$.links..[?(@.rel == '%s')]..href";
+	private static final ContentType JSON_CONTENT_TYPE = ContentType.of("application/json");
 
-	public LinkRequestExecutor(EndpointRequestExecutor endpointRequestExecutor, EndpointRequestInterceptorStack endpointRequestInterceptorStack) {
-		this.endpointRequestExecutor = endpointRequestExecutor;
-		this.endpointRequestInterceptorStack = endpointRequestInterceptorStack;
-	}
-
-	public <T> EndpointResponse<T> execute(LinkEndpointRequest linkRequest) {
-		EndpointRequest endpointRequest = endpointRequestInterceptorStack.apply(newRequest(linkRequest));
-
-		return endpointRequestExecutor.execute(endpointRequest);
-	}
-
-	private EndpointRequest newRequest(LinkEndpointRequest linkRequest) {
-		return new EndpointRequest(linkRequest.expand(), "GET", linkRequest.responseType());
+	public WebLinkJsonPathLinkDiscovery() {
+		super(LINK_FORMAT_TEMPLATE, JSON_CONTENT_TYPE);
 	}
 }

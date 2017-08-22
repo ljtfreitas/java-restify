@@ -23,30 +23,37 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.http.client.hateoas.browser;
+package com.github.ljtfreitas.restify.http.client.hateoas.hal;
 
-import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
-import com.github.ljtfreitas.restify.http.client.request.EndpointRequestExecutor;
-import com.github.ljtfreitas.restify.http.client.request.interceptor.EndpointRequestInterceptorStack;
-import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.ljtfreitas.restify.http.client.message.converter.json.JacksonMessageConverter;
+import com.github.ljtfreitas.restify.http.contract.ContentType;
 
-public class LinkRequestExecutor {
+public class JacksonHalJsonMessageConverter<T> extends JacksonMessageConverter<T> {
 
-	private final EndpointRequestExecutor endpointRequestExecutor;
-	private final EndpointRequestInterceptorStack endpointRequestInterceptorStack;
+	private static final ContentType HYPERMEDIA_JSON_CONTENT_TYPE = ContentType.of("application", "*+json");
 
-	public LinkRequestExecutor(EndpointRequestExecutor endpointRequestExecutor, EndpointRequestInterceptorStack endpointRequestInterceptorStack) {
-		this.endpointRequestExecutor = endpointRequestExecutor;
-		this.endpointRequestInterceptorStack = endpointRequestInterceptorStack;
+	public JacksonHalJsonMessageConverter() {
+		super(configure());
 	}
 
-	public <T> EndpointResponse<T> execute(LinkEndpointRequest linkRequest) {
-		EndpointRequest endpointRequest = endpointRequestInterceptorStack.apply(newRequest(linkRequest));
-
-		return endpointRequestExecutor.execute(endpointRequest);
+	public JacksonHalJsonMessageConverter(ObjectMapper objectMapper) {
+		super(configure(objectMapper));
 	}
 
-	private EndpointRequest newRequest(LinkEndpointRequest linkRequest) {
-		return new EndpointRequest(linkRequest.expand(), "GET", linkRequest.responseType());
+	private static ObjectMapper configure() {
+		return configure(new ObjectMapper());
+	}
+
+	private static ObjectMapper configure(ObjectMapper objectMapper) {
+		objectMapper.registerModule(new JacksonHypermediaHalModule());
+		objectMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+		return objectMapper;
+	}
+
+	@Override
+	public ContentType contentType() {
+		return HYPERMEDIA_JSON_CONTENT_TYPE;
 	}
 }

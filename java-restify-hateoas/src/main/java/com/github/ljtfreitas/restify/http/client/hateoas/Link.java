@@ -74,12 +74,12 @@ public class Link {
 	}
 
 	public Link(String href, String rel) {
-		this.href = href;
+		this.href = nonNull(href, "Link href cannot be null.");
 		this.rel = rel;
 	}
 
 	public Link(String href, String rel, Map<String, String> properties) {
-		this.href = href;
+		this.href = nonNull(href, "Link href cannot be null.");
 		this.rel = rel;
 		this.properties = properties;
 	}
@@ -137,6 +137,11 @@ public class Link {
 
 	public Object follow() {
 		return null;
+	}
+
+	@Override
+	public String toString() {
+		return String.format("Link: %s", href);
 	}
 
 	public static Link self(String href) {

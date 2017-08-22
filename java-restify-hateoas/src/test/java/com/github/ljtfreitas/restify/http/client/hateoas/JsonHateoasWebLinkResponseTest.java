@@ -19,8 +19,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.ljtfreitas.restify.http.RestifyProxyBuilder;
-import com.github.ljtfreitas.restify.http.client.hateoas.Link;
-import com.github.ljtfreitas.restify.http.client.hateoas.Resource;
 import com.github.ljtfreitas.restify.http.client.message.converter.json.JacksonMessageConverter;
 import com.github.ljtfreitas.restify.http.contract.Get;
 import com.github.ljtfreitas.restify.http.contract.Path;
@@ -52,13 +50,15 @@ public class JsonHateoasWebLinkResponseTest {
 
 	@Test
 	public void shouldSendGetRequestWithHalLinks() {
-		mockServerClient.when(request().withMethod("GET").withPath("/json")).respond(response().withStatusCode(200)
-				.withHeader("Content-Type", "application/hal+json")
-				.withBody(json("{\"name\":\"Tiago de Freitas Lima\",\"birth_date\":\"1985-07-02\"," 
-								+ "\"links\":["
-									+ "{\"rel\":\"self\",\"href\":\"http://localhost:8080/\"},"
-									+ "{\"rel\":\"friends\",\"href\":\"http://localhost:8080/{user}/friends\",\"templated\":true}"
-								+ "]}")));
+		mockServerClient.when(request().withMethod("GET").withPath("/json"))
+			.respond(response()
+						.withStatusCode(200)
+						.withHeader("Content-Type", "application/json")
+						.withBody(json("{\"name\":\"Tiago de Freitas Lima\",\"birth_date\":\"1985-07-02\","
+									+ "\"links\":["
+										+ "{\"rel\":\"self\",\"href\":\"http://localhost:8080/\"},"
+										+ "{\"rel\":\"friends\",\"href\":\"http://localhost:8080/{user}/friends\",\"templated\":true}"
+									+ "]}")));
 
 		Resource<MyModel> resource = myApi.json();
 

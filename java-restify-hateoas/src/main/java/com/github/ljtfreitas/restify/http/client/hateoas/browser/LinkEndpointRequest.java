@@ -89,4 +89,26 @@ public class LinkEndpointRequest {
 	public JavaType responseType() {
 		return responseType;
 	}
+
+	@Override
+	public String toString() {
+		StringBuilder report = new StringBuilder();
+
+		report
+			.append("LinkEndpointRequest: [")
+				.append("Link: ")
+					.append(link.href())
+				.append(", ")
+				.append("Base URL: ")
+					.append(source)
+				.append(", ")
+				.append("Response Type: ")
+					.append(responseType)
+				.append(", ")
+					.append("Parameters: ")
+					.append(parameters)
+			.append("]");
+
+		return report.toString();
+	}
 }

@@ -23,30 +23,21 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.http.client.hateoas.browser;
+package com.github.ljtfreitas.restify.http.client.hateoas.browser.discovery;
 
-import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
-import com.github.ljtfreitas.restify.http.client.request.EndpointRequestExecutor;
-import com.github.ljtfreitas.restify.http.client.request.interceptor.EndpointRequestInterceptorStack;
-import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
+public class RawResource {
 
-public class LinkRequestExecutor {
+	private final String content;
 
-	private final EndpointRequestExecutor endpointRequestExecutor;
-	private final EndpointRequestInterceptorStack endpointRequestInterceptorStack;
-
-	public LinkRequestExecutor(EndpointRequestExecutor endpointRequestExecutor, EndpointRequestInterceptorStack endpointRequestInterceptorStack) {
-		this.endpointRequestExecutor = endpointRequestExecutor;
-		this.endpointRequestInterceptorStack = endpointRequestInterceptorStack;
+	public RawResource(String content) {
+		this.content = content;
 	}
 
-	public <T> EndpointResponse<T> execute(LinkEndpointRequest linkRequest) {
-		EndpointRequest endpointRequest = endpointRequestInterceptorStack.apply(newRequest(linkRequest));
-
-		return endpointRequestExecutor.execute(endpointRequest);
+	public String content() {
+		return content;
 	}
 
-	private EndpointRequest newRequest(LinkEndpointRequest linkRequest) {
-		return new EndpointRequest(linkRequest.expand(), "GET", linkRequest.responseType());
+	public static RawResource of(String content) {
+		return new RawResource(content);
 	}
 }

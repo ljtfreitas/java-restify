@@ -49,7 +49,7 @@ public class Hop {
 		return parameters;
 	}
 
-	public Hop with(String name, String value) {
+	public Hop parameter(String name, String value) {
 		LinkURITemplateParameters parameters = new LinkURITemplateParameters(this.parameters);
 		parameters.put(name, value);
 		return new Hop(rel, parameters);

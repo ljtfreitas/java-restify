@@ -16,12 +16,9 @@ import org.mockserver.client.server.MockServerClient;
 import org.mockserver.junit.MockServerRule;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.ljtfreitas.restify.http.RestifyProxyBuilder;
 import com.github.ljtfreitas.restify.http.client.hateoas.Link;
 import com.github.ljtfreitas.restify.http.client.hateoas.Resource;
-import com.github.ljtfreitas.restify.http.client.message.converter.json.JacksonMessageConverter;
 import com.github.ljtfreitas.restify.http.contract.Get;
 import com.github.ljtfreitas.restify.http.contract.Path;
 
@@ -41,11 +38,7 @@ public class JsonHateoasHalResponseTest {
 	public void setup() {
 		mockServerClient = new MockServerClient("localhost", 7080);
 
-		ObjectMapper objectMapper = new ObjectMapper();
-		objectMapper.registerModule(new JacksonHypermediaHalModule());
-		objectMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
-
-		JacksonMessageConverter<Object> jacksonMessageConverter = new JacksonMessageConverter<>(objectMapper);
+		JacksonHalJsonMessageConverter<Object> jacksonMessageConverter = new JacksonHalJsonMessageConverter<>();
 
 		myApi = new RestifyProxyBuilder().converters(jacksonMessageConverter)
 				.target(MyApi.class, "http://localhost:7080").build();

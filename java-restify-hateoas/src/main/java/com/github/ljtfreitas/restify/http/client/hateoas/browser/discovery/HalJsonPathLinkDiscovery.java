@@ -23,37 +23,16 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.http.client.hateoas.hal;
+package com.github.ljtfreitas.restify.http.client.hateoas.browser.discovery;
 
-import com.fasterxml.jackson.databind.DeserializationFeature;
-import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.ljtfreitas.restify.http.client.message.converter.json.JacksonMessageConverter;
 import com.github.ljtfreitas.restify.http.contract.ContentType;
 
-public class JacksonHypermediaHalConverter<T> extends JacksonMessageConverter<T> {
+public class HalJsonPathLinkDiscovery extends JsonPathLinkDiscovery {
 
-	private static final ContentType HYPERMEDIA_JSON_CONTENT_TYPE = ContentType.of("application", "*+json");
+	private static final String HAL_LINK_FORMAT_TEMPLATE = "$._links..['%s']..href";
+	private static final ContentType HAL_JSON_CONTENT_TYPE = ContentType.of("application/hal+json");
 
-	public JacksonHypermediaHalConverter() {
-		super(configure());
-	}
-
-	public JacksonHypermediaHalConverter(ObjectMapper objectMapper) {
-		super(configure(objectMapper));
-	}
-
-	private static ObjectMapper configure() {
-		return configure(new ObjectMapper());
-	}
-
-	private static ObjectMapper configure(ObjectMapper objectMapper) {
-		objectMapper.registerModule(new JacksonHypermediaHalModule());
-		objectMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
-		return objectMapper;
-	}
-
-	@Override
-	public ContentType contentType() {
-		return HYPERMEDIA_JSON_CONTENT_TYPE;
+	public HalJsonPathLinkDiscovery() {
+		super(HAL_LINK_FORMAT_TEMPLATE, HAL_JSON_CONTENT_TYPE);
 	}
 }

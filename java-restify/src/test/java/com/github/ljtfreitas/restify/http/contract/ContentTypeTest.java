@@ -117,6 +117,7 @@ public class ContentTypeTest {
 		ContentType jsonWildcardContentType = ContentType.of("application/*+json");
 
 		assertTrue(halJsonContentType.compatible(jsonWildcardContentType));
+		assertTrue(jsonWildcardContentType.compatible(halJsonContentType));
 	}
 
 	@Test
