@@ -46,7 +46,7 @@ public class WebLinkResourceTest {
 	public void resourceMustBeSerializedToJsonOnWebLinkFormatWithAttributes() throws IOException {
 		Resource<Model> resource = new Resource<>(new Model("Tiago de Freitas Lima"));
 		resource.addLink(Link.self("http://my.api"));
-		resource.addLink(new Link.Builder()
+		resource.addLink(new LinkBuilder()
 				.href("http://my.api/{user}/friends")
 				.rel("friends")
 				.title("All friends for user")

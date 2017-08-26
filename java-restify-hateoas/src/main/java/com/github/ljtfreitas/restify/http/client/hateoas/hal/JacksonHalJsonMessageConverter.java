@@ -32,7 +32,7 @@ import com.github.ljtfreitas.restify.http.contract.ContentType;
 
 public class JacksonHalJsonMessageConverter<T> extends JacksonMessageConverter<T> {
 
-	private static final ContentType HYPERMEDIA_JSON_CONTENT_TYPE = ContentType.of("application", "*+json");
+	private static final ContentType HYPERMEDIA_JSON_CONTENT_TYPE = ContentType.of("application", "hal+json");
 
 	public JacksonHalJsonMessageConverter() {
 		super(configure());

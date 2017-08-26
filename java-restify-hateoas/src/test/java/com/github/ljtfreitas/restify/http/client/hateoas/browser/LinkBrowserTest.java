@@ -11,7 +11,6 @@ import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
 import static org.mockserver.model.JsonBody.json;
 
-import java.util.Arrays;
 import java.util.Collection;
 
 import org.hamcrest.Matchers;
@@ -28,26 +27,13 @@ import org.mockserver.model.HttpRequest;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.github.ljtfreitas.restify.http.client.hateoas.Link;
-import com.github.ljtfreitas.restify.http.client.hateoas.hal.JacksonHalJsonMessageConverter;
-import com.github.ljtfreitas.restify.http.client.message.HttpMessageConverters;
-import com.github.ljtfreitas.restify.http.client.message.converter.json.JacksonMessageConverter;
-import com.github.ljtfreitas.restify.http.client.message.converter.text.SimpleTextMessageConverter;
-import com.github.ljtfreitas.restify.http.client.request.EndpointRequestExecutor;
-import com.github.ljtfreitas.restify.http.client.request.EndpointRequestWriter;
-import com.github.ljtfreitas.restify.http.client.request.RestifyEndpointRequestExecutor;
 import com.github.ljtfreitas.restify.http.client.request.interceptor.EndpointRequestInterceptorStack;
-import com.github.ljtfreitas.restify.http.client.request.jdk.JdkHttpClientRequestFactory;
-import com.github.ljtfreitas.restify.http.client.response.EndpointResponseReader;
 
 @RunWith(MockitoJUnitRunner.class)
 public class LinkBrowserTest {
 
 	@Mock
 	private EndpointRequestInterceptorStack endpointRequestInterceptorStack;
-
-	private EndpointRequestExecutor endpointRequestExecutor;
-
-	private LinkRequestExecutor linkRequestExecutor;
 
 	@Rule
 	public MockServerRule mockServerRule = new MockServerRule(this, 7080);
@@ -60,14 +46,7 @@ public class LinkBrowserTest {
 	public void setup() {
 		when(endpointRequestInterceptorStack.apply(any())).then(returnsFirstArg());
 
-		HttpMessageConverters converters = new HttpMessageConverters(Arrays.asList(new SimpleTextMessageConverter(), new JacksonHalJsonMessageConverter<>(), new JacksonMessageConverter<>()));
-
-		endpointRequestExecutor = new RestifyEndpointRequestExecutor(new JdkHttpClientRequestFactory(), new EndpointRequestWriter(converters),
-				new EndpointResponseReader(converters));
-
-		linkRequestExecutor = new LinkRequestExecutor(endpointRequestExecutor, endpointRequestInterceptorStack);
-
-		linkBrowser = new LinkBrowser(linkRequestExecutor);
+		linkBrowser = new LinkBrowserBuilder().build();
 
 		mockServerClient = new MockServerClient("localhost", 7080);
 	}
@@ -194,7 +173,7 @@ public class LinkBrowserTest {
 
 		HttpRequest cityRequest = request()
 			.withMethod("GET")
-			.withPath("/cities/sao-paulo");
+			.withPath("/cities/rio-de-janeiro");
 
 		mockServerClient.when(personRequest)
 			.respond(
@@ -212,26 +191,28 @@ public class LinkBrowserTest {
 				response()
 					.withStatusCode(200)
 					.withHeader("Content-Type", "application/hal+json")
-					.withBody(json("[{\"name\":\"Fulano de Tal\",\"birth_date\":\"1985-08-02\","
-								+ "\"_links\":{"
-									+ "\"city\":{\"href\":\"http://localhost:7080/cities/sao-paulo\"}"
-								+ "}}]")));
+					.withBody(json("["
+								+ "{\"name\":\"Fulano de Tal\",\"birth_date\":\"1985-08-02\","
+									+ "\"_links\":{\"city\":{\"href\":\"http://localhost:7080/cities/sao-paulo\"}}},"
+								+ "{\"name\":\"Beltrano da Silva\",\"birth_date\":\"1985-09-02\","
+									+ "\"_links\":{\"city\":{\"href\":\"http://localhost:7080/cities/rio-de-janeiro\"}}}"
+								+ "]")));
 
 		mockServerClient.when(cityRequest)
 			.respond(
 				response()
 					.withStatusCode(200)
 					.withHeader("Content-Type", "application/json")
-					.withBody(json("{\"name\":\"Sao Paulo\",\"state\":\"Sao Paulo\"}")));
+					.withBody(json("{\"name\":\"Rio de Janeiro\",\"state\":\"Rio de Janeiro\"}")));
 
 		City city = linkBrowser
 				.follow(Link.self("http://localhost:7080/me"))
 					.follow(rel("friends").parameter("user", "tiago"))
-						.follow(rel("$.[0]._links.city.href"))
+						.follow(rel("$.[1]._links.city.href"))
 							.as(City.class);
 
-		assertEquals("Sao Paulo", city.name);
-		assertEquals("Sao Paulo", city.state);
+		assertEquals("Rio de Janeiro", city.name);
+		assertEquals("Rio de Janeiro", city.state);
 
 		mockServerClient.verify(personRequest, friendsRequest, cityRequest);
 	}
@@ -292,7 +273,7 @@ public class LinkBrowserTest {
 	}
 
 	@Test
-	public void shouldFollowLinksOnProperties() {
+	public void shouldFollowLinksOnPropertiesUsingJsonPathExpression() {
 		HttpRequest personRequest = request()
 			.withMethod("GET")
 			.withPath("/me");
@@ -337,6 +318,97 @@ public class LinkBrowserTest {
 		assertEquals("Sao Paulo", city.state);
 
 		mockServerClient.verify(personRequest, friendsRequest, cityRequest);
+	}
+
+	@Test
+	public void shouldFollowLinksOnPropertiesUsingRootJsonPath() {
+		HttpRequest personRequest = request()
+			.withMethod("GET")
+			.withPath("/me");
+
+		HttpRequest wifeRequest = request()
+			.withMethod("GET")
+			.withPath("/tatiana-gomes-da-silva");
+
+		HttpRequest cityRequest = request()
+			.withMethod("GET")
+			.withPath("/cities/sao-paulo");
+
+		mockServerClient.when(personRequest)
+			.respond(
+				response()
+					.withStatusCode(200)
+					.withHeader("Content-Type", "application/json")
+					.withBody(json("{\"name\":\"Tiago de Freitas Lima\",\"birth_date\":\"1985-07-02\","
+								+ "\"wife_url\":\"http://localhost:7080/tatiana-gomes-da-silva\"}")));
+
+		mockServerClient.when(wifeRequest)
+			.respond(
+				response()
+					.withStatusCode(200)
+					.withHeader("Content-Type", "application/json")
+					.withBody(json("{\"name\":\"Tatiana Gomes da Silva\",\"birth_date\":\"1983-10-05\","
+								+ "\"city_url\":\"http://localhost:7080/cities/sao-paulo\"}")));
+
+		mockServerClient.when(cityRequest)
+			.respond(
+				response()
+					.withStatusCode(200)
+					.withHeader("Content-Type", "application/json")
+					.withBody(json("{\"name\":\"Sao Paulo\",\"state\":\"Sao Paulo\"}")));
+
+		linkBrowser = new LinkBrowserBuilder()
+				.discovery()
+					.jsonPath()
+					.and()
+				.build();
+
+		City city = linkBrowser
+				.follow(Link.self("http://localhost:7080/me"))
+					.follow("wife_url", "city_url")
+						.as(City.class);
+
+		assertEquals("Sao Paulo", city.name);
+		assertEquals("Sao Paulo", city.state);
+
+		mockServerClient.verify(personRequest, wifeRequest, cityRequest);
+	}
+
+	@Test
+	public void shouldFollowLinksUsingBaseUrlWhenIPresent() {
+		HttpRequest personRequest = request()
+			.withMethod("GET")
+			.withPath("/me");
+
+		HttpRequest wifeRequest = request()
+			.withMethod("GET")
+			.withPath("/tatiana-gomes-da-silva");
+
+		mockServerClient.when(personRequest)
+			.respond(
+				response()
+					.withStatusCode(200)
+					.withHeader("Content-Type", "application/hal+json")
+					.withBody(json("{\"name\":\"Tiago de Freitas Lima\",\"birth_date\":\"1985-07-02\","
+								+ "\"_links\":{\"wife\":{\"href\":\"/tatiana-gomes-da-silva\"}}}")));
+
+		mockServerClient.when(wifeRequest)
+			.respond(
+				response()
+					.withStatusCode(200)
+					.withHeader("Content-Type", "application/json")
+					.withBody(json("{\"name\":\"Tatiana Gomes da Silva\",\"birth_date\":\"1983-10-05\"}")));
+
+		linkBrowser = new LinkBrowserBuilder().baseURL("http://localhost:7080").build();
+
+		Person wife = linkBrowser
+				.follow(Link.self("http://localhost:7080/me"))
+					.follow("wife")
+						.as(Person.class);
+
+		assertEquals("Tatiana Gomes da Silva", wife.name);
+
+		mockServerClient.verify(personRequest, wifeRequest);
 	}
 
 	private static class Person {

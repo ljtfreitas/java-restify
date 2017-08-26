@@ -46,10 +46,12 @@ public class ResourceLinkDiscovery {
 	}
 
 	public Optional<Link> discovery(String rel, RawResource resource, ContentType contentType) {
-		return resolvers.stream()
+		LinkDiscovery discovery = resolvers.stream()
 			.filter(r -> r.supports(contentType))
 				.findFirst()
-					.flatMap(r -> r.find(rel, resource));
+					.orElseThrow(() -> new IllegalArgumentException("Cannot discovery links in a response of ContenType [" + contentType + "]."));
+
+		return discovery.find(rel, resource);
 	}
 
 	public static ResourceLinkDiscovery all() {

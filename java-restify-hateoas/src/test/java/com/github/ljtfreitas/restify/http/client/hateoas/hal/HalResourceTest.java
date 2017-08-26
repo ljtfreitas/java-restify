@@ -14,6 +14,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.ljtfreitas.restify.http.client.hateoas.LinkBuilder;
 import com.github.ljtfreitas.restify.http.client.hateoas.Link;
 import com.github.ljtfreitas.restify.http.client.hateoas.Resource;
 
@@ -49,7 +50,7 @@ public class HalResourceTest {
 	public void resourceMustBeSerializedToJsonOnHalFormatWithAttributes() throws IOException {
 		Resource<Model> resource = new Resource<>(new Model("Tiago de Freitas Lima"));
 		resource.addLink(Link.self("http://my.api"));
-		resource.addLink(new Link.Builder()
+		resource.addLink(new LinkBuilder()
 				.href("http://my.api/{user}/friends")
 				.rel("friends")
 				.title("All friends for user")

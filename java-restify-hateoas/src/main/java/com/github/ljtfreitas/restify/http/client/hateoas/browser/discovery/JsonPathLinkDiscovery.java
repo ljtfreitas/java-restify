@@ -34,10 +34,14 @@ import com.jayway.jsonpath.JsonPath;
 import net.minidev.json.JSONArray;
 import net.minidev.json.JSONValue;
 
-public abstract class JsonPathLinkDiscovery implements LinkDiscovery {
+public class JsonPathLinkDiscovery implements LinkDiscovery {
 
 	private final String jsonPathTemplate;
 	private final ContentType contentType;
+
+	public JsonPathLinkDiscovery(String jsonPathTemplate) {
+		this(jsonPathTemplate, ContentType.of("application/json"));
+	}
 
 	public JsonPathLinkDiscovery(String jsonPathTemplate, ContentType contentType) {
 		this.jsonPathTemplate = jsonPathTemplate;

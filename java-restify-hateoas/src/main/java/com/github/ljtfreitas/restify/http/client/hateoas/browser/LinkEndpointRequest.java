@@ -80,7 +80,7 @@ public class LinkEndpointRequest {
 		URI href = new LinkURITemplate(link.href()).expand(parameters);
 
 		URI endpoint = Optional.ofNullable(source)
-			.map(s -> Tryable.of(s::toURI).relativize(href))
+			.map(s -> href.isAbsolute() ? href : Tryable.of(s::toURI).resolve(href))
 				.orElse(href);
 
 		return endpoint;

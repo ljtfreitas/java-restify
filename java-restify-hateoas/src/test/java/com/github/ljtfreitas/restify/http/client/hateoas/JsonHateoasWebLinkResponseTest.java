@@ -11,7 +11,6 @@ import java.util.Optional;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
-import org.junit.rules.ExpectedException;
 import org.mockserver.client.server.MockServerClient;
 import org.mockserver.junit.MockServerRule;
 
@@ -27,9 +26,6 @@ public class JsonHateoasWebLinkResponseTest {
 
 	@Rule
 	public MockServerRule mockServerRule = new MockServerRule(this, 7080, 7084);
-
-	@Rule
-	public ExpectedException expectedException = ExpectedException.none();
 
 	private MyApi myApi;
 
