@@ -23,13 +23,12 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.http.client.hateoas.hal;
+package com.github.ljtfreitas.restify.http.client.hateoas;
 
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.core.JsonToken;
@@ -41,21 +40,27 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.deser.ContextualDeserializer;
 import com.fasterxml.jackson.databind.deser.std.ContainerDeserializerBase;
 import com.fasterxml.jackson.databind.type.TypeFactory;
-import com.github.ljtfreitas.restify.http.client.hateoas.Link;
+import com.github.ljtfreitas.restify.http.client.hateoas.browser.LinkBrowser;
 
-class HalLinksDeserializer extends ContainerDeserializerBase<List<Link>> implements ContextualDeserializer {
+class HypermediaLinksDeserializer extends ContainerDeserializerBase<List<Link>> implements ContextualDeserializer {
 
 	private static final long serialVersionUID = 1L;
 
 	private final JsonDeserializer<Object> linkDeserializer;
+	private final LinkBrowser linkBrowser;
 
-	public HalLinksDeserializer() {
-		this(null);
+	public HypermediaLinksDeserializer() {
+		this(null, null);
 	}
 
-	public HalLinksDeserializer(JsonDeserializer<Object> linkDeserializer) {
+	public HypermediaLinksDeserializer(LinkBrowser linkBrowser) {
+		this(null, linkBrowser);
+	}
+
+	public HypermediaLinksDeserializer(JsonDeserializer<Object> linkDeserializer, LinkBrowser browser) {
 		super(TypeFactory.defaultInstance().constructCollectionLikeType(List.class, Link.class));
 		this.linkDeserializer = linkDeserializer;
+		this.linkBrowser = browser;
 	}
 
 	@Override
@@ -74,34 +79,17 @@ class HalLinksDeserializer extends ContainerDeserializerBase<List<Link>> impleme
 
 		List<Link> links = new ArrayList<Link>();
 
-		while (!JsonToken.END_OBJECT.equals(jsonParser.nextToken())) {
-			if (!JsonToken.FIELD_NAME.equals(jsonParser.getCurrentToken())) {
-				throw new JsonParseException(jsonParser, "Expected link name.");
-			}
-
-			String relation = jsonParser.getText();
-
-			if (JsonToken.START_ARRAY.equals(jsonParser.nextToken())) {
-				while (!JsonToken.END_ARRAY.equals(jsonParser.nextToken())) {
-					links.add(createLink(relation, jsonParser));
-				}
-			} else {
-				links.add(createLink(relation, jsonParser));
-			}
+		while (!JsonToken.END_ARRAY.equals(jsonParser.nextToken())) {
+			links.add(new Link(jsonParser.readValueAs(Link.class), linkBrowser));
 		}
 
 		return links;
-	}
-	
-	private Link createLink(String relation, JsonParser jsonParser) throws IOException {
-		Link link = jsonParser.readValueAs(Link.class);
-		return new Link(link, relation);
 	}
 
 	@Override
 	public JsonDeserializer<?> createContextual(DeserializationContext context, BeanProperty property)
 			throws JsonMappingException {
 		JsonDeserializer<Object> linkDeserializer = context.findNonContextualValueDeserializer(TypeFactory.defaultInstance().constructType(Link.class));
-		return new HalLinksDeserializer(linkDeserializer);
+		return new HypermediaLinksDeserializer(linkDeserializer, linkBrowser);
 	}
 }

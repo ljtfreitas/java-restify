@@ -27,12 +27,12 @@ package com.github.ljtfreitas.restify.http.client.hateoas.browser.discovery;
 
 import com.github.ljtfreitas.restify.http.contract.ContentType;
 
-public class WebLinkJsonPathLinkDiscovery extends JsonPathLinkDiscovery {
+public class HypermediaHalJsonPathLinkDiscovery extends JsonPathLinkDiscovery {
 
-	private static final String LINK_FORMAT_TEMPLATE = "$.links..[?(@.rel == '%s')]..href";
-	private static final ContentType JSON_CONTENT_TYPE = ContentType.of("application/json");
+	private static final String HAL_LINK_FORMAT_TEMPLATE = "$._links..['%s']..href";
+	private static final ContentType HAL_JSON_CONTENT_TYPE = ContentType.of("application/hal+json");
 
-	public WebLinkJsonPathLinkDiscovery() {
-		super(LINK_FORMAT_TEMPLATE, JSON_CONTENT_TYPE);
+	public HypermediaHalJsonPathLinkDiscovery() {
+		super(HAL_LINK_FORMAT_TEMPLATE, HAL_JSON_CONTENT_TYPE);
 	}
 }

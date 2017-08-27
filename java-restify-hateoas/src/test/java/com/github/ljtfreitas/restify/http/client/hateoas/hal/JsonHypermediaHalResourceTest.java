@@ -14,19 +14,20 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.ljtfreitas.restify.http.client.hateoas.LinkBuilder;
 import com.github.ljtfreitas.restify.http.client.hateoas.Link;
+import com.github.ljtfreitas.restify.http.client.hateoas.LinkBuilder;
 import com.github.ljtfreitas.restify.http.client.hateoas.Resource;
 
-public class HalResourceTest {
+public class JsonHypermediaHalResourceTest {
 
 	private ObjectMapper objectMapper;
 
 	@Before
 	public void setup() {
 		objectMapper = new ObjectMapper();
-		objectMapper.registerModule(new JacksonHypermediaHalModule());
+		objectMapper.registerModule(new HypermediaHalModule());
 		objectMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+		objectMapper.setHandlerInstantiator(new HypermediaHalHandlerInstantiator(null));
 	}
 
 	@Test

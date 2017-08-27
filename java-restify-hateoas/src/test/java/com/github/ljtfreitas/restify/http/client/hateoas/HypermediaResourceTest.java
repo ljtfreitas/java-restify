@@ -15,7 +15,7 @@ import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
-public class WebLinkResourceTest {
+public class HypermediaResourceTest {
 
 	private ObjectMapper objectMapper;
 

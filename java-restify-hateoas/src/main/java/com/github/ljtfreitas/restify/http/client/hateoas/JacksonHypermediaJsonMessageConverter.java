@@ -25,54 +25,33 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.hateoas;
 
-import java.util.ArrayList;
-import java.util.Collection;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.ljtfreitas.restify.http.client.hateoas.browser.LinkBrowser;
+import com.github.ljtfreitas.restify.http.client.message.converter.json.JacksonMessageConverter;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonUnwrapped;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+public class JacksonHypermediaJsonMessageConverter<T> extends JacksonMessageConverter<T> {
 
-public class Resource<T> {
-
-	@JsonUnwrapped
-	private T content;
-
-	@JsonProperty("links")
-	@JsonInclude(JsonInclude.Include.NON_EMPTY)
-	@JsonDeserialize(using = HypermediaLinksDeserializer.class)
-	@JsonManagedReference
-	private Collection<Link> links = new ArrayList<>();
-
-	@Deprecated
-	Resource() {
+	public JacksonHypermediaJsonMessageConverter() {
+		super(configure(new ObjectMapper(), null));
 	}
 
-	public Resource(T content) {
-		this.content = content;
+	public JacksonHypermediaJsonMessageConverter(LinkBrowser linkBrowser) {
+		super(configure(new ObjectMapper(), linkBrowser));
 	}
 
-	public Resource(T content, Links links) {
-		this.content = content;
-		this.links = new ArrayList<>(links.unwrap());
+	public JacksonHypermediaJsonMessageConverter(ObjectMapper objectMapper) {
+		super(configure(objectMapper, null));
 	}
 
-	public Resource(T content, Collection<Link> links) {
-		this.content = content;
-		this.links = new ArrayList<>(links);
+	public JacksonHypermediaJsonMessageConverter(ObjectMapper objectMapper, LinkBrowser linkBrowser) {
+		super(configure(objectMapper, linkBrowser));
 	}
 
-	public T content() {
-		return content;
-	}
-
-	public Links links() {
-		return new Links(links);
-	}
-
-	public Resource<T> addLink(Link link) {
-		links.add(link);
-		return this;
+	private static ObjectMapper configure(ObjectMapper objectMapper, LinkBrowser linkBrowser) {
+		objectMapper.setHandlerInstantiator(new HypermediaHandlerInstantiator(linkBrowser));
+		objectMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+		objectMapper.setHandlerInstantiator(new HypermediaHandlerInstantiator(linkBrowser));
+		return objectMapper;
 	}
 }

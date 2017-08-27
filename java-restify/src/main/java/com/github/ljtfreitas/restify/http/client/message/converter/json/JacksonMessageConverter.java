@@ -93,6 +93,7 @@ public class JacksonMessageConverter<T> extends JsonMessageConverter<T> {
 
 			objectMapper.writeValue(generator, body);
 			generator.flush();
+			generator.close();
 
 		} catch (IOException e) {
 			throw new RestifyHttpMessageWriteException(e);

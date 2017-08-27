@@ -25,9 +25,13 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.hateoas.browser;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+
+import com.github.ljtfreitas.restify.http.client.hateoas.Resource;
+import com.github.ljtfreitas.restify.http.util.Tryable;
 
 public class LinkURITemplateParameters {
 
@@ -62,5 +66,21 @@ public class LinkURITemplateParameters {
 	@Override
 	public String toString() {
 		return String.format("[%s]", parameters);
+	}
+
+	public static LinkURITemplateParameters of(Resource<?> resource) {
+		Map<String, String> parameters = new HashMap<>();
+
+		Object content = resource.content();
+
+		Arrays.stream(content.getClass().getDeclaredFields())
+			.peek(field -> field.setAccessible(true))
+			.forEach(field -> parameters.put(field.getName(), Tryable.of(() -> field.get(content)).toString()));
+
+		return new LinkURITemplateParameters(parameters);
+	}
+
+	public static LinkURITemplateParameters empty() {
+		return new LinkURITemplateParameters();
 	}
 }

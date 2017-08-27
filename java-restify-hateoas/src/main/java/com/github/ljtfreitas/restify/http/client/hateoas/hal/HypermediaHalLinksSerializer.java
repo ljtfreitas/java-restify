@@ -55,17 +55,17 @@ import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.github.ljtfreitas.restify.http.client.hateoas.Link;
 import com.github.ljtfreitas.restify.http.util.Tryable;
 
-class HalLinksSerializer extends ContainerSerializer<List<Link>> implements ContextualSerializer {
+class HypermediaHalLinksSerializer extends ContainerSerializer<List<Link>> implements ContextualSerializer {
 
 	private static final long serialVersionUID = 1L;
 
 	private final BeanProperty property;
 
-	public HalLinksSerializer() {
+	public HypermediaHalLinksSerializer() {
 		this(null);
 	}
 
-	public HalLinksSerializer(BeanProperty property) {
+	public HypermediaHalLinksSerializer(BeanProperty property) {
 		super(TypeFactory.defaultInstance().constructCollectionLikeType(List.class, Link.class));
 		this.property = property;
 	}
@@ -101,7 +101,7 @@ class HalLinksSerializer extends ContainerSerializer<List<Link>> implements Cont
 	@Override
 	public JsonSerializer<?> createContextual(SerializerProvider provider, BeanProperty property)
 			throws JsonMappingException {
-		return new HalLinksSerializer(property);
+		return new HypermediaHalLinksSerializer(property);
 	}
 
 	@Override
@@ -207,7 +207,7 @@ class HalLinksSerializer extends ContainerSerializer<List<Link>> implements Cont
 		@Override
 		public JsonSerializer<?> createContextual(SerializerProvider provider, BeanProperty property)
 				throws JsonMappingException {
-			return new HalLinksSerializer(property);
+			return new HypermediaHalLinksSerializer(property);
 		}
 	}
 

@@ -107,7 +107,7 @@ public class LinkBrowserTest {
 		Collection<Person> friends = linkBrowser
 				.follow(Link.self("http://localhost:7080/me"))
 					.follow(rel("friends").parameter("user", "tiago"))
-						.collectionOf(Person.class);
+						.asCollectionOf(Person.class);
 
 		assertThat(friends, Matchers.hasSize(3));
 		assertThat(friends, Matchers.hasItem(new Person("Fulano de Tal", "1985-08-02")));
@@ -151,7 +151,7 @@ public class LinkBrowserTest {
 		Collection<Person> friends = linkBrowser
 				.follow(Link.self("http://localhost:7080/me"))
 					.follow(rel("friends").parameter("user", "tiago"))
-						.collectionOf(Person.class);
+						.asCollectionOf(Person.class);
 
 		assertThat(friends, Matchers.hasSize(3));
 		assertThat(friends, Matchers.hasItem(new Person("Fulano de Tal", "1985-08-02")));

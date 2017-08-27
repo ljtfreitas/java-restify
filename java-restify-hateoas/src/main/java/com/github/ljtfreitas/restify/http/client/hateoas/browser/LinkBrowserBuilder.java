@@ -39,12 +39,12 @@ import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLSocketFactory;
 
 import com.github.ljtfreitas.restify.http.client.authentication.Authentication;
-import com.github.ljtfreitas.restify.http.client.hateoas.browser.discovery.HalJsonPathLinkDiscovery;
+import com.github.ljtfreitas.restify.http.client.hateoas.browser.discovery.HypermediaHalJsonPathLinkDiscovery;
 import com.github.ljtfreitas.restify.http.client.hateoas.browser.discovery.JsonPathLinkDiscovery;
 import com.github.ljtfreitas.restify.http.client.hateoas.browser.discovery.LinkDiscovery;
-import com.github.ljtfreitas.restify.http.client.hateoas.browser.discovery.ResourceLinkDiscovery;
-import com.github.ljtfreitas.restify.http.client.hateoas.browser.discovery.WebLinkJsonPathLinkDiscovery;
-import com.github.ljtfreitas.restify.http.client.hateoas.hal.JacksonHalJsonMessageConverter;
+import com.github.ljtfreitas.restify.http.client.hateoas.browser.discovery.HypermediaLinkDiscovery;
+import com.github.ljtfreitas.restify.http.client.hateoas.browser.discovery.HypermediaJsonPathLinkDiscovery;
+import com.github.ljtfreitas.restify.http.client.hateoas.hal.JacksonHypermediaHalJsonMessageConverter;
 import com.github.ljtfreitas.restify.http.client.message.HttpMessageConverter;
 import com.github.ljtfreitas.restify.http.client.message.HttpMessageConverters;
 import com.github.ljtfreitas.restify.http.client.message.converter.json.JacksonMessageConverter;
@@ -143,7 +143,7 @@ public class LinkBrowserBuilder {
 
 	public LinkBrowser build() {
 		LinkRequestExecutor linkRequestExecutor = linkRequestExecutor();
-		ResourceLinkDiscovery resourceLinkDiscovery = resourceLinkDiscoveryBuilder.build();
+		HypermediaLinkDiscovery resourceLinkDiscovery = resourceLinkDiscoveryBuilder.build();
 
 		return new LinkBrowser(linkRequestExecutor, resourceLinkDiscovery, baseURL);
 	}
@@ -247,7 +247,7 @@ public class LinkBrowserBuilder {
 		}
 
 		public HttpMessageConvertersBuilder hal() {
-			converters.add(new JacksonHalJsonMessageConverter<>());
+			converters.add(new JacksonHypermediaHalJsonMessageConverter<>());
 			return this;
 		}
 
@@ -279,12 +279,12 @@ public class LinkBrowserBuilder {
 		}
 
 		public ResourceLinkDiscoveryBuilder jsonLink() {
-			resolvers.add(new WebLinkJsonPathLinkDiscovery());
+			resolvers.add(new HypermediaJsonPathLinkDiscovery());
 			return this;
 		}
 
 		public ResourceLinkDiscoveryBuilder hal() {
-			resolvers.add(new HalJsonPathLinkDiscovery());
+			resolvers.add(new HypermediaHalJsonPathLinkDiscovery());
 			return this;
 		}
 
@@ -299,7 +299,7 @@ public class LinkBrowserBuilder {
 		}
 
 		public ResourceLinkDiscoveryBuilder jsonPathTemplate(String jsonPathTemplate) {
-			resolvers.add(new HalJsonPathLinkDiscovery());
+			resolvers.add(new HypermediaHalJsonPathLinkDiscovery());
 			return this;
 		}
 
@@ -316,8 +316,8 @@ public class LinkBrowserBuilder {
 			return context;
 		}
 
-		private ResourceLinkDiscovery build() {
-			return resolvers.isEmpty() ? all().build() : new ResourceLinkDiscovery(resolvers);
+		private HypermediaLinkDiscovery build() {
+			return resolvers.isEmpty() ? all().build() : new HypermediaLinkDiscovery(resolvers);
 		}
 	}
 

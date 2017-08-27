@@ -37,7 +37,7 @@ import java.util.Map;
 import com.github.ljtfreitas.restify.http.client.Headers;
 import com.github.ljtfreitas.restify.http.client.hateoas.Link;
 import com.github.ljtfreitas.restify.http.client.hateoas.browser.discovery.RawResource;
-import com.github.ljtfreitas.restify.http.client.hateoas.browser.discovery.ResourceLinkDiscovery;
+import com.github.ljtfreitas.restify.http.client.hateoas.browser.discovery.HypermediaLinkDiscovery;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
 import com.github.ljtfreitas.restify.http.contract.ContentType;
 import com.github.ljtfreitas.restify.http.contract.metadata.reflection.JavaType;
@@ -45,18 +45,18 @@ import com.github.ljtfreitas.restify.http.contract.metadata.reflection.JavaType;
 public class LinkBrowser {
 
 	private final LinkRequestExecutor linkRequestExecutor;
-	private final ResourceLinkDiscovery resourceLinkDiscovery;
+	private final HypermediaLinkDiscovery resourceLinkDiscovery;
 	private final URL baseURL;
 
 	public LinkBrowser(LinkRequestExecutor linkRequestExecutor) {
-		this(linkRequestExecutor, ResourceLinkDiscovery.all(), null);
+		this(linkRequestExecutor, HypermediaLinkDiscovery.all(), null);
 	}
 
-	public LinkBrowser(LinkRequestExecutor linkRequestExecutor, ResourceLinkDiscovery resourceLinkDiscovery) {
+	public LinkBrowser(LinkRequestExecutor linkRequestExecutor, HypermediaLinkDiscovery resourceLinkDiscovery) {
 		this(linkRequestExecutor, resourceLinkDiscovery, null);
 	}
 
-	public LinkBrowser(LinkRequestExecutor linkRequestExecutor, ResourceLinkDiscovery resourceLinkDiscovery, URL baseURL) {
+	public LinkBrowser(LinkRequestExecutor linkRequestExecutor, HypermediaLinkDiscovery resourceLinkDiscovery, URL baseURL) {
 		this.linkRequestExecutor = linkRequestExecutor;
 		this.resourceLinkDiscovery = resourceLinkDiscovery;
 		this.baseURL = baseURL;
@@ -66,14 +66,25 @@ public class LinkBrowser {
 		return new LinkBrowserTraverson(link);
 	}
 
+	public LinkBrowserTraverson follow(Link link, LinkURITemplateParameters parameters) {
+		return new LinkBrowserTraverson(link, parameters);
+	}
+
 	public class LinkBrowserTraverson {
 
 		private final Link link;
+		private final LinkURITemplateParameters parameters;
+
 		private final Collection<Hop> relations = new ArrayList<>();
-		private final LinkURITemplateParameters parameters = new LinkURITemplateParameters();
 
 		private LinkBrowserTraverson(Link link) {
 			this.link = link;
+			this.parameters = new LinkURITemplateParameters();
+		}
+
+		private LinkBrowserTraverson(Link link, LinkURITemplateParameters parameters) {
+			this.link = link;
+			this.parameters = parameters;
 		}
 
 		public LinkBrowserTraverson follow(String... rels) {
@@ -100,7 +111,7 @@ public class LinkBrowser {
 			return tryExecute(type);
 		}
 
-		public <T> Collection<T> collectionOf(Class<? extends T> type) {
+		public <T> Collection<T> asCollectionOf(Class<? extends T> type) {
 			return tryExecute(JavaType.parameterizedType(List.class, type));
 		}
 

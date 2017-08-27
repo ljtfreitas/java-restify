@@ -32,13 +32,15 @@ import java.net.URL;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
+import com.github.ljtfreitas.restify.http.client.hateoas.browser.LinkBrowser;
+
 public class LinkBuilder {
 
 	private String href;
 	private String rel;
-	private String type;
-	private String title;
 	private Map<String, String> properties = new LinkedHashMap<>();
+	private LinkBrowser browser;
+	private Resource<?> owner;
 
 	public LinkBuilder href(String href) {
 		this.href = href;
@@ -61,12 +63,12 @@ public class LinkBuilder {
 	}
 
 	public LinkBuilder type(String type) {
-		this.type = type;
+		properties.put("type", type);
 		return this;
 	}
 
 	public LinkBuilder title(String title) {
-		this.title = title;
+		properties.put("title", title);
 		return this;
 	}
 
@@ -95,9 +97,19 @@ public class LinkBuilder {
 		return this;
 	}
 
+	public LinkBuilder browser(LinkBrowser browser) {
+		this.browser = browser;
+		return this;
+	}
+
+	public LinkBuilder owner(Resource<?> owner) {
+		this.owner = owner;
+		return this;
+	}
+
 	public Link build() {
 		nonNull(href, "'href' link can't be null.");
 
-		return new Link(href, rel, title, type, properties);
+		return new Link(href, rel, properties, owner, browser);
 	}
 }

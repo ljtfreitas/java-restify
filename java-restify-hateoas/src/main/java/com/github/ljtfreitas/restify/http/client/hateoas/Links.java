@@ -66,8 +66,9 @@ public class Links implements Iterable<Link> {
 				.findFirst();
 	}
 
-	public void add(Link link) {
+	public Links add(Link link) {
 		links.add(link);
+		return this;
 	}
 
 	public Collection<Link> unwrap() {

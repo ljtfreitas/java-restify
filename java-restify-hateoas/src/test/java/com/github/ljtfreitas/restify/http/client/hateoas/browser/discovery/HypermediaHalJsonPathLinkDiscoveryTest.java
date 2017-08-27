@@ -10,15 +10,15 @@ import org.junit.Test;
 
 import com.github.ljtfreitas.restify.http.client.hateoas.Link;
 
-public class HalJsonPathLinkDiscoveryTest {
+public class HypermediaHalJsonPathLinkDiscoveryTest {
 
-	private HalJsonPathLinkDiscovery discovery;
+	private HypermediaHalJsonPathLinkDiscovery discovery;
 
 	private RawResource resource;
 
 	@Before
 	public void setup() {
-		discovery = new HalJsonPathLinkDiscovery();
+		discovery = new HypermediaHalJsonPathLinkDiscovery();
 
 		String json = "{\"name\":\"Tiago de Freitas Lima\",\"birth_date\":\"1985-07-02\","
 					+ "\"_links\":{"

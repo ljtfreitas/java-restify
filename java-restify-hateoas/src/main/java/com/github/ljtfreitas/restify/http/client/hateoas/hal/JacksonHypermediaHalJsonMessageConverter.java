@@ -27,28 +27,34 @@ package com.github.ljtfreitas.restify.http.client.hateoas.hal;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.ljtfreitas.restify.http.client.hateoas.browser.LinkBrowser;
 import com.github.ljtfreitas.restify.http.client.message.converter.json.JacksonMessageConverter;
 import com.github.ljtfreitas.restify.http.contract.ContentType;
 
-public class JacksonHalJsonMessageConverter<T> extends JacksonMessageConverter<T> {
+public class JacksonHypermediaHalJsonMessageConverter<T> extends JacksonMessageConverter<T> {
 
 	private static final ContentType HYPERMEDIA_JSON_CONTENT_TYPE = ContentType.of("application", "hal+json");
 
-	public JacksonHalJsonMessageConverter() {
-		super(configure());
+	public JacksonHypermediaHalJsonMessageConverter() {
+		super(configure(new ObjectMapper(), null));
 	}
 
-	public JacksonHalJsonMessageConverter(ObjectMapper objectMapper) {
-		super(configure(objectMapper));
+	public JacksonHypermediaHalJsonMessageConverter(LinkBrowser linkBrowser) {
+		super(configure(new ObjectMapper(), linkBrowser));
 	}
 
-	private static ObjectMapper configure() {
-		return configure(new ObjectMapper());
+	public JacksonHypermediaHalJsonMessageConverter(ObjectMapper objectMapper) {
+		super(configure(objectMapper, null));
 	}
 
-	private static ObjectMapper configure(ObjectMapper objectMapper) {
-		objectMapper.registerModule(new JacksonHypermediaHalModule());
+	public JacksonHypermediaHalJsonMessageConverter(ObjectMapper objectMapper, LinkBrowser linkBrowser) {
+		super(configure(objectMapper, linkBrowser));
+	}
+
+	private static ObjectMapper configure(ObjectMapper objectMapper, LinkBrowser linkBrowser) {
 		objectMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+		objectMapper.registerModule(new HypermediaHalModule());
+		objectMapper.setHandlerInstantiator(new HypermediaHalHandlerInstantiator(linkBrowser));
 		return objectMapper;
 	}
 

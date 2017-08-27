@@ -27,17 +27,21 @@ package com.github.ljtfreitas.restify.http.client.hateoas;
 
 import static com.github.ljtfreitas.restify.http.util.Preconditions.nonNull;
 
+import java.util.Collections;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 
 import com.fasterxml.jackson.annotation.JsonAnySetter;
 import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
+import com.github.ljtfreitas.restify.http.client.hateoas.browser.LinkBrowser;
+import com.github.ljtfreitas.restify.http.client.hateoas.browser.LinkBrowser.LinkBrowserTraverson;
+import com.github.ljtfreitas.restify.http.client.hateoas.browser.LinkURITemplateParameters;
 
 @JsonPropertyOrder(value = {"href", "rel", "type", "title"})
 public class Link {
@@ -63,37 +67,43 @@ public class Link {
 	@JsonBackReference
 	private Resource<?> owner;
 
+	@JsonIgnore
+	private LinkBrowser browser;
+
 	@Deprecated
 	protected Link() {
 	}
 
-	public Link(@JsonProperty("href") String href) {
-		this(href, REL_SELF);
-	}
-
 	public Link(String href, String rel) {
-		this.href = nonNull(href, "Link href cannot be null.");
-		this.rel = rel;
+		this(href, rel, Collections.emptyMap(), null, null);
 	}
 
-	public Link(String href, String rel, Map<String, String> properties) {
-		this(href, rel, null, null, properties);
-	}
-
-	public Link(String href, String rel, String title, String type,  Map<String, String> properties) {
+	public Link(String href, String rel, Map<String, String> properties, Resource<?> owner, LinkBrowser browser) {
 		this.href = nonNull(href, "Link href cannot be null.");
 		this.rel = rel;
-		this.title = title;
-		this.type = type;
+		this.title = properties.getOrDefault("title", null);
+		this.type = properties.getOrDefault("type", null);
 		this.properties = properties;
+		this.owner = owner;
+		this.browser = browser;
 	}
 
-	public Link(Link source, String rel) {
+	public Link(Link source) {
+		this(source, source.browser);
+	}
+
+	public Link(Link source, LinkBrowser browser) {
+		this(source, source.rel, browser);
+	}
+
+	public Link(Link source, String rel, LinkBrowser browser) {
 		this.href = source.href;
 		this.type = source.type;
 		this.title = source.title;
-		this.properties = new LinkedHashMap<>(source.properties);
+		this.properties = new HashMap<>(source.properties);
+		this.owner = source.owner;
 		this.rel = rel;
+		this.browser = browser;
 	}
 
 	public String href() {
@@ -139,16 +149,21 @@ public class Link {
 		this.properties.put(name, value);
 	}
 
-	public Object follow() {
-		return null;
+	public LinkBrowserTraverson follow() {
+		nonNull(browser, "Cannot follow this link [" + href + "], because LinkBrowser has not set.");
+		return browser.follow(this, owner == null ? LinkURITemplateParameters.empty() : LinkURITemplateParameters.of(owner));
 	}
 
 	@Override
 	public String toString() {
-		return String.format("Link: %s", href);
+		return String.format("Link: [" + href + "]");
 	}
 
 	public static Link self(String href) {
-		return new Link(href, REL_SELF);
+		return new Link(href, REL_SELF, Collections.emptyMap(), null, null);
+	}
+
+	public static Link self(String href, LinkBrowser linkBrowser) {
+		return new Link(href, REL_SELF, Collections.emptyMap(), null, linkBrowser);
 	}
 }

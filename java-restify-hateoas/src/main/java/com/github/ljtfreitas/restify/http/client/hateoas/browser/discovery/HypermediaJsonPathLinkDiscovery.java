@@ -25,36 +25,14 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.hateoas.browser.discovery;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collection;
-import java.util.Optional;
-
-import com.github.ljtfreitas.restify.http.client.hateoas.Link;
 import com.github.ljtfreitas.restify.http.contract.ContentType;
 
-public class ResourceLinkDiscovery {
+public class HypermediaJsonPathLinkDiscovery extends JsonPathLinkDiscovery {
 
-	private final Collection<LinkDiscovery> resolvers;
+	private static final String LINK_FORMAT_TEMPLATE = "$.links..[?(@.rel == '%s')]..href";
+	private static final ContentType JSON_CONTENT_TYPE = ContentType.of("application/json");
 
-	public ResourceLinkDiscovery(LinkDiscovery... resolvers) {
-		this.resolvers = Arrays.asList(resolvers);
-	}
-
-	public ResourceLinkDiscovery(Collection<LinkDiscovery> resolvers) {
-		this.resolvers = new ArrayList<>(resolvers);
-	}
-
-	public Optional<Link> discovery(String rel, RawResource resource, ContentType contentType) {
-		LinkDiscovery discovery = resolvers.stream()
-			.filter(r -> r.supports(contentType))
-				.findFirst()
-					.orElseThrow(() -> new IllegalArgumentException("Cannot discovery links in a response of ContenType [" + contentType + "]."));
-
-		return discovery.find(rel, resource);
-	}
-
-	public static ResourceLinkDiscovery all() {
-		return new ResourceLinkDiscovery(new WebLinkJsonPathLinkDiscovery(), new HalJsonPathLinkDiscovery());
+	public HypermediaJsonPathLinkDiscovery() {
+		super(LINK_FORMAT_TEMPLATE, JSON_CONTENT_TYPE);
 	}
 }
