@@ -25,62 +25,14 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.hateoas;
 
-import java.util.ArrayList;
 import java.util.Collection;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonProperty.Access;
-import com.fasterxml.jackson.annotation.JsonUnwrapped;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+public interface EmbeddedResource {
 
-public class Resource<T> {
+	public String name();
 
-	@JsonUnwrapped
-	private T content;
+	public <T> Resource<T> as(Class<? extends T> type);
 
-	@JsonProperty("links")
-	@JsonInclude(JsonInclude.Include.NON_EMPTY)
-	@JsonDeserialize(using = HypermediaLinksDeserializer.class)
-	@JsonManagedReference
-	private Collection<Link> links = new ArrayList<>();
+	public <T> Collection<Resource<T>> collectionOf(Class<? extends T> type);
 
-	@JsonProperty(value = "resource", access = Access.WRITE_ONLY)
-	private Embedded embedded = new Embedded();
-
-	@Deprecated
-	Resource() {
-	}
-
-	public Resource(T content) {
-		this.content = content;
-	}
-
-	public Resource(T content, Links links) {
-		this.content = content;
-		this.links = new ArrayList<>(links.unwrap());
-	}
-
-	public Resource(T content, Collection<Link> links) {
-		this.content = content;
-		this.links = new ArrayList<>(links);
-	}
-
-	public T content() {
-		return content;
-	}
-
-	public Embedded embedded() {
-		return embedded;
-	}
-
-	public Links links() {
-		return new Links(links);
-	}
-
-	public Resource<T> addLink(Link link) {
-		links.add(link);
-		return this;
-	}
 }

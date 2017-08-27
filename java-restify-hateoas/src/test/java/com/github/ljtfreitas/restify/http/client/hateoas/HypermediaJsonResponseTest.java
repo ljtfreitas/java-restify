@@ -27,7 +27,7 @@ import com.github.ljtfreitas.restify.http.client.hateoas.browser.LinkBrowserBuil
 import com.github.ljtfreitas.restify.http.contract.Get;
 import com.github.ljtfreitas.restify.http.contract.Path;
 
-public class JsonHypermediaResponseTest {
+public class HypermediaJsonResponseTest {
 
 	@Rule
 	public MockServerRule mockServerRule = new MockServerRule(this, 7080, 7084);

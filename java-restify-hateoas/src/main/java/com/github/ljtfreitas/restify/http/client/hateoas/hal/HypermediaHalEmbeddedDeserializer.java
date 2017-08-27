@@ -23,64 +23,40 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.http.client.hateoas;
+package com.github.ljtfreitas.restify.http.client.hateoas.hal;
 
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonProperty.Access;
-import com.fasterxml.jackson.annotation.JsonUnwrapped;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.core.ObjectCodec;
+import com.fasterxml.jackson.core.TreeNode;
+import com.fasterxml.jackson.databind.DeserializationContext;
+import com.fasterxml.jackson.databind.JsonDeserializer;
+import com.github.ljtfreitas.restify.http.client.hateoas.Embedded;
+import com.github.ljtfreitas.restify.http.client.hateoas.JsonEmbeddedResource;
+import com.github.ljtfreitas.restify.http.client.hateoas.JsonEmbeddedResourceReader;
 
-public class Resource<T> {
+class HypermediaHalEmbeddedDeserializer extends JsonDeserializer<Embedded> {
 
-	@JsonUnwrapped
-	private T content;
+	@Override
+	public Embedded deserialize(JsonParser jsonParser, DeserializationContext context)
+			throws IOException, JsonProcessingException {
+		ObjectCodec codec = jsonParser.getCodec();
 
-	@JsonProperty("links")
-	@JsonInclude(JsonInclude.Include.NON_EMPTY)
-	@JsonDeserialize(using = HypermediaLinksDeserializer.class)
-	@JsonManagedReference
-	private Collection<Link> links = new ArrayList<>();
+		TreeNode tree = codec.readTree(jsonParser);
 
-	@JsonProperty(value = "resource", access = Access.WRITE_ONLY)
-	private Embedded embedded = new Embedded();
+		context.getTypeFactory();
 
-	@Deprecated
-	Resource() {
+		Collection<JsonEmbeddedResource> elements = new ArrayList<>();
+
+		tree.fieldNames()
+			.forEachRemaining(field -> elements.add(new JsonEmbeddedResource(field, tree.get(field),
+					new JsonEmbeddedResourceReader(codec, context.getTypeFactory()))));
+
+        return new Embedded(elements);
 	}
 
-	public Resource(T content) {
-		this.content = content;
-	}
-
-	public Resource(T content, Links links) {
-		this.content = content;
-		this.links = new ArrayList<>(links.unwrap());
-	}
-
-	public Resource(T content, Collection<Link> links) {
-		this.content = content;
-		this.links = new ArrayList<>(links);
-	}
-
-	public T content() {
-		return content;
-	}
-
-	public Embedded embedded() {
-		return embedded;
-	}
-
-	public Links links() {
-		return new Links(links);
-	}
-
-	public Resource<T> addLink(Link link) {
-		links.add(link);
-		return this;
-	}
 }

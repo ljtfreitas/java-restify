@@ -27,60 +27,29 @@ package com.github.ljtfreitas.restify.http.client.hateoas;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
+import java.util.Optional;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonProperty.Access;
-import com.fasterxml.jackson.annotation.JsonUnwrapped;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+public class Embedded {
 
-public class Resource<T> {
+	private final Collection<JsonEmbeddedResource> resources;
 
-	@JsonUnwrapped
-	private T content;
-
-	@JsonProperty("links")
-	@JsonInclude(JsonInclude.Include.NON_EMPTY)
-	@JsonDeserialize(using = HypermediaLinksDeserializer.class)
-	@JsonManagedReference
-	private Collection<Link> links = new ArrayList<>();
-
-	@JsonProperty(value = "resource", access = Access.WRITE_ONLY)
-	private Embedded embedded = new Embedded();
-
-	@Deprecated
-	Resource() {
+	public Embedded() {
+		this(Collections.emptyList());
 	}
 
-	public Resource(T content) {
-		this.content = content;
+	public Embedded(Collection<JsonEmbeddedResource> resources) {
+		this.resources = new ArrayList<>(resources);
 	}
 
-	public Resource(T content, Links links) {
-		this.content = content;
-		this.links = new ArrayList<>(links.unwrap());
+	public <T> Optional<JsonEmbeddedResource> field(String name) {
+		return resources.stream()
+			.filter(e -> e.name().equalsIgnoreCase(name))
+				.findFirst();
 	}
 
-	public Resource(T content, Collection<Link> links) {
-		this.content = content;
-		this.links = new ArrayList<>(links);
-	}
-
-	public T content() {
-		return content;
-	}
-
-	public Embedded embedded() {
-		return embedded;
-	}
-
-	public Links links() {
-		return new Links(links);
-	}
-
-	public Resource<T> addLink(Link link) {
-		links.add(link);
-		return this;
+	@Override
+	public String toString() {
+		return resources.toString();
 	}
 }

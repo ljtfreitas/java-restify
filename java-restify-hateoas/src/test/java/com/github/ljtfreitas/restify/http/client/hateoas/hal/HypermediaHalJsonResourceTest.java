@@ -1,10 +1,13 @@
 package com.github.ljtfreitas.restify.http.client.hateoas.hal;
 
+import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 import java.io.IOException;
+import java.util.Collection;
 import java.util.Optional;
 
 import org.junit.Before;
@@ -18,7 +21,7 @@ import com.github.ljtfreitas.restify.http.client.hateoas.Link;
 import com.github.ljtfreitas.restify.http.client.hateoas.LinkBuilder;
 import com.github.ljtfreitas.restify.http.client.hateoas.Resource;
 
-public class JsonHypermediaHalResourceTest {
+public class HypermediaHalJsonResourceTest {
 
 	private ObjectMapper objectMapper;
 
@@ -120,6 +123,35 @@ public class JsonHypermediaHalResourceTest {
 		assertEquals("true", friends.get().property("templated").get());
 	}
 
+	@Test
+	public void resourceMustBeDeserializedWithEmbeddedFields() throws IOException {
+		String source = "{\"name\":\"Tiago de Freitas Lima\","
+				+ "\"_links\":"
+					+ "{\"self\":{\"href\":\"http://my.api/tiago\"}"
+				+ "},\"_embedded\":"
+					+ "{\"friends\":"
+						+ "[{\"name\":\"Fulano de Tal\",\"_links\":{\"self\":{\"href\":\"http://my.api/fulano\"}}}]"
+					+ ",\"book\":"
+						+ "{\"title\":\"1984\",\"_links\":{\"self\":{\"href\":\"http://my.api/books/1984\"}}}"
+				+ "}}";
+
+		Resource<Model> resource = objectMapper.readValue(source, new TypeReference<Resource<Model>>(){});
+		assertNotNull(resource);
+		assertEquals(1, resource.links().size());
+
+		Collection<Resource<Friend>> friends = resource.embedded().field("friends").get().collectionOf(Friend.class);
+		assertThat(friends, hasSize(1));
+		Optional<Link> firstFriendSelfLink = friends.iterator().next().links().get("self");
+		assertTrue(firstFriendSelfLink.isPresent());
+		assertEquals("http://my.api/fulano", firstFriendSelfLink.get().href());
+
+		Resource<Book> book = resource.embedded().field("book").get().as(Book.class);
+		assertEquals("1984", book.content().title);
+		Optional<Link> bookSelfLink = book.links().get("self");
+		assertTrue(bookSelfLink.isPresent());
+		assertEquals("http://my.api/books/1984", bookSelfLink.get().href());
+	}
+
 	private static class Model {
 
 		@JsonProperty
@@ -130,4 +162,23 @@ public class JsonHypermediaHalResourceTest {
 		}
 	}
 
+	private static class Friend {
+
+		@JsonProperty
+		String name;
+
+		private Friend(@JsonProperty("name") String name) {
+			this.name = name;
+		}
+	}
+
+	private static class Book {
+
+		@JsonProperty
+		String title;
+
+		private Book(@JsonProperty("title") String title) {
+			this.title = title;
+		}
+	}
 }

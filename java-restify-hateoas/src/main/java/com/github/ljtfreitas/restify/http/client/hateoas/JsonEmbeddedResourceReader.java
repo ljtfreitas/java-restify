@@ -25,62 +25,40 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.hateoas;
 
-import java.util.ArrayList;
+import java.io.IOException;
 import java.util.Collection;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonProperty.Access;
-import com.fasterxml.jackson.annotation.JsonUnwrapped;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.core.JsonParser;
+import com.fasterxml.jackson.core.ObjectCodec;
+import com.fasterxml.jackson.core.TreeNode;
+import com.fasterxml.jackson.core.type.ResolvedType;
+import com.fasterxml.jackson.databind.JavaType;
+import com.fasterxml.jackson.databind.type.TypeFactory;
+import com.github.ljtfreitas.restify.http.util.Tryable;
 
-public class Resource<T> {
+public class JsonEmbeddedResourceReader {
 
-	@JsonUnwrapped
-	private T content;
+	private final ObjectCodec codec;
+	private final TypeFactory typeFactory;
 
-	@JsonProperty("links")
-	@JsonInclude(JsonInclude.Include.NON_EMPTY)
-	@JsonDeserialize(using = HypermediaLinksDeserializer.class)
-	@JsonManagedReference
-	private Collection<Link> links = new ArrayList<>();
-
-	@JsonProperty(value = "resource", access = Access.WRITE_ONLY)
-	private Embedded embedded = new Embedded();
-
-	@Deprecated
-	Resource() {
+	public JsonEmbeddedResourceReader(ObjectCodec codec, TypeFactory typeFactory) {
+		this.codec = codec;
+		this.typeFactory = typeFactory;
 	}
 
-	public Resource(T content) {
-		this.content = content;
+	public <T> Resource<T> readAs(Class<? extends T> type, TreeNode tree) {
+		return Tryable.of(() -> this.readAs(typeFactory.constructParametricType(Resource.class, type), tree));
 	}
 
-	public Resource(T content, Links links) {
-		this.content = content;
-		this.links = new ArrayList<>(links.unwrap());
+	public <T> Collection<Resource<T>> readAsCollectionOf(Class<? extends T> type, TreeNode tree) {
+		JavaType resourceType = typeFactory.constructParametricType(Resource.class, type);
+		return Tryable.of(() -> this.readAs(typeFactory.constructParametricType(Collection.class, resourceType), tree));
 	}
 
-	public Resource(T content, Collection<Link> links) {
-		this.content = content;
-		this.links = new ArrayList<>(links);
+	private <T> T readAs(ResolvedType resolvedType, TreeNode tree) throws IOException {
+		try (JsonParser parser = tree.traverse(codec)) {
+			return codec.readValue(parser, resolvedType);
+		}
 	}
 
-	public T content() {
-		return content;
-	}
-
-	public Embedded embedded() {
-		return embedded;
-	}
-
-	public Links links() {
-		return new Links(links);
-	}
-
-	public Resource<T> addLink(Link link) {
-		links.add(link);
-		return this;
-	}
 }

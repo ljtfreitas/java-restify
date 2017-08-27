@@ -25,62 +25,39 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.hateoas;
 
-import java.util.ArrayList;
 import java.util.Collection;
 
-import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.annotation.JsonProperty.Access;
-import com.fasterxml.jackson.annotation.JsonUnwrapped;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
+import com.fasterxml.jackson.core.TreeNode;
 
-public class Resource<T> {
+public class JsonEmbeddedResource implements EmbeddedResource {
 
-	@JsonUnwrapped
-	private T content;
+	private final String name;
+	private final TreeNode tree;
+	private final JsonEmbeddedResourceReader reader;
 
-	@JsonProperty("links")
-	@JsonInclude(JsonInclude.Include.NON_EMPTY)
-	@JsonDeserialize(using = HypermediaLinksDeserializer.class)
-	@JsonManagedReference
-	private Collection<Link> links = new ArrayList<>();
-
-	@JsonProperty(value = "resource", access = Access.WRITE_ONLY)
-	private Embedded embedded = new Embedded();
-
-	@Deprecated
-	Resource() {
+	public JsonEmbeddedResource(String name, TreeNode tree, JsonEmbeddedResourceReader reader) {
+		this.name = name;
+		this.tree = tree;
+		this.reader = reader;
 	}
 
-	public Resource(T content) {
-		this.content = content;
+	@Override
+	public String name() {
+		return name;
 	}
 
-	public Resource(T content, Links links) {
-		this.content = content;
-		this.links = new ArrayList<>(links.unwrap());
+	@Override
+	public <T> Resource<T> as(Class<? extends T> type) {
+		return reader.readAs(type, tree);
 	}
 
-	public Resource(T content, Collection<Link> links) {
-		this.content = content;
-		this.links = new ArrayList<>(links);
+	@Override
+	public <T> Collection<Resource<T>> collectionOf(Class<? extends T> type) {
+		return reader.readAsCollectionOf(type, tree);
 	}
 
-	public T content() {
-		return content;
-	}
-
-	public Embedded embedded() {
-		return embedded;
-	}
-
-	public Links links() {
-		return new Links(links);
-	}
-
-	public Resource<T> addLink(Link link) {
-		links.add(link);
-		return this;
+	@Override
+	public String toString() {
+		return tree.toString();
 	}
 }

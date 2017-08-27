@@ -32,9 +32,11 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.annotation.JsonProperty.Access;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.fasterxml.jackson.databind.module.SimpleModule;
+import com.github.ljtfreitas.restify.http.client.hateoas.Embedded;
 import com.github.ljtfreitas.restify.http.client.hateoas.Link;
 import com.github.ljtfreitas.restify.http.client.hateoas.Resource;
 
@@ -58,6 +60,10 @@ class HypermediaHalModule extends SimpleModule {
 		@JsonSerialize(using = HypermediaHalLinksSerializer.class)
 		@JsonManagedReference
 		private Collection<Link> links = new ArrayList<>();
+
+		@JsonProperty(value = "_embedded", access = Access.WRITE_ONLY)
+		@JsonDeserialize(using = HypermediaHalEmbeddedDeserializer.class)
+		private Embedded embedded;
 	}
 
 }
