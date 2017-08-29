@@ -7,8 +7,6 @@ import java.util.Map;
 
 import org.junit.Test;
 
-import com.github.ljtfreitas.restify.http.client.hateoas.Resource;
-
 public class LinkURITemplateTest {
 
 	@Test
@@ -16,15 +14,6 @@ public class LinkURITemplateTest {
 		LinkURITemplate linkURITemplate = new LinkURITemplate("http://my.api.com/path");
 
 		assertEquals("http://my.api.com/path", linkURITemplate.expand().toString());
-	}
-
-	@Test
-	public void shouldExpandUriTemplateWithSimpleStringVariableUsingResourceParameters() {
-		LinkURITemplate linkURITemplate = new LinkURITemplate("http://my.api.com/path/{name}");
-
-		Resource<Person> resource = new Resource<Person>(new Person("ljtfreitas"));
-
-		assertEquals("http://my.api.com/path/ljtfreitas", linkURITemplate.expand(resource).toString());
 	}
 
 	@Test
@@ -48,15 +37,6 @@ public class LinkURITemplateTest {
 	}
 
 	@Test
-	public void shouldExpandUriTemplateWithReservedVariableUsingResourceParameters() {
-		LinkURITemplate linkURITemplate = new LinkURITemplate("http://my.api.com/path/{+name}");
-
-		Resource<Person> resource = new Resource<Person>(new Person("ljtfreitas"));
-
-		assertEquals("http://my.api.com/path/ljtfreitas", linkURITemplate.expand(resource).toString());
-	}
-
-	@Test
 	public void shouldExpandUriTemplateWithReservedVariableUsingMapParameters() {
 		LinkURITemplate linkURITemplate = new LinkURITemplate("http://my.api.com/path/{+name}");
 
@@ -74,15 +54,6 @@ public class LinkURITemplateTest {
 		parameters.put("name", "ljtfreitas");
 
 		assertEquals("http://my.api.com/path/ljtfreitas", linkURITemplate.expand(parameters).toString());
-	}
-
-	@Test
-	public void shouldExpandUriTemplateWithFragmentVariableUsingResourceParameters() {
-		LinkURITemplate linkURITemplate = new LinkURITemplate("http://my.api.com/path{#name}");
-
-		Resource<Person> resource = new Resource<Person>(new Person("ljtfreitas"));
-
-		assertEquals("http://my.api.com/path#ljtfreitas", linkURITemplate.expand(resource).toString());
 	}
 
 	@Test
@@ -106,15 +77,6 @@ public class LinkURITemplateTest {
 	}
 
 	@Test
-	public void shouldExpandUriTemplateWithSinpleStringVariableUsingResourceParameters() {
-		LinkURITemplate linkURITemplate = new LinkURITemplate("http://my.api.com/path{/name}");
-
-		Resource<Person> resource = new Resource<Person>(new Person("ljtfreitas"));
-
-		assertEquals("http://my.api.com/path/ljtfreitas", linkURITemplate.expand(resource).toString());
-	}
-
-	@Test
 	public void shouldExpandUriTemplateWithPathSegmentVariableUsingMapParameters() {
 		LinkURITemplate linkURITemplate = new LinkURITemplate("http://my.api.com/path{/name}");
 
@@ -132,15 +94,6 @@ public class LinkURITemplateTest {
 		parameters.put("name", "ljtfreitas");
 
 		assertEquals("http://my.api.com/path/ljtfreitas", linkURITemplate.expand(parameters).toString());
-	}
-
-	@Test
-	public void shouldExpandUriTemplateWithQueryParameterVariableUsingResourceParameters() {
-		LinkURITemplate linkURITemplate = new LinkURITemplate("http://my.api.com/path{?name}");
-
-		Resource<Person> resource = new Resource<Person>(new Person("ljtfreitas"));
-
-		assertEquals("http://my.api.com/path?name=ljtfreitas", linkURITemplate.expand(resource).toString());
 	}
 
 	@Test
@@ -164,15 +117,6 @@ public class LinkURITemplateTest {
 	}
 
 	@Test
-	public void shouldExpandUriTemplateWithQueryParameterContinuedVariableUsingResourceParameters() {
-		LinkURITemplate linkURITemplate = new LinkURITemplate("http://my.api.com/path?age=32{&name}");
-
-		Resource<Person> resource = new Resource<Person>(new Person("ljtfreitas"));
-
-		assertEquals("http://my.api.com/path?age=32&name=ljtfreitas", linkURITemplate.expand(resource).toString());
-	}
-
-	@Test
 	public void shouldExpandUriTemplateWithQueryParameterContinuedVariableUsingMapParameters() {
 		LinkURITemplate linkURITemplate = new LinkURITemplate("http://my.api.com/path?age=32{&name}");
 
@@ -190,15 +134,5 @@ public class LinkURITemplateTest {
 		parameters.put("name", "ljtfreitas");
 
 		assertEquals("http://my.api.com/path?age=32&name=ljtfreitas", linkURITemplate.expand(parameters).toString());
-	}
-
-	private class Person {
-
-		@SuppressWarnings("unused")
-		String name;
-
-		Person(String name) {
-			this.name = name;
-		}
 	}
 }

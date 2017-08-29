@@ -33,8 +33,6 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import com.github.ljtfreitas.restify.http.client.charset.Encoding;
-import com.github.ljtfreitas.restify.http.client.hateoas.Resource;
-import com.github.ljtfreitas.restify.http.util.Tryable;
 
 public class LinkURITemplate {
 
@@ -46,20 +44,6 @@ public class LinkURITemplate {
 
 	public URI expand() {
 		return URI.create(source);
-	}
-
-	public URI expand(Resource<?> resource) {
-		LinkURITemplateParameters parameters = new LinkURITemplateParameters();
-
-		Object content = resource.content();
-
-		Arrays.stream(content.getClass().getDeclaredFields())
-			.forEach(field -> {
-				field.setAccessible(true);
-				parameters.put(field.getName(), Tryable.of(() -> field.get(content)));
-			});
-
-		return doExpand(parameters);
 	}
 
 	public URI expand(Map<String, String> parameters) {
@@ -118,7 +102,9 @@ public class LinkURITemplate {
 	}
 
 	private enum TemplateVariableType {
-		PATH_VARIABLE(""), PATH_SEGMENT("/"), REQUEST_PARAMETER("?") {
+		PATH_VARIABLE(""),
+		PATH_SEGMENT("/"),
+		REQUEST_PARAMETER("?") {
 			@Override
 			public String resolve(String name, String value) {
 				return "?" + name + "=" + Encoding.UTF_8.encode(value);
@@ -130,7 +116,8 @@ public class LinkURITemplate {
 				return "&" + name + "=" + Encoding.UTF_8.encode(value);
 			}
 		},
-		FRAGMENT("#"), RESERVED("+") {
+		FRAGMENT("#"),
+		RESERVED("+") {
 			@Override
 			public String resolve(String name, String value) {
 				return value;

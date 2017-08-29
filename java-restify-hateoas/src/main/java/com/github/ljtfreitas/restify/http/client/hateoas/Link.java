@@ -41,6 +41,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
 import com.github.ljtfreitas.restify.http.client.hateoas.browser.LinkBrowser;
 import com.github.ljtfreitas.restify.http.client.hateoas.browser.LinkBrowser.LinkBrowserTraverson;
+import com.github.ljtfreitas.restify.http.client.hateoas.browser.LinkURITemplateParameter;
 import com.github.ljtfreitas.restify.http.client.hateoas.browser.LinkURITemplateParameters;
 
 @JsonPropertyOrder(value = {"href", "rel", "type", "title"})
@@ -150,8 +151,24 @@ public class Link {
 	}
 
 	public LinkBrowserTraverson follow() {
+		return doFollow(LinkURITemplateParameters.empty());
+	}
+
+	public LinkBrowserTraverson follow(LinkURITemplateParameters parameters) {
+		return doFollow(parameters);
+	}
+
+	public LinkBrowserTraverson follow(LinkURITemplateParameter... parameters) {
+		return doFollow(new LinkURITemplateParameters(parameters));
+	}
+
+	public LinkBrowserTraverson follow(Map<String, String> parameters) {
+		return doFollow(new LinkURITemplateParameters(parameters));
+	}
+
+	private LinkBrowserTraverson doFollow(LinkURITemplateParameters parameters) {
 		nonNull(browser, "Cannot follow this link [" + href + "], because LinkBrowser has not set.");
-		return browser.follow(this, owner == null ? LinkURITemplateParameters.empty() : LinkURITemplateParameters.of(owner));
+		return browser.follow(this, parameters);
 	}
 
 	@Override

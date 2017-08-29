@@ -1,6 +1,8 @@
 package com.github.ljtfreitas.restify.http.client.hateoas.hal;
 
+import static com.github.ljtfreitas.restify.http.client.hateoas.browser.LinkURITemplateParameter.using;
 import static org.hamcrest.CoreMatchers.hasItem;
+import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
@@ -107,11 +109,49 @@ public class HypermediaHalResponseTest {
 		assertEquals("Tiago de Freitas Lima", user.name);
 		assertEquals("ljtfreitas", user.username);
 
-		Collection<User> friends = resource.links().get("friends").get().follow().asCollectionOf(User.class);
+		Collection<User> friends = resource.links().get("friends").get()
+				.follow(using("username", "ljtfreitas"))
+					.asCollectionOf(User.class);
 
 		assertThat(friends, hasItem(new User("Fulano de Tal", "fulano")));
 
 		mockServerClient.verify(meRequest, friendsRequest);
+	}
+
+
+	@Test
+	public void shouldGetEmbeddedFieldOnTheResponse() {
+		HttpRequest meRequest = request().withMethod("GET").withPath("/me");
+
+		mockServerClient.when(meRequest)
+			.respond(response()
+				.withStatusCode(200)
+				.withHeader("Content-Type", "application/hal+json")
+				.withBody(json("{\"name\":\"Tiago de Freitas Lima\",\"username\":\"ljtfreitas\","
+							+ "\"_links\":{\"self\":{\"href\":\"http://localhost:7080/\"}},"
+							+ "\"_embedded\":{"
+								+ "\"friends\":[{\"name\":\"Fulano de Tal\",\"_links\":{\"self\":{\"href\":\"http://my.api/fulano\"}}}]"
+								+ ",\"book\":{\"title\":\"1984\",\"_links\":{\"self\":{\"href\":\"http://my.api/books/1984\"}}}"
+							+ "}}")));
+
+		Resource<User> resource = myApi.me();
+
+		User user = resource.content();
+
+		assertEquals("Tiago de Freitas Lima", user.name);
+		assertEquals("ljtfreitas", user.username);
+
+		Collection<Resource<User>> friends = resource.embedded().field("friends").get().collectionOf(User.class);
+		assertThat(friends, hasSize(1));
+		Optional<Link> firstFriendSelfLink = friends.iterator().next().links().get("self");
+		assertTrue(firstFriendSelfLink.isPresent());
+		assertEquals("http://my.api/fulano", firstFriendSelfLink.get().href());
+
+		Resource<Book> book = resource.embedded().field("book").get().as(Book.class);
+		assertEquals("1984", book.content().title);
+		Optional<Link> bookSelfLink = book.links().get("self");
+		assertTrue(bookSelfLink.isPresent());
+		assertEquals("http://my.api/books/1984", bookSelfLink.get().href());
 	}
 
 	interface MyApi {
@@ -157,6 +197,16 @@ public class HypermediaHalResponseTest {
 
 			User that = (User) obj;
 			return name.equals(that.name) && username.equals(that.username);
+		}
+	}
+
+	private static class Book {
+
+		@JsonProperty
+		String title;
+
+		private Book(@JsonProperty("title") String title) {
+			this.title = title;
 		}
 	}
 }

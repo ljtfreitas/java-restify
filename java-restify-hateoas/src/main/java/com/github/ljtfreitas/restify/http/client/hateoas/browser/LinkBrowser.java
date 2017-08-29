@@ -70,6 +70,10 @@ public class LinkBrowser {
 		return new LinkBrowserTraverson(link, parameters);
 	}
 
+	public LinkBrowserTraverson follow(Link link, LinkURITemplateParameter... parameters) {
+		return new LinkBrowserTraverson(link, new LinkURITemplateParameters(parameters));
+	}
+
 	public class LinkBrowserTraverson {
 
 		private final Link link;

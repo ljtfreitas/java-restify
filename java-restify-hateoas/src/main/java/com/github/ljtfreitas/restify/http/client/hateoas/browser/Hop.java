@@ -66,4 +66,8 @@ public class Hop {
 	public static Hop rel(String rel, LinkURITemplateParameters parameters) {
 		return new Hop(rel, parameters);
 	}
+
+	public static Hop rel(String rel, LinkURITemplateParameter... parameters) {
+		return new Hop(rel, new LinkURITemplateParameters(parameters));
+	}
 }

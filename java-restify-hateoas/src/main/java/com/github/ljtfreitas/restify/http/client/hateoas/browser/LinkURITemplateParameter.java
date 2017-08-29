@@ -25,52 +25,25 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.hateoas.browser;
 
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.Map;
-import java.util.Optional;
-import java.util.stream.Collectors;
+public class LinkURITemplateParameter {
 
-public class LinkURITemplateParameters {
+	private final String name;
+	private final String value;
 
-	private final Map<String, String> parameters;
-
-	public LinkURITemplateParameters() {
-		this.parameters = new HashMap<>();
+	private LinkURITemplateParameter(String name, String value) {
+		this.name = name;
+		this.value = value;
 	}
 
-	public LinkURITemplateParameters(Map<String, String> parameters) {
-		this.parameters = new HashMap<>(parameters);
+	public String name() {
+		return name;
 	}
 
-	public LinkURITemplateParameters(LinkURITemplateParameters source) {
-		this(source.parameters);
+	public String value() {
+		return value;
 	}
 
-	public LinkURITemplateParameters(LinkURITemplateParameter... parameters) {
-		this(Arrays.stream(parameters).collect(Collectors.toMap(LinkURITemplateParameter::name, LinkURITemplateParameter::value)));
-	}
-
-	public Optional<String> find(String name) {
-		return Optional.ofNullable(parameters.get(name));
-	}
-
-	public LinkURITemplateParameters put(String name, String value) {
-		parameters.put(name, value);
-		return this;
-	}
-
-	public LinkURITemplateParameters put(String name, Object value) {
-		parameters.put(name, value.toString());
-		return this;
-	}
-
-	@Override
-	public String toString() {
-		return String.format("[%s]", parameters);
-	}
-
-	public static LinkURITemplateParameters empty() {
-		return new LinkURITemplateParameters();
+	public static LinkURITemplateParameter using(String name, Object value) {
+		return new LinkURITemplateParameter(name, value.toString());
 	}
 }

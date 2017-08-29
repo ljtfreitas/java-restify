@@ -85,7 +85,7 @@ public class JacksonMessageConverter<T> extends JsonMessageConverter<T> {
 	public void write(T body, HttpRequestMessage httpRequestMessage) throws RestifyHttpMessageWriteException {
 		try {
 			JsonEncoding encoding = Arrays.stream(JsonEncoding.values())
-					.filter(e -> e.getJavaName().equals(httpRequestMessage.charset()))
+					.filter(e -> e.getJavaName().equals(httpRequestMessage.charset().name()))
 					.findFirst()
 					.orElse(JsonEncoding.UTF8);
 

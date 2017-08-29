@@ -1,5 +1,6 @@
 package com.github.ljtfreitas.restify.http.client.hateoas;
 
+import static com.github.ljtfreitas.restify.http.client.hateoas.browser.LinkURITemplateParameter.using;
 import static org.hamcrest.CoreMatchers.hasItem;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
@@ -107,7 +108,7 @@ public class HypermediaJsonResponseTest {
 		assertEquals("Tiago de Freitas Lima", user.name);
 		assertEquals("ljtfreitas", user.username);
 
-		Collection<User> friends = resource.links().get("friends").get().follow().asCollectionOf(User.class);
+		Collection<User> friends = resource.links().get("friends").get().follow(using("username", "ljtfreitas")).asCollectionOf(User.class);
 
 		assertThat(friends, hasItem(new User("Fulano de Tal", "fulano")));
 
