@@ -43,13 +43,12 @@ public class Links implements Iterable<Link> {
 		this.links = links;
 	}
 
-	public int size() {
-		return links.size();
+	public Collection<Link> all() {
+		return Collections.unmodifiableCollection(links);
 	}
 
-	@Override
-	public Iterator<Link> iterator() {
-		return links.iterator();
+	public int size() {
+		return links.size();
 	}
 
 	public Optional<Link> self() {
@@ -69,6 +68,16 @@ public class Links implements Iterable<Link> {
 	public Links add(Link link) {
 		links.add(link);
 		return this;
+	}
+
+	@Override
+	public Iterator<Link> iterator() {
+		return links.iterator();
+	}
+
+	@Override
+	public String toString() {
+		return links.toString();
 	}
 
 	public Collection<Link> unwrap() {

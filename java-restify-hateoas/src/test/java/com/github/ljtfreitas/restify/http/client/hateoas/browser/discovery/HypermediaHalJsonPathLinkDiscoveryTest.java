@@ -9,6 +9,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.github.ljtfreitas.restify.http.client.hateoas.Link;
+import com.github.ljtfreitas.restify.http.contract.ContentType;
 
 public class HypermediaHalJsonPathLinkDiscoveryTest {
 
@@ -26,7 +27,7 @@ public class HypermediaHalJsonPathLinkDiscoveryTest {
 						+ "\"friends\":{\"href\":\"http://localhost:8080/tiago/friends\",\"templated\":true}"
 					+ "}}";
 
-		resource = RawResource.of(json);
+		resource = RawResource.of(json, ContentType.of("application/json"));
 	}
 
 	@Test

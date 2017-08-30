@@ -40,7 +40,6 @@ public class LinkBuilder {
 	private String rel;
 	private Map<String, String> properties = new LinkedHashMap<>();
 	private LinkBrowser browser;
-	private Resource<?> owner;
 
 	public LinkBuilder href(String href) {
 		this.href = href;
@@ -102,14 +101,9 @@ public class LinkBuilder {
 		return this;
 	}
 
-	public LinkBuilder owner(Resource<?> owner) {
-		this.owner = owner;
-		return this;
-	}
-
 	public Link build() {
 		nonNull(href, "'href' link can't be null.");
 
-		return new Link(href, rel, properties, owner, browser);
+		return new Link(href, rel, properties, browser);
 	}
 }

@@ -29,7 +29,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonProperty.Access;
 import com.fasterxml.jackson.annotation.JsonUnwrapped;
@@ -43,7 +42,6 @@ public class Resource<T> {
 	@JsonProperty("links")
 	@JsonInclude(JsonInclude.Include.NON_EMPTY)
 	@JsonDeserialize(using = HypermediaLinksDeserializer.class)
-	@JsonManagedReference
 	private Collection<Link> links = new ArrayList<>();
 
 	@JsonProperty(value = "resource", access = Access.WRITE_ONLY)
@@ -82,5 +80,21 @@ public class Resource<T> {
 	public Resource<T> addLink(Link link) {
 		links.add(link);
 		return this;
+	}
+
+	@Override
+	public String toString() {
+		StringBuilder report = new StringBuilder();
+
+		report
+			.append("Resource: [")
+				.append("Content: ")
+					.append(content)
+				.append(", ")
+				.append("Links: ")
+					.append(links)
+			.append("]");
+
+		return report.toString();
 	}
 }

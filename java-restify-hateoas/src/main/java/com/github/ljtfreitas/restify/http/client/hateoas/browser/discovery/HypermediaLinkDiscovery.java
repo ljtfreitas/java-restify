@@ -31,7 +31,6 @@ import java.util.Collection;
 import java.util.Optional;
 
 import com.github.ljtfreitas.restify.http.client.hateoas.Link;
-import com.github.ljtfreitas.restify.http.contract.ContentType;
 
 public class HypermediaLinkDiscovery {
 
@@ -45,11 +44,11 @@ public class HypermediaLinkDiscovery {
 		this.resolvers = new ArrayList<>(resolvers);
 	}
 
-	public Optional<Link> discovery(String rel, RawResource resource, ContentType contentType) {
+	public Optional<Link> discovery(String rel, RawResource resource) {
 		LinkDiscovery discovery = resolvers.stream()
-			.filter(r -> r.supports(contentType))
+			.filter(r -> r.supports(resource.contentType()))
 				.findFirst()
-					.orElseThrow(() -> new IllegalArgumentException("Cannot discovery links in a response of ContenType [" + contentType + "]."));
+					.orElseThrow(() -> new IllegalArgumentException("Cannot discovery links in a response of ContenType [" + resource.contentType() + "]."));
 
 		return discovery.find(rel, resource);
 	}

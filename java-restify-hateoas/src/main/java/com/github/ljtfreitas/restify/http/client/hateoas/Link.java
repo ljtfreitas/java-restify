@@ -33,7 +33,6 @@ import java.util.Map;
 import java.util.Optional;
 
 import com.fasterxml.jackson.annotation.JsonAnySetter;
-import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
@@ -65,9 +64,6 @@ public class Link {
 
 	private Map<String, String> properties = new HashMap<>();
 
-	@JsonBackReference
-	private Resource<?> owner;
-
 	@JsonIgnore
 	private LinkBrowser browser;
 
@@ -76,16 +72,15 @@ public class Link {
 	}
 
 	public Link(String href, String rel) {
-		this(href, rel, Collections.emptyMap(), null, null);
+		this(href, rel, Collections.emptyMap(), null);
 	}
 
-	public Link(String href, String rel, Map<String, String> properties, Resource<?> owner, LinkBrowser browser) {
+	public Link(String href, String rel, Map<String, String> properties, LinkBrowser browser) {
 		this.href = nonNull(href, "Link href cannot be null.");
 		this.rel = rel;
 		this.title = properties.getOrDefault("title", null);
 		this.type = properties.getOrDefault("type", null);
 		this.properties = properties;
-		this.owner = owner;
 		this.browser = browser;
 	}
 
@@ -102,7 +97,6 @@ public class Link {
 		this.type = source.type;
 		this.title = source.title;
 		this.properties = new HashMap<>(source.properties);
-		this.owner = source.owner;
 		this.rel = rel;
 		this.browser = browser;
 	}
@@ -177,10 +171,10 @@ public class Link {
 	}
 
 	public static Link self(String href) {
-		return new Link(href, REL_SELF, Collections.emptyMap(), null, null);
+		return new Link(href, REL_SELF, Collections.emptyMap(), null);
 	}
 
 	public static Link self(String href, LinkBrowser linkBrowser) {
-		return new Link(href, REL_SELF, Collections.emptyMap(), null, linkBrowser);
+		return new Link(href, REL_SELF, Collections.emptyMap(), linkBrowser);
 	}
 }

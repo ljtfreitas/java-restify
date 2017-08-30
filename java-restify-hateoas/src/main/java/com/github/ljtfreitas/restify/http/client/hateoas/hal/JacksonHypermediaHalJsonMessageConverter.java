@@ -53,7 +53,7 @@ public class JacksonHypermediaHalJsonMessageConverter<T> extends JacksonMessageC
 
 	private static ObjectMapper configure(ObjectMapper objectMapper, LinkBrowser linkBrowser) {
 		objectMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
-		objectMapper.registerModule(new HypermediaHalModule());
+		objectMapper.registerModule(new HypermediaHalJsonModule());
 		objectMapper.setHandlerInstantiator(new HypermediaHalHandlerInstantiator(linkBrowser));
 		return objectMapper;
 	}

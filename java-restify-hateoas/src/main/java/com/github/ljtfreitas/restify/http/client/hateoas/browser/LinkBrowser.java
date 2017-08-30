@@ -27,17 +27,17 @@ package com.github.ljtfreitas.restify.http.client.hateoas.browser;
 
 import java.lang.reflect.Type;
 import java.net.URL;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Iterator;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.Queue;
 
 import com.github.ljtfreitas.restify.http.client.Headers;
 import com.github.ljtfreitas.restify.http.client.hateoas.Link;
-import com.github.ljtfreitas.restify.http.client.hateoas.browser.discovery.RawResource;
 import com.github.ljtfreitas.restify.http.client.hateoas.browser.discovery.HypermediaLinkDiscovery;
+import com.github.ljtfreitas.restify.http.client.hateoas.browser.discovery.RawResource;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
 import com.github.ljtfreitas.restify.http.contract.ContentType;
 import com.github.ljtfreitas.restify.http.contract.metadata.reflection.JavaType;
@@ -79,7 +79,7 @@ public class LinkBrowser {
 		private final Link link;
 		private final LinkURITemplateParameters parameters;
 
-		private final Collection<Hop> relations = new ArrayList<>();
+		private final Queue<Hop> relations = new LinkedList<>();
 
 		private LinkBrowserTraverson(Link link) {
 			this.link = link;
@@ -131,11 +131,11 @@ public class LinkBrowser {
 		private LinkURI traverse() {
 			LinkURI linkURI = new LinkURI(link, parameters);
 			if (relations.isEmpty()) return linkURI;
-			return traverse(linkURI, relations.iterator());
+			return traverse(linkURI, relations.poll());
 		}
 
-		private LinkURI traverse(LinkURI linkURI, Iterator<Hop> relations) {
-			if (!relations.hasNext()) return linkURI;
+		private LinkURI traverse(LinkURI linkURI, Hop relation) {
+			if (relation == null) return linkURI;
 
 			EndpointResponse<String> resource = execute(linkURI, String.class);
 
@@ -145,13 +145,11 @@ public class LinkBrowser {
 					.map(h -> ContentType.of(h.value()))
 						.orElseThrow(() -> new IllegalArgumentException("Your response body does not have a Content-Type header?"));
 
-			Hop relation = relations.next();
-
-			Link relationLink = resourceLinkDiscovery.discovery(relation.rel(), RawResource.of(resourceBody), contentType)
+			Link relationLink = resourceLinkDiscovery.discovery(relation.rel(), RawResource.of(resourceBody, contentType))
 				.orElseThrow(() -> new IllegalStateException("Expected to find link [" + relation.rel() + "] "
 						+ "in resource [" + resourceBody + "]."));
 
-			return traverse(new LinkURI(relationLink, relation.parameters()), relations);
+			return traverse(new LinkURI(relationLink, relation.parameters()), relations.poll());
 		}
 
 		private <T> EndpointResponse<T> execute(LinkURI linkURI, Type responseType) {

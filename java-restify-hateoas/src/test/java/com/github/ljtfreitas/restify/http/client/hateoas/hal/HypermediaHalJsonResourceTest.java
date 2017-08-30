@@ -28,7 +28,7 @@ public class HypermediaHalJsonResourceTest {
 	@Before
 	public void setup() {
 		objectMapper = new ObjectMapper();
-		objectMapper.registerModule(new HypermediaHalModule());
+		objectMapper.registerModule(new HypermediaHalJsonModule());
 		objectMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
 		objectMapper.setHandlerInstantiator(new HypermediaHalHandlerInstantiator(null));
 	}

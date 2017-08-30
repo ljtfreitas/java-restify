@@ -25,19 +25,32 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.hateoas.browser.discovery;
 
+import com.github.ljtfreitas.restify.http.contract.ContentType;
+
 public class RawResource {
 
 	private final String content;
+	private final ContentType contentType;
 
-	public RawResource(String content) {
+	public RawResource(String content, ContentType contentType) {
 		this.content = content;
+		this.contentType = contentType;
 	}
 
 	public String content() {
 		return content;
 	}
 
-	public static RawResource of(String content) {
-		return new RawResource(content);
+	public ContentType contentType() {
+		return contentType;
+	}
+
+	@Override
+	public String toString() {
+		return contentType + "\n" + content;
+	}
+
+	public static RawResource of(String content, ContentType contentType) {
+		return new RawResource(content, contentType);
 	}
 }
