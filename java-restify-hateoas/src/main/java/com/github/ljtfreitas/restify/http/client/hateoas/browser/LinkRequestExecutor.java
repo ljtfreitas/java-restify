@@ -41,12 +41,8 @@ public class LinkRequestExecutor {
 	}
 
 	public <T> EndpointResponse<T> execute(LinkEndpointRequest linkRequest) {
-		EndpointRequest endpointRequest = endpointRequestInterceptorStack.apply(newRequest(linkRequest));
+		EndpointRequest endpointRequest = endpointRequestInterceptorStack.apply(linkRequest.asEndpointRequest());
 
 		return endpointRequestExecutor.execute(endpointRequest);
-	}
-
-	private EndpointRequest newRequest(LinkEndpointRequest linkRequest) {
-		return new EndpointRequest(linkRequest.expand(), "GET", linkRequest.responseType());
 	}
 }

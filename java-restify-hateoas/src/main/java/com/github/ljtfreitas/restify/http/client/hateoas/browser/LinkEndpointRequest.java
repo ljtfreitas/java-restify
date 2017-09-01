@@ -30,64 +30,69 @@ import java.net.URI;
 import java.net.URL;
 import java.util.Optional;
 
+import com.github.ljtfreitas.restify.http.client.Headers;
 import com.github.ljtfreitas.restify.http.client.hateoas.Link;
-import com.github.ljtfreitas.restify.http.contract.metadata.reflection.JavaType;
+import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
 import com.github.ljtfreitas.restify.http.util.Tryable;
 
 public class LinkEndpointRequest {
 
 	private final URL source;
 	private final Link link;
-	private final JavaType responseType;
 	private final LinkURITemplateParameters parameters;
+	private final Type responseType;
+	private final String method;
+	private final Headers headers;
+	private final Object body;
 
-	public LinkEndpointRequest(URL source, Link link, Type responseType) {
-		this(source, link, responseType, new LinkURITemplateParameters());
-	}
-
-	public LinkEndpointRequest(URL source, Link link, JavaType responseType) {
-		this(source, link, responseType, new LinkURITemplateParameters());
+	public LinkEndpointRequest(URL source, Link link) {
+		this(source, link, LinkURITemplateParameters.empty());
 	}
 
 	public LinkEndpointRequest(Link link, Type responseType) {
-		this(link, responseType, new LinkURITemplateParameters());
+		this(null, link, LinkURITemplateParameters.empty(), responseType);
 	}
 
-	public LinkEndpointRequest(Link link, JavaType responseType) {
-		this(link, responseType, new LinkURITemplateParameters());
+	public LinkEndpointRequest(URL source, Link link, LinkURITemplateParameters parameters) {
+		this(source, link, parameters, void.class);
 	}
 
-	public LinkEndpointRequest(Link link, Type responseType, LinkURITemplateParameters parameters) {
-		this(null, link, responseType, parameters);
+	public LinkEndpointRequest(URL source, Link link, LinkURITemplateParameters parameters, Type responseType) {
+		this(source, link, parameters, responseType, "GET");
 	}
 
-	public LinkEndpointRequest(Link link, JavaType responseType, LinkURITemplateParameters parameters) {
-		this(null, link, responseType, parameters);
+	public LinkEndpointRequest(URL source, Link link, LinkURITemplateParameters parameters, Type responseType,
+			String method) {
+		this(source, link, parameters, responseType, method, new Headers(), null);
 	}
 
-	public LinkEndpointRequest(URL source, Link link, Type responseType, LinkURITemplateParameters parameters) {
-		this(source, link, JavaType.of(responseType), parameters);
+	public LinkEndpointRequest(URL source, Link link, LinkURITemplateParameters parameters, Type responseType,
+			String method, Headers headers) {
+		this(source, link, parameters, responseType, method, headers, null);
 	}
 
-	public LinkEndpointRequest(URL source, Link link, JavaType responseType, LinkURITemplateParameters parameters) {
+	public LinkEndpointRequest(URL source, Link link, LinkURITemplateParameters parameters, Type responseType,
+			String method, Headers headers, Object body) {
 		this.source = source;
 		this.link = link;
-		this.responseType = responseType;
 		this.parameters = parameters;
+		this.responseType = responseType;
+		this.method = method;
+		this.headers = headers;
+		this.body = body;
 	}
 
-	public URI expand() {
+	public EndpointRequest asEndpointRequest() {
+		return new EndpointRequest(expand(), method, headers, body, responseType);
+	}
+
+	private URI expand() {
 		URI href = new LinkURITemplate(link.href()).expand(parameters);
 
 		URI endpoint = Optional.ofNullable(source)
 			.map(s -> href.isAbsolute() ? href : Tryable.of(s::toURI).resolve(href))
 				.orElse(href);
-
 		return endpoint;
-	}
-
-	public JavaType responseType() {
-		return responseType;
 	}
 
 	@Override
@@ -106,6 +111,12 @@ public class LinkEndpointRequest {
 					.append(responseType)
 				.append(", ")
 					.append("Parameters: ")
+					.append(parameters)
+				.append(", ")
+					.append("HTTP Method: ")
+					.append(parameters)
+				.append(", ")
+					.append("Headers: ")
 					.append(parameters)
 			.append("]");
 

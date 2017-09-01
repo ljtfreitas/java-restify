@@ -65,6 +65,11 @@ public class LinkURITemplateParameters {
 		return this;
 	}
 
+	public LinkURITemplateParameters put(LinkURITemplateParameter parameter) {
+		parameters.put(parameter.name(), parameter.value());
+		return this;
+	}
+
 	@Override
 	public String toString() {
 		return String.format("[%s]", parameters);

@@ -27,18 +27,31 @@ package com.github.ljtfreitas.restify.http.client.hateoas.browser;
 
 import java.util.Map;
 
+import com.github.ljtfreitas.restify.http.client.Header;
+import com.github.ljtfreitas.restify.http.client.Headers;
+
 public class Hop {
 
 	private final String rel;
 	private final LinkURITemplateParameters parameters;
+	private final Headers headers;
+	private final String method;
+	private final Object body;
 
 	private Hop(String rel) {
 		this(rel, new LinkURITemplateParameters());
 	}
 
 	private Hop(String rel, LinkURITemplateParameters parameters) {
+		this(rel, parameters, new Headers(), "GET", null);
+	}
+
+	private Hop(String rel, LinkURITemplateParameters parameters, Headers headers, String method, Object body) {
 		this.rel = rel;
 		this.parameters = parameters;
+		this.headers = headers;
+		this.method = method;
+		this.body = body;
 	}
 
 	public String rel() {
@@ -49,10 +62,76 @@ public class Hop {
 		return parameters;
 	}
 
-	public Hop parameter(String name, String value) {
+	public Headers headers() {
+		return headers;
+	}
+
+	public String method() {
+		return method;
+	}
+
+	public Object body() {
+		return body;
+	}
+
+	public Hop usingParameter(String name, String value) {
 		LinkURITemplateParameters parameters = new LinkURITemplateParameters(this.parameters);
 		parameters.put(name, value);
-		return new Hop(rel, parameters);
+		return new Hop(rel, parameters, headers, method, body);
+	}
+
+	public Hop usingParameter(LinkURITemplateParameter parameter) {
+		LinkURITemplateParameters parameters = new LinkURITemplateParameters(this.parameters);
+		parameters.put(parameter);
+		return new Hop(rel, parameters, headers, method, body);
+	}
+
+	public Hop usingParameters(LinkURITemplateParameters parameters) {
+		return new Hop(rel, parameters, headers, method, body);
+	}
+
+	public Hop usingHeader(String name, String value) {
+		Headers headers = new Headers(this.headers);
+		headers.put(name, value);
+		return new Hop(rel, parameters, headers, method, body);
+	}
+
+	public Hop usingHeader(Header header) {
+		Headers headers = new Headers(this.headers);
+		headers.add(header);
+		return new Hop(rel, parameters, headers, method, body);
+	}
+
+	public Hop usingGet() {
+		return new Hop(rel, parameters, headers, "GET", body);
+	}
+
+	public Hop usingPost() {
+		return new Hop(rel, parameters, headers, "POST", body);
+	}
+
+	public Hop usingPost(Object body) {
+		return new Hop(rel, parameters, headers, "POST", body);
+	}
+
+	public Hop usingPut() {
+		return new Hop(rel, parameters, headers, "PUT", body);
+	}
+
+	public Hop usingPut(Object body) {
+		return new Hop(rel, parameters, headers, "PUT", body);
+	}
+
+	public Hop usingDelete() {
+		return new Hop(rel, parameters, headers, "DELETE", body);
+	}
+
+	public Hop usingMethod(String method) {
+		return new Hop(rel, parameters, headers, method, body);
+	}
+
+	public Hop usingMethod(String method, Object body) {
+		return new Hop(rel, parameters, headers, method, body);
 	}
 
 	public static Hop rel(String rel) {

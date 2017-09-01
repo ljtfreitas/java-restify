@@ -149,11 +149,12 @@ public class LinkBrowser {
 				.orElseThrow(() -> new IllegalStateException("Expected to find link [" + relation.rel() + "] "
 						+ "in resource [" + resourceBody + "]."));
 
-			return traverse(new LinkURI(relationLink, relation.parameters()), relations.poll());
+			return traverse(new LinkURI(relationLink, relation), relations.poll());
 		}
 
 		private <T> EndpointResponse<T> execute(LinkURI linkURI, Type responseType) {
-			LinkEndpointRequest request = new LinkEndpointRequest(baseURL, linkURI.link, responseType, linkURI.parameters);
+			LinkEndpointRequest request = new LinkEndpointRequest(baseURL, linkURI.link, linkURI.parameters, responseType, linkURI.method,
+					linkURI.headers, linkURI.body);
 
 			return linkRequestExecutor.execute(request);
 		}
@@ -162,10 +163,24 @@ public class LinkBrowser {
 
 			private final Link link;
 			private final LinkURITemplateParameters parameters;
+			private final Headers headers;
+			private final String method;
+			private final Object body;
+
+			private LinkURI(Link link, Hop relation) {
+				this.link = link;
+				this.parameters = relation.parameters();
+				this.headers = relation.headers();
+				this.method = relation.method();
+				this.body = relation.body();
+			}
 
 			private LinkURI(Link link, LinkURITemplateParameters parameters) {
 				this.link = link;
 				this.parameters = parameters;
+				this.headers = new Headers();
+				this.method = "GET";
+				this.body = null;
 			}
 		}
 	}

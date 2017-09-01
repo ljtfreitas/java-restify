@@ -106,7 +106,7 @@ public class LinkBrowserTest {
 
 		Collection<Person> friends = linkBrowser
 				.follow(Link.self("http://localhost:7080/me"))
-					.follow(rel("friends").parameter("user", "tiago"))
+					.follow(rel("friends").usingParameter("user", "tiago"))
 						.asCollectionOf(Person.class);
 
 		assertThat(friends, Matchers.hasSize(3));
@@ -150,7 +150,7 @@ public class LinkBrowserTest {
 
 		Collection<Person> friends = linkBrowser
 				.follow(Link.self("http://localhost:7080/me"))
-					.follow(rel("friends").parameter("user", "tiago"))
+					.follow(rel("friends").usingParameter("user", "tiago"))
 						.asCollectionOf(Person.class);
 
 		assertThat(friends, Matchers.hasSize(3));
@@ -207,7 +207,7 @@ public class LinkBrowserTest {
 
 		City city = linkBrowser
 				.follow(Link.self("http://localhost:7080/me"))
-					.follow(rel("friends").parameter("user", "tiago"))
+					.follow(rel("friends").usingParameter("user", "tiago"))
 						.follow(rel("$.[1]._links.city.href"))
 							.as(City.class);
 
@@ -262,7 +262,7 @@ public class LinkBrowserTest {
 
 		City city = linkBrowser
 				.follow(Link.self("http://localhost:7080/me"))
-					.follow(rel("friends").parameter("user", "tiago"))
+					.follow(rel("friends").usingParameter("user", "tiago"))
 						.follow(rel("$.[0].links[?(@.rel == 'city')].href"))
 							.as(City.class);
 
@@ -409,6 +409,44 @@ public class LinkBrowserTest {
 		assertEquals("Tatiana Gomes da Silva", wife.name);
 
 		mockServerClient.verify(personRequest, wifeRequest);
+	}
+
+	@Test
+	public void shouldFollowLinkUsingPostHttpMethod() {
+		HttpRequest personRequest = request()
+			.withMethod("GET")
+			.withPath("/me");
+
+		HttpRequest avatarRequest = request()
+			.withMethod("POST")
+			.withHeader("X-Whatever", "whatever")
+			.withPath("/me/avatar");
+
+		mockServerClient.when(personRequest)
+			.respond(
+				response()
+					.withStatusCode(200)
+					.withHeader("Content-Type", "application/hal+json")
+					.withBody(json("{\"name\":\"Tiago de Freitas Lima\",\"birth_date\":\"1985-07-02\","
+								+ "\"_links\":{\"update_avatar\":{\"href\":\"http://localhost:7080/me/avatar\"}}}")));
+
+		mockServerClient.when(avatarRequest)
+			.respond(
+				response()
+					.withStatusCode(200)
+					.withHeader("Content-Type", "application/json")
+					.withBody("ok"));
+
+		linkBrowser = new LinkBrowserBuilder().baseURL("http://localhost:7080").build();
+
+		String result = linkBrowser
+				.follow(Link.self("http://localhost:7080/me"))
+					.follow(rel("update_avatar").usingPost().usingHeader("X-Whatever", "whatever"))
+						.as(String.class);
+
+		assertEquals("ok", result);
+
+		mockServerClient.verify(personRequest, avatarRequest);
 	}
 
 	private static class Person {
