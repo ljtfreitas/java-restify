@@ -60,5 +60,4 @@ public class JsonEmbeddedResourceReader {
 			return codec.readValue(parser, resolvedType);
 		}
 	}
-
 }

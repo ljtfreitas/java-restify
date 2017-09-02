@@ -26,8 +26,6 @@
 package com.github.ljtfreitas.restify.http.client.hateoas;
 
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.List;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -42,7 +40,7 @@ import com.fasterxml.jackson.databind.deser.std.ContainerDeserializerBase;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.github.ljtfreitas.restify.http.client.hateoas.browser.LinkBrowser;
 
-class HypermediaLinksDeserializer extends ContainerDeserializerBase<List<Link>> implements ContextualDeserializer {
+class HypermediaLinksDeserializer extends ContainerDeserializerBase<Links> implements ContextualDeserializer {
 
 	private static final long serialVersionUID = 1L;
 
@@ -58,7 +56,7 @@ class HypermediaLinksDeserializer extends ContainerDeserializerBase<List<Link>> 
 	}
 
 	public HypermediaLinksDeserializer(JsonDeserializer<Object> linkDeserializer, LinkBrowser browser) {
-		super(TypeFactory.defaultInstance().constructCollectionLikeType(List.class, Link.class));
+		super(TypeFactory.defaultInstance().constructType(Links.class));
 		this.linkDeserializer = linkDeserializer;
 		this.linkBrowser = browser;
 	}
@@ -74,10 +72,10 @@ class HypermediaLinksDeserializer extends ContainerDeserializerBase<List<Link>> 
 	}
 
 	@Override
-	public List<Link> deserialize(JsonParser jsonParser, DeserializationContext context)
+	public Links deserialize(JsonParser jsonParser, DeserializationContext context)
 			throws IOException, JsonProcessingException {
 
-		List<Link> links = new ArrayList<Link>();
+		Links links = new Links();
 
 		while (!JsonToken.END_ARRAY.equals(jsonParser.nextToken())) {
 			links.add(new Link(jsonParser.readValueAs(Link.class), linkBrowser));

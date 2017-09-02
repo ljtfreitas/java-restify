@@ -32,7 +32,7 @@ import java.util.Optional;
 
 public class Embedded {
 
-	private final Collection<JsonEmbeddedResource> resources;
+	private final Collection<EmbeddedResource> resources;
 
 	public Embedded() {
 		this(Collections.emptyList());
@@ -42,7 +42,7 @@ public class Embedded {
 		this.resources = new ArrayList<>(resources);
 	}
 
-	public <T> Optional<JsonEmbeddedResource> field(String name) {
+	public <T> Optional<EmbeddedResource> field(String name) {
 		return resources.stream()
 			.filter(e -> e.name().equalsIgnoreCase(name))
 				.findFirst();

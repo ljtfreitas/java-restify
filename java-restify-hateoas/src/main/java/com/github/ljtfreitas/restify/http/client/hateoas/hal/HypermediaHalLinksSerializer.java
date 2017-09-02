@@ -53,9 +53,10 @@ import com.fasterxml.jackson.databind.ser.ContextualSerializer;
 import com.fasterxml.jackson.databind.ser.std.MapSerializer;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.github.ljtfreitas.restify.http.client.hateoas.Link;
+import com.github.ljtfreitas.restify.http.client.hateoas.Links;
 import com.github.ljtfreitas.restify.http.util.Tryable;
 
-class HypermediaHalLinksSerializer extends ContainerSerializer<List<Link>> implements ContextualSerializer {
+class HypermediaHalLinksSerializer extends ContainerSerializer<Links> implements ContextualSerializer {
 
 	private static final long serialVersionUID = 1L;
 
@@ -66,15 +67,17 @@ class HypermediaHalLinksSerializer extends ContainerSerializer<List<Link>> imple
 	}
 
 	public HypermediaHalLinksSerializer(BeanProperty property) {
-		super(TypeFactory.defaultInstance().constructCollectionLikeType(List.class, Link.class));
+		super(TypeFactory.defaultInstance().constructType(Links.class));
 		this.property = property;
 	}
 
 	@Override
-	public void serialize(List<Link> value, JsonGenerator jsonGenerator, SerializerProvider serializerProvider)
+	public void serialize(Links value, JsonGenerator jsonGenerator, SerializerProvider serializerProvider)
 			throws IOException, JsonGenerationException {
 
-		Map<String, List<HalLink>> links = value.stream().map(this::halLink).collect(Collectors.groupingBy(h -> h.link.rel()));
+		Map<String, List<HalLink>> links = value.all().stream()
+				.map(this::halLink)
+					.collect(Collectors.groupingBy(h -> h.link.rel()));
 
 		serializer(serializerProvider).serialize(links, jsonGenerator, serializerProvider);;
 	}
@@ -123,7 +126,7 @@ class HypermediaHalLinksSerializer extends ContainerSerializer<List<Link>> imple
 	}
 
 	@Override
-	public boolean hasSingleElement(List<Link> value) {
+	public boolean hasSingleElement(Links value) {
 		return value.size() == 1;
 	}
 

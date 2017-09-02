@@ -25,7 +25,6 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.hateoas;
 
-import java.util.ArrayList;
 import java.util.Collection;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
@@ -42,7 +41,7 @@ public class Resource<T> {
 	@JsonProperty("links")
 	@JsonInclude(JsonInclude.Include.NON_EMPTY)
 	@JsonDeserialize(using = HypermediaLinksDeserializer.class)
-	private Collection<Link> links = new ArrayList<>();
+	private Links links = new Links();
 
 	@JsonProperty(value = "resource", access = Access.WRITE_ONLY)
 	private Embedded embedded = new Embedded();
@@ -57,12 +56,10 @@ public class Resource<T> {
 
 	public Resource(T content, Links links) {
 		this.content = content;
-		this.links = new ArrayList<>(links.unwrap());
 	}
 
 	public Resource(T content, Collection<Link> links) {
 		this.content = content;
-		this.links = new ArrayList<>(links);
 	}
 
 	public T content() {
@@ -74,7 +71,7 @@ public class Resource<T> {
 	}
 
 	public Links links() {
-		return new Links(links);
+		return links;
 	}
 
 	public Resource<T> addLink(Link link) {
