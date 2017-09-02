@@ -37,6 +37,17 @@ public class LinkURITemplateTest {
 	}
 
 	@Test
+	public void shouldExpandUriTemplateWithMultipleSimpleStringVariables() {
+		LinkURITemplate linkURITemplate = new LinkURITemplate("http://my.api.com/path/{name,nickname}");
+
+		Map<String, String> parameters = new LinkedHashMap<>();
+		parameters.put("name", "tiago");
+		parameters.put("nickname", "ljtfreitas");
+
+		assertEquals("http://my.api.com/path/tiago,ljtfreitas", linkURITemplate.expand(parameters).toString());
+	}
+
+	@Test
 	public void shouldExpandUriTemplateWithReservedVariableUsingMapParameters() {
 		LinkURITemplate linkURITemplate = new LinkURITemplate("http://my.api.com/path/{+name}");
 
@@ -54,6 +65,17 @@ public class LinkURITemplateTest {
 		parameters.put("name", "ljtfreitas");
 
 		assertEquals("http://my.api.com/path/ljtfreitas", linkURITemplate.expand(parameters).toString());
+	}
+
+	@Test
+	public void shouldExpandUriTemplateWithMultipleReservedVariables() {
+		LinkURITemplate linkURITemplate = new LinkURITemplate("http://my.api.com/path/{+name,nickname}");
+
+		Map<String, String> parameters = new LinkedHashMap<>();
+		parameters.put("name", "tiago");
+		parameters.put("nickname", "ljtfreitas");
+
+		assertEquals("http://my.api.com/path/tiago,ljtfreitas", linkURITemplate.expand(parameters).toString());
 	}
 
 	@Test
@@ -77,6 +99,17 @@ public class LinkURITemplateTest {
 	}
 
 	@Test
+	public void shouldExpandUriTemplateWithMultipleFragmentVariable() {
+		LinkURITemplate linkURITemplate = new LinkURITemplate("http://my.api.com/path{#name,nickname}");
+
+		Map<String, String> parameters = new LinkedHashMap<>();
+		parameters.put("name", "tiago");
+		parameters.put("nickname", "ljtfreitas");
+
+		assertEquals("http://my.api.com/path#tiago,ljtfreitas", linkURITemplate.expand(parameters).toString());
+	}
+
+	@Test
 	public void shouldExpandUriTemplateWithPathSegmentVariableUsingMapParameters() {
 		LinkURITemplate linkURITemplate = new LinkURITemplate("http://my.api.com/path{/name}");
 
@@ -94,6 +127,17 @@ public class LinkURITemplateTest {
 		parameters.put("name", "ljtfreitas");
 
 		assertEquals("http://my.api.com/path/ljtfreitas", linkURITemplate.expand(parameters).toString());
+	}
+
+	@Test
+	public void shouldExpandUriTemplateWithMultiplePathSegmentVariables() {
+		LinkURITemplate linkURITemplate = new LinkURITemplate("http://my.api.com/path{/name,nickname}");
+
+		LinkURITemplateParameters parameters = new LinkURITemplateParameters();
+		parameters.put("name", "tiago");
+		parameters.put("nickname", "ljtfreitas");
+
+		assertEquals("http://my.api.com/path/tiago/ljtfreitas", linkURITemplate.expand(parameters).toString());
 	}
 
 	@Test
@@ -117,6 +161,18 @@ public class LinkURITemplateTest {
 	}
 
 	@Test
+	public void shouldExpandUriTemplateWithMultipleQueryParameterVariables() {
+		LinkURITemplate linkURITemplate = new LinkURITemplate("http://my.api.com/path{?name,nickname}");
+
+		LinkURITemplateParameters parameters = new LinkURITemplateParameters();
+		parameters.put("name", "tiago");
+		parameters.put("nickname", "ljtfreitas");
+
+		assertEquals("http://my.api.com/path?name=tiago&nickname=ljtfreitas",
+				linkURITemplate.expand(parameters).toString());
+	}
+
+	@Test
 	public void shouldExpandUriTemplateWithQueryParameterContinuedVariableUsingMapParameters() {
 		LinkURITemplate linkURITemplate = new LinkURITemplate("http://my.api.com/path?age=32{&name}");
 
@@ -134,5 +190,16 @@ public class LinkURITemplateTest {
 		parameters.put("name", "ljtfreitas");
 
 		assertEquals("http://my.api.com/path?age=32&name=ljtfreitas", linkURITemplate.expand(parameters).toString());
+	}
+
+	@Test
+	public void shouldExpandUriTemplateWithMultipleQueryParameters() {
+		LinkURITemplate linkURITemplate = new LinkURITemplate("http://my.api.com/path?age=32{&name,nickname}");
+
+		LinkURITemplateParameters parameters = new LinkURITemplateParameters();
+		parameters.put("name", "tiago");
+		parameters.put("nickname", "ljtfreitas");
+
+		assertEquals("http://my.api.com/path?age=32&name=tiago&nickname=ljtfreitas", linkURITemplate.expand(parameters).toString());
 	}
 }

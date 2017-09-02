@@ -31,6 +31,7 @@ import java.util.Map;
 import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import com.github.ljtfreitas.restify.http.client.charset.Encoding;
 
@@ -72,8 +73,12 @@ public class LinkURITemplate {
 
 			String[] names = match.group(2).split(",");
 
-			Arrays.stream(names).map(name -> new TemplateVariable(name, type))
-				.forEach(variable -> matcher.appendReplacement(builder, replace(variable, parameters)));
+			String expanded = Arrays.stream(names)
+					.map(name -> new TemplateVariable(name, type))
+						.map(variable -> expand(variable, parameters))
+							.collect(Collectors.joining(type.separator, type.starter, ""));
+
+			matcher.appendReplacement(builder, expanded);
 		}
 
 		matcher.appendTail(builder);
@@ -81,9 +86,8 @@ public class LinkURITemplate {
 		return builder.toString();
 	}
 
-	private String replace(TemplateVariable variable, LinkURITemplateParameters parameters) {
-		String name = variable.name;
-		return parameters.find(name).map(p -> variable.resolve(p)).orElseGet(() -> "");
+	private String expand(TemplateVariable variable, LinkURITemplateParameters parameters) {
+		return parameters.find(variable.name).map(parameter -> variable.resolve(parameter)).orElse("");
 	}
 
 	private class TemplateVariable {
@@ -96,55 +100,71 @@ public class LinkURITemplate {
 			this.type = type;
 		}
 
-		public String resolve(String value) {
+		private String resolve(String value) {
 			return type.resolve(name, value);
 		}
 	}
 
 	private enum TemplateVariableType {
-		PATH_VARIABLE(""),
-		PATH_SEGMENT("/"),
-		REQUEST_PARAMETER("?") {
+		PATH_VARIABLE("", ",") {
 			@Override
-			public String resolve(String name, String value) {
-				return "?" + name + "=" + Encoding.UTF_8.encode(value);
+			String resolve(String name, String value) {
+				return value;
 			}
 		},
-		REQUEST_PARAMETER_CONTINUED("&") {
+		PATH_SEGMENT("/", "/", "/") {
 			@Override
-			public String resolve(String name, String value) {
-				return "&" + name + "=" + Encoding.UTF_8.encode(value);
+			String resolve(String name, String value) {
+				return value;
 			}
 		},
-		FRAGMENT("#"),
-		RESERVED("+") {
+		REQUEST_PARAMETER("?", "&", "?") {
 			@Override
-			public String resolve(String name, String value) {
+			String resolve(String name, String value) {
+				return String.format("%s=%s", name, Encoding.UTF_8.encode(value));
+			}
+		},
+		REQUEST_PARAMETER_CONTINUED("&", "&", "&") {
+			@Override
+			String resolve(String name, String value) {
+				return REQUEST_PARAMETER.resolve(name, value);
+			}
+		},
+		FRAGMENT("#", ",", "#") {
+			@Override
+			String resolve(String name, String value) {
+				return value;
+			}
+		},
+		RESERVED("+", ",") {
+			@Override
+			String resolve(String name, String value) {
 				return value;
 			}
 		};
 
-		private final String key;
+		private final String operator;
+		private final String separator;
+		private final String starter;
 
-		private TemplateVariableType(String key) {
-			this.key = key;
+		private TemplateVariableType(String operator, String separator) {
+			this(operator, separator, "");
 		}
 
-		public String resolve(String name, String value) {
-			return key + value;
+		private TemplateVariableType(String operator, String separator, String starter) {
+			this.operator = operator;
+			this.separator = separator;
+			this.starter = starter;
 		}
 
 		private static TemplateVariableType of(String key) {
 			return Arrays.stream(values())
-						.filter(t -> t.key.equals(key))
+						.filter(t -> t.operator.equals(key))
 							.findFirst()
 								.orElseThrow(() -> new IllegalArgumentException("Unsupported variable type: [" + key + "]"));
 		}
 
-		@Override
-		public String toString() {
-			return key;
-		}
+		abstract String resolve(String name, String value);
 	}
 
 	private static class URITemplateMatcher {
