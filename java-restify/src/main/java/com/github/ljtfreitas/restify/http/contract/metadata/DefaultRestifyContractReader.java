@@ -32,6 +32,7 @@ import java.lang.reflect.Parameter;
 import java.lang.reflect.Type;
 import java.net.URL;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -57,9 +58,18 @@ public class DefaultRestifyContractReader implements RestifyContractReader {
 	}
 
 	@Override
-	public EndpointMethod read(EndpointTarget target, java.lang.reflect.Method javaMethod) {
-		JavaTypeMetadata javaTypeMetadata = new JavaTypeMetadata(target.type());
+	public EndpointMethods read(EndpointTarget target) {
+		return new EndpointMethods(doRead(target));
+	}
 
+	private Collection<EndpointMethod> doRead(EndpointTarget target) {
+		JavaTypeMetadata javaTypeMetadata = new JavaTypeMetadata(target.type());
+		return target.methods().stream()
+			.map(javaMethod -> doReadMethod(target, javaTypeMetadata, javaMethod))
+				.collect(Collectors.toList());
+	}
+
+	private EndpointMethod doReadMethod(EndpointTarget target, JavaTypeMetadata javaTypeMetadata, java.lang.reflect.Method javaMethod) {
 		JavaMethodMetadata javaMethodMetadata = new JavaMethodMetadata(javaMethod);
 
 		String endpointPath = endpointPath(target, javaTypeMetadata, javaMethodMetadata);

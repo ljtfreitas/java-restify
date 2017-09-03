@@ -41,6 +41,7 @@ import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethodParame
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethodParameter.EndpointMethodParameterType;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethodParameterSerializer;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethodParameters;
+import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethods;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointTarget;
 import com.github.ljtfreitas.restify.http.contract.metadata.RestifyContractReader;
 import com.github.ljtfreitas.restify.http.jaxrs.contract.metadata.JaxRsEndpointHeader;
@@ -50,13 +51,22 @@ import com.github.ljtfreitas.restify.http.jaxrs.contract.metadata.reflection.Jax
 import com.github.ljtfreitas.restify.http.jaxrs.contract.metadata.reflection.JaxRsJavaTypeMetadata;
 import com.github.ljtfreitas.restify.http.util.Tryable;
 
-
 public class JaxRsContractReader implements RestifyContractReader {
 
 	@Override
-	public EndpointMethod read(EndpointTarget target, java.lang.reflect.Method javaMethod) {
+	public EndpointMethods read(EndpointTarget endpointTarget) {
+		return new EndpointMethods(doRead(endpointTarget));
+	}
+
+	private Collection<EndpointMethod> doRead(EndpointTarget target) {
 		JaxRsJavaTypeMetadata javaTypeMetadata = new JaxRsJavaTypeMetadata(target.type());
 
+		return target.methods().stream()
+				.map(javaMethod -> doReadMethod(target, javaTypeMetadata, javaMethod))
+					.collect(Collectors.toList());
+	}
+
+	private EndpointMethod doReadMethod(EndpointTarget target, JaxRsJavaTypeMetadata javaTypeMetadata, java.lang.reflect.Method javaMethod) {
 		JaxRsJavaMethodMetadata javaMethodMetadata = new JaxRsJavaMethodMetadata(javaMethod);
 
 		JaxRsJavaMethodParameters javaMethodParameters = new JaxRsJavaMethodParameters(javaMethod, target.type());
