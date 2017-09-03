@@ -27,27 +27,45 @@ package com.github.ljtfreitas.restify.http.contract.metadata.reflection;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
-import com.github.ljtfreitas.restify.http.contract.metadata.reflection.JavaAnnotationScanner;
+import com.github.ljtfreitas.restify.http.contract.metadata.Metadata;
 
-public class JavaMethodAnnotations {
+public class MethodMetadata {
 
-	private final Method javaMethod;
-	private final Class<?> javaType;
+	private final Map<Class<? extends Annotation>, List<Annotation>> annotations;
 
-	public JavaMethodAnnotations(Method javaMethod) {
-		this.javaMethod = javaMethod;
-		this.javaType = javaMethod.getDeclaringClass();
+	public MethodMetadata(Method javaMethod) {
+		this.annotations = scan(javaMethod).stream().collect(Collectors.groupingBy(Annotation::annotationType));
+	}
+
+	private List<Annotation> scan(Method javaMethod) {
+		List<Annotation> annotations = new ArrayList<>();
+		annotations.addAll(Arrays.asList(new JavaAnnotationScanner(javaMethod.getDeclaringClass()).allWith(Metadata.class)));
+		annotations.addAll(Arrays.asList(new JavaAnnotationScanner(javaMethod).allWith(Metadata.class)));
+		return annotations;
 	}
 
 	public <A extends Annotation> boolean contains(Class<A> annotation) {
-		return new JavaAnnotationScanner(javaMethod).contains(annotation)
-				|| new JavaAnnotationScanner(javaType).contains(annotation);
+		return annotations.containsKey(annotation);
 	}
 
+	@SuppressWarnings("unchecked")
 	public <A extends Annotation> Optional<A> get(Class<A> annotation) {
-		Optional<A> methodAnnotation = Optional.ofNullable(new JavaAnnotationScanner(javaMethod).scan(annotation));
-		return methodAnnotation.isPresent() ? methodAnnotation : Optional.ofNullable(new JavaAnnotationScanner(javaType).scan(annotation));
+		return annotations.getOrDefault(annotation, Collections.emptyList()).stream()
+				.findFirst()
+					.map(a -> (A) a);
+	}
+
+	@SuppressWarnings("unchecked")
+	public <A extends Annotation> Collection<A> all(Class<A> annotation) {
+		return (List<A>) annotations.getOrDefault(annotation, Collections.emptyList());
 	}
 }

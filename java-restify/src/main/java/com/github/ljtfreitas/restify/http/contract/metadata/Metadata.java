@@ -23,7 +23,7 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.http.netflix.client.request.circuitbreaker;
+package com.github.ljtfreitas.restify.http.contract.metadata;
 
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Inherited;
@@ -31,19 +31,8 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-import com.github.ljtfreitas.restify.http.contract.metadata.Metadata;
-
-@Target({ElementType.TYPE, ElementType.METHOD})
+@Target(ElementType.ANNOTATION_TYPE)
 @Retention(RetentionPolicy.RUNTIME)
 @Inherited
-@Metadata
-public @interface OnCircuitBreaker {
-
-	String groupKey() default "";
-
-	String commandKey() default "";
-
-	String threadPoolKey() default "";
-
-	CircuitBreakerProperty[] properties() default {};
+public @interface Metadata {
 }

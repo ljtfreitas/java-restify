@@ -70,7 +70,7 @@ public abstract class BaseHystrixCircuitBreakerEndpointCallExecutableFactory<T, 
 	}
 
 	private boolean onCircuitBreaker(EndpointMethod endpointMethod) {
-		return endpointMethod.annotations().contains(OnCircuitBreaker.class);
+		return endpointMethod.metadata().contains(OnCircuitBreaker.class);
 	}
 
 	private boolean returnHystrixCommand(EndpointMethod endpointMethod) {
