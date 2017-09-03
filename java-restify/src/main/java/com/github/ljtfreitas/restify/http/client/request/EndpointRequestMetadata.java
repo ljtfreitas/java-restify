@@ -23,59 +23,37 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.http.contract.metadata.reflection;
+package com.github.ljtfreitas.restify.http.client.request;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
-import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import com.github.ljtfreitas.restify.http.contract.metadata.Metadata;
+public class EndpointRequestMetadata {
 
-public class MethodMetadata {
+	private final Collection<Annotation> annotations;
 
-	private final Map<Class<? extends Annotation>, List<Annotation>> annotations;
-
-	public MethodMetadata(Method javaMethod) {
-		this.annotations = scan(javaMethod).stream().collect(Collectors.groupingBy(Annotation::annotationType));
-	}
-
-	private List<Annotation> scan(Method javaMethod) {
-		List<Annotation> annotations = new ArrayList<>();
-		annotations.addAll(Arrays.asList(new JavaAnnotationScanner(javaMethod).allWith(Metadata.class)));
-		annotations.addAll(Arrays.asList(new JavaAnnotationScanner(javaMethod.getDeclaringClass()).allWith(Metadata.class)));
-		return annotations;
-	}
-
-	public <A extends Annotation> boolean contains(Class<A> annotation) {
-		return annotations.containsKey(annotation);
+	public EndpointRequestMetadata(Collection<Annotation> annotations) {
+		this.annotations = Collections.unmodifiableCollection(annotations);
 	}
 
 	@SuppressWarnings("unchecked")
 	public <A extends Annotation> Optional<A> get(Class<A> annotation) {
-		return annotations.getOrDefault(annotation, Collections.emptyList()).stream()
+		return annotations.stream().filter(a -> a.annotationType().isAssignableFrom(annotation))
 				.findFirst()
 					.map(a -> (A) a);
 	}
 
 	@SuppressWarnings("unchecked")
 	public <A extends Annotation> Collection<A> all(Class<A> annotation) {
-		return (List<A>) annotations.getOrDefault(annotation, Collections.emptyList());
-	}
-
-	public Collection<Annotation> all() {
-		return annotations.values().stream()
-				.flatMap(c -> c.stream())
+		return annotations.stream().filter(a -> a.annotationType().isAssignableFrom(annotation))
+				.map(a -> (A) a)
 					.collect(Collectors.toList());
 	}
 
-	public static MethodMetadata of(Method method) {
-		return new MethodMetadata(method);
+	public static EndpointRequestMetadata empty() {
+		return new EndpointRequestMetadata(Collections.emptyList());
 	}
 }

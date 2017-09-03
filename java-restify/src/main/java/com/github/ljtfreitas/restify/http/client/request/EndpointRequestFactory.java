@@ -67,7 +67,9 @@ public class EndpointRequestFactory {
 
 			EndpointVersion version = endpointMethod.version().map(EndpointVersion::of).orElse(null);
 
-			return new EndpointRequest(endpoint, endpointMethod.httpMethod(), headers, body, responseType, version);
+			EndpointRequestMetadata metadata = new EndpointRequestMetadata(endpointMethod.metadata().all());
+
+			return new EndpointRequest(endpoint, endpointMethod.httpMethod(), headers, body, responseType, version, metadata);
 
 		} catch (URISyntaxException e) {
 			throw new RestifyHttpException(e);
