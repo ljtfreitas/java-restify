@@ -23,27 +23,37 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.http.netflix.client.request.circuitbreaker;
+package com.github.ljtfreitas.restify.http.client.request;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Inherited;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.lang.annotation.Annotation;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
-import com.github.ljtfreitas.restify.http.contract.metadata.Metadata;
+public class EndpointRequestMetadata {
 
-@Target({ElementType.TYPE, ElementType.METHOD})
-@Retention(RetentionPolicy.RUNTIME)
-@Inherited
-@Metadata
-public @interface OnCircuitBreaker {
+	private final Collection<Annotation> annotations;
 
-	String groupKey() default "";
+	public EndpointRequestMetadata(Collection<Annotation> annotations) {
+		this.annotations = Collections.unmodifiableCollection(annotations);
+	}
 
-	String commandKey() default "";
+	@SuppressWarnings("unchecked")
+	public <A extends Annotation> Optional<A> get(Class<A> annotation) {
+		return annotations.stream().filter(a -> a.annotationType().isAssignableFrom(annotation))
+				.findFirst()
+					.map(a -> (A) a);
+	}
 
-	String threadPoolKey() default "";
+	@SuppressWarnings("unchecked")
+	public <A extends Annotation> Collection<A> all(Class<A> annotation) {
+		return annotations.stream().filter(a -> a.annotationType().isAssignableFrom(annotation))
+				.map(a -> (A) a)
+					.collect(Collectors.toList());
+	}
 
-	CircuitBreakerProperty[] properties() default {};
+	public static EndpointRequestMetadata empty() {
+		return new EndpointRequestMetadata(Collections.emptyList());
+	}
 }

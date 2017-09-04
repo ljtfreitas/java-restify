@@ -44,6 +44,7 @@ import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethodParame
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethodParameter.EndpointMethodParameterType;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethodParameterSerializer;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethodParameters;
+import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethods;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointTarget;
 import com.github.ljtfreitas.restify.http.contract.metadata.RestifyContractExpressionResolver;
 import com.github.ljtfreitas.restify.http.contract.metadata.RestifyContractReader;
@@ -66,9 +67,19 @@ public class SpringWebContractReader implements RestifyContractReader {
 	}
 
 	@Override
-	public EndpointMethod read(EndpointTarget target, Method javaMethod) {
+	public EndpointMethods read(EndpointTarget target) {
+		return new EndpointMethods(doRead(target));
+	}
+
+	private Collection<EndpointMethod> doRead(EndpointTarget target) {
 		SpringWebJavaTypeMetadata javaTypeMetadata = new SpringWebJavaTypeMetadata(target.type());
 
+		return target.methods().stream()
+				.map(javaMethod -> doReadMethod(target, javaTypeMetadata, javaMethod))
+					.collect(Collectors.toList());
+	}
+
+	private EndpointMethod doReadMethod(EndpointTarget target, SpringWebJavaTypeMetadata javaTypeMetadata, Method javaMethod) {
 		SpringWebJavaMethodMetadata javaMethodMetadata = new SpringWebJavaMethodMetadata(javaMethod);
 
 		String endpointPath = endpointPath(target, javaTypeMetadata, javaMethodMetadata);

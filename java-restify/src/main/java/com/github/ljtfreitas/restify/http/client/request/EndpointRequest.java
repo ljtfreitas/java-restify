@@ -42,6 +42,7 @@ public class EndpointRequest {
 	private final Object body;
 	private final JavaType responseType;
 	private final EndpointVersion version;
+	private final EndpointRequestMetadata metadata;
 
 	public EndpointRequest(URI endpoint, String method) {
 		this(endpoint, method, (EndpointVersion) null);
@@ -80,20 +81,22 @@ public class EndpointRequest {
 	}
 
 	public EndpointRequest(URI endpoint, String method, Headers headers, Object body, Type responseType, EndpointVersion version) {
-		this(endpoint, method, headers, body, JavaType.of(responseType), version);
+		this(endpoint, method, headers, body, JavaType.of(responseType), version, EndpointRequestMetadata.empty());
 	}
 
 	public EndpointRequest(URI endpoint, String method, Headers headers, Object body, JavaType responseType) {
-		this(endpoint, method, headers, body, responseType, null);
+		this(endpoint, method, headers, body, responseType, null, EndpointRequestMetadata.empty());
 	}
 
-	public EndpointRequest(URI endpoint, String method, Headers headers, Object body, JavaType responseType, EndpointVersion version) {
+	public EndpointRequest(URI endpoint, String method, Headers headers, Object body, JavaType responseType,
+			EndpointVersion version, EndpointRequestMetadata metadata) {
 		this.endpoint = endpoint;
 		this.method = method;
 		this.headers = headers;
 		this.body = body;
 		this.responseType = responseType;
 		this.version = version;
+		this.metadata = metadata;
 	}
 
 	public URI endpoint() {
@@ -120,6 +123,10 @@ public class EndpointRequest {
 		return Optional.ofNullable(version);
 	}
 
+	public EndpointRequestMetadata metadata() {
+		return metadata;
+	}
+
 	public EndpointRequest appendParameter(String name, String value) {
 		String appender = endpoint.getQuery() == null ? "" : "&";
 
@@ -132,14 +139,14 @@ public class EndpointRequest {
 			URI newURI = new URI(endpoint.getScheme(), endpoint.getRawAuthority(), endpoint.getRawPath(),
 					newQuery, endpoint.getRawFragment());
 
-			return new EndpointRequest(newURI, method, headers, body, responseType, version);
+			return new EndpointRequest(newURI, method, headers, body, responseType, version, metadata);
 		} catch (URISyntaxException e) {
 			throw new RestifyHttpException(e);
 		}
 	}
 
 	public EndpointRequest replace(URI endpoint) {
-		return new EndpointRequest(endpoint, method, headers, body, responseType, version);
+		return new EndpointRequest(endpoint, method, headers, body, responseType, version, metadata);
 	}
 
 	@Override

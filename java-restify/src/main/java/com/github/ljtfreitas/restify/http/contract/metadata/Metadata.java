@@ -23,31 +23,16 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.http.contract.metadata.reflection;
+package com.github.ljtfreitas.restify.http.contract.metadata;
 
-import java.lang.annotation.Annotation;
-import java.lang.reflect.Method;
-import java.util.Optional;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Inherited;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-import com.github.ljtfreitas.restify.http.contract.metadata.reflection.JavaAnnotationScanner;
-
-public class JavaMethodAnnotations {
-
-	private final Method javaMethod;
-	private final Class<?> javaType;
-
-	public JavaMethodAnnotations(Method javaMethod) {
-		this.javaMethod = javaMethod;
-		this.javaType = javaMethod.getDeclaringClass();
-	}
-
-	public <A extends Annotation> boolean contains(Class<A> annotation) {
-		return new JavaAnnotationScanner(javaMethod).contains(annotation)
-				|| new JavaAnnotationScanner(javaType).contains(annotation);
-	}
-
-	public <A extends Annotation> Optional<A> get(Class<A> annotation) {
-		Optional<A> methodAnnotation = Optional.ofNullable(new JavaAnnotationScanner(javaMethod).scan(annotation));
-		return methodAnnotation.isPresent() ? methodAnnotation : Optional.ofNullable(new JavaAnnotationScanner(javaType).scan(annotation));
-	}
+@Target(ElementType.ANNOTATION_TYPE)
+@Retention(RetentionPolicy.RUNTIME)
+@Inherited
+public @interface Metadata {
 }
