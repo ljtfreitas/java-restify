@@ -27,10 +27,6 @@ package com.github.ljtfreitas.restify.http.contract;
 
 import static com.github.ljtfreitas.restify.http.util.Preconditions.nonNull;
 
-import java.util.Collection;
-import java.util.stream.Collectors;
-
-import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethod;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethods;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointTarget;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointType;
@@ -48,10 +44,8 @@ public class DefaultRestifyContract implements RestifyContract {
 	public EndpointType read(EndpointTarget target) {
 		nonNull(target, "Endpoint target cannot be null.");
 
-		Collection<EndpointMethod> endpointMethods = target.methods().stream()
-					.map(javaMethod -> reader.read(target, javaMethod))
-						.collect(Collectors.toSet());
+		EndpointMethods endpointMethods = reader.read(target);
 
-		return new EndpointType(target, new EndpointMethods(endpointMethods));
+		return new EndpointType(target, endpointMethods);
 	}
 }

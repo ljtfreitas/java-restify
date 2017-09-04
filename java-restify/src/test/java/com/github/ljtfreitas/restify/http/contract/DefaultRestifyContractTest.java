@@ -2,12 +2,12 @@ package com.github.ljtfreitas.restify.http.contract;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.same;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Method;
+import java.util.Arrays;
 import java.util.Optional;
 
 import org.junit.Before;
@@ -17,8 +17,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import com.github.ljtfreitas.restify.http.contract.DefaultRestifyContract;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethod;
+import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethods;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointTarget;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointType;
 import com.github.ljtfreitas.restify.http.contract.metadata.RestifyContractReader;
@@ -38,8 +38,10 @@ public class DefaultRestifyContractTest {
 	public void setup() {
 		endpointTarget = new EndpointTarget(MyApiType.class);
 
-		when(restifyContractReaderMock.read(same(endpointTarget), any(Method.class)))
-			.then(invocation -> new EndpointMethod(invocation.getArgumentAt(1, Method.class), "/path", "GET"));
+		when(restifyContractReaderMock.read(same(endpointTarget)))
+			.then(invocation ->
+				new EndpointMethods(Arrays.asList(
+						new EndpointMethod(invocation.getArgumentAt(0, EndpointTarget.class).type().getMethods()[0], "/path", "GET"))));
 	}
 
 	@Test
@@ -55,7 +57,7 @@ public class DefaultRestifyContractTest {
 
 		assertEquals(javaMethod, endpointMethod.get().javaMethod());
 
-		verify(restifyContractReaderMock).read(endpointTarget, javaMethod);
+		verify(restifyContractReaderMock).read(endpointTarget);
 	}
 	
 	private interface MyApiType {

@@ -44,7 +44,7 @@ class HystrixCommandMetadataFactory {
 
 	public HystrixCommandMetadataFactory(EndpointMethod endpointMethod) {
 		this.endpointMethod = endpointMethod;
-		this.onCircuitBreaker = endpointMethod.annotations().get(OnCircuitBreaker.class);
+		this.onCircuitBreaker = endpointMethod.metadata().get(OnCircuitBreaker.class);
 	}
 
 	public HystrixCommand.Setter create() {

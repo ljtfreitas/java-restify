@@ -74,8 +74,10 @@ public class DefaultRestifyContractReaderTest {
 
 	@Test
 	public void shouldCreateEndpointMethodWhenMethodHasSingleParameter() throws Exception {
-		EndpointMethod endpointMethod = restifyContractReader.read(myApiTypeTarget,
-				MyApiType.class.getMethod("method", new Class[] { String.class }));
+		EndpointMethods endpointMethods = restifyContractReader.read(myApiTypeTarget);
+
+		EndpointMethod endpointMethod = endpointMethods.find(MyApiType.class.getMethod("method", new Class[] { String.class }))
+			.orElseThrow(() -> new IllegalStateException("Method not found..."));
 
 		assertEquals("GET", endpointMethod.httpMethod());
 		assertEquals("http://my.api.com/{path}", endpointMethod.path());
@@ -90,8 +92,10 @@ public class DefaultRestifyContractReaderTest {
 
 	@Test
 	public void shouldCreateEndpointMethodWhenMethodHasMultiplesParameters() throws Exception {
-		EndpointMethod endpointMethod = restifyContractReader.read(myApiTypeTarget,
-				MyApiType.class.getMethod("method", new Class[] { String.class, String.class, Object.class }));
+		EndpointMethods endpointMethods = restifyContractReader.read(myApiTypeTarget);
+
+		EndpointMethod endpointMethod = endpointMethods.find(MyApiType.class.getMethod("method", new Class[] { String.class, String.class, Object.class }))
+			.orElseThrow(() -> new IllegalStateException("Method not found..."));
 
 		assertEquals("GET", endpointMethod.httpMethod());
 		assertEquals("http://my.api.com/{path}", endpointMethod.path());
@@ -115,8 +119,10 @@ public class DefaultRestifyContractReaderTest {
 
 	@Test
 	public void shouldCreateEndpointMethodWhenPathAnnotationOnMethodHasNoSlashOnStart() throws Exception {
-		EndpointMethod endpointMethod = restifyContractReader.read(myApiTypeTarget,
-				MyApiType.class.getMethod("pathWithoutSlash"));
+		EndpointMethods endpointMethods = restifyContractReader.read(myApiTypeTarget);
+
+		EndpointMethod endpointMethod = endpointMethods.find(MyApiType.class.getMethod("pathWithoutSlash"))
+			.orElseThrow(() -> new IllegalStateException("Method not found..."));
 
 		assertEquals("GET", endpointMethod.httpMethod());
 		assertEquals("http://my.api.com/path", endpointMethod.path());
@@ -125,8 +131,10 @@ public class DefaultRestifyContractReaderTest {
 
 	@Test
 	public void shouldCreateEndpointMethodMergingEndpointHeadersDeclaredOnTypeWithDeclaredOnMethod() throws Exception {
-		EndpointMethod endpointMethod = restifyContractReader.read(myApiTypeTarget,
-				MyApiType.class.getMethod("mergeHeaders"));
+		EndpointMethods endpointMethods = restifyContractReader.read(myApiTypeTarget);
+
+		EndpointMethod endpointMethod = endpointMethods.find(MyApiType.class.getMethod("mergeHeaders"))
+			.orElseThrow(() -> new IllegalStateException("Method not found..."));
 
 		assertEquals("GET", endpointMethod.httpMethod());
 		assertEquals("http://my.api.com/mergeHeaders", endpointMethod.path());
@@ -147,8 +155,10 @@ public class DefaultRestifyContractReaderTest {
 
 	@Test
 	public void shouldCreateEndpointMethodWithEndpointHeadersMetaAnnotation() throws Exception {
-		EndpointMethod endpointMethod = restifyContractReader.read(myApiTypeTarget,
-				MyApiType.class.getMethod("metaHeaders"));
+		EndpointMethods endpointMethods = restifyContractReader.read(myApiTypeTarget);
+
+		EndpointMethod endpointMethod = endpointMethods.find(MyApiType.class.getMethod("metaHeaders"))
+			.orElseThrow(() -> new IllegalStateException("Method not found..."));
 
 		assertEquals("GET", endpointMethod.httpMethod());
 		assertEquals("http://my.api.com/metaHeaders", endpointMethod.path());
@@ -169,8 +179,10 @@ public class DefaultRestifyContractReaderTest {
 
 	@Test
 	public void shouldCreateEndpointMethodWhenMethodHasCustomizedParameterNames() throws Exception {
-		EndpointMethod endpointMethod = restifyContractReader.read(myApiTypeTarget,
-				MyApiType.class.getMethod("customizedNames", new Class[] { String.class, String.class }));
+		EndpointMethods endpointMethods = restifyContractReader.read(myApiTypeTarget);
+
+		EndpointMethod endpointMethod = endpointMethods.find(MyApiType.class.getMethod("customizedNames", new Class[] { String.class, String.class }))
+			.orElseThrow(() -> new IllegalStateException("Method not found..."));
 
 		assertEquals("GET", endpointMethod.httpMethod());
 		assertEquals("http://my.api.com/{customArgumentPath}", endpointMethod.path());
@@ -189,8 +201,10 @@ public class DefaultRestifyContractReaderTest {
 
 	@Test
 	public void shouldCreateEndpointMethodOfMethodWithHttpMethodMetaAnnotation() throws Exception {
-		EndpointMethod endpointMethod = restifyContractReader.read(myApiTypeTarget,
-				MyApiType.class.getMethod("metaAnnotationOfHttpMethod"));
+		EndpointMethods endpointMethods = restifyContractReader.read(myApiTypeTarget);
+
+		EndpointMethod endpointMethod = endpointMethods.find(MyApiType.class.getMethod("metaAnnotationOfHttpMethod"))
+			.orElseThrow(() -> new IllegalStateException("Method not found..."));
 
 		assertEquals("POST", endpointMethod.httpMethod());
 		assertEquals("http://my.api.com/some-method", endpointMethod.path());
@@ -199,8 +213,10 @@ public class DefaultRestifyContractReaderTest {
 
 	@Test
 	public void shouldCreateEndpointMethodOfMethodWithQueryStringParameter() throws Exception {
-		EndpointMethod endpointMethod = restifyContractReader.read(myApiTypeTarget,
-				MyApiType.class.getMethod("queryString", new Class[] { Parameters.class }));
+		EndpointMethods endpointMethods = restifyContractReader.read(myApiTypeTarget);
+
+		EndpointMethod endpointMethod = endpointMethods.find(MyApiType.class.getMethod("queryString", new Class[] { Parameters.class }))
+				.orElseThrow(() -> new IllegalStateException("Method not found..."));
 
 		assertEquals("GET", endpointMethod.httpMethod());
 		assertEquals("http://my.api.com/query", endpointMethod.path());
@@ -214,14 +230,15 @@ public class DefaultRestifyContractReaderTest {
 
 	@Test(expected = IllegalArgumentException.class)
 	public void shouldThrowExceptionWhenMethodHasMoreThanOneBodyParameter() throws Exception {
-		new DefaultRestifyContractReader().read(myApiTypeTarget,
-				MyApiType.class.getMethod("methodWithTwoBodyParameters", new Class[] { Object.class, Object.class }));
+		new DefaultRestifyContractReader().read(new EndpointTarget(MyApiTypeWithWrongBodyParameter.class));
 	}
 
 	@Test
 	public void shouldCreateAsyncEndpointMethodWhenMethodHasOneCallback() throws Exception {
-		EndpointMethod endpointMethod = new DefaultRestifyContractReader().read(myApiTypeTarget,
-				MyApiType.class.getMethod("async", new Class[] { EndpointCallCallback.class }));
+		EndpointMethods endpointMethods = new DefaultRestifyContractReader().read(myApiTypeTarget);
+
+		EndpointMethod endpointMethod = endpointMethods.find(MyApiType.class.getMethod("async", new Class[] { EndpointCallCallback.class }))
+				.orElseThrow(() -> new IllegalStateException("Method not found..."));
 
 		assertEquals("GET", endpointMethod.httpMethod());
 		assertEquals("http://my.api.com/async", endpointMethod.path());
@@ -239,8 +256,10 @@ public class DefaultRestifyContractReaderTest {
 
 	@Test
 	public void shouldCreateAsyncEndpointMethodWhenMethodHasMultiplesCallbacks() throws Exception {
-		EndpointMethod endpointMethod = new DefaultRestifyContractReader().read(myApiTypeTarget,
-				MyApiType.class.getMethod("async", new Class[] { EndpointCallSuccessCallback.class, EndpointCallFailureCallback.class }));
+		EndpointMethods endpointMethods = new DefaultRestifyContractReader().read(myApiTypeTarget);
+
+		EndpointMethod endpointMethod = endpointMethods.find(MyApiType.class.getMethod("async", new Class[] { EndpointCallSuccessCallback.class, EndpointCallFailureCallback.class }))
+			.orElseThrow(() -> new IllegalStateException("Method not found..."));
 
 		assertEquals("GET", endpointMethod.httpMethod());
 		assertEquals("http://my.api.com/async", endpointMethod.path());
@@ -264,30 +283,35 @@ public class DefaultRestifyContractReaderTest {
 
 	@Test(expected = IllegalArgumentException.class)
 	public void shouldThrowExceptionWhenMethodHasMoreOneCallbackParameterOfSameType() throws Exception {
-		new DefaultRestifyContractReader().read(myApiTypeTarget,
-				MyApiType.class.getMethod("asyncWithTwoCallbacks", new Class[] { EndpointCallCallback.class, EndpointCallCallback.class }));
+		new DefaultRestifyContractReader().read(new EndpointTarget(MyApiTypeWithWrongCallbackParameter.class));
 	}
 
 	@Test
 	public void shouldCreateEndpointMethodWhenInterfaceHasAInheritance() throws Exception {
-		EndpointMethod endpointMethod = restifyContractReader.read(myInheritanceApiTarget,
-				MyInheritanceApiType.class.getMethod("method"));
+		EndpointMethods endpointMethods = restifyContractReader.read(myInheritanceApiTarget);
+
+		EndpointMethod endpointMethod = endpointMethods.find(MyInheritanceApiType.class.getMethod("method"))
+			.orElseThrow(() -> new IllegalStateException("Method not found..."));
 
 		assertEquals("http://my.api.com/simple", endpointMethod.path());
 	}
 
 	@Test
 	public void shouldCreateEndpointMethodWhenMethodIsInherited() throws Exception {
-		EndpointMethod endpointMethod = restifyContractReader.read(myInheritanceApiTarget,
-				MyInheritanceApiType.class.getMethod("inheritedMethod"));
+		EndpointMethods endpointMethods = restifyContractReader.read(myInheritanceApiTarget);
+
+		EndpointMethod endpointMethod = endpointMethods.find(MyInheritanceApiType.class.getMethod("inheritedMethod"))
+			.orElseThrow(() -> new IllegalStateException("Method not found..."));
 
 		assertEquals("http://my.api.com/inherited", endpointMethod.path());
 	}
 
 	@Test
 	public void shouldCreateEndpointMethodWhenMethodHasAGenericParameter() throws Exception {
-		EndpointMethod endpointMethod = restifyContractReader.read(myGenericSpecificApiTarget,
-				MySpecificApi.class.getMethod("create", new Class[] { Object.class }));
+		EndpointMethods endpointMethods = restifyContractReader.read(myGenericSpecificApiTarget);
+
+		EndpointMethod endpointMethod = endpointMethods.find(MySpecificApi.class.getMethod("create", new Class[] { Object.class }))
+			.orElseThrow(() -> new IllegalStateException("Method not found..."));
 
 		assertEquals("http://my.model.api/create", endpointMethod.path());
 
@@ -298,8 +322,10 @@ public class DefaultRestifyContractReaderTest {
 
 	@Test
 	public void shouldCreateEndpointMethodWhenMethodReturnTypeIsASimpleGenericType() throws Exception {
-		EndpointMethod endpointMethod = restifyContractReader.read(myGenericSpecificApiTarget,
-				MySpecificApi.class.getMethod("find", new Class[] { int.class }));
+		EndpointMethods endpointMethods = restifyContractReader.read(myGenericSpecificApiTarget);
+
+		EndpointMethod endpointMethod = endpointMethods.find(MySpecificApi.class.getMethod("find", new Class[] { int.class }))
+			.orElseThrow(() -> new IllegalStateException("Method not found..."));
 
 		assertEquals("http://my.model.api/find", endpointMethod.path());
 		assertEquals(MyModel.class, endpointMethod.returnType().classType());
@@ -307,8 +333,10 @@ public class DefaultRestifyContractReaderTest {
 
 	@Test
 	public void shouldCreateEndpointMethodWhenMethodReturnTypeIsACollectionWithGenericType() throws Exception {
-		EndpointMethod endpointMethod = restifyContractReader.read(myGenericSpecificApiTarget,
-				MySpecificApi.class.getMethod("allAsList"));
+		EndpointMethods endpointMethods = restifyContractReader.read(myGenericSpecificApiTarget);
+
+		EndpointMethod endpointMethod = endpointMethods.find(MySpecificApi.class.getMethod("allAsList"))
+			.orElseThrow(() -> new IllegalStateException("Method not found..."));
 
 		assertEquals("http://my.model.api/all", endpointMethod.path());
 		assertEquals(new SimpleParameterizedType(List.class, null, MyModel.class), endpointMethod.returnType().unwrap());
@@ -316,8 +344,10 @@ public class DefaultRestifyContractReaderTest {
 
 	@Test
 	public void shouldCreateEndpointMethodWhenMethodReturnTypeIsGenericArray() throws Exception {
-		EndpointMethod endpointMethod = restifyContractReader.read(myGenericSpecificApiTarget,
-				MySpecificApi.class.getMethod("allAsArray"));
+		EndpointMethods endpointMethods = restifyContractReader.read(myGenericSpecificApiTarget);
+
+		EndpointMethod endpointMethod = endpointMethods.find(MySpecificApi.class.getMethod("allAsArray"))
+			.orElseThrow(() -> new IllegalStateException("Method not found..."));
 
 		assertEquals("http://my.model.api/all", endpointMethod.path());
 		assertEquals(new SimpleGenericArrayType(MyModel.class), endpointMethod.returnType().unwrap());
@@ -325,8 +355,10 @@ public class DefaultRestifyContractReaderTest {
 
 	@Test
 	public void shouldCreateEndpointMethodWhenMethodReturnTypeIsArray() throws Exception {
-		EndpointMethod endpointMethod = restifyContractReader.read(myGenericSpecificApiTarget,
-				MySpecificApi.class.getMethod("myModelArray"));
+		EndpointMethods endpointMethods = restifyContractReader.read(myGenericSpecificApiTarget);
+
+		EndpointMethod endpointMethod = endpointMethods.find(MySpecificApi.class.getMethod("myModelArray"))
+			.orElseThrow(() -> new IllegalStateException("Method not found..."));
 
 		assertEquals("http://my.model.api/all", endpointMethod.path());
 		assertEquals(MyModel[].class, endpointMethod.returnType().classType());
@@ -334,8 +366,10 @@ public class DefaultRestifyContractReaderTest {
 
 	@Test
 	public void shouldCreateEndpointMethodWhenMethodReturnTypeIsMap() throws Exception {
-		EndpointMethod endpointMethod = restifyContractReader.read(myGenericSpecificApiTarget,
-				MySpecificApi.class.getMethod("myModelAsMap"));
+		EndpointMethods endpointMethods = restifyContractReader.read(myGenericSpecificApiTarget);
+
+		EndpointMethod endpointMethod = endpointMethods.find(MySpecificApi.class.getMethod("myModelAsMap"))
+			.orElseThrow(() -> new IllegalStateException("Method not found..."));;
 
 		assertEquals("http://my.model.api/all", endpointMethod.path());
 		assertEquals(new SimpleParameterizedType(Map.class, null, String.class, MyModel.class),
@@ -344,8 +378,10 @@ public class DefaultRestifyContractReaderTest {
 
 	@Test
 	public void shouldCreateEndpointMethodWhenMethodReturnTypeIsMapWithGenericValue() throws Exception {
-		EndpointMethod endpointMethod = restifyContractReader.read(myGenericSpecificApiTarget,
-				MySpecificApi.class.getMethod("allAsMap"));
+		EndpointMethods endpointMethods = restifyContractReader.read(myGenericSpecificApiTarget);
+
+		EndpointMethod endpointMethod = endpointMethods.find(MySpecificApi.class.getMethod("allAsMap"))
+				.orElseThrow(() -> new IllegalStateException("Method not found..."));
 
 		assertEquals("http://my.model.api/all", endpointMethod.path());
 		assertEquals(new SimpleParameterizedType(Map.class, null, String.class, MyModel.class),
@@ -354,8 +390,10 @@ public class DefaultRestifyContractReaderTest {
 
 	@Test
 	public void shouldCreateEndpointMethodWhenMethodReturnTypeIsMapWithGenericKeyAndValue() throws Exception {
-		EndpointMethod endpointMethod = restifyContractReader.read(myGenericSpecificApiTarget,
-				MySpecificApi.class.getMethod("anyAsMap"));
+		EndpointMethods endpointMethods = restifyContractReader.read(myGenericSpecificApiTarget);
+
+		EndpointMethod endpointMethod = endpointMethods.find(MySpecificApi.class.getMethod("anyAsMap"))
+			.orElseThrow(() -> new IllegalStateException("Method not found..."));;
 
 		assertEquals("http://my.model.api/any", endpointMethod.path());
 		assertEquals(
@@ -367,8 +405,10 @@ public class DefaultRestifyContractReaderTest {
 
 	@Test
 	public void shouldCreateAsyncEndpointMethodWhenMethodHasOneCallbackWithGenericType() throws Exception {
-		EndpointMethod endpointMethod = restifyContractReader.read(myGenericSpecificApiTarget,
-				MySpecificApi.class.getMethod("async", EndpointCallCallback.class));
+		EndpointMethods endpointMethods = restifyContractReader.read(myGenericSpecificApiTarget);
+
+		EndpointMethod endpointMethod = endpointMethods.find(MySpecificApi.class.getMethod("async", EndpointCallCallback.class))
+			.orElseThrow(() -> new IllegalStateException("Method not found..."));;
 
 		assertEquals("http://my.model.api/async", endpointMethod.path());
 		assertEquals("GET", endpointMethod.httpMethod());
@@ -386,15 +426,20 @@ public class DefaultRestifyContractReaderTest {
 
 	@Test
 	public void shouldCreateEndpointMethodWhenTargetHasEndpointUrl() throws Exception {
-		EndpointMethod endpointMethod = restifyContractReader.read(myContextApiTarget,
-				MyContextApi.class.getMethod("method"));
+		EndpointMethods endpointMethods = restifyContractReader.read(myContextApiTarget);
+
+		EndpointMethod endpointMethod = endpointMethods.find(MyContextApi.class.getMethod("method"))
+			.orElseThrow(() -> new IllegalStateException("Method not found..."));;
 
 		assertEquals("http://my.api.com/context/any", endpointMethod.path());
 	}
 
 	@Test
 	public void shouldCreateEndpointMethodWhenJavaMethodHasNotPathAnnotation() throws Exception {
-		EndpointMethod endpointMethod = restifyContractReader.read(mySimpleCrudApiTarget, MySimpleCrudApi.class.getMethod("post", MyModel.class));
+		EndpointMethods endpointMethods = restifyContractReader.read(mySimpleCrudApiTarget);
+
+		EndpointMethod endpointMethod = endpointMethods.find(MySimpleCrudApi.class.getMethod("post", MyModel.class))
+			.orElseThrow(() -> new IllegalStateException("Method not found..."));;
 
 		assertEquals("http://my.api.com/context", endpointMethod.path());
 	}
@@ -405,7 +450,10 @@ public class DefaultRestifyContractReaderTest {
 
 		EndpointTarget dynamicApiTarget = new EndpointTarget(MyDynamicApi.class);
 
-		EndpointMethod endpointMethod = restifyContractReader.read(dynamicApiTarget, MyDynamicApi.class.getMethod("method"));
+		EndpointMethods endpointMethods = restifyContractReader.read(dynamicApiTarget);
+
+		EndpointMethod endpointMethod = endpointMethods.find(MyDynamicApi.class.getMethod("method"))
+			.orElseThrow(() -> new IllegalStateException("Method not found..."));;
 
 		assertEquals("http://localhost:8080/any", endpointMethod.path());
 	}
@@ -416,15 +464,19 @@ public class DefaultRestifyContractReaderTest {
 
 		EndpointTarget dynamicApiTarget = new EndpointTarget(OtherDynamicApi.class, "@{api.endpoint}");
 
-		EndpointMethod endpointMethod = restifyContractReader.read(dynamicApiTarget, OtherDynamicApi.class.getMethod("method"));
+		EndpointMethods endpointMethods = restifyContractReader.read(dynamicApiTarget);
+
+		EndpointMethod endpointMethod = endpointMethods.find(OtherDynamicApi.class.getMethod("method"))
+			.orElseThrow(() -> new IllegalStateException("Method not found..."));;
 
 		assertEquals("http://localhost:8080/context/any", endpointMethod.path());
 	}
 
 	@Test
 	public void shouldCreateEndpointMethodWithVersionWhenTypeIsVersioned() throws Exception {
-		EndpointMethod endpointMethod = restifyContractReader.read(myVersionedApiTarget,
-				MyVersionedApi.class.getMethod("versionOne"));
+		EndpointMethod endpointMethod = restifyContractReader.read(myVersionedApiTarget)
+			.find(MyVersionedApi.class.getMethod("versionOne"))
+				.orElseThrow(() -> new IllegalStateException("Method not found..."));;
 
 		assertEquals("http://my.api.com/v1/model", endpointMethod.path());
 
@@ -434,8 +486,9 @@ public class DefaultRestifyContractReaderTest {
 
 	@Test
 	public void shouldCreateEndpointMethodWithMethodVersionWhenVersionAnnotationIsPresentOnMethod() throws Exception {
-		EndpointMethod endpointMethod = restifyContractReader.read(myVersionedApiTarget,
-				MyVersionedApi.class.getMethod("versionTwo"));
+		EndpointMethod endpointMethod = restifyContractReader.read(myVersionedApiTarget)
+			.find(MyVersionedApi.class.getMethod("versionTwo"))
+				.orElseThrow(() -> new IllegalStateException("Method not found..."));;
 
 		assertEquals("http://my.api.com/v2/model", endpointMethod.path());
 
@@ -480,10 +533,6 @@ public class DefaultRestifyContractReaderTest {
 		@Get
 		public Void queryString(@QueryParameters Parameters parameters);
 
-		@Path("/twoBodyParameters")
-		@Get
-		public String methodWithTwoBodyParameters(@BodyParameter Object first, @BodyParameter Object second);
-
 		@Path("/async")
 		@Get
 		public void async(@CallbackParameter EndpointCallCallback<String> callback);
@@ -493,16 +542,28 @@ public class DefaultRestifyContractReaderTest {
 		public void async(@CallbackParameter EndpointCallSuccessCallback<String> successCallback,
 				@CallbackParameter EndpointCallFailureCallback failureCallback);
 
-		@Path("/asyncWithTwoCallbacks")
-		@Get
-		public void asyncWithTwoCallbacks(@CallbackParameter EndpointCallCallback<String> first, @CallbackParameter EndpointCallCallback<String> second);
-
 		@Path("/metaHeaders")
 		@Method("GET")
 		@JsonContent
 		@AcceptJson
 		@Header(name = "User-Agent", value = "Restify-Agent")
 		public String metaHeaders();
+	}
+
+	@Path("http://my.api.com")
+	interface MyApiTypeWithWrongBodyParameter {
+
+		@Path("/twoBodyParameters")
+		@Get
+		public String methodWithTwoBodyParameters(@BodyParameter Object first, @BodyParameter Object second);
+	}
+
+	@Path("http://my.api.com")
+	interface MyApiTypeWithWrongCallbackParameter {
+
+		@Path("/asyncWithTwoCallbacks")
+		@Get
+		public void asyncWithTwoCallbacks(@CallbackParameter EndpointCallCallback<String> first, @CallbackParameter EndpointCallCallback<String> second);
 	}
 
 	@Path("http://my.api.com")

@@ -48,6 +48,12 @@ public class JavaAnnotationScanner {
 						.orElse(null);
 	}
 
+	public <T extends Annotation> Annotation[] allWith(Class<T> javaAnnotationType) {
+		return Arrays.stream(javaAnnotatedElement.getAnnotations())
+				.filter(a -> a.annotationType().isAnnotationPresent(javaAnnotationType))
+					.toArray(Annotation[]::new);
+	}
+
 	public <T extends Annotation> T scan(Class<T> javaAnnotationType) {
 		return doScan(javaAnnotationType);
 	}

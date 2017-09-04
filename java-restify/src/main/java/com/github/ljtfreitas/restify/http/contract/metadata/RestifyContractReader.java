@@ -25,10 +25,8 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.contract.metadata;
 
-import java.lang.reflect.Method;
-
 public interface RestifyContractReader {
 
-	EndpointMethod read(EndpointTarget endpointTarget, Method javaMethod);
+	public EndpointMethods read(EndpointTarget endpointTarget);
 
 }
