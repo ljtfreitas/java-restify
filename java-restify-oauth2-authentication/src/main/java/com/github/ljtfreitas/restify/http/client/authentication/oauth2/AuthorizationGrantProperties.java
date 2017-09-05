@@ -68,8 +68,18 @@ public class AuthorizationGrantProperties extends GrantProperties {
 
 	public static class Builder {
 
-		private final AuthorizationGrantProperties properties = new AuthorizationGrantProperties();
-		private final GrantProperties.Builder delegate = new GrantProperties.Builder(properties);
+		private final AuthorizationGrantProperties properties;
+		private final GrantProperties.Builder delegate;
+
+		public Builder() {
+			this.properties = new AuthorizationGrantProperties();
+			this.delegate = new GrantProperties.Builder(properties);
+		}
+
+		public Builder(AuthorizationGrantProperties properties) {
+			this.properties = properties;
+			this.delegate = new GrantProperties.Builder(properties);
+		}
 
 		public Builder resource(Resource resource) {
 			delegate.resource(resource);

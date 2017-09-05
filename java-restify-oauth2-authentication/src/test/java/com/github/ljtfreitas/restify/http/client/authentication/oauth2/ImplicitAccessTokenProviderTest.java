@@ -33,7 +33,7 @@ public class ImplicitAccessTokenProviderTest {
 	public void setup() {
 		mockServerClient = new MockServerClient("localhost", 8088);
 
-		AuthorizationGrantProperties properties = GrantProperties.Builder.implicit()
+		ImplicitGrantProperties properties = GrantProperties.Builder.implicit()
 				.authorizationUri("http://localhost:8088/oauth/authorize")
 				.clientId("client-id")
 				.redirectUri("http://my.web.app/oauth/callback")

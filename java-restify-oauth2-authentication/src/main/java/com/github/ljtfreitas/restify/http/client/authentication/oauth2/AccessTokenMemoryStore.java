@@ -46,7 +46,7 @@ class AccessTokenMemoryStore implements AccessTokenStore {
 	}
 
 	private AccessTokenKey key(OAuthAuthenticatedEndpointRequest request) {
-		String resourceServer = request.resourceServer();
+		String resourceServer = request.endpoint().getHost();
 		String clientId = request.clientId();
 		String scope = request.scope();
 		String username = request.user().map(Principal::getName).orElse(null);

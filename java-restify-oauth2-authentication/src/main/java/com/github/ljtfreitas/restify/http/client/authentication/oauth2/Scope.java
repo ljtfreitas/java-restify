@@ -25,39 +25,16 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.authentication.oauth2;
 
-import java.util.Objects;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Inherited;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-public class ClientCredentials {
+@Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.TYPE, ElementType.METHOD, ElementType.ANNOTATION_TYPE})
+@Inherited
+public @interface Scope {
 
-	private final String clientId;
-	private final String clientSecret;
-
-	public ClientCredentials(String clientId, String clientSecret) {
-		this.clientId = clientId;
-		this.clientSecret = clientSecret == null ? "" : clientSecret;
-	}
-
-	public String clientId() {
-		return clientId;
-	}
-
-	public String clientSecret() {
-		return clientSecret;
-	}
-
-	@Override
-	public int hashCode() {
-		return Objects.hash(clientId, clientSecret);
-	}
-
-	@Override
-	public boolean equals(Object obj) {
-		if (!(obj instanceof ClientCredentials)) return false;
-		ClientCredentials that = (ClientCredentials) obj;
-		return this.clientId.equals(that.clientId) && this.clientSecret.equals(that.clientSecret);
-	}
-
-	public static ClientCredentials clientId(String clientId) {
-		return new ClientCredentials(clientId, "");
-	}
+	public String[] value(); 
 }

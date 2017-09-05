@@ -27,7 +27,10 @@ package com.github.ljtfreitas.restify.http.client.authentication.oauth2;
 
 import java.net.URI;
 import java.security.Principal;
+import java.util.Arrays;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
 import com.github.ljtfreitas.restify.http.util.Tryable;
@@ -37,6 +40,7 @@ public class OAuthAuthenticatedEndpointRequest {
 	private final EndpointRequest source;
 	private final GrantProperties properties;
 	private final Principal user;
+	private final String scope;
 
 	public OAuthAuthenticatedEndpointRequest(EndpointRequest source, GrantProperties properties) {
 		this(source, properties, null);
@@ -46,10 +50,21 @@ public class OAuthAuthenticatedEndpointRequest {
 		this.source = source;
 		this.properties = properties;
 		this.user = user;
+		this.scope = scopes(properties, source);
+	}
+
+	private String scopes(GrantProperties properties, EndpointRequest source) {
+		return Stream.concat(properties.scopes().stream(),
+				source.metadata().all(Scope.class).stream().flatMap(scope -> Arrays.stream(scope.value())))
+					.collect(Collectors.joining(" "));
 	}
 
 	public EndpointRequest source() {
 		return source;
+	}
+
+	public URI endpoint() {
+		return source.endpoint();
 	}
 
 	public GrantProperties properties() {
@@ -70,11 +85,7 @@ public class OAuthAuthenticatedEndpointRequest {
 	}
 
 	public String scope() {
-		return properties.scope();
-	}
-
-	public String resourceServer() {
-		return source.endpoint().getHost();
+		return scope;
 	}
 
 	public URI accessTokenUri() {

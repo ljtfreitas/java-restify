@@ -27,113 +27,120 @@ package com.github.ljtfreitas.restify.http.client.authentication.oauth2;
 
 import java.net.URI;
 import java.net.URL;
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
-import java.util.stream.Collectors;
 
-public class GrantProperties {
+import com.github.ljtfreitas.restify.http.contract.Cookie;
+import com.github.ljtfreitas.restify.http.contract.Cookies;
 
-	private Resource resource;
-	private URI accessTokenUri;
-	private ClientCredentials credentials;
-	private Collection<String> scopes = Collections.emptyList();
-
-	public Resource resource() {
-		return resource;
-	}
-
-	public ClientCredentials credentials() {
-		return credentials;
-	}
-
-	public Collection<String> scopes() {
-		return scopes;
-	}
-
-	public String scope() {
-		return scopes.stream().collect(Collectors.joining(" "));
-	}
-
-	public URI accessTokenUri() {
-		return accessTokenUri;
-	}
+public class ImplicitGrantProperties extends AuthorizationGrantProperties {
 
 	public static class Builder {
 
-		private final GrantProperties properties;
-
-		public Builder() {
-			this.properties = new GrantProperties();
-		}
-
-		public Builder(GrantProperties properties) {
-			this.properties = properties;
-		}
+		private final ImplicitGrantProperties properties = new ImplicitGrantProperties();
+		private final AuthorizationGrantProperties.Builder delegate = new AuthorizationGrantProperties.Builder(properties);
 
 		public Builder resource(Resource resource) {
-			properties.resource = resource;
+			delegate.resource(resource);
 			return this;
 		}
 
 		public Builder resource(String id) {
-			properties.resource = new Resource(id);
+			delegate.resource(id);
 			return this;
 		}
 
 		public Builder resource(String id, URL url) {
-			properties.resource = new Resource(id, url);
+			delegate.resource(id, url);
 			return this;
 		}
 
 		public Builder accessTokenUri(String accessTokenUri) {
-			properties.accessTokenUri = URI.create(accessTokenUri);
+			delegate.accessTokenUri(accessTokenUri);
 			return this;
 		}
 
 		public Builder accessTokenUri(URI accessTokenUri) {
-			properties.accessTokenUri = accessTokenUri;
+			delegate.accessTokenUri(accessTokenUri);
 			return this;
 		}
 
 		public Builder clientId(String clientId) {
-			properties.credentials = ClientCredentials.clientId(clientId);
+			delegate.clientId(clientId);
 			return this;
 		}
 
 		public Builder credentials(ClientCredentials credentials) {
-			properties.credentials = credentials;
+			delegate.credentials(credentials);
 			return this;
 		}
 
 		public Builder scopes(Collection<String> scopes) {
-			properties.scopes = scopes;
+			delegate.scopes(scopes);
 			return this;
 		}
 
 		public Builder scopes(String... scopes) {
-			properties.scopes = Arrays.asList(scopes);
+			delegate.scopes(scopes);
 			return this;
 		}
 
-		public GrantProperties build() {
+		public Builder authorizationCode(String authorizationCode) {
+			delegate.authorizationCode(authorizationCode);
+			return this;
+		}
+
+		public Builder authorizationUri(URI authorizationUri) {
+			delegate.authorizationUri(authorizationUri);
+			return this;
+		}
+
+		public Builder authorizationUri(String authorizationUri) {
+			delegate.authorizationUri(URI.create(authorizationUri));
+			return this;
+		}
+
+		public Builder redirectUri(URI redirectUri) {
+			delegate.redirectUri(redirectUri);
+			return this;
+		}
+
+		public Builder redirectUri(String redirectUri) {
+			delegate.redirectUri(URI.create(redirectUri));
+			return this;
+		}
+
+		public Builder responseType(String responseType) {
+			delegate.responseType(responseType);
+			return this;
+		}
+
+		public Builder cookie(String cookie) {
+			delegate.cookie(cookie);
+			return this;
+		}
+
+		public Builder cookie(Cookie cookie) {
+			delegate.cookie(cookie.toString());
+			return this;
+		}
+
+		public Builder cookie(String name, String value) {
+			delegate.cookie(new Cookie(name, value).toString());
+			return this;
+		}
+
+		public Builder cookies(Cookies cookies) {
+			delegate.cookie(cookies.toString());
+			return this;
+		}
+
+		public Builder state(String state) {
+			delegate.state(state);
+			return this;
+		}
+
+		public ImplicitGrantProperties build() {
 			return properties;
-		}
-
-		public static AuthorizationGrantProperties.Builder authorization() {
-			return new AuthorizationGrantProperties.Builder();
-		}
-
-		public static ImplicitGrantProperties.Builder implicit() {
-			return new ImplicitGrantProperties.Builder();
-		}
-
-		public static ResourceOwnerGrantProperties.Builder resourceOwner() {
-			return new ResourceOwnerGrantProperties.Builder();
-		}
-
-		public static ClientCredentialsGrantProperties.Builder clientCredentials() {
-			return new ClientCredentialsGrantProperties.Builder();
 		}
 	}
 }
