@@ -48,18 +48,17 @@ class DefaultAuthorizationCodeProvider implements AuthorizationCodeProvider {
 
 	@Override
 	public String provides(OAuthAuthenticatedEndpointRequest request) {
-		AuthorizationGrantProperties properties = request.properties(AuthorizationGrantProperties.class);
+		AuthorizationCodeGrantProperties properties = request.properties(AuthorizationCodeGrantProperties.class);
 
 		EndpointResponse<String> authorizationResponse = authorizationServer.authorize(properties);
 
 		StatusCode status = authorizationResponse.code();
 
-		if (status.isOK()) {
-			String message = "Do you approve the client [" + request.clientId() + "] to access your resources "
-				+ "with scopes [" + request.scope() + "].";
+		if (status.isOk()) {
+			String message = "You need approve the client [" + properties.credentials().clientId() + "] to access protected resources "
+					+ "with scopes [" + properties.scopes() + "]";
 
 			throw new OAuth2UserApprovalRequiredException(message);
-
 		} else {
 			Header location = authorizationResponse.headers().get("Location")
 					.orElseThrow(() -> new IllegalStateException("Location header must be present on Authorization redirect!"));

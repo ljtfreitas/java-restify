@@ -53,7 +53,7 @@ import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponseReader;
 import com.github.ljtfreitas.restify.http.contract.Parameters;
 
-class DefaultAuthorizationServer implements AuthorizationServer {
+public class DefaultAuthorizationServer implements AuthorizationServer {
 
 	private static final String FORM_URLENCODED_CONTENT_TYPE = "application/x-www-form-urlencoded";
 
@@ -94,7 +94,7 @@ class DefaultAuthorizationServer implements AuthorizationServer {
 	}
 
 	@Override
-	public EndpointResponse<String> authorize(AuthorizationGrantProperties properties) {
+	public EndpointResponse<String> authorize(AuthorizationCodeGrantProperties properties) {
 		nonNull(properties.credentials().clientId(), "Your Client ID is required.");
 		nonNull(properties.authorizationUri(), "The authorization URI of authorization server is required.");
 		nonNull(properties.responseType(), "The response_type parameter is required.");

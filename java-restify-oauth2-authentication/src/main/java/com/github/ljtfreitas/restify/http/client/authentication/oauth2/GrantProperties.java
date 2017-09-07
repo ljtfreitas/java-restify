@@ -27,9 +27,11 @@ package com.github.ljtfreitas.restify.http.client.authentication.oauth2;
 
 import java.net.URI;
 import java.net.URL;
+import java.security.Principal;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class GrantProperties {
@@ -38,6 +40,7 @@ public class GrantProperties {
 	private URI accessTokenUri;
 	private ClientCredentials credentials;
 	private Collection<String> scopes = Collections.emptyList();
+	private Principal user;
 
 	public Resource resource() {
 		return resource;
@@ -57,6 +60,10 @@ public class GrantProperties {
 
 	public URI accessTokenUri() {
 		return accessTokenUri;
+	}
+
+	public Optional<Principal> user() {
+		return Optional.ofNullable(user);
 	}
 
 	public static class Builder {
@@ -116,12 +123,17 @@ public class GrantProperties {
 			return this;
 		}
 
+		public Builder user(Principal user) {
+			properties.user = user;
+			return this;
+		}
+
 		public GrantProperties build() {
 			return properties;
 		}
 
-		public static AuthorizationGrantProperties.Builder authorization() {
-			return new AuthorizationGrantProperties.Builder();
+		public static AuthorizationCodeGrantProperties.Builder authorizationCode() {
+			return new AuthorizationCodeGrantProperties.Builder();
 		}
 
 		public static ImplicitGrantProperties.Builder implicit() {

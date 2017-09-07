@@ -31,16 +31,16 @@ import java.util.function.Supplier;
 class DefaultAccessTokenRepository implements AccessTokenRepository {
 
 	private final AccessTokenProvider accessTokenProvider;
-	private final AccessTokenStore accessTokenStore;
+	private final AccessTokenStorage accessTokenStorage;
 
-	public DefaultAccessTokenRepository(AccessTokenProvider accessTokenProvider, AccessTokenStore accessTokenStore) {
+	public DefaultAccessTokenRepository(AccessTokenProvider accessTokenProvider, AccessTokenStorage accessTokenStorage) {
 		this.accessTokenProvider = accessTokenProvider;
-		this.accessTokenStore = accessTokenStore;
+		this.accessTokenStorage = accessTokenStorage;
 	}
 
 	@Override
 	public AccessToken findBy(OAuthAuthenticatedEndpointRequest request) {
-		Optional<AccessToken> accessToken = accessTokenStore.findBy(request);
+		Optional<AccessToken> accessToken = accessTokenStorage.findBy(request);
 
 		if (accessToken.isPresent()) {
 			if (accessToken.get().expired()) {
@@ -68,7 +68,7 @@ class DefaultAccessTokenRepository implements AccessTokenRepository {
 	private AccessToken store(OAuthAuthenticatedEndpointRequest request, Supplier<AccessToken> supplier) {
 		AccessToken newAccessToken = supplier.get();
 
-		accessTokenStore.add(request, newAccessToken);
+		accessTokenStorage.add(request, newAccessToken);
 
 		return newAccessToken;
 	}

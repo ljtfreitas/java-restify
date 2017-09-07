@@ -46,17 +46,17 @@ public class OAuth2Authentication implements Authentication {
 
 	public OAuth2Authentication(GrantProperties properties, AccessTokenProvider accessTokenProvider,
 			Principal user) {
-		this(properties, accessTokenProvider, new AccessTokenMemoryStore(), user);
+		this(properties, accessTokenProvider, new AccessTokenMemoryStorage(), user);
 	}
 
 	public OAuth2Authentication(GrantProperties properties, AccessTokenProvider accessTokenProvider,
-			AccessTokenStore accessTokenStore) {
-		this(properties, accessTokenProvider, accessTokenStore, null);
+			AccessTokenStorage accessTokenStorage) {
+		this(properties, accessTokenProvider, accessTokenStorage, null);
 	}
 
 	public OAuth2Authentication(GrantProperties properties, AccessTokenProvider accessTokenProvider,
-			AccessTokenStore accessTokenStore, Principal user) {
-		this(properties, new DefaultAccessTokenRepository(accessTokenProvider, accessTokenStore), null);
+			AccessTokenStorage accessTokenStorage, Principal user) {
+		this(properties, new DefaultAccessTokenRepository(accessTokenProvider, accessTokenStorage), null);
 	}
 
 	public OAuth2Authentication(GrantProperties properties, AccessTokenRepository accessTokenRepository, Principal user) {

@@ -25,12 +25,29 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.authentication.oauth2;
 
-import java.util.Optional;
+import static com.github.ljtfreitas.restify.http.util.Preconditions.nonNull;
 
-public interface AccessTokenStore {
+public class ResourceOwnerPasswordAccessTokenProvider extends BaseAccessTokenProvider {
 
-	public Optional<AccessToken> findBy(OAuthAuthenticatedEndpointRequest request);
+	public ResourceOwnerPasswordAccessTokenProvider() {
+		super();
+	}
 
-	public void add(OAuthAuthenticatedEndpointRequest request, AccessToken accessToken);
+	public ResourceOwnerPasswordAccessTokenProvider(AuthorizationServer authorizationServer) {
+		super(authorizationServer);
+	}
 
+	@Override
+	protected AccessTokenRequest buildAccessTokenRequest(OAuthAuthenticatedEndpointRequest request) {
+		ResourceOwnerGrantProperties properties = request.properties(ResourceOwnerGrantProperties.class);
+
+		nonNull(properties.resourceOwner(), "Your resource owner credentials are required.");
+
+		AccessTokenRequest.Builder builder = AccessTokenRequest.resourceOwner(properties.resourceOwner());
+
+		return builder.accessTokenUri(properties.accessTokenUri())
+					  .credentials(properties.credentials())
+					  .parameter("scope", properties.scope())
+					  .build();
+	}
 }

@@ -27,17 +27,18 @@ package com.github.ljtfreitas.restify.http.client.authentication.oauth2;
 
 import java.net.URI;
 import java.net.URL;
+import java.security.Principal;
 import java.util.Collection;
 
 import com.github.ljtfreitas.restify.http.contract.Cookie;
 import com.github.ljtfreitas.restify.http.contract.Cookies;
 
-public class ImplicitGrantProperties extends AuthorizationGrantProperties {
+public class ImplicitGrantProperties extends AuthorizationCodeGrantProperties {
 
 	public static class Builder {
 
 		private final ImplicitGrantProperties properties = new ImplicitGrantProperties();
-		private final AuthorizationGrantProperties.Builder delegate = new AuthorizationGrantProperties.Builder(properties);
+		private final AuthorizationCodeGrantProperties.Builder delegate = new AuthorizationCodeGrantProperties.Builder(properties);
 
 		public Builder resource(Resource resource) {
 			delegate.resource(resource);
@@ -66,6 +67,11 @@ public class ImplicitGrantProperties extends AuthorizationGrantProperties {
 
 		public Builder clientId(String clientId) {
 			delegate.clientId(clientId);
+			return this;
+		}
+
+		public Builder credentials(String clientId, String clientSecret) {
+			delegate.credentials(new ClientCredentials(clientId, clientSecret));
 			return this;
 		}
 
@@ -136,6 +142,11 @@ public class ImplicitGrantProperties extends AuthorizationGrantProperties {
 
 		public Builder state(String state) {
 			delegate.state(state);
+			return this;
+		}
+
+		public Builder user(Principal user) {
+			delegate.user(user);
 			return this;
 		}
 

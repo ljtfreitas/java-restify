@@ -27,6 +27,7 @@ package com.github.ljtfreitas.restify.http.client.authentication.oauth2;
 
 import java.net.URI;
 import java.net.URL;
+import java.security.Principal;
 import java.util.Collection;
 
 public class ClientCredentialsGrantProperties extends GrantProperties {
@@ -78,6 +79,11 @@ public class ClientCredentialsGrantProperties extends GrantProperties {
 
 		public Builder scopes(String... scopes) {
 			delegate.scopes(scopes);
+			return this;
+		}
+
+		public Builder user(Principal user) {
+			delegate.user(user);
 			return this;
 		}
 

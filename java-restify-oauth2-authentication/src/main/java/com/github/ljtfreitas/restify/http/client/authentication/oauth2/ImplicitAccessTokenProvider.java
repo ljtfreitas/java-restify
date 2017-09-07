@@ -48,14 +48,14 @@ public class ImplicitAccessTokenProvider implements AccessTokenProvider {
 
 	@Override
 	public AccessToken provides(OAuthAuthenticatedEndpointRequest request) {
-		AuthorizationGrantProperties properties = request.properties(AuthorizationGrantProperties.class);
+		ImplicitGrantProperties properties = request.properties(ImplicitGrantProperties.class);
 
 		EndpointResponse<String> authorizationResponse = authorizationServer.authorize(properties);
 
 		StatusCode status = authorizationResponse.code();
 
-		if (status.isOK()) {
-			String message = "Do you approve the client [" + properties.credentials().clientId() + "] to access your resources "
+		if (status.isOk()) {
+			String message = "You need approve the client [" + properties.credentials().clientId() + "] to access protected resources "
 				+ "with scopes [" + properties.scopes() + "]";
 
 			throw new OAuth2UserApprovalRequiredException(message);

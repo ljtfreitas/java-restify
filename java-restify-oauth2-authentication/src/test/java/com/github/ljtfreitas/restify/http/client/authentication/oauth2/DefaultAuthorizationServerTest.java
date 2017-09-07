@@ -36,7 +36,7 @@ public class DefaultAuthorizationServerTest {
 
 	@Test
 	public void shouldAuthorizeOnAuthorizationServer() {
-		AuthorizationGrantProperties properties = GrantProperties.Builder.authorization()
+		AuthorizationCodeGrantProperties properties = GrantProperties.Builder.authorizationCode()
 				.authorizationUri("http://localhost:8088/oauth/authorize")
 				.clientId("client-id")
 				.redirectUri("http://my.web.app/oauth/callback")

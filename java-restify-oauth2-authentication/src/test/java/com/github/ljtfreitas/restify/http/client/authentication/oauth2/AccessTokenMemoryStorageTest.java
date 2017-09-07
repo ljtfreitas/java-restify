@@ -10,9 +10,9 @@ import org.junit.Test;
 
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
 
-public class AccessTokenMemoryStoreTest {
+public class AccessTokenMemoryStorageTest {
 
-	private AccessTokenMemoryStore acessTokenMemoryStore;
+	private AccessTokenMemoryStorage acessTokenMemoryStore;
 
 	@Test
 	public void shouldSaveAccessTokenOnStore() {
@@ -27,7 +27,7 @@ public class AccessTokenMemoryStoreTest {
 
 		OAuthAuthenticatedEndpointRequest request = new OAuthAuthenticatedEndpointRequest(source, properties, user);
 
-		acessTokenMemoryStore = new AccessTokenMemoryStore();
+		acessTokenMemoryStore = new AccessTokenMemoryStorage();
 
 		assertFalse(acessTokenMemoryStore.findBy(request).isPresent());
 

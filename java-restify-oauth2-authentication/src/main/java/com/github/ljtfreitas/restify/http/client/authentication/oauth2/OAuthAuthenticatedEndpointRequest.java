@@ -49,7 +49,7 @@ public class OAuthAuthenticatedEndpointRequest {
 	public OAuthAuthenticatedEndpointRequest(EndpointRequest source, GrantProperties properties, Principal user) {
 		this.source = source;
 		this.properties = properties;
-		this.user = user;
+		this.user = Optional.ofNullable(user).orElseGet(() -> properties.user().orElse(null));
 		this.scope = scopes(properties, source);
 	}
 

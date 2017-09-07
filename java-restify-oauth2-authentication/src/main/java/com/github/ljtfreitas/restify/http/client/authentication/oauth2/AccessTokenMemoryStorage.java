@@ -31,7 +31,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
-class AccessTokenMemoryStore implements AccessTokenStore {
+class AccessTokenMemoryStorage implements AccessTokenStorage {
 
 	private final Map<AccessTokenKey, AccessToken> tokens = new ConcurrentHashMap<>();
 

@@ -29,7 +29,7 @@ import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
 
 public interface AuthorizationServer {
 
-	public EndpointResponse<String> authorize(AuthorizationGrantProperties properties);
+	public EndpointResponse<String> authorize(AuthorizationCodeGrantProperties properties);
 
 	public EndpointResponse<AccessToken> requireToken(AccessTokenRequest request);
 

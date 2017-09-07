@@ -27,13 +27,14 @@ package com.github.ljtfreitas.restify.http.client.authentication.oauth2;
 
 import java.net.URI;
 import java.net.URL;
+import java.security.Principal;
 import java.util.Collection;
 import java.util.Optional;
 
 import com.github.ljtfreitas.restify.http.contract.Cookie;
 import com.github.ljtfreitas.restify.http.contract.Cookies;
 
-public class AuthorizationGrantProperties extends GrantProperties {
+public class AuthorizationCodeGrantProperties extends GrantProperties {
 
 	private String authorizationCode;
 	private URI authorizationUri;
@@ -68,15 +69,15 @@ public class AuthorizationGrantProperties extends GrantProperties {
 
 	public static class Builder {
 
-		private final AuthorizationGrantProperties properties;
+		private final AuthorizationCodeGrantProperties properties;
 		private final GrantProperties.Builder delegate;
 
 		public Builder() {
-			this.properties = new AuthorizationGrantProperties();
+			this.properties = new AuthorizationCodeGrantProperties();
 			this.delegate = new GrantProperties.Builder(properties);
 		}
 
-		public Builder(AuthorizationGrantProperties properties) {
+		public Builder(AuthorizationCodeGrantProperties properties) {
 			this.properties = properties;
 			this.delegate = new GrantProperties.Builder(properties);
 		}
@@ -111,6 +112,11 @@ public class AuthorizationGrantProperties extends GrantProperties {
 			return this;
 		}
 
+		public Builder credentials(String clientId, String clientSecret) {
+			delegate.credentials(new ClientCredentials(clientId, clientSecret));
+			return this;
+		}
+
 		public Builder credentials(ClientCredentials credentials) {
 			delegate.credentials(credentials);
 			return this;
@@ -123,6 +129,11 @@ public class AuthorizationGrantProperties extends GrantProperties {
 
 		public Builder scopes(String... scopes) {
 			delegate.scopes(scopes);
+			return this;
+		}
+
+		public Builder user(Principal user) {
+			delegate.user(user);
 			return this;
 		}
 
@@ -181,7 +192,7 @@ public class AuthorizationGrantProperties extends GrantProperties {
 			return this;
 		}
 
-		public AuthorizationGrantProperties build() {
+		public AuthorizationCodeGrantProperties build() {
 			return properties;
 		}
 	}
