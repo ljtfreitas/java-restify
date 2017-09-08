@@ -6,6 +6,7 @@ import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
 import static org.mockserver.model.JsonBody.json;
 import static org.mockserver.model.ParameterBody.params;
+import static org.mockserver.model.StringBody.exact;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -82,6 +83,39 @@ public class DefaultAuthorizationServerTest {
 					.withStatusCode(200)
 					.withHeader("Content-Type", "application/json")
 					.withBody(json("{\"access_token\":\"aaa111\",\"token_type\":\"bearer\",\"expires_in\":3600,\"scope\":\"read write\"}")));
+
+		AccessTokenRequest request = AccessTokenRequest
+				.clientCredentials(new ClientCredentials("client-id", "client-secret"))
+					.accessTokenUri("http://localhost:8088/oauth/token")
+					.parameter("scope", "read write")
+					.build();
+
+		EndpointResponse<AccessToken> tokenResponse = authorizationServer.requireToken(request);
+
+		assertNotNull(tokenResponse);
+		assertEquals(StatusCode.of(HttpStatusCode.OK), tokenResponse.code());
+	}
+
+	@Test
+	public void shouldGetAccessTokenOnXmlFormat() {
+		String authorizationCredentials = "Y2xpZW50LWlkOmNsaWVudC1zZWNyZXQ="; //(base64(client_id:client_secret))
+
+		mockServerClient
+			.when(request()
+					.withMethod("POST")
+					.withPath("/oauth/token")
+					.withBody(params(new Parameter("grant_type", "client_credentials"),
+									 new Parameter("scope", "read write")))
+					.withHeader("Authorization", "Basic " + authorizationCredentials))
+				.respond(response()
+					.withStatusCode(200)
+					.withHeader("Content-Type", "application/xml")
+					.withBody(exact("<oauth>"
+									+ "<access_token>aaa111</access_token>"
+									+ "<token_type>bearer</token_type>"
+									+ "<expires_in>3600</expires_in>"
+									+ "<scope>read write</scope>"
+								+ "</oauth>")));
 
 		AccessTokenRequest request = AccessTokenRequest
 				.clientCredentials(new ClientCredentials("client-id", "client-secret"))

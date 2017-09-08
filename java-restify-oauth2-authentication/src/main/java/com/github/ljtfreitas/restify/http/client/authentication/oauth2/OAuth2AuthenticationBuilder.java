@@ -39,6 +39,7 @@ import com.github.ljtfreitas.restify.http.client.message.HttpMessageConverter;
 import com.github.ljtfreitas.restify.http.client.message.HttpMessageConverters;
 import com.github.ljtfreitas.restify.http.client.message.converter.json.JsonMessageConverter;
 import com.github.ljtfreitas.restify.http.client.message.converter.text.TextPlainMessageConverter;
+import com.github.ljtfreitas.restify.http.client.message.converter.xml.JaxbXmlMessageConverter;
 import com.github.ljtfreitas.restify.http.client.message.form.FormURLEncodedParametersMessageConverter;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequestExecutor;
 import com.github.ljtfreitas.restify.http.client.request.HttpClientRequestFactory;
@@ -189,6 +190,11 @@ public class OAuth2AuthenticationBuilder {
 
 			public OAuth2AuthorizationServerHttpMessageConvertersBuilder json() {
 				converters.add(JsonMessageConverter.available());
+				return this;
+			}
+
+			public OAuth2AuthorizationServerHttpMessageConvertersBuilder xml() {
+				converters.add(new JaxbXmlMessageConverter<>());
 				return this;
 			}
 

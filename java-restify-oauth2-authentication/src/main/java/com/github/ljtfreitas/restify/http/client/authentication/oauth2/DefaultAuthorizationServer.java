@@ -32,7 +32,6 @@ import static com.github.ljtfreitas.restify.http.util.Preconditions.nonNull;
 import java.net.URI;
 import java.util.Arrays;
 import java.util.List;
-import java.util.Map;
 
 import com.github.ljtfreitas.restify.http.client.Header;
 import com.github.ljtfreitas.restify.http.client.Headers;
@@ -41,6 +40,7 @@ import com.github.ljtfreitas.restify.http.client.message.HttpMessageConverter;
 import com.github.ljtfreitas.restify.http.client.message.HttpMessageConverters;
 import com.github.ljtfreitas.restify.http.client.message.converter.json.JsonMessageConverter;
 import com.github.ljtfreitas.restify.http.client.message.converter.text.TextPlainMessageConverter;
+import com.github.ljtfreitas.restify.http.client.message.converter.xml.JaxbXmlMessageConverter;
 import com.github.ljtfreitas.restify.http.client.message.form.FormURLEncodedParametersMessageConverter;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequestExecutor;
@@ -127,15 +127,13 @@ public class DefaultAuthorizationServer implements AuthorizationServer {
 	public EndpointResponse<AccessToken> requireToken(AccessTokenRequest request) {
 		EndpointRequest accessTokenEndpointRequest = new AccessTokenEndpointRequestFactory(request).create();
 
-		EndpointResponse<Map<String, Object>> accessTokenResponse = delegate.execute(accessTokenEndpointRequest);
+		EndpointResponse<AccessTokenResponse> accessTokenResponse = delegate.execute(accessTokenEndpointRequest);
 
 		return buildAccessToken(accessTokenResponse);
 	}
 
-	private EndpointResponse<AccessToken> buildAccessToken(EndpointResponse<Map<String, Object>> accessTokenResponse) {
-		Parameters parameters = Parameters.of(accessTokenResponse.body());
-
-		AccessToken accessToken = AccessToken.create(parameters);
+	private EndpointResponse<AccessToken> buildAccessToken(EndpointResponse<AccessTokenResponse> accessTokenResponse) {
+		AccessToken accessToken = AccessToken.of(accessTokenResponse.body());
 
 		return new EndpointResponse<>(accessTokenResponse.code(), accessTokenResponse.headers(), accessToken);
 	}
@@ -186,7 +184,7 @@ public class DefaultAuthorizationServer implements AuthorizationServer {
 
 		private HttpMessageConverters converters() {
 			List<HttpMessageConverter> converters = Arrays.asList(new TextPlainMessageConverter(),
-					new FormURLEncodedParametersMessageConverter(), JsonMessageConverter.available());
+					new FormURLEncodedParametersMessageConverter(), JsonMessageConverter.available(), new JaxbXmlMessageConverter<>());
 			return new HttpMessageConverters(converters);
 		}
 	}
@@ -207,7 +205,7 @@ public class DefaultAuthorizationServer implements AuthorizationServer {
 
 			Parameters body = source.parameters();
 
-			return authenticated(new EndpointRequest(source.uri(), "POST", headers, body, Map.class));
+			return authenticated(new EndpointRequest(source.uri(), "POST", headers, body, AccessTokenResponse.class));
 		}
 
 		private EndpointRequest authenticated(EndpointRequest endpointRequest) {

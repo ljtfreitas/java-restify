@@ -25,26 +25,19 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.authentication.oauth2;
 
+import static com.github.ljtfreitas.restify.http.util.Preconditions.nonNull;
+
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collections;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import com.github.ljtfreitas.restify.http.contract.Parameters;
 import com.github.ljtfreitas.restify.http.util.Tryable;
 
 public class AccessToken {
-
-	private static final String ACCESS_TOKEN_FIELD = "access_token";
-	private static final String TOKEN_TYPE_FIELD = "token_type";
-	private static final String EXPIRES_IN_FIELD = "expires_in";
-	private static final String SCOPE_FIELD = "scope";
-	private static final String REFRESH_TOKEN_FIELD = "refresh_token";
 
 	private final AccessTokenType tokenType;
 	private final String token;
@@ -52,8 +45,6 @@ public class AccessToken {
 	private LocalDateTime expiration = null;
 	private Set<String> scopes = Collections.emptySet();
 	private String refreshToken = null;
-
-	private Map<String, Object> parameters = new HashMap<>();
 
 	public AccessToken(AccessTokenType tokenType, String token) {
 		this.tokenType = tokenType;
@@ -126,14 +117,6 @@ public class AccessToken {
 		return Optional.ofNullable(refreshToken);
 	}
 
-	private void parameter(String name, Object value) {
-		this.parameters.put(name, value);
-	}
-
-	public Map<String, Object> parameters() {
-		return parameters;
-	}
-
 	@Override
 	public String toString() {
 		return tokenType + " " + token;
@@ -147,25 +130,21 @@ public class AccessToken {
 		return new AccessToken(AccessTokenType.BEARER, token, duration);
 	}
 
-	public static AccessToken create(Parameters parameters) {
-		String token = parameters.get(ACCESS_TOKEN_FIELD)
-				.orElseThrow(() -> new IllegalStateException("Access token cannot be null!"));
+	public static AccessToken of(AccessTokenResponse source) {
+		AccessTokenType tokenType = Optional.ofNullable(source.tokenType())
+				.map(t -> Tryable.or(() -> AccessTokenType.of(t), AccessTokenType.BEARER))
+					.orElse(AccessTokenType.BEARER);
 
-		AccessTokenType tokenType = Tryable.or(() -> AccessTokenType.of(parameters.get(TOKEN_TYPE_FIELD).orElse(null)),
-				AccessTokenType.BEARER);
+		AccessToken.Builder accessTokenBuilder = AccessToken.Builder.of(tokenType, source.accessToken());
 
-		AccessToken.Builder accessTokenBuilder = AccessToken.Builder.of(tokenType, token);
-
-		parameters.get(EXPIRES_IN_FIELD)
+		Optional.ofNullable(source.expires())
 			.ifPresent(expires -> accessTokenBuilder.expiration(Duration.ofSeconds(Long.valueOf(expires))));
 
-		parameters.get(SCOPE_FIELD)
+		Optional.ofNullable(source.scope())
 			.ifPresent(scope -> accessTokenBuilder.scope(scope));
 
-		parameters.get(REFRESH_TOKEN_FIELD)
+		Optional.ofNullable(source.refreshToken())
 			.ifPresent(refreshToken -> accessTokenBuilder.refreshToken(refreshToken));
-
-		parameters.all().forEach(p -> accessTokenBuilder.parameter(p.name(), p.value()));
 
 		return accessTokenBuilder.build();
 	}
@@ -208,11 +187,6 @@ public class AccessToken {
 			return this;
 		}
 
-		public AccessToken.Builder parameter(String name, Object value) {
-			accessToken.parameter(name, value);
-			return this;
-		}
-
 		public AccessToken build() {
 			return accessToken;
 		}
@@ -222,6 +196,8 @@ public class AccessToken {
 		}
 
 		public static AccessToken.Builder of(AccessTokenType tokenType, String token) {
+			nonNull(tokenType, "Token type can't be null.");
+			nonNull(token, "Access token can't be null.");
 			return new AccessToken.Builder(tokenType, token);
 		}
 	}
