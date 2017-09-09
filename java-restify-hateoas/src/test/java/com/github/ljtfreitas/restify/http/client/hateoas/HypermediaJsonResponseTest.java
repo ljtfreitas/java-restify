@@ -23,8 +23,6 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.ljtfreitas.restify.http.RestifyProxyBuilder;
-import com.github.ljtfreitas.restify.http.client.hateoas.browser.LinkBrowser;
-import com.github.ljtfreitas.restify.http.client.hateoas.browser.LinkBrowserBuilder;
 import com.github.ljtfreitas.restify.http.contract.Get;
 import com.github.ljtfreitas.restify.http.contract.Path;
 
@@ -44,9 +42,7 @@ public class HypermediaJsonResponseTest {
 		ObjectMapper objectMapper = new ObjectMapper();
 		objectMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
 
-		LinkBrowser linkBrowser = new LinkBrowserBuilder().build();
-
-		myApi = new RestifyProxyBuilder().converters(new JacksonHypermediaJsonMessageConverter<>(linkBrowser))
+		myApi = new RestifyProxyBuilder().converters(new JacksonHypermediaJsonMessageConverter<>())
 				.target(MyApi.class, "http://localhost:7080").build();
 	}
 

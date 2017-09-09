@@ -39,15 +39,15 @@ import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLSocketFactory;
 
 import com.github.ljtfreitas.restify.http.client.authentication.Authentication;
+import com.github.ljtfreitas.restify.http.client.hateoas.JacksonHypermediaJsonMessageConverter;
 import com.github.ljtfreitas.restify.http.client.hateoas.browser.discovery.HypermediaHalJsonPathLinkDiscovery;
+import com.github.ljtfreitas.restify.http.client.hateoas.browser.discovery.HypermediaJsonPathLinkDiscovery;
+import com.github.ljtfreitas.restify.http.client.hateoas.browser.discovery.HypermediaLinkDiscovery;
 import com.github.ljtfreitas.restify.http.client.hateoas.browser.discovery.JsonPathLinkDiscovery;
 import com.github.ljtfreitas.restify.http.client.hateoas.browser.discovery.LinkDiscovery;
-import com.github.ljtfreitas.restify.http.client.hateoas.browser.discovery.HypermediaLinkDiscovery;
-import com.github.ljtfreitas.restify.http.client.hateoas.browser.discovery.HypermediaJsonPathLinkDiscovery;
 import com.github.ljtfreitas.restify.http.client.hateoas.hal.JacksonHypermediaHalJsonMessageConverter;
 import com.github.ljtfreitas.restify.http.client.message.HttpMessageConverter;
 import com.github.ljtfreitas.restify.http.client.message.HttpMessageConverters;
-import com.github.ljtfreitas.restify.http.client.message.converter.json.JacksonMessageConverter;
 import com.github.ljtfreitas.restify.http.client.message.converter.text.SimpleTextMessageConverter;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequestExecutor;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequestWriter;
@@ -242,12 +242,12 @@ public class LinkBrowserBuilder {
 		}
 
 		public HttpMessageConvertersBuilder json() {
-			converters.add(new JacksonMessageConverter<>());
+			converters.add(JacksonHypermediaJsonMessageConverter.withoutBrowser());
 			return this;
 		}
 
 		public HttpMessageConvertersBuilder hal() {
-			converters.add(new JacksonHypermediaHalJsonMessageConverter<>());
+			converters.add(JacksonHypermediaHalJsonMessageConverter.withoutBrowser());
 			return this;
 		}
 

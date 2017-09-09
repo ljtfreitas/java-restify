@@ -28,12 +28,13 @@ package com.github.ljtfreitas.restify.http.client.hateoas;
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.ljtfreitas.restify.http.client.hateoas.browser.LinkBrowser;
+import com.github.ljtfreitas.restify.http.client.hateoas.browser.LinkBrowserBuilder;
 import com.github.ljtfreitas.restify.http.client.message.converter.json.JacksonMessageConverter;
 
 public class JacksonHypermediaJsonMessageConverter<T> extends JacksonMessageConverter<T> {
 
 	public JacksonHypermediaJsonMessageConverter() {
-		super(configure(new ObjectMapper(), null));
+		super(configure(new ObjectMapper(), new LinkBrowserBuilder().build()));
 	}
 
 	public JacksonHypermediaJsonMessageConverter(LinkBrowser linkBrowser) {
@@ -41,7 +42,7 @@ public class JacksonHypermediaJsonMessageConverter<T> extends JacksonMessageConv
 	}
 
 	public JacksonHypermediaJsonMessageConverter(ObjectMapper objectMapper) {
-		super(configure(objectMapper, null));
+		super(configure(objectMapper, new LinkBrowserBuilder().build()));
 	}
 
 	public JacksonHypermediaJsonMessageConverter(ObjectMapper objectMapper, LinkBrowser linkBrowser) {
@@ -53,5 +54,9 @@ public class JacksonHypermediaJsonMessageConverter<T> extends JacksonMessageConv
 		objectMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
 		objectMapper.setHandlerInstantiator(new HypermediaHandlerInstantiator(linkBrowser));
 		return objectMapper;
+	}
+
+	public static <T> JacksonHypermediaJsonMessageConverter<T> withoutBrowser() {
+		return new JacksonHypermediaJsonMessageConverter<>((LinkBrowser) null);
 	}
 }
