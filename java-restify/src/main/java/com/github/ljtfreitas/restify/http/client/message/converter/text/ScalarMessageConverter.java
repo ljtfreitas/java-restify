@@ -39,10 +39,11 @@ import com.github.ljtfreitas.restify.http.client.request.HttpRequestMessage;
 import com.github.ljtfreitas.restify.http.client.request.RestifyHttpMessageWriteException;
 import com.github.ljtfreitas.restify.http.client.response.HttpResponseMessage;
 import com.github.ljtfreitas.restify.http.client.response.RestifyHttpMessageReadException;
+import com.github.ljtfreitas.restify.http.contract.ContentType;
 
 public class ScalarMessageConverter implements HttpMessageReader<Object>, HttpMessageWriter<Object> {
 
-	private static final String TEXT_PLAIN = "text/plain";
+	private static final ContentType TEXT_PLAIN_CONTENT_TYPE = ContentType.of("text/plain");
 
 	private static final Set<Type> SCALAR_TYPES = new HashSet<>();
 
@@ -68,8 +69,8 @@ public class ScalarMessageConverter implements HttpMessageReader<Object>, HttpMe
 	}
 
 	@Override
-	public String contentType() {
-		return TEXT_PLAIN;
+	public ContentType contentType() {
+		return TEXT_PLAIN_CONTENT_TYPE;
 	}
 
 	@Override

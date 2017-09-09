@@ -40,6 +40,10 @@ public class EndpointResponseReader {
 	private final HttpMessageConverters converters;
 	private final EndpointResponseErrorFallback endpointResponseErrorFallback;
 
+	public EndpointResponseReader(HttpMessageConverters converters) {
+		this(converters, new DefaultEndpointResponseErrorFallback());
+	}
+
 	public EndpointResponseReader(HttpMessageConverters converters, EndpointResponseErrorFallback endpointResponseErrorFallback) {
 		this.converters = converters;
 		this.endpointResponseErrorFallback = endpointResponseErrorFallback;

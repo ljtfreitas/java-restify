@@ -27,13 +27,14 @@ package com.github.ljtfreitas.restify.http.client.message.converter.octet;
 
 import com.github.ljtfreitas.restify.http.client.message.HttpMessageReader;
 import com.github.ljtfreitas.restify.http.client.message.HttpMessageWriter;
+import com.github.ljtfreitas.restify.http.contract.ContentType;
 
 public abstract class OctetStreamMessageConverter<T> implements HttpMessageReader<T>, HttpMessageWriter<T> {
 
-	private static final String OCTET_STREAM_MEDIA_TYPE = "application/octet-stream";
+	private static final ContentType OCTET_STREAM_MEDIA_TYPE = ContentType.of("application/octet-stream");
 
 	@Override
-	public final String contentType() {
+	public final ContentType contentType() {
 		return OCTET_STREAM_MEDIA_TYPE;
 	}
 }

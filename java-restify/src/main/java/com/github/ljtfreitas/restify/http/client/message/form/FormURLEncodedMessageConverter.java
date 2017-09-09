@@ -39,16 +39,17 @@ import com.github.ljtfreitas.restify.http.client.request.HttpRequestMessage;
 import com.github.ljtfreitas.restify.http.client.request.RestifyHttpMessageWriteException;
 import com.github.ljtfreitas.restify.http.client.response.HttpResponseMessage;
 import com.github.ljtfreitas.restify.http.client.response.RestifyHttpMessageReadException;
+import com.github.ljtfreitas.restify.http.contract.ContentType;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethodQueryParametersSerializer;
 
 public abstract class FormURLEncodedMessageConverter<T> implements HttpMessageReader<T>, HttpMessageWriter<T> {
 
-	private static final String APPLICATION_X_WWW_FORM_URLENCODED = "application/x-www-form-urlencoded";
+	private static final ContentType APPLICATION_X_WWW_FORM_URLENCODED = ContentType.of("application/x-www-form-urlencoded");
 
 	private final EndpointMethodQueryParametersSerializer serializer = new EndpointMethodQueryParametersSerializer();
 
 	@Override
-	public String contentType() {
+	public ContentType contentType() {
 		return APPLICATION_X_WWW_FORM_URLENCODED;
 	}
 

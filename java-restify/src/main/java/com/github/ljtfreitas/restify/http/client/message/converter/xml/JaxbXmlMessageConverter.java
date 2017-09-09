@@ -48,15 +48,16 @@ import com.github.ljtfreitas.restify.http.client.request.HttpRequestMessage;
 import com.github.ljtfreitas.restify.http.client.request.RestifyHttpMessageWriteException;
 import com.github.ljtfreitas.restify.http.client.response.HttpResponseMessage;
 import com.github.ljtfreitas.restify.http.client.response.RestifyHttpMessageReadException;
+import com.github.ljtfreitas.restify.http.contract.ContentType;
 
 public class JaxbXmlMessageConverter<T> implements HttpMessageReader<T>, HttpMessageWriter<T> {
 
-	private static final String APPLICATION_XML = "application/xml";
+	private static final ContentType APPLICATION_XML = ContentType.of("application/xml");
 
 	private final Map<Class<?>, JAXBContext> contexts = new ConcurrentHashMap<>();
 
 	@Override
-	public String contentType() {
+	public ContentType contentType() {
 		return APPLICATION_XML;
 	}
 
