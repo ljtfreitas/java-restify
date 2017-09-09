@@ -56,33 +56,33 @@ public class JavaTypeResolver {
 		return doResolve(parameterizedType);
 	}
 
-	private Type doResolve(Type methodReturnType) {
-		Type returnType = methodReturnType;
+	private Type doResolve(Type type) {
+		Type unresolvedType = type;
 
 		while (true) {
-			if (returnType instanceof TypeVariable) {
-				TypeVariable<?> typeVariable = (TypeVariable<?>) returnType;
-				returnType = doResolveTypeVariable(typeVariable);
-				if (returnType == typeVariable) return returnType;
+			if (unresolvedType instanceof TypeVariable) {
+				TypeVariable<?> typeVariable = (TypeVariable<?>) unresolvedType;
+				unresolvedType = doResolveTypeVariable(typeVariable);
+				if (unresolvedType == typeVariable) return unresolvedType;
 
-			} else if (returnType instanceof ParameterizedType) {
-				ParameterizedType parameterizedType = (ParameterizedType) returnType;
+			} else if (unresolvedType instanceof ParameterizedType) {
+				ParameterizedType parameterizedType = (ParameterizedType) unresolvedType;
 				return doResolveParameterizedType(parameterizedType);
 
-			} else if (returnType instanceof Class && ((Class<?>) returnType).isArray()) {
-				Class<?> arrayClassType = (Class<?>) returnType;
+			} else if (unresolvedType instanceof Class && ((Class<?>) unresolvedType).isArray()) {
+				Class<?> arrayClassType = (Class<?>) unresolvedType;
 				return doResolveArrayClassType(arrayClassType);
 
-			} else if (returnType instanceof GenericArrayType) {
-				GenericArrayType genericArrayType = (GenericArrayType) returnType;
+			} else if (unresolvedType instanceof GenericArrayType) {
+				GenericArrayType genericArrayType = (GenericArrayType) unresolvedType;
 				return doResolveGenericArrayType(genericArrayType);
 
-			} else if (returnType instanceof WildcardType) {
-				WildcardType wildcardType = (WildcardType) returnType;
+			} else if (unresolvedType instanceof WildcardType) {
+				WildcardType wildcardType = (WildcardType) unresolvedType;
 				return doResolveWildcardType(wildcardType);
 
 			} else {
-				return returnType;
+				return unresolvedType;
 			}
 		}
 	}

@@ -91,4 +91,8 @@ public class JavaType {
 	public String toString() {
 		return "JavaType:[" + type + "]";
 	}
+
+	public static ParameterizedType parameterizedType(Class<?> rawType, Type... typeArguments) {
+		return new SimpleParameterizedType(rawType, null, typeArguments);
+	}
 }

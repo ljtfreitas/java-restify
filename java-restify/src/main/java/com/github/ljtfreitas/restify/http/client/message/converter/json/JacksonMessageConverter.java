@@ -37,8 +37,11 @@ import com.github.ljtfreitas.restify.http.client.request.HttpRequestMessage;
 import com.github.ljtfreitas.restify.http.client.request.RestifyHttpMessageWriteException;
 import com.github.ljtfreitas.restify.http.client.response.HttpResponseMessage;
 import com.github.ljtfreitas.restify.http.client.response.RestifyHttpMessageReadException;
+import com.github.ljtfreitas.restify.http.contract.ContentType;
 
 public class JacksonMessageConverter<T> extends JsonMessageConverter<T> {
+
+	private static final ContentType APPLICATION_JSON_CONTENT_TYPE = ContentType.of("application/json");
 
 	private final ObjectMapper objectMapper;
 
@@ -48,6 +51,11 @@ public class JacksonMessageConverter<T> extends JsonMessageConverter<T> {
 
 	public JacksonMessageConverter(ObjectMapper objectMapper) {
 		this.objectMapper = objectMapper;
+	}
+
+	@Override
+	public ContentType contentType() {
+		return APPLICATION_JSON_CONTENT_TYPE;
 	}
 
 	@Override
@@ -77,7 +85,7 @@ public class JacksonMessageConverter<T> extends JsonMessageConverter<T> {
 	public void write(T body, HttpRequestMessage httpRequestMessage) throws RestifyHttpMessageWriteException {
 		try {
 			JsonEncoding encoding = Arrays.stream(JsonEncoding.values())
-					.filter(e -> e.getJavaName().equals(httpRequestMessage.charset()))
+					.filter(e -> e.getJavaName().equals(httpRequestMessage.charset().name()))
 					.findFirst()
 					.orElse(JsonEncoding.UTF8);
 
@@ -85,6 +93,7 @@ public class JacksonMessageConverter<T> extends JsonMessageConverter<T> {
 
 			objectMapper.writeValue(generator, body);
 			generator.flush();
+			generator.close();
 
 		} catch (IOException e) {
 			throw new RestifyHttpMessageWriteException(e);

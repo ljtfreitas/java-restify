@@ -13,6 +13,7 @@ import org.junit.Test;
 import com.github.ljtfreitas.restify.http.client.message.converter.text.TextMessageConverter;
 import com.github.ljtfreitas.restify.http.client.request.SimpleHttpRequestMessage;
 import com.github.ljtfreitas.restify.http.client.response.SimpleHttpResponseMessage;
+import com.github.ljtfreitas.restify.http.contract.ContentType;
 
 public class TextMessageConverterTest {
 
@@ -24,8 +25,8 @@ public class TextMessageConverterTest {
 	public void setup() {
 		converter = new TextMessageConverter() {
 			@Override
-			public String contentType() {
-				return "*";
+			public ContentType contentType() {
+				return ContentType.of("*");
 			}
 		};
 

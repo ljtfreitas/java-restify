@@ -28,6 +28,7 @@ package com.github.ljtfreitas.restify.http.contract;
 import static com.github.ljtfreitas.restify.http.util.Preconditions.isTrue;
 
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -83,21 +84,49 @@ public class ContentType {
 
 	private boolean doCompatible(ContentType contentType) {
 		return doEquals(contentType)
-			|| (doCompatibleWithType(contentType.type)
-				&& doCompatibleWithSubtype(contentType.subtype));
+			|| (isWildcardType(this.type) || isWildcardType(contentType.type))
+			|| (compatibleWithType(contentType.type) && compatibleWithSubtype(contentType.subtype));
 	}
 
-	private boolean doCompatibleWithSubtype(String subtype) {
-		return this.subtype.equals(subtype)
-			|| (isWildcard(this.subtype) || isWildcard(subtype));
-	}
-
-	private boolean doCompatibleWithType(String type) {
+	private boolean compatibleWithType(String type) {
 		return this.type.equals(type)
-			|| (isWildcard(this.type) || isWildcard(type));
+				|| (isWildcardType(this.type) || isWildcardType(type));
 	}
 
-	private boolean isWildcard(String type) {
+	private boolean compatibleWithSubtype(String subtype) {
+		if (this.subtype.equals(subtype)) {
+			return true;
+		} else if (isWildcardSubtype(this.subtype) || isWildcardSubtype(subtype)) {
+			if (!isWildcardWithSuffix(this.subtype) && !isWildcardWithSuffix(subtype)) {
+				return true;
+
+			} else if (isWildcardWithSuffix(this.subtype) && isWildcardWithSuffix(subtype)) {
+				return (extractSubtypeSuffix(this.subtype).equals(extractSubtypeSuffix(subtype)) &&
+						(WILDCARD_TYPE.equals(extractSubtypeWithoutSuffix(this.subtype)) 
+								|| WILDCARD_TYPE.equals(extractSubtypeWithoutSuffix(subtype))));
+			}
+		}
+
+		return false;
+	}
+
+	private String extractSubtypeWithoutSuffix(String subtype) {
+		return subtype.substring(0, subtype.indexOf("+"));
+	}
+
+	private String extractSubtypeSuffix(String subtype) {
+		return subtype.substring(subtype.indexOf("+") + 1);
+	}
+
+	private boolean isWildcardWithSuffix(String subtype) {
+		return subtype.contains("+");
+	}
+	
+	private boolean isWildcardSubtype(String subtype) {
+		return WILDCARD_TYPE.equals(subtype) || subtype.startsWith("*+");
+	}
+	
+	private boolean isWildcardType(String type) {
 		return WILDCARD_TYPE.equals(type);
 	}
 
@@ -147,11 +176,19 @@ public class ContentType {
 
 		return new ContentType(type, subtype, ContentTypeParameters.of(parameters));
 	}
+	
+	public static ContentType of(String type, String subtype) {
+		return new ContentType(type, subtype, new ContentTypeParameters());		
+	}
 
 	public static class ContentTypeParameters {
 
 		private final Map<String, String> parameters;
 
+		private ContentTypeParameters() {
+			this(Collections.emptyMap());
+		}
+		
 		private ContentTypeParameters(Map<String, String> parameters) {
 			this.parameters = new LinkedHashMap<>(parameters);
 		}

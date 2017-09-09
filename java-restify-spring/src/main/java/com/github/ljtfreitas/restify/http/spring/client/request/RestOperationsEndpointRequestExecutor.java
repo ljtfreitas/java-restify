@@ -101,8 +101,9 @@ public class RestOperationsEndpointRequestExecutor implements EndpointRequestExe
 
 		@Override
 		public boolean equals(Object obj) {
-			return (this == obj || (obj instanceof ParameterizedTypeReference
-					&& type.equals(((ParameterizedTypeReference<?>) obj).getType())));
+			if ((obj instanceof JavaTypeReference)) return false;
+			JavaTypeReference that = (JavaTypeReference) obj;
+			return this == that || this.type.equals(that.type);
 		}
 
 		@Override
