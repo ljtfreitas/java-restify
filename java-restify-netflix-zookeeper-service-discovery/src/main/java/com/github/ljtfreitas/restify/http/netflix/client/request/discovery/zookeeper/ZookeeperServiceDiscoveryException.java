@@ -23,65 +23,21 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.http.util;
+package com.github.ljtfreitas.restify.http.netflix.client.request.discovery.zookeeper;
 
-import java.util.function.Function;
-import java.util.function.Supplier;
+public class ZookeeperServiceDiscoveryException extends RuntimeException {
 
-public interface Tryable {
+	private static final long serialVersionUID = 1L;
 
-	public static <T> T of(TryableSupplier<T> supplier) {
-		try {
-			return supplier.get();
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
+	public ZookeeperServiceDiscoveryException(String message, Throwable cause) {
+		super(message, cause);
 	}
 
-	public static <T> T or(TryableSupplier<T> supplier, T onError) {
-		try {
-			return supplier.get();
-		} catch (Exception e) {
-			return onError;
-		}
+	public ZookeeperServiceDiscoveryException(String message) {
+		super(message);
 	}
 
-	public static <X extends Throwable, T> T of(TryableSupplier<T> supplier, Supplier<? extends X> exception) throws X {
-		try {
-			return supplier.get();
-		} catch (Exception e) {
-			throw exception.get();
-		}
-	}
-
-	public static <X extends Throwable, T> T of(TryableSupplier<T> supplier, Function<? super Exception, ? extends X> exception) throws X {
-		try {
-			return supplier.get();
-		} catch (Exception e) {
-			throw exception.apply(e);
-		}
-	}
-
-	public static void run(TryableExpression expression) {
-		try {
-			expression.run();
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
-	}
-
-	public static void silently(TryableExpression expression) {
-		try {
-			expression.run();
-		} catch (Exception e) {
-		}
-	}
-
-	public interface TryableSupplier<T> {
-		T get() throws Exception;
-	}
-
-	public interface TryableExpression {
-		void run() throws Exception;
+	public ZookeeperServiceDiscoveryException(Throwable cause) {
+		super(cause);
 	}
 }

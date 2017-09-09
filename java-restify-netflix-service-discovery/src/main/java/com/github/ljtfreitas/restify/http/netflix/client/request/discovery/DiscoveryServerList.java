@@ -23,65 +23,49 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.http.util;
+package com.github.ljtfreitas.restify.http.netflix.client.request.discovery;
 
-import java.util.function.Function;
-import java.util.function.Supplier;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
-public interface Tryable {
+import com.netflix.client.config.IClientConfig;
+import com.netflix.loadbalancer.AbstractServerList;
+import com.netflix.loadbalancer.Server;
 
-	public static <T> T of(TryableSupplier<T> supplier) {
-		try {
-			return supplier.get();
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
+public class DiscoveryServerList<T extends ServiceInstance> extends AbstractServerList<Server> {
+
+	private final ServiceDiscovery<T> serviceDiscovery;
+	private String serviceName;
+
+	public DiscoveryServerList(ServiceDiscovery<T> serviceDiscovery) {
+		this(serviceDiscovery, null);
 	}
 
-	public static <T> T or(TryableSupplier<T> supplier, T onError) {
-		try {
-			return supplier.get();
-		} catch (Exception e) {
-			return onError;
-		}
+	public DiscoveryServerList(ServiceDiscovery<T> serviceDiscovery, String serviceName) {
+		this.serviceDiscovery = serviceDiscovery;
+		this.serviceName = serviceName;
 	}
 
-	public static <X extends Throwable, T> T of(TryableSupplier<T> supplier, Supplier<? extends X> exception) throws X {
-		try {
-			return supplier.get();
-		} catch (Exception e) {
-			throw exception.get();
-		}
+	@Override
+	public List<Server> getInitialListOfServers() {
+		return allServers();
 	}
 
-	public static <X extends Throwable, T> T of(TryableSupplier<T> supplier, Function<? super Exception, ? extends X> exception) throws X {
-		try {
-			return supplier.get();
-		} catch (Exception e) {
-			throw exception.apply(e);
-		}
+	@Override
+	public List<Server> getUpdatedListOfServers() {
+		return allServers();
 	}
 
-	public static void run(TryableExpression expression) {
-		try {
-			expression.run();
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
+	private List<Server> allServers() {
+		return serviceDiscovery.queryForInstances(serviceName)
+			.stream()
+				.map(DiscoveryServer::new)
+					.collect(Collectors.toList());
 	}
 
-	public static void silently(TryableExpression expression) {
-		try {
-			expression.run();
-		} catch (Exception e) {
-		}
-	}
-
-	public interface TryableSupplier<T> {
-		T get() throws Exception;
-	}
-
-	public interface TryableExpression {
-		void run() throws Exception;
+	@Override
+	public void initWithNiwsConfig(IClientConfig clientConfig) {
+		this.serviceName = Optional.ofNullable(this.serviceName).orElseGet(clientConfig::getClientName);
 	}
 }
