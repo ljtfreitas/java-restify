@@ -28,7 +28,6 @@ package com.github.ljtfreitas.restify.http.client.authentication.oauth2;
 import static com.github.ljtfreitas.restify.http.util.Preconditions.nonNull;
 
 import java.net.URI;
-import java.net.URL;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -258,21 +257,6 @@ public class OAuth2AuthenticationBuilder {
 			this.context = context;
 		}
 
-		public OAuth2ClientCredentialsGrantBuilder resource(Resource resource) {
-			delegate.resource(resource);
-			return this;
-		}
-
-		public OAuth2ClientCredentialsGrantBuilder resource(String id) {
-			delegate.resource(id);
-			return this;
-		}
-
-		public OAuth2ClientCredentialsGrantBuilder resource(String id, URL url) {
-			delegate.resource(id, url);
-			return this;
-		}
-
 		public OAuth2ClientCredentialsGrantBuilder accessTokenUri(String accessTokenUri) {
 			delegate.accessTokenUri(accessTokenUri);
 			return this;
@@ -330,21 +314,6 @@ public class OAuth2AuthenticationBuilder {
 
 		private OAuth2ResourceOwnerGrantBuilder(OAuth2AuthenticationBuilder context) {
 			this.context = context;
-		}
-
-		public OAuth2ResourceOwnerGrantBuilder resource(Resource resource) {
-			delegate.resource(resource);
-			return this;
-		}
-
-		public OAuth2ResourceOwnerGrantBuilder resource(String id) {
-			delegate.resource(id);
-			return this;
-		}
-
-		public OAuth2ResourceOwnerGrantBuilder resource(String id, URL url) {
-			delegate.resource(id, url);
-			return this;
 		}
 
 		public OAuth2ResourceOwnerGrantBuilder accessTokenUri(String accessTokenUri) {
@@ -419,21 +388,6 @@ public class OAuth2AuthenticationBuilder {
 
 		private OAuth2ImplicitGrantBuilder(OAuth2AuthenticationBuilder context) {
 			this.context = context;
-		}
-
-		public OAuth2ImplicitGrantBuilder resource(Resource resource) {
-			delegate.resource(resource);
-			return this;
-		}
-
-		public OAuth2ImplicitGrantBuilder resource(String id) {
-			delegate.resource(id);
-			return this;
-		}
-
-		public OAuth2ImplicitGrantBuilder resource(String id, URL url) {
-			delegate.resource(id, url);
-			return this;
 		}
 
 		public OAuth2ImplicitGrantBuilder accessTokenUri(String accessTokenUri) {
@@ -575,21 +529,6 @@ public class OAuth2AuthenticationBuilder {
 
 		private OAuth2AuthorizationCodeGrantBuilder(OAuth2AuthenticationBuilder context) {
 			this.context = context;
-		}
-
-		public OAuth2AuthorizationCodeGrantBuilder resource(Resource resource) {
-			delegate.resource(resource);
-			return this;
-		}
-
-		public OAuth2AuthorizationCodeGrantBuilder resource(String id) {
-			delegate.resource(id);
-			return this;
-		}
-
-		public OAuth2AuthorizationCodeGrantBuilder resource(String id, URL url) {
-			delegate.resource(id, url);
-			return this;
 		}
 
 		public OAuth2AuthorizationCodeGrantBuilder accessTokenUri(String accessTokenUri) {

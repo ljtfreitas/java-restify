@@ -94,5 +94,5 @@ public class OAuthAuthenticatedEndpointRequest {
 
 	public ClientCredentials credentials() {
 		return properties.credentials();
-	}	
+	}
 }

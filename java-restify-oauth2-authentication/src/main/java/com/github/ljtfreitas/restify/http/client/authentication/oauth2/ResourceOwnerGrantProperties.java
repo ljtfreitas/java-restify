@@ -28,7 +28,6 @@ package com.github.ljtfreitas.restify.http.client.authentication.oauth2;
 import static com.github.ljtfreitas.restify.http.util.Preconditions.nonNull;
 
 import java.net.URI;
-import java.net.URL;
 import java.security.Principal;
 import java.util.Collection;
 
@@ -44,21 +43,6 @@ public class ResourceOwnerGrantProperties extends GrantProperties {
 
 		private final ResourceOwnerGrantProperties properties = new ResourceOwnerGrantProperties();
 		private final GrantProperties.Builder delegate = new GrantProperties.Builder(properties);
-
-		public Builder resource(Resource resource) {
-			delegate.resource(resource);
-			return this;
-		}
-
-		public Builder resource(String id) {
-			delegate.resource(id);
-			return this;
-		}
-
-		public Builder resource(String id, URL url) {
-			delegate.resource(id, url);
-			return this;
-		}
 
 		public Builder accessTokenUri(String accessTokenUri) {
 			delegate.accessTokenUri(accessTokenUri);

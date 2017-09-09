@@ -46,12 +46,12 @@ class AccessTokenMemoryStorage implements AccessTokenStorage {
 	}
 
 	private AccessTokenKey key(OAuthAuthenticatedEndpointRequest request) {
-		String resourceServer = request.endpoint().getHost();
+		String resource = request.endpoint().getHost();
 		String clientId = request.clientId();
 		String scope = request.scope();
 		String username = request.user().map(Principal::getName).orElse(null);
 
-		return new AccessTokenKey(resourceServer, clientId, scope, username);
+		return new AccessTokenKey(resource, clientId, scope, username);
 	}
 
 	private class AccessTokenKey {
