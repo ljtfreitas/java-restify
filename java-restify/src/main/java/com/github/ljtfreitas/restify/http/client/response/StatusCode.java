@@ -33,6 +33,7 @@ import static com.github.ljtfreitas.restify.http.client.response.HttpStatusCode.
 import static com.github.ljtfreitas.restify.http.client.response.HttpStatusCode.CREATED;
 import static com.github.ljtfreitas.restify.http.client.response.HttpStatusCode.EXPECTIATION_FAILED;
 import static com.github.ljtfreitas.restify.http.client.response.HttpStatusCode.FORBIDDEN;
+import static com.github.ljtfreitas.restify.http.client.response.HttpStatusCode.FOUND;
 import static com.github.ljtfreitas.restify.http.client.response.HttpStatusCode.GATEWAY_TIMEOUT;
 import static com.github.ljtfreitas.restify.http.client.response.HttpStatusCode.GONE;
 import static com.github.ljtfreitas.restify.http.client.response.HttpStatusCode.HTTP_VERSION_NOT_SUPPORTED;
@@ -119,7 +120,7 @@ public class StatusCode {
 		return code == SWITCHING_PROTOCOLS.value();
 	}
 
-	public boolean isOK() {
+	public boolean isOk() {
 		return code == OK.value();
 	}
 
@@ -279,6 +280,10 @@ public class StatusCode {
 
 	public static StatusCode noContent() {
 		return new StatusCode(NO_CONTENT);
+	}
+
+	public static StatusCode found() {
+		return new StatusCode(FOUND);
 	}
 
 	public static StatusCode notModified() {
