@@ -31,6 +31,8 @@ import java.security.Principal;
 import java.util.Collection;
 import java.util.Optional;
 
+import com.github.ljtfreitas.restify.http.client.Header;
+import com.github.ljtfreitas.restify.http.client.Headers;
 import com.github.ljtfreitas.restify.http.contract.Cookie;
 import com.github.ljtfreitas.restify.http.contract.Cookies;
 
@@ -42,6 +44,7 @@ public class AuthorizationCodeGrantProperties extends GrantProperties {
 	private String responseType;
 	private String cookie;
 	private String state;
+	private Headers headers = new Headers();
 
 	public Optional<String> authorizationCode() {
 		return Optional.ofNullable(authorizationCode);
@@ -65,6 +68,10 @@ public class AuthorizationCodeGrantProperties extends GrantProperties {
 
 	public Optional<String> state() {
 		return Optional.ofNullable(state);
+	}
+
+	public Headers headers() {
+		return headers;
 	}
 
 	public static class Builder {
@@ -189,6 +196,26 @@ public class AuthorizationCodeGrantProperties extends GrantProperties {
 
 		public Builder state(String state) {
 			properties.state = state;
+			return this;
+		}
+
+		public Builder header(String name, String value) {
+			properties.headers.put(name, value);
+			return this;
+		}
+
+		public Builder header(Header header) {
+			properties.headers.put(header);
+			return this;
+		}
+
+		public Builder headers(Header... headers) {
+			properties.headers.putAll(new Headers(headers));
+			return this;
+		}
+
+		public Builder headers(Headers headers) {
+			properties.headers.putAll(headers);
 			return this;
 		}
 

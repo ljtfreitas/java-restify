@@ -30,6 +30,8 @@ import java.net.URL;
 import java.security.Principal;
 import java.util.Collection;
 
+import com.github.ljtfreitas.restify.http.client.Header;
+import com.github.ljtfreitas.restify.http.client.Headers;
 import com.github.ljtfreitas.restify.http.contract.Cookie;
 import com.github.ljtfreitas.restify.http.contract.Cookies;
 
@@ -147,6 +149,26 @@ public class ImplicitGrantProperties extends AuthorizationCodeGrantProperties {
 
 		public Builder user(Principal user) {
 			delegate.user(user);
+			return this;
+		}
+
+		public Builder header(String name, String value) {
+			delegate.header(name, value);
+			return this;
+		}
+
+		public Builder header(Header header) {
+			delegate.header(header);
+			return this;
+		}
+
+		public Builder headers(Header... headers) {
+			delegate.headers(new Headers(headers));
+			return this;
+		}
+
+		public Builder headers(Headers headers) {
+			delegate.headers(headers);
 			return this;
 		}
 

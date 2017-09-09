@@ -35,6 +35,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Optional;
 
+import com.github.ljtfreitas.restify.http.client.Header;
+import com.github.ljtfreitas.restify.http.client.Headers;
 import com.github.ljtfreitas.restify.http.client.message.HttpMessageConverter;
 import com.github.ljtfreitas.restify.http.client.message.HttpMessageConverters;
 import com.github.ljtfreitas.restify.http.client.message.converter.json.JsonMessageConverter;
@@ -529,6 +531,26 @@ public class OAuth2AuthenticationBuilder {
 			return this;
 		}
 
+		public OAuth2ImplicitGrantBuilder header(String name, String value) {
+			delegate.header(name, value);
+			return this;
+		}
+
+		public OAuth2ImplicitGrantBuilder header(Header header) {
+			delegate.header(header);
+			return this;
+		}
+
+		public OAuth2ImplicitGrantBuilder headers(Header... headers) {
+			delegate.headers(headers);
+			return this;
+		}
+
+		public OAuth2ImplicitGrantBuilder headers(Headers headers) {
+			delegate.headers(headers);
+			return this;
+		}
+
 		public OAuth2AuthenticationBuilder and() {
 			return context;
 		}
@@ -662,6 +684,26 @@ public class OAuth2AuthenticationBuilder {
 
 		public OAuth2AuthorizationCodeGrantBuilder state(String state) {
 			delegate.state(state);
+			return this;
+		}
+
+		public OAuth2AuthorizationCodeGrantBuilder header(String name, String value) {
+			delegate.header(name, value);
+			return this;
+		}
+
+		public OAuth2AuthorizationCodeGrantBuilder header(Header header) {
+			delegate.header(header);
+			return this;
+		}
+
+		public OAuth2AuthorizationCodeGrantBuilder headers(Header... headers) {
+			delegate.headers(headers);
+			return this;
+		}
+
+		public OAuth2AuthorizationCodeGrantBuilder headers(Headers headers) {
+			delegate.headers(headers);
 			return this;
 		}
 

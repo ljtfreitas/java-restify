@@ -112,7 +112,7 @@ public class DefaultAuthorizationServer implements AuthorizationServer {
 			parameters.put("state", properties.state().get());
 		}
 
-		Headers headers = new Headers();
+		Headers headers = new Headers(properties.headers());
 
 		if (properties.cookie().isPresent()) {
 			headers.put("Cookie", properties.cookie().get());
