@@ -1,23 +1,29 @@
 package com.github.ljtfreitas.restify.http.client.authentication;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.mockito.Mockito.when;
 
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 
-import com.github.ljtfreitas.restify.http.client.authentication.BasicAuthentication;
-
+@RunWith(MockitoJUnitRunner.class)
 public class BasicAuthenticationTest {
+
+	@Mock
+	private BasicCredentials basicCredentials;
 
 	@Test
 	public void shouldGenerateBasicAuthenticationForUserAndPassword() {
-		// user = myUser
-		// password = myPassword
-		// encodedBase64(myUser:myPassword) = bXlVc2VyOm15UGFzc3dvcmQ=
+		String content = "Basic aaa111";
 
-		BasicAuthentication basicAuthentication = new BasicAuthentication("myUser", "myPassword");
+		when(basicCredentials.toString()).thenReturn(content);
 
-		String authenticationContent = basicAuthentication.content();
+		BasicAuthentication basicAuthentication = new BasicAuthentication(basicCredentials);
 
-		assertEquals(authenticationContent, "Basic bXlVc2VyOm15UGFzc3dvcmQ=");
+		String authenticationContent = basicAuthentication.content(null);
+
+		assertEquals(authenticationContent, content);
 	}
 }

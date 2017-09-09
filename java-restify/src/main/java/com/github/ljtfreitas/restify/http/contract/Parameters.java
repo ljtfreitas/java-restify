@@ -25,13 +25,18 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.contract;
 
+import static com.github.ljtfreitas.restify.http.util.Preconditions.nonNull;
+
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.StringJoiner;
+import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
 import com.github.ljtfreitas.restify.http.client.charset.Encoding;
@@ -66,8 +71,16 @@ public class Parameters {
 	}
 
 	public Optional<String> first(String name) {
+		return doFirst(name);
+	}
+
+	private Optional<String> doFirst(String name) {
 		return Optional.ofNullable(parameters.get(name))
 			.flatMap(values -> values.stream().findFirst());
+	}
+
+	public Optional<String> get(String name) {
+		return doFirst(name);
 	}
 
 	public Collection<Parameter> all() {
@@ -100,6 +113,11 @@ public class Parameters {
 			this.values = values;
 		}
 
+		public Parameter(String name, String value) {
+			this.name = name;
+			this.values = Collections.singleton(nonNull(value));
+		}
+
 		public String name() {
 			return name;
 		}
@@ -108,5 +126,38 @@ public class Parameters {
 			return values;
 		}
 
+		public String value() {
+			return values.stream().findFirst().orElse(null);
+		}
+	}
+
+	public static Parameters parse(String source) {
+		Parameters parameters = new Parameters();
+
+		String safe = Optional.ofNullable(source).orElse("");
+
+		Arrays.stream(safe.split("&"))
+				.map(p -> p.split("="))
+					.filter(p -> p.length == 2)
+						.forEach(p -> parameters.put(p[0], p[1]));
+
+		return parameters;
+	}
+
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	public static Parameters of(Map<String, ?> source) {
+		Parameters parameters = new Parameters();
+
+		BiConsumer<String, Object> applier = (name, value) -> parameters.put(name, value.toString());
+
+		source.forEach((key, value) -> {
+			if (value instanceof Iterable) {
+				((Iterable) value).forEach(e -> applier.accept(key, e));
+			} else {
+				applier.accept(key, value);
+			}
+		});
+
+		return parameters;
 	}
 }

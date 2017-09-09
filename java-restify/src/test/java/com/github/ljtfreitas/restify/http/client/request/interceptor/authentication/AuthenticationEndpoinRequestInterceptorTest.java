@@ -1,6 +1,7 @@
 package com.github.ljtfreitas.restify.http.client.request.interceptor.authentication;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
@@ -29,14 +30,16 @@ public class AuthenticationEndpoinRequestInterceptorTest {
 
 	@Test
 	public void shouldCreateAuthorizationHeader() {
-		when(authenticationMock.content())
-			.thenReturn("abc:123");
-
 		EndpointRequest endpointRequest = new EndpointRequest(URI.create("http://my.api.com"), "GET");
 
-		interceptor.intercepts(endpointRequest);
+		when(authenticationMock.content(endpointRequest))
+			.thenReturn("abc:123");
 
-		Optional<Header> authorizationHeader = endpointRequest.headers().get("Authorization");
+		EndpointRequest authorizedEndpointRequest = interceptor.intercepts(endpointRequest);
+
+		assertSame(endpointRequest, authorizedEndpointRequest);
+
+		Optional<Header> authorizationHeader = authorizedEndpointRequest.headers().get("Authorization");
 
 		assertTrue(authorizationHeader.isPresent());
 		assertEquals("abc:123", authorizationHeader.get().value());

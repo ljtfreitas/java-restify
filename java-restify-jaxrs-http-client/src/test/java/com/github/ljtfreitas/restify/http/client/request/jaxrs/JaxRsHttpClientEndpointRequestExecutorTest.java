@@ -64,7 +64,7 @@ public class JaxRsHttpClientEndpointRequestExecutorTest {
 
 		EndpointResponse<MyModel> myModelResponse = executor.execute(endpointRequest);
 
-		assertTrue(myModelResponse.code().isOK());
+		assertTrue(myModelResponse.code().isOk());
 
 		MyModel myModel = myModelResponse.body();
 
@@ -119,7 +119,7 @@ public class JaxRsHttpClientEndpointRequestExecutorTest {
 
 		EndpointResponse<MyModel> myModelResponse = executor.execute(endpointRequest);
 
-		assertTrue(myModelResponse.code().isOK());
+		assertTrue(myModelResponse.code().isOk());
 
 		MyModel myModel = myModelResponse.body();
 

@@ -25,21 +25,28 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.authentication;
 
-import java.util.Base64;
+import static com.github.ljtfreitas.restify.http.util.Preconditions.nonNull;
+
+import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
 
 public class BasicAuthentication implements Authentication {
 
-	private final String user;
-	private final String password;
+	private final BasicCredentials credentials;
 
-	public BasicAuthentication(String user, String password) {
-		this.user = user;
-		this.password = password;
+	public BasicAuthentication(String username, String password) {
+		this(new BasicCredentials(username, password));
+	}
+
+	public BasicAuthentication(Credentials credentials) {
+		this(new BasicCredentials(credentials));
+	}
+
+	public BasicAuthentication(BasicCredentials credentials) {
+		this.credentials = nonNull(credentials, "Credentials are required.");
 	}
 
 	@Override
-	public String content() {
-		String content = user + ":" + password;
-		return "Basic " + Base64.getEncoder().encodeToString(content.getBytes());
+	public String content(EndpointRequest endpointRequest) {
+		return credentials.toString();
 	}
 }
