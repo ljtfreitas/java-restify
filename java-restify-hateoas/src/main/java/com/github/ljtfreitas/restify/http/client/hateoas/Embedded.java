@@ -38,7 +38,7 @@ public class Embedded {
 		this(Collections.emptyList());
 	}
 
-	public Embedded(Collection<JsonEmbeddedResource> resources) {
+	public Embedded(Collection<EmbeddedResource> resources) {
 		this.resources = new ArrayList<>(resources);
 	}
 

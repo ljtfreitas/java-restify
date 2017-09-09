@@ -36,6 +36,7 @@ import com.fasterxml.jackson.core.TreeNode;
 import com.fasterxml.jackson.databind.DeserializationContext;
 import com.fasterxml.jackson.databind.JsonDeserializer;
 import com.github.ljtfreitas.restify.http.client.hateoas.Embedded;
+import com.github.ljtfreitas.restify.http.client.hateoas.EmbeddedResource;
 import com.github.ljtfreitas.restify.http.client.hateoas.JsonEmbeddedResource;
 import com.github.ljtfreitas.restify.http.client.hateoas.JsonEmbeddedResourceReader;
 
@@ -50,7 +51,7 @@ class HypermediaHalEmbeddedDeserializer extends JsonDeserializer<Embedded> {
 
 		context.getTypeFactory();
 
-		Collection<JsonEmbeddedResource> elements = new ArrayList<>();
+		Collection<EmbeddedResource> elements = new ArrayList<>();
 
 		tree.fieldNames()
 			.forEachRemaining(field -> elements.add(new JsonEmbeddedResource(field, tree.get(field),
