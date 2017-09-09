@@ -23,65 +23,33 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.http.util;
+package com.github.ljtfreitas.restify.http.netflix.client.request.discovery.kubernetes;
 
-import java.util.function.Function;
-import java.util.function.Supplier;
+import java.util.Optional;
 
-public interface Tryable {
+public class KubernetesDiscoveryConfiguration {
 
-	public static <T> T of(TryableSupplier<T> supplier) {
-		try {
-			return supplier.get();
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
+	private final String namespace;
+	private final String portName;
+
+	public KubernetesDiscoveryConfiguration() {
+		this(null, null);
 	}
 
-	public static <T> T or(TryableSupplier<T> supplier, T onError) {
-		try {
-			return supplier.get();
-		} catch (Exception e) {
-			return onError;
-		}
+	public KubernetesDiscoveryConfiguration(String namespace) {
+		this(namespace, null);
 	}
 
-	public static <X extends Throwable, T> T of(TryableSupplier<T> supplier, Supplier<? extends X> exception) throws X {
-		try {
-			return supplier.get();
-		} catch (Exception e) {
-			throw exception.get();
-		}
+	public KubernetesDiscoveryConfiguration(String namespace, String portName) {
+		this.namespace = namespace;
+		this.portName = portName;
 	}
 
-	public static <X extends Throwable, T> T of(TryableSupplier<T> supplier, Function<? super Exception, ? extends X> exception) throws X {
-		try {
-			return supplier.get();
-		} catch (Exception e) {
-			throw exception.apply(e);
-		}
+	public Optional<String> namespace() {
+		return Optional.ofNullable(namespace);
 	}
 
-	public static void run(TryableExpression expression) {
-		try {
-			expression.run();
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
-	}
-
-	public static void silently(TryableExpression expression) {
-		try {
-			expression.run();
-		} catch (Exception e) {
-		}
-	}
-
-	public interface TryableSupplier<T> {
-		T get() throws Exception;
-	}
-
-	public interface TryableExpression {
-		void run() throws Exception;
+	public Optional<String> portName() {
+		return Optional.ofNullable(portName);
 	}
 }

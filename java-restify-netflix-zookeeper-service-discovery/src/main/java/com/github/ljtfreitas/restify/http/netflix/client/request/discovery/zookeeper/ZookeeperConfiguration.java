@@ -23,65 +23,37 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.http.util;
+package com.github.ljtfreitas.restify.http.netflix.client.request.discovery.zookeeper;
 
-import java.util.function.Function;
-import java.util.function.Supplier;
+import static com.github.ljtfreitas.restify.http.util.Preconditions.nonNull;
 
-public interface Tryable {
+public class ZookeeperConfiguration {
 
-	public static <T> T of(TryableSupplier<T> supplier) {
-		try {
-			return supplier.get();
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
+	private final String address;
+	private final Integer port;
+	private final String root;
+
+	public ZookeeperConfiguration(String root) {
+		this(null, 2181, root);
 	}
 
-	public static <T> T or(TryableSupplier<T> supplier, T onError) {
-		try {
-			return supplier.get();
-		} catch (Exception e) {
-			return onError;
-		}
+	public ZookeeperConfiguration(String address, int port) {
+		this(address, port, "/");
 	}
 
-	public static <X extends Throwable, T> T of(TryableSupplier<T> supplier, Supplier<? extends X> exception) throws X {
-		try {
-			return supplier.get();
-		} catch (Exception e) {
-			throw exception.get();
-		}
+	public ZookeeperConfiguration(String address, int port, String root) {
+		this.address = address;
+		this.port = port;
+		this.root = root;
 	}
 
-	public static <X extends Throwable, T> T of(TryableSupplier<T> supplier, Function<? super Exception, ? extends X> exception) throws X {
-		try {
-			return supplier.get();
-		} catch (Exception e) {
-			throw exception.apply(e);
-		}
+	public String root() {
+		return root;
 	}
 
-	public static void run(TryableExpression expression) {
-		try {
-			expression.run();
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
-	}
-
-	public static void silently(TryableExpression expression) {
-		try {
-			expression.run();
-		} catch (Exception e) {
-		}
-	}
-
-	public interface TryableSupplier<T> {
-		T get() throws Exception;
-	}
-
-	public interface TryableExpression {
-		void run() throws Exception;
+	public String connectionString() {
+		nonNull(address, "Zookeeper address cannot be null.");
+		nonNull(port, "Zookeeper port cannot be null.");
+		return address + ":" + port;
 	}
 }

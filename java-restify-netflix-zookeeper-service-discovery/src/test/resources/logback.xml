@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+    <logger name="org.mockserver" level="OFF"/>
+
+    <root level="INFO">
+        <appender class="ch.qos.logback.core.ConsoleAppender">
+            <encoder>
+                <pattern>%date %level [%thread] %logger{35} [%file:%line] %msg%n</pattern>
+            </encoder>
+        </appender>
+    </root>
+</configuration>

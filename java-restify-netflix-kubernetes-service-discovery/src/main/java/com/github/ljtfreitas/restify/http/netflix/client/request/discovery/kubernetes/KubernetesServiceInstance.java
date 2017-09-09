@@ -23,65 +23,37 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.http.util;
+package com.github.ljtfreitas.restify.http.netflix.client.request.discovery.kubernetes;
 
-import java.util.function.Function;
-import java.util.function.Supplier;
+import com.github.ljtfreitas.restify.http.netflix.client.request.discovery.ServiceInstance;
 
-public interface Tryable {
+import io.fabric8.kubernetes.api.model.EndpointAddress;
+import io.fabric8.kubernetes.api.model.EndpointPort;
 
-	public static <T> T of(TryableSupplier<T> supplier) {
-		try {
-			return supplier.get();
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
+public class KubernetesServiceInstance implements ServiceInstance {
+
+	private final String id;
+	private final String address;
+	private final int port;
+
+	public KubernetesServiceInstance(String id, EndpointAddress address, EndpointPort port) {
+		this.id = id;
+		this.address = address.getIp();
+		this.port = port.getPort();
 	}
 
-	public static <T> T or(TryableSupplier<T> supplier, T onError) {
-		try {
-			return supplier.get();
-		} catch (Exception e) {
-			return onError;
-		}
+	@Override
+	public String name() {
+		return id;
 	}
 
-	public static <X extends Throwable, T> T of(TryableSupplier<T> supplier, Supplier<? extends X> exception) throws X {
-		try {
-			return supplier.get();
-		} catch (Exception e) {
-			throw exception.get();
-		}
+	@Override
+	public String host() {
+		return address;
 	}
 
-	public static <X extends Throwable, T> T of(TryableSupplier<T> supplier, Function<? super Exception, ? extends X> exception) throws X {
-		try {
-			return supplier.get();
-		} catch (Exception e) {
-			throw exception.apply(e);
-		}
-	}
-
-	public static void run(TryableExpression expression) {
-		try {
-			expression.run();
-		} catch (Exception e) {
-			throw new RuntimeException(e);
-		}
-	}
-
-	public static void silently(TryableExpression expression) {
-		try {
-			expression.run();
-		} catch (Exception e) {
-		}
-	}
-
-	public interface TryableSupplier<T> {
-		T get() throws Exception;
-	}
-
-	public interface TryableExpression {
-		void run() throws Exception;
+	@Override
+	public int port() {
+		return port;
 	}
 }

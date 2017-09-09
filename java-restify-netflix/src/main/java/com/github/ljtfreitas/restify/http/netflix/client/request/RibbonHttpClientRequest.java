@@ -39,7 +39,7 @@ import com.github.ljtfreitas.restify.http.client.response.HttpResponseMessage;
 import com.github.ljtfreitas.restify.http.util.Tryable;
 import com.netflix.client.ClientException;
 
-class RibbonHttpClientRequest implements HttpClientRequest {
+public class RibbonHttpClientRequest implements HttpClientRequest {
 
 	private final EndpointRequest endpointRequest;
 	private final RibbonLoadBalancedClient ribbonLoadBalancedClient;
