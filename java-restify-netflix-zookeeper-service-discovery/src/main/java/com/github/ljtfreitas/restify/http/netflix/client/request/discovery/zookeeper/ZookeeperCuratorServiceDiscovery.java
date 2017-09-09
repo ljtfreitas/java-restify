@@ -140,8 +140,10 @@ public class ZookeeperCuratorServiceDiscovery<T> implements Closeable {
 
 	@Override
 	public final void close() throws IOException {
-		Tryable.silently(serviceDiscovery::close);
-		Tryable.silently(curator::close);
+		if (!CuratorFrameworkState.STOPPED.equals(curator.getState())) {
+			Tryable.silently(serviceDiscovery::close);
+			Tryable.silently(curator::close);
+		}
 	}
 
 	private class RetryNever implements RetryPolicy {
