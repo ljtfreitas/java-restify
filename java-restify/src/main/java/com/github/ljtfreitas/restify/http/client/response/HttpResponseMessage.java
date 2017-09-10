@@ -28,12 +28,12 @@ package com.github.ljtfreitas.restify.http.client.response;
 import java.io.Closeable;
 import java.io.InputStream;
 
-import com.github.ljtfreitas.restify.http.client.Headers;
+import com.github.ljtfreitas.restify.http.client.header.Headers;
 import com.github.ljtfreitas.restify.http.client.request.HttpRequestMessage;
 
 public interface HttpResponseMessage extends Closeable {
 
-	public StatusCode statusCode();
+	public StatusCode status();
 
 	public Headers headers();
 

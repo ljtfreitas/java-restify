@@ -1,4 +1,4 @@
-package com.github.ljtfreitas.restify.http.client;
+package com.github.ljtfreitas.restify.http.client.call;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
@@ -14,9 +14,6 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import com.github.ljtfreitas.restify.http.client.EndpointMethodExecutor;
-import com.github.ljtfreitas.restify.http.client.call.EndpointCall;
-import com.github.ljtfreitas.restify.http.client.call.EndpointCallFactory;
 import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutable;
 import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutables;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethod;

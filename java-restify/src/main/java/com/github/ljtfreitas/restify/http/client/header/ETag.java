@@ -23,47 +23,74 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.http.contract;
+package com.github.ljtfreitas.restify.http.client.header;
 
 import static com.github.ljtfreitas.restify.http.util.Preconditions.nonNull;
 
 import java.util.Objects;
 
-public class Cookie {
+public class ETag {
 
-	private final String name;
+	private static final String ETAG_ANY_RESOURCE = "*";
+	
 	private final String value;
+	private final String formatted;
+	private final ETagEquality equality;
 
-	public Cookie(String name, String value) {
-		this.name = nonNull(name, "Cookie name cannot be null");
-		this.value = nonNull(value, "Cookie name cannot be null");
+	private ETag(String value, String formatted, ETagEquality equality) {
+		this.value = value;
+		this.formatted = formatted;
+		this.equality = equality;
 	}
 
-	public String name() {
-		return name;
-	}
-
-	public String value() {
+	public String raw() {
 		return value;
 	}
 
 	@Override
-	public String toString() {
-		return name + "=" + value;
-	}
-
-	@Override
 	public int hashCode() {
-		return Objects.hash(name, value);
+		return Objects.hash(value);
 	}
 
 	@Override
 	public boolean equals(Object obj) {
-		if (obj instanceof Cookie) {
-			Cookie that = (Cookie) obj;
-
-			return name.equals(that.name) && value.equals(that.value);
+		if (obj instanceof ETag) {
+			return equality.equals(this, (ETag) obj);
 
 		} else return false;
+	}
+	
+	@Override
+	public String toString() {
+		return formatted;
+	}
+
+	public static ETag of(String tag) {
+		nonNull(tag, "ETag value cannot be null.");
+		return new ETag(tag, format(tag, false), (current, other) -> current.value.equals(other.value));
+	}
+	
+	public static ETag weak(String tag) {
+		nonNull(tag, "ETag value cannot be null.");
+		return new ETag(tag, format(tag, true), (current, other) -> current.value.equalsIgnoreCase(other.value));
+	}
+
+	public static ETag any() {
+		return new ETag(ETAG_ANY_RESOURCE, ETAG_ANY_RESOURCE, (current, other) -> true);
+	}
+	
+	private static String format(String tag, boolean weak) {
+		return new StringBuilder()
+			.append(weak ? "W/" : "")
+			.append("\"")
+			.append(tag)
+			.append("\"") 
+			.toString();
+	}
+	
+	@FunctionalInterface
+	private interface ETagEquality {
+		
+		boolean equals(ETag current, ETag other);
 	}
 }

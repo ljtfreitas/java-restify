@@ -32,7 +32,7 @@ import java.net.URI;
 import java.nio.charset.Charset;
 
 import com.github.ljtfreitas.restify.http.RestifyHttpException;
-import com.github.ljtfreitas.restify.http.client.Headers;
+import com.github.ljtfreitas.restify.http.client.header.Headers;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
 import com.github.ljtfreitas.restify.http.client.request.HttpClientRequest;
 import com.github.ljtfreitas.restify.http.client.response.HttpResponseMessage;

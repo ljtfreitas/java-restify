@@ -27,13 +27,17 @@ package com.github.ljtfreitas.restify.http.client.response;
 
 import static com.github.ljtfreitas.restify.http.util.Preconditions.isTrue;
 
-import com.github.ljtfreitas.restify.http.client.Headers;
+import com.github.ljtfreitas.restify.http.client.header.Headers;
 
 public class EndpointResponse<T> {
 
 	private final StatusCode statusCode;
 	private final Headers headers;
 	private final T body;
+
+	public EndpointResponse(StatusCode statusCode, T body) {
+		this(statusCode, new Headers(), body);
+	}
 
 	public EndpointResponse(StatusCode statusCode, Headers headers, T body) {
 		this.statusCode = statusCode;
@@ -45,7 +49,7 @@ public class EndpointResponse<T> {
 		return headers;
 	}
 
-	public StatusCode code() {
+	public StatusCode status() {
 		return statusCode;
 	}
 

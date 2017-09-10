@@ -1,6 +1,6 @@
 package com.github.ljtfreitas.restify.http.client.message.form.multipart;
 
-import static com.github.ljtfreitas.restify.http.client.Headers.CONTENT_TYPE;
+import static com.github.ljtfreitas.restify.http.client.header.Headers.CONTENT_TYPE;
 import static org.junit.Assert.assertEquals;
 
 import java.io.IOException;
@@ -10,8 +10,8 @@ import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.github.ljtfreitas.restify.http.client.Header;
-import com.github.ljtfreitas.restify.http.client.Headers;
+import com.github.ljtfreitas.restify.http.client.header.Header;
+import com.github.ljtfreitas.restify.http.client.header.Headers;
 import com.github.ljtfreitas.restify.http.client.message.form.multipart.MultipartFormMessageWriter;
 import com.github.ljtfreitas.restify.http.client.request.HttpRequestMessage;
 import com.github.ljtfreitas.restify.http.client.request.SimpleHttpRequestMessage;

@@ -1,6 +1,6 @@
 package com.github.ljtfreitas.restify.http.client.response;
 
-import static com.github.ljtfreitas.restify.http.client.Headers.CONTENT_LENGTH;
+import static com.github.ljtfreitas.restify.http.client.header.Headers.CONTENT_LENGTH;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 
@@ -10,8 +10,8 @@ import java.net.URI;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.github.ljtfreitas.restify.http.client.Header;
-import com.github.ljtfreitas.restify.http.client.Headers;
+import com.github.ljtfreitas.restify.http.client.header.Header;
+import com.github.ljtfreitas.restify.http.client.header.Headers;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
 import com.github.ljtfreitas.restify.http.client.request.HttpRequestMessage;
 import com.github.ljtfreitas.restify.http.client.request.SimpleHttpRequestMessage;

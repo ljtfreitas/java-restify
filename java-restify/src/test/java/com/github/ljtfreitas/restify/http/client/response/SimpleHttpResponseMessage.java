@@ -4,7 +4,7 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-import com.github.ljtfreitas.restify.http.client.Headers;
+import com.github.ljtfreitas.restify.http.client.header.Headers;
 import com.github.ljtfreitas.restify.http.client.request.HttpRequestMessage;
 import com.github.ljtfreitas.restify.http.client.request.SimpleHttpRequestMessage;
 
@@ -55,8 +55,8 @@ public class SimpleHttpResponseMessage implements HttpResponseMessage {
 	}
 
 	@Override
-	public StatusCode statusCode() {
-		return delegate.statusCode();
+	public StatusCode status() {
+		return delegate.status();
 	}
 
 	@Override

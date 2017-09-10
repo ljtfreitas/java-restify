@@ -23,46 +23,29 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.http.client;
+package com.github.ljtfreitas.restify.http.client.call;
 
-import java.util.Objects;
+import com.github.ljtfreitas.restify.http.client.call.EndpointCall;
+import com.github.ljtfreitas.restify.http.client.call.EndpointCallFactory;
+import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutable;
+import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutables;
+import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethod;
 
-public class Header {
+public class EndpointMethodExecutor {
 
-	private final String name;
-	private final String value;
+	private final EndpointCallExecutables endpointCallExecutables;
+	private final EndpointCallFactory endpointCallFactory;
 
-	public Header(String name, String value) {
-		this.name = name;
-		this.value = value;
+	public EndpointMethodExecutor(EndpointCallExecutables endpointCallExecutables, EndpointCallFactory endpointCallFactory) {
+		this.endpointCallExecutables = endpointCallExecutables;
+		this.endpointCallFactory = endpointCallFactory;
 	}
 
-	public String name() {
-		return name;
-	}
+	public Object execute(EndpointMethod endpointMethod, Object[] args) {
+		EndpointCallExecutable<Object, Object> executable = endpointCallExecutables.of(endpointMethod);
 
-	public String value() {
-		return value;
-	}
+		EndpointCall<Object> call = endpointCallFactory.createWith(endpointMethod, args, executable.returnType());
 
-	@Override
-	public boolean equals(Object obj) {
-		if (obj instanceof Header) {
-			Header that = (Header) obj;
-
-			return this.name.equalsIgnoreCase(that.name)
-				&& this.value.equals(that.value);
-
-		} else return false;
-	}
-
-	@Override
-	public int hashCode() {
-		return Objects.hash(name, value);
-	}
-
-	@Override
-	public String toString() {
-		return name + ": " + value;
+		return executable.execute(call, args);
 	}
 }

@@ -30,8 +30,8 @@ import java.security.Principal;
 import java.util.Collection;
 import java.util.Optional;
 
-import com.github.ljtfreitas.restify.http.client.Header;
-import com.github.ljtfreitas.restify.http.client.Headers;
+import com.github.ljtfreitas.restify.http.client.header.Header;
+import com.github.ljtfreitas.restify.http.client.header.Headers;
 import com.github.ljtfreitas.restify.http.contract.Cookie;
 import com.github.ljtfreitas.restify.http.contract.Cookies;
 
@@ -184,22 +184,22 @@ public class AuthorizationCodeGrantProperties extends GrantProperties {
 		}
 
 		public Builder header(String name, String value) {
-			properties.headers.put(name, value);
+			properties.headers.add(name, value);
 			return this;
 		}
 
 		public Builder header(Header header) {
-			properties.headers.put(header);
+			properties.headers.add(header);
 			return this;
 		}
 
 		public Builder headers(Header... headers) {
-			properties.headers.putAll(new Headers(headers));
+			properties.headers.addAll(new Headers(headers));
 			return this;
 		}
 
 		public Builder headers(Headers headers) {
-			properties.headers.putAll(headers);
+			properties.headers.addAll(headers);
 			return this;
 		}
 

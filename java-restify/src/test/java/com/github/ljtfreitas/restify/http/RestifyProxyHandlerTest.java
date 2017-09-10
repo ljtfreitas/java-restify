@@ -16,8 +16,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import com.github.ljtfreitas.restify.http.RestifyProxyHandler;
-import com.github.ljtfreitas.restify.http.client.EndpointMethodExecutor;
+import com.github.ljtfreitas.restify.http.client.call.EndpointMethodExecutor;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethod;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethods;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointTarget;

@@ -30,8 +30,8 @@ import java.net.URI;
 import java.net.URL;
 import java.util.Optional;
 
-import com.github.ljtfreitas.restify.http.client.Headers;
 import com.github.ljtfreitas.restify.http.client.hateoas.Link;
+import com.github.ljtfreitas.restify.http.client.header.Headers;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
 import com.github.ljtfreitas.restify.http.util.Tryable;
 

@@ -23,29 +23,46 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.http.client;
+package com.github.ljtfreitas.restify.http.client.header;
 
-import com.github.ljtfreitas.restify.http.client.call.EndpointCall;
-import com.github.ljtfreitas.restify.http.client.call.EndpointCallFactory;
-import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutable;
-import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutables;
-import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethod;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.ZoneOffset;
+import java.time.ZonedDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.Calendar;
+import java.util.Date;
+import java.util.Locale;
 
-public class EndpointMethodExecutor {
+public class DateTimeHeaderFormatter {
 
-	private final EndpointCallExecutables endpointCallExecutables;
-	private final EndpointCallFactory endpointCallFactory;
+	private static final DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("EEE, dd MMM yyyy HH:mm:ss zzz",
+			Locale.US);
 
-	public EndpointMethodExecutor(EndpointCallExecutables endpointCallExecutables, EndpointCallFactory endpointCallFactory) {
-		this.endpointCallExecutables = endpointCallExecutables;
-		this.endpointCallFactory = endpointCallFactory;
+	private static final ZoneId GMT = ZoneId.of("GMT");
+
+	public static String format(long timestamp) {
+		return format(Instant.ofEpochMilli(timestamp));
 	}
 
-	public Object execute(EndpointMethod endpointMethod, Object[] args) {
-		EndpointCallExecutable<Object, Object> executable = endpointCallExecutables.of(endpointMethod);
+	public static String format(Date date) {
+		return format(date.toInstant());
+	}
 
-		EndpointCall<Object> call = endpointCallFactory.createWith(endpointMethod, args, executable.returnType());
+	public static String format(Calendar calendar) {
+		return format(calendar.getTime());
+	}
 
-		return executable.execute(call, args);
+	public static String format(LocalDateTime dateTime) {
+		return format(dateTime.toInstant(ZoneOffset.UTC));
+	}
+
+	public static String format(Instant instant) {
+		return format(ZonedDateTime.ofInstant(instant, GMT));
+	}
+
+	public static String format(ZonedDateTime zonedDateTime) {
+		return zonedDateTime.format(FORMATTER);
 	}
 }

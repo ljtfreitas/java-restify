@@ -8,7 +8,7 @@ import java.net.URISyntaxException;
 
 import org.junit.Test;
 
-import com.github.ljtfreitas.restify.http.client.Headers;
+import com.github.ljtfreitas.restify.http.client.header.Headers;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
 
 public class EndpointRequestTest {

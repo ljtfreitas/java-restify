@@ -29,7 +29,7 @@ import static com.github.ljtfreitas.restify.http.util.Preconditions.isTrue;
 
 import java.net.URI;
 
-import com.github.ljtfreitas.restify.http.client.Header;
+import com.github.ljtfreitas.restify.http.client.header.Header;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
 import com.github.ljtfreitas.restify.http.client.response.StatusCode;
 import com.github.ljtfreitas.restify.http.contract.Parameters;
@@ -52,7 +52,7 @@ public class ImplicitAccessTokenProvider implements AccessTokenProvider {
 
 		EndpointResponse<String> authorizationResponse = authorizationServer.authorize(properties);
 
-		StatusCode status = authorizationResponse.code();
+		StatusCode status = authorizationResponse.status();
 
 		if (status.isOk()) {
 			String message = "You need approve the client [" + properties.credentials().clientId() + "] to access protected resources "

@@ -29,8 +29,8 @@ import java.net.URI;
 import java.security.Principal;
 import java.util.Collection;
 
-import com.github.ljtfreitas.restify.http.client.Header;
-import com.github.ljtfreitas.restify.http.client.Headers;
+import com.github.ljtfreitas.restify.http.client.header.Header;
+import com.github.ljtfreitas.restify.http.client.header.Headers;
 import com.github.ljtfreitas.restify.http.contract.Cookie;
 import com.github.ljtfreitas.restify.http.contract.Cookies;
 

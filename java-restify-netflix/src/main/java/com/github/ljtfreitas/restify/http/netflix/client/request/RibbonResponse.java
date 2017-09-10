@@ -30,7 +30,7 @@ import java.net.URI;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import com.github.ljtfreitas.restify.http.client.Header;
+import com.github.ljtfreitas.restify.http.client.header.Header;
 import com.github.ljtfreitas.restify.http.client.response.HttpResponseMessage;
 import com.netflix.client.ClientException;
 import com.netflix.client.IResponse;
@@ -60,7 +60,7 @@ public class RibbonResponse implements IResponse {
 
 	@Override
 	public boolean isSuccess() {
-		return response.statusCode().isSucessful();
+		return response.status().isSucessful();
 	}
 
 	@Override

@@ -43,8 +43,8 @@ public class DefaultEndpointResponseErrorFallback implements EndpointResponseErr
 
 	@Override
 	public <T> EndpointResponse<T> onError(HttpResponseMessage response, JavaType responseType) {
-		if (response.statusCode().isNotFound() && emptyOnNotFound) {
-			return EndpointResponse.empty(response.statusCode(), response.headers());
+		if (response.status().isNotFound() && emptyOnNotFound) {
+			return EndpointResponse.empty(response.status(), response.headers());
 
 		} else {
 			throw exception(response);

@@ -41,13 +41,14 @@ import java.util.concurrent.Executors;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLSocketFactory;
 
-import com.github.ljtfreitas.restify.http.client.EndpointMethodExecutor;
 import com.github.ljtfreitas.restify.http.client.authentication.Authentication;
 import com.github.ljtfreitas.restify.http.client.call.EndpointCallFactory;
+import com.github.ljtfreitas.restify.http.client.call.EndpointMethodExecutor;
 import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutableProvider;
 import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutables;
 import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallObjectExecutableFactory;
 import com.github.ljtfreitas.restify.http.client.call.exec.HeadersEndpointCallExecutableFactory;
+import com.github.ljtfreitas.restify.http.client.call.exec.StatusCodeEndpointCallExecutableFactory;
 import com.github.ljtfreitas.restify.http.client.call.exec.async.AsyncCallbackEndpointCallExecutableFactory;
 import com.github.ljtfreitas.restify.http.client.call.exec.async.AsyncEndpointCallExecutableFactory;
 import com.github.ljtfreitas.restify.http.client.call.exec.jdk.CallableEndpointCallExecutableFactory;
@@ -62,6 +63,8 @@ import com.github.ljtfreitas.restify.http.client.call.exec.jdk.IteratorEndpointC
 import com.github.ljtfreitas.restify.http.client.call.exec.jdk.ListIteratorEndpointCallExecutableFactory;
 import com.github.ljtfreitas.restify.http.client.call.exec.jdk.OptionalEndpointCallExecutableFactory;
 import com.github.ljtfreitas.restify.http.client.call.exec.jdk.RunnableEndpointCallExecutableFactory;
+import com.github.ljtfreitas.restify.http.client.header.Header;
+import com.github.ljtfreitas.restify.http.client.header.Headers;
 import com.github.ljtfreitas.restify.http.client.message.HttpMessageConverter;
 import com.github.ljtfreitas.restify.http.client.message.HttpMessageConverters;
 import com.github.ljtfreitas.restify.http.client.message.converter.ByteArrayMessageConverter;
@@ -87,18 +90,16 @@ import com.github.ljtfreitas.restify.http.client.request.EndpointRequestWriter;
 import com.github.ljtfreitas.restify.http.client.request.EndpointVersion;
 import com.github.ljtfreitas.restify.http.client.request.HttpClientRequestFactory;
 import com.github.ljtfreitas.restify.http.client.request.RestifyEndpointRequestExecutor;
-import com.github.ljtfreitas.restify.http.client.request.interceptor.AcceptHeaderEndpointRequestInterceptor;
 import com.github.ljtfreitas.restify.http.client.request.interceptor.AcceptVersionHeaderEndpointRequestInterceptor;
-import com.github.ljtfreitas.restify.http.client.request.interceptor.ContentTypeHeaderEndpointRequestInterceptor;
 import com.github.ljtfreitas.restify.http.client.request.interceptor.EndpointRequestInterceptor;
 import com.github.ljtfreitas.restify.http.client.request.interceptor.EndpointRequestInterceptorStack;
+import com.github.ljtfreitas.restify.http.client.request.interceptor.HeaderEndpointRequestInterceptor;
 import com.github.ljtfreitas.restify.http.client.request.interceptor.authentication.AuthenticationEndpoinRequestInterceptor;
 import com.github.ljtfreitas.restify.http.client.request.jdk.HttpClientRequestConfiguration;
 import com.github.ljtfreitas.restify.http.client.request.jdk.JdkHttpClientRequestFactory;
 import com.github.ljtfreitas.restify.http.client.response.DefaultEndpointResponseErrorFallback;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponseErrorFallback;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponseReader;
-import com.github.ljtfreitas.restify.http.contract.ContentType;
 import com.github.ljtfreitas.restify.http.contract.DefaultRestifyContract;
 import com.github.ljtfreitas.restify.http.contract.RestifyContract;
 import com.github.ljtfreitas.restify.http.contract.metadata.DefaultRestifyContractReader;
@@ -368,26 +369,6 @@ public class RestifyProxyBuilder {
 			return this;
 		}
 
-		public EndpointRequestInterceptorsBuilder accept(String... contentTypes) {
-			interceptors.add(new AcceptHeaderEndpointRequestInterceptor(contentTypes));
-			return this;
-		}
-
-		public EndpointRequestInterceptorsBuilder accept(ContentType... contentTypes) {
-			interceptors.add(new AcceptHeaderEndpointRequestInterceptor(contentTypes));
-			return this;
-		}
-
-		public EndpointRequestInterceptorsBuilder contentType(String contentType) {
-			interceptors.add(new ContentTypeHeaderEndpointRequestInterceptor(contentType));
-			return this;
-		}
-
-		public EndpointRequestInterceptorsBuilder contentType(ContentType contentType) {
-			interceptors.add(new ContentTypeHeaderEndpointRequestInterceptor(contentType));
-			return this;
-		}
-
 		public EndpointRequestInterceptorsBuilder acceptVersion() {
 			interceptors.add(new AcceptVersionHeaderEndpointRequestInterceptor());
 			return this;
@@ -400,6 +381,21 @@ public class RestifyProxyBuilder {
 
 		public EndpointRequestInterceptorsBuilder acceptVersion(EndpointVersion version) {
 			interceptors.add(new AcceptVersionHeaderEndpointRequestInterceptor(version));
+			return this;
+		}
+
+		public EndpointRequestInterceptorsBuilder headers(Header... headers) {
+			this.interceptors.add(new HeaderEndpointRequestInterceptor(headers));
+			return this;
+		}
+
+		public EndpointRequestInterceptorsBuilder headers(Collection<Header> headers) {
+			this.interceptors.add(new HeaderEndpointRequestInterceptor(headers));
+			return this;
+		}
+
+		public EndpointRequestInterceptorsBuilder headers(Headers headers) {
+			this.interceptors.add(new HeaderEndpointRequestInterceptor(headers));
 			return this;
 		}
 
@@ -437,6 +433,7 @@ public class RestifyProxyBuilder {
 			this.built.add(new IterableEndpointCallExecutableFactory<>());
 			this.built.add(new EndpointCallObjectExecutableFactory<Object, Object>());
 			this.built.add(new HeadersEndpointCallExecutableFactory());
+			this.built.add(new StatusCodeEndpointCallExecutableFactory());
 		}
 
 		public EndpointCallExecutablesBuilder async() {
