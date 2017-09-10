@@ -24,8 +24,8 @@ import org.mockserver.junit.MockServerRule;
 import org.mockserver.model.HttpRequest;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.github.ljtfreitas.restify.http.client.Header;
-import com.github.ljtfreitas.restify.http.client.Headers;
+import com.github.ljtfreitas.restify.http.client.header.Header;
+import com.github.ljtfreitas.restify.http.client.header.Headers;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
 import com.github.ljtfreitas.restify.http.client.response.RestifyEndpointResponseInternalServerErrorException;
@@ -64,7 +64,7 @@ public class JaxRsHttpClientEndpointRequestExecutorTest {
 
 		EndpointResponse<MyModel> myModelResponse = executor.execute(endpointRequest);
 
-		assertTrue(myModelResponse.code().isOk());
+		assertTrue(myModelResponse.status().isOk());
 
 		MyModel myModel = myModelResponse.body();
 
@@ -97,7 +97,7 @@ public class JaxRsHttpClientEndpointRequestExecutorTest {
 
 		EndpointResponse<String> myModelResponse = executor.execute(endpointRequest);
 
-		assertTrue(myModelResponse.code().isCreated());
+		assertTrue(myModelResponse.status().isCreated());
 
 		assertEquals("OK", myModelResponse.body());
 
@@ -119,7 +119,7 @@ public class JaxRsHttpClientEndpointRequestExecutorTest {
 
 		EndpointResponse<MyModel> myModelResponse = executor.execute(endpointRequest);
 
-		assertTrue(myModelResponse.code().isOk());
+		assertTrue(myModelResponse.status().isOk());
 
 		MyModel myModel = myModelResponse.body();
 
@@ -152,7 +152,7 @@ public class JaxRsHttpClientEndpointRequestExecutorTest {
 
 		EndpointResponse<String> myModelResponse = executor.execute(endpointRequest);
 
-		assertTrue(myModelResponse.code().isCreated());
+		assertTrue(myModelResponse.status().isCreated());
 
 		assertEquals("OK", myModelResponse.body());
 
@@ -186,7 +186,7 @@ public class JaxRsHttpClientEndpointRequestExecutorTest {
 
 		EndpointResponse<Object> endpointResponse = executor.execute(endpointRequest);
 
-		assertTrue(endpointResponse.code().isNotFound());
+		assertTrue(endpointResponse.status().isNotFound());
 		assertNull(endpointResponse.body());
 	}
 

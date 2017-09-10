@@ -63,7 +63,7 @@ public class DefaultAuthorizationServerTest {
 		EndpointResponse<String> authorizationResponse = authorizationServer.authorize(properties);
 
 		assertNotNull(authorizationResponse);
-		assertEquals(StatusCode.of(HttpStatusCode.FOUND), authorizationResponse.code());
+		assertEquals(StatusCode.of(HttpStatusCode.FOUND), authorizationResponse.status());
 		assertEquals("http://my.web.app/oauth/callback?code=abc1234&state=current-state",
 				authorizationResponse.headers().get("Location").get().value());
 	}
@@ -93,7 +93,7 @@ public class DefaultAuthorizationServerTest {
 		EndpointResponse<AccessToken> tokenResponse = authorizationServer.requireToken(request);
 
 		assertNotNull(tokenResponse);
-		assertEquals(StatusCode.of(HttpStatusCode.OK), tokenResponse.code());
+		assertEquals(StatusCode.of(HttpStatusCode.OK), tokenResponse.status());
 	}
 
 	@Test
@@ -126,7 +126,7 @@ public class DefaultAuthorizationServerTest {
 		EndpointResponse<AccessToken> tokenResponse = authorizationServer.requireToken(request);
 
 		assertNotNull(tokenResponse);
-		assertEquals(StatusCode.of(HttpStatusCode.OK), tokenResponse.code());
+		assertEquals(StatusCode.of(HttpStatusCode.OK), tokenResponse.status());
 	}
 
 	@Test
@@ -155,7 +155,7 @@ public class DefaultAuthorizationServerTest {
 		EndpointResponse<AccessToken> tokenResponse = authorizationServer.requireToken(request);
 
 		assertNotNull(tokenResponse);
-		assertEquals(StatusCode.of(HttpStatusCode.OK), tokenResponse.code());
+		assertEquals(StatusCode.of(HttpStatusCode.OK), tokenResponse.status());
 	}
 
 	@Test
@@ -184,6 +184,6 @@ public class DefaultAuthorizationServerTest {
 		EndpointResponse<AccessToken> tokenResponse = authorizationServer.requireToken(request);
 
 		assertNotNull(tokenResponse);
-		assertEquals(StatusCode.of(HttpStatusCode.OK), tokenResponse.code());
+		assertEquals(StatusCode.of(HttpStatusCode.OK), tokenResponse.status());
 	}
 }

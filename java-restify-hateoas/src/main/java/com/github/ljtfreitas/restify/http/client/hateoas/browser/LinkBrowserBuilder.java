@@ -46,6 +46,8 @@ import com.github.ljtfreitas.restify.http.client.hateoas.browser.discovery.Hyper
 import com.github.ljtfreitas.restify.http.client.hateoas.browser.discovery.JsonPathLinkDiscovery;
 import com.github.ljtfreitas.restify.http.client.hateoas.browser.discovery.LinkDiscovery;
 import com.github.ljtfreitas.restify.http.client.hateoas.hal.JacksonHypermediaHalJsonMessageConverter;
+import com.github.ljtfreitas.restify.http.client.header.Header;
+import com.github.ljtfreitas.restify.http.client.header.Headers;
 import com.github.ljtfreitas.restify.http.client.message.HttpMessageConverter;
 import com.github.ljtfreitas.restify.http.client.message.HttpMessageConverters;
 import com.github.ljtfreitas.restify.http.client.message.converter.text.SimpleTextMessageConverter;
@@ -55,6 +57,7 @@ import com.github.ljtfreitas.restify.http.client.request.HttpClientRequestFactor
 import com.github.ljtfreitas.restify.http.client.request.RestifyEndpointRequestExecutor;
 import com.github.ljtfreitas.restify.http.client.request.interceptor.EndpointRequestInterceptor;
 import com.github.ljtfreitas.restify.http.client.request.interceptor.EndpointRequestInterceptorStack;
+import com.github.ljtfreitas.restify.http.client.request.interceptor.HeaderEndpointRequestInterceptor;
 import com.github.ljtfreitas.restify.http.client.request.interceptor.authentication.AuthenticationEndpoinRequestInterceptor;
 import com.github.ljtfreitas.restify.http.client.request.jdk.HttpClientRequestConfiguration;
 import com.github.ljtfreitas.restify.http.client.request.jdk.JdkHttpClientRequestFactory;
@@ -181,6 +184,21 @@ public class LinkBrowserBuilder {
 
 		public EndpointRequestInterceptorsBuilder authentication(Authentication authentication) {
 			interceptors.add(new AuthenticationEndpoinRequestInterceptor(authentication));
+			return this;
+		}
+
+		public EndpointRequestInterceptorsBuilder headers(Header... headers) {
+			this.interceptors.add(new HeaderEndpointRequestInterceptor(headers));
+			return this;
+		}
+
+		public EndpointRequestInterceptorsBuilder headers(Collection<Header> headers) {
+			this.interceptors.add(new HeaderEndpointRequestInterceptor(headers));
+			return this;
+		}
+
+		public EndpointRequestInterceptorsBuilder headers(Headers headers) {
+			this.interceptors.add(new HeaderEndpointRequestInterceptor(headers));
 			return this;
 		}
 

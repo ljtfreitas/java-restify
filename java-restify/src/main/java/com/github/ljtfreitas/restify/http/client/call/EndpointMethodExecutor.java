@@ -23,37 +23,29 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.http.client.request.interceptor;
+package com.github.ljtfreitas.restify.http.client.call;
 
-import static com.github.ljtfreitas.restify.http.client.Headers.CONTENT_TYPE;
+import com.github.ljtfreitas.restify.http.client.call.EndpointCall;
+import com.github.ljtfreitas.restify.http.client.call.EndpointCallFactory;
+import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutable;
+import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutables;
+import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethod;
 
-import java.util.Optional;
+public class EndpointMethodExecutor {
 
-import com.github.ljtfreitas.restify.http.client.Header;
-import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
-import com.github.ljtfreitas.restify.http.contract.ContentType;
+	private final EndpointCallExecutables endpointCallExecutables;
+	private final EndpointCallFactory endpointCallFactory;
 
-public class ContentTypeHeaderEndpointRequestInterceptor implements EndpointRequestInterceptor {
-
-	private final ContentType contentType;
-
-	public ContentTypeHeaderEndpointRequestInterceptor(String contentType) {
-		this.contentType = ContentType.of(contentType);
+	public EndpointMethodExecutor(EndpointCallExecutables endpointCallExecutables, EndpointCallFactory endpointCallFactory) {
+		this.endpointCallExecutables = endpointCallExecutables;
+		this.endpointCallFactory = endpointCallFactory;
 	}
 
-	public ContentTypeHeaderEndpointRequestInterceptor(ContentType contentType) {
-		this.contentType = contentType;
-	}
+	public Object execute(EndpointMethod endpointMethod, Object[] args) {
+		EndpointCallExecutable<Object, Object> executable = endpointCallExecutables.of(endpointMethod);
 
-	@Override
-	public EndpointRequest intercepts(EndpointRequest endpointRequest) {
-		Optional<Header> contentType = endpointRequest.headers().get(CONTENT_TYPE);
-		boolean hasBody = endpointRequest.body().isPresent();
+		EndpointCall<Object> call = endpointCallFactory.createWith(endpointMethod, args, executable.returnType());
 
-		if (!contentType.isPresent() && hasBody) {
-			endpointRequest.headers().add(new Header(CONTENT_TYPE, this.contentType.toString()));
-		}
-
-		return endpointRequest;
+		return executable.execute(call, args);
 	}
 }

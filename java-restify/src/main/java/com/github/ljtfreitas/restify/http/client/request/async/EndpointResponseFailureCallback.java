@@ -50,7 +50,7 @@ public abstract class EndpointResponseFailureCallback implements EndpointCallFai
 	}
 
 	protected void onResponseFailure(RestifyEndpointResponseException exception) {
-		StatusCode responseStatusCode = exception.statusCode();
+		StatusCode responseStatusCode = exception.status();
 
 		EndpointResponse<String> response = exception.response();
 

@@ -38,6 +38,6 @@ public class EndpointResponseConverterTest {
 
 		assertEquals("expected result", endpointResponse.body());
 
-		assertEquals(HttpStatus.OK.value(), endpointResponse.code().value());
+		assertEquals(HttpStatus.OK.value(), endpointResponse.status().value());
 	}
 }

@@ -25,28 +25,46 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.contract;
 
-import static com.github.ljtfreitas.restify.http.util.Preconditions.nonNull;
-
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.stream.Collectors;
 
 public class Cookies {
 
-	private final Map<String, Cookie> cookies = new HashMap<>();
+	private final Collection<Cookie> cookies;
+
+	public Cookies() {
+		this.cookies = new ArrayList<>();
+	}
+
+	public Cookies(Cookie... cookies) {
+		this.cookies = new ArrayList<>(Arrays.asList(cookies));
+	}
+
+	public Cookies(String... cookies) {
+		this.cookies = new ArrayList<>(Arrays.stream(cookies)
+				.map(c -> c.split("="))
+					.filter(c -> c.length == 2)
+						.map(c -> new Cookie(c[0], c[1]))
+							.collect(Collectors.toList()));
+	}
 
 	public Cookies add(String name, String value) {
-		nonNull(name, "Cookie name can't be null");
-		nonNull(value, "Cookie value can't be null");
-		cookies.put(name, new Cookie(name, value));
+		return add(new Cookie(name, value));
+	}
+
+	public Cookies add(Cookie cookie) {
+		cookies.add(cookie);
 		return this;
 	}
 
 	@Override
 	public String toString() {
-		String content = cookies.values().stream()
-			.map(c -> c.toString())
+		String content = cookies.stream()
+			.map(Cookie::toString)
 				.collect(Collectors.joining("; "));
+
 		return content;
 	}
 }

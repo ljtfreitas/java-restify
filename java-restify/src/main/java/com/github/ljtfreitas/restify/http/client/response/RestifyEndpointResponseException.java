@@ -25,7 +25,7 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.response;
 
-import com.github.ljtfreitas.restify.http.client.Headers;
+import com.github.ljtfreitas.restify.http.client.header.Headers;
 
 public class RestifyEndpointResponseException extends RestifyHttpMessageReadException {
 
@@ -43,8 +43,8 @@ public class RestifyEndpointResponseException extends RestifyHttpMessageReadExce
 		this.response = new EndpointResponse<>(statusCode, headers, body);
 	}
 
-	public StatusCode statusCode() {
-		return response.code();
+	public StatusCode status() {
+		return response.status();
 	}
 
 	public Headers headers() {

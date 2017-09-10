@@ -27,8 +27,8 @@ package com.github.ljtfreitas.restify.http.client.response;
 
 import java.util.stream.Collectors;
 
-import com.github.ljtfreitas.restify.http.client.Header;
-import com.github.ljtfreitas.restify.http.client.Headers;
+import com.github.ljtfreitas.restify.http.client.header.Header;
+import com.github.ljtfreitas.restify.http.client.header.Headers;
 import com.github.ljtfreitas.restify.http.client.message.converter.text.TextPlainMessageConverter;
 
 public class EndpointResponseExceptionFactory {
@@ -50,7 +50,7 @@ public class EndpointResponseExceptionFactory {
 					.append("\n")
 				.append("HTTP response: ")
 					.append("[")
-						.append(response.statusCode())
+						.append(response.status())
 					.append("]")
 						.append("\n")
 					.append("Headers: ")
@@ -61,7 +61,7 @@ public class EndpointResponseExceptionFactory {
 				.append(responseBody)
 			.toString();
 
-		StatusCode statusCode = response.statusCode();
+		StatusCode statusCode = response.status();
 
 		if (statusCode.isBadRequest()) {
 			return onBadRequest(message, response.headers(), bodyAsString);
@@ -133,7 +133,7 @@ public class EndpointResponseExceptionFactory {
 			return onHttpVersionNotSupported(message, response.headers(), bodyAsString);
 
 		} else {
-			return unhandled(message, response.statusCode(), response.headers(), bodyAsString);
+			return unhandled(message, response.status(), response.headers(), bodyAsString);
 		}
 	}
 

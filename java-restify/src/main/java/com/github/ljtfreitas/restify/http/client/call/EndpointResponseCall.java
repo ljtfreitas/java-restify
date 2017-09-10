@@ -45,7 +45,7 @@ class EndpointResponseCall<T> implements EndpointCall<EndpointResponse<T>> {
 		try {
 			return endpointRequestExecutor.execute(endpointRequest);
 		} catch (RestifyEndpointResponseException e) {
-			return EndpointResponse.error(e);
+			return EndpointResponse.error(e.status(), e.headers(), e.bodyAsString());
 		}
 	}
 }

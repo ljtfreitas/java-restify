@@ -12,7 +12,7 @@ import org.mockito.ArgumentMatcher;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import com.github.ljtfreitas.restify.http.client.Headers;
+import com.github.ljtfreitas.restify.http.client.header.Headers;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
 import com.github.ljtfreitas.restify.http.client.response.RestifyEndpointResponseBadGatewayException;
 import com.github.ljtfreitas.restify.http.client.response.RestifyEndpointResponseBadRequestException;
@@ -258,7 +258,7 @@ public class EndpointResponseFailureCallbackTest {
 			@Override
 			public boolean matches(Object argument) {
 				EndpointResponse<String> response = (EndpointResponse<String>) argument;
-				return exception.statusCode() == response.code()
+				return exception.status() == response.status()
 						&& exception.headers() == response.headers()
 						&& Optional.ofNullable(exception.bodyAsString()).orElse("").equals(response.body());
 			}

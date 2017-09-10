@@ -25,11 +25,11 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.response;
 
-import static com.github.ljtfreitas.restify.http.client.Headers.CONTENT_LENGTH;
+import static com.github.ljtfreitas.restify.http.client.header.Headers.CONTENT_LENGTH;
 
 import java.io.InputStream;
 
-import com.github.ljtfreitas.restify.http.client.Headers;
+import com.github.ljtfreitas.restify.http.client.header.Headers;
 import com.github.ljtfreitas.restify.http.client.request.HttpRequestMessage;
 
 public abstract class BaseHttpResponseMessage implements HttpResponseMessage {
@@ -52,7 +52,7 @@ public abstract class BaseHttpResponseMessage implements HttpResponseMessage {
 	}
 
 	@Override
-	public StatusCode statusCode() {
+	public StatusCode status() {
 		return statusCode;
 	}
 	

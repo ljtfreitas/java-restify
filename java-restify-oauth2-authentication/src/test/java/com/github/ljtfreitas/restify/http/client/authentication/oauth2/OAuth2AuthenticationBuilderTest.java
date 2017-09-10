@@ -21,8 +21,6 @@ import org.mockserver.client.server.MockServerClient;
 import org.mockserver.junit.MockServerRule;
 import org.mockserver.model.Parameter;
 
-import com.github.ljtfreitas.restify.http.client.Header;
-import com.github.ljtfreitas.restify.http.client.Headers;
 import com.github.ljtfreitas.restify.http.client.authentication.oauth2.AccessToken;
 import com.github.ljtfreitas.restify.http.client.authentication.oauth2.AccessTokenProvider;
 import com.github.ljtfreitas.restify.http.client.authentication.oauth2.AccessTokenRepository;
@@ -35,6 +33,8 @@ import com.github.ljtfreitas.restify.http.client.authentication.oauth2.ClientCre
 import com.github.ljtfreitas.restify.http.client.authentication.oauth2.OAuth2Authentication;
 import com.github.ljtfreitas.restify.http.client.authentication.oauth2.OAuth2AuthenticationBuilder;
 import com.github.ljtfreitas.restify.http.client.authentication.oauth2.OAuthAuthenticatedEndpointRequest;
+import com.github.ljtfreitas.restify.http.client.header.Header;
+import com.github.ljtfreitas.restify.http.client.header.Headers;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
 import com.github.ljtfreitas.restify.http.client.response.StatusCode;

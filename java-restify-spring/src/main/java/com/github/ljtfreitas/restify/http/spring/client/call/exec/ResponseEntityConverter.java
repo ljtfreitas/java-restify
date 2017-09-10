@@ -30,16 +30,16 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 
-import com.github.ljtfreitas.restify.http.client.Headers;
+import com.github.ljtfreitas.restify.http.client.header.Headers;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
 
 class ResponseEntityConverter<T> implements Converter<EndpointResponse<T>, ResponseEntity<T>> {
 
 	@Override
 	public ResponseEntity<T> convert(EndpointResponse<T> source) {
-		return ResponseEntity.status(HttpStatus.valueOf(source.code().value()))
+		return ResponseEntity.status(HttpStatus.valueOf(source.status().value()))
 				.headers(headersOf(source.headers()))
-				.body(source.body());
+				.body(source.status().isError() ? null : source.body());
 	}
 
 	private HttpHeaders headersOf(Headers headers) {

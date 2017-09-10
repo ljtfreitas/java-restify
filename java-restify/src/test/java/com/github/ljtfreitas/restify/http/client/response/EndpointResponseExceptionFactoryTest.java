@@ -11,7 +11,7 @@ import java.io.ByteArrayInputStream;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.github.ljtfreitas.restify.http.client.Headers;
+import com.github.ljtfreitas.restify.http.client.header.Headers;
 
 public class EndpointResponseExceptionFactoryTest {
 
@@ -35,7 +35,7 @@ public class EndpointResponseExceptionFactoryTest {
 		RestifyEndpointResponseException exception = exceptionFactory.create(response);
 
 		assertThat(exception, instanceOf(RestifyEndpointResponseBadRequestException.class));
-		assertThat(exception.statusCode(), equalTo(response.statusCode()));
+		assertThat(exception.status(), equalTo(response.status()));
 		assertThat(exception.headers(), sameInstance(response.headers()));
 		assertThat(exception.bodyAsString(), isEmptyString());
 	}
@@ -47,7 +47,7 @@ public class EndpointResponseExceptionFactoryTest {
 		RestifyEndpointResponseException exception = exceptionFactory.create(response);
 
 		assertThat(exception, instanceOf(RestifyEndpointResponseUnauthorizedException.class));
-		assertThat(exception.statusCode(), equalTo(response.statusCode()));
+		assertThat(exception.status(), equalTo(response.status()));
 		assertThat(exception.headers(), sameInstance(response.headers()));
 		assertThat(exception.bodyAsString(), isEmptyString());
 	}
@@ -59,7 +59,7 @@ public class EndpointResponseExceptionFactoryTest {
 		RestifyEndpointResponseException exception = exceptionFactory.create(response);
 
 		assertThat(exception, instanceOf(RestifyEndpointResponseForbiddenException.class));
-		assertThat(exception.statusCode(), equalTo(response.statusCode()));
+		assertThat(exception.status(), equalTo(response.status()));
 		assertThat(exception.headers(), sameInstance(response.headers()));
 		assertThat(exception.bodyAsString(), isEmptyString());
 	}
@@ -71,7 +71,7 @@ public class EndpointResponseExceptionFactoryTest {
 		RestifyEndpointResponseException exception = exceptionFactory.create(response);
 
 		assertThat(exception, instanceOf(RestifyEndpointResponseNotFoundException.class));
-		assertThat(exception.statusCode(), equalTo(response.statusCode()));
+		assertThat(exception.status(), equalTo(response.status()));
 		assertThat(exception.headers(), sameInstance(response.headers()));
 		assertThat(exception.bodyAsString(), isEmptyString());
 	}
@@ -84,7 +84,7 @@ public class EndpointResponseExceptionFactoryTest {
 		RestifyEndpointResponseException exception = exceptionFactory.create(response);
 
 		assertThat(exception, instanceOf(RestifyEndpointResponseMethodNotAllowedException.class));
-		assertThat(exception.statusCode(), equalTo(response.statusCode()));
+		assertThat(exception.status(), equalTo(response.status()));
 		assertThat(exception.headers(), sameInstance(response.headers()));
 		assertThat(exception.bodyAsString(), isEmptyString());
 	}
@@ -96,7 +96,7 @@ public class EndpointResponseExceptionFactoryTest {
 		RestifyEndpointResponseException exception = exceptionFactory.create(response);
 
 		assertThat(exception, instanceOf(RestifyEndpointResponseNotAcceptableException.class));
-		assertThat(exception.statusCode(), equalTo(response.statusCode()));
+		assertThat(exception.status(), equalTo(response.status()));
 		assertThat(exception.headers(), sameInstance(response.headers()));
 		assertThat(exception.bodyAsString(), isEmptyString());
 	}
@@ -109,7 +109,7 @@ public class EndpointResponseExceptionFactoryTest {
 		RestifyEndpointResponseException exception = exceptionFactory.create(response);
 
 		assertThat(exception, instanceOf(RestifyEndpointResponseProxyAuthenticationRequiredException.class));
-		assertThat(exception.statusCode(), equalTo(response.statusCode()));
+		assertThat(exception.status(), equalTo(response.status()));
 		assertThat(exception.headers(), sameInstance(response.headers()));
 		assertThat(exception.bodyAsString(), isEmptyString());
 	}
@@ -122,7 +122,7 @@ public class EndpointResponseExceptionFactoryTest {
 		RestifyEndpointResponseException exception = exceptionFactory.create(response);
 
 		assertThat(exception, instanceOf(RestifyEndpointResponseRequestTimeoutException.class));
-		assertThat(exception.statusCode(), equalTo(response.statusCode()));
+		assertThat(exception.status(), equalTo(response.status()));
 		assertThat(exception.headers(), sameInstance(response.headers()));
 		assertThat(exception.bodyAsString(), isEmptyString());
 	}
@@ -134,7 +134,7 @@ public class EndpointResponseExceptionFactoryTest {
 		RestifyEndpointResponseException exception = exceptionFactory.create(response);
 
 		assertThat(exception, instanceOf(RestifyEndpointResponseConflictException.class));
-		assertThat(exception.statusCode(), equalTo(response.statusCode()));
+		assertThat(exception.status(), equalTo(response.status()));
 		assertThat(exception.headers(), sameInstance(response.headers()));
 		assertThat(exception.bodyAsString(), isEmptyString());
 	}
@@ -146,7 +146,7 @@ public class EndpointResponseExceptionFactoryTest {
 		RestifyEndpointResponseException exception = exceptionFactory.create(response);
 
 		assertThat(exception, instanceOf(RestifyEndpointResponseGoneException.class));
-		assertThat(exception.statusCode(), equalTo(response.statusCode()));
+		assertThat(exception.status(), equalTo(response.status()));
 		assertThat(exception.headers(), sameInstance(response.headers()));
 		assertThat(exception.bodyAsString(), isEmptyString());
 	}
@@ -159,7 +159,7 @@ public class EndpointResponseExceptionFactoryTest {
 		RestifyEndpointResponseException exception = exceptionFactory.create(response);
 
 		assertThat(exception, instanceOf(RestifyEndpointResponseLengthRequiredException.class));
-		assertThat(exception.statusCode(), equalTo(response.statusCode()));
+		assertThat(exception.status(), equalTo(response.status()));
 		assertThat(exception.headers(), sameInstance(response.headers()));
 		assertThat(exception.bodyAsString(), isEmptyString());
 	}
@@ -172,7 +172,7 @@ public class EndpointResponseExceptionFactoryTest {
 		RestifyEndpointResponseException exception = exceptionFactory.create(response);
 
 		assertThat(exception, instanceOf(RestifyEndpointResponseRequestEntityTooLargeException.class));
-		assertThat(exception.statusCode(), equalTo(response.statusCode()));
+		assertThat(exception.status(), equalTo(response.status()));
 		assertThat(exception.headers(), sameInstance(response.headers()));
 		assertThat(exception.bodyAsString(), isEmptyString());
 	}
@@ -185,7 +185,7 @@ public class EndpointResponseExceptionFactoryTest {
 		RestifyEndpointResponseException exception = exceptionFactory.create(response);
 
 		assertThat(exception, instanceOf(RestifyEndpointResponseRequestUriTooLongException.class));
-		assertThat(exception.statusCode(), equalTo(response.statusCode()));
+		assertThat(exception.status(), equalTo(response.status()));
 		assertThat(exception.headers(), sameInstance(response.headers()));
 		assertThat(exception.bodyAsString(), isEmptyString());
 	}
@@ -198,7 +198,7 @@ public class EndpointResponseExceptionFactoryTest {
 		RestifyEndpointResponseException exception = exceptionFactory.create(response);
 
 		assertThat(exception, instanceOf(RestifyEndpointResponseUnsupportedMediaTypeException.class));
-		assertThat(exception.statusCode(), equalTo(response.statusCode()));
+		assertThat(exception.status(), equalTo(response.status()));
 		assertThat(exception.headers(), sameInstance(response.headers()));
 		assertThat(exception.bodyAsString(), isEmptyString());
 	}
@@ -211,7 +211,7 @@ public class EndpointResponseExceptionFactoryTest {
 		RestifyEndpointResponseException exception = exceptionFactory.create(response);
 
 		assertThat(exception, instanceOf(RestifyEndpointResponseRequestedRangeNotSatisfiableException.class));
-		assertThat(exception.statusCode(), equalTo(response.statusCode()));
+		assertThat(exception.status(), equalTo(response.status()));
 		assertThat(exception.headers(), sameInstance(response.headers()));
 		assertThat(exception.bodyAsString(), isEmptyString());
 	}
@@ -224,7 +224,7 @@ public class EndpointResponseExceptionFactoryTest {
 		RestifyEndpointResponseException exception = exceptionFactory.create(response);
 
 		assertThat(exception, instanceOf(RestifyEndpointResponseExpectationFailedException.class));
-		assertThat(exception.statusCode(), equalTo(response.statusCode()));
+		assertThat(exception.status(), equalTo(response.status()));
 		assertThat(exception.headers(), sameInstance(response.headers()));
 		assertThat(exception.bodyAsString(), isEmptyString());
 	}
@@ -237,7 +237,7 @@ public class EndpointResponseExceptionFactoryTest {
 		RestifyEndpointResponseException exception = exceptionFactory.create(response);
 
 		assertThat(exception, instanceOf(RestifyEndpointResponseInternalServerErrorException.class));
-		assertThat(exception.statusCode(), equalTo(response.statusCode()));
+		assertThat(exception.status(), equalTo(response.status()));
 		assertThat(exception.headers(), sameInstance(response.headers()));
 		assertThat(exception.bodyAsString(), isEmptyString());
 	}
@@ -250,7 +250,7 @@ public class EndpointResponseExceptionFactoryTest {
 		RestifyEndpointResponseException exception = exceptionFactory.create(response);
 
 		assertThat(exception, instanceOf(RestifyEndpointResponseNotImplementedException.class));
-		assertThat(exception.statusCode(), equalTo(response.statusCode()));
+		assertThat(exception.status(), equalTo(response.status()));
 		assertThat(exception.headers(), sameInstance(response.headers()));
 		assertThat(exception.bodyAsString(), isEmptyString());
 	}
@@ -262,7 +262,7 @@ public class EndpointResponseExceptionFactoryTest {
 		RestifyEndpointResponseException exception = exceptionFactory.create(response);
 
 		assertThat(exception, instanceOf(RestifyEndpointResponseBadGatewayException.class));
-		assertThat(exception.statusCode(), equalTo(response.statusCode()));
+		assertThat(exception.status(), equalTo(response.status()));
 		assertThat(exception.headers(), sameInstance(response.headers()));
 		assertThat(exception.bodyAsString(), isEmptyString());
 	}
@@ -275,7 +275,7 @@ public class EndpointResponseExceptionFactoryTest {
 		RestifyEndpointResponseException exception = exceptionFactory.create(response);
 
 		assertThat(exception, instanceOf(RestifyEndpointResponseServiceUnavailableException.class));
-		assertThat(exception.statusCode(), equalTo(response.statusCode()));
+		assertThat(exception.status(), equalTo(response.status()));
 		assertThat(exception.headers(), sameInstance(response.headers()));
 		assertThat(exception.bodyAsString(), isEmptyString());
 	}
@@ -288,7 +288,7 @@ public class EndpointResponseExceptionFactoryTest {
 		RestifyEndpointResponseException exception = exceptionFactory.create(response);
 
 		assertThat(exception, instanceOf(RestifyEndpointResponseGatewayTimeoutException.class));
-		assertThat(exception.statusCode(), equalTo(response.statusCode()));
+		assertThat(exception.status(), equalTo(response.status()));
 		assertThat(exception.headers(), sameInstance(response.headers()));
 		assertThat(exception.bodyAsString(), isEmptyString());
 	}
@@ -301,7 +301,7 @@ public class EndpointResponseExceptionFactoryTest {
 		RestifyEndpointResponseException exception = exceptionFactory.create(response);
 
 		assertThat(exception, instanceOf(RestifyEndpointResponseHttpVersionNotSupportedException.class));
-		assertThat(exception.statusCode(), equalTo(response.statusCode()));
+		assertThat(exception.status(), equalTo(response.status()));
 		assertThat(exception.headers(), sameInstance(response.headers()));
 		assertThat(exception.bodyAsString(), isEmptyString());
 	}
@@ -313,7 +313,7 @@ public class EndpointResponseExceptionFactoryTest {
 		RestifyEndpointResponseException exception = exceptionFactory.create(response);
 
 		assertThat(exception, instanceOf(RestifyEndpointResponseException.class));
-		assertThat(exception.statusCode(), equalTo(response.statusCode()));
+		assertThat(exception.status(), equalTo(response.status()));
 		assertThat(exception.headers(), sameInstance(response.headers()));
 		assertThat(exception.bodyAsString(), isEmptyString());
 	}

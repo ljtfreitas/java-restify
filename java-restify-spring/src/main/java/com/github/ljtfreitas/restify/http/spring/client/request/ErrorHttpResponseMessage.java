@@ -35,7 +35,7 @@ import java.nio.charset.Charset;
 import org.springframework.http.RequestEntity;
 import org.springframework.web.client.RestClientResponseException;
 
-import com.github.ljtfreitas.restify.http.client.Headers;
+import com.github.ljtfreitas.restify.http.client.header.Headers;
 import com.github.ljtfreitas.restify.http.client.request.HttpRequestMessage;
 import com.github.ljtfreitas.restify.http.client.response.BaseHttpResponseMessage;
 import com.github.ljtfreitas.restify.http.client.response.StatusCode;
@@ -54,7 +54,7 @@ class ErrorHttpResponseMessage extends BaseHttpResponseMessage {
 		StatusCode statusCode = StatusCode.of(e.getRawStatusCode(), e.getStatusText());
 
 		Headers headers = new Headers();
-		e.getResponseHeaders().forEach((k, v) -> headers.put(k, v));
+		e.getResponseHeaders().forEach((k, v) -> headers.add(k, v));
 
 		InputStream body = new ByteArrayInputStream(e.getResponseBodyAsByteArray());
 
@@ -70,7 +70,7 @@ class ErrorHttpResponseMessage extends BaseHttpResponseMessage {
 			this.request = request;
 
 			Headers headers = new Headers();
-			request.getHeaders().forEach((k, v) -> headers.put(k, v));
+			request.getHeaders().forEach((k, v) -> headers.add(k, v));
 			this.headers = headers;
 		}
 

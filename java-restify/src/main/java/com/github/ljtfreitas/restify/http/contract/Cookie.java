@@ -25,14 +25,18 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.contract;
 
+import static com.github.ljtfreitas.restify.http.util.Preconditions.nonNull;
+
+import java.util.Objects;
+
 public class Cookie {
 
 	private final String name;
 	private final String value;
 
 	public Cookie(String name, String value) {
-		this.name = name;
-		this.value = value;
+		this.name = nonNull(name, "Cookie name cannot be null");
+		this.value = nonNull(value, "Cookie name cannot be null");
 	}
 
 	public String name() {
@@ -46,5 +50,20 @@ public class Cookie {
 	@Override
 	public String toString() {
 		return name + "=" + value;
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(name, value);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (obj instanceof Cookie) {
+			Cookie that = (Cookie) obj;
+
+			return name.equals(that.name) && value.equals(that.value);
+
+		} else return false;
 	}
 }
