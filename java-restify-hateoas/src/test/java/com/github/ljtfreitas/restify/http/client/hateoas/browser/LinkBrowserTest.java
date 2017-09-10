@@ -12,6 +12,8 @@ import static org.mockserver.model.HttpResponse.response;
 import static org.mockserver.model.JsonBody.json;
 
 import java.util.Collection;
+import java.util.HashMap;
+import java.util.Map;
 
 import org.hamcrest.Matchers;
 import org.junit.Before;
@@ -28,6 +30,7 @@ import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.github.ljtfreitas.restify.http.client.hateoas.Link;
 import com.github.ljtfreitas.restify.http.client.request.interceptor.EndpointRequestInterceptorStack;
+import com.github.ljtfreitas.restify.http.contract.ContentType;
 
 @RunWith(MockitoJUnitRunner.class)
 public class LinkBrowserTest {
@@ -420,6 +423,8 @@ public class LinkBrowserTest {
 		HttpRequest avatarRequest = request()
 			.withMethod("POST")
 			.withHeader("X-Whatever", "whatever")
+			.withHeader("Content-Type", "application/json; charset=UTF-8")
+			.withBody(json("{\"image\":\"http://path.to.image/image.jpg\"}"))
 			.withPath("/me/avatar");
 
 		mockServerClient.when(personRequest)
@@ -439,9 +444,14 @@ public class LinkBrowserTest {
 
 		linkBrowser = new LinkBrowserBuilder().baseURL("http://localhost:7080").build();
 
+		Map<String, String> body = new HashMap<>();
+		body.put("image", "http://path.to.image/image.jpg");
+
 		String result = linkBrowser
 				.follow(Link.self("http://localhost:7080/me"))
-					.follow(rel("update_avatar").usingPost().usingHeader("X-Whatever", "whatever"))
+					.follow(rel("update_avatar")
+							.usingPost(body, ContentType.of("application/json"))
+							.usingHeader("X-Whatever", "whatever"))
 						.as(String.class);
 
 		assertEquals("ok", result);
