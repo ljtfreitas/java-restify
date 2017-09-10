@@ -43,8 +43,8 @@ public class RestifyEndpointResponseException extends RestifyHttpMessageReadExce
 		this.response = new EndpointResponse<>(statusCode, headers, body);
 	}
 
-	public StatusCode statusCode() {
-		return response.code();
+	public StatusCode status() {
+		return response.status();
 	}
 
 	public Headers headers() {

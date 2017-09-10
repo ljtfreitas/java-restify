@@ -55,8 +55,8 @@ public class SimpleHttpResponseMessage implements HttpResponseMessage {
 	}
 
 	@Override
-	public StatusCode statusCode() {
-		return delegate.statusCode();
+	public StatusCode status() {
+		return delegate.status();
 	}
 
 	@Override

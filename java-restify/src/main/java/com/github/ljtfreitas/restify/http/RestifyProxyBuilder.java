@@ -48,6 +48,7 @@ import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutabl
 import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutables;
 import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallObjectExecutableFactory;
 import com.github.ljtfreitas.restify.http.client.call.exec.HeadersEndpointCallExecutableFactory;
+import com.github.ljtfreitas.restify.http.client.call.exec.StatusCodeEndpointCallExecutableFactory;
 import com.github.ljtfreitas.restify.http.client.call.exec.async.AsyncCallbackEndpointCallExecutableFactory;
 import com.github.ljtfreitas.restify.http.client.call.exec.async.AsyncEndpointCallExecutableFactory;
 import com.github.ljtfreitas.restify.http.client.call.exec.jdk.CallableEndpointCallExecutableFactory;
@@ -432,6 +433,7 @@ public class RestifyProxyBuilder {
 			this.built.add(new IterableEndpointCallExecutableFactory<>());
 			this.built.add(new EndpointCallObjectExecutableFactory<Object, Object>());
 			this.built.add(new HeadersEndpointCallExecutableFactory());
+			this.built.add(new StatusCodeEndpointCallExecutableFactory());
 		}
 
 		public EndpointCallExecutablesBuilder async() {

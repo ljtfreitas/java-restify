@@ -33,7 +33,7 @@ import com.github.ljtfreitas.restify.http.client.request.HttpRequestMessage;
 
 public interface HttpResponseMessage extends Closeable {
 
-	public StatusCode statusCode();
+	public StatusCode status();
 
 	public Headers headers();
 

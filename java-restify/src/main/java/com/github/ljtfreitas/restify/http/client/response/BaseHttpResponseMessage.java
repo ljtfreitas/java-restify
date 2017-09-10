@@ -52,7 +52,7 @@ public abstract class BaseHttpResponseMessage implements HttpResponseMessage {
 	}
 
 	@Override
-	public StatusCode statusCode() {
+	public StatusCode status() {
 		return statusCode;
 	}
 	

@@ -52,7 +52,7 @@ public class ImplicitAccessTokenProvider implements AccessTokenProvider {
 
 		EndpointResponse<String> authorizationResponse = authorizationServer.authorize(properties);
 
-		StatusCode status = authorizationResponse.code();
+		StatusCode status = authorizationResponse.status();
 
 		if (status.isOk()) {
 			String message = "You need approve the client [" + properties.credentials().clientId() + "] to access protected resources "

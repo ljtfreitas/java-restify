@@ -64,7 +64,7 @@ public class JaxRsHttpClientEndpointRequestExecutorTest {
 
 		EndpointResponse<MyModel> myModelResponse = executor.execute(endpointRequest);
 
-		assertTrue(myModelResponse.code().isOk());
+		assertTrue(myModelResponse.status().isOk());
 
 		MyModel myModel = myModelResponse.body();
 
@@ -97,7 +97,7 @@ public class JaxRsHttpClientEndpointRequestExecutorTest {
 
 		EndpointResponse<String> myModelResponse = executor.execute(endpointRequest);
 
-		assertTrue(myModelResponse.code().isCreated());
+		assertTrue(myModelResponse.status().isCreated());
 
 		assertEquals("OK", myModelResponse.body());
 
@@ -119,7 +119,7 @@ public class JaxRsHttpClientEndpointRequestExecutorTest {
 
 		EndpointResponse<MyModel> myModelResponse = executor.execute(endpointRequest);
 
-		assertTrue(myModelResponse.code().isOk());
+		assertTrue(myModelResponse.status().isOk());
 
 		MyModel myModel = myModelResponse.body();
 
@@ -152,7 +152,7 @@ public class JaxRsHttpClientEndpointRequestExecutorTest {
 
 		EndpointResponse<String> myModelResponse = executor.execute(endpointRequest);
 
-		assertTrue(myModelResponse.code().isCreated());
+		assertTrue(myModelResponse.status().isCreated());
 
 		assertEquals("OK", myModelResponse.body());
 
@@ -186,7 +186,7 @@ public class JaxRsHttpClientEndpointRequestExecutorTest {
 
 		EndpointResponse<Object> endpointResponse = executor.execute(endpointRequest);
 
-		assertTrue(endpointResponse.code().isNotFound());
+		assertTrue(endpointResponse.status().isNotFound());
 		assertNull(endpointResponse.body());
 	}
 

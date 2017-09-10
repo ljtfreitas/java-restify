@@ -40,9 +40,9 @@ public class DefaultEndpointResponseErrorFallbackTest {
 		HttpResponseMessage response = new SimpleHttpResponseMessage(StatusCode.internalServerError(), new Headers(), new ByteArrayInputStream(body.getBytes()));
 
 		expectedException.expect(RestifyEndpointResponseException.class);
-		expectedException.expectMessage(allOf(containsString(response.statusCode().toString()), endsWith(body)));
+		expectedException.expectMessage(allOf(containsString(response.status().toString()), endsWith(body)));
 
-		expectedException.expect(method(e -> e.statusCode(), is(response.statusCode())));
+		expectedException.expect(method(e -> e.status(), is(response.status())));
 		expectedException.expect(method(e -> e.headers(), sameInstance(response.headers())));
 		expectedException.expect(method(e -> e.bodyAsString(), is(body)));
 
@@ -56,9 +56,9 @@ public class DefaultEndpointResponseErrorFallbackTest {
 		HttpResponseMessage response = new SimpleHttpResponseMessage(StatusCode.notFound(), new Headers(), new ByteArrayInputStream(body.getBytes()));
 
 		expectedException.expect(RestifyEndpointResponseException.class);
-		expectedException.expectMessage(allOf(containsString(response.statusCode().toString()), endsWith(body)));
+		expectedException.expectMessage(allOf(containsString(response.status().toString()), endsWith(body)));
 
-		expectedException.expect(method(e -> e.statusCode(), is(response.statusCode())));
+		expectedException.expect(method(e -> e.status(), is(response.status())));
 		expectedException.expect(method(e -> e.headers(), sameInstance(response.headers())));
 		expectedException.expect(method(e -> e.bodyAsString(), is(body)));
 
@@ -75,7 +75,7 @@ public class DefaultEndpointResponseErrorFallbackTest {
 
 		EndpointResponse<Object> newEndpointResponse = fallback.onError(response, null);
 
-		assertEquals(response.statusCode(), newEndpointResponse.code());
+		assertEquals(response.status(), newEndpointResponse.status());
 		assertSame(response.headers(), newEndpointResponse.headers());
 		assertNull(newEndpointResponse.body());
 	}

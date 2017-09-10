@@ -60,7 +60,7 @@ public class RibbonResponse implements IResponse {
 
 	@Override
 	public boolean isSuccess() {
-		return response.statusCode().isSucessful();
+		return response.status().isSucessful();
 	}
 
 	@Override

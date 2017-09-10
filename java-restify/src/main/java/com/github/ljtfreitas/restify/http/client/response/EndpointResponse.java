@@ -35,6 +35,10 @@ public class EndpointResponse<T> {
 	private final Headers headers;
 	private final T body;
 
+	public EndpointResponse(StatusCode statusCode, T body) {
+		this(statusCode, new Headers(), body);
+	}
+
 	public EndpointResponse(StatusCode statusCode, Headers headers, T body) {
 		this.statusCode = statusCode;
 		this.headers = headers;
@@ -45,7 +49,7 @@ public class EndpointResponse<T> {
 		return headers;
 	}
 
-	public StatusCode code() {
+	public StatusCode status() {
 		return statusCode;
 	}
 

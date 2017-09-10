@@ -50,7 +50,7 @@ public class EndpointResponseExceptionFactory {
 					.append("\n")
 				.append("HTTP response: ")
 					.append("[")
-						.append(response.statusCode())
+						.append(response.status())
 					.append("]")
 						.append("\n")
 					.append("Headers: ")
@@ -61,7 +61,7 @@ public class EndpointResponseExceptionFactory {
 				.append(responseBody)
 			.toString();
 
-		StatusCode statusCode = response.statusCode();
+		StatusCode statusCode = response.status();
 
 		if (statusCode.isBadRequest()) {
 			return onBadRequest(message, response.headers(), bodyAsString);
@@ -133,7 +133,7 @@ public class EndpointResponseExceptionFactory {
 			return onHttpVersionNotSupported(message, response.headers(), bodyAsString);
 
 		} else {
-			return unhandled(message, response.statusCode(), response.headers(), bodyAsString);
+			return unhandled(message, response.status(), response.headers(), bodyAsString);
 		}
 	}
 

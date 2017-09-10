@@ -134,7 +134,7 @@ public class DefaultAuthorizationServer implements AuthorizationServer {
 	private EndpointResponse<AccessToken> buildAccessToken(EndpointResponse<AccessTokenResponse> accessTokenResponse) {
 		AccessToken accessToken = AccessToken.of(accessTokenResponse.body());
 
-		return new EndpointResponse<>(accessTokenResponse.code(), accessTokenResponse.headers(), accessToken);
+		return new EndpointResponse<>(accessTokenResponse.status(), accessTokenResponse.headers(), accessToken);
 	}
 
 	private static class EndpointRequestExecutorFactory {

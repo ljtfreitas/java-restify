@@ -258,7 +258,7 @@ public class EndpointResponseFailureCallbackTest {
 			@Override
 			public boolean matches(Object argument) {
 				EndpointResponse<String> response = (EndpointResponse<String>) argument;
-				return exception.statusCode() == response.code()
+				return exception.status() == response.status()
 						&& exception.headers() == response.headers()
 						&& Optional.ofNullable(exception.bodyAsString()).orElse("").equals(response.body());
 			}
