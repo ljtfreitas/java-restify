@@ -110,7 +110,7 @@ public class Headers implements Iterable<Header> {
 		this(new LinkedHashSet<>(source.headers));
 	}
 
-	private Headers(Collection<Header> headers) {
+	public Headers(Collection<Header> headers) {
 		this.headers = headers;
 	}
 

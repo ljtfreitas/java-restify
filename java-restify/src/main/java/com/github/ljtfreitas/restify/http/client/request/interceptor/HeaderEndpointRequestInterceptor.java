@@ -25,42 +25,31 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.request.interceptor;
 
-import static com.github.ljtfreitas.restify.http.client.header.Headers.ACCEPT;
-
-import java.util.Arrays;
 import java.util.Collection;
-import java.util.LinkedHashSet;
-import java.util.Optional;
-import java.util.stream.Collectors;
 
 import com.github.ljtfreitas.restify.http.client.header.Header;
+import com.github.ljtfreitas.restify.http.client.header.Headers;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
-import com.github.ljtfreitas.restify.http.contract.ContentType;
 
-public class AcceptHeaderEndpointRequestInterceptor implements EndpointRequestInterceptor {
+public class HeaderEndpointRequestInterceptor implements EndpointRequestInterceptor {
 
-	private final Collection<ContentType> contentTypes;
+	private final Headers headers;
 
-	public AcceptHeaderEndpointRequestInterceptor(String... contentTypes) {
-		this(Arrays.stream(contentTypes).map(ContentType::of).collect(Collectors.toSet()));
+	public HeaderEndpointRequestInterceptor(Header... headers) {
+		this.headers = new Headers(headers);
 	}
 
-	public AcceptHeaderEndpointRequestInterceptor(ContentType... contentTypes) {
-		this(Arrays.stream(contentTypes).collect(Collectors.toSet()));
+	public HeaderEndpointRequestInterceptor(Collection<Header> headers) {
+		this.headers = new Headers(headers);
 	}
 
-	public AcceptHeaderEndpointRequestInterceptor(Collection<ContentType> contentTypes) {
-		this.contentTypes = new LinkedHashSet<>(contentTypes);
+	public HeaderEndpointRequestInterceptor(Headers headers) {
+		this.headers = headers;
 	}
 
 	@Override
 	public EndpointRequest intercepts(EndpointRequest endpointRequest) {
-		Optional<Header> accept = endpointRequest.headers().get(ACCEPT);
-
-		if (!accept.isPresent()) {
-			endpointRequest.headers().add(Header.accept(contentTypes));
-		}
-
+		endpointRequest.headers().addAll(headers);
 		return endpointRequest;
 	}
 }
