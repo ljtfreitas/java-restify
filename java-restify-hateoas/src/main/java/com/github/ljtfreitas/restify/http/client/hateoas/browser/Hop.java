@@ -29,6 +29,7 @@ import java.util.Map;
 
 import com.github.ljtfreitas.restify.http.client.Header;
 import com.github.ljtfreitas.restify.http.client.Headers;
+import com.github.ljtfreitas.restify.http.contract.ContentType;
 
 public class Hop {
 
@@ -110,15 +111,19 @@ public class Hop {
 		return new Hop(rel, parameters, headers, "POST", body);
 	}
 
-	public Hop usingPost(Object body) {
-		return new Hop(rel, parameters, headers, "POST", body);
+	public Hop usingPost(Object body, ContentType contentType) {
+		Headers newHeaders = new Headers(this.headers);
+		newHeaders.put(new Header(Headers.CONTENT_TYPE, contentType.toString()));
+		return new Hop(rel, parameters, newHeaders, "POST", body);
 	}
 
 	public Hop usingPut() {
 		return new Hop(rel, parameters, headers, "PUT", body);
 	}
 
-	public Hop usingPut(Object body) {
+	public Hop usingPut(Object body, ContentType contentType) {
+		Headers newHeaders = new Headers(this.headers);
+		newHeaders.put(new Header(Headers.CONTENT_TYPE, contentType.toString()));
 		return new Hop(rel, parameters, headers, "PUT", body);
 	}
 
@@ -130,8 +135,10 @@ public class Hop {
 		return new Hop(rel, parameters, headers, method, body);
 	}
 
-	public Hop usingMethod(String method, Object body) {
-		return new Hop(rel, parameters, headers, method, body);
+	public Hop usingMethod(String method, Object body, ContentType contentType) {
+		Headers newHeaders = new Headers(this.headers);
+		newHeaders.put(new Header(Headers.CONTENT_TYPE, contentType.toString()));
+		return new Hop(rel, parameters, newHeaders, method, body);
 	}
 
 	public static Hop rel(String rel) {
