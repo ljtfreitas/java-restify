@@ -28,6 +28,7 @@ package com.github.ljtfreitas.restify.http.client.authentication.oauth2;
 import static com.github.ljtfreitas.restify.http.util.Preconditions.nonNull;
 
 import java.net.URI;
+import java.net.URL;
 import java.security.Principal;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -176,17 +177,17 @@ public class OAuth2AuthenticationBuilder {
 		public class OAuth2AuthorizationServerHttpMessageConvertersBuilder {
 
 			private final OAuth2AuthorizationServerBuilder delegate;
-			private final Collection<HttpMessageConverter> converters;
+			private final Collection<HttpMessageConverter> converters = new ArrayList<>(Arrays.asList(
+					new TextPlainMessageConverter(), new FormURLEncodedParametersMessageConverter()));
 
 			private OAuth2AuthorizationServerHttpMessageConvertersBuilder(OAuth2AuthorizationServerBuilder context) {
-				this(context,
-						Arrays.asList(new TextPlainMessageConverter(), new FormURLEncodedParametersMessageConverter()));
+				this.delegate = context;
 			}
 
 			private OAuth2AuthorizationServerHttpMessageConvertersBuilder(OAuth2AuthorizationServerBuilder context,
 					Collection<HttpMessageConverter> converters) {
 				this.delegate = context;
-				this.converters = new ArrayList<>(converters);
+				this.converters.addAll(converters);
 			}
 
 			public OAuth2AuthorizationServerHttpMessageConvertersBuilder json() {
@@ -267,6 +268,11 @@ public class OAuth2AuthenticationBuilder {
 			return this;
 		}
 
+		public OAuth2ClientCredentialsGrantBuilder accessTokenUri(URL accessTokenUri) {
+			delegate.accessTokenUri(accessTokenUri);
+			return this;
+		}
+
 		public OAuth2ClientCredentialsGrantBuilder credentials(String clientId, String clientSecret) {
 			delegate.credentials(clientId, clientSecret);
 			return this;
@@ -322,6 +328,11 @@ public class OAuth2AuthenticationBuilder {
 		}
 
 		public OAuth2ResourceOwnerGrantBuilder accessTokenUri(URI accessTokenUri) {
+			delegate.accessTokenUri(accessTokenUri);
+			return this;
+		}
+
+		public OAuth2ResourceOwnerGrantBuilder accessTokenUri(URL accessTokenUri) {
 			delegate.accessTokenUri(accessTokenUri);
 			return this;
 		}
@@ -396,6 +407,11 @@ public class OAuth2AuthenticationBuilder {
 		}
 
 		public OAuth2ImplicitGrantBuilder accessTokenUri(URI accessTokenUri) {
+			delegate.accessTokenUri(accessTokenUri);
+			return this;
+		}
+
+		public OAuth2ImplicitGrantBuilder accessTokenUri(URL accessTokenUri) {
 			delegate.accessTokenUri(accessTokenUri);
 			return this;
 		}
@@ -537,6 +553,11 @@ public class OAuth2AuthenticationBuilder {
 		}
 
 		public OAuth2AuthorizationCodeGrantBuilder accessTokenUri(URI accessTokenUri) {
+			delegate.accessTokenUri(accessTokenUri);
+			return this;
+		}
+
+		public OAuth2AuthorizationCodeGrantBuilder accessTokenUri(URL accessTokenUri) {
 			delegate.accessTokenUri(accessTokenUri);
 			return this;
 		}

@@ -28,11 +28,13 @@ package com.github.ljtfreitas.restify.http.client.authentication.oauth2;
 import static com.github.ljtfreitas.restify.http.util.Preconditions.nonNull;
 
 import java.net.URI;
+import java.net.URL;
 
 import com.github.ljtfreitas.restify.http.client.header.Header;
 import com.github.ljtfreitas.restify.http.client.header.Headers;
 import com.github.ljtfreitas.restify.http.contract.Parameters;
 import com.github.ljtfreitas.restify.http.contract.Parameters.Parameter;
+import com.github.ljtfreitas.restify.http.util.Tryable;
 
 public class AccessTokenRequest {
 
@@ -123,6 +125,11 @@ public class AccessTokenRequest {
 
 		public Builder accessTokenUri(URI acessTokenUri) {
 			this.accessTokenUri = acessTokenUri;
+			return this;
+		}
+
+		public Builder accessTokenUri(URL acessTokenUri) {
+			this.accessTokenUri = Tryable.of(acessTokenUri::toURI);
 			return this;
 		}
 

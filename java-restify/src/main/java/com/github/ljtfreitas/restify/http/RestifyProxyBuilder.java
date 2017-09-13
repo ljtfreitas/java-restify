@@ -220,9 +220,9 @@ public class RestifyProxyBuilder {
 		}
 
 		private RestifyProxyHandler doBuild() {
-			EndpointTarget target = new EndpointTarget(type, endpoint);
+			EndpointTarget target = new EndpointTarget(type, Optional.ofNullable(endpoint).orElse(null));
 
-			EndpointMethodExecutor endpointMethodExecutor = new EndpointMethodExecutor(endpointCallExecutables(), endpointMethodCallFactory()); 
+			EndpointMethodExecutor endpointMethodExecutor = new EndpointMethodExecutor(endpointCallExecutables(), endpointMethodCallFactory());
 
 			RestifyContract restifyContract = contract();
 
@@ -244,7 +244,7 @@ public class RestifyProxyBuilder {
 		private EndpointRequestExecutor endpointRequestExecutor() {
 			HttpMessageConverters messageConverters = httpMessageConvertersBuilder.build();
 			return Optional.ofNullable(endpointRequestExecutor)
-					.orElseGet(() -> new RestifyEndpointRequestExecutor(httpClientRequestFactory(), 
+					.orElseGet(() -> new RestifyEndpointRequestExecutor(httpClientRequestFactory(),
 							new EndpointRequestWriter(messageConverters),
 							new EndpointResponseReader(messageConverters, endpointResponseErrorFallbackBuilder())));
 		}
