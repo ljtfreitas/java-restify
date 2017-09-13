@@ -25,15 +25,21 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.authentication.oauth2;
 
+import java.io.Serializable;
+
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.github.ljtfreitas.restify.http.contract.Parameters;
 import com.google.gson.annotations.SerializedName;
 
+@JsonIgnoreProperties(ignoreUnknown = true)
 @XmlRootElement(name = "oauth")
-public class AccessTokenResponse {
+public class AccessTokenResponse implements Serializable {
+
+	private static final long serialVersionUID = 1L;
 
 	@JsonProperty("access_token")
 	@XmlElement(name = "access_token")

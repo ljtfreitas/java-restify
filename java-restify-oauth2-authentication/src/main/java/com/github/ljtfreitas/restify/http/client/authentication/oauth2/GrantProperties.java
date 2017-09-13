@@ -26,12 +26,15 @@
 package com.github.ljtfreitas.restify.http.client.authentication.oauth2;
 
 import java.net.URI;
+import java.net.URL;
 import java.security.Principal;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import com.github.ljtfreitas.restify.http.util.Tryable;
 
 public class GrantProperties {
 
@@ -79,6 +82,11 @@ public class GrantProperties {
 
 		public Builder accessTokenUri(URI accessTokenUri) {
 			properties.accessTokenUri = accessTokenUri;
+			return this;
+		}
+
+		public Builder accessTokenUri(URL acessTokenUri) {
+			properties.accessTokenUri = Tryable.of(acessTokenUri::toURI);
 			return this;
 		}
 
