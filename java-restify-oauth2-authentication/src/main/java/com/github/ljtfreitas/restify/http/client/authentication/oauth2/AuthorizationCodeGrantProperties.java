@@ -26,6 +26,7 @@
 package com.github.ljtfreitas.restify.http.client.authentication.oauth2;
 
 import java.net.URI;
+import java.net.URL;
 import java.security.Principal;
 import java.util.Collection;
 import java.util.Optional;
@@ -95,6 +96,11 @@ public class AuthorizationCodeGrantProperties extends GrantProperties {
 
 		public Builder accessTokenUri(URI accessTokenUri) {
 			delegate.accessTokenUri(accessTokenUri);
+			return this;
+		}
+
+		public Builder accessTokenUri(URL acessTokenUri) {
+			delegate.accessTokenUri(acessTokenUri);
 			return this;
 		}
 
