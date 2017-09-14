@@ -35,6 +35,7 @@ import java.util.Map;
 import java.util.Queue;
 
 import com.github.ljtfreitas.restify.http.client.hateoas.Link;
+import com.github.ljtfreitas.restify.http.client.hateoas.Resource;
 import com.github.ljtfreitas.restify.http.client.hateoas.browser.discovery.HypermediaLinkDiscovery;
 import com.github.ljtfreitas.restify.http.client.hateoas.browser.discovery.RawResource;
 import com.github.ljtfreitas.restify.http.client.header.Headers;
@@ -42,89 +43,103 @@ import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
 import com.github.ljtfreitas.restify.http.contract.ContentType;
 import com.github.ljtfreitas.restify.http.contract.metadata.reflection.JavaType;
 
-public class LinkBrowser {
+public class HypermediaBrowser {
 
 	private final LinkRequestExecutor linkRequestExecutor;
 	private final HypermediaLinkDiscovery resourceLinkDiscovery;
 	private final URL baseURL;
 
-	public LinkBrowser(LinkRequestExecutor linkRequestExecutor) {
+	public HypermediaBrowser(LinkRequestExecutor linkRequestExecutor) {
 		this(linkRequestExecutor, HypermediaLinkDiscovery.all(), null);
 	}
 
-	public LinkBrowser(LinkRequestExecutor linkRequestExecutor, HypermediaLinkDiscovery resourceLinkDiscovery) {
+	public HypermediaBrowser(LinkRequestExecutor linkRequestExecutor, HypermediaLinkDiscovery resourceLinkDiscovery) {
 		this(linkRequestExecutor, resourceLinkDiscovery, null);
 	}
 
-	public LinkBrowser(LinkRequestExecutor linkRequestExecutor, HypermediaLinkDiscovery resourceLinkDiscovery, URL baseURL) {
+	public HypermediaBrowser(LinkRequestExecutor linkRequestExecutor, HypermediaLinkDiscovery resourceLinkDiscovery, URL baseURL) {
 		this.linkRequestExecutor = linkRequestExecutor;
 		this.resourceLinkDiscovery = resourceLinkDiscovery;
 		this.baseURL = baseURL;
 	}
 
-	public LinkBrowserTraverson follow(Link link) {
-		return new LinkBrowserTraverson(link);
+	public HypermediaBrowserTraverson follow(Link link) {
+		return new HypermediaBrowserTraverson(link);
 	}
 
-	public LinkBrowserTraverson follow(Link link, LinkURITemplateParameters parameters) {
-		return new LinkBrowserTraverson(link, parameters);
+	public HypermediaBrowserTraverson follow(Link link, LinkURITemplateParameters parameters) {
+		return new HypermediaBrowserTraverson(link, parameters);
 	}
 
-	public LinkBrowserTraverson follow(Link link, LinkURITemplateParameter... parameters) {
-		return new LinkBrowserTraverson(link, new LinkURITemplateParameters(parameters));
+	public HypermediaBrowserTraverson follow(Link link, LinkURITemplateParameter... parameters) {
+		return new HypermediaBrowserTraverson(link, new LinkURITemplateParameters(parameters));
 	}
 
-	public class LinkBrowserTraverson {
+	public class HypermediaBrowserTraverson {
 
 		private final Link link;
 		private final LinkURITemplateParameters parameters;
 
 		private final Queue<Hop> relations = new LinkedList<>();
 
-		private LinkBrowserTraverson(Link link) {
+		private HypermediaBrowserTraverson(Link link) {
 			this.link = link;
 			this.parameters = new LinkURITemplateParameters();
 		}
 
-		private LinkBrowserTraverson(Link link, LinkURITemplateParameters parameters) {
+		private HypermediaBrowserTraverson(Link link, LinkURITemplateParameters parameters) {
 			this.link = link;
 			this.parameters = parameters;
 		}
 
-		public LinkBrowserTraverson follow(String... rels) {
+		public HypermediaBrowserTraverson follow(String... rels) {
 			Arrays.stream(rels).map(Hop::rel).forEach(relations::add);
 			return this;
 		}
 
-		public LinkBrowserTraverson follow(String rel, Map<String, String> parameters) {
+		public HypermediaBrowserTraverson follow(String rel, Map<String, String> parameters) {
 			relations.add(Hop.rel(rel, parameters));
 			return this;
 		}
 
-		public LinkBrowserTraverson follow(String rel, LinkURITemplateParameters parameters) {
+		public HypermediaBrowserTraverson follow(String rel, LinkURITemplateParameters parameters) {
 			relations.add(Hop.rel(rel, parameters));
 			return this;
 		}
 
-		public LinkBrowserTraverson follow(Hop... hops) {
+		public HypermediaBrowserTraverson follow(Hop... hops) {
 			Arrays.stream(hops).forEach(relations::add);
 			return this;
 		}
 
-		public <T> T as(Class<? extends T> type) {
+		public <T> T as(Type type) {
+			EndpointResponse<T> response = tryExecute(type);
+			return response.body();
+		}
+
+		public <T> Collection<T> asCollectionOf(Type type) {
+			EndpointResponse<List<T>> response = tryExecute(JavaType.parameterizedType(List.class, type));
+			return response.body();
+		}
+
+		public <T> Resource<T> asResourceOf(Type type) {
+			EndpointResponse<Resource<T>> response = tryExecute(JavaType.parameterizedType(Resource.class, type));
+			return response.body();
+		}
+
+		public <T> EndpointResponse<T> responseAs(Type type) {
 			return tryExecute(type);
 		}
 
-		public <T> Collection<T> asCollectionOf(Class<? extends T> type) {
-			return tryExecute(JavaType.parameterizedType(List.class, type));
+		public EndpointResponse<Void> execute() {
+			return tryExecute(void.class);
 		}
 
-		private <T> T tryExecute(Type responseType) {
+		private <T> EndpointResponse<T> tryExecute(Type responseType) {
 			try {
-				EndpointResponse<T> response = execute(traverse(), responseType);
-				return response.body();
+				return execute(traverse(), responseType);
 			} catch (Exception e) {
-				throw new LinkBrowserException("Could not follow link [" + link + "]", e);
+				throw new HypermediaBrowserException("Could not follow link [" + link + "]", e);
 			}
 		}
 

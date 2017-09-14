@@ -41,27 +41,27 @@ import com.fasterxml.jackson.databind.deser.std.ContainerDeserializerBase;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.github.ljtfreitas.restify.http.client.hateoas.Link;
 import com.github.ljtfreitas.restify.http.client.hateoas.Links;
-import com.github.ljtfreitas.restify.http.client.hateoas.browser.LinkBrowser;
+import com.github.ljtfreitas.restify.http.client.hateoas.browser.HypermediaBrowser;
 
 class HypermediaHalLinksDeserializer extends ContainerDeserializerBase<Links> implements ContextualDeserializer {
 
 	private static final long serialVersionUID = 1L;
 
 	private final JsonDeserializer<Object> linkDeserializer;
-	private final LinkBrowser browser;
+	private final HypermediaBrowser hypermediaBrowser;
 
 	public HypermediaHalLinksDeserializer() {
 		this(null, null);
 	}
 
-	public HypermediaHalLinksDeserializer(LinkBrowser linkBrowser) {
-		this(null, linkBrowser);
+	public HypermediaHalLinksDeserializer(HypermediaBrowser hypermediaBrowser) {
+		this(null, hypermediaBrowser);
 	}
 
-	public HypermediaHalLinksDeserializer(JsonDeserializer<Object> linkDeserializer, LinkBrowser browser) {
+	public HypermediaHalLinksDeserializer(JsonDeserializer<Object> linkDeserializer, HypermediaBrowser hypermediaBrowser) {
 		super(TypeFactory.defaultInstance().constructType(Links.class));
 		this.linkDeserializer = linkDeserializer;
-		this.browser = browser;
+		this.hypermediaBrowser = hypermediaBrowser;
 	}
 
 	@Override
@@ -101,13 +101,13 @@ class HypermediaHalLinksDeserializer extends ContainerDeserializerBase<Links> im
 
 	private Link createLink(String relation, JsonParser jsonParser) throws IOException {
 		Link link = jsonParser.readValueAs(Link.class);
-		return new Link(link, relation, browser);
+		return new Link(link, relation, hypermediaBrowser);
 	}
 
 	@Override
 	public JsonDeserializer<?> createContextual(DeserializationContext context, BeanProperty property)
 			throws JsonMappingException {
 		JsonDeserializer<Object> linkDeserializer = context.findNonContextualValueDeserializer(TypeFactory.defaultInstance().constructType(Link.class));
-		return new HypermediaHalLinksDeserializer(linkDeserializer, browser);
+		return new HypermediaHalLinksDeserializer(linkDeserializer, hypermediaBrowser);
 	}
 }

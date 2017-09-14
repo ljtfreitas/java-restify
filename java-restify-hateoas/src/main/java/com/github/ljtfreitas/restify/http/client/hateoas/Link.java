@@ -27,6 +27,8 @@ package com.github.ljtfreitas.restify.http.client.hateoas;
 
 import static com.github.ljtfreitas.restify.http.util.Preconditions.nonNull;
 
+import java.net.URI;
+import java.net.URL;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
@@ -38,8 +40,8 @@ import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonInclude.Include;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.annotation.JsonPropertyOrder;
-import com.github.ljtfreitas.restify.http.client.hateoas.browser.LinkBrowser;
-import com.github.ljtfreitas.restify.http.client.hateoas.browser.LinkBrowser.LinkBrowserTraverson;
+import com.github.ljtfreitas.restify.http.client.hateoas.browser.HypermediaBrowser;
+import com.github.ljtfreitas.restify.http.client.hateoas.browser.HypermediaBrowser.HypermediaBrowserTraverson;
 import com.github.ljtfreitas.restify.http.client.hateoas.browser.LinkURITemplateParameter;
 import com.github.ljtfreitas.restify.http.client.hateoas.browser.LinkURITemplateParameters;
 
@@ -65,40 +67,128 @@ public class Link {
 	private Map<String, String> properties = new HashMap<>();
 
 	@JsonIgnore
-	private LinkBrowser browser;
+	private HypermediaBrowser hypermediaBrowser;
 
 	@Deprecated
 	protected Link() {
 	}
 
-	public Link(String href, String rel) {
-		this(href, rel, Collections.emptyMap(), null);
+	public Link(URI href) {
+		this(href, REL_SELF);
 	}
 
-	public Link(String href, String rel, Map<String, String> properties, LinkBrowser browser) {
+	public Link(URL href) {
+		this(href, REL_SELF);
+	}
+
+	public Link(String href) {
+		this(href, REL_SELF);
+	}
+
+	public Link(URI href, String rel) {
+		this(href, rel, Collections.emptyMap());
+	}
+
+	public Link(URL href, String rel) {
+		this(href, rel, Collections.emptyMap());
+	}
+
+	public Link(String href, String rel) {
+		this(href, rel, Collections.emptyMap());
+	}
+
+	public Link(URI href, String rel, Map<String, String> properties) {
+		this(href, rel, properties, null);
+	}
+
+	public Link(URL href, String rel, Map<String, String> properties) {
+		this(href, rel, properties, null);
+	}
+
+	public Link(String href, String rel, Map<String, String> properties) {
+		this(href, rel, properties, null);
+	}
+
+	public Link(URI href, String rel, HypermediaBrowser hypermediaBrowser) {
+		this(href, rel, Collections.emptyMap(), hypermediaBrowser);
+	}
+
+	public Link(URL href, String rel, HypermediaBrowser hypermediaBrowser) {
+		this(href, rel, Collections.emptyMap(), hypermediaBrowser);
+	}
+
+	public Link(String href, String rel, HypermediaBrowser hypermediaBrowser) {
+		this(href, rel, Collections.emptyMap(), hypermediaBrowser);
+	}
+
+	public Link(URI href, Map<String, String> properties) {
+		this(href, REL_SELF, properties);
+	}
+
+	public Link(URL href, Map<String, String> properties) {
+		this(href, REL_SELF, properties);
+	}
+
+	public Link(String href, Map<String, String> properties) {
+		this(href, REL_SELF, properties);
+	}
+
+	public Link(URI href, HypermediaBrowser hypermediaBrowser) {
+		this(href, REL_SELF, hypermediaBrowser);
+	}
+
+	public Link(URL href, HypermediaBrowser hypermediaBrowser) {
+		this(href, REL_SELF, hypermediaBrowser);
+	}
+
+	public Link(String href, HypermediaBrowser hypermediaBrowser) {
+		this(href, REL_SELF, hypermediaBrowser);
+	}
+
+	public Link(URI href, Map<String, String> properties, HypermediaBrowser hypermediaBrowser) {
+		this(href, REL_SELF, properties, hypermediaBrowser);
+	}
+
+	public Link(URL href, Map<String, String> properties, HypermediaBrowser hypermediaBrowser) {
+		this(href, REL_SELF, properties, hypermediaBrowser);
+	}
+
+	public Link(String href, Map<String, String> properties, HypermediaBrowser hypermediaBrowser) {
+		this(href, REL_SELF, properties, hypermediaBrowser);
+	}
+
+	public Link(URI href, String rel, Map<String, String> properties, HypermediaBrowser hypermediaBrowser) {
+		this(nonNull(href, "Link href cannot be null.").toString(), rel, properties, hypermediaBrowser);
+	}
+
+	public Link(URL href, String rel, Map<String, String> properties, HypermediaBrowser hypermediaBrowser) {
+		this(nonNull(href, "Link href cannot be null.").toString(), rel, properties, hypermediaBrowser);
+	}
+
+	public Link(String href, String rel, Map<String, String> properties, HypermediaBrowser hypermediaBrowser) {
 		this.href = nonNull(href, "Link href cannot be null.");
 		this.rel = rel;
 		this.title = properties.getOrDefault("title", null);
 		this.type = properties.getOrDefault("type", null);
 		this.properties = properties;
-		this.browser = browser;
+		this.hypermediaBrowser = hypermediaBrowser;
 	}
 
 	public Link(Link source) {
-		this(source, source.browser);
+		this(source, source.hypermediaBrowser);
 	}
 
-	public Link(Link source, LinkBrowser browser) {
-		this(source, source.rel, browser);
+	public Link(Link source, HypermediaBrowser hypermediaBrowser) {
+		this(source, source.rel, hypermediaBrowser);
 	}
 
-	public Link(Link source, String rel, LinkBrowser browser) {
+	public Link(Link source, String rel, HypermediaBrowser hypermediaBrowser) {
 		this.href = source.href;
 		this.type = source.type;
 		this.title = source.title;
 		this.properties = new HashMap<>(source.properties);
 		this.rel = rel;
-		this.browser = browser;
+		this.hypermediaBrowser = hypermediaBrowser;
 	}
 
 	public String href() {
@@ -144,37 +234,37 @@ public class Link {
 		this.properties.put(name, value);
 	}
 
-	public LinkBrowserTraverson follow() {
+	public HypermediaBrowserTraverson follow() {
 		return doFollow(LinkURITemplateParameters.empty());
 	}
 
-	public LinkBrowserTraverson follow(LinkURITemplateParameters parameters) {
+	public HypermediaBrowserTraverson follow(LinkURITemplateParameters parameters) {
 		return doFollow(parameters);
 	}
 
-	public LinkBrowserTraverson follow(LinkURITemplateParameter... parameters) {
+	public HypermediaBrowserTraverson follow(LinkURITemplateParameter... parameters) {
 		return doFollow(new LinkURITemplateParameters(parameters));
 	}
 
-	public LinkBrowserTraverson follow(Map<String, String> parameters) {
+	public HypermediaBrowserTraverson follow(Map<String, String> parameters) {
 		return doFollow(new LinkURITemplateParameters(parameters));
 	}
 
-	private LinkBrowserTraverson doFollow(LinkURITemplateParameters parameters) {
-		nonNull(browser, "Cannot follow this link [" + href + "], because LinkBrowser has not set.");
-		return browser.follow(this, parameters);
+	private HypermediaBrowserTraverson doFollow(LinkURITemplateParameters parameters) {
+		nonNull(hypermediaBrowser, "Cannot follow this link [" + href + "], because LinkBrowser has not set.");
+		return hypermediaBrowser.follow(this, parameters);
 	}
 
 	@Override
 	public String toString() {
-		return String.format("Link: [" + href + "]");
+		return String.format("Link: [%s:%s]", rel, href);
 	}
 
 	public static Link self(String href) {
 		return new Link(href, REL_SELF, Collections.emptyMap(), null);
 	}
 
-	public static Link self(String href, LinkBrowser linkBrowser) {
-		return new Link(href, REL_SELF, Collections.emptyMap(), linkBrowser);
+	public static Link self(String href, HypermediaBrowser hypermediaBrowser) {
+		return new Link(href, REL_SELF, Collections.emptyMap(), hypermediaBrowser);
 	}
 }

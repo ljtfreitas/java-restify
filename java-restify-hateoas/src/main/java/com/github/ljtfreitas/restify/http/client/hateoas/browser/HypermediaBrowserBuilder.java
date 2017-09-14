@@ -66,7 +66,7 @@ import com.github.ljtfreitas.restify.http.client.response.EndpointResponseErrorF
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponseReader;
 import com.github.ljtfreitas.restify.http.util.Tryable;
 
-public class LinkBrowserBuilder {
+public class HypermediaBrowserBuilder {
 
 	private URL baseURL;
 
@@ -84,22 +84,22 @@ public class LinkBrowserBuilder {
 
 	private ResourceLinkDiscoveryBuilder resourceLinkDiscoveryBuilder = new ResourceLinkDiscoveryBuilder(this);
 
-	public LinkBrowserBuilder baseURL(String baseUrl) {
+	public HypermediaBrowserBuilder baseURL(String baseUrl) {
 		this.baseURL = Tryable.of(() -> new URL(baseUrl));
 		return this;
 	}
 
-	public LinkBrowserBuilder baseURL(URL baseUrl) {
+	public HypermediaBrowserBuilder baseURL(URL baseUrl) {
 		this.baseURL = baseUrl;
 		return this;
 	}
 
-	public LinkBrowserBuilder baseURL(URI baseUrl) {
+	public HypermediaBrowserBuilder baseURL(URI baseUrl) {
 		this.baseURL = Tryable.of(baseUrl::toURL);
 		return this;
 	}
 
-	public LinkBrowserBuilder client(HttpClientRequestFactory httpClientRequestFactory) {
+	public HypermediaBrowserBuilder client(HttpClientRequestFactory httpClientRequestFactory) {
 		this.httpClientRequestFactory = httpClientRequestFactory;
 		return this;
 	}
@@ -108,7 +108,7 @@ public class LinkBrowserBuilder {
 		return httpClientRequestConfigurationBuilder;
 	}
 
-	public LinkBrowserBuilder executor(EndpointRequestExecutor endpointRequestExecutor) {
+	public HypermediaBrowserBuilder executor(EndpointRequestExecutor endpointRequestExecutor) {
 		this.endpointRequestExecutor = endpointRequestExecutor;
 		return this;
 	}
@@ -117,7 +117,7 @@ public class LinkBrowserBuilder {
 		return this.httpMessageConvertersBuilder;
 	}
 
-	public LinkBrowserBuilder converters(HttpMessageConverter... converters) {
+	public HypermediaBrowserBuilder converters(HttpMessageConverter... converters) {
 		this.httpMessageConvertersBuilder.add(converters);
 		return this;
 	}
@@ -126,7 +126,7 @@ public class LinkBrowserBuilder {
 		return this.endpointRequestInterceptorsBuilder;
 	}
 
-	public LinkBrowserBuilder interceptors(EndpointRequestInterceptor... interceptors) {
+	public HypermediaBrowserBuilder interceptors(EndpointRequestInterceptor... interceptors) {
 		this.endpointRequestInterceptorsBuilder.add(interceptors);
 		return this;
 	}
@@ -135,7 +135,7 @@ public class LinkBrowserBuilder {
 		return endpointResponseErrorFallbackBuilder;
 	}
 
-	public LinkBrowserBuilder error(EndpointResponseErrorFallback fallback) {
+	public HypermediaBrowserBuilder error(EndpointResponseErrorFallback fallback) {
 		this.endpointResponseErrorFallbackBuilder = new EndpointResponseErrorFallbackBuilder(this, fallback);
 		return this;
 	}
@@ -144,11 +144,11 @@ public class LinkBrowserBuilder {
 		return resourceLinkDiscoveryBuilder;
 	}
 
-	public LinkBrowser build() {
+	public HypermediaBrowser build() {
 		LinkRequestExecutor linkRequestExecutor = linkRequestExecutor();
 		HypermediaLinkDiscovery resourceLinkDiscovery = resourceLinkDiscoveryBuilder.build();
 
-		return new LinkBrowser(linkRequestExecutor, resourceLinkDiscovery, baseURL);
+		return new HypermediaBrowser(linkRequestExecutor, resourceLinkDiscovery, baseURL);
 	}
 
 	private LinkRequestExecutor linkRequestExecutor() {
@@ -175,10 +175,10 @@ public class LinkBrowserBuilder {
 
 	public class EndpointRequestInterceptorsBuilder {
 
-		private final LinkBrowserBuilder context;
+		private final HypermediaBrowserBuilder context;
 		private final Collection<EndpointRequestInterceptor> interceptors = new ArrayList<>();
 
-		private EndpointRequestInterceptorsBuilder(LinkBrowserBuilder context) {
+		private EndpointRequestInterceptorsBuilder(HypermediaBrowserBuilder context) {
 			this.context = context;
 		}
 
@@ -207,7 +207,7 @@ public class LinkBrowserBuilder {
 			return this;
 		}
 
-		public LinkBrowserBuilder and() {
+		public HypermediaBrowserBuilder and() {
 			return context;
 		}
 
@@ -218,26 +218,26 @@ public class LinkBrowserBuilder {
 
 	public class EndpointResponseErrorFallbackBuilder {
 
-		private final LinkBrowserBuilder context;
+		private final HypermediaBrowserBuilder context;
 
 		private EndpointResponseErrorFallback fallback = null;
 		private boolean emptyOnNotFound = false;
 
-		private EndpointResponseErrorFallbackBuilder(LinkBrowserBuilder context) {
+		private EndpointResponseErrorFallbackBuilder(HypermediaBrowserBuilder context) {
 			this.context = context;
 		}
 
-		private EndpointResponseErrorFallbackBuilder(LinkBrowserBuilder context, EndpointResponseErrorFallback fallback) {
+		private EndpointResponseErrorFallbackBuilder(HypermediaBrowserBuilder context, EndpointResponseErrorFallback fallback) {
 			this.context = context;
 			this.fallback = fallback;
 		}
 
-		public LinkBrowserBuilder emptyOnNotFound() {
+		public HypermediaBrowserBuilder emptyOnNotFound() {
 			this.emptyOnNotFound = true;
 			return context;
 		}
 
-		public LinkBrowserBuilder using(EndpointResponseErrorFallback fallback) {
+		public HypermediaBrowserBuilder using(EndpointResponseErrorFallback fallback) {
 			this.fallback = fallback;
 			return context;
 		}
@@ -251,21 +251,21 @@ public class LinkBrowserBuilder {
 
 	public class HttpMessageConvertersBuilder {
 
-		private final LinkBrowserBuilder context;
+		private final HypermediaBrowserBuilder context;
 		private final Collection<HttpMessageConverter> converters = new ArrayList<>();
 
-		private HttpMessageConvertersBuilder(LinkBrowserBuilder context) {
+		private HttpMessageConvertersBuilder(HypermediaBrowserBuilder context) {
 			this.context = context;
 			this.converters.add(new SimpleTextMessageConverter());
 		}
 
 		public HttpMessageConvertersBuilder json() {
-			converters.add(JacksonHypermediaJsonMessageConverter.withoutBrowser());
+			converters.add(JacksonHypermediaJsonMessageConverter.unfollow());
 			return this;
 		}
 
 		public HttpMessageConvertersBuilder hal() {
-			converters.add(JacksonHypermediaHalJsonMessageConverter.withoutBrowser());
+			converters.add(JacksonHypermediaHalJsonMessageConverter.unfollow());
 			return this;
 		}
 
@@ -278,7 +278,7 @@ public class LinkBrowserBuilder {
 			return this;
 		}
 
-		public LinkBrowserBuilder and() {
+		public HypermediaBrowserBuilder and() {
 			return context;
 		}
 
@@ -289,10 +289,10 @@ public class LinkBrowserBuilder {
 
 	public class ResourceLinkDiscoveryBuilder {
 
-		private final LinkBrowserBuilder context;
+		private final HypermediaBrowserBuilder context;
 		private final Collection<LinkDiscovery> resolvers = new ArrayList<>();
 
-		private ResourceLinkDiscoveryBuilder(LinkBrowserBuilder context) {
+		private ResourceLinkDiscoveryBuilder(HypermediaBrowserBuilder context) {
 			this.context = context;
 		}
 
@@ -330,7 +330,7 @@ public class LinkBrowserBuilder {
 			return this;
 		}
 
-		public LinkBrowserBuilder and() {
+		public HypermediaBrowserBuilder and() {
 			return context;
 		}
 
@@ -341,12 +341,12 @@ public class LinkBrowserBuilder {
 
 	public class HttpClientRequestConfigurationBuilder {
 
-		private final LinkBrowserBuilder context;
+		private final HypermediaBrowserBuilder context;
 		private final HttpClientRequestConfiguration.Builder builder = new HttpClientRequestConfiguration.Builder();
 
 		private HttpClientRequestConfiguration httpClientRequestConfiguration = null;
 
-		private HttpClientRequestConfigurationBuilder(LinkBrowserBuilder context) {
+		private HttpClientRequestConfigurationBuilder(HypermediaBrowserBuilder context) {
 			this.context = context;
 		}
 
@@ -402,12 +402,12 @@ public class LinkBrowserBuilder {
 			return new HttpClientRequestSslConfigurationBuilder();
 		}
 
-		public LinkBrowserBuilder using(HttpClientRequestConfiguration httpClientRequestConfiguration) {
+		public HypermediaBrowserBuilder using(HttpClientRequestConfiguration httpClientRequestConfiguration) {
 			this.httpClientRequestConfiguration = httpClientRequestConfiguration;
 			return context;
 		}
 
-		public LinkBrowserBuilder and() {
+		public HypermediaBrowserBuilder and() {
 			return context;
 		}
 
@@ -453,7 +453,7 @@ public class LinkBrowserBuilder {
 				return HttpClientRequestConfigurationBuilder.this;
 			}
 
-			public LinkBrowserBuilder and() {
+			public HypermediaBrowserBuilder and() {
 				return context;
 			}
 		}
