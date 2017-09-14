@@ -1,9 +1,12 @@
 package com.github.ljtfreitas.restify.http.client.hateoas.browser;
 
 import static com.github.ljtfreitas.restify.http.client.hateoas.browser.Hop.rel;
+import static org.hamcrest.Matchers.hasItem;
+import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
@@ -29,11 +32,12 @@ import org.mockserver.model.HttpRequest;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.github.ljtfreitas.restify.http.client.hateoas.Link;
+import com.github.ljtfreitas.restify.http.client.hateoas.Resource;
 import com.github.ljtfreitas.restify.http.client.request.interceptor.EndpointRequestInterceptorStack;
 import com.github.ljtfreitas.restify.http.contract.ContentType;
 
 @RunWith(MockitoJUnitRunner.class)
-public class LinkBrowserTest {
+public class HypermediaBrowserTest {
 
 	@Mock
 	private EndpointRequestInterceptorStack endpointRequestInterceptorStack;
@@ -43,13 +47,13 @@ public class LinkBrowserTest {
 
 	private MockServerClient mockServerClient;
 
-	private LinkBrowser linkBrowser;
+	private HypermediaBrowser hypermediaBrowser;
 
 	@Before
 	public void setup() {
 		when(endpointRequestInterceptorStack.apply(any())).then(returnsFirstArg());
 
-		linkBrowser = new LinkBrowserBuilder().build();
+		hypermediaBrowser = new HypermediaBrowserBuilder().build();
 
 		mockServerClient = new MockServerClient("localhost", 7080);
 	}
@@ -67,7 +71,7 @@ public class LinkBrowserTest {
 					.withHeader("Content-Type", "application/hal+json")
 					.withBody(json("{\"name\":\"Tiago de Freitas Lima\",\"birth_date\":\"1985-07-02\"}")));
 
-		Person person = linkBrowser
+		Person person = hypermediaBrowser
 			.follow(Link.self("http://localhost:7080/me"))
 				.as(Person.class);
 
@@ -107,7 +111,7 @@ public class LinkBrowserTest {
 								  + "{\"name\":\"Sicrano dos Santos\",\"birth_date\":\"1985-10-02\"}"
 								 + "]")));
 
-		Collection<Person> friends = linkBrowser
+		Collection<Person> friends = hypermediaBrowser
 				.follow(Link.self("http://localhost:7080/me"))
 					.follow(rel("friends").usingParameter("user", "tiago"))
 						.asCollectionOf(Person.class);
@@ -118,6 +122,65 @@ public class LinkBrowserTest {
 		assertThat(friends, Matchers.hasItem(new Person("Sicrano dos Santos", "1985-10-02")));
 
 		mockServerClient.verify(personRequest, friendsRequest);
+	}
+
+	@Test
+	public void shouldFollowHalLinkWithResponseOfOtherResourceType() {
+		HttpRequest personRequest = request()
+			.withMethod("GET")
+			.withPath("/me");
+
+		HttpRequest friendsRequest = request()
+			.withMethod("GET")
+			.withPath("/tiago/friends");
+
+		HttpRequest cityRequest = request()
+			.withMethod("GET")
+			.withPath("/cities/rio-de-janeiro");
+
+		mockServerClient.when(personRequest)
+			.respond(
+				response()
+					.withStatusCode(200)
+					.withHeader("Content-Type", "application/hal+json")
+					.withBody(json("{\"name\":\"Tiago de Freitas Lima\",\"birth_date\":\"1985-07-02\","
+								+ "\"_links\":{"
+									+ "\"self\":{\"href\":\"http://localhost:8080/\"},"
+									+ "\"friends\":{\"href\":\"http://localhost:7080/{user}/friends\",\"templated\":true}"
+								+ "}}")));
+
+		mockServerClient.when(friendsRequest)
+			.respond(
+				response()
+					.withStatusCode(200)
+					.withHeader("Content-Type", "application/hal+json")
+					.withBody(json("["
+								+ "{\"name\":\"Fulano de Tal\",\"birth_date\":\"1985-08-02\","
+									+ "\"_links\":{\"city\":{\"href\":\"http://localhost:7080/cities/sao-paulo\"}}},"
+								+ "{\"name\":\"Beltrano da Silva\",\"birth_date\":\"1985-09-02\","
+									+ "\"_links\":{\"city\":{\"href\":\"http://localhost:7080/cities/rio-de-janeiro\"}}}"
+								+ "]")));
+
+		mockServerClient.when(cityRequest)
+			.respond(
+				response()
+					.withStatusCode(200)
+					.withHeader("Content-Type", "application/hal+json")
+					.withBody(json("{\"name\":\"Rio de Janeiro\",\"state\":\"Rio de Janeiro\","
+							+ "\"_links\":{\"self\":{\"href\":\"http://localhost:7080/cities/rio-de-janeiro\"}}}")));
+
+		Resource<City> city = hypermediaBrowser
+				.follow(Link.self("http://localhost:7080/me"))
+					.follow(rel("friends").usingParameter("user", "tiago"))
+						.follow(rel("$.[1]._links.city.href"))
+							.asResourceOf(City.class);
+
+		assertEquals("Rio de Janeiro", city.content().name);
+		assertEquals("Rio de Janeiro", city.content().state);
+
+		assertTrue(city.links().get("self").isPresent());
+
+		mockServerClient.verify(personRequest, friendsRequest, cityRequest);
 	}
 
 	@Test
@@ -151,15 +214,15 @@ public class LinkBrowserTest {
 								  + "{\"name\":\"Sicrano dos Santos\",\"birth_date\":\"1985-10-02\"}"
 								 + "]")));
 
-		Collection<Person> friends = linkBrowser
+		Collection<Person> friends = hypermediaBrowser
 				.follow(Link.self("http://localhost:7080/me"))
 					.follow(rel("friends").usingParameter("user", "tiago"))
 						.asCollectionOf(Person.class);
 
-		assertThat(friends, Matchers.hasSize(3));
-		assertThat(friends, Matchers.hasItem(new Person("Fulano de Tal", "1985-08-02")));
-		assertThat(friends, Matchers.hasItem(new Person("Beltrano da Silva", "1985-09-02")));
-		assertThat(friends, Matchers.hasItem(new Person("Sicrano dos Santos", "1985-10-02")));
+		assertThat(friends, hasSize(3));
+		assertThat(friends, hasItem(new Person("Fulano de Tal", "1985-08-02")));
+		assertThat(friends, hasItem(new Person("Beltrano da Silva", "1985-09-02")));
+		assertThat(friends, hasItem(new Person("Sicrano dos Santos", "1985-10-02")));
 
 		mockServerClient.verify(personRequest, friendsRequest);
 	}
@@ -208,7 +271,7 @@ public class LinkBrowserTest {
 					.withHeader("Content-Type", "application/json")
 					.withBody(json("{\"name\":\"Rio de Janeiro\",\"state\":\"Rio de Janeiro\"}")));
 
-		City city = linkBrowser
+		City city = hypermediaBrowser
 				.follow(Link.self("http://localhost:7080/me"))
 					.follow(rel("friends").usingParameter("user", "tiago"))
 						.follow(rel("$.[1]._links.city.href"))
@@ -263,7 +326,7 @@ public class LinkBrowserTest {
 					.withHeader("Content-Type", "application/json")
 					.withBody(json("{\"name\":\"Sao Paulo\",\"state\":\"Sao Paulo\"}")));
 
-		City city = linkBrowser
+		City city = hypermediaBrowser
 				.follow(Link.self("http://localhost:7080/me"))
 					.follow(rel("friends").usingParameter("user", "tiago"))
 						.follow(rel("$.[0].links[?(@.rel == 'city')].href"))
@@ -312,7 +375,7 @@ public class LinkBrowserTest {
 					.withHeader("Content-Type", "application/json")
 					.withBody(json("{\"name\":\"Sao Paulo\",\"state\":\"Sao Paulo\"}")));
 
-		City city = linkBrowser
+		City city = hypermediaBrowser
 				.follow(Link.self("http://localhost:7080/me"))
 					.follow("$.friends_url", "$.[0].city_url")
 						.as(City.class);
@@ -360,13 +423,13 @@ public class LinkBrowserTest {
 					.withHeader("Content-Type", "application/json")
 					.withBody(json("{\"name\":\"Sao Paulo\",\"state\":\"Sao Paulo\"}")));
 
-		linkBrowser = new LinkBrowserBuilder()
+		hypermediaBrowser = new HypermediaBrowserBuilder()
 				.discovery()
 					.jsonPath()
 					.and()
 				.build();
 
-		City city = linkBrowser
+		City city = hypermediaBrowser
 				.follow(Link.self("http://localhost:7080/me"))
 					.follow("wife_url", "city_url")
 						.as(City.class);
@@ -402,9 +465,9 @@ public class LinkBrowserTest {
 					.withHeader("Content-Type", "application/json")
 					.withBody(json("{\"name\":\"Tatiana Gomes da Silva\",\"birth_date\":\"1983-10-05\"}")));
 
-		linkBrowser = new LinkBrowserBuilder().baseURL("http://localhost:7080").build();
+		hypermediaBrowser = new HypermediaBrowserBuilder().baseURL("http://localhost:7080").build();
 
-		Person wife = linkBrowser
+		Person wife = hypermediaBrowser
 				.follow(Link.self("http://localhost:7080/me"))
 					.follow("wife")
 						.as(Person.class);
@@ -442,12 +505,12 @@ public class LinkBrowserTest {
 					.withHeader("Content-Type", "application/json")
 					.withBody("ok"));
 
-		linkBrowser = new LinkBrowserBuilder().baseURL("http://localhost:7080").build();
+		hypermediaBrowser = new HypermediaBrowserBuilder().baseURL("http://localhost:7080").build();
 
 		Map<String, String> body = new HashMap<>();
 		body.put("image", "http://path.to.image/image.jpg");
 
-		String result = linkBrowser
+		String result = hypermediaBrowser
 				.follow(Link.self("http://localhost:7080/me"))
 					.follow(rel("update_avatar")
 							.usingPost(body, ContentType.of("application/json"))

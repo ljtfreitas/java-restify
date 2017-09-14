@@ -38,27 +38,27 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.deser.ContextualDeserializer;
 import com.fasterxml.jackson.databind.deser.std.ContainerDeserializerBase;
 import com.fasterxml.jackson.databind.type.TypeFactory;
-import com.github.ljtfreitas.restify.http.client.hateoas.browser.LinkBrowser;
+import com.github.ljtfreitas.restify.http.client.hateoas.browser.HypermediaBrowser;
 
 class HypermediaLinksDeserializer extends ContainerDeserializerBase<Links> implements ContextualDeserializer {
 
 	private static final long serialVersionUID = 1L;
 
 	private final JsonDeserializer<Object> linkDeserializer;
-	private final LinkBrowser linkBrowser;
+	private final HypermediaBrowser hypermediaBrowser;
 
 	public HypermediaLinksDeserializer() {
 		this(null, null);
 	}
 
-	public HypermediaLinksDeserializer(LinkBrowser linkBrowser) {
-		this(null, linkBrowser);
+	public HypermediaLinksDeserializer(HypermediaBrowser hypermediaBrowser) {
+		this(null, hypermediaBrowser);
 	}
 
-	public HypermediaLinksDeserializer(JsonDeserializer<Object> linkDeserializer, LinkBrowser browser) {
+	public HypermediaLinksDeserializer(JsonDeserializer<Object> linkDeserializer, HypermediaBrowser hypermediaBrowser) {
 		super(TypeFactory.defaultInstance().constructType(Links.class));
 		this.linkDeserializer = linkDeserializer;
-		this.linkBrowser = browser;
+		this.hypermediaBrowser = hypermediaBrowser;
 	}
 
 	@Override
@@ -78,7 +78,7 @@ class HypermediaLinksDeserializer extends ContainerDeserializerBase<Links> imple
 		Links links = new Links();
 
 		while (!JsonToken.END_ARRAY.equals(jsonParser.nextToken())) {
-			links.add(new Link(jsonParser.readValueAs(Link.class), linkBrowser));
+			links.add(new Link(jsonParser.readValueAs(Link.class), hypermediaBrowser));
 		}
 
 		return links;
@@ -88,6 +88,6 @@ class HypermediaLinksDeserializer extends ContainerDeserializerBase<Links> imple
 	public JsonDeserializer<?> createContextual(DeserializationContext context, BeanProperty property)
 			throws JsonMappingException {
 		JsonDeserializer<Object> linkDeserializer = context.findNonContextualValueDeserializer(TypeFactory.defaultInstance().constructType(Link.class));
-		return new HypermediaLinksDeserializer(linkDeserializer, linkBrowser);
+		return new HypermediaLinksDeserializer(linkDeserializer, hypermediaBrowser);
 	}
 }

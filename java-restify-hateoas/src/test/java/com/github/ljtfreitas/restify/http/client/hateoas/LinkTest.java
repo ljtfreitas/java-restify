@@ -14,8 +14,8 @@ import org.mockserver.junit.MockServerRule;
 import org.mockserver.model.HttpRequest;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.github.ljtfreitas.restify.http.client.hateoas.browser.LinkBrowser;
-import com.github.ljtfreitas.restify.http.client.hateoas.browser.LinkBrowserBuilder;
+import com.github.ljtfreitas.restify.http.client.hateoas.browser.HypermediaBrowser;
+import com.github.ljtfreitas.restify.http.client.hateoas.browser.HypermediaBrowserBuilder;
 
 public class LinkTest {
 
@@ -41,9 +41,9 @@ public class LinkTest {
 					.withHeader("Content-Type", "application/hal+json")
 					.withBody(json("{\"name\":\"Tiago de Freitas Lima\",\"birth_date\":\"1985-07-02\"}")));
 
-		LinkBrowser browser = new LinkBrowserBuilder().build();
+		HypermediaBrowser hypermediaBrowser = new HypermediaBrowserBuilder().build();
 
-		link = Link.self("http://localhost:7080/me", browser);
+		link = Link.self("http://localhost:7080/me", hypermediaBrowser);
 	}
 
 	@Test
