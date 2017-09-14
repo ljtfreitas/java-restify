@@ -29,8 +29,8 @@ import java.util.Optional;
 
 public interface AccessTokenStorage {
 
-	public Optional<AccessToken> findBy(OAuthAuthenticatedEndpointRequest request);
+	public Optional<AccessToken> findBy(OAuth2AuthenticatedEndpointRequest request);
 
-	public void add(OAuthAuthenticatedEndpointRequest request, AccessToken accessToken);
+	public void add(OAuth2AuthenticatedEndpointRequest request, AccessToken accessToken);
 
 }

@@ -59,7 +59,7 @@ public class OAuth2AuthenticationTest {
 	private OAuth2Authentication authentication;
 
 	@Captor
-	private ArgumentCaptor<OAuthAuthenticatedEndpointRequest> requestCapture;
+	private ArgumentCaptor<OAuth2AuthenticatedEndpointRequest> requestCapture;
 
 	private GrantProperties properties;
 
@@ -70,7 +70,7 @@ public class OAuth2AuthenticationTest {
 	public void setup() {
 		accessToken = AccessToken.bearer("aaa111");
 
-		when(accessTokenRepository.findBy(notNull(OAuthAuthenticatedEndpointRequest.class)))
+		when(accessTokenRepository.findBy(notNull(OAuth2AuthenticatedEndpointRequest.class)))
 			.thenReturn(accessToken);
 
 		properties = GrantProperties.Builder.clientCredentials()
@@ -88,7 +88,7 @@ public class OAuth2AuthenticationTest {
 
 		assertEquals(accessToken.toString(), result);
 
-		verify(accessTokenRepository).findBy(notNull(OAuthAuthenticatedEndpointRequest.class));
+		verify(accessTokenRepository).findBy(notNull(OAuth2AuthenticatedEndpointRequest.class));
 	}
 
 	@Test
@@ -111,7 +111,7 @@ public class OAuth2AuthenticationTest {
 
 		verify(accessTokenRepository).findBy(requestCapture.capture());
 
-		OAuthAuthenticatedEndpointRequest request = requestCapture.getValue();
+		OAuth2AuthenticatedEndpointRequest request = requestCapture.getValue();
 
 		assertEquals(properties.accessTokenUri(), request.accessTokenUri());
 		assertEquals(properties.credentials(), request.credentials());

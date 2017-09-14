@@ -38,7 +38,7 @@ public class ResourceOwnerPasswordAccessTokenProvider extends BaseAccessTokenPro
 	}
 
 	@Override
-	protected AccessTokenRequest buildAccessTokenRequest(OAuthAuthenticatedEndpointRequest request) {
+	protected AccessTokenRequest buildAccessTokenRequest(OAuth2AuthenticatedEndpointRequest request) {
 		ResourceOwnerGrantProperties properties = request.properties(ResourceOwnerGrantProperties.class);
 
 		nonNull(properties.resourceOwner(), "Your resource owner credentials are required.");
@@ -47,7 +47,7 @@ public class ResourceOwnerPasswordAccessTokenProvider extends BaseAccessTokenPro
 
 		return builder.accessTokenUri(properties.accessTokenUri())
 					  .credentials(properties.credentials())
-					  .parameter("scope", properties.scope())
+					  .parameter("scope", request.scope())
 					  .build();
 	}
 }

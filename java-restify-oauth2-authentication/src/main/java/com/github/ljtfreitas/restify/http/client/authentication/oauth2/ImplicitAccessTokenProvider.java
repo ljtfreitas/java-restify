@@ -47,10 +47,10 @@ public class ImplicitAccessTokenProvider implements AccessTokenProvider {
 	}
 
 	@Override
-	public AccessToken provides(OAuthAuthenticatedEndpointRequest request) {
+	public AccessToken provides(OAuth2AuthenticatedEndpointRequest request) {
 		ImplicitGrantProperties properties = request.properties(ImplicitGrantProperties.class);
 
-		EndpointResponse<String> authorizationResponse = authorizationServer.authorize(properties);
+		EndpointResponse<String> authorizationResponse = authorizationServer.authorize(new AuthorizationCodeRequest(properties, request.scope()));
 
 		StatusCode status = authorizationResponse.status();
 
@@ -74,7 +74,7 @@ public class ImplicitAccessTokenProvider implements AccessTokenProvider {
 	}
 
 	@Override
-	public AccessToken refresh(AccessToken accessToken, OAuthAuthenticatedEndpointRequest request) {
+	public AccessToken refresh(AccessToken accessToken, OAuth2AuthenticatedEndpointRequest request) {
 		throw new UnsupportedOperationException("Implicit Grant does not support refresh token.");
 	}
 }

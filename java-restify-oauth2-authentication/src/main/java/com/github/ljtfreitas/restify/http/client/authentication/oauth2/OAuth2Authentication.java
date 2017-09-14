@@ -67,7 +67,7 @@ public class OAuth2Authentication implements Authentication {
 
 	@Override
 	public String content(EndpointRequest endpointRequest) {
-		AccessToken accessToken = accessTokenRepository.findBy(new OAuthAuthenticatedEndpointRequest(endpointRequest, properties, user));
+		AccessToken accessToken = accessTokenRepository.findBy(new OAuth2AuthenticatedEndpointRequest(endpointRequest, properties, user));
 		return accessToken.toString();
 	}
 }
