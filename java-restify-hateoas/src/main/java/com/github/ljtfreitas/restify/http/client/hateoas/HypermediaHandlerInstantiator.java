@@ -39,15 +39,15 @@ import com.fasterxml.jackson.databind.cfg.MapperConfig;
 import com.fasterxml.jackson.databind.introspect.Annotated;
 import com.fasterxml.jackson.databind.jsontype.TypeIdResolver;
 import com.fasterxml.jackson.databind.jsontype.TypeResolverBuilder;
-import com.github.ljtfreitas.restify.http.client.hateoas.browser.LinkBrowser;
+import com.github.ljtfreitas.restify.http.client.hateoas.browser.HypermediaBrowser;
 import com.github.ljtfreitas.restify.http.util.Tryable;
 
 class HypermediaHandlerInstantiator extends HandlerInstantiator {
 
 	private final Map<Class<?>, JsonDeserializer<?>> deserializers = new HashMap<>();
 
-	public HypermediaHandlerInstantiator(LinkBrowser linkBrowser) {
-		this.deserializers.put(HypermediaLinksDeserializer.class, new HypermediaLinksDeserializer(linkBrowser));
+	public HypermediaHandlerInstantiator(HypermediaBrowser hypermediaBrowser) {
+		this.deserializers.put(HypermediaLinksDeserializer.class, new HypermediaLinksDeserializer(hypermediaBrowser));
 	}
 
 	@Override

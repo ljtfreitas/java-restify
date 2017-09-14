@@ -27,6 +27,7 @@ package com.github.ljtfreitas.restify.http.client.hateoas.browser;
 
 import java.net.URI;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Map;
 import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
@@ -44,7 +45,7 @@ public class LinkURITemplate {
 	}
 
 	public URI expand() {
-		return URI.create(source);
+		return doExpand(LinkURITemplateParameters.empty());
 	}
 
 	public URI expand(Map<String, String> parameters) {
@@ -73,10 +74,13 @@ public class LinkURITemplate {
 
 			String[] names = match.group(2).split(",");
 
-			String expanded = Arrays.stream(names)
+			Collection<String> variables = Arrays.stream(names)
 					.map(name -> new TemplateVariable(name, type))
 						.map(variable -> expand(variable, parameters))
-							.collect(Collectors.joining(type.separator, type.starter, ""));
+							.filter(value -> value != null && !value.trim().isEmpty())
+								.collect(Collectors.toList());
+
+			String expanded = variables.isEmpty() ? "" : variables.stream().collect(Collectors.joining(type.separator, type.starter, ""));
 
 			matcher.appendReplacement(builder, expanded);
 		}

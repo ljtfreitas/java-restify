@@ -25,23 +25,23 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.hateoas.browser;
 
-public class LinkBrowserException extends RuntimeException {
+public class HypermediaBrowserException extends RuntimeException {
 
 	private static final long serialVersionUID = 1L;
 
-	public LinkBrowserException() {
+	public HypermediaBrowserException() {
 		super();
 	}
 
-	public LinkBrowserException(String message, Throwable cause) {
+	public HypermediaBrowserException(String message, Throwable cause) {
 		super(message, cause);
 	}
 
-	public LinkBrowserException(String message) {
+	public HypermediaBrowserException(String message) {
 		super(message);
 	}
 
-	public LinkBrowserException(Throwable cause) {
+	public HypermediaBrowserException(Throwable cause) {
 		super(cause);
 	}
 }

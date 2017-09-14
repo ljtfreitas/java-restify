@@ -27,36 +27,36 @@ package com.github.ljtfreitas.restify.http.client.hateoas;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.ljtfreitas.restify.http.client.hateoas.browser.LinkBrowser;
-import com.github.ljtfreitas.restify.http.client.hateoas.browser.LinkBrowserBuilder;
+import com.github.ljtfreitas.restify.http.client.hateoas.browser.HypermediaBrowser;
+import com.github.ljtfreitas.restify.http.client.hateoas.browser.HypermediaBrowserBuilder;
 import com.github.ljtfreitas.restify.http.client.message.converter.json.JacksonMessageConverter;
 
 public class JacksonHypermediaJsonMessageConverter<T> extends JacksonMessageConverter<T> {
 
 	public JacksonHypermediaJsonMessageConverter() {
-		super(configure(new ObjectMapper(), new LinkBrowserBuilder().build()));
+		super(configure(new ObjectMapper(), new HypermediaBrowserBuilder().build()));
 	}
 
-	public JacksonHypermediaJsonMessageConverter(LinkBrowser linkBrowser) {
-		super(configure(new ObjectMapper(), linkBrowser));
+	public JacksonHypermediaJsonMessageConverter(HypermediaBrowser hypermediaBrowser) {
+		super(configure(new ObjectMapper(), hypermediaBrowser));
 	}
 
 	public JacksonHypermediaJsonMessageConverter(ObjectMapper objectMapper) {
-		super(configure(objectMapper, new LinkBrowserBuilder().build()));
+		super(configure(objectMapper, new HypermediaBrowserBuilder().build()));
 	}
 
-	public JacksonHypermediaJsonMessageConverter(ObjectMapper objectMapper, LinkBrowser linkBrowser) {
-		super(configure(objectMapper, linkBrowser));
+	public JacksonHypermediaJsonMessageConverter(ObjectMapper objectMapper, HypermediaBrowser hypermediaBrowser) {
+		super(configure(objectMapper, hypermediaBrowser));
 	}
 
-	private static ObjectMapper configure(ObjectMapper objectMapper, LinkBrowser linkBrowser) {
-		objectMapper.setHandlerInstantiator(new HypermediaHandlerInstantiator(linkBrowser));
+	private static ObjectMapper configure(ObjectMapper objectMapper, HypermediaBrowser hypermediaBrowser) {
+		objectMapper.setHandlerInstantiator(new HypermediaHandlerInstantiator(hypermediaBrowser));
 		objectMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
-		objectMapper.setHandlerInstantiator(new HypermediaHandlerInstantiator(linkBrowser));
+		objectMapper.setHandlerInstantiator(new HypermediaHandlerInstantiator(hypermediaBrowser));
 		return objectMapper;
 	}
 
-	public static <T> JacksonHypermediaJsonMessageConverter<T> withoutBrowser() {
-		return new JacksonHypermediaJsonMessageConverter<>((LinkBrowser) null);
+	public static <T> JacksonHypermediaJsonMessageConverter<T> unfollow() {
+		return new JacksonHypermediaJsonMessageConverter<>((HypermediaBrowser) null);
 	}
 }

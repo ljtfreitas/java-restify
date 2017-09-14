@@ -27,8 +27,8 @@ package com.github.ljtfreitas.restify.http.client.hateoas.hal;
 
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import com.github.ljtfreitas.restify.http.client.hateoas.browser.LinkBrowser;
-import com.github.ljtfreitas.restify.http.client.hateoas.browser.LinkBrowserBuilder;
+import com.github.ljtfreitas.restify.http.client.hateoas.browser.HypermediaBrowser;
+import com.github.ljtfreitas.restify.http.client.hateoas.browser.HypermediaBrowserBuilder;
 import com.github.ljtfreitas.restify.http.client.message.converter.json.JacksonMessageConverter;
 import com.github.ljtfreitas.restify.http.contract.ContentType;
 
@@ -37,25 +37,25 @@ public class JacksonHypermediaHalJsonMessageConverter<T> extends JacksonMessageC
 	private static final ContentType HYPERMEDIA_JSON_CONTENT_TYPE = ContentType.of("application", "hal+json");
 
 	public JacksonHypermediaHalJsonMessageConverter() {
-		super(configure(new ObjectMapper(), new LinkBrowserBuilder().build()));
+		super(configure(new ObjectMapper(), new HypermediaBrowserBuilder().build()));
 	}
 
-	public JacksonHypermediaHalJsonMessageConverter(LinkBrowser linkBrowser) {
-		super(configure(new ObjectMapper(), linkBrowser));
+	public JacksonHypermediaHalJsonMessageConverter(HypermediaBrowser hypermediaBrowser) {
+		super(configure(new ObjectMapper(), hypermediaBrowser));
 	}
 
 	public JacksonHypermediaHalJsonMessageConverter(ObjectMapper objectMapper) {
 		super(configure(objectMapper, null));
 	}
 
-	public JacksonHypermediaHalJsonMessageConverter(ObjectMapper objectMapper, LinkBrowser linkBrowser) {
-		super(configure(objectMapper, linkBrowser));
+	public JacksonHypermediaHalJsonMessageConverter(ObjectMapper objectMapper, HypermediaBrowser hypermediaBrowser) {
+		super(configure(objectMapper, hypermediaBrowser));
 	}
 
-	private static ObjectMapper configure(ObjectMapper objectMapper, LinkBrowser linkBrowser) {
+	private static ObjectMapper configure(ObjectMapper objectMapper, HypermediaBrowser hypermediaBrowser) {
 		objectMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
 		objectMapper.registerModule(new HypermediaHalJsonModule());
-		objectMapper.setHandlerInstantiator(new HypermediaHalHandlerInstantiator(linkBrowser));
+		objectMapper.setHandlerInstantiator(new HypermediaHalHandlerInstantiator(hypermediaBrowser));
 		return objectMapper;
 	}
 
@@ -64,7 +64,7 @@ public class JacksonHypermediaHalJsonMessageConverter<T> extends JacksonMessageC
 		return HYPERMEDIA_JSON_CONTENT_TYPE;
 	}
 
-	public static <T> JacksonHypermediaHalJsonMessageConverter<T> withoutBrowser() {
-		return new JacksonHypermediaHalJsonMessageConverter<>((LinkBrowser) null);
+	public static <T> JacksonHypermediaHalJsonMessageConverter<T> unfollow() {
+		return new JacksonHypermediaHalJsonMessageConverter<>((HypermediaBrowser) null);
 	}
 }

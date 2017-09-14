@@ -48,6 +48,13 @@ public class LinkURITemplateTest {
 	}
 
 	@Test
+	public void shouldDiscardSimpleStringVariableWhenParameterIsNotPresent() {
+		LinkURITemplate linkURITemplate = new LinkURITemplate("http://my.api.com/path/{name}");
+
+		assertEquals("http://my.api.com/path/", linkURITemplate.expand().toString());
+	}
+
+	@Test
 	public void shouldExpandUriTemplateWithReservedVariableUsingMapParameters() {
 		LinkURITemplate linkURITemplate = new LinkURITemplate("http://my.api.com/path/{+name}");
 
@@ -76,6 +83,13 @@ public class LinkURITemplateTest {
 		parameters.put("nickname", "ljtfreitas");
 
 		assertEquals("http://my.api.com/path/tiago,ljtfreitas", linkURITemplate.expand(parameters).toString());
+	}
+
+	@Test
+	public void shouldDiscardReservedVariableWhenParameterIsNotPresent() {
+		LinkURITemplate linkURITemplate = new LinkURITemplate("http://my.api.com/path/{+name}");
+
+		assertEquals("http://my.api.com/path/", linkURITemplate.expand().toString());
 	}
 
 	@Test
@@ -110,6 +124,13 @@ public class LinkURITemplateTest {
 	}
 
 	@Test
+	public void shouldDiscardFragmentVariableWhenParameterIsNotPresent() {
+		LinkURITemplate linkURITemplate = new LinkURITemplate("http://my.api.com/path{#name}");
+
+		assertEquals("http://my.api.com/path", linkURITemplate.expand().toString());
+	}
+
+	@Test
 	public void shouldExpandUriTemplateWithPathSegmentVariableUsingMapParameters() {
 		LinkURITemplate linkURITemplate = new LinkURITemplate("http://my.api.com/path{/name}");
 
@@ -138,6 +159,13 @@ public class LinkURITemplateTest {
 		parameters.put("nickname", "ljtfreitas");
 
 		assertEquals("http://my.api.com/path/tiago/ljtfreitas", linkURITemplate.expand(parameters).toString());
+	}
+
+	@Test
+	public void shouldDiscardPathSegmentVariableWhenParameterIsNotPresent() {
+		LinkURITemplate linkURITemplate = new LinkURITemplate("http://my.api.com/path{/name}");
+
+		assertEquals("http://my.api.com/path", linkURITemplate.expand().toString());
 	}
 
 	@Test
@@ -173,6 +201,13 @@ public class LinkURITemplateTest {
 	}
 
 	@Test
+	public void shouldDiscardQueryParameterVariableWhenParameterIsNotPresent() {
+		LinkURITemplate linkURITemplate = new LinkURITemplate("http://my.api.com/path{?name}");
+
+		assertEquals("http://my.api.com/path", linkURITemplate.expand().toString());
+	}
+
+	@Test
 	public void shouldExpandUriTemplateWithQueryParameterContinuedVariableUsingMapParameters() {
 		LinkURITemplate linkURITemplate = new LinkURITemplate("http://my.api.com/path?age=32{&name}");
 
@@ -201,5 +236,12 @@ public class LinkURITemplateTest {
 		parameters.put("nickname", "ljtfreitas");
 
 		assertEquals("http://my.api.com/path?age=32&name=tiago&nickname=ljtfreitas", linkURITemplate.expand(parameters).toString());
+	}
+
+	@Test
+	public void shouldDiscardQueryParameterContinuedVariableWhenParameterIsNotPresent() {
+		LinkURITemplate linkURITemplate = new LinkURITemplate("http://my.api.com/path?age=32{&name}");
+
+		assertEquals("http://my.api.com/path?age=32", linkURITemplate.expand().toString());
 	}
 }
