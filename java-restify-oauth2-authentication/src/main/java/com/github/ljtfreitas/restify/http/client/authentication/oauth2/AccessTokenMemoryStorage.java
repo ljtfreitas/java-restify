@@ -36,16 +36,16 @@ class AccessTokenMemoryStorage implements AccessTokenStorage {
 	private final Map<AccessTokenKey, AccessToken> tokens = new ConcurrentHashMap<>();
 
 	@Override
-	public Optional<AccessToken> findBy(OAuthAuthenticatedEndpointRequest request) {
+	public Optional<AccessToken> findBy(OAuth2AuthenticatedEndpointRequest request) {
 		return Optional.ofNullable(tokens.get(key(request)));
 	}
 
 	@Override
-	public void add(OAuthAuthenticatedEndpointRequest request, AccessToken accessToken) {
+	public void add(OAuth2AuthenticatedEndpointRequest request, AccessToken accessToken) {
 		tokens.put(key(request), accessToken);
 	}
 
-	private AccessTokenKey key(OAuthAuthenticatedEndpointRequest request) {
+	private AccessTokenKey key(OAuth2AuthenticatedEndpointRequest request) {
 		String resource = request.endpoint().getHost();
 		String clientId = request.clientId();
 		String scope = request.scope();

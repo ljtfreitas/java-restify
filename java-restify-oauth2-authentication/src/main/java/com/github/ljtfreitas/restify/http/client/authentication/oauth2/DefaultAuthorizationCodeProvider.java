@@ -47,10 +47,10 @@ class DefaultAuthorizationCodeProvider implements AuthorizationCodeProvider {
 	}
 
 	@Override
-	public String provides(OAuthAuthenticatedEndpointRequest request) {
+	public String provides(OAuth2AuthenticatedEndpointRequest request) {
 		AuthorizationCodeGrantProperties properties = request.properties(AuthorizationCodeGrantProperties.class);
 
-		EndpointResponse<String> authorizationResponse = authorizationServer.authorize(properties);
+		EndpointResponse<String> authorizationResponse = authorizationServer.authorize(new AuthorizationCodeRequest(properties, request.scope()));
 
 		StatusCode status = authorizationResponse.status();
 

@@ -37,7 +37,7 @@ public class DefaultAccessTokenRepositoryTest {
 	@Mock
 	private Principal user;
 
-	private OAuthAuthenticatedEndpointRequest request;
+	private OAuth2AuthenticatedEndpointRequest request;
 
 	@Before
 	public void setup() {
@@ -45,7 +45,7 @@ public class DefaultAccessTokenRepositoryTest {
 
 		EndpointRequest source = new EndpointRequest(URI.create("http://my.resource.server/path"), "GET");
 
-		request = new OAuthAuthenticatedEndpointRequest(source, properties, user);
+		request = new OAuth2AuthenticatedEndpointRequest(source, properties, user);
 	}
 
 	@Test

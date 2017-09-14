@@ -27,7 +27,7 @@ public class ImplicitAccessTokenProviderTest {
 
 	private ImplicitAccessTokenProvider provider;
 
-	private OAuthAuthenticatedEndpointRequest request;
+	private OAuth2AuthenticatedEndpointRequest request;
 
 	@Before
 	public void setup() {
@@ -44,7 +44,7 @@ public class ImplicitAccessTokenProviderTest {
 
 		EndpointRequest source = new EndpointRequest(URI.create("http://my.resource.server/path"), "GET");
 
-		request = new OAuthAuthenticatedEndpointRequest(source, properties);
+		request = new OAuth2AuthenticatedEndpointRequest(source, properties);
 
 		provider = new ImplicitAccessTokenProvider();
 	}

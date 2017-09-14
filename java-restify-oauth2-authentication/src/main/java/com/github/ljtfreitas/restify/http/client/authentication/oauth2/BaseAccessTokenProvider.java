@@ -43,18 +43,18 @@ abstract class BaseAccessTokenProvider implements AccessTokenProvider {
 	}
 
 	@Override
-	public AccessToken provides(OAuthAuthenticatedEndpointRequest request) {
+	public AccessToken provides(OAuth2AuthenticatedEndpointRequest request) {
 		EndpointResponse<AccessToken> response = authorizationServer.requireToken(buildAccessTokenRequest(request));
 		return response.body();
 	}
 
 	@Override
-	public AccessToken refresh(AccessToken accessToken, OAuthAuthenticatedEndpointRequest request) {
+	public AccessToken refresh(AccessToken accessToken, OAuth2AuthenticatedEndpointRequest request) {
 		EndpointResponse<AccessToken> response = authorizationServer.requireToken(buildRefreshTokenRequest(accessToken, request));
 		return response.body();
 	}
 
-	protected AccessTokenRequest buildRefreshTokenRequest(AccessToken accessToken, OAuthAuthenticatedEndpointRequest request) {
+	protected AccessTokenRequest buildRefreshTokenRequest(AccessToken accessToken, OAuth2AuthenticatedEndpointRequest request) {
 		isTrue(accessToken.refreshToken().isPresent(), "Your access token must have a refresh token.");
 
 		Builder builder = AccessTokenRequest.refreshToken(accessToken.refreshToken().get());
@@ -64,5 +64,5 @@ abstract class BaseAccessTokenProvider implements AccessTokenProvider {
 					  .build();
 	}
 
-	protected abstract AccessTokenRequest buildAccessTokenRequest(OAuthAuthenticatedEndpointRequest request);
+	protected abstract AccessTokenRequest buildAccessTokenRequest(OAuth2AuthenticatedEndpointRequest request);
 }

@@ -21,18 +21,6 @@ import org.mockserver.client.server.MockServerClient;
 import org.mockserver.junit.MockServerRule;
 import org.mockserver.model.Parameter;
 
-import com.github.ljtfreitas.restify.http.client.authentication.oauth2.AccessToken;
-import com.github.ljtfreitas.restify.http.client.authentication.oauth2.AccessTokenProvider;
-import com.github.ljtfreitas.restify.http.client.authentication.oauth2.AccessTokenRepository;
-import com.github.ljtfreitas.restify.http.client.authentication.oauth2.AccessTokenRequest;
-import com.github.ljtfreitas.restify.http.client.authentication.oauth2.AccessTokenStorage;
-import com.github.ljtfreitas.restify.http.client.authentication.oauth2.AuthorizationCodeGrantProperties;
-import com.github.ljtfreitas.restify.http.client.authentication.oauth2.AuthorizationCodeProvider;
-import com.github.ljtfreitas.restify.http.client.authentication.oauth2.AuthorizationServer;
-import com.github.ljtfreitas.restify.http.client.authentication.oauth2.ClientCredentials;
-import com.github.ljtfreitas.restify.http.client.authentication.oauth2.OAuth2Authentication;
-import com.github.ljtfreitas.restify.http.client.authentication.oauth2.OAuth2AuthenticationBuilder;
-import com.github.ljtfreitas.restify.http.client.authentication.oauth2.OAuthAuthenticatedEndpointRequest;
 import com.github.ljtfreitas.restify.http.client.header.Header;
 import com.github.ljtfreitas.restify.http.client.header.Headers;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
@@ -91,7 +79,7 @@ public class OAuth2AuthenticationBuilderTest {
 	public void shouldBuildOAuth2AuthenticationObjectToClientCredentialsGrantTypeUsingCustomizedAccessTokenRepository() {
 		AccessTokenRepository accessTokenRepository = mock(AccessTokenRepository.class);
 
-		when(accessTokenRepository.findBy(notNull(OAuthAuthenticatedEndpointRequest.class)))
+		when(accessTokenRepository.findBy(notNull(OAuth2AuthenticatedEndpointRequest.class)))
 			.thenReturn(AccessToken.bearer("aaa111"));
 
 		OAuth2Authentication authentication = new OAuth2AuthenticationBuilder()
@@ -110,14 +98,14 @@ public class OAuth2AuthenticationBuilderTest {
 
 		assertEquals("Bearer aaa111", content);
 
-		verify(accessTokenRepository).findBy(notNull(OAuthAuthenticatedEndpointRequest.class));
+		verify(accessTokenRepository).findBy(notNull(OAuth2AuthenticatedEndpointRequest.class));
 	}
 
 	@Test
 	public void shouldBuildOAuth2AuthenticationObjectToClientCredentialsGrantTypeUsingCustomizedAccessTokenStorage() {
 		AccessTokenStorage accessTokenStorage = mock(AccessTokenStorage.class);
 
-		when(accessTokenStorage.findBy(notNull(OAuthAuthenticatedEndpointRequest.class)))
+		when(accessTokenStorage.findBy(notNull(OAuth2AuthenticatedEndpointRequest.class)))
 			.thenReturn(Optional.ofNullable(AccessToken.bearer("aaa111")));
 
 		OAuth2Authentication authentication = new OAuth2AuthenticationBuilder()
@@ -136,14 +124,14 @@ public class OAuth2AuthenticationBuilderTest {
 
 		assertEquals("Bearer aaa111", content);
 
-		verify(accessTokenStorage).findBy(notNull(OAuthAuthenticatedEndpointRequest.class));
+		verify(accessTokenStorage).findBy(notNull(OAuth2AuthenticatedEndpointRequest.class));
 	}
 
 	@Test
 	public void shouldBuildOAuth2AuthenticationObjectToClientCredentialsGrantTypeUsingCustomizedAccessTokenProvider() {
 		AccessTokenProvider accessTokenProvider = mock(AccessTokenProvider.class);
 
-		when(accessTokenProvider.provides(notNull(OAuthAuthenticatedEndpointRequest.class)))
+		when(accessTokenProvider.provides(notNull(OAuth2AuthenticatedEndpointRequest.class)))
 			.thenReturn(AccessToken.bearer("aaa111"));
 
 		OAuth2Authentication authentication = new OAuth2AuthenticationBuilder()
@@ -162,7 +150,7 @@ public class OAuth2AuthenticationBuilderTest {
 
 		assertEquals("Bearer aaa111", content);
 
-		verify(accessTokenProvider).provides(notNull(OAuthAuthenticatedEndpointRequest.class));
+		verify(accessTokenProvider).provides(notNull(OAuth2AuthenticatedEndpointRequest.class));
 	}
 
 	@Test
@@ -229,7 +217,7 @@ public class OAuth2AuthenticationBuilderTest {
 	public void shouldBuildOAuth2AuthenticationObjectToResourceOwnerGrantTypeUsingCustomizedAccessTokenRepository() {
 		AccessTokenRepository accessTokenRepository = mock(AccessTokenRepository.class);
 
-		when(accessTokenRepository.findBy(notNull(OAuthAuthenticatedEndpointRequest.class)))
+		when(accessTokenRepository.findBy(notNull(OAuth2AuthenticatedEndpointRequest.class)))
 			.thenReturn(AccessToken.bearer("aaa111"));
 
 		OAuth2Authentication authentication = new OAuth2AuthenticationBuilder()
@@ -249,14 +237,14 @@ public class OAuth2AuthenticationBuilderTest {
 
 		assertEquals("Bearer aaa111", content);
 
-		verify(accessTokenRepository).findBy(notNull(OAuthAuthenticatedEndpointRequest.class));
+		verify(accessTokenRepository).findBy(notNull(OAuth2AuthenticatedEndpointRequest.class));
 	}
 
 	@Test
 	public void shouldBuildOAuth2AuthenticationObjectToResourceOwnerGrantTypeUsingCustomizedAccessTokenStorage() {
 		AccessTokenStorage accessTokenStorage = mock(AccessTokenStorage.class);
 
-		when(accessTokenStorage.findBy(notNull(OAuthAuthenticatedEndpointRequest.class)))
+		when(accessTokenStorage.findBy(notNull(OAuth2AuthenticatedEndpointRequest.class)))
 			.thenReturn(Optional.ofNullable(AccessToken.bearer("aaa111")));
 
 		OAuth2Authentication authentication = new OAuth2AuthenticationBuilder()
@@ -276,14 +264,14 @@ public class OAuth2AuthenticationBuilderTest {
 
 		assertEquals("Bearer aaa111", content);
 
-		verify(accessTokenStorage).findBy(notNull(OAuthAuthenticatedEndpointRequest.class));
+		verify(accessTokenStorage).findBy(notNull(OAuth2AuthenticatedEndpointRequest.class));
 	}
 
 	@Test
 	public void shouldBuildOAuth2AuthenticationObjectToResourceOwnerGrantTypeUsingCustomizedAccessTokenProvider() {
 		AccessTokenProvider accessTokenProvider = mock(AccessTokenProvider.class);
 
-		when(accessTokenProvider.provides(notNull(OAuthAuthenticatedEndpointRequest.class)))
+		when(accessTokenProvider.provides(notNull(OAuth2AuthenticatedEndpointRequest.class)))
 			.thenReturn(AccessToken.bearer("aaa111"));
 
 		OAuth2Authentication authentication = new OAuth2AuthenticationBuilder()
@@ -303,7 +291,7 @@ public class OAuth2AuthenticationBuilderTest {
 
 		assertEquals("Bearer aaa111", content);
 
-		verify(accessTokenProvider).provides(notNull(OAuthAuthenticatedEndpointRequest.class));
+		verify(accessTokenProvider).provides(notNull(OAuth2AuthenticatedEndpointRequest.class));
 	}
 
 	@Test
@@ -372,7 +360,7 @@ public class OAuth2AuthenticationBuilderTest {
 	public void shouldBuildOAuth2AuthenticationObjectToImplicitGrantTypeUsingCustomizedAccessTokenRepository() {
 		AccessTokenRepository accessTokenRepository = mock(AccessTokenRepository.class);
 
-		when(accessTokenRepository.findBy(notNull(OAuthAuthenticatedEndpointRequest.class)))
+		when(accessTokenRepository.findBy(notNull(OAuth2AuthenticatedEndpointRequest.class)))
 			.thenReturn(AccessToken.bearer("aaa111"));
 
 		OAuth2Authentication authentication = new OAuth2AuthenticationBuilder()
@@ -394,14 +382,14 @@ public class OAuth2AuthenticationBuilderTest {
 
 		assertEquals("Bearer aaa111", content);
 
-		verify(accessTokenRepository).findBy(notNull(OAuthAuthenticatedEndpointRequest.class));
+		verify(accessTokenRepository).findBy(notNull(OAuth2AuthenticatedEndpointRequest.class));
 	}
 
 	@Test
 	public void shouldBuildOAuth2AuthenticationObjectToImplicitGrantTypeUsingCustomizedAccessTokenStorage() {
 		AccessTokenStorage accessTokenStorage = mock(AccessTokenStorage.class);
 
-		when(accessTokenStorage.findBy(notNull(OAuthAuthenticatedEndpointRequest.class)))
+		when(accessTokenStorage.findBy(notNull(OAuth2AuthenticatedEndpointRequest.class)))
 			.thenReturn(Optional.ofNullable(AccessToken.bearer("aaa111")));
 
 		OAuth2Authentication authentication = new OAuth2AuthenticationBuilder()
@@ -423,14 +411,14 @@ public class OAuth2AuthenticationBuilderTest {
 
 		assertEquals("Bearer aaa111", content);
 
-		verify(accessTokenStorage).findBy(notNull(OAuthAuthenticatedEndpointRequest.class));
+		verify(accessTokenStorage).findBy(notNull(OAuth2AuthenticatedEndpointRequest.class));
 	}
 
 	@Test
 	public void shouldBuildOAuth2AuthenticationObjectToImplicitGrantTypeUsingCustomizedAccessTokenProvider() {
 		AccessTokenProvider accessTokenProvider = mock(AccessTokenProvider.class);
 
-		when(accessTokenProvider.provides(notNull(OAuthAuthenticatedEndpointRequest.class)))
+		when(accessTokenProvider.provides(notNull(OAuth2AuthenticatedEndpointRequest.class)))
 			.thenReturn(AccessToken.bearer("aaa111"));
 
 		OAuth2Authentication authentication = new OAuth2AuthenticationBuilder()
@@ -452,7 +440,7 @@ public class OAuth2AuthenticationBuilderTest {
 
 		assertEquals("Bearer aaa111", content);
 
-		verify(accessTokenProvider).provides(notNull(OAuthAuthenticatedEndpointRequest.class));
+		verify(accessTokenProvider).provides(notNull(OAuth2AuthenticatedEndpointRequest.class));
 	}
 
 	@Test
@@ -462,7 +450,7 @@ public class OAuth2AuthenticationBuilderTest {
 		Header location = new Header("Location", "http://my.web.app/oauth/callback#access_token=aaa111&token_type=bearer&state=current-state&expires_in=3600&scope=read%20write");
 		EndpointResponse<String> response = new EndpointResponse<>(StatusCode.found(), new Headers(location), "hello");
 
-		when(authorizationServer.authorize(notNull(AuthorizationCodeGrantProperties.class))).thenReturn(response);
+		when(authorizationServer.authorize(notNull(AuthorizationCodeRequest.class))).thenReturn(response);
 
 		OAuth2Authentication authentication = new OAuth2AuthenticationBuilder()
 				.grantType()
@@ -484,7 +472,7 @@ public class OAuth2AuthenticationBuilderTest {
 
 		assertEquals("Bearer aaa111", content);
 
-		verify(authorizationServer).authorize(notNull(AuthorizationCodeGrantProperties.class));
+		verify(authorizationServer).authorize(notNull(AuthorizationCodeRequest.class));
 	}
 
 	@Test
@@ -539,7 +527,7 @@ public class OAuth2AuthenticationBuilderTest {
 	public void shouldBuildOAuth2AuthenticationObjectToAuthorizationCodeGrantTypeUsingCustomizedAccessTokenRepository() {
 		AccessTokenRepository accessTokenRepository = mock(AccessTokenRepository.class);
 
-		when(accessTokenRepository.findBy(notNull(OAuthAuthenticatedEndpointRequest.class)))
+		when(accessTokenRepository.findBy(notNull(OAuth2AuthenticatedEndpointRequest.class)))
 			.thenReturn(AccessToken.bearer("aaa111"));
 
 		OAuth2Authentication authentication = new OAuth2AuthenticationBuilder()
@@ -562,14 +550,14 @@ public class OAuth2AuthenticationBuilderTest {
 
 		assertEquals("Bearer aaa111", content);
 
-		verify(accessTokenRepository).findBy(notNull(OAuthAuthenticatedEndpointRequest.class));
+		verify(accessTokenRepository).findBy(notNull(OAuth2AuthenticatedEndpointRequest.class));
 	}
 
 	@Test
 	public void shouldBuildOAuth2AuthenticationObjectToAuthorizationCodeGrantTypeUsingCustomizedAccessTokenStorage() {
 		AccessTokenStorage accessTokenStorage = mock(AccessTokenStorage.class);
 
-		when(accessTokenStorage.findBy(notNull(OAuthAuthenticatedEndpointRequest.class)))
+		when(accessTokenStorage.findBy(notNull(OAuth2AuthenticatedEndpointRequest.class)))
 			.thenReturn(Optional.ofNullable(AccessToken.bearer("aaa111")));
 
 		OAuth2Authentication authentication = new OAuth2AuthenticationBuilder()
@@ -592,7 +580,7 @@ public class OAuth2AuthenticationBuilderTest {
 
 		assertEquals("Bearer aaa111", content);
 
-		verify(accessTokenStorage).findBy(notNull(OAuthAuthenticatedEndpointRequest.class));
+		verify(accessTokenStorage).findBy(notNull(OAuth2AuthenticatedEndpointRequest.class));
 	}
 
 	@Test
@@ -601,7 +589,7 @@ public class OAuth2AuthenticationBuilderTest {
 
 		Header location = new Header("Location", "http://my.web.app/oauth/callback?code=abc1234&state=current-state");
 		EndpointResponse<String> response = new EndpointResponse<>(StatusCode.found(), new Headers(location), "hello");
-		when(authorizationServer.authorize(notNull(AuthorizationCodeGrantProperties.class)))
+		when(authorizationServer.authorize(notNull(AuthorizationCodeRequest.class)))
 			.thenReturn(response);
 
 		when(authorizationServer.requireToken(notNull(AccessTokenRequest.class)))
@@ -633,7 +621,7 @@ public class OAuth2AuthenticationBuilderTest {
 	public void shouldBuildOAuth2AuthenticationObjectToAuthorizationCodeGrantTypeUsingCustomizedAuthorizationCodeProvider() {
 		AuthorizationCodeProvider authorizationCodeProvider = mock(AuthorizationCodeProvider.class);
 
-		when(authorizationCodeProvider.provides(notNull(OAuthAuthenticatedEndpointRequest.class)))
+		when(authorizationCodeProvider.provides(notNull(OAuth2AuthenticatedEndpointRequest.class)))
 			.thenReturn("abc1234");
 
 		mockServerClient
@@ -669,6 +657,6 @@ public class OAuth2AuthenticationBuilderTest {
 
 		assertEquals("Bearer aaa111", content);
 
-		verify(authorizationCodeProvider).provides(notNull(OAuthAuthenticatedEndpointRequest.class));
+		verify(authorizationCodeProvider).provides(notNull(OAuth2AuthenticatedEndpointRequest.class));
 	}
 }

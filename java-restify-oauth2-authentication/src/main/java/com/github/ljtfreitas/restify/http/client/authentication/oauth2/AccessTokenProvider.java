@@ -27,7 +27,7 @@ package com.github.ljtfreitas.restify.http.client.authentication.oauth2;
 
 public interface AccessTokenProvider {
 
-	public AccessToken provides(OAuthAuthenticatedEndpointRequest request);
+	public AccessToken provides(OAuth2AuthenticatedEndpointRequest request);
 
-	public AccessToken refresh(AccessToken accessToken, OAuthAuthenticatedEndpointRequest request);
+	public AccessToken refresh(AccessToken accessToken, OAuth2AuthenticatedEndpointRequest request);
 }

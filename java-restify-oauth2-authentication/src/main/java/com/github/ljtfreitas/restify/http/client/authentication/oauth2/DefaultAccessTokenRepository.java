@@ -39,7 +39,7 @@ class DefaultAccessTokenRepository implements AccessTokenRepository {
 	}
 
 	@Override
-	public AccessToken findBy(OAuthAuthenticatedEndpointRequest request) {
+	public AccessToken findBy(OAuth2AuthenticatedEndpointRequest request) {
 		Optional<AccessToken> accessToken = accessTokenStorage.findBy(request);
 
 		if (accessToken.isPresent()) {
@@ -57,15 +57,15 @@ class DefaultAccessTokenRepository implements AccessTokenRepository {
 		}
 	}
 
-	private AccessToken refresh(AccessToken accessToken, OAuthAuthenticatedEndpointRequest request) {
+	private AccessToken refresh(AccessToken accessToken, OAuth2AuthenticatedEndpointRequest request) {
 		return store(request, () -> accessTokenProvider.refresh(accessToken, request));
 	}
 
-	private AccessToken newToken(OAuthAuthenticatedEndpointRequest request) {
+	private AccessToken newToken(OAuth2AuthenticatedEndpointRequest request) {
 		return store(request, () -> accessTokenProvider.provides(request));
 	}
 
-	private AccessToken store(OAuthAuthenticatedEndpointRequest request, Supplier<AccessToken> supplier) {
+	private AccessToken store(OAuth2AuthenticatedEndpointRequest request, Supplier<AccessToken> supplier) {
 		AccessToken newAccessToken = supplier.get();
 
 		accessTokenStorage.add(request, newAccessToken);
