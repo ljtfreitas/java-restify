@@ -60,7 +60,7 @@ public class DefaultAuthorizationServerTest {
 				.withHeader("Content-Type", "application/x-www-form-urlencoded")
 				.withHeader("Location", "http://my.web.app/oauth/callback?code=abc1234&state=current-state"));
 
-		EndpointResponse<String> authorizationResponse = authorizationServer.authorize(properties);
+		EndpointResponse<String> authorizationResponse = authorizationServer.authorize(new AuthorizationCodeRequest(properties));
 
 		assertNotNull(authorizationResponse);
 		assertEquals(StatusCode.of(HttpStatusCode.FOUND), authorizationResponse.status());

@@ -42,6 +42,10 @@ public class ImplicitGrantProperties extends AuthorizationCodeGrantProperties {
 		private final ImplicitGrantProperties properties = new ImplicitGrantProperties();
 		private final AuthorizationCodeGrantProperties.Builder delegate = new AuthorizationCodeGrantProperties.Builder(properties);
 
+		public Builder() {
+			delegate.responseType("token");
+		}
+
 		public Builder accessTokenUri(String accessTokenUri) {
 			delegate.accessTokenUri(accessTokenUri);
 			return this;

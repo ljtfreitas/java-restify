@@ -35,18 +35,18 @@ import java.util.stream.Stream;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
 import com.github.ljtfreitas.restify.http.util.Tryable;
 
-public class OAuthAuthenticatedEndpointRequest {
+public class OAuth2AuthenticatedEndpointRequest {
 
 	private final EndpointRequest source;
 	private final GrantProperties properties;
 	private final Principal user;
 	private final String scope;
 
-	public OAuthAuthenticatedEndpointRequest(EndpointRequest source, GrantProperties properties) {
+	public OAuth2AuthenticatedEndpointRequest(EndpointRequest source, GrantProperties properties) {
 		this(source, properties, null);
 	}
 
-	public OAuthAuthenticatedEndpointRequest(EndpointRequest source, GrantProperties properties, Principal user) {
+	public OAuth2AuthenticatedEndpointRequest(EndpointRequest source, GrantProperties properties, Principal user) {
 		this.source = source;
 		this.properties = properties;
 		this.user = Optional.ofNullable(user).orElseGet(() -> properties.user().orElse(null));

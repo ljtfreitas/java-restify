@@ -47,7 +47,7 @@ public class AuthorizationCodeAccessTokenProvider extends BaseAccessTokenProvide
 	}
 
 	@Override
-	protected AccessTokenRequest buildAccessTokenRequest(OAuthAuthenticatedEndpointRequest request) {
+	protected AccessTokenRequest buildAccessTokenRequest(OAuth2AuthenticatedEndpointRequest request) {
 		AuthorizationCodeGrantProperties properties = request.properties(AuthorizationCodeGrantProperties.class);
 
 		String authorizationCode = properties.authorizationCode()

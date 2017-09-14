@@ -25,29 +25,54 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.authentication.oauth2;
 
-public class ClientCredentialsAccessTokenProvider extends BaseAccessTokenProvider {
+import java.net.URI;
+import java.util.Optional;
 
-	public ClientCredentialsAccessTokenProvider() {
-		super();
+import com.github.ljtfreitas.restify.http.client.header.Headers;
+
+public class AuthorizationCodeRequest {
+
+	private final AuthorizationCodeGrantProperties properties;
+	private final String scope;
+
+	public AuthorizationCodeRequest(AuthorizationCodeGrantProperties properties) {
+		this(properties, properties.scope());
 	}
 
-	public ClientCredentialsAccessTokenProvider(AuthorizationServer authorizationServer) {
-		super(authorizationServer);
+	public AuthorizationCodeRequest(AuthorizationCodeGrantProperties properties, String scope) {
+		this.properties = properties;
+		this.scope = scope;
 	}
 
-	@Override
-	protected AccessTokenRequest buildAccessTokenRequest(OAuth2AuthenticatedEndpointRequest request) {
-		GrantProperties properties = request.properties();
-
-		AccessTokenRequest.Builder builder = AccessTokenRequest.clientCredentials(properties.credentials());
-
-		return builder.accessTokenUri(properties.accessTokenUri())
-					  .parameter("scope", request.scope())
-					  .build();
+	public ClientCredentials credentials() {
+		return properties.credentials();
 	}
 
-	@Override
-	public AccessToken refresh(AccessToken accessToken, OAuth2AuthenticatedEndpointRequest request) {
-		throw new UnsupportedOperationException("Client Credentials Grant does not support refresh token.");
+	public URI authorizationUri() {
+		return properties.authorizationUri();
+	}
+
+	public String responseType() {
+		return properties.responseType();
+	}
+
+	public String scope() {
+		return scope;
+	}
+
+	public Optional<URI> redirectUri() {
+		return properties.redirectUri();
+	}
+
+	public Optional<String> state() {
+		return properties.state();
+	}
+
+	public Headers headers() {
+		return properties.headers();
+	}
+
+	public Optional<String> cookie() {
+		return properties.cookie();
 	}
 }

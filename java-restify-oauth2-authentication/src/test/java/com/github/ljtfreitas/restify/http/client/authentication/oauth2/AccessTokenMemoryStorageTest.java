@@ -25,7 +25,7 @@ public class AccessTokenMemoryStorageTest {
 
 		EndpointRequest source = new EndpointRequest(URI.create("http://my.resource.server/path"), "GET");
 
-		OAuthAuthenticatedEndpointRequest request = new OAuthAuthenticatedEndpointRequest(source, properties, user);
+		OAuth2AuthenticatedEndpointRequest request = new OAuth2AuthenticatedEndpointRequest(source, properties, user);
 
 		acessTokenMemoryStore = new AccessTokenMemoryStorage();
 

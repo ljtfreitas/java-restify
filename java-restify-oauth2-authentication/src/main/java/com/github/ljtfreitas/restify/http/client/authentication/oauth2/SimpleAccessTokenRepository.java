@@ -34,7 +34,7 @@ public class SimpleAccessTokenRepository implements AccessTokenRepository {
 	}
 
 	@Override
-	public AccessToken findBy(OAuthAuthenticatedEndpointRequest request) {
+	public AccessToken findBy(OAuth2AuthenticatedEndpointRequest request) {
 		return accessToken;
 	}
 }

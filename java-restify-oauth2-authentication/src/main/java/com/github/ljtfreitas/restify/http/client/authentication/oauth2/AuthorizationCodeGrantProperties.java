@@ -41,7 +41,7 @@ public class AuthorizationCodeGrantProperties extends GrantProperties {
 	private String authorizationCode;
 	private URI authorizationUri;
 	private URI redirectUri;
-	private String responseType;
+	private String responseType = "code";
 	private String cookie;
 	private String state;
 	private Headers headers = new Headers();

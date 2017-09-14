@@ -31,9 +31,12 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
+import com.github.ljtfreitas.restify.http.contract.metadata.Metadata;
+
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.TYPE, ElementType.METHOD, ElementType.ANNOTATION_TYPE})
 @Inherited
+@Metadata
 public @interface Scope {
 
 	public String[] value();
