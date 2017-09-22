@@ -84,7 +84,7 @@ public class OkHttpClientRequestTest {
 		HttpRequest httpRequest = request()
 			.withMethod("POST")
 			.withPath("/json")
-			.withHeader("Content-Type", "application/json; charset=UTF-8")
+			.withHeader("Content-Type", "application/json")
 			.withBody(json("{\"name\":\"Tiago de Freitas Lima\",\"age\":31}"));
 
 		mockServerClient
@@ -121,7 +121,7 @@ public class OkHttpClientRequestTest {
 		HttpRequest httpRequest = request()
 			.withMethod("POST")
 			.withPath("/xml")
-			.withHeader("Content-Type", "application/xml; charset=UTF-8")
+			.withHeader("Content-Type", "application/xml")
 			.withBody(exact("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?><model><name>Tiago de Freitas Lima</name><age>31</age></model>"));
 
 		mockServerClient

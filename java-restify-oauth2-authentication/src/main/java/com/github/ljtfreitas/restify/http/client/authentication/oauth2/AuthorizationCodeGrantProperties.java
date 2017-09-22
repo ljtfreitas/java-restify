@@ -190,22 +190,22 @@ public class AuthorizationCodeGrantProperties extends GrantProperties {
 		}
 
 		public Builder header(String name, String value) {
-			properties.headers.add(name, value);
+			properties.headers = properties.headers.add(name, value);
 			return this;
 		}
 
 		public Builder header(Header header) {
-			properties.headers.add(header);
+			properties.headers = properties.headers.add(header);
 			return this;
 		}
 
 		public Builder headers(Header... headers) {
-			properties.headers.addAll(new Headers(headers));
+			properties.headers = properties.headers.addAll(new Headers(headers));
 			return this;
 		}
 
 		public Builder headers(Headers headers) {
-			properties.headers.addAll(headers);
+			properties.headers = properties.headers.addAll(headers);
 			return this;
 		}
 

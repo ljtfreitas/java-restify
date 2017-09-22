@@ -48,11 +48,7 @@ public class AcceptVersionHeaderEndpointRequestInterceptor implements EndpointRe
 		EndpointVersion version = Optional.ofNullable(this.version)
 				.orElseGet(() -> request.version().orElse(null));
 
-		if (version != null) {
-			request.headers().add(Header.acceptVersion(version.get()));
-		}
-
-		return request;
+		return version == null ? request : request.add(Header.acceptVersion(version.get()));
 	}
 
 }

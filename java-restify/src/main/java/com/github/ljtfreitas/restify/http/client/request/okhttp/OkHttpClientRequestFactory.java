@@ -59,7 +59,8 @@ public class OkHttpClientRequestFactory implements HttpClientRequestFactory, Clo
 
 	@Override
 	public OkHttpClientRequest createOf(EndpointRequest endpointRequest) {
-		return new OkHttpClientRequest(okHttpClient, endpointRequest, charset);
+		return new OkHttpClientRequest(okHttpClient, endpointRequest.endpoint(), endpointRequest.method(), endpointRequest.headers(),
+				charset);
 	}
 
 	@Override

@@ -7,6 +7,7 @@ import java.nio.charset.Charset;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 
 import com.github.ljtfreitas.restify.http.client.charset.Encoding;
+import com.github.ljtfreitas.restify.http.client.header.Header;
 import com.github.ljtfreitas.restify.http.client.header.Headers;
 
 public class SimpleHttpRequestMessage implements HttpRequestMessage {
@@ -60,6 +61,11 @@ public class SimpleHttpRequestMessage implements HttpRequestMessage {
 	@Override
 	public Headers headers() {
 		return headers;
+	}
+
+	@Override
+	public HttpRequestMessage replace(Header header) {
+		return new SimpleHttpRequestMessage(source, output, headers.replace(header));
 	}
 
 	public static SimpleHttpRequestMessage some() {

@@ -34,9 +34,10 @@ import java.net.URL;
 import java.nio.charset.Charset;
 
 import com.github.ljtfreitas.restify.http.RestifyHttpException;
+import com.github.ljtfreitas.restify.http.client.header.Header;
 import com.github.ljtfreitas.restify.http.client.header.Headers;
-import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
 import com.github.ljtfreitas.restify.http.client.request.HttpClientRequest;
+import com.github.ljtfreitas.restify.http.client.request.HttpRequestMessage;
 import com.github.ljtfreitas.restify.http.client.response.HttpResponseMessage;
 import com.github.ljtfreitas.restify.http.client.response.StatusCode;
 import com.github.ljtfreitas.restify.http.util.Tryable;
@@ -50,25 +51,35 @@ import okhttp3.Response;
 class OkHttpClientRequest implements HttpClientRequest {
 
 	private final OkHttpClient okHttpClient;
-	private final EndpointRequest endpointRequest;
+	private final URI uri;
+	private final String method;
+	private final Headers headers;
 	private final Charset charset;
 
-	private final ByteArrayOutputStream outputStream = new ByteArrayOutputStream(1024);
+	private final ByteArrayOutputStream outputStream;
 
-	public OkHttpClientRequest(OkHttpClient okHttpClient, EndpointRequest endpointRequest, Charset charset) {
+	public OkHttpClientRequest(OkHttpClient okHttpClient, URI uri, String method, Headers headers, Charset charset) {
+		this(okHttpClient, uri, method, headers, charset, new ByteArrayOutputStream(1024));
+	}
+
+	private OkHttpClientRequest(OkHttpClient okHttpClient, URI uri, String method, Headers headers, Charset charset,
+			ByteArrayOutputStream outputStream) {
 		this.okHttpClient = okHttpClient;
-		this.endpointRequest = endpointRequest;
+		this.uri = uri;
+		this.method = method;
+		this.headers = headers;
 		this.charset = charset;
+		this.outputStream = outputStream;
 	}
 
 	@Override
 	public URI uri() {
-		return endpointRequest.endpoint();
+		return uri;
 	}
 
 	@Override
 	public String method() {
-		return endpointRequest.method();
+		return method;
 	}
 
 	@Override
@@ -83,26 +94,31 @@ class OkHttpClientRequest implements HttpClientRequest {
 
 	@Override
 	public Headers headers() {
-		return endpointRequest.headers();
+		return headers;
+	}
+
+	@Override
+	public HttpRequestMessage replace(Header header) {
+		return new OkHttpClientRequest(okHttpClient, uri, method, headers.replace(header), charset);
 	}
 
 	@Override
 	public HttpResponseMessage execute() throws RestifyHttpException {
-		MediaType contentType = endpointRequest.headers().get("Content-Type").map(header -> MediaType.parse(header.value()))
+		MediaType contentType = headers.get("Content-Type").map(header -> MediaType.parse(header.value()))
 				.orElse(null);
 
 		byte[] content = outputStream.toByteArray();
 
 		RequestBody body = (content.length > 0 ? RequestBody.create(contentType, content) : null);
 
-		URL url = Tryable.of(() -> endpointRequest.endpoint().toURL());
+		URL url = Tryable.of(() -> uri.toURL());
 
 		Request.Builder builder = new Request.Builder();
 
 		builder.url(url)
-				.method(endpointRequest.method(), body);
+				.method(method, body);
 
-		endpointRequest.headers().all().forEach(h -> builder.addHeader(h.name(), h.value()));
+		headers.forEach(h -> builder.addHeader(h.name(), h.value()));
 
 		Request request = builder.build();
 
@@ -118,8 +134,8 @@ class OkHttpClientRequest implements HttpClientRequest {
 	private OkHttpClientResponse responseOf(Response response) {
 		StatusCode statusCode = StatusCode.of(response.code(), response.message());
 
-		Headers headers = new Headers();
-		response.headers().names().forEach(name -> headers.add(name, response.headers(name)));
+		Headers headers = response.headers().names().stream()
+				.reduce(new Headers(), (a, b) -> a.add(b, response.headers(b)), (a, b) -> b);
 
 		InputStream stream = response.body().byteStream();
 

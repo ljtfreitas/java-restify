@@ -24,9 +24,9 @@ public class ResponseEntityConverterTest {
 
 	@Before
 	public void setup() {
-		Headers headers = new Headers();
-		headers.add(Header.contentType(MediaType.TEXT_PLAIN_VALUE));
-		headers.add(Header.of("X-Header-Whatever", "whatever"));
+		Headers headers = new Headers()
+				.add(Header.contentType(MediaType.TEXT_PLAIN_VALUE))
+				.add(Header.of("X-Header-Whatever", "whatever"));
 
 		endpointResponse = new EndpointResponse<>(StatusCode.ok(), headers, "expected result");
 	}

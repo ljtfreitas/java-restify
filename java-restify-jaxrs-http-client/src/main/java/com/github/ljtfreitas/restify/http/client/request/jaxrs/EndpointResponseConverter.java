@@ -29,7 +29,6 @@ import javax.ws.rs.core.GenericType;
 import javax.ws.rs.core.Response;
 import javax.ws.rs.core.Response.Status.Family;
 
-import com.github.ljtfreitas.restify.http.client.header.Header;
 import com.github.ljtfreitas.restify.http.client.header.Headers;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
@@ -66,12 +65,8 @@ class EndpointResponseConverter {
 	}
 
 	private Headers headersOf(Response response) {
-		Headers headers = new Headers();
-
-		response.getHeaders()
-			.forEach((key, values) ->
-				values.forEach(value -> headers.add(new Header(key, value.toString()))));
-
-		return headers;
+		return response.getHeaders().entrySet().stream()
+				.reduce(new Headers(), (a, b) -> {b.getValue().forEach(c -> a.add(b.getKey(), c.toString())); return a;},
+						(a, b) -> b);
 	}
 }

@@ -31,9 +31,11 @@ import java.net.URISyntaxException;
 import java.util.Optional;
 
 import com.github.ljtfreitas.restify.http.RestifyHttpException;
+import com.github.ljtfreitas.restify.http.client.header.Header;
 import com.github.ljtfreitas.restify.http.client.header.Headers;
 import com.github.ljtfreitas.restify.http.contract.Parameters;
 import com.github.ljtfreitas.restify.http.contract.metadata.reflection.JavaType;
+import com.github.ljtfreitas.restify.http.util.Tryable;
 
 public class EndpointRequest {
 
@@ -159,14 +161,21 @@ public class EndpointRequest {
 
 	public EndpointRequest append(Parameters parameters) {
 		String query = parameters.queryString();
-		return addQueryString(query);
+		return appendOnQuery(query);
 	}
 
-	public EndpointRequest appendParameter(String name, String value) {
-		return addQueryString(name + "=" + value);
+	public EndpointRequest add(Header header) {
+		Headers headers = new Headers(this.headers).add(header);
+
+		return new EndpointRequest(endpoint, method, headers, body, responseType, version, metadata);
 	}
 
-	private EndpointRequest addQueryString(String query) {
+	public EndpointRequest add(Headers headers) {
+		return new EndpointRequest(endpoint, method, this.headers.addAll(headers), body, responseType, version,
+				metadata);
+	}
+
+	private EndpointRequest appendOnQuery(String query) {
 		String appender = endpoint.getQuery() == null ? "" : "&";
 
 		String newQuery = Optional.ofNullable(endpoint.getRawQuery())
@@ -174,14 +183,14 @@ public class EndpointRequest {
 					.concat(appender)
 						.concat(query);
 
-		try {
-			URI newURI = new URI(endpoint.getScheme(), endpoint.getRawAuthority(), endpoint.getRawPath(),
-					newQuery, endpoint.getRawFragment());
+		return Tryable.of(() -> cloneWithQuery(newQuery), (e) -> new RestifyHttpException(e));
+	}
 
-			return new EndpointRequest(newURI, method, headers, body, responseType, version, metadata);
-		} catch (URISyntaxException e) {
-			throw new RestifyHttpException(e);
-		}
+	private EndpointRequest cloneWithQuery(String query) throws URISyntaxException {
+		URI newURI = new URI(endpoint.getScheme(), endpoint.getRawAuthority(), endpoint.getRawPath(),
+				query, endpoint.getRawFragment());
+
+		return new EndpointRequest(newURI, method, headers, body, responseType, version, metadata);
 	}
 
 	public EndpointRequest replace(URI endpoint) {

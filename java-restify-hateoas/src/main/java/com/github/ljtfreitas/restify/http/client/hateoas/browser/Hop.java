@@ -92,14 +92,12 @@ public class Hop {
 	}
 
 	public Hop usingHeader(String name, String value) {
-		Headers headers = new Headers(this.headers);
-		headers.add(name, value);
+		Headers headers = this.headers.add(name, value);
 		return new Hop(rel, parameters, headers, method, body);
 	}
 
 	public Hop usingHeader(Header header) {
-		Headers headers = new Headers(this.headers);
-		headers.add(header);
+		Headers headers = this.headers.add(header);
 		return new Hop(rel, parameters, headers, method, body);
 	}
 
@@ -112,9 +110,8 @@ public class Hop {
 	}
 
 	public Hop usingPost(Object body, ContentType contentType) {
-		Headers newHeaders = new Headers(this.headers);
-		newHeaders.add(new Header(Headers.CONTENT_TYPE, contentType.toString()));
-		return new Hop(rel, parameters, newHeaders, "POST", body);
+		Headers headers = this.headers.add(new Header(Headers.CONTENT_TYPE, contentType.toString()));
+		return new Hop(rel, parameters, headers, "POST", body);
 	}
 
 	public Hop usingPut() {
@@ -122,8 +119,7 @@ public class Hop {
 	}
 
 	public Hop usingPut(Object body, ContentType contentType) {
-		Headers newHeaders = new Headers(this.headers);
-		newHeaders.add(new Header(Headers.CONTENT_TYPE, contentType.toString()));
+		Headers headers = this.headers.add(new Header(Headers.CONTENT_TYPE, contentType.toString()));
 		return new Hop(rel, parameters, headers, "PUT", body);
 	}
 
@@ -136,9 +132,8 @@ public class Hop {
 	}
 
 	public Hop usingMethod(String method, Object body, ContentType contentType) {
-		Headers newHeaders = new Headers(this.headers);
-		newHeaders.add(new Header(Headers.CONTENT_TYPE, contentType.toString()));
-		return new Hop(rel, parameters, newHeaders, method, body);
+		Headers headers = this.headers.add(new Header(Headers.CONTENT_TYPE, contentType.toString()));
+		return new Hop(rel, parameters, headers, method, body);
 	}
 
 	public static Hop rel(String rel) {

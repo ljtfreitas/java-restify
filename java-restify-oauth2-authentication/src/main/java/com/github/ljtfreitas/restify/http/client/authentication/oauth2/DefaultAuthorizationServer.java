@@ -29,7 +29,9 @@ import static com.github.ljtfreitas.restify.http.client.header.Headers.AUTHORIZA
 import static com.github.ljtfreitas.restify.http.util.Preconditions.nonNull;
 
 import java.net.URI;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.List;
 
 import com.github.ljtfreitas.restify.http.client.authentication.BasicAuthentication;
@@ -37,10 +39,10 @@ import com.github.ljtfreitas.restify.http.client.header.Header;
 import com.github.ljtfreitas.restify.http.client.header.Headers;
 import com.github.ljtfreitas.restify.http.client.message.HttpMessageConverter;
 import com.github.ljtfreitas.restify.http.client.message.HttpMessageConverters;
+import com.github.ljtfreitas.restify.http.client.message.converter.form.FormURLEncodedParametersMessageConverter;
 import com.github.ljtfreitas.restify.http.client.message.converter.json.JsonMessageConverter;
 import com.github.ljtfreitas.restify.http.client.message.converter.text.TextPlainMessageConverter;
 import com.github.ljtfreitas.restify.http.client.message.converter.xml.JaxbXmlMessageConverter;
-import com.github.ljtfreitas.restify.http.client.message.form.FormURLEncodedParametersMessageConverter;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequestExecutor;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequestWriter;
@@ -111,7 +113,7 @@ public class DefaultAuthorizationServer implements AuthorizationServer {
 			parameters.put("state", request.state().get());
 		}
 
-		Headers headers = new Headers(request.headers());
+		Headers headers = new Headers(headersOf(request));
 
 		if (request.cookie().isPresent()) {
 			headers.add("Cookie", request.cookie().get());
@@ -120,6 +122,16 @@ public class DefaultAuthorizationServer implements AuthorizationServer {
 		URI authorizationUri = URI.create(request.authorizationUri().toString() + "?" + parameters.queryString());
 
 		return delegate.execute(new EndpointRequest(authorizationUri, "GET", headers, String.class));
+	}
+
+	private Collection<Header> headersOf(AuthorizationCodeRequest request) {
+		Collection<Header> headers = new ArrayList<>(request.headers().all());
+
+		if (request.cookie().isPresent()) {
+			headers.add(Header.cookie(request.cookie().get()));
+		}
+
+		return headers;
 	}
 
 	@Override
@@ -197,8 +209,8 @@ public class DefaultAuthorizationServer implements AuthorizationServer {
 		}
 
 		private EndpointRequest create() {
-			Headers headers = new Headers(Header.contentType(FORM_URLENCODED_CONTENT_TYPE));
-			headers.addAll(source.headers());
+			Headers headers = new Headers(Header.contentType(FORM_URLENCODED_CONTENT_TYPE))
+					.addAll(source.headers());
 
 			Parameters body = source.parameters();
 
@@ -208,8 +220,7 @@ public class DefaultAuthorizationServer implements AuthorizationServer {
 		private EndpointRequest authenticated(EndpointRequest endpointRequest) {
 			switch (clientAuthenticationMethod) {
 				case HEADER:
-					endpointRequest.headers().add(authorization());
-					return endpointRequest;
+					return endpointRequest.add(authorization());
 
 				case FORM_PARAMETER:
 					((Parameters) endpointRequest.body().get()).putAll(parameters());

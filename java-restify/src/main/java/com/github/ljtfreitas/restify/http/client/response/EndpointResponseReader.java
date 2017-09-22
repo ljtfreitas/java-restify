@@ -87,7 +87,9 @@ public class EndpointResponseReader {
 		@SuppressWarnings("unchecked")
 		private EndpointResponse<T> doRead(HttpResponseMessage response, Type responseType) {
 			ContentType contentType = ContentType
-					.of(response.headers().get("Content-Type").map(Header::value).orElse("text/plain"));
+					.of(response.headers().get("Content-Type").map(Header::value)
+						.orElseThrow(
+							() -> new RestifyHttpMessageReadException("Your request responded a content, but Content-Type header is not present.")));
 
 			HttpMessageReader<Object> converter = converters.readerOf(contentType, responseType).orElseThrow(
 					() -> new RestifyHttpMessageReadException("Your request responded a content " + "of type ["

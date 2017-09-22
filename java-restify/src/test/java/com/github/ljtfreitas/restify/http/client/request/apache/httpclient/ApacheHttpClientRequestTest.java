@@ -70,7 +70,7 @@ public class ApacheHttpClientRequestTest {
 					.withPath("/json"))
 			.respond(response()
 					.withStatusCode(200)
-					.withHeader("Content-Type", "application/json; charset=UTF-8")
+					.withHeader("Content-Type", "application/json")
 					.withBody(json("{\"name\": \"Tiago de Freitas Lima\",\"age\":31}")));
 
 		MyModel myModel = myApi.json();
@@ -84,7 +84,7 @@ public class ApacheHttpClientRequestTest {
 		HttpRequest httpRequest = request()
 			.withMethod("POST")
 			.withPath("/json")
-			.withHeader("Content-Type", "application/json; charset=UTF-8")
+			.withHeader("Content-Type", "application/json")
 			.withBody(json("{\"name\":\"Tiago de Freitas Lima\",\"age\":31}"));
 
 		mockServerClient
@@ -107,7 +107,7 @@ public class ApacheHttpClientRequestTest {
 					.withPath("/xml"))
 			.respond(response()
 					.withStatusCode(200)
-					.withHeader("Content-Type", "application/xml; charset=UTF-8")
+					.withHeader("Content-Type", "application/xml")
 					.withBody(exact("<model><name>Tiago de Freitas Lima</name><age>31</age></model>")));
 
 		MyModel myModel = myApi.xml();
@@ -121,7 +121,7 @@ public class ApacheHttpClientRequestTest {
 		HttpRequest httpRequest = request()
 			.withMethod("POST")
 			.withPath("/xml")
-			.withHeader("Content-Type", "application/xml; charset=UTF-8")
+			.withHeader("Content-Type", "application/xml")
 			.withBody(exact("<?xml version=\"1.0\" encoding=\"UTF-8\" standalone=\"yes\"?><model><name>Tiago de Freitas Lima</name><age>31</age></model>"));
 
 		mockServerClient
