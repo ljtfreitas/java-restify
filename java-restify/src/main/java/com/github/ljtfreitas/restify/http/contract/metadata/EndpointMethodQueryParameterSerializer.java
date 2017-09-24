@@ -55,7 +55,7 @@ public class EndpointMethodQueryParameterSerializer implements EndpointMethodPar
 		Parameters parameters = new Parameters();
 
 		for (Object e : source) {
-			parameters.put(name, e.toString());
+			parameters = parameters.put(name, e.toString());
 		}
 
 		return parameters.queryString();

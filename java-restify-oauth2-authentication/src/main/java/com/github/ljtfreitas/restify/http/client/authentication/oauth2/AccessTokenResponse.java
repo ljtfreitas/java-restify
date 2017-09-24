@@ -89,15 +89,15 @@ public class AccessTokenResponse implements Serializable {
 	public static AccessTokenResponse of(Parameters parameters) {
 		AccessTokenResponse response = new AccessTokenResponse();
 
-		parameters.get("access_token").ifPresent(accessToken -> response.accessToken = accessToken);
+		parameters.first("access_token").ifPresent(accessToken -> response.accessToken = accessToken);
 
-		parameters.get("token_type").ifPresent(tokenType -> response.tokenType = tokenType);
+		parameters.first("token_type").ifPresent(tokenType -> response.tokenType = tokenType);
 
-		parameters.get("expires_in").ifPresent(expires -> response.expires = expires);
+		parameters.first("expires_in").ifPresent(expires -> response.expires = expires);
 
-		parameters.get("scope").ifPresent(scope -> response.scope = scope);
+		parameters.first("scope").ifPresent(scope -> response.scope = scope);
 
-		parameters.get("refresh_token").ifPresent(refreshToken -> response.refreshToken = refreshToken);
+		parameters.first("refresh_token").ifPresent(refreshToken -> response.refreshToken = refreshToken);
 
 		return response;
 	}

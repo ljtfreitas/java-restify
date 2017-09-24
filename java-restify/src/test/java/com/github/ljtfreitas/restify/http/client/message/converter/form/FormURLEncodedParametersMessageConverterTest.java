@@ -8,7 +8,6 @@ import java.io.ByteArrayOutputStream;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.github.ljtfreitas.restify.http.client.message.converter.form.FormURLEncodedParametersMessageConverter;
 import com.github.ljtfreitas.restify.http.client.request.SimpleHttpRequestMessage;
 import com.github.ljtfreitas.restify.http.client.response.SimpleHttpResponseMessage;
 import com.github.ljtfreitas.restify.http.contract.Parameters;
@@ -26,9 +25,9 @@ public class FormURLEncodedParametersMessageConverterTest {
 
 	@Test
 	public void shouldWriteFormUrlEncodedMessageWithParametersSource() {
-		Parameters body = new Parameters();
-		body.put("param1", "value1");
-		body.put("param2", "value2");
+		Parameters body = new Parameters()
+			.put("param1", "value1")
+			.put("param2", "value2");
 
 		ByteArrayOutputStream output = new ByteArrayOutputStream();
 

@@ -35,8 +35,10 @@ import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
 import com.github.ljtfreitas.restify.http.contract.Form;
-import com.github.ljtfreitas.restify.http.contract.Parameters;
 import com.github.ljtfreitas.restify.http.contract.Form.Field;
+import com.github.ljtfreitas.restify.http.contract.Parameters;
+import com.github.ljtfreitas.restify.http.contract.Parameters.Parameter;
+import com.github.ljtfreitas.restify.http.util.Tryable;
 
 public class FormObjects {
 
@@ -105,17 +107,9 @@ public class FormObjects {
 		private Parameters serializeAsParameters(Object source, String name) {
 			String prefix = name.isEmpty() || name.endsWith(".") ? name : name + ".";
 
-			Parameters parameters = new Parameters(prefix);
-
-			fields.values().forEach(field -> {
-				try {
-					field.serialize(source, parameters);
-				} catch (Exception e) {
-					throw new UnsupportedOperationException(e);
-				}
-			});
-
-			return parameters;
+			return fields.values().stream()
+				.reduce(new Parameters(prefix), (parameters, field) -> Tryable.of(() -> parameters.putAll(field.serialize(source))),
+						(a, b) -> b);
 		}
 
 		private void put(String name, boolean indexed, java.lang.reflect.Field field) {
@@ -135,51 +129,57 @@ public class FormObjects {
 				this.field = field;
 			}
 
-			private void serialize(Object source, Parameters parameters) throws Exception {
+			private Parameters serialize(Object source) throws Exception {
 				field.setAccessible(true);
 
 				Object value = field.get(source);
 
-				apply(name, value, parameters);
+				return apply(name, value);
 			}
 
-			private void apply(String name, Object value, Parameters parameters) throws Exception {
+			private Parameters apply(String name, Object value) throws Exception {
 				if (value != null) {
 					if (value.getClass().isAnnotationPresent(Form.class)) {
-						serializeNested(name, value, parameters);
+						return serializeNested(name, value);
 
 					} else if (Iterable.class.isAssignableFrom(value.getClass())) {
-						serializeIterable(name, value, parameters);
+						return serializeIterable(name, value);
 
 					} else {
-						parameters.put(name, value.toString());
+						return Parameters.of(Parameter.of(name, value.toString()));
 					}
+				} else {
+					return Parameters.empty();
 				}
 			}
 
 			@SuppressWarnings("rawtypes")
-			private void serializeIterable(String name, Object value, Parameters parameters) throws Exception {
+			private Parameters serializeIterable(String name, Object value) throws Exception {
 				Iterable iterable = (Iterable) value;
 
 				int position = 0;
 
+				Parameters parameters = new Parameters();
+
 				for (Object element : iterable) {
 					String newName = indexed ? name + "[" + position + "]" : name;
 
-					apply(newName, element, parameters);
+					parameters = parameters.putAll(apply(newName, element));
 
 					position++;
 				}
+
+				return parameters;
 			}
 
-			private void serializeNested(String name, Object value, Parameters parameters) {
+			private Parameters serializeNested(String name, Object value) {
 				FormObject formObject = FormObjects.cache().of(value.getClass());
 
 				String appendedName = name + (formObject.name.isEmpty() ? "" : "." + formObject.name);
 
 				Parameters nestedParameters = formObject.serializeAsParameters(value, appendedName);
 
-				parameters.putAll(nestedParameters);
+				return nestedParameters;
 			}
 
 			public void applyTo(Object object, Object value) {

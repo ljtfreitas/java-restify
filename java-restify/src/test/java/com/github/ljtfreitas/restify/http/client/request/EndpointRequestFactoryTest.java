@@ -171,9 +171,9 @@ public class EndpointRequestFactoryTest {
 		EndpointMethod endpointMethod = new EndpointMethod(TargetType.class.getMethod("queryString", new Class[]{Parameters.class}),
 				"http://my.api.com/query", "GET", endpointMethodParameters);
 
-		Parameters parameters = new Parameters();
-		parameters.put("param1", "value1");
-		parameters.put("param2", "value2");
+		Parameters parameters = new Parameters()
+				.put("param1", "value1")
+				.put("param2", "value2");
 
 		Object[] args = new Object[]{parameters};
 

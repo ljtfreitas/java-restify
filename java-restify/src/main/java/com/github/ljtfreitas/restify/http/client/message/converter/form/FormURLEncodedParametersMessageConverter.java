@@ -26,6 +26,7 @@
 package com.github.ljtfreitas.restify.http.client.message.converter.form;
 
 import java.lang.reflect.Type;
+import java.util.Arrays;
 
 import com.github.ljtfreitas.restify.http.contract.Parameters;
 
@@ -38,13 +39,10 @@ public class FormURLEncodedParametersMessageConverter extends FormURLEncodedMess
 
 	@Override
 	protected Parameters doRead(Type expectedType, ParameterPair[] pairs) {
-		Parameters parameters = new Parameters();
-
-		for (ParameterPair pair : pairs) {
-			parameters.put(pair.name(), pair.value());
-		}
-
-		return parameters;
+		return Arrays.stream(pairs)
+				.reduce(new Parameters(),
+						(parameters, parameter) -> parameters.put(parameter.name(), parameter.value()),
+							(a, b) -> b);
 	}
 
 	@Override

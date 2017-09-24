@@ -197,6 +197,10 @@ public class EndpointRequest {
 		return new EndpointRequest(endpoint, method, headers, body, responseType, version, metadata);
 	}
 
+	public EndpointRequest usingBody(Object body) {
+		return new EndpointRequest(endpoint, method, headers, body, responseType, version, metadata);
+	}
+
 	@Override
 	public String toString() {
 		StringBuilder report = new StringBuilder();
