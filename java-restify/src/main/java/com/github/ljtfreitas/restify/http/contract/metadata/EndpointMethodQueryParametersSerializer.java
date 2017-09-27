@@ -108,18 +108,7 @@ public class EndpointMethodQueryParametersSerializer implements EndpointMethodPa
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private String serializeAsMap(Map source) {
-		Parameters parameters = new Parameters();
-
-		source.forEach((key, value) -> {
-			if (value instanceof Iterable) {
-				((Iterable) value).forEach(o -> parameters.put(key.toString(), o.toString()));
-
-			} else {
-				parameters.put(key.toString(), value.toString());
-			}
-		});
-
-		return serializeAsParameters(parameters);
+		return serializeAsParameters(Parameters.of(source));
 	}
 
 	private String serializeAsParameters(Parameters source) {

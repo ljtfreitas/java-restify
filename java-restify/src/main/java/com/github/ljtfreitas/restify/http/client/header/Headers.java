@@ -95,11 +95,10 @@ public class Headers implements Iterable<Header> {
 	public static final String WARNING = "Warning";
 	public static final String WWW_AUTHENTICATE = "WWW-Authenticate";
 
-
 	private final Collection<Header> headers;
 
 	public Headers() {
-		this(new LinkedHashSet<>());
+		this.headers = new LinkedHashSet<>();
 	}
 
 	public Headers(Header... headers) {
@@ -111,28 +110,54 @@ public class Headers implements Iterable<Header> {
 	}
 
 	public Headers(Collection<Header> headers) {
-		this.headers = headers;
+		this.headers = new LinkedHashSet<>(headers);
 	}
 
-	public void add(Header header) {
+	public Headers add(Header header) {
+		Headers headers = new Headers(this.headers);
+		headers.put(header);
+		return headers;
+	}
+
+	public Headers add(String name, String value) {
+		Headers headers = new Headers(this.headers);
+		headers.put(new Header(name, value));
+		return headers;
+	}
+
+	public Headers add(String name, Collection<String> values) {
+		Headers headers = new Headers(this.headers);
+		values.forEach(value -> headers.put(new Header(name, value)));
+		return headers;
+	}
+
+	public Headers addAll(Headers source) {
+		Headers headers = new Headers(this.headers);
+		source.forEach(h -> headers.put(h));
+		return headers;
+	}
+
+	public Headers replace(String name, String value) {
+		return doReplace(Header.of(name, value));
+	}
+
+	public Headers replace(Header header) {
+		return doReplace(header);
+	}
+
+	private Headers doReplace(Header header) {
+		Headers headers = new Headers(this.headers);
+		headers.remove(header.name());
+		headers.put(header);
+		return headers;
+	}
+
+	private void put(Header header) {
 		headers.add(header);
 	}
 
-	public void add(String name, String value) {
-		headers.add(new Header(name, value));
-	}
-
-	public void add(String name, Collection<String> values) {
-		values.forEach(value -> headers.add(new Header(name, value)));
-	}
-
-	public void addAll(Headers headers) {
-		this.headers.addAll(headers.all());
-	}
-
-	public void replace(String name, String value) {
+	private void remove(String name) {
 		headers.removeIf(h -> h.name().equalsIgnoreCase(name));
-		headers.add(new Header(name, value));
 	}
 
 	public Collection<Header> all() {

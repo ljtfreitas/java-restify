@@ -48,6 +48,7 @@ import com.github.ljtfreitas.restify.http.RestifyHttpException;
 import com.github.ljtfreitas.restify.http.client.header.Header;
 import com.github.ljtfreitas.restify.http.client.header.Headers;
 import com.github.ljtfreitas.restify.http.client.request.HttpClientRequest;
+import com.github.ljtfreitas.restify.http.client.request.HttpRequestMessage;
 import com.github.ljtfreitas.restify.http.client.response.HttpResponseMessage;
 import com.github.ljtfreitas.restify.http.client.response.StatusCode;
 
@@ -59,16 +60,29 @@ class ApacheHttpClientRequest implements HttpClientRequest {
 	private final Charset charset;
 	private final Headers headers;
 
-	private final ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream(1024 * 100);
-	private final BufferedOutputStream bufferedOutputStream = new BufferedOutputStream(byteArrayOutputStream);
+	private final ByteArrayOutputStream byteArrayOutputStream;
+	private final BufferedOutputStream bufferedOutputStream;
 
 	public ApacheHttpClientRequest(HttpClient httpClient, HttpUriRequest httpRequest, HttpContext httpContext, Charset charset,
 			Headers headers) {
+		this(httpClient, httpRequest, httpContext, charset, headers, new ByteArrayOutputStream(1024 * 100));
+	}
+
+	private ApacheHttpClientRequest(HttpClient httpClient, HttpUriRequest httpRequest, HttpContext httpContext, Charset charset,
+			Headers headers, ByteArrayOutputStream byteArrayOutputStream) {
+		this(httpClient, httpRequest, httpContext, charset, headers,
+				byteArrayOutputStream, new BufferedOutputStream(byteArrayOutputStream));
+	}
+
+	private ApacheHttpClientRequest(HttpClient httpClient, HttpUriRequest httpRequest, HttpContext httpContext, Charset charset,
+			Headers headers, ByteArrayOutputStream byteArrayOutputStream, BufferedOutputStream bufferedOutputStream) {
 		this.httpClient = httpClient;
 		this.httpRequest = httpRequest;
 		this.httpContext = httpContext;
 		this.charset = charset;
 		this.headers = headers;
+		this.byteArrayOutputStream = byteArrayOutputStream;
+		this.bufferedOutputStream = bufferedOutputStream;
 	}
 
 	@Override
@@ -98,9 +112,8 @@ class ApacheHttpClientRequest implements HttpClientRequest {
 
 		StatusCode statusCode = StatusCode.of(statusLine.getStatusCode(), statusLine.getReasonPhrase());
 
-		Headers headers = new Headers();
-		Arrays.stream(httpResponse.getAllHeaders())
-			.forEach(h -> headers.add(new Header(h.getName(), h.getValue())));
+		Headers headers = Arrays.stream(httpResponse.getAllHeaders())
+			.reduce(new Headers(), (a, b) -> a.add(b.getName(), b.getValue()), (a, b) -> b);
 
 		HttpEntity entity = httpResponse.getEntity();
 
@@ -132,5 +145,11 @@ class ApacheHttpClientRequest implements HttpClientRequest {
 	@Override
 	public Headers headers() {
 		return headers;
+	}
+
+	@Override
+	public HttpRequestMessage replace(Header header) {
+		return new ApacheHttpClientRequest(httpClient, httpRequest, httpContext, charset, headers.replace(header),
+				byteArrayOutputStream, bufferedOutputStream);
 	}
 }

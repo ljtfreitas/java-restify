@@ -35,6 +35,7 @@ import java.nio.charset.Charset;
 import org.springframework.http.RequestEntity;
 import org.springframework.web.client.RestClientResponseException;
 
+import com.github.ljtfreitas.restify.http.client.header.Header;
 import com.github.ljtfreitas.restify.http.client.header.Headers;
 import com.github.ljtfreitas.restify.http.client.request.HttpRequestMessage;
 import com.github.ljtfreitas.restify.http.client.response.BaseHttpResponseMessage;
@@ -96,6 +97,11 @@ class ErrorHttpResponseMessage extends BaseHttpResponseMessage {
 
 		@Override
 		public Charset charset() {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		public HttpRequestMessage replace(Header header) {
 			throw new UnsupportedOperationException();
 		}
 	}

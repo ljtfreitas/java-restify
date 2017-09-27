@@ -49,7 +49,6 @@ public class HeaderEndpointRequestInterceptor implements EndpointRequestIntercep
 
 	@Override
 	public EndpointRequest intercepts(EndpointRequest endpointRequest) {
-		endpointRequest.headers().addAll(headers);
-		return endpointRequest;
+		return endpointRequest.add(headers);
 	}
 }

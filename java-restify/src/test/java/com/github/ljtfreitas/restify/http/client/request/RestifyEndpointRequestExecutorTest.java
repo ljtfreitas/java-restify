@@ -22,6 +22,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import com.github.ljtfreitas.restify.http.RestifyHttpException;
 import com.github.ljtfreitas.restify.http.client.charset.Encoding;
+import com.github.ljtfreitas.restify.http.client.header.Header;
 import com.github.ljtfreitas.restify.http.client.header.Headers;
 import com.github.ljtfreitas.restify.http.client.request.interceptor.EndpointRequestInterceptorStack;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
@@ -139,6 +140,11 @@ public class RestifyEndpointRequestExecutorTest {
 		@Override
 		public Headers headers() {
 			return source.headers();
+		}
+
+		@Override
+		public HttpRequestMessage replace(Header header) {
+			throw new UnsupportedOperationException();
 		}
 	}
 

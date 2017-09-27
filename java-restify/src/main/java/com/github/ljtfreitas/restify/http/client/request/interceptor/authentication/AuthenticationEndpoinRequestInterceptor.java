@@ -25,8 +25,6 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.request.interceptor.authentication;
 
-import java.util.Optional;
-
 import com.github.ljtfreitas.restify.http.client.authentication.Authentication;
 import com.github.ljtfreitas.restify.http.client.header.Header;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
@@ -42,10 +40,8 @@ public class AuthenticationEndpoinRequestInterceptor implements EndpointRequestI
 
 	@Override
 	public EndpointRequest intercepts(EndpointRequest endpointRequest) {
-		Optional.ofNullable(authentication.content(endpointRequest))
-			.filter(a -> !a.isEmpty())
-				.ifPresent(a -> endpointRequest.headers().add(Header.authorization(a)));
+		String content = authentication.content(endpointRequest);
 
-		return endpointRequest;
+		return content == null ? endpointRequest : endpointRequest.add(Header.authorization(content));
 	}
 }

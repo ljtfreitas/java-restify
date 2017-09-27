@@ -1,6 +1,5 @@
 /*******************************************************************************
  *
- * MIT License
  *
  * Copyright (c) 2016 Tiago de Freitas Lima
  *
@@ -27,26 +26,24 @@ package com.github.ljtfreitas.restify.http.contract;
 
 import static com.github.ljtfreitas.restify.http.util.Preconditions.nonNull;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.Collections;
+import java.util.Iterator;
 import java.util.LinkedHashMap;
-import java.util.List;
+import java.util.LinkedHashSet;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
-import java.util.StringJoiner;
-import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
 import com.github.ljtfreitas.restify.http.client.charset.Encoding;
 
-public class Parameters {
+public class Parameters implements Iterable<Parameters.Parameter> {
 
 	private static final String DEFAULT_PREFIX = "";
 
 	private final String prefix;
-	private final Map<String, List<String>> parameters = new LinkedHashMap<>();
+	private final Map<String, Parameter> parameters;
 
 	public Parameters() {
 		this(DEFAULT_PREFIX);
@@ -54,68 +51,154 @@ public class Parameters {
 
 	public Parameters(String prefix) {
 		this.prefix = prefix;
+		this.parameters = new LinkedHashMap<>();
 	}
 
-	public void put(String name, String value) {
-		parameters.compute(prefix + name, (k, v) -> Optional.ofNullable(v).orElseGet(() -> new ArrayList<>()))
-			.add(value);
+	public Parameters(Collection<Parameter> parameters) {
+		this(DEFAULT_PREFIX, parameters);
 	}
 
-	public void put(String name, Collection<String> values) {
-		parameters.compute(prefix + name, (k, v) -> Optional.ofNullable(v).orElseGet(() -> new ArrayList<>()))
-			.addAll(values);
+	public Parameters(String prefix, Collection<Parameter> parameters) {
+		this(prefix);
+		parameters.forEach(p -> add(p.name, p.values));
 	}
 
-	public void putAll(Parameters other) {
-		other.parameters.forEach(this::put);
+	public Parameters(Parameter... parameters) {
+		this(DEFAULT_PREFIX, parameters);
+	}
+
+	public Parameters(String prefix, Parameter... parameters) {
+		this(prefix);
+		Arrays.stream(parameters).forEach(p -> add(p.name, p.values));
+	}
+
+	private Parameters(String prefix, Map<String, Parameter> parameters) {
+		this.prefix = prefix;
+		this.parameters = new LinkedHashMap<>(parameters);
+	}
+
+	public Parameters put(String name, String value) {
+		Parameters parameters = new Parameters(prefix, this.parameters);
+		parameters.add(name, value);
+		return parameters;
+	}
+
+	public Parameters put(String name, Collection<String> values) {
+		Parameters parameters = new Parameters(prefix, this.parameters);
+		parameters.add(name, values);
+		return parameters;
+	}
+
+	public Parameters put(Parameter parameter) {
+		Parameters parameters = new Parameters(prefix, this.parameters);
+		parameters.add(parameter.name, parameter.values);
+		return parameters;
+	}
+
+	public Parameters putAll(Parameters source) {
+		Parameters parameters = new Parameters(prefix, this.parameters);
+		parameters.addAll(source);
+		return parameters;
+	}
+
+	private void add(String name, String value) {
+		parameters.compute(prefix + name,
+			(key, parameter) ->
+				Optional.ofNullable(parameter).map(p -> p.add(value))
+					.orElseGet(() -> new Parameter(key, value)));
+	}
+
+	private void add(String name, Collection<String> values) {
+		values.forEach(value -> add(name, value));
+	}
+
+	private void addAll(Parameters source) {
+		source.forEach(p ->
+			p.values.forEach(value ->
+				add(p.name(), value)));
 	}
 
 	public Optional<String> first(String name) {
+		return doFirst(name).flatMap(p -> Optional.ofNullable(p.value()));
+	}
+
+	public Optional<Parameter> get(String name) {
 		return doFirst(name);
 	}
 
-	private Optional<String> doFirst(String name) {
-		return Optional.ofNullable(parameters.get(name))
-			.flatMap(values -> values.stream().findFirst());
-	}
-
-	public Optional<String> get(String name) {
-		return doFirst(name);
+	private Optional<Parameter> doFirst(String name) {
+		return Optional.ofNullable(parameters.get(name));
 	}
 
 	public Collection<Parameter> all() {
-		return parameters.entrySet().stream()
-					.map(e -> new Parameter(e.getKey(), e.getValue()))
-						.collect(Collectors.toList());
+		return parameters.values();
 	}
 
 	public String queryString() {
-		StringJoiner joiner = new StringJoiner("&");
+		return parameters.values().stream().map(Parameter::queryString).collect(Collectors.joining("&"));
+	}
 
-		parameters.forEach((name, values) -> {
-			values.forEach(v -> joiner.add(name + "=" + encode(v)));
+	@Override
+	public String toString() {
+		return parameters.toString();
+	}
+
+	@Override
+	public Iterator<Parameter> iterator() {
+		return parameters.values().iterator();
+	}
+
+	public static Parameters parse(String source) {
+		Parameters parameters = new Parameters();
+
+		String safe = Optional.ofNullable(source).orElse("");
+
+		Arrays.stream(safe.split("&"))
+			.map(p -> p.split("="))
+				.filter(p -> p.length == 2)
+					.forEach(p -> parameters.add(p[0], p[1]));
+
+		return parameters;
+	}
+
+	public static Parameters of(Map<String, ?> source) {
+		Parameters parameters = new Parameters();
+
+		source.forEach((key, value) -> {
+			if (value instanceof Iterable) {
+				((Iterable<?>) value).forEach(e -> parameters.add(key, e.toString()));
+			} else {
+				parameters.add(key, value.toString());
+			}
 		});
 
-		return joiner.toString();
+		return parameters;
 	}
 
-	private String encode(String value) {
-		return Encoding.UTF_8.encode(value);
+	public static Parameters of(Parameter... source) {
+		return new Parameters(source);
 	}
 
-	public class Parameter {
+	public static Parameters of(Collection<Parameter> source) {
+		return new Parameters(source);
+	}
+
+	public static Parameters empty() {
+		return new Parameters();
+	}
+
+	public static class Parameter {
 
 		private final String name;
 		private final Collection<String> values;
 
-		public Parameter(String name, Collection<String> values) {
-			this.name = name;
-			this.values = values;
+		public Parameter(String name, String value) {
+			this(name, Arrays.asList(nonNull(value)));
 		}
 
-		public Parameter(String name, String value) {
+		public Parameter(String name, Collection<String> values) {
 			this.name = name;
-			this.values = Collections.singleton(nonNull(value));
+			this.values = new LinkedHashSet<>(values);
 		}
 
 		public String name() {
@@ -129,35 +212,46 @@ public class Parameters {
 		public String value() {
 			return values.stream().findFirst().orElse(null);
 		}
-	}
 
-	public static Parameters parse(String source) {
-		Parameters parameters = new Parameters();
+		private Parameter add(String value) {
+			Parameter parameter = new Parameter(this.name, this.values);
+			parameter.values.add(value);
+			return parameter;
+		}
 
-		String safe = Optional.ofNullable(source).orElse("");
+		public static Parameter of(String name, String value) {
+			return new Parameter(name, value);
+		}
 
-		Arrays.stream(safe.split("&"))
-				.map(p -> p.split("="))
-					.filter(p -> p.length == 2)
-						.forEach(p -> parameters.put(p[0], p[1]));
+		public static Parameter of(String name, Collection<String> values) {
+			return new Parameter(name, values);
+		}
 
-		return parameters;
-	}
+		@Override
+		public int hashCode() {
+			return Objects.hash(name, values);
+		}
 
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	public static Parameters of(Map<String, ?> source) {
-		Parameters parameters = new Parameters();
+		@Override
+		public boolean equals(Object obj) {
+			if (!(obj instanceof Parameter)) return false;
 
-		BiConsumer<String, Object> applier = (name, value) -> parameters.put(name, value.toString());
+			Parameter that = (Parameter) obj;
+			return this.name.equals(that.name)
+				&& this.values.equals(that.values);
+		}
 
-		source.forEach((key, value) -> {
-			if (value instanceof Iterable) {
-				((Iterable) value).forEach(e -> applier.accept(key, e));
-			} else {
-				applier.accept(key, value);
-			}
-		});
+		public String queryString() {
+			return values.stream()
+					.map(value -> name + "=" + Encoding.UTF_8.encode(value))
+						.collect(Collectors.joining("&"));
+		}
 
-		return parameters;
+		@Override
+		public String toString() {
+			return values.stream()
+					.map(value -> name + "=" + value)
+						.collect(Collectors.joining("&", "Parameter:[", "]"));
+		}
 	}
 }

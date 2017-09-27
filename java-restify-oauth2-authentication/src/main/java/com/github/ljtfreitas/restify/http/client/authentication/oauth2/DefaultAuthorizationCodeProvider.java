@@ -67,10 +67,10 @@ class DefaultAuthorizationCodeProvider implements AuthorizationCodeProvider {
 
 			Parameters parameters = Parameters.parse(redirectUri.getQuery());
 
-			isTrue(properties.state().orElse("").equals(parameters.get("state").orElse("")),
+			isTrue(properties.state().orElse("").equals(parameters.first("state").orElse("")),
 					"Possible CSRF attack? [state] parameter returned by the authorization server is not the same of the authorization request.");
 
-			String code = parameters.get("code")
+			String code = parameters.first("code")
 					.orElseThrow(() -> new OAuth2UserRedirectRequiredException("A redirect to [" + redirectUri + "] is required!"));
 
 			return code;
