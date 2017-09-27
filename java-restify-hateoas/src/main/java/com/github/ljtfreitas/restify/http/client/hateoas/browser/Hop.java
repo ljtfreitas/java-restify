@@ -76,14 +76,14 @@ public class Hop {
 	}
 
 	public Hop usingParameter(String name, String value) {
-		LinkURITemplateParameters parameters = new LinkURITemplateParameters(this.parameters);
-		parameters.put(name, value);
+		LinkURITemplateParameters parameters = new LinkURITemplateParameters(this.parameters)
+				.put(name, value);
 		return new Hop(rel, parameters, headers, method, body);
 	}
 
 	public Hop usingParameter(LinkURITemplateParameter parameter) {
-		LinkURITemplateParameters parameters = new LinkURITemplateParameters(this.parameters);
-		parameters.put(parameter);
+		LinkURITemplateParameters parameters = new LinkURITemplateParameters(this.parameters)
+				.put(parameter);
 		return new Hop(rel, parameters, headers, method, body);
 	}
 

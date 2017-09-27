@@ -115,10 +115,6 @@ public class ParametersTest {
 
 	@Test
 	public void mustCreateNewParametersInstanceFromFactoryMethodUsingArray() {
-		Map<String, Object> parameters = new LinkedHashMap<>();
-		parameters.put("param1", "value1");
-		parameters.put("param2", Arrays.asList("value2", "value3"));
-
 		Parameters output = Parameters.of(Parameter.of("param1", "value1"), Parameter.of("param2", Arrays.asList("value2", "value3")));
 
 		Optional<Parameter> parameter = output.get("param1");

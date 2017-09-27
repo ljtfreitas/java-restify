@@ -25,6 +25,8 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.hateoas.browser;
 
+import static com.github.ljtfreitas.restify.http.util.Preconditions.nonNull;
+
 public class LinkURITemplateParameter {
 
 	private final String name;
@@ -43,7 +45,21 @@ public class LinkURITemplateParameter {
 		return value;
 	}
 
+	@Override
+	public boolean equals(Object obj) {
+		if (!(obj instanceof LinkURITemplateParameter)) return false;
+
+		LinkURITemplateParameter that = (LinkURITemplateParameter) obj;
+		return this.name.equals(that.name)
+			&& this.value.equals(that.value);
+	}
+
+	@Override
+	public String toString() {
+		return name + "=" + value;
+	}
+
 	public static LinkURITemplateParameter using(String name, Object value) {
-		return new LinkURITemplateParameter(name, value.toString());
+		return new LinkURITemplateParameter(nonNull(name), nonNull(value).toString());
 	}
 }
