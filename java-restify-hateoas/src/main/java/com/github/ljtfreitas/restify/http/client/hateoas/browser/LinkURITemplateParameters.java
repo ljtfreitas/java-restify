@@ -27,11 +27,12 @@ package com.github.ljtfreitas.restify.http.client.hateoas.browser;
 
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-public class LinkURITemplateParameters {
+public class LinkURITemplateParameters implements Iterable<LinkURITemplateParameter> {
 
 	private final Map<String, String> parameters;
 
@@ -48,31 +49,47 @@ public class LinkURITemplateParameters {
 	}
 
 	public LinkURITemplateParameters(LinkURITemplateParameter... parameters) {
-		this(Arrays.stream(parameters).collect(Collectors.toMap(LinkURITemplateParameter::name, LinkURITemplateParameter::value)));
+		this(Arrays.stream(parameters)
+				.collect(Collectors.toMap(LinkURITemplateParameter::name, LinkURITemplateParameter::value)));
 	}
 
-	public Optional<String> find(String name) {
+	public Optional<String> get(String name) {
 		return Optional.ofNullable(parameters.get(name));
 	}
 
 	public LinkURITemplateParameters put(String name, String value) {
-		parameters.put(name, value);
-		return this;
+		LinkURITemplateParameters parameters = new LinkURITemplateParameters(this.parameters);
+		parameters.add(name, value);
+		return parameters;
 	}
 
 	public LinkURITemplateParameters put(String name, Object value) {
-		parameters.put(name, value.toString());
-		return this;
+		LinkURITemplateParameters parameters = new LinkURITemplateParameters(this.parameters);
+		parameters.add(name, value.toString());
+		return parameters;
 	}
 
 	public LinkURITemplateParameters put(LinkURITemplateParameter parameter) {
-		parameters.put(parameter.name(), parameter.value());
-		return this;
+		LinkURITemplateParameters parameters = new LinkURITemplateParameters(this.parameters);
+		parameters.add(parameter.name(), parameter.value());
+		return parameters;
+	}
+
+	private void add(String name, String value) {
+		parameters.put(name, value);
+	}
+
+	@Override
+	public Iterator<LinkURITemplateParameter> iterator() {
+		return parameters.entrySet().stream()
+				.map(e -> LinkURITemplateParameter.using(e.getKey(), e.getValue()))
+					.collect(Collectors.toList())
+						.iterator();
 	}
 
 	@Override
 	public String toString() {
-		return String.format("[%s]", parameters);
+		return parameters.toString();
 	}
 
 	public static LinkURITemplateParameters empty() {

@@ -29,6 +29,7 @@ import java.io.OutputStream;
 import java.net.URI;
 import java.nio.charset.Charset;
 
+import com.github.ljtfreitas.restify.http.client.header.Header;
 import com.github.ljtfreitas.restify.http.client.header.Headers;
 
 public interface HttpRequestMessage {
@@ -43,4 +44,5 @@ public interface HttpRequestMessage {
 
 	public Charset charset();
 
+	public HttpRequestMessage replace(Header header);
 }

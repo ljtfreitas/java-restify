@@ -96,5 +96,10 @@ class ErrorHttpResponseMessage extends BaseHttpResponseMessage {
 		public Charset charset() {
 			throw new UnsupportedOperationException();
 		}
+
+		@Override
+		public HttpRequestMessage replace(Header header) {
+			throw new UnsupportedOperationException("Headers are unmodifiable.");
+		}
 	}
 }

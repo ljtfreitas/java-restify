@@ -66,7 +66,7 @@ public class ImplicitAccessTokenProvider implements AccessTokenProvider {
 
 			Parameters parameters = Parameters.parse(URI.create(location.value()).getFragment());
 
-			isTrue(properties.state().orElse("").equals(parameters.get("state").orElse("")),
+			isTrue(properties.state().orElse("").equals(parameters.first("state").orElse("")),
 					"Possible CSRF attack? [state] parameter returned by the authorization server is not the same of the authorization request.");
 
 			return  AccessToken.of(AccessTokenResponse.of(parameters));

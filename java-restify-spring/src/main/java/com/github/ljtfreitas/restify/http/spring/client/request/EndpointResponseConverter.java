@@ -43,8 +43,7 @@ class EndpointResponseConverter implements Converter<ResponseEntity<Object>, End
 	}
 
 	private Headers headersOf(HttpHeaders httpHeaders) {
-		Headers headers = new Headers();
-		httpHeaders.forEach((k, v) -> headers.add(k, v));
-		return headers;
+		return httpHeaders.entrySet().stream()
+				.reduce(new Headers(), (a, b) -> a.add(b.getKey(), b.getValue()), (a, b) -> b);
 	}
 }

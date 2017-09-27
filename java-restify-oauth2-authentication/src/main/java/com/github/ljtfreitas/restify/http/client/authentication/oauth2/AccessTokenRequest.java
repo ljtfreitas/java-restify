@@ -101,20 +101,20 @@ public class AccessTokenRequest {
 
 		private URI accessTokenUri = null;
 		private ClientCredentials credentials = null;
-		private Parameters parameters = new Parameters();
+		private Parameters parameters = null;
 		private Headers headers = new Headers();
 
 		private Builder(String grantType) {
-			parameters.put("grant_type", grantType);
+			parameters = Parameters.of(new Parameter("grant_type", grantType));
 		}
 
 		public Builder parameter(String name, String value) {
-			parameters.put(name, value);
+			parameters = parameters.put(name, value);
 			return this;
 		}
 
 		public Builder parameter(Parameter parameter) {
-			parameters.put(parameter.name(), parameter.value());
+			parameters = parameters.put(parameter.name(), parameter.value());
 			return this;
 		}
 

@@ -89,8 +89,8 @@ public class JaxRsHttpClientEndpointRequestExecutorTest {
 
 		MyModel myModel = new MyModel("Tiago de Freitas Lima", 31);
 
-		Headers headers = new Headers();
-		headers.add(new Header("Content-Type", "application/json"));
+		Headers headers = new Headers()
+				.add(new Header("Content-Type", "application/json"));
 
 		EndpointRequest endpointRequest = new EndpointRequest(URI.create("http://localhost:7080/json"), "POST", headers,
 				myModel, String.class);
@@ -144,8 +144,8 @@ public class JaxRsHttpClientEndpointRequestExecutorTest {
 
 		MyModel myModel = new MyModel("Tiago de Freitas Lima", 31);
 
-		Headers headers = new Headers();
-		headers.add(new Header("Content-Type", "application/xml"));
+		Headers headers = new Headers()
+				.add(new Header("Content-Type", "application/xml"));
 
 		EndpointRequest endpointRequest = new EndpointRequest(URI.create("http://localhost:7080/xml"), "POST", headers,
 				myModel, String.class);

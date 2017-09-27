@@ -55,7 +55,7 @@ public class ContentTypeTest {
 	public void shouldCreateNewContentTypeWhenParameterIsAdded() {
 		ContentType contentType = ContentType.of("application/json");
 
-		ContentType newContentType = contentType.newParameter("charset", "UTF-8");
+		ContentType newContentType = contentType.append("charset", "UTF-8");
 
 		assertTrue(contentType.parameters().empty());
 

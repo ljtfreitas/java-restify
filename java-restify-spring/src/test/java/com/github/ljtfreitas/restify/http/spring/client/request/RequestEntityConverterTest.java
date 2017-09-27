@@ -24,9 +24,9 @@ public class RequestEntityConverterTest {
 	public void shouldConvertRestifyEndpointRequestToRequestEntity() {
 		URI endpoint = URI.create("http://my.api.com/path");
 
-		Headers headers = new Headers();
-		headers.add(Header.contentType("application/json"));
-		headers.add(Header.accept("application/json"));
+		Headers headers = new Headers()
+				.add(Header.contentType("application/json"))
+				.add(Header.accept("application/json"));
 
 		MyRequestModel body = new MyRequestModel();
 

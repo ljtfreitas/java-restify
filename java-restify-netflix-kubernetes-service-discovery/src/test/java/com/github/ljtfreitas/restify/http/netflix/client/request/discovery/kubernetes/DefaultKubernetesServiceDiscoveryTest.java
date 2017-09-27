@@ -122,7 +122,7 @@ public class DefaultKubernetesServiceDiscoveryTest {
 		HttpRequest httpRequest = request()
 			.withMethod("POST")
 			.withPath("/json")
-			.withHeader("Content-Type", "application/json; charset=UTF-8")
+			.withHeader("Content-Type", "application/json")
 			.withBody(json("{\"name\":\"Tiago de Freitas Lima\",\"age\":31}"));
 
 		mockServerClient

@@ -35,8 +35,10 @@ import java.nio.charset.Charset;
 import java.util.Collection;
 
 import com.github.ljtfreitas.restify.http.RestifyHttpException;
+import com.github.ljtfreitas.restify.http.client.header.Header;
 import com.github.ljtfreitas.restify.http.client.header.Headers;
 import com.github.ljtfreitas.restify.http.client.request.HttpClientRequest;
+import com.github.ljtfreitas.restify.http.client.request.HttpRequestMessage;
 import com.github.ljtfreitas.restify.http.client.response.HttpResponseMessage;
 import com.github.ljtfreitas.restify.http.client.response.StatusCode;
 import com.github.ljtfreitas.restify.http.util.Tryable;
@@ -69,11 +71,9 @@ class JdkHttpClientRequest implements HttpClientRequest {
 	private JdkHttpClientResponse responseOf(HttpURLConnection connection) throws IOException {
 		StatusCode statusCode = StatusCode.of(connection.getResponseCode(), connection.getResponseMessage());
 
-		Headers headers = new Headers();
-
-		connection.getHeaderFields().entrySet().stream()
+		Headers headers = connection.getHeaderFields().entrySet().stream()
 			.filter(e -> e.getKey() != null && !e.getKey().equals(""))
-				.forEach(e -> headers.add(e.getKey(), e.getValue()));
+				.reduce(new Headers(), (a, b) -> a.add(b.getKey(), b.getValue()), (a, b) -> b);
 
 		InputStream stream = Tryable.or(() -> connection.getErrorStream() == null ? connection.getInputStream() : connection.getErrorStream(),
 				new ByteArrayInputStream(new byte[0]));
@@ -106,6 +106,11 @@ class JdkHttpClientRequest implements HttpClientRequest {
 		return headers;
 	}
 
+	@Override
+	public HttpRequestMessage replace(Header header) {
+		return new JdkHttpClientRequest(connection, charset, headers.replace(header));
+	}
+
 	private class JdkHttpClientHeadersDecorator extends Headers {
 
 		private final Headers headers;
@@ -123,21 +128,21 @@ class JdkHttpClientRequest implements HttpClientRequest {
 		}
 
 		@Override
-		public void add(String name, String value) {
-			super.add(name, value);
+		public Headers add(String name, String value) {
 			connection.setRequestProperty(name, value);
+			return new JdkHttpClientHeadersDecorator(connection, super.add(name, value));
 		}
 
 		@Override
-		public void add(String name, Collection<String> values) {
-			super.add(name, values);
+		public Headers add(String name, Collection<String> values) {
 			values.forEach(value -> connection.setRequestProperty(name, value));
+			return new JdkHttpClientHeadersDecorator(connection, super.add(name, values));
 		}
 
 		@Override
-		public void replace(String name, String value) {
-			super.replace(name, value);
+		public Headers replace(String name, String value) {
 			connection.setRequestProperty(name, value);
+			return new JdkHttpClientHeadersDecorator(connection, super.replace(name, value));
 		}
 	}
 }

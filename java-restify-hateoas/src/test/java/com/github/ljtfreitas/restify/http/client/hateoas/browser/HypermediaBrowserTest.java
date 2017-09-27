@@ -486,7 +486,7 @@ public class HypermediaBrowserTest {
 		HttpRequest avatarRequest = request()
 			.withMethod("POST")
 			.withHeader("X-Whatever", "whatever")
-			.withHeader("Content-Type", "application/json; charset=UTF-8")
+			.withHeader("Content-Type", "application/json")
 			.withBody(json("{\"image\":\"http://path.to.image/image.jpg\"}"))
 			.withPath("/me/avatar");
 

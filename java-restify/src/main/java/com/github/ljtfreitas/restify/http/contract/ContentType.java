@@ -57,7 +57,7 @@ public class ContentType {
 		return parameters.get(name);
 	}
 
-	public ContentType newParameter(String name, String value) {
+	public ContentType append(String name, String value) {
 		ContentTypeParameters newParameters = parameters.put(name, value);
 		return new ContentType(type, subtype, newParameters);
 	}

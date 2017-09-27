@@ -32,8 +32,10 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
 import com.github.ljtfreitas.restify.http.RestifyHttpException;
+import com.github.ljtfreitas.restify.http.client.header.Header;
 import com.github.ljtfreitas.restify.http.client.header.Headers;
 import com.github.ljtfreitas.restify.http.client.request.HttpClientRequest;
+import com.github.ljtfreitas.restify.http.client.request.HttpRequestMessage;
 import com.github.ljtfreitas.restify.http.client.response.HttpResponseMessage;
 
 import io.netty.bootstrap.Bootstrap;
@@ -63,12 +65,16 @@ class NettyHttpClientRequest implements HttpClientRequest {
 	private final ByteBufOutputStream body;
 
 	public NettyHttpClientRequest(Bootstrap bootstrap, URI uri, Headers headers, String method, Charset charset) {
+		this(bootstrap, uri, headers, method, charset, new ByteBufOutputStream(Unpooled.buffer()));
+	}
+
+	private NettyHttpClientRequest(Bootstrap bootstrap, URI uri, Headers headers, String method, Charset charset, ByteBufOutputStream body) {
 		this.bootstrap = bootstrap;
 		this.uri = uri;
 		this.headers = headers;
 		this.method = method;
 		this.charset = charset;
-		this.body = new ByteBufOutputStream(Unpooled.buffer());
+		this.body = body;
 	}
 
 	@Override
@@ -94,6 +100,11 @@ class NettyHttpClientRequest implements HttpClientRequest {
 	@Override
 	public Charset charset() {
 		return charset;
+	}
+
+	@Override
+	public HttpRequestMessage replace(Header header) {
+		return new NettyHttpClientRequest(bootstrap, uri, headers.replace(header), method, charset, body);
 	}
 
 	@Override

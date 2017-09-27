@@ -24,6 +24,10 @@ public class SimpleHttpResponseMessage implements HttpResponseMessage {
 		this(StatusCode.ok(), new Headers(), input, source);
 	}
 
+	public SimpleHttpResponseMessage(InputStream input, HttpRequestMessage source, Headers headers) {
+		this(StatusCode.ok(), headers, input, source);
+	}
+
 	public SimpleHttpResponseMessage(StatusCode statusCode) {
 		this(statusCode, null);
 	}

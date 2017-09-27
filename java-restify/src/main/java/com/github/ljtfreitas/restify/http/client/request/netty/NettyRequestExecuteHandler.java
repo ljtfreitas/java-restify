@@ -71,13 +71,9 @@ class NettyRequestExecuteHandler extends SimpleChannelInboundHandler<FullHttpRes
 	}
 
 	private Headers headersOf(FullHttpResponse nettyResponse) {
-		Headers headers = new Headers();
-
-		nettyResponse.headers().entries().stream()
+		return nettyResponse.headers().entries().stream()
 			.map(header -> new Header(header.getKey(), header.getValue()))
-				.forEach(headers::add);
-
-		return headers;
+				.reduce(new Headers(), (a, b) -> a.add(b), (a, b) -> b);
 	}
 
 	@Override

@@ -91,7 +91,7 @@ public class LinkURITemplate {
 	}
 
 	private String expand(TemplateVariable variable, LinkURITemplateParameters parameters) {
-		return parameters.find(variable.name).map(parameter -> variable.resolve(parameter)).orElse("");
+		return parameters.get(variable.name).map(parameter -> variable.resolve(parameter)).orElse("");
 	}
 
 	private class TemplateVariable {

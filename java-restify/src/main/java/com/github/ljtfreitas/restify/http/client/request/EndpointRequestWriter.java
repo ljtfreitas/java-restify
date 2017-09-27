@@ -70,14 +70,7 @@ public class EndpointRequestWriter {
 				.orElseThrow(() -> new RestifyHttpMessageWriteException("Your request has a body, but the header [Content-Type] "
 						+ "it was not provided."));
 
-		ContentType contentType = ContentType.of(contentTypeHeader.value());
-
-		if (!contentType.parameter("charset").isPresent()) {
-			contentType = contentType.newParameter("charset", httpRequestMessage.charset().name());
-			httpRequestMessage.headers().replace(CONTENT_TYPE, contentType.toString());
-		}
-
-		return contentType;
+		return ContentType.of(contentTypeHeader.value());
 	}
 
 	private HttpMessageWriter<Object> writerOf(ContentType contentType, Object body) {

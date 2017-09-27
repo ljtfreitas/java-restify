@@ -56,14 +56,9 @@ public class EndpointRequestFactory {
 		try {
 			URI endpoint = new URI(endpointMethod.expand(args));
 
-			Object body = endpointMethod.parameters()
-					.ofBody()
-						.map(p -> args[p.position()]).orElse(null);
+			Object body = bodyOf(endpointMethod, args);
 
-			Headers headers = new Headers();
-			endpointMethod.headers().all().stream()
-				.forEach(h -> headers.add(new Header(h.name(), new EndpointHeaderParameterResolver(h.value(), endpointMethod.parameters())
-						.resolve(args))));
+			Headers headers = headersOf(endpointMethod, args);
 
 			EndpointVersion version = endpointMethod.version().map(EndpointVersion::of).orElse(null);
 
@@ -74,5 +69,18 @@ public class EndpointRequestFactory {
 		} catch (URISyntaxException e) {
 			throw new RestifyHttpException(e);
 		}
+	}
+
+	private Object bodyOf(EndpointMethod endpointMethod, Object[] args) {
+		return endpointMethod.parameters()
+				.ofBody()
+					.map(p -> args[p.position()]).orElse(null);
+	}
+
+	private Headers headersOf(EndpointMethod endpointMethod, Object[] args) {
+		return endpointMethod.headers().all().stream()
+				.map(h -> new Header(h.name(),
+						new EndpointHeaderParameterResolver(h.value(), endpointMethod.parameters()).resolve(args)))
+				.reduce(new Headers(), (a, b) -> a.add(b), (a, b) -> b);
 	}
 }
