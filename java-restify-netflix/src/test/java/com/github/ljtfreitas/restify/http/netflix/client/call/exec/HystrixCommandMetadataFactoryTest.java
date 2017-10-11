@@ -25,7 +25,7 @@ public class HystrixCommandMetadataFactoryTest {
 		EmptyHystrixCommand command = new EmptyHystrixCommand(hystrixMetadata);
 
 		assertEquals("MyApiWithCircuitBreaker", command.getCommandGroup().name());
-		assertEquals("simple", command.getCommandKey().name());
+		assertEquals("MyApiWithCircuitBreaker.simple", command.getCommandKey().name());
 		assertEquals("MyApiWithCircuitBreaker", command.getThreadPoolKey().name());
 	}
 
@@ -51,7 +51,7 @@ public class HystrixCommandMetadataFactoryTest {
 		EmptyHystrixCommand command = new EmptyHystrixCommand(hystrixMetadata);
 
 		assertEquals("MyApiWithCircuitBreaker", command.getCommandGroup().name());
-		assertEquals("customizedProperties", command.getCommandKey().name());
+		assertEquals("MyApiWithCircuitBreaker.customizedProperties", command.getCommandKey().name());
 		assertEquals("MyApiWithCircuitBreaker", command.getThreadPoolKey().name());
 
 		assertEquals(ExecutionIsolationStrategy.SEMAPHORE, command.getProperties().executionIsolationStrategy().get());

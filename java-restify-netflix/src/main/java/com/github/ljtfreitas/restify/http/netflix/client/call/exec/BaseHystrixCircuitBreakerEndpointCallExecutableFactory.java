@@ -33,7 +33,6 @@ import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethod;
 import com.github.ljtfreitas.restify.http.contract.metadata.reflection.JavaType;
 import com.github.ljtfreitas.restify.http.netflix.client.request.circuitbreaker.OnCircuitBreaker;
 import com.netflix.hystrix.HystrixCommand;
-import com.netflix.hystrix.HystrixCommand.Setter;
 
 public abstract class BaseHystrixCircuitBreakerEndpointCallExecutableFactory<T, O> implements EndpointCallExecutableDecoratorFactory<T, T, O> {
 
@@ -44,11 +43,11 @@ public abstract class BaseHystrixCircuitBreakerEndpointCallExecutableFactory<T, 
 		this(null, null);
 	}
 
-	protected BaseHystrixCircuitBreakerEndpointCallExecutableFactory(Setter hystrixMetadata) {
+	protected BaseHystrixCircuitBreakerEndpointCallExecutableFactory(HystrixCommand.Setter hystrixMetadata) {
 		this(hystrixMetadata, null);
 	}
 
-	protected BaseHystrixCircuitBreakerEndpointCallExecutableFactory(Setter hystrixMetadata, Object fallback) {
+	protected BaseHystrixCircuitBreakerEndpointCallExecutableFactory(HystrixCommand.Setter hystrixMetadata, Object fallback) {
 		this.hystrixMetadata = hystrixMetadata;
 		this.fallback = fallback;
 	}

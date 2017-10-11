@@ -69,7 +69,7 @@ class HystrixCommandMetadataFactory {
 	private HystrixCommandKey commandKey() {
 		String commandKey = onCircuitBreaker.map(a -> a.commandKey())
 				.filter(g -> g != null && !"".equals(g))
-					.orElseGet(() -> endpointMethod.javaMethod().getName());
+					.orElseGet(() -> groupKey() + "." + endpointMethod.javaMethod().getName());
 
 		return HystrixCommandKey.Factory.asKey(commandKey);
 	}
