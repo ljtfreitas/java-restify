@@ -25,7 +25,7 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.netflix.client.call.exec;
 
-import com.netflix.hystrix.HystrixCommand.Setter;
+import com.netflix.hystrix.HystrixCommand;
 
 public class HystrixCircuitBreakerEndpointCallExecutableFactory<T, O> extends BaseHystrixCircuitBreakerEndpointCallExecutableFactory<T, O> {
 
@@ -33,7 +33,7 @@ public class HystrixCircuitBreakerEndpointCallExecutableFactory<T, O> extends Ba
 		super();
 	}
 
-	public HystrixCircuitBreakerEndpointCallExecutableFactory(Setter hystrixMetadata) {
+	public HystrixCircuitBreakerEndpointCallExecutableFactory(HystrixCommand.Setter hystrixMetadata) {
 		super(hystrixMetadata);
 	}
 }
