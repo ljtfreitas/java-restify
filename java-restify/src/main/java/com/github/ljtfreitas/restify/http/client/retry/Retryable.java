@@ -25,7 +25,7 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.retry;
 
-public interface Retryable<T> {
+interface Retryable<T> {
 
-	public T execute() throws Exception;
+	T execute() throws Exception;
 }

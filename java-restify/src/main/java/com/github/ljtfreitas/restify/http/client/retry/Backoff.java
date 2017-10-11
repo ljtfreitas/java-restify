@@ -25,15 +25,9 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.retry;
 
-class AlwaysRetryPolicy implements RetryPolicy {
+public @interface Backoff {
 
-	@Override
-	public boolean retryable() {
-		return true;
-	}
+	int delay() default 1000;
 
-	@Override
-	public RetryPolicy refresh() {
-		return this;
-	}
+	int multiplier() default 0;
 }

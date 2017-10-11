@@ -25,15 +25,41 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.retry;
 
-class AlwaysRetryPolicy implements RetryPolicy {
+import com.github.ljtfreitas.restify.http.RestifyHttpException;
+import com.github.ljtfreitas.restify.http.client.response.HttpStatusCode;
+import com.github.ljtfreitas.restify.http.client.response.RestifyEndpointResponseException;
+import com.github.ljtfreitas.restify.http.client.response.StatusCode;
 
-	@Override
-	public boolean retryable() {
-		return true;
+class RetryConditionMatcher {
+
+	private final RetryConfiguration configuration;
+
+	public RetryConditionMatcher(RetryConfiguration configuration) {
+		this.configuration = configuration;
 	}
 
-	@Override
-	public RetryPolicy refresh() {
-		return this;
+	public boolean match(Throwable throwable) {
+		if (throwable instanceof RestifyEndpointResponseException) {
+			RestifyEndpointResponseException response = (RestifyEndpointResponseException) throwable;
+			return doMatch(response.status()) || exausth(throwable);
+
+		} else if (throwable instanceof RestifyHttpException) {
+			return exausth(throwable.getCause());
+
+		} else {
+			return exausth(throwable);
+		}
+	}
+
+	private boolean exausth(Throwable throwable) {
+		return throwable == null ? false : doMatch(throwable) || exausth(throwable.getCause());
+	}
+
+	private boolean doMatch(Throwable throwable) {
+		return configuration.retryable(throwable);
+	}
+
+	private boolean doMatch(StatusCode status) {
+		return configuration.retryable(HttpStatusCode.of(status.value()).orElse(null));
 	}
 }

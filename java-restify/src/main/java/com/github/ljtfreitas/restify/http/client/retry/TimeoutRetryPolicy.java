@@ -25,15 +25,27 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.retry;
 
-class AlwaysRetryPolicy implements RetryPolicy {
+import java.time.Duration;
+import java.time.Instant;
+
+class TimeoutRetryPolicy implements RetryPolicy {
+
+	private final Duration timeout;
+	private final Instant limit;
+
+	public TimeoutRetryPolicy(Duration timeout) {
+		this.timeout = timeout;
+		this.limit = Instant.now().plus(timeout);
+	}
 
 	@Override
 	public boolean retryable() {
-		return true;
+		return limit.isAfter(Instant.now());
 	}
 
 	@Override
 	public RetryPolicy refresh() {
-		return this;
+		return new TimeoutRetryPolicy(timeout);
 	}
+
 }

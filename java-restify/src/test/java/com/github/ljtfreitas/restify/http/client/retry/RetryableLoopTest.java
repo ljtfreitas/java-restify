@@ -5,8 +5,6 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.Arrays;
-
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -15,8 +13,13 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import com.github.ljtfreitas.restify.http.client.header.Headers;
+import com.github.ljtfreitas.restify.http.client.response.HttpStatusCode;
+import com.github.ljtfreitas.restify.http.client.response.RestifyEndpointResponseGatewayTimeoutException;
+import com.github.ljtfreitas.restify.http.client.response.RestifyEndpointResponseInternalServerErrorException;
+
 @RunWith(MockitoJUnitRunner.class)
-public class RetryLoopTest {
+public class RetryableLoopTest {
 
 	@Mock
 	private MyObject myObject;
@@ -24,11 +27,16 @@ public class RetryLoopTest {
 	@Rule
 	public ExpectedException expectedException = ExpectedException.none();
 
-	private RetryLoop retryLoop;
+	private RetryableLoop retryLoop;
 
 	@Before
 	public void setup() {
-		retryLoop = new RetryLoop(3, Arrays.asList(MyException.class));
+		RetryConfiguration configuration = new RetryConfiguration.Builder()
+				.when(MyException.class)
+				.when(HttpStatusCode.INTERNAL_SERVER_ERROR, HttpStatusCode.GATEWAY_TIMEOUT)
+					.build();
+
+		retryLoop = new RetryableLoop(new RetryConditionMatcher(configuration));
 	}
 
 	@Test
@@ -38,7 +46,21 @@ public class RetryLoopTest {
 			.thenThrow(new MyException("2st error..."))
 			.thenReturn("success");
 
-		String output = retryLoop.repeat(myObject::bla);
+		String output = retryLoop.repeat(3, myObject::bla);
+
+		assertEquals("success", output);
+
+		verify(myObject, times(3)).bla();
+	}
+
+	@Test
+	public void shouldRepeatRetryableBlockWhenTheResponseExceptionIsARetryableStatusCode() {
+		when(myObject.bla())
+			.thenThrow(new RestifyEndpointResponseInternalServerErrorException("Buuuuuu", Headers.empty(), "server error..."))
+			.thenThrow(new RestifyEndpointResponseGatewayTimeoutException("Buuuuuu", Headers.empty(), "gateway timeout..."))
+			.thenReturn("success");
+
+		String output = retryLoop.repeat(3, myObject::bla);
 
 		assertEquals("success", output);
 
@@ -55,20 +77,18 @@ public class RetryLoopTest {
 			.thenThrow(new MyException("2st error..."))
 			.thenThrow(new MyException("3st error..."));
 
-		retryLoop.repeat(myObject::bla);
+		retryLoop.repeat(3, myObject::bla);
 	}
 
 	@Test
 	public void shouldThrowOriginalExceptionWhenTheNumberOfAttemptsIsOne() {
-		retryLoop = new RetryLoop(1, Arrays.asList(MyException.class));
-
 		expectedException.expect(MyException.class);
 		expectedException.expectMessage("1st and unique error...");
 
 		when(myObject.bla())
 			.thenThrow(new MyException("1st and unique error..."));
 
-		retryLoop.repeat(myObject::bla);
+		retryLoop.repeat(1, myObject::bla);
 	}
 
 	private interface MyObject {

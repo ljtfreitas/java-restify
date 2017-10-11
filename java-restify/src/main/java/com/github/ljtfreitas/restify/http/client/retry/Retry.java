@@ -25,15 +25,33 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.retry;
 
-class AlwaysRetryPolicy implements RetryPolicy {
+import static java.lang.annotation.ElementType.ANNOTATION_TYPE;
+import static java.lang.annotation.ElementType.METHOD;
+import static java.lang.annotation.ElementType.TYPE;
+import static java.lang.annotation.RetentionPolicy.RUNTIME;
 
-	@Override
-	public boolean retryable() {
-		return true;
-	}
+import java.lang.annotation.Retention;
+import java.lang.annotation.Target;
 
-	@Override
-	public RetryPolicy refresh() {
-		return this;
-	}
+import com.github.ljtfreitas.restify.http.client.response.HttpStatusCode;
+
+@Retention(RUNTIME)
+@Target({ TYPE, METHOD, ANNOTATION_TYPE })
+public @interface Retry {
+
+	int attempts() default 1;
+
+	int timeout() default -1;
+
+	HttpStatusCode[] status() default {};
+
+	Class<? extends Throwable>[] exceptions() default {};
+
+	boolean on4xx() default false;
+
+	boolean on5xx() default false;
+
+	boolean ioFailure() default false;
+
+	Backoff backoff() default @Backoff;
 }

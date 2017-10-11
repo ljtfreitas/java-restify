@@ -26,6 +26,8 @@
 package com.github.ljtfreitas.restify.http.client.response;
 
 import java.util.Arrays;
+import java.util.Collection;
+import java.util.EnumSet;
 import java.util.Optional;
 
 public enum HttpStatusCode {
@@ -98,4 +100,26 @@ public enum HttpStatusCode {
 	public static Optional<HttpStatusCode> of(int code) {
 		return Arrays.stream(HttpStatusCode.values()).filter(s -> s.value == code).findFirst();
 	}
+
+	// Informational 1xx
+	public static final Collection<HttpStatusCode> INFORMATIONAL_STATUSES = EnumSet.of(CONTINUE, SWITCHING_PROTOCOLS);
+
+	// Successful 2xx
+	public static final Collection<HttpStatusCode> SUCCESS_STATUSES =
+			EnumSet.of(OK, CREATED, ACCEPTED, NON_AUTHORITATIVE_INFORMATION, NO_CONTENT, RESET_CONTENT, PARTIAL_CONTENT);
+
+	// Redirection 3xx
+	public static final Collection<HttpStatusCode> REDIRECTION_STATUSES =
+			EnumSet.of(MULTIPLES_CHOICES, MOVED_PERMANENTLY, FOUND, SEE_OTHER, NOT_MODIFIED, USE_PROXY, TEMPORARY_REDIRECT);
+
+	// Client Error 4xx
+	public static final Collection<HttpStatusCode> CLIENT_ERROR_STATUSES =
+			EnumSet.of(BAD_REQUEST, UNAUTHORIZED, FORBIDDEN, NOT_FOUND, METHOD_NOT_ALLOWED, NOT_ACCEPTABLE, PROXY_AUTHENTATION_REQUIRED,
+						REQUEST_TIMEOUT, CONFLICT, GONE, LENGHT_REQUIRED, PRECONDITION_FAILED, REQUEST_ENTITY_TOO_LARGE,
+						REQUEST_URI_TOO_LONG, UNSUPPORTED_MEDIA_TYPE, REQUESTED_RANGE_NOT_SATISFIABLE, EXPECTIATION_FAILED);
+
+	// Server Error 5xx
+	public static final Collection<HttpStatusCode> SERVER_ERROR_STATUSES =
+			EnumSet.of(INTERNAL_SERVER_ERROR, NOT_IMPLEMENTED, BAD_GATEWAY, SERVICE_UNAVAILABLE,
+					GATEWAY_TIMEOUT, HTTP_VERSION_NOT_SUPPORTED);
 }
