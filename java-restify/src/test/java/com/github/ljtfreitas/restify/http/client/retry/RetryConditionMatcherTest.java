@@ -1,6 +1,6 @@
 package com.github.ljtfreitas.restify.http.client.retry;
 
-import static com.github.ljtfreitas.restify.http.client.retry.RetryCondition.HttpStatusRetryCondition.any4xx;
+import static com.github.ljtfreitas.restify.http.client.retry.RetryCondition.StatusCodeRetryCondition.any4xx;
 import static com.github.ljtfreitas.restify.http.client.retry.RetryCondition.ThrowableRetryCondition.ioFailure;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
@@ -30,7 +30,7 @@ public class RetryConditionMatcherTest {
 				.when(ioFailure())
 				.build();
 
-		matcher = new RetryConditionMatcher(configuration);
+		matcher = new RetryConditionMatcher(configuration.conditions());
 	}
 
 	@Test

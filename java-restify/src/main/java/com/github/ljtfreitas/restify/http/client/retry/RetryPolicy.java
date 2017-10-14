@@ -25,9 +25,9 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.retry;
 
-interface RetryPolicy {
+public interface RetryPolicy {
 
-	boolean retryable();
+	public boolean retryable();
 
-	RetryPolicy refresh();
+	public RetryPolicy refresh();
 }

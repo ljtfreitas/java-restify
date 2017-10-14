@@ -27,25 +27,34 @@ package com.github.ljtfreitas.restify.http.client.retry;
 
 import static com.github.ljtfreitas.restify.http.util.Preconditions.nonNull;
 
+import com.github.ljtfreitas.restify.http.util.Tryable;
+
 class RetryableLoop {
 
-	private static final RetryPolicy ALWAYS_RETRY_POLICY = new AlwaysRetryPolicy();
+	private static final RetryPolicy ALWAYS_RETRY_POLICY = AlwaysRetryPolicy.instance();
+	private static final BackOffPolicy DEFAULT_BACKOFF_POLICY = BackOffPolicy.instance();
 
-	private final RetryConditionMatcher retryExceptionPolicy;
+	private final RetryConditionMatcher retryConditionMatcher;
+	private final BackOffPolicy backOffPolicy;
 	private final RetryPolicy retryPolicy;
 
-	RetryableLoop(RetryConditionMatcher retryExceptionPolicy) {
-		this(retryExceptionPolicy, ALWAYS_RETRY_POLICY);
+	RetryableLoop(RetryConditionMatcher retryConditionMatcher) {
+		this(retryConditionMatcher, DEFAULT_BACKOFF_POLICY, ALWAYS_RETRY_POLICY);
 	}
 
-	RetryableLoop(RetryConditionMatcher retryExceptionPolicy, RetryPolicy retryPolicy) {
-		this.retryExceptionPolicy = nonNull(retryExceptionPolicy, "Retry exception policy cannot be null");
+	RetryableLoop(RetryConditionMatcher retryConditionMatcher, BackOffPolicy backOffPolicy) {
+		this(retryConditionMatcher, backOffPolicy, ALWAYS_RETRY_POLICY);
+	}
+
+	RetryableLoop(RetryConditionMatcher retryConditionMatcher, BackOffPolicy backOffPolicy, RetryPolicy retryPolicy) {
+		this.retryConditionMatcher = nonNull(retryConditionMatcher, "Retry condition matcher cannot be null");
+		this.backOffPolicy = nonNull(backOffPolicy, "BackOff policy cannot be null");
 		this.retryPolicy = nonNull(retryPolicy, "Retry policy cannot be null");
 	}
 
 	public <T> T repeat(int attempts, Retryable<T> retryable) throws RetryExhaustedException {
 		try {
-			return new RetryLoop(attempts, retryPolicy.refresh()).repeat(retryable);
+			return new RetryLoop(attempts, retryPolicy.refresh(), backOffPolicy).repeat(retryable);
 
 		} catch (RuntimeException e) {
 			throw e;
@@ -59,29 +68,36 @@ class RetryableLoop {
 
 		private final int attempts;
 		private final RetryPolicy retryPolicy;
+		private final BackOffPolicy backOffPolicy;
 
-		private RetryLoop(int attempts, RetryPolicy retryPolicy) {
+		private RetryLoop(int attempts, RetryPolicy retryPolicy, BackOffPolicy backOffPolicy) {
 			this.attempts = attempts;
 			this.retryPolicy = retryPolicy;
+			this.backOffPolicy = backOffPolicy;
 		}
 
 		private <T> T repeat(Retryable<T> retryable) throws Exception {
 			return doRepeat(0, retryable, null);
 		}
 
-		private <T> T doRepeat(int counter, Retryable<T> retryable, Exception last) throws Exception {
+		private <T> T doRepeat(int attempt, Retryable<T> retryable, Exception last) throws Exception {
 			Exception current = last;
 
-			while (retryable(++counter) && retryPolicy.retryable()) {
+			while (retryable(++attempt) && retryPolicy.retryable()) {
 				try {
 					return retryable.execute();
 				} catch (Exception e) {
 					current = e;
-					if (retryable(current)) return doRepeat(counter, retryable, current); else throw current;
+					if (retryable(current)) return retry(attempt, retryable, current); else throw current;
 				}
 			}
 
 			if (current == null) throw new RetryExhaustedException(); throw current;
+		}
+
+		private <T> T retry(int attempt, Retryable<T> retryable, Exception last) throws Exception {
+			Tryable.run(() -> Thread.sleep(backOffPolicy.backOff(attempt).toMillis()));
+			return doRepeat(attempt, retryable, last);
 		}
 
 		private boolean retryable(int counter) {
@@ -89,7 +105,7 @@ class RetryableLoop {
 		}
 
 		private boolean retryable(Exception exception) {
-			return retryExceptionPolicy.match(exception);
+			return retryConditionMatcher.match(exception);
 		}
 	}
 }

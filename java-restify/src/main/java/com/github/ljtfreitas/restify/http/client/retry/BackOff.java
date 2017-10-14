@@ -25,9 +25,9 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.retry;
 
-public @interface Backoff {
+public @interface BackOff {
 
-	int delay() default 1000;
+	long delay() default BackOffPolicy.DEFAULT_BACKOFF_DELAY;
 
-	int multiplier() default 0;
+	double multiplier() default BackOffPolicy.DEFAULT_BACKOFF_MULTIPLIER;
 }

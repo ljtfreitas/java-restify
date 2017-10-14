@@ -25,48 +25,82 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.retry;
 
-import static com.github.ljtfreitas.restify.http.client.retry.RetryCondition.HttpStatusRetryCondition.any;
+import static com.github.ljtfreitas.restify.http.client.retry.RetryCondition.StatusCodeRetryCondition.any;
 import static com.github.ljtfreitas.restify.http.client.retry.RetryCondition.ThrowableRetryCondition.any;
 
+import java.time.Duration;
 import java.util.ArrayList;
 import java.util.Collection;
-import java.util.Optional;
+import java.util.Collections;
 
 import com.github.ljtfreitas.restify.http.client.response.HttpStatusCode;
-import com.github.ljtfreitas.restify.http.client.retry.RetryCondition.HttpStatusRetryCondition;
+import com.github.ljtfreitas.restify.http.client.retry.RetryCondition.StatusCodeRetryCondition;
 import com.github.ljtfreitas.restify.http.client.retry.RetryCondition.ThrowableRetryCondition;
 
 public class RetryConfiguration {
 
-	public static final Integer MINIMUM_ATTEMPTS = 1;
-	public static final Integer UNDEFINED_TIMEOUT = null;
+	public static final int MINIMUM_ATTEMPTS = 1;
+	public static final Duration UNDEFINED_TIMEOUT = Duration.ZERO;
 
-	private Integer attempts = MINIMUM_ATTEMPTS;
-	private Integer timeout = UNDEFINED_TIMEOUT;
+	private int attempts = MINIMUM_ATTEMPTS;
+	private Duration timeout = UNDEFINED_TIMEOUT;
 
-	private Collection<HttpStatusRetryCondition> httpStatusConditions = new ArrayList<>();
-	private Collection<ThrowableRetryCondition> throwableConditions = new ArrayList<>();
+	private BackOff backOff = new BackOff();
 
-	public Optional<Integer> attempts() {
-		return Optional.ofNullable(attempts);
+	private Collection<RetryCondition> conditions = new ArrayList<>();
+
+	private RetryConfiguration() {
 	}
 
-	public Optional<Integer> timeout() {
-		return Optional.ofNullable(timeout);
+	private RetryConfiguration(RetryConfiguration source) {
+		this.attempts = source.attempts;
+		this.timeout = source.timeout;
+		this.backOff = new BackOff(source.backOff);
+		this.conditions = new ArrayList<>(source.conditions);
 	}
 
-	public boolean retryable(HttpStatusCode status) {
-		return httpStatusConditions.stream().anyMatch(condition -> condition.test(status));
+	public int attempts() {
+		return attempts;
 	}
 
-	public boolean retryable(Throwable throwable) {
-		return throwableConditions.stream().anyMatch(condition -> condition.test(throwable));
+	public Duration timeout() {
+		return timeout;
+	}
+
+	public BackOff backOff() {
+		return backOff;
+	}
+
+	public Collection<RetryCondition> conditions() {
+		return Collections.unmodifiableCollection(conditions);
 	}
 
 	public static RetryConfiguration minimum() {
 		RetryConfiguration configuration = new RetryConfiguration();
 		configuration.attempts = MINIMUM_ATTEMPTS;
 		return configuration;
+	}
+
+	public class BackOff {
+
+		private Duration delay = Duration.ofMillis(BackOffPolicy.DEFAULT_BACKOFF_DELAY);
+		private double multiplier = BackOffPolicy.DEFAULT_BACKOFF_MULTIPLIER;
+
+		private BackOff() {
+		}
+
+		private BackOff(BackOff source) {
+			this.delay = source.delay;
+			this.multiplier = source.multiplier;
+		}
+
+		public Duration delay() {
+			return delay;
+		}
+
+		public double multiplier() {
+			return multiplier;
+		}
 	}
 
 	public static class Builder {
@@ -78,34 +112,65 @@ public class RetryConfiguration {
 			return this;
 		}
 
-		public Builder timeout(int timeout) {
-			configuration.timeout = (timeout <= 0) ? UNDEFINED_TIMEOUT : timeout;
+		public Builder timeout(long timeout) {
+			configuration.timeout = (timeout <= 0) ? UNDEFINED_TIMEOUT : Duration.ofMillis(timeout);
 			return this;
+		}
+
+		public Builder timeout(Duration timeout) {
+			configuration.timeout = UNDEFINED_TIMEOUT.compareTo(timeout) <= 0 ? UNDEFINED_TIMEOUT : timeout;
+			return this;
+		}
+
+		public RetryBackOffBuilder backOff() {
+			return new RetryBackOffBuilder();
 		}
 
 		public Builder when(HttpStatusCode... statuses) {
-			configuration.httpStatusConditions.add(any(statuses));
+			configuration.conditions.add(any(statuses));
 			return this;
 		}
 
-		public Builder when(HttpStatusRetryCondition condition) {
-			configuration.httpStatusConditions.add(condition);
+		public Builder when(StatusCodeRetryCondition condition) {
+			configuration.conditions.add(condition);
 			return this;
 		}
 
 		@SafeVarargs
 		public final Builder when(Class<? extends Throwable>... throwableTypes) {
-			configuration.throwableConditions.add(any(throwableTypes));
+			configuration.conditions.add(any(throwableTypes));
 			return this;
 		}
 
 		public final Builder when(ThrowableRetryCondition condition) {
-			configuration.throwableConditions.add(condition);
+			configuration.conditions.add(condition);
 			return this;
 		}
 
 		public RetryConfiguration build() {
-			return configuration;
+			return new RetryConfiguration(configuration);
+		}
+
+		public class RetryBackOffBuilder {
+
+			public RetryBackOffBuilder delay(long delay) {
+				configuration.backOff.delay = Duration.ofMillis(delay);
+				return this;
+			}
+
+			public RetryBackOffBuilder delay(Duration delay) {
+				configuration.backOff.delay = delay;
+				return this;
+			}
+
+			public RetryBackOffBuilder multiplier(double multiplier) {
+				configuration.backOff.multiplier = multiplier;
+				return this;
+			}
+
+			public Builder and() {
+				return RetryConfiguration.Builder.this;
+			}
 		}
 	}
 }

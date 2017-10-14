@@ -25,9 +25,6 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.retry;
 
-import static com.github.ljtfreitas.restify.http.client.retry.RetryConfiguration.MINIMUM_ATTEMPTS;
-
-import java.time.Duration;
 import java.util.Optional;
 
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
@@ -52,9 +49,10 @@ public class RetryableEndpointRequestExecutor implements EndpointRequestExecutor
 	public <T> EndpointResponse<T> execute(EndpointRequest endpointRequest) {
 		RetryConfiguration configuration = configurationOf(endpointRequest);
 
-		RetryableLoop retryLoop = new RetryableLoop(new RetryConditionMatcher(configuration), retryPolicyOf(configuration));
+		RetryableLoop retryLoop = new RetryableLoop(new RetryConditionMatcher(configuration.conditions()), backOffPolicy(configuration),
+				retryPolicyOf(configuration));
 
-		return retryLoop.repeat(configuration.attempts().orElse(MINIMUM_ATTEMPTS), () -> delegate.execute(endpointRequest));
+		return retryLoop.repeat(configuration.attempts(), () -> delegate.execute(endpointRequest));
 	}
 
 	private RetryConfiguration configurationOf(EndpointRequest endpointRequest) {
@@ -67,13 +65,21 @@ public class RetryableEndpointRequestExecutor implements EndpointRequestExecutor
 		return new RetryConfiguration.Builder()
 				.attempts(retry.attempts())
 				.timeout(retry.timeout())
+				.backOff()
+					.delay(retry.backoff().delay())
+					.multiplier(retry.backoff().multiplier())
+					.and()
 				.build();
 	}
 
 	private RetryPolicy retryPolicyOf(RetryConfiguration configuration) {
-		if (configuration.timeout().isPresent()) {
-			return new TimeoutRetryPolicy(Duration.ofMillis(configuration.timeout().get()));
+		if (!configuration.timeout().isZero()) {
+			return new TimeoutRetryPolicy(configuration.timeout());
 
-		} else return null;
+		} else return NeverRetryPolicy.instance();
+	}
+
+	private BackOffPolicy backOffPolicy(RetryConfiguration configuration) {
+		return new BackOffPolicy(configuration.backOff().delay().toMillis(), configuration.backOff().multiplier());
 	}
 }

@@ -53,5 +53,5 @@ public @interface Retry {
 
 	boolean ioFailure() default false;
 
-	Backoff backoff() default @Backoff;
+	BackOff backoff() default @BackOff;
 }

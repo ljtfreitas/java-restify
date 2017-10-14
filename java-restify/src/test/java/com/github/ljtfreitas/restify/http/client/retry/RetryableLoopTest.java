@@ -1,9 +1,12 @@
 package com.github.ljtfreitas.restify.http.client.retry;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.anyInt;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import java.time.Duration;
 
 import org.junit.Before;
 import org.junit.Rule;
@@ -24,10 +27,13 @@ public class RetryableLoopTest {
 	@Mock
 	private MyObject myObject;
 
+	@Mock
+	private BackOffPolicy backOffPolicy;
+
 	@Rule
 	public ExpectedException expectedException = ExpectedException.none();
 
-	private RetryableLoop retryLoop;
+	private RetryableLoop retryableLoop;
 
 	@Before
 	public void setup() {
@@ -36,7 +42,9 @@ public class RetryableLoopTest {
 				.when(HttpStatusCode.INTERNAL_SERVER_ERROR, HttpStatusCode.GATEWAY_TIMEOUT)
 					.build();
 
-		retryLoop = new RetryableLoop(new RetryConditionMatcher(configuration));
+		when(backOffPolicy.backOff(anyInt())).thenReturn(Duration.ZERO);
+
+		retryableLoop = new RetryableLoop(new RetryConditionMatcher(configuration.conditions()), backOffPolicy);
 	}
 
 	@Test
@@ -46,7 +54,7 @@ public class RetryableLoopTest {
 			.thenThrow(new MyException("2st error..."))
 			.thenReturn("success");
 
-		String output = retryLoop.repeat(3, myObject::bla);
+		String output = retryableLoop.repeat(3, myObject::bla);
 
 		assertEquals("success", output);
 
@@ -60,7 +68,7 @@ public class RetryableLoopTest {
 			.thenThrow(new RestifyEndpointResponseGatewayTimeoutException("Buuuuuu", Headers.empty(), "gateway timeout..."))
 			.thenReturn("success");
 
-		String output = retryLoop.repeat(3, myObject::bla);
+		String output = retryableLoop.repeat(3, myObject::bla);
 
 		assertEquals("success", output);
 
@@ -77,7 +85,7 @@ public class RetryableLoopTest {
 			.thenThrow(new MyException("2st error..."))
 			.thenThrow(new MyException("3st error..."));
 
-		retryLoop.repeat(3, myObject::bla);
+		retryableLoop.repeat(3, myObject::bla);
 	}
 
 	@Test
@@ -88,7 +96,7 @@ public class RetryableLoopTest {
 		when(myObject.bla())
 			.thenThrow(new MyException("1st and unique error..."));
 
-		retryLoop.repeat(1, myObject::bla);
+		retryableLoop.repeat(1, myObject::bla);
 	}
 
 	private interface MyObject {

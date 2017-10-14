@@ -25,17 +25,25 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.retry;
 
+import java.util.Collection;
+import java.util.stream.Collectors;
+
 import com.github.ljtfreitas.restify.http.RestifyHttpException;
-import com.github.ljtfreitas.restify.http.client.response.HttpStatusCode;
 import com.github.ljtfreitas.restify.http.client.response.RestifyEndpointResponseException;
 import com.github.ljtfreitas.restify.http.client.response.StatusCode;
+import com.github.ljtfreitas.restify.http.client.retry.RetryCondition.StatusCodeRetryCondition;
+import com.github.ljtfreitas.restify.http.client.retry.RetryCondition.ThrowableRetryCondition;
 
 class RetryConditionMatcher {
 
-	private final RetryConfiguration configuration;
+	private final Collection<StatusCodeRetryCondition> statusCodeConditions;
+	private final Collection<ThrowableRetryCondition> throwableConditions;
 
-	public RetryConditionMatcher(RetryConfiguration configuration) {
-		this.configuration = configuration;
+	public RetryConditionMatcher(Collection<RetryCondition> conditions) {
+		this.statusCodeConditions = conditions.stream().filter(c -> c instanceof StatusCodeRetryCondition)
+				.map(c -> (StatusCodeRetryCondition) c).collect(Collectors.toList());
+		this.throwableConditions = conditions.stream().filter(c -> c instanceof ThrowableRetryCondition)
+				.map(c -> (ThrowableRetryCondition) c).collect(Collectors.toList());
 	}
 
 	public boolean match(Throwable throwable) {
@@ -56,10 +64,10 @@ class RetryConditionMatcher {
 	}
 
 	private boolean doMatch(Throwable throwable) {
-		return configuration.retryable(throwable);
+		return throwableConditions.stream().anyMatch(c -> c.test(throwable));
 	}
 
 	private boolean doMatch(StatusCode status) {
-		return configuration.retryable(HttpStatusCode.of(status.value()).orElse(null));
+		return statusCodeConditions.stream().anyMatch(c -> c.test(status));
 	}
 }

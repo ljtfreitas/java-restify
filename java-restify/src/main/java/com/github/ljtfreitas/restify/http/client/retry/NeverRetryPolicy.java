@@ -25,16 +25,15 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.retry;
 
-class AlwaysRetryPolicy implements RetryPolicy {
+class NeverRetryPolicy implements RetryPolicy {
 
-	private static final AlwaysRetryPolicy SINGLE_INSTANCE = new AlwaysRetryPolicy();
+	private static final NeverRetryPolicy SINGLE_INSTANCE = new NeverRetryPolicy();
 
-	private AlwaysRetryPolicy() {
-	}
+	private NeverRetryPolicy() {}
 
 	@Override
 	public boolean retryable() {
-		return true;
+		return false;
 	}
 
 	@Override
@@ -42,7 +41,7 @@ class AlwaysRetryPolicy implements RetryPolicy {
 		return this;
 	}
 
-	public static AlwaysRetryPolicy instance() {
+	public static NeverRetryPolicy instance() {
 		return SINGLE_INSTANCE;
 	}
 }

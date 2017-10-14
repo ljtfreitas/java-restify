@@ -28,30 +28,32 @@ package com.github.ljtfreitas.restify.http.client.retry;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.EnumSet;
 import java.util.function.Predicate;
+import java.util.stream.Collectors;
 
 import com.github.ljtfreitas.restify.http.client.response.HttpStatusCode;
+import com.github.ljtfreitas.restify.http.client.response.StatusCode;
 
 public interface RetryCondition {
 
-	public interface HttpStatusRetryCondition extends RetryCondition, Predicate<HttpStatusCode> {
+	public interface StatusCodeRetryCondition extends RetryCondition, Predicate<StatusCode> {
 
-		public static HttpStatusRetryCondition any4xx() {
-			return any(HttpStatusCode.CLIENT_ERROR_STATUSES);
+		public static StatusCodeRetryCondition any4xx() {
+			return (s) -> s.isClientError();
 		}
 
-		public static HttpStatusRetryCondition any5xx() {
-			return any(HttpStatusCode.SERVER_ERROR_STATUSES);
+		public static StatusCodeRetryCondition any5xx() {
+			return (s) -> s.isServerError();
 		}
 
-		public static HttpStatusRetryCondition any(HttpStatusCode... statuses) {
-			return any(Arrays.asList(statuses));
+		public static StatusCodeRetryCondition any(HttpStatusCode... statuses) {
+			Collection<StatusCode> collection = Arrays.asList(statuses).stream().map(StatusCode::of).collect(Collectors.toSet());
+			return (s) -> collection.contains(s);
 		}
 
-		public static HttpStatusRetryCondition any(Collection<HttpStatusCode> statuses) {
-			EnumSet<HttpStatusCode> all = EnumSet.copyOf(statuses);
-			return (s) -> all.contains(s);
+		public static StatusCodeRetryCondition any(StatusCode... statuses) {
+			Collection<StatusCode> collection = Arrays.asList(statuses).stream().collect(Collectors.toSet());
+			return (s) -> collection.contains(s);
 		}
 	}
 
