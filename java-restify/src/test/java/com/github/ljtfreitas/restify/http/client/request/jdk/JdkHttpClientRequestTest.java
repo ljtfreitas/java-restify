@@ -2,6 +2,7 @@ package com.github.ljtfreitas.restify.http.client.request.jdk;
 
 import static org.hamcrest.Matchers.isA;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
 import static org.mockserver.model.JsonBody.json;
@@ -32,10 +33,13 @@ import org.mockserver.client.server.MockServerClient;
 import org.mockserver.junit.MockServerRule;
 import org.mockserver.model.HttpRequest;
 import org.mockserver.socket.SSLFactory;
+import org.mockserver.verify.VerificationTimes;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.github.ljtfreitas.restify.http.RestifyHttpException;
 import com.github.ljtfreitas.restify.http.RestifyProxyBuilder;
+import com.github.ljtfreitas.restify.http.client.response.HttpStatusCode;
+import com.github.ljtfreitas.restify.http.client.response.StatusCode;
 import com.github.ljtfreitas.restify.http.contract.BodyParameter;
 import com.github.ljtfreitas.restify.http.contract.Get;
 import com.github.ljtfreitas.restify.http.contract.Header;
@@ -298,6 +302,33 @@ public class JdkHttpClientRequestTest {
 		assertEquals(31, myModel.age);
 	}
 
+	@Test
+	public void shouldRetryRequest() {
+		HttpRequest errorRequest = request()
+			.withMethod("GET")
+			.withPath("/retry");
+
+		mockServerClient
+			.when(errorRequest)
+			.respond(response()
+					.withStatusCode(500));
+
+		myApi = new RestifyProxyBuilder()
+				.retry()
+					.configure()
+						.attempts(3)
+						.when(HttpStatusCode.INTERNAL_SERVER_ERROR)
+						.and()
+				.target(MyApi.class, "http://localhost:7080")
+				.build();
+
+		StatusCode status = myApi.retry();
+
+		assertTrue(status.isServerError());
+
+		mockServerClient.verify(errorRequest, VerificationTimes.exactly(3));
+	}
+
 	interface MyApi {
 
 		@Path("/json") @Get
@@ -322,6 +353,9 @@ public class JdkHttpClientRequestTest {
 
 		@Path("/json") @Get
 		public byte[] jsonAsBytes();
+
+		@Path("/retry") @Get
+		public StatusCode retry();
 	}
 
 	@XmlRootElement(name = "model")

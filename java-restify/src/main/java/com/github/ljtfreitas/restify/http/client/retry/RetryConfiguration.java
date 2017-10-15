@@ -75,7 +75,7 @@ public class RetryConfiguration {
 		return Collections.unmodifiableCollection(conditions);
 	}
 
-	public static RetryConfiguration minimum() {
+	public static RetryConfiguration simple() {
 		RetryConfiguration configuration = new RetryConfiguration();
 		configuration.attempts = MINIMUM_ATTEMPTS;
 		return configuration;
@@ -105,7 +105,8 @@ public class RetryConfiguration {
 
 	public static class Builder {
 
-		private RetryConfiguration configuration = new RetryConfiguration();
+		private final RetryConfiguration configuration = new RetryConfiguration();
+		private final RetryBackOffBuilder backOff = new RetryBackOffBuilder();
 
 		public Builder attempts(int attempts) {
 			configuration.attempts = (attempts <= 0) ? MINIMUM_ATTEMPTS : attempts;
@@ -123,7 +124,7 @@ public class RetryConfiguration {
 		}
 
 		public RetryBackOffBuilder backOff() {
-			return new RetryBackOffBuilder();
+			return backOff;
 		}
 
 		public Builder when(HttpStatusCode... statuses) {

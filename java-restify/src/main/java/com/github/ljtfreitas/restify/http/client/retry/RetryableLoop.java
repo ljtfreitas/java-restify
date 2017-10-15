@@ -92,7 +92,7 @@ class RetryableLoop {
 				}
 			}
 
-			if (current == null) throw new RetryExhaustedException(); throw current;
+			if (current == null) throw new RetryExhaustedException("Exhausted with " + attempt + " attempts."); throw current;
 		}
 
 		private <T> T retry(int attempt, Retryable<T> retryable, Exception last) throws Exception {

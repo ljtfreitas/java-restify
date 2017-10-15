@@ -58,7 +58,7 @@ public class RetryableEndpointRequestExecutor implements EndpointRequestExecutor
 	private RetryConfiguration configurationOf(EndpointRequest endpointRequest) {
 		return endpointRequest.metadata().get(Retry.class)
 				.map(retry -> configurationOf(retry))
-					.orElseGet(() -> Optional.ofNullable(configuration).orElseGet(RetryConfiguration::minimum));
+					.orElseGet(() -> Optional.ofNullable(configuration).orElseGet(RetryConfiguration::simple));
 	}
 
 	private RetryConfiguration configurationOf(Retry retry) {
@@ -76,7 +76,7 @@ public class RetryableEndpointRequestExecutor implements EndpointRequestExecutor
 		if (!configuration.timeout().isZero()) {
 			return new TimeoutRetryPolicy(configuration.timeout());
 
-		} else return NeverRetryPolicy.instance();
+		} else return AlwaysRetryPolicy.instance();
 	}
 
 	private BackOffPolicy backOffPolicy(RetryConfiguration configuration) {

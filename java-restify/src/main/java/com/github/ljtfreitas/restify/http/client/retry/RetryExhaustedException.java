@@ -36,4 +36,8 @@ public class RetryExhaustedException extends RuntimeException {
 		super(cause);
 	}
 
+	public RetryExhaustedException(String message) {
+		super(message);
+	}
+
 }
