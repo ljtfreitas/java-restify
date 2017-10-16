@@ -101,6 +101,8 @@ import com.github.ljtfreitas.restify.http.client.response.DefaultEndpointRespons
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponseErrorFallback;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponseReader;
 import com.github.ljtfreitas.restify.http.client.response.HttpStatusCode;
+import com.github.ljtfreitas.restify.http.client.retry.RetryCondition.EndpointResponseRetryCondition;
+import com.github.ljtfreitas.restify.http.client.retry.RetryCondition.HeadersRetryCondition;
 import com.github.ljtfreitas.restify.http.client.retry.RetryCondition.StatusCodeRetryCondition;
 import com.github.ljtfreitas.restify.http.client.retry.RetryCondition.ThrowableRetryCondition;
 import com.github.ljtfreitas.restify.http.client.retry.RetryConfiguration;
@@ -742,6 +744,16 @@ public class RestifyProxyBuilder {
 			}
 
 			public final RetryConfigurationBuilder when(ThrowableRetryCondition condition) {
+				delegate.when(condition);
+				return this;
+			}
+
+			public final RetryConfigurationBuilder when(HeadersRetryCondition condition) {
+				delegate.when(condition);
+				return this;
+			}
+
+			public final RetryConfigurationBuilder when(EndpointResponseRetryCondition condition) {
 				delegate.when(condition);
 				return this;
 			}

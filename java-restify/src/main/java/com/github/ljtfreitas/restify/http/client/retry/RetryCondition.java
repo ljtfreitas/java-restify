@@ -31,6 +31,9 @@ import java.util.Collection;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
+import com.github.ljtfreitas.restify.http.client.header.Header;
+import com.github.ljtfreitas.restify.http.client.header.Headers;
+import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
 import com.github.ljtfreitas.restify.http.client.response.HttpStatusCode;
 import com.github.ljtfreitas.restify.http.client.response.StatusCode;
 
@@ -55,6 +58,20 @@ public interface RetryCondition {
 			Collection<StatusCode> collection = Arrays.asList(statuses).stream().collect(Collectors.toSet());
 			return (s) -> collection.contains(s);
 		}
+	}
+
+	public interface HeadersRetryCondition extends RetryCondition, Predicate<Headers> {
+
+		public static HeadersRetryCondition contains(Header header) {
+			return (headers) -> headers.get(header.name()).filter(h -> h.equals(header)).isPresent();
+		}
+
+		public static HeadersRetryCondition contains(String header) {
+			return (headers) -> headers.get(header).isPresent();
+		}
+	}
+
+	public interface EndpointResponseRetryCondition extends RetryCondition, Predicate<EndpointResponse<String>> {
 	}
 
 	public interface ThrowableRetryCondition extends RetryCondition, Predicate<Throwable> {

@@ -40,6 +40,7 @@ import com.github.ljtfreitas.restify.http.RestifyHttpException;
 import com.github.ljtfreitas.restify.http.RestifyProxyBuilder;
 import com.github.ljtfreitas.restify.http.client.response.HttpStatusCode;
 import com.github.ljtfreitas.restify.http.client.response.StatusCode;
+import com.github.ljtfreitas.restify.http.client.retry.Retry;
 import com.github.ljtfreitas.restify.http.contract.BodyParameter;
 import com.github.ljtfreitas.restify.http.contract.Get;
 import com.github.ljtfreitas.restify.http.contract.Header;
@@ -329,6 +330,31 @@ public class JdkHttpClientRequestTest {
 		mockServerClient.verify(errorRequest, VerificationTimes.exactly(3));
 	}
 
+	@Test(timeout = 10000)
+	public void shouldRetryRequestUsingRequestMetadata() {
+		HttpRequest errorRequest = request()
+			.withMethod("GET")
+			.withPath("/retry");
+
+		mockServerClient
+			.when(errorRequest)
+			.respond(response()
+					.withStatusCode(500));
+
+		myApi = new RestifyProxyBuilder()
+				.retry()
+					.enabled()
+					.and()
+				.target(MyApi.class, "http://localhost:7080")
+				.build();
+
+		StatusCode status = myApi.retryWithAnnotation();
+
+		assertTrue(status.isServerError());
+
+		mockServerClient.verify(errorRequest, VerificationTimes.exactly(3));
+	}
+
 	interface MyApi {
 
 		@Path("/json") @Get
@@ -356,6 +382,10 @@ public class JdkHttpClientRequestTest {
 
 		@Path("/retry") @Get
 		public StatusCode retry();
+
+		@Path("/retry") @Get
+		@Retry(attempts = 3, status = HttpStatusCode.INTERNAL_SERVER_ERROR)
+		public StatusCode retryWithAnnotation();
 	}
 
 	@XmlRootElement(name = "model")

@@ -34,6 +34,8 @@ import java.util.Collection;
 import java.util.Collections;
 
 import com.github.ljtfreitas.restify.http.client.response.HttpStatusCode;
+import com.github.ljtfreitas.restify.http.client.retry.RetryCondition.EndpointResponseRetryCondition;
+import com.github.ljtfreitas.restify.http.client.retry.RetryCondition.HeadersRetryCondition;
 import com.github.ljtfreitas.restify.http.client.retry.RetryCondition.StatusCodeRetryCondition;
 import com.github.ljtfreitas.restify.http.client.retry.RetryCondition.ThrowableRetryCondition;
 
@@ -144,6 +146,16 @@ public class RetryConfiguration {
 		}
 
 		public final Builder when(ThrowableRetryCondition condition) {
+			configuration.conditions.add(condition);
+			return this;
+		}
+
+		public final Builder when(HeadersRetryCondition condition) {
+			configuration.conditions.add(condition);
+			return this;
+		}
+
+		public final Builder when(EndpointResponseRetryCondition condition) {
 			configuration.conditions.add(condition);
 			return this;
 		}

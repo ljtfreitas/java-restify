@@ -34,9 +34,11 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
 import com.github.ljtfreitas.restify.http.client.response.HttpStatusCode;
+import com.github.ljtfreitas.restify.http.contract.metadata.Metadata;
 
 @Retention(RUNTIME)
 @Target({ TYPE, METHOD, ANNOTATION_TYPE })
+@Metadata
 public @interface Retry {
 
 	int attempts() default 1;
@@ -47,11 +49,11 @@ public @interface Retry {
 
 	Class<? extends Throwable>[] exceptions() default {};
 
-	boolean on4xx() default false;
+	boolean on4xxStatus() default false;
 
-	boolean on5xx() default false;
+	boolean on5xxStatus() default false;
 
-	boolean ioFailure() default false;
+	boolean onIOFailure() default false;
 
 	BackOff backoff() default @BackOff;
 }

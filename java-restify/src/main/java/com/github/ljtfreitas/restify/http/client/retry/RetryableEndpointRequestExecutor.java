@@ -25,11 +25,14 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.retry;
 
+import static com.github.ljtfreitas.restify.http.client.retry.RetryCondition.ThrowableRetryCondition.ioFailure;
+
 import java.util.Optional;
 
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequestExecutor;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
+import com.github.ljtfreitas.restify.http.client.response.StatusCode;
 
 public class RetryableEndpointRequestExecutor implements EndpointRequestExecutor {
 
@@ -65,6 +68,11 @@ public class RetryableEndpointRequestExecutor implements EndpointRequestExecutor
 		return new RetryConfiguration.Builder()
 				.attempts(retry.attempts())
 				.timeout(retry.timeout())
+				.when(retry.status())
+				.when(retry.exceptions())
+				.when((StatusCode s) -> retry.on4xxStatus() && s.isClientError())
+				.when((StatusCode s) -> retry.on5xxStatus() && s.isServerError())
+				.when((Throwable t) -> retry.onIOFailure() && ioFailure().test(t))
 				.backOff()
 					.delay(retry.backoff().delay())
 					.multiplier(retry.backoff().multiplier())

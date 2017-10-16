@@ -28,9 +28,12 @@ package com.github.ljtfreitas.restify.http.client.retry;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
-import com.github.ljtfreitas.restify.http.RestifyHttpException;
+import com.github.ljtfreitas.restify.http.client.header.Headers;
+import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
 import com.github.ljtfreitas.restify.http.client.response.RestifyEndpointResponseException;
 import com.github.ljtfreitas.restify.http.client.response.StatusCode;
+import com.github.ljtfreitas.restify.http.client.retry.RetryCondition.EndpointResponseRetryCondition;
+import com.github.ljtfreitas.restify.http.client.retry.RetryCondition.HeadersRetryCondition;
 import com.github.ljtfreitas.restify.http.client.retry.RetryCondition.StatusCodeRetryCondition;
 import com.github.ljtfreitas.restify.http.client.retry.RetryCondition.ThrowableRetryCondition;
 
@@ -38,29 +41,27 @@ class RetryConditionMatcher {
 
 	private final Collection<StatusCodeRetryCondition> statusCodeConditions;
 	private final Collection<ThrowableRetryCondition> throwableConditions;
+	private final Collection<HeadersRetryCondition> headersConditions;
+	private final Collection<EndpointResponseRetryCondition> endpointResponseConditions;
 
 	public RetryConditionMatcher(Collection<RetryCondition> conditions) {
 		this.statusCodeConditions = conditions.stream().filter(c -> c instanceof StatusCodeRetryCondition)
 				.map(c -> (StatusCodeRetryCondition) c).collect(Collectors.toList());
 		this.throwableConditions = conditions.stream().filter(c -> c instanceof ThrowableRetryCondition)
 				.map(c -> (ThrowableRetryCondition) c).collect(Collectors.toList());
+		this.headersConditions = conditions.stream().filter(c -> c instanceof HeadersRetryCondition)
+				.map(c -> (HeadersRetryCondition) c).collect(Collectors.toList());
+		this.endpointResponseConditions = conditions.stream().filter(c -> c instanceof EndpointResponseRetryCondition)
+				.map(c -> (EndpointResponseRetryCondition) c).collect(Collectors.toList());
 	}
 
 	public boolean match(Throwable throwable) {
 		if (throwable instanceof RestifyEndpointResponseException) {
-			RestifyEndpointResponseException response = (RestifyEndpointResponseException) throwable;
-			return doMatch(response.status()) || exausth(throwable);
-
-		} else if (throwable instanceof RestifyHttpException) {
-			return exausth(throwable.getCause());
-
+			RestifyEndpointResponseException exception = (RestifyEndpointResponseException) throwable;
+			return doMatch(exception.status()) || doMatch(exception.headers()) || doMatch(exception.response());
 		} else {
-			return exausth(throwable);
+			return doMatch(throwable);
 		}
-	}
-
-	private boolean exausth(Throwable throwable) {
-		return throwable == null ? false : doMatch(throwable) || exausth(throwable.getCause());
 	}
 
 	private boolean doMatch(Throwable throwable) {
@@ -69,5 +70,13 @@ class RetryConditionMatcher {
 
 	private boolean doMatch(StatusCode status) {
 		return statusCodeConditions.stream().anyMatch(c -> c.test(status));
+	}
+
+	private boolean doMatch(Headers headers) {
+		return headersConditions.stream().anyMatch(c -> c.test(headers));
+	}
+
+	private boolean doMatch(EndpointResponse<String> response) {
+		return endpointResponseConditions.stream().anyMatch(c -> c.test(response));
 	}
 }

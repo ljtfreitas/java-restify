@@ -89,6 +89,14 @@ public class StatusCode {
 		return code;
 	}
 
+	public boolean is(int code) {
+		return Integer.compare(this.code, code) == 0;
+	}
+
+	public boolean is(HttpStatusCode httpStatusCode) {
+		return Integer.compare(this.code, httpStatusCode.value()) == 0;
+	}
+
 	public boolean isInformational() {
 		return (code / 100) == 1;
 	}
