@@ -38,6 +38,7 @@ import com.github.ljtfreitas.restify.http.RestifyHttpException;
 import com.github.ljtfreitas.restify.http.client.charset.Encoding;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
 import com.github.ljtfreitas.restify.http.client.request.HttpClientRequestFactory;
+import com.github.ljtfreitas.restify.http.client.request.Timeout;
 
 public class JdkHttpClientRequestFactory implements HttpClientRequestFactory {
 
@@ -83,16 +84,15 @@ public class JdkHttpClientRequestFactory implements HttpClientRequestFactory {
 		return (HttpURLConnection) connection;
 	}
 
-	private void configure(EndpointRequest request, HttpURLConnection connection) throws IOException {
+	private void configure(EndpointRequest source, HttpURLConnection connection) throws IOException {
 		connection.setConnectTimeout(httpClientRequestConfiguration.connectionTimeout());
-		connection.setReadTimeout(httpClientRequestConfiguration.readTimeout());
 		connection.setReadTimeout(httpClientRequestConfiguration.readTimeout());
 		connection.setInstanceFollowRedirects(httpClientRequestConfiguration.followRedirects());
 		connection.setUseCaches(httpClientRequestConfiguration.useCaches());
 
 		connection.setDoOutput(true);
 		connection.setAllowUserInteraction(false);
-		connection.setRequestMethod(request.method());
+		connection.setRequestMethod(source.method());
 
 		if (connection instanceof HttpsURLConnection) {
 			HttpsURLConnection https = (HttpsURLConnection) connection;
@@ -103,5 +103,10 @@ public class JdkHttpClientRequestFactory implements HttpClientRequestFactory {
 			httpClientRequestConfiguration.ssl().hostnameVerifier()
 				.ifPresent(hostnameVerifier -> https.setHostnameVerifier(hostnameVerifier));
 		}
+
+		source.metadata().get(Timeout.class).ifPresent(timeout -> {
+			connection.setConnectTimeout((int) (timeout.connection() <= 0 ? 0 : timeout.connection()));
+			connection.setReadTimeout((int) (timeout.read() <= 0 ? 0 : timeout.read()));
+		});
 	}
 }
