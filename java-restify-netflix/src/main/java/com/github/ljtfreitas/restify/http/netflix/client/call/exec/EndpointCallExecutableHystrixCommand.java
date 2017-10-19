@@ -25,59 +25,37 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.netflix.client.call.exec;
 
-import java.util.Optional;
-
 import com.github.ljtfreitas.restify.http.client.call.EndpointCall;
 import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutable;
-import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethod;
-import com.github.ljtfreitas.restify.http.contract.metadata.reflection.JavaType;
 import com.netflix.hystrix.HystrixCommand;
 
-class HystrixCircuitBreakerEndpointCallExecutable<T, R> implements EndpointCallExecutable<T, R> {
+class EndpointCallExecutableHystrixCommand<T, R> extends HystrixCommand<T> {
 
-	private final HystrixCommand.Setter hystrixMetadata;
-	private final EndpointMethod endpointMethod;
 	private final EndpointCallExecutable<T, R> delegate;
-	private final Object fallback;
+	private final EndpointCall<R> call;
+	private final Object[] args;
+	private final HystrixCommandFallback fallback;
 
-	public HystrixCircuitBreakerEndpointCallExecutable(HystrixCommand.Setter hystrixMetadata, EndpointMethod endpointMethod,
-			EndpointCallExecutable<T, R> delegate) {
-
-		this(hystrixMetadata, endpointMethod, delegate, null);
-	}
-
-	public HystrixCircuitBreakerEndpointCallExecutable(HystrixCommand.Setter hystrixMetadata, EndpointMethod endpointMethod,
-			EndpointCallExecutable<T, R> delegate, Object fallback) {
-
-		this.hystrixMetadata = hystrixMetadata;
-		this.endpointMethod = endpointMethod;
+	EndpointCallExecutableHystrixCommand(HystrixCommand.Setter hystrixMetadata, EndpointCallExecutable<T, R> delegate,
+			EndpointCall<R> call, Object[] args, HystrixCommandFallback fallback) {
+		super(hystrixMetadata);
 		this.delegate = delegate;
+		this.call = call;
+		this.args = args;
 		this.fallback = fallback;
 	}
 
 	@Override
-	public JavaType returnType() {
-		return delegate.returnType();
+	protected T run() throws Exception {
+		return delegate.execute(call, args);
 	}
 
 	@Override
-	public T execute(EndpointCall<R> call, Object[] args) {
-		HystrixCommandFallback hystrixCommandFallback = Optional.ofNullable(fallback)
-				.map(f -> new HystrixCommandFallback(endpointMethod, args, fallback))
-					.orElse(null);
-
-		EndpointCallExecutableHystrixCommand<T, R> command = new EndpointCallExecutableHystrixCommand<T, R>(hystrixMetadata(), delegate,
-				call, args, hystrixCommandFallback);
-
-		return command.execute();
+	protected T getFallback() {
+		return fallback == null ? super.getFallback() : doFallback();
 	}
 
-	private HystrixCommand.Setter hystrixMetadata() {
-		return Optional.ofNullable(hystrixMetadata)
-				.orElseGet(() -> buildHystrixMetadata());
-	}
-
-	private HystrixCommand.Setter buildHystrixMetadata() {
-		return new HystrixCommandMetadataFactory(endpointMethod).create();
+	private T doFallback() {
+		return fallback.run();
 	}
 }

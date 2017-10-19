@@ -65,6 +65,23 @@ public class HystrixCommandEndpointCallExecutableFactoryTest {
 		verify(delegate).execute(notNull(EndpointCall.class), any());
 	}
 
+	@SuppressWarnings("unchecked")
+	@Test
+	public void shouldGetObservableFromHystrixCommand() throws Exception {
+		EndpointCallExecutable<HystrixCommand<String>, String> executable = factory
+				.create(new SimpleEndpointMethod(SomeType.class.getMethod("command")), delegate);
+
+		String result = "result";
+
+		HystrixCommand<String> hystrixCommand = executable.execute(() -> result, null);
+
+		String output = hystrixCommand.toObservable().toBlocking().single();
+
+		assertEquals(result, output);
+
+		verify(delegate).execute(notNull(EndpointCall.class), any());
+	}
+
 	@Test
 	public void shouldReturnObjectTypeWhenHystrixCommandIsNotParameterized() throws Exception {
 		assertEquals(JavaType.of(Object.class), factory.returnType(new SimpleEndpointMethod(SomeType.class.getMethod("dumbCommand"))));

@@ -31,24 +31,23 @@ import com.github.ljtfreitas.restify.http.client.call.EndpointCall;
 import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutable;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethod;
 import com.github.ljtfreitas.restify.http.contract.metadata.reflection.JavaType;
-import com.github.ljtfreitas.restify.http.util.Tryable;
 import com.netflix.hystrix.HystrixCommand;
 
-class HystrixCommandEndpointCallExecutable<T, O> implements EndpointCallExecutable<HystrixCommand<T>, O> {
+class HystrixCommandEndpointCallExecutable<T, R> implements EndpointCallExecutable<HystrixCommand<T>, R> {
 
 	private final HystrixCommand.Setter hystrixMetadata;
 	private final EndpointMethod endpointMethod;
-	private final EndpointCallExecutable<T, O> delegate;
+	private final EndpointCallExecutable<T, R> delegate;
 	private final Object fallback;
 
 	public HystrixCommandEndpointCallExecutable(HystrixCommand.Setter hystrixMetadata, EndpointMethod endpointMethod,
-			EndpointCallExecutable<T, O> delegate) {
+			EndpointCallExecutable<T, R> delegate) {
 
 		this(hystrixMetadata, endpointMethod, delegate, null);
 	}
 
 	public HystrixCommandEndpointCallExecutable(HystrixCommand.Setter hystrixMetadata, EndpointMethod endpointMethod,
-			EndpointCallExecutable<T, O> delegate, Object fallback) {
+			EndpointCallExecutable<T, R> delegate, Object fallback) {
 
 		this.hystrixMetadata = hystrixMetadata;
 		this.endpointMethod = endpointMethod;
@@ -62,25 +61,25 @@ class HystrixCommandEndpointCallExecutable<T, O> implements EndpointCallExecutab
 	}
 
 	@Override
-	public HystrixCommand<T> execute(EndpointCall<O> call, Object[] args) {
+	public HystrixCommand<T> execute(EndpointCall<R> call, Object[] args) {
 		return new HystrixCommand<T>(hystrixMetadata()) {
 			@Override
 			protected T run() throws Exception {
 				return delegate.execute(call, args);
 			}
 
-			@Override
 			protected T getFallback() {
-				return Optional.ofNullable(fallback)
-						.map(f -> Tryable.of(() -> doFallback()))
-							.orElseGet(() -> super.getFallback());
+				return fallback == null ? super.getFallback() : doFallback();
 			}
 
-			@SuppressWarnings("unchecked")
-			private T doFallback() throws Exception {
-				HystrixCommand<T> fallbackCommand = (HystrixCommand<T>) endpointMethod.javaMethod().invoke(fallback, args);
-				return fallbackCommand.execute();
-			}
+			private T doFallback() {
+				HystrixCommandFallback hystrixCommandFallback = Optional.ofNullable(fallback)
+						.map(f -> new HystrixCommandFallback(endpointMethod, args, fallback))
+							.orElse(null);
+
+				HystrixCommand<T> value = hystrixCommandFallback.run();
+				return value.execute();
+			};
 		};
 	}
 
