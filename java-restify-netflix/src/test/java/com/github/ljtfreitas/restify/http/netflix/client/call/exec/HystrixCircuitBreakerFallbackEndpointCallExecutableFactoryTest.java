@@ -9,6 +9,7 @@ import static org.mockito.Matchers.notNull;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Optional;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
@@ -34,11 +35,16 @@ public class HystrixCircuitBreakerFallbackEndpointCallExecutableFactoryTest {
 	private EndpointCallExecutable<Future<String>, String> endpointCallFutureExecutable;
 
 	@Mock
+	private EndpointCallExecutable<Optional<String>, String> endpointCallOptionalExecutable;
+
+	@Mock
 	private EndpointCall<String> endpointCallString;
 
 	private HystrixCircuitBreakerFallbackEndpointCallExecutableFactory<String, String, SomeType> hystrixCircuitBreakerStringExecutableFactory;
 
 	private HystrixCircuitBreakerFallbackEndpointCallExecutableFactory<Future<String>, String, SomeType> hystrixCircuitBreakerFutureExecutableFactory;
+
+	private HystrixCircuitBreakerFallbackEndpointCallExecutableFactory<Optional<String>, String, SomeType> hystrixCircuitBreakerOptionalExecutableFactory;
 
 	private Object[] arguments;
 
@@ -58,6 +64,8 @@ public class HystrixCircuitBreakerFallbackEndpointCallExecutableFactoryTest {
 		hystrixCircuitBreakerStringExecutableFactory = new HystrixCircuitBreakerFallbackEndpointCallExecutableFactory<>(fallback);
 
 		hystrixCircuitBreakerFutureExecutableFactory = new HystrixCircuitBreakerFallbackEndpointCallExecutableFactory<>(fallback);
+
+		hystrixCircuitBreakerOptionalExecutableFactory = new HystrixCircuitBreakerFallbackEndpointCallExecutableFactory<>(fallback);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -98,6 +106,36 @@ public class HystrixCircuitBreakerFallbackEndpointCallExecutableFactoryTest {
 	}
 
 	@Test
+	public void shouldExecuteFallbackWhenHystrixCommandThrowException() throws Exception {
+		EndpointCallExecutable<String, String> executable = hystrixCircuitBreakerStringExecutableFactory
+				.create(new SimpleEndpointMethod(SomeType.class.getMethod("onCircuitBreaker")), endpointCallStringExecutable);
+
+		when(endpointCallString.execute())
+			.thenThrow(new RuntimeException("whatever exception"));
+
+		String result = executable.execute(endpointCallString, arguments);
+
+		assertEquals("onCircuitBreakerFallback", result);
+
+		verify(fallback).onCircuitBreaker();
+	}
+
+	@Test
+	public void shouldExecuteFallbackWhenHystrixCommandThrowExceptionOnMethdWithReturnTypeDifferentOfResponseType() throws Exception {
+		EndpointCallExecutable<Optional<String>, String> executable = hystrixCircuitBreakerOptionalExecutableFactory
+				.create(new SimpleEndpointMethod(SomeType.class.getMethod("onCircuitBreakerWithOptional")), endpointCallOptionalExecutable);
+
+		when(endpointCallOptionalExecutable.execute(any(), any()))
+			.thenThrow(new RuntimeException("whatever exception"));
+
+		Optional<String> result = executable.execute(endpointCallString, arguments);
+
+		assertEquals("onCircuitBreakerFallbackWithOptional", result.get());
+
+		verify(fallback).onCircuitBreakerWithOptional();
+	}
+
+	@Test
 	public void shouldSupportsOnCircuitBreakerEndpointMethod() throws Exception {
 		SimpleEndpointMethod endpointMethod = new SimpleEndpointMethod(SomeType.class.getMethod("onCircuitBreaker"));
 		assertTrue(hystrixCircuitBreakerStringExecutableFactory.supports(endpointMethod));
@@ -114,6 +152,9 @@ public class HystrixCircuitBreakerFallbackEndpointCallExecutableFactoryTest {
 		@OnCircuitBreaker
 		String onCircuitBreaker();
 
+		@OnCircuitBreaker
+		Optional<String> onCircuitBreakerWithOptional();
+
 		String withoutCircuitBreaker();
 	}
 
@@ -121,12 +162,17 @@ public class HystrixCircuitBreakerFallbackEndpointCallExecutableFactoryTest {
 
 		@Override
 		public String onCircuitBreaker() {
-			return "onCircuitBreaker";
+			return "onCircuitBreakerFallback";
+		}
+
+		@Override
+		public Optional<String> onCircuitBreakerWithOptional() {
+			return Optional.ofNullable("onCircuitBreakerFallbackWithOptional");
 		}
 
 		@Override
 		public String withoutCircuitBreaker() {
-			return "withoutCircuitBreaker";
+			return "withoutCircuitBreakerFallback";
 		}
 	}
 }
