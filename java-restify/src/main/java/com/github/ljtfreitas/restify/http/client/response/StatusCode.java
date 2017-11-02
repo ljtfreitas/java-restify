@@ -60,6 +60,7 @@ import static com.github.ljtfreitas.restify.http.client.response.HttpStatusCode.
 import static com.github.ljtfreitas.restify.http.client.response.HttpStatusCode.UNAUTHORIZED;
 import static com.github.ljtfreitas.restify.http.client.response.HttpStatusCode.UNSUPPORTED_MEDIA_TYPE;
 
+import java.util.Objects;
 import java.util.Optional;
 
 public class StatusCode {
@@ -86,6 +87,14 @@ public class StatusCode {
 
 	public int message() {
 		return code;
+	}
+
+	public boolean is(int code) {
+		return Integer.compare(this.code, code) == 0;
+	}
+
+	public boolean is(HttpStatusCode httpStatusCode) {
+		return Integer.compare(this.code, httpStatusCode.value()) == 0;
 	}
 
 	public boolean isInformational() {
@@ -253,6 +262,11 @@ public class StatusCode {
 		} else {
 			return false;
 		}
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(code);
 	}
 
 	@Override
