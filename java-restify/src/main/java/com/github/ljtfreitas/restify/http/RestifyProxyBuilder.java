@@ -100,6 +100,13 @@ import com.github.ljtfreitas.restify.http.client.request.jdk.JdkHttpClientReques
 import com.github.ljtfreitas.restify.http.client.response.DefaultEndpointResponseErrorFallback;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponseErrorFallback;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponseReader;
+import com.github.ljtfreitas.restify.http.client.response.HttpStatusCode;
+import com.github.ljtfreitas.restify.http.client.retry.RetryCondition.EndpointResponseRetryCondition;
+import com.github.ljtfreitas.restify.http.client.retry.RetryCondition.HeadersRetryCondition;
+import com.github.ljtfreitas.restify.http.client.retry.RetryCondition.StatusCodeRetryCondition;
+import com.github.ljtfreitas.restify.http.client.retry.RetryCondition.ThrowableRetryCondition;
+import com.github.ljtfreitas.restify.http.client.retry.RetryConfiguration;
+import com.github.ljtfreitas.restify.http.client.retry.RetryableEndpointRequestExecutor;
 import com.github.ljtfreitas.restify.http.contract.DefaultRestifyContract;
 import com.github.ljtfreitas.restify.http.contract.RestifyContract;
 import com.github.ljtfreitas.restify.http.contract.metadata.DefaultRestifyContractReader;
@@ -127,6 +134,8 @@ public class RestifyProxyBuilder {
 	private EndpointResponseErrorFallbackBuilder endpointResponseErrorFallbackBuilder = new EndpointResponseErrorFallbackBuilder(this);
 
 	private HttpClientRequestConfigurationBuilder httpClientRequestConfigurationBuilder = new HttpClientRequestConfigurationBuilder(this);
+
+	private RetryBuilder retryBuilder = new RetryBuilder(this);
 
 	public RestifyProxyBuilder client(HttpClientRequestFactory httpClientRequestFactory) {
 		this.httpClientRequestFactory = httpClientRequestFactory;
@@ -188,6 +197,10 @@ public class RestifyProxyBuilder {
 		return this;
 	}
 
+	public RetryBuilder retry() {
+		return retryBuilder;
+	}
+
 	public <T> RestifyProxyBuilderOnTarget<T> target(Class<T> target) {
 		return new RestifyProxyBuilderOnTarget<>(target, null);
 	}
@@ -234,7 +247,7 @@ public class RestifyProxyBuilder {
 		}
 
 		private EndpointCallFactory endpointMethodCallFactory() {
-			return new EndpointCallFactory(endpointRequestFactory(), endpointRequestExecutor());
+			return new EndpointCallFactory(endpointRequestFactory(), retryable(endpointRequestExecutor()));
 		}
 
 		private EndpointRequestFactory endpointRequestFactory() {
@@ -247,6 +260,11 @@ public class RestifyProxyBuilder {
 					.orElseGet(() -> new RestifyEndpointRequestExecutor(httpClientRequestFactory(),
 							new EndpointRequestWriter(messageConverters),
 							new EndpointResponseReader(messageConverters, endpointResponseErrorFallbackBuilder())));
+		}
+
+		private EndpointRequestExecutor retryable(EndpointRequestExecutor delegate) {
+			RetryConfiguration configuration = retryBuilder.build();
+			return configuration == null ? delegate : new RetryableEndpointRequestExecutor(delegate, configuration);
 		}
 
 		private EndpointResponseErrorFallback endpointResponseErrorFallbackBuilder() {
@@ -649,6 +667,129 @@ public class RestifyProxyBuilder {
 
 			public RestifyProxyBuilder and() {
 				return context;
+			}
+		}
+	}
+
+	public class RetryBuilder {
+
+		private final RestifyProxyBuilder context;
+		private final RetryConfigurationBuilder builder = new RetryConfigurationBuilder();
+
+		private boolean enabled = false;
+		private RetryConfiguration configuration;
+
+		public RetryBuilder(RestifyProxyBuilder context) {
+			this.context = context;
+		}
+
+		public RetryBuilder enabled() {
+			this.enabled = true;
+			return this;
+		}
+
+		public RetryConfigurationBuilder configure() {
+			this.enabled = true;
+			return builder;
+		}
+
+		public RestifyProxyBuilder using(RetryConfiguration configuration) {
+			this.enabled = true;
+			this.configuration = configuration;
+			return context;
+		}
+
+		public RestifyProxyBuilder and() {
+			return context;
+		}
+
+		private RetryConfiguration build() {
+			return enabled ? Optional.ofNullable(configuration).orElseGet(() -> builder.build()) : null;
+		}
+
+		public class RetryConfigurationBuilder {
+
+			private final RetryConfiguration.Builder delegate = new RetryConfiguration.Builder();
+			private final RetryConfigurationBackOffBuilder backOff = new RetryConfigurationBackOffBuilder();
+
+			public RetryConfigurationBuilder attempts(int attempts) {
+				delegate.attempts(attempts);
+				return this;
+			}
+
+			public RetryConfigurationBuilder timeout(long timeout) {
+				delegate.timeout(timeout);
+				return this;
+			}
+
+			public RetryConfigurationBuilder timeout(Duration timeout) {
+				delegate.timeout(timeout);
+				return this;
+			}
+
+			public RetryConfigurationBuilder when(HttpStatusCode... statuses) {
+				delegate.when(statuses);
+				return this;
+			}
+
+			public RetryConfigurationBuilder when(StatusCodeRetryCondition condition) {
+				delegate.when(condition);
+				return this;
+			}
+
+			@SafeVarargs
+			public final RetryConfigurationBuilder when(Class<? extends Throwable>... throwableTypes) {
+				delegate.when(throwableTypes);
+				return this;
+			}
+
+			public final RetryConfigurationBuilder when(ThrowableRetryCondition condition) {
+				delegate.when(condition);
+				return this;
+			}
+
+			public final RetryConfigurationBuilder when(HeadersRetryCondition condition) {
+				delegate.when(condition);
+				return this;
+			}
+
+			public final RetryConfigurationBuilder when(EndpointResponseRetryCondition condition) {
+				delegate.when(condition);
+				return this;
+			}
+
+			public RetryConfigurationBackOffBuilder backOff() {
+				return backOff;
+			}
+
+			public RestifyProxyBuilder and() {
+				return context;
+			}
+
+			private RetryConfiguration build() {
+				return delegate.build();
+			}
+
+			public class RetryConfigurationBackOffBuilder {
+
+				public RetryConfigurationBackOffBuilder delay(long delay) {
+					builder.backOff().delay(delay);
+					return this;
+				}
+
+				public RetryConfigurationBackOffBuilder delay(Duration delay) {
+					builder.backOff().delay(delay);
+					return this;
+				}
+
+				public RetryConfigurationBackOffBuilder multiplier(double multiplier) {
+					builder.backOff().multiplier(multiplier);
+					return this;
+				}
+
+				public RestifyProxyBuilder and() {
+					return context;
+				}
 			}
 		}
 	}
