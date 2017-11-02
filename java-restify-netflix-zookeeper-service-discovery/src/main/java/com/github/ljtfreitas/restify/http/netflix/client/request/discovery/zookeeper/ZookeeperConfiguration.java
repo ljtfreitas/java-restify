@@ -25,35 +25,30 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.netflix.client.request.discovery.zookeeper;
 
-import static com.github.ljtfreitas.restify.http.util.Preconditions.nonNull;
-
 public class ZookeeperConfiguration {
 
-	private final String address;
-	private final Integer port;
-	private final String root;
+	private final ZookeeperQuorum quorum;
+	private final String chroot;
 
-	public ZookeeperConfiguration(String root) {
-		this(null, 2181, root);
+	public ZookeeperConfiguration(ZookeeperQuorum quorum) {
+		this(quorum, quorum.chroot());
 	}
 
-	public ZookeeperConfiguration(String address, int port) {
-		this(address, port, "/");
+	public ZookeeperConfiguration(ZookeeperQuorum quorum, String chroot) {
+		this.quorum = quorum;
+		this.chroot = chroot;
 	}
 
-	public ZookeeperConfiguration(String address, int port, String root) {
-		this.address = address;
-		this.port = port;
-		this.root = root;
-	}
-
-	public String root() {
-		return root;
+	public String chroot() {
+		return chroot;
 	}
 
 	public String connectionString() {
-		nonNull(address, "Zookeeper address cannot be null.");
-		nonNull(port, "Zookeeper port cannot be null.");
-		return address + ":" + port;
+		return quorum.connectionString();
+	}
+
+	@Override
+	public String toString() {
+		return quorum.connectionString();
 	}
 }

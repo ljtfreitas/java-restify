@@ -7,7 +7,7 @@ import static org.mockserver.model.JsonBody.json;
 import static org.mockserver.model.StringBody.exact;
 import static org.mockserver.verify.VerificationTimes.once;
 
-import org.apache.curator.test.TestingServer;
+import org.apache.curator.test.TestingCluster;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Rule;
@@ -34,7 +34,7 @@ public class ZookeeperServiceInstanceDiscoveryTest {
 	@Rule
 	public MockServerRule mockApiServerRule = new MockServerRule(this, 7080, 7081, 7082);
 
-	private TestingServer zookeeperServer;
+	private TestingCluster zookeeperCluster;
 
 	private MyApi myApi;
 
@@ -44,11 +44,13 @@ public class ZookeeperServiceInstanceDiscoveryTest {
 
 	@Before
 	public void setup() throws Exception {
-		zookeeperServer = new TestingServer(2181, true);
+		zookeeperCluster = new TestingCluster(3);
+		zookeeperCluster.start();
 
-		ZookeeperConfiguration zookeeperConfiguration = new ZookeeperConfiguration("localhost", 2181, "/services");
+		ZookeeperConfiguration zookeeperConfiguration = new ZookeeperConfiguration(ZookeeperQuorum.of(zookeeperCluster.getConnectString()), "/services");
 
-		ZookeeperCuratorServiceDiscovery<ZookeeperServiceInstance> zookeeperCuratorServiceDiscovery = new ZookeeperCuratorServiceDiscovery<>(ZookeeperServiceInstance.class, zookeeperConfiguration, new ZookeeperInstanceSerializer());
+		ZookeeperCuratorServiceDiscovery<ZookeeperServiceInstance> zookeeperCuratorServiceDiscovery
+			= new ZookeeperCuratorServiceDiscovery<>(ZookeeperServiceInstance.class, zookeeperConfiguration, new ZookeeperInstanceSerializer());
 
 		zookeeperServiceDiscovery = new ZookeeperServiceInstanceDiscovery(zookeeperCuratorServiceDiscovery);
 
@@ -73,7 +75,7 @@ public class ZookeeperServiceInstanceDiscoveryTest {
 	@After
 	public void after() throws Exception {
 		zookeeperServiceDiscovery.close();
-		zookeeperServer.close();
+		zookeeperCluster.close();
 	}
 
 	@Test

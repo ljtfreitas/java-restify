@@ -49,7 +49,7 @@ public class ZookeeperServiceProviderDiscoveryTest {
 	public void setup() throws Exception {
 		zookeeperServer = new TestingServer(2181, true);
 
-		ZookeeperConfiguration zookeeperConfiguration = new ZookeeperConfiguration("localhost", 2181, "/services");
+		ZookeeperConfiguration zookeeperConfiguration = new ZookeeperConfiguration(ZookeeperQuorum.of("localhost:2181/services"));
 
 		ZookeeperCuratorServiceDiscovery<ZookeeperServiceInstance> zookeeperCuratorServiceDiscovery = new ZookeeperCuratorServiceDiscovery<>(ZookeeperServiceInstance.class, zookeeperConfiguration, new ZookeeperInstanceSerializer());
 
