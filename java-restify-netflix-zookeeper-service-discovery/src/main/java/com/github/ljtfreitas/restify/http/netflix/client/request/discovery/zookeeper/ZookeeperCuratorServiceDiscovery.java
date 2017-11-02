@@ -78,7 +78,7 @@ public class ZookeeperCuratorServiceDiscovery<T> implements Closeable {
 
 			ServiceDiscovery<T> serviceDiscovery = ServiceDiscoveryBuilder.builder(instanceType)
 					.client(curator)
-						.basePath(configuration.root())
+						.basePath(configuration.chroot())
 						.serializer(serializer)
 							.build();
 
