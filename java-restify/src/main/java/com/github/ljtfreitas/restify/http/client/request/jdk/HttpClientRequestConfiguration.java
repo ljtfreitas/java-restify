@@ -57,7 +57,7 @@ public class HttpClientRequestConfiguration {
 		this.useCaches = source.useCaches;
 		this.charset = source.charset;
 		this.proxy = source.proxy;
-		this.ssl = new HttpClientRequestSsl(ssl);
+		this.ssl = new HttpClientRequestSsl(source.ssl);
 	}
 
 	public int connectionTimeout() {
