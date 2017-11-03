@@ -41,6 +41,8 @@ import com.github.ljtfreitas.restify.http.contract.metadata.reflection.JavaType;
 
 public class CollectionEndpointCallExecutableFactory<T> implements EndpointCallExecutableFactory<Collection<T>, Collection<T>> {
 
+	private static final CollectionEndpointCallExecutableFactory<Object> DEFAULT_INSTANCE = new CollectionEndpointCallExecutableFactory<>();
+
 	@Override
 	public boolean supports(EndpointMethod endpointMethod) {
 		Class<?> classType = endpointMethod.returnType().classType();
@@ -88,5 +90,9 @@ public class CollectionEndpointCallExecutableFactory<T> implements EndpointCallE
 				return Collections.emptyList();
 			}
 		}
+	}
+
+	public static CollectionEndpointCallExecutableFactory<Object> instance() {
+		return DEFAULT_INSTANCE;
 	}
 }

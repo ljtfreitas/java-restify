@@ -33,6 +33,8 @@ import com.github.ljtfreitas.restify.http.contract.metadata.reflection.JavaType;
 
 public class RunnableEndpointCallExecutableFactory implements EndpointCallExecutableFactory<Runnable, Void> {
 
+	private static final RunnableEndpointCallExecutableFactory DEFAULT_INSTANCE = new RunnableEndpointCallExecutableFactory();
+
 	@Override
 	public boolean supports(EndpointMethod endpointMethod) {
 		return endpointMethod.returnType().is(Runnable.class);
@@ -60,5 +62,9 @@ public class RunnableEndpointCallExecutableFactory implements EndpointCallExecut
 		public Runnable execute(EndpointCall<Void> call, Object[] args) {
 			return () -> call.execute();
 		}
+	}
+
+	public static RunnableEndpointCallExecutableFactory instance() {
+		return DEFAULT_INSTANCE;
 	}
 }

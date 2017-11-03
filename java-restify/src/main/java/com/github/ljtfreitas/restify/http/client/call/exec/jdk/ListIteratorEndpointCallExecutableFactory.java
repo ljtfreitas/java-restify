@@ -41,6 +41,8 @@ import com.github.ljtfreitas.restify.http.contract.metadata.reflection.SimplePar
 
 public class ListIteratorEndpointCallExecutableFactory<T> implements EndpointCallExecutableDecoratorFactory<ListIterator<T>, List<T>, List<T>> {
 
+	private static final ListIteratorEndpointCallExecutableFactory<Object> DEFAULT_INSTANCE = new ListIteratorEndpointCallExecutableFactory<>();
+
 	@Override
 	public boolean supports(EndpointMethod endpointMethod) {
 		return endpointMethod.returnType().is(ListIterator.class);
@@ -80,5 +82,9 @@ public class ListIteratorEndpointCallExecutableFactory<T> implements EndpointCal
 				.map(c -> c.listIterator())
 					.orElseGet(Collections::emptyListIterator);
 		}
+	}
+
+	public static ListIteratorEndpointCallExecutableFactory<Object> instance() {
+		return DEFAULT_INSTANCE;
 	}
 }

@@ -34,6 +34,8 @@ import com.github.ljtfreitas.restify.http.contract.metadata.reflection.JavaType;
 
 public class EndpointCallObjectExecutableFactory<T, O> implements EndpointCallExecutableDecoratorFactory<EndpointCall<T>, T, O> {
 
+	private static final EndpointCallObjectExecutableFactory<Object, Object> DEFAULT_INSTANCE = new EndpointCallObjectExecutableFactory<>();
+
 	@Override
 	public boolean supports(EndpointMethod endpointMethod) {
 		return endpointMethod.returnType().is(EndpointCall.class);
@@ -71,5 +73,9 @@ public class EndpointCallObjectExecutableFactory<T, O> implements EndpointCallEx
 		public EndpointCall<T> execute(EndpointCall<O> call, Object[] args) {
 			return () -> delegate.execute(call, args);
 		}
+	}
+
+	public static EndpointCallObjectExecutableFactory<Object, Object> instance() {
+		return DEFAULT_INSTANCE;
 	}
 }

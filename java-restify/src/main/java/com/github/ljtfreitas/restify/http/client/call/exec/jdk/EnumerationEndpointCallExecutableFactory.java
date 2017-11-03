@@ -40,6 +40,8 @@ import com.github.ljtfreitas.restify.http.contract.metadata.reflection.SimplePar
 
 public class EnumerationEndpointCallExecutableFactory<T> implements EndpointCallExecutableDecoratorFactory<Enumeration<T>, Collection<T>, Collection<T>> {
 
+	private static final EnumerationEndpointCallExecutableFactory<Object> DEFAULT_INSTANCE = new EnumerationEndpointCallExecutableFactory<>();
+
 	@Override
 	public boolean supports(EndpointMethod endpointMethod) {
 		return endpointMethod.returnType().is(Enumeration.class);
@@ -77,5 +79,9 @@ public class EnumerationEndpointCallExecutableFactory<T> implements EndpointCall
 		public Enumeration<T> execute(EndpointCall<Collection<T>> call, Object[] args) {
 			return Collections.enumeration(delegate.execute(call, args));
 		}
+	}
+
+	public static EnumerationEndpointCallExecutableFactory<Object> instance() {
+		return DEFAULT_INSTANCE;
 	}
 }

@@ -40,6 +40,8 @@ import com.github.ljtfreitas.restify.http.contract.metadata.reflection.SimplePar
 
 public class IterableEndpointCallExecutableFactory<T> implements EndpointCallExecutableDecoratorFactory<Iterable<T>, Collection<T>, Collection<T>> {
 
+	private static final IterableEndpointCallExecutableFactory<Object> DEFAULT_INSTANCE = new IterableEndpointCallExecutableFactory<>();
+
 	@Override
 	public boolean supports(EndpointMethod endpointMethod) {
 		return endpointMethod.returnType().is(Iterable.class);
@@ -78,5 +80,9 @@ public class IterableEndpointCallExecutableFactory<T> implements EndpointCallExe
 			return Optional.ofNullable(delegate.execute(call, args))
 				.orElseGet(Collections::emptyList);
 		}
+	}
+
+	public static IterableEndpointCallExecutableFactory<Object> instance() {
+		return DEFAULT_INSTANCE;
 	}
 }

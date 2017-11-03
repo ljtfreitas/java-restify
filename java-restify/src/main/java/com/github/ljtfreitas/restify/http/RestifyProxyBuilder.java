@@ -114,6 +114,7 @@ import com.github.ljtfreitas.restify.http.contract.metadata.EndpointTarget;
 import com.github.ljtfreitas.restify.http.contract.metadata.RestifyContractExpressionResolver;
 import com.github.ljtfreitas.restify.http.contract.metadata.RestifyContractReader;
 import com.github.ljtfreitas.restify.http.contract.metadata.SimpleRestifyContractExpressionResolver;
+import com.github.ljtfreitas.restify.http.spi.ComponentLoader;
 
 public class RestifyProxyBuilder {
 
@@ -136,6 +137,8 @@ public class RestifyProxyBuilder {
 	private HttpClientRequestConfigurationBuilder httpClientRequestConfigurationBuilder = new HttpClientRequestConfigurationBuilder(this);
 
 	private RetryBuilder retryBuilder = new RetryBuilder(this);
+
+	private ComponentLoader componentLoader = new ComponentLoader();
 
 	public RestifyProxyBuilder client(HttpClientRequestFactory httpClientRequestFactory) {
 		this.httpClientRequestFactory = httpClientRequestFactory;
@@ -441,17 +444,17 @@ public class RestifyProxyBuilder {
 
 		private EndpointCallExecutablesBuilder(RestifyProxyBuilder context) {
 			this.context = context;
-			this.built.add(new OptionalEndpointCallExecutableFactory<Object>());
-			this.built.add(new CallableEndpointCallExecutableFactory<Object, Object>());
-			this.built.add(new RunnableEndpointCallExecutableFactory());
-			this.built.add(new CollectionEndpointCallExecutableFactory<>());
-			this.built.add(new EnumerationEndpointCallExecutableFactory<>());
-			this.built.add(new IteratorEndpointCallExecutableFactory<>());
-			this.built.add(new ListIteratorEndpointCallExecutableFactory<>());
-			this.built.add(new IterableEndpointCallExecutableFactory<>());
-			this.built.add(new EndpointCallObjectExecutableFactory<Object, Object>());
-			this.built.add(new HeadersEndpointCallExecutableFactory());
-			this.built.add(new StatusCodeEndpointCallExecutableFactory());
+			this.built.add(OptionalEndpointCallExecutableFactory.instance());
+			this.built.add(CallableEndpointCallExecutableFactory.instance());
+			this.built.add(RunnableEndpointCallExecutableFactory.instance());
+			this.built.add(CollectionEndpointCallExecutableFactory.instance());
+			this.built.add(EnumerationEndpointCallExecutableFactory.instance());
+			this.built.add(IteratorEndpointCallExecutableFactory.instance());
+			this.built.add(ListIteratorEndpointCallExecutableFactory.instance());
+			this.built.add(IterableEndpointCallExecutableFactory.instance());
+			this.built.add(EndpointCallObjectExecutableFactory.instance());
+			this.built.add(HeadersEndpointCallExecutableFactory.instance());
+			this.built.add(StatusCodeEndpointCallExecutableFactory.instance());
 		}
 
 		public EndpointCallExecutablesBuilder async() {
@@ -486,6 +489,7 @@ public class RestifyProxyBuilder {
 		private EndpointCallExecutables build() {
 			providers.addAll(built);
 			providers.addAll(async.build());
+			providers.addAll(componentLoader.load(EndpointCallExecutableProvider.class));
 			return new EndpointCallExecutables(providers);
 		}
 	}

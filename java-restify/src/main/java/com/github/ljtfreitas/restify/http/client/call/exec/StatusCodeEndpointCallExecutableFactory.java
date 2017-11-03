@@ -34,6 +34,8 @@ import com.github.ljtfreitas.restify.http.contract.metadata.reflection.SimplePar
 
 public class StatusCodeEndpointCallExecutableFactory implements EndpointCallExecutableDecoratorFactory<StatusCode, EndpointResponse<Void>, Void> {
 
+	private static final StatusCodeEndpointCallExecutableFactory DEFAULT_INSTANCE = new StatusCodeEndpointCallExecutableFactory();
+
 	private static final JavaType DEFAULT_RETURN_TYPE = JavaType.of(new SimpleParameterizedType(EndpointResponse.class, null, Void.class));
 
 	@Override
@@ -68,5 +70,9 @@ public class StatusCodeEndpointCallExecutableFactory implements EndpointCallExec
 		public StatusCode execute(EndpointCall<Void> call, Object[] args) {
 			return delegate.execute(call, args).status();
 		}
+	}
+
+	public static StatusCodeEndpointCallExecutableFactory instance() {
+		return DEFAULT_INSTANCE;
 	}
 }

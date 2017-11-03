@@ -34,6 +34,8 @@ import com.github.ljtfreitas.restify.http.contract.metadata.reflection.SimplePar
 
 public class HeadersEndpointCallExecutableFactory implements EndpointCallExecutableDecoratorFactory<Headers, EndpointResponse<Void>, Void> {
 
+	private static final HeadersEndpointCallExecutableFactory DEFAULT_INSTANCE = new HeadersEndpointCallExecutableFactory();
+
 	private static final JavaType DEFAULT_RETURN_TYPE = JavaType.of(new SimpleParameterizedType(EndpointResponse.class, null, Void.class));
 
 	@Override
@@ -68,5 +70,9 @@ public class HeadersEndpointCallExecutableFactory implements EndpointCallExecuta
 		public Headers execute(EndpointCall<Void> call, Object[] args) {
 			return delegate.execute(call, args).headers();
 		}
+	}
+
+	public static HeadersEndpointCallExecutableFactory instance() {
+		return DEFAULT_INSTANCE;
 	}
 }
