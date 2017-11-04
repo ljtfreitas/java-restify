@@ -27,6 +27,7 @@ import org.mockserver.model.HttpRequest;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.github.ljtfreitas.restify.http.RestifyHttpException;
 import com.github.ljtfreitas.restify.http.RestifyProxyBuilder;
+import com.github.ljtfreitas.restify.http.client.request.Timeout;
 import com.github.ljtfreitas.restify.http.client.request.apache.httpclient.ApacheHttpClientRequestFactory;
 import com.github.ljtfreitas.restify.http.contract.BodyParameter;
 import com.github.ljtfreitas.restify.http.contract.Get;
@@ -50,11 +51,7 @@ public class ApacheHttpClientRequestTest {
 	public void setup() {
 		mockServerClient = new MockServerClient("localhost", 7080);
 
-		RequestConfig configuration = RequestConfig.custom()
-				.setSocketTimeout(2000)
-					.build();
-
-		ApacheHttpClientRequestFactory apacheHttpClientRequestFactory = new ApacheHttpClientRequestFactory(configuration);
+		ApacheHttpClientRequestFactory apacheHttpClientRequestFactory = new ApacheHttpClientRequestFactory();
 
 		myApi = new RestifyProxyBuilder()
 				.client(apacheHttpClientRequestFactory)
@@ -145,16 +142,44 @@ public class ApacheHttpClientRequestTest {
 			.respond(response()
 				.withDelay(TimeUnit.MILLISECONDS, 3000));
 
+		RequestConfig configuration = RequestConfig.custom()
+				.setSocketTimeout(2000)
+					.build();
+
+		myApi = new RestifyProxyBuilder()
+				.client(new ApacheHttpClientRequestFactory(configuration))
+				.target(MyApi.class, "http://localhost:7080")
+				.build();
+
 		expectedException.expect(isA(RestifyHttpException.class));
 		expectedException.expectCause(isA(SocketTimeoutException.class));
 
 		myApi.json();
 	}
 
+	@Test
+	public void shouldThrowExceptionOnTimeoutUsingAnnotation() {
+		mockServerClient
+			.when(request()
+				.withMethod("GET")
+				.withPath("/json"))
+			.respond(response()
+				.withDelay(TimeUnit.MILLISECONDS, 3000));
+
+		expectedException.expect(isA(RestifyHttpException.class));
+		expectedException.expectCause(isA(SocketTimeoutException.class));
+
+		myApi.jsonWithTimeout();
+	}
+
 	interface MyApi {
 
 		@Path("/json") @Get
 		public MyModel json();
+
+		@Path("/json") @Get
+		@Timeout(read = 2000)
+		public MyModel jsonWithTimeout();
 
 		@Path("/json") @Post
 		@Header(name = "Content-Type", value = "application/json")

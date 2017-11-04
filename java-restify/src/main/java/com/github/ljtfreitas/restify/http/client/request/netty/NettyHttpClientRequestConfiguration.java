@@ -47,6 +47,14 @@ public class NettyHttpClientRequestConfiguration {
 	private NettyHttpClientRequestConfiguration() {
 	}
 
+	private NettyHttpClientRequestConfiguration(NettyHttpClientRequestConfiguration configuration) {
+		this.connectionTimeout = configuration.connectionTimeout;
+		this.readTimeout = configuration.readTimeout;
+		this.maxResponseSize = configuration.maxResponseSize;
+		this.sslContext = configuration.sslContext;
+		this.charset = configuration.charset;
+	}
+
 	public int connectionTimeout() {
 		return connectionTimeout;
 	}
@@ -111,7 +119,7 @@ public class NettyHttpClientRequestConfiguration {
 		}
 
 		public NettyHttpClientRequestConfiguration build() {
-			return configuration;
+			return new NettyHttpClientRequestConfiguration(configuration);
 		}
 	}
 }

@@ -41,6 +41,7 @@ import com.github.ljtfreitas.restify.http.RestifyProxyBuilder;
 import com.github.ljtfreitas.restify.http.client.response.HttpStatusCode;
 import com.github.ljtfreitas.restify.http.client.response.StatusCode;
 import com.github.ljtfreitas.restify.http.client.retry.Retry;
+import com.github.ljtfreitas.restify.http.client.request.Timeout;
 import com.github.ljtfreitas.restify.http.contract.BodyParameter;
 import com.github.ljtfreitas.restify.http.contract.Get;
 import com.github.ljtfreitas.restify.http.contract.Header;
@@ -240,6 +241,25 @@ public class JdkHttpClientRequestTest {
 	}
 
 	@Test
+	public void shouldThrowExceptionOnTimeoutWithAnnotation() {
+		mockServerClient
+			.when(request()
+				.withMethod("GET")
+				.withPath("/json"))
+			.respond(response()
+				.withDelay(TimeUnit.MILLISECONDS, 3000));
+
+		myApi = new RestifyProxyBuilder()
+				.target(MyApi.class, "http://localhost:7080")
+				.build();
+
+		expectedException.expect(isA(RestifyHttpException.class));
+		expectedException.expectCause(isA(SocketTimeoutException.class));
+
+		myApi.jsonWithTimeout();
+	}
+
+	@Test
 	public void shouldSendSecureRequest() throws Exception {
 		mockServerClient = new MockServerClient("localhost", 7084);
 
@@ -359,6 +379,10 @@ public class JdkHttpClientRequestTest {
 
 		@Path("/json") @Get
 		public MyModel json();
+
+		@Path("/json") @Get
+		@Timeout(connection = 2000, read = 2000)
+		public MyModel jsonWithTimeout();
 
 		@Path("/json") @Post
 		@Header(name = "Content-Type", value = "application/json")

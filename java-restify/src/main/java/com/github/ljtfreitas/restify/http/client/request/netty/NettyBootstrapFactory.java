@@ -27,6 +27,9 @@ package com.github.ljtfreitas.restify.http.client.request.netty;
 
 import java.util.concurrent.TimeUnit;
 
+import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
+import com.github.ljtfreitas.restify.http.client.request.Timeout;
+
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.ChannelInitializer;
 import io.netty.channel.ChannelPipeline;
@@ -48,17 +51,23 @@ class NettyBootstrapFactory {
 		this.nettyHttpClientRequestConfiguration = nettyHttpClientRequestConfiguration;
 	}
 
-	public Bootstrap create() {
+	public Bootstrap createTo(EndpointRequest source) {
 		Bootstrap bootstrap = new Bootstrap();
 
 		bootstrap.group(this.eventLoopGroup)
 			.channel(NioSocketChannel.class)
-				.handler(new NettyChannelInitializer());
+				.handler(new NettyChannelInitializer(source));
 
 		return bootstrap;
 	}
 
 	private class NettyChannelInitializer extends ChannelInitializer<SocketChannel> {
+
+		private final EndpointRequest source;
+
+		private NettyChannelInitializer(EndpointRequest source) {
+			this.source = source;
+		}
 
 		@Override
 		protected void initChannel(SocketChannel channel) throws Exception {
@@ -69,11 +78,21 @@ class NettyBootstrapFactory {
 
 			pipeline.addLast(new HttpClientCodec());
 			pipeline.addLast(new HttpObjectAggregator(nettyHttpClientRequestConfiguration.maxResponseSize()));
-			pipeline.addLast(new ReadTimeoutHandler(nettyHttpClientRequestConfiguration.readTimeout(), TimeUnit.MILLISECONDS));
+
+			long readTimeout = source.metadata().get(Timeout.class)
+					.map(t -> t.read())
+						.filter(t -> t >= 0)
+							.orElse(nettyHttpClientRequestConfiguration.readTimeout());
+			pipeline.addLast(new ReadTimeoutHandler(readTimeout, TimeUnit.MILLISECONDS));
 		}
 
 		private void configure(SocketChannelConfig channelConfiguration) {
-			channelConfiguration.setConnectTimeoutMillis(nettyHttpClientRequestConfiguration.connectionTimeout());
+			int connectionTimeout = source.metadata().get(Timeout.class)
+					.map(t -> (int) t.connection())
+						.filter(t -> t >= 0)
+							.orElse(nettyHttpClientRequestConfiguration.connectionTimeout());
+
+			channelConfiguration.setConnectTimeoutMillis(connectionTimeout);
 		}
 	}
 }
