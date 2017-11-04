@@ -25,6 +25,7 @@ import org.mockserver.model.HttpRequest;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.github.ljtfreitas.restify.http.RestifyHttpException;
 import com.github.ljtfreitas.restify.http.RestifyProxyBuilder;
+import com.github.ljtfreitas.restify.http.client.request.Timeout;
 import com.github.ljtfreitas.restify.http.contract.BodyParameter;
 import com.github.ljtfreitas.restify.http.contract.Get;
 import com.github.ljtfreitas.restify.http.contract.Header;
@@ -113,6 +114,26 @@ public class NettyHttpClientRequestTest {
 		myApi.json();
 	}
 
+	@Test
+	public void shouldThrowExceptionOnTimeoutByAnnotation() {
+		mockServerClient
+			.when(request()
+				.withMethod("GET")
+				.withPath("/json"))
+			.respond(response()
+				.withDelay(TimeUnit.MILLISECONDS, 3000));
+
+		myApi = new RestifyProxyBuilder()
+				.client(new NettyHttpClientRequestFactory())
+				.target(MyApi.class, "http://localhost:7080")
+				.build();
+
+		expectedException.expect(isA(RestifyHttpException.class));
+		expectedException.expectCause(deeply(ReadTimeoutException.class));
+
+		myApi.jsonWithTimeout();
+	}
+
 	private Matcher<? extends Throwable> deeply(Class<? extends Throwable> expectedCause) {
 		return new BaseMatcher<Throwable>() {
 			@Override
@@ -139,6 +160,10 @@ public class NettyHttpClientRequestTest {
 
 		@Path("/json") @Get
 		public MyModel json();
+
+		@Path("/json") @Get
+		@Timeout(read = 2000)
+		public MyModel jsonWithTimeout();
 
 		@Path("/json") @Post
 		@Header(name = "Content-Type", value = "application/json")

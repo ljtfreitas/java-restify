@@ -33,6 +33,8 @@ import java.util.Optional;
 
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
+import org.apache.http.client.config.RequestConfig.Builder;
+import org.apache.http.client.methods.Configurable;
 import org.apache.http.client.methods.HttpDelete;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpHead;
@@ -49,6 +51,7 @@ import org.apache.http.protocol.HttpContext;
 import com.github.ljtfreitas.restify.http.client.charset.Encoding;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
 import com.github.ljtfreitas.restify.http.client.request.HttpClientRequestFactory;
+import com.github.ljtfreitas.restify.http.client.request.Timeout;
 
 public class ApacheHttpClientRequestFactory implements HttpClientRequestFactory, Closeable {
 
@@ -74,11 +77,11 @@ public class ApacheHttpClientRequestFactory implements HttpClientRequestFactory,
 	}
 
 	public ApacheHttpClientRequestFactory(Charset charset) {
-		this(HttpClients.createSystem(), null, HttpClientContext.create(), charset);
+		this(HttpClients.createSystem(), null, null, charset);
 	}
 
 	public ApacheHttpClientRequestFactory(HttpClient httpClient, RequestConfig requestConfig) {
-		this(httpClient, requestConfig, HttpClientContext.create());
+		this(httpClient, requestConfig, null);
 	}
 
 	public ApacheHttpClientRequestFactory(HttpClient httpClient, RequestConfig requestConfig, HttpContext httpContext) {
@@ -97,26 +100,42 @@ public class ApacheHttpClientRequestFactory implements HttpClientRequestFactory,
 		HttpUriRequest httpRequest = HttpUriRequestStrategy.of(endpointRequest.method())
 				.create(endpointRequest.endpoint().toString());
 
-		HttpContext context = configure(httpRequest);
+		HttpContext context = configure(endpointRequest);
 
 		return new ApacheHttpClientRequest(httpClient, httpRequest, context, charset, endpointRequest.headers());
 	}
 
-	private HttpContext configure(HttpUriRequest httpRequest) {
-		if (httpContext.getAttribute(HttpClientContext.REQUEST_CONFIG) == null) {
-			RequestConfig configuration = Optional.ofNullable(requestConfig)
-					.orElseGet(() -> buildNewConfiguration());
-
-			httpContext.setAttribute(HttpClientContext.REQUEST_CONFIG, configuration);
-		}
-
-		return httpContext;
+	private HttpContext configure(EndpointRequest source) {
+		return Optional.ofNullable(httpContext).orElseGet(() -> buildNewContext(source));
 	}
 
-	private RequestConfig buildNewConfiguration() {
-		 return RequestConfig.custom()
-			.setAuthenticationEnabled(true)
-				.build();
+	private HttpContext buildNewContext(EndpointRequest source) {
+		HttpContext context = HttpClientContext.create();
+
+		if (context.getAttribute(HttpClientContext.REQUEST_CONFIG) == null) {
+			context.setAttribute(HttpClientContext.REQUEST_CONFIG, buildNewConfiguration(source));
+		}
+
+		return context;
+	}
+
+	private RequestConfig buildNewConfiguration(EndpointRequest source) {
+		RequestConfig httpClientConfiguration = (httpClient instanceof Configurable) ? ((Configurable) httpClient).getConfig() : null;
+
+		Builder builder = Optional.ofNullable(requestConfig).map(r -> RequestConfig.copy(r))
+				.orElseGet(() -> Optional.ofNullable(httpClientConfiguration)
+						.map(r -> RequestConfig.copy(r))
+							.orElseGet(RequestConfig::custom));
+
+		builder.setAuthenticationEnabled(true);
+
+		source.metadata().get(Timeout.class).ifPresent(timeout -> {
+			builder.setConnectTimeout((int) timeout.connection());
+			builder.setConnectionRequestTimeout((int) timeout.connection());
+			builder.setSocketTimeout((int) timeout.read());
+		});
+
+		return builder.build();
 	}
 
 	private enum HttpUriRequestStrategy {

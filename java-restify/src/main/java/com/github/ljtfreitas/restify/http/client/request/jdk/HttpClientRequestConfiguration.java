@@ -45,9 +45,19 @@ public class HttpClientRequestConfiguration {
 	private Charset charset = Encoding.UTF_8.charset();
 	private Proxy proxy = null;
 
-	private HttpClientRequestSslConfiguration ssl = new HttpClientRequestSslConfiguration();
+	private HttpClientRequestSsl ssl = new HttpClientRequestSsl();
 
 	private HttpClientRequestConfiguration() {
+	}
+
+	private HttpClientRequestConfiguration(HttpClientRequestConfiguration source) {
+		this.connectionTimeout = source.connectionTimeout;
+		this.readTimeout = source.readTimeout;
+		this.followRedirects = source.followRedirects;
+		this.useCaches = source.useCaches;
+		this.charset = source.charset;
+		this.proxy = source.proxy;
+		this.ssl = new HttpClientRequestSsl(source.ssl);
 	}
 
 	public int connectionTimeout() {
@@ -74,7 +84,7 @@ public class HttpClientRequestConfiguration {
 		return Optional.ofNullable(proxy);
 	}
 
-	public HttpClientRequestSslConfiguration ssl() {
+	public HttpClientRequestSsl ssl() {
 		return ssl;
 	}
 
@@ -82,10 +92,18 @@ public class HttpClientRequestConfiguration {
 		return new HttpClientRequestConfiguration();
 	}
 
-	public class HttpClientRequestSslConfiguration {
+	public class HttpClientRequestSsl {
 
 		private SSLSocketFactory sslSocketFactory;
 		private HostnameVerifier hostnameVerifier;
+
+		private HttpClientRequestSsl() {
+		}
+
+		private HttpClientRequestSsl(HttpClientRequestSsl source) {
+			this.sslSocketFactory = source.sslSocketFactory;
+			this.hostnameVerifier = source.hostnameVerifier;
+		}
 
 		public Optional<SSLSocketFactory> sslSocketFactory() {
 			return Optional.ofNullable(sslSocketFactory);
@@ -153,7 +171,7 @@ public class HttpClientRequestConfiguration {
 		}
 
 		public HttpClientRequestConfiguration build() {
-			return configuration;
+			return new HttpClientRequestConfiguration(configuration);
 		}
 
 		public class FolllowRedirectsBuilder {

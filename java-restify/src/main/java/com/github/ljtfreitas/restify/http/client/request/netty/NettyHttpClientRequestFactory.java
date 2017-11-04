@@ -37,9 +37,8 @@ import io.netty.channel.EventLoopGroup;
 
 public class NettyHttpClientRequestFactory implements HttpClientRequestFactory, Closeable {
 
-	private final Bootstrap bootstrap;
 	private final EventLoopGroup eventLoopGroup;
-	private NettyHttpClientRequestConfiguration nettyHttpClientRequestConfiguration;
+	private final NettyHttpClientRequestConfiguration nettyHttpClientRequestConfiguration;
 
 	public NettyHttpClientRequestFactory() {
 		this(new NettyEventLoopGroupFactory().create());
@@ -56,11 +55,13 @@ public class NettyHttpClientRequestFactory implements HttpClientRequestFactory, 
 	public NettyHttpClientRequestFactory(EventLoopGroup eventLoopGroup, NettyHttpClientRequestConfiguration nettyHttpClientRequestConfiguration) {
 		this.eventLoopGroup = eventLoopGroup;
 		this.nettyHttpClientRequestConfiguration = nettyHttpClientRequestConfiguration;
-		this.bootstrap = new NettyBootstrapFactory(eventLoopGroup, nettyHttpClientRequestConfiguration).create();
 	}
 
 	@Override
 	public HttpClientRequest createOf(EndpointRequest endpointRequest) {
+		Bootstrap bootstrap = new NettyBootstrapFactory(eventLoopGroup, nettyHttpClientRequestConfiguration)
+				.createTo(endpointRequest);
+
 		return new NettyHttpClientRequest(bootstrap, endpointRequest.endpoint(), endpointRequest.headers(), endpointRequest.method(),
 				nettyHttpClientRequestConfiguration.charset());
 	}
