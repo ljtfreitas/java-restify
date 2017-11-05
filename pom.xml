@@ -36,6 +36,7 @@
 		<module>java-restify-hateoas</module>
 		<module>java-restify-guava</module>
 		<module>java-restify-rxjava</module>
+		<module>java-restify-rxjava-2</module>
 	</modules>
 
 	<dependencies>
