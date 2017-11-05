@@ -20,7 +20,6 @@ import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutabl
 import com.github.ljtfreitas.restify.http.client.call.exec.guava.ListenableFutureCallbackEndpointCallExecutableFactory;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethodParameter;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethodParameters;
-import com.github.ljtfreitas.restify.http.contract.metadata.SimpleEndpointMethod;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethodParameter.EndpointMethodParameterType;
 import com.github.ljtfreitas.restify.http.contract.metadata.reflection.JavaType;
 import com.github.ljtfreitas.restify.http.contract.metadata.reflection.SimpleParameterizedType;

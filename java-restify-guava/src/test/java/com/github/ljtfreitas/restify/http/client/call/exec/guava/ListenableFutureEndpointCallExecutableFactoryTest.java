@@ -16,24 +16,22 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import com.github.ljtfreitas.restify.http.client.call.EndpointCall;
 import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutable;
-import com.github.ljtfreitas.restify.http.client.call.exec.guava.ListenableFutureTaskEndpointCallExecutableFactory;
-import com.github.ljtfreitas.restify.http.contract.metadata.SimpleEndpointMethod;
+import com.github.ljtfreitas.restify.http.client.call.exec.guava.ListenableFutureEndpointCallExecutableFactory;
 import com.github.ljtfreitas.restify.http.contract.metadata.reflection.JavaType;
 import com.google.common.util.concurrent.ListenableFuture;
-import com.google.common.util.concurrent.ListenableFutureTask;
 import com.google.common.util.concurrent.MoreExecutors;
 
 @RunWith(MockitoJUnitRunner.class)
-public class ListenableFutureTaskEndpointCallExecutableFactoryTest {
+public class ListenableFutureEndpointCallExecutableFactoryTest {
 
 	@Mock
 	private EndpointCallExecutable<String, String> delegate;
 
-	private ListenableFutureTaskEndpointCallExecutableFactory<String, String> factory;
+	private ListenableFutureEndpointCallExecutableFactory<String, String> factory;
 
 	@Before
 	public void setup() {
-		factory = new ListenableFutureTaskEndpointCallExecutableFactory<>(MoreExecutors.newDirectExecutorService());
+		factory = new ListenableFutureEndpointCallExecutableFactory<>(MoreExecutors.newDirectExecutorService());
 
 		when(delegate.execute(any(), anyVararg()))
 			.then(invocation -> invocation.getArgumentAt(0, EndpointCall.class).execute());
@@ -43,29 +41,29 @@ public class ListenableFutureTaskEndpointCallExecutableFactoryTest {
 	}
 
 	@Test
-	public void shouldSupportsWhenEndpointMethodReturnTypeIsListenableFutureTask() throws Exception {
-		assertTrue(factory.supports(new SimpleEndpointMethod(SomeType.class.getMethod("futureTask"))));
+	public void shouldSupportsWhenEndpointMethodReturnTypeIsListenableFuture() throws Exception {
+		assertTrue(factory.supports(new SimpleEndpointMethod(SomeType.class.getMethod("future"))));
 	}
 
 	@Test
-	public void shouldNotSupportsWhenEndpointMethodReturnTypeIsNotListenableFutureTask() throws Exception {
+	public void shouldNotSupportsWhenEndpointMethodReturnTypeIsNotListenableFuture() throws Exception {
 		assertFalse(factory.supports(new SimpleEndpointMethod(SomeType.class.getMethod("string"))));
 	}
 
 	@Test
-	public void shouldReturnArgumentTypeOfListenableFutureTask() throws Exception {
-		assertEquals(JavaType.of(String.class), factory.returnType(new SimpleEndpointMethod(SomeType.class.getMethod("futureTask"))));
+	public void shouldReturnArgumentTypeOfListenableFuture() throws Exception {
+		assertEquals(JavaType.of(String.class), factory.returnType(new SimpleEndpointMethod(SomeType.class.getMethod("future"))));
 	}
 
 	@Test
-	public void shouldReturnObjectTypeWhenListenableFutureTaskIsNotParameterized() throws Exception {
-		assertEquals(JavaType.of(Object.class), factory.returnType(new SimpleEndpointMethod(SomeType.class.getMethod("dumbFutureTask"))));
+	public void shouldReturnObjectTypeWhenListenableFutureIsNotParameterized() throws Exception {
+		assertEquals(JavaType.of(Object.class), factory.returnType(new SimpleEndpointMethod(SomeType.class.getMethod("dumbFuture"))));
 	}
 
 	@Test
-	public void shouldCreateExecutableFromEndpointMethodWithListenableFutureTaskReturnType() throws Exception {
-		EndpointCallExecutable<ListenableFutureTask<String>, String> executable = factory
-				.create(new SimpleEndpointMethod(SomeType.class.getMethod("futureTask")), delegate);
+	public void shouldCreateExecutableFromEndpointMethodWithListenableFutureReturnType() throws Exception {
+		EndpointCallExecutable<ListenableFuture<String>, String> executable = factory
+				.create(new SimpleEndpointMethod(SomeType.class.getMethod("future")), delegate);
 
 		String result = "future result";
 
@@ -79,10 +77,10 @@ public class ListenableFutureTaskEndpointCallExecutableFactoryTest {
 
 	interface SomeType {
 
-		ListenableFutureTask<String> futureTask();
+		ListenableFuture<String> future();
 
 		@SuppressWarnings("rawtypes")
-		ListenableFutureTask dumbFutureTask();
+		ListenableFuture dumbFuture();
 
 		String string();
 	}

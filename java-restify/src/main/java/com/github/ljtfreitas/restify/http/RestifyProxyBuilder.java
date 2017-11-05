@@ -442,6 +442,9 @@ public class RestifyProxyBuilder {
 		private final Collection<EndpointCallExecutableProvider> built = new ArrayList<>();
 		private final Collection<EndpointCallExecutableProvider> providers = new ArrayList<>();
 
+		private final DiscoveryComponentConfigurationBuilder<EndpointCallExecutablesBuilder> discoveryComponentConfiguration =
+				new DiscoveryComponentConfigurationBuilder<>(this);
+
 		private EndpointCallExecutablesBuilder(RestifyProxyBuilder context) {
 			this.context = context;
 			this.built.add(OptionalEndpointCallExecutableFactory.instance());
@@ -482,6 +485,10 @@ public class RestifyProxyBuilder {
 			return this;
 		}
 
+		public DiscoveryComponentConfigurationBuilder<EndpointCallExecutablesBuilder> discovery() {
+			return discoveryComponentConfiguration;
+		}
+
 		public RestifyProxyBuilder and() {
 			return context;
 		}
@@ -489,7 +496,11 @@ public class RestifyProxyBuilder {
 		private EndpointCallExecutables build() {
 			providers.addAll(built);
 			providers.addAll(async.build());
-			providers.addAll(componentLoader.load(EndpointCallExecutableProvider.class));
+
+			if (discoveryComponentConfiguration.enabled) {
+				providers.addAll(componentLoader.load(EndpointCallExecutableProvider.class));
+			}
+
 			return new EndpointCallExecutables(providers);
 		}
 	}
@@ -795,6 +806,26 @@ public class RestifyProxyBuilder {
 					return context;
 				}
 			}
+		}
+	}
+
+	public class DiscoveryComponentConfigurationBuilder<C> {
+
+		private final C context;
+		private boolean enabled = true;
+
+		private DiscoveryComponentConfigurationBuilder(C context) {
+			this.context = context;
+		}
+
+		public C enabled() {
+			this.enabled = true;
+			return context;
+		}
+
+		public C disabled() {
+			this.enabled = true;
+			return context;
 		}
 	}
 }

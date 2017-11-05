@@ -101,7 +101,7 @@ public class ListenableFutureCallbackEndpointCallExecutableFactory<T, O> impleme
 			FutureCallback<T> callback = callbackParameter(args);
 
 			ListenableFuture<T> future = executorService.submit(() -> delegate.execute(call, args));
-			Futures.addCallback(future, callback);
+			Futures.addCallback(future, callback, executorService);
 
 			return null;
 		}
