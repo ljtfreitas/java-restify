@@ -37,6 +37,7 @@
 		<module>java-restify-guava</module>
 		<module>java-restify-rxjava</module>
 		<module>java-restify-rxjava-2</module>
+		<module>java-restify-jsoup</module>
 	</modules>
 
 	<dependencies>
