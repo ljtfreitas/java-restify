@@ -35,6 +35,7 @@
 		<module>java-restify-oauth2-authentication</module>
 		<module>java-restify-hateoas</module>
 		<module>java-restify-guava</module>
+		<module>java-restify-rxjava</module>
 	</modules>
 
 	<dependencies>
