@@ -1,0 +1,4 @@
+com.github.ljtfreitas.restify.http.client.message.converter.form.multipart.MultipartFormFileObjectMessageWriter
+com.github.ljtfreitas.restify.http.client.message.converter.form.multipart.MultipartFormMapMessageWriter
+com.github.ljtfreitas.restify.http.client.message.converter.form.multipart.MultipartFormObjectMessageWriter
+com.github.ljtfreitas.restify.http.client.message.converter.form.multipart.MultipartFormParametersMessageWriter

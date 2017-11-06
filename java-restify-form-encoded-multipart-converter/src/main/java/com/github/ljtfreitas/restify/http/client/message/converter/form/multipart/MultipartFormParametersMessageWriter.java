@@ -26,29 +26,36 @@
 package com.github.ljtfreitas.restify.http.client.message.converter.form.multipart;
 
 import java.io.IOException;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import com.github.ljtfreitas.restify.http.client.request.HttpRequestMessage;
-import com.github.ljtfreitas.restify.http.contract.MultipartFile;
+import com.github.ljtfreitas.restify.http.contract.MultipartParameters;
 
-public class MultipartFormFileObjectMessageWriter extends MultipartFormMessageWriter<MultipartFile> {
+public class MultipartFormParametersMessageWriter extends BaseMultipartFormMessageWriter<MultipartParameters> {
 
-	public MultipartFormFileObjectMessageWriter() {
+	private final MultipartFormMapMessageWriter mapMessageConverter = new MultipartFormMapMessageWriter();
+
+	public MultipartFormParametersMessageWriter() {
 	}
 
-	protected MultipartFormFileObjectMessageWriter(MultipartFormBoundaryGenerator boundaryGenerator) {
+	protected MultipartFormParametersMessageWriter(MultipartFormBoundaryGenerator boundaryGenerator) {
 		super(boundaryGenerator);
 	}
 
 	@Override
 	public boolean canWrite(Class<?> type) {
-		return type == MultipartFile.class;
+		return type == MultipartParameters.class;
 	}
 
-	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Override
-	protected void doWrite(String boundary, MultipartFile body, HttpRequestMessage httpRequestMessage) throws IOException {
-		MultipartField field = new MultipartField<MultipartFile>(body.name(), body);
+	protected void doWrite(String boundary, MultipartParameters body, HttpRequestMessage httpRequestMessage)
+			throws IOException {
 
-		serializers.of(MultipartFile.class).write(boundary, field, httpRequestMessage);
+		Map<String, Object> bodyAsMap = new LinkedHashMap<>();
+
+		body.all().forEach(part -> bodyAsMap.put(part.name(), part.values()));
+
+		mapMessageConverter.doWrite(boundary, bodyAsMap, httpRequestMessage);
 	}
 }

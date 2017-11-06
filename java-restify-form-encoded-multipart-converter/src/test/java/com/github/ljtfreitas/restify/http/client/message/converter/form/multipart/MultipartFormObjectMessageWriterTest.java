@@ -11,10 +11,9 @@ import java.io.OutputStreamWriter;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.github.ljtfreitas.restify.http.client.message.converter.form.multipart.MultipartFormObjectMessageWriter;
-import com.github.ljtfreitas.restify.http.client.request.SimpleHttpRequestMessage;
-import com.github.ljtfreitas.restify.http.contract.MultipartForm;
+import com.github.ljtfreitas.restify.http.client.message.converter.form.SimpleHttpRequestMessage;
 import com.github.ljtfreitas.restify.http.contract.Form.Field;
+import com.github.ljtfreitas.restify.http.contract.MultipartForm;
 import com.github.ljtfreitas.restify.http.contract.MultipartForm.MultipartField;
 
 public class MultipartFormObjectMessageWriterTest {

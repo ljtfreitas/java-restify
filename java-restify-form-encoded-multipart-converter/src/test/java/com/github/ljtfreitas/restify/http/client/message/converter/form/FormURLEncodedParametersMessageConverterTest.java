@@ -8,8 +8,6 @@ import java.io.ByteArrayOutputStream;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.github.ljtfreitas.restify.http.client.request.SimpleHttpRequestMessage;
-import com.github.ljtfreitas.restify.http.client.response.SimpleHttpResponseMessage;
 import com.github.ljtfreitas.restify.http.contract.Parameters;
 
 public class FormURLEncodedParametersMessageConverterTest {

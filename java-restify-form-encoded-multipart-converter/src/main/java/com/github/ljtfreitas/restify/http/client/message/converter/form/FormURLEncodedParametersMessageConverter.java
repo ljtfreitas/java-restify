@@ -30,7 +30,7 @@ import java.util.Arrays;
 
 import com.github.ljtfreitas.restify.http.contract.Parameters;
 
-public class FormURLEncodedParametersMessageConverter extends FormURLEncodedMessageConverter<Parameters> {
+public class FormURLEncodedParametersMessageConverter extends BaseFormURLEncodedMessageConverter<Parameters> {
 
 	@Override
 	public boolean canRead(Type type) {

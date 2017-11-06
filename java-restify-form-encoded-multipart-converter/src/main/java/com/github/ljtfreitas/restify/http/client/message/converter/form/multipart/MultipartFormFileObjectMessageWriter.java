@@ -26,39 +26,29 @@
 package com.github.ljtfreitas.restify.http.client.message.converter.form.multipart;
 
 import java.io.IOException;
-import java.util.LinkedHashMap;
-import java.util.Map;
 
 import com.github.ljtfreitas.restify.http.client.request.HttpRequestMessage;
-import com.github.ljtfreitas.restify.http.contract.MultipartForm;
-import com.github.ljtfreitas.restify.http.contract.metadata.MultipartFormObjects;
-import com.github.ljtfreitas.restify.http.contract.metadata.reflection.JavaAnnotationScanner;
+import com.github.ljtfreitas.restify.http.contract.MultipartFile;
 
-public class MultipartFormObjectMessageWriter extends MultipartFormMessageWriter<Object> {
+public class MultipartFormFileObjectMessageWriter extends BaseMultipartFormMessageWriter<MultipartFile> {
 
-	private final MultipartFormObjects multipartFormObjects = MultipartFormObjects.cache();
-
-	private final MultipartFormMapMessageWriter mapMessageConverter = new MultipartFormMapMessageWriter();
-
-	public MultipartFormObjectMessageWriter() {
+	public MultipartFormFileObjectMessageWriter() {
 	}
 
-	protected MultipartFormObjectMessageWriter(MultipartFormBoundaryGenerator boundaryGenerator) {
+	protected MultipartFormFileObjectMessageWriter(MultipartFormBoundaryGenerator boundaryGenerator) {
 		super(boundaryGenerator);
 	}
 
 	@Override
 	public boolean canWrite(Class<?> type) {
-		return new JavaAnnotationScanner(type).contains(MultipartForm.class);
+		return type == MultipartFile.class;
 	}
 
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Override
-	protected void doWrite(String boundary, Object body, HttpRequestMessage httpRequestMessage) throws IOException {
-		Map<String, Object> bodyAsMap = new LinkedHashMap<>();
+	protected void doWrite(String boundary, MultipartFile body, HttpRequestMessage httpRequestMessage) throws IOException {
+		MultipartField field = new MultipartField<MultipartFile>(body.name(), body);
 
-		multipartFormObjects.of(body.getClass()).fields()
-				.forEach(field -> bodyAsMap.put(field.name(), field.valueOn(body)));
-
-		mapMessageConverter.doWrite(boundary, bodyAsMap, httpRequestMessage);
+		serializers.of(MultipartFile.class).write(boundary, field, httpRequestMessage);
 	}
 }

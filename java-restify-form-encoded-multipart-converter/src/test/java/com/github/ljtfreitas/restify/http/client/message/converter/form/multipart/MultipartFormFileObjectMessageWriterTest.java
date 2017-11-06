@@ -12,8 +12,7 @@ import java.io.OutputStreamWriter;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.github.ljtfreitas.restify.http.client.message.converter.form.multipart.MultipartFormFileObjectMessageWriter;
-import com.github.ljtfreitas.restify.http.client.request.SimpleHttpRequestMessage;
+import com.github.ljtfreitas.restify.http.client.message.converter.form.SimpleHttpRequestMessage;
 import com.github.ljtfreitas.restify.http.contract.ContentType;
 import com.github.ljtfreitas.restify.http.contract.MultipartFile;
 

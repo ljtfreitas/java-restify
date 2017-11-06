@@ -38,6 +38,7 @@
 		<module>java-restify-rxjava</module>
 		<module>java-restify-rxjava-2</module>
 		<module>java-restify-jsoup</module>
+		<module>java-restify-form-encoded-multipart-converter</module>
 	</modules>
 
 	<dependencies>

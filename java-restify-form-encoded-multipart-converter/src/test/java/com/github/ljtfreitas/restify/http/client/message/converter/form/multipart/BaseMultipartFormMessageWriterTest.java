@@ -15,16 +15,16 @@ import org.junit.Test;
 
 import com.github.ljtfreitas.restify.http.client.header.Header;
 import com.github.ljtfreitas.restify.http.client.header.Headers;
+import com.github.ljtfreitas.restify.http.client.message.converter.form.SimpleHttpRequestMessage;
 import com.github.ljtfreitas.restify.http.client.request.HttpRequestMessage;
-import com.github.ljtfreitas.restify.http.client.request.SimpleHttpRequestMessage;
 
-public class MultipartFormMessageWriterTest {
+public class BaseMultipartFormMessageWriterTest {
 
-	private MultipartFormMessageWriter<Object> writer;
+	private BaseMultipartFormMessageWriter<Object> writer;
 
 	@Before
 	public void setup() {
-		writer = new MultipartFormMessageWriter<Object>(new SimpleMultipartFormBoundaryGenerator("abc1234")) {
+		writer = new BaseMultipartFormMessageWriter<Object>(new SimpleMultipartFormBoundaryGenerator("abc1234")) {
 			@Override
 			public boolean canWrite(Class<?> type) {
 				return true;

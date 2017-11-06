@@ -69,13 +69,8 @@ import com.github.ljtfreitas.restify.http.client.message.HttpMessageConverter;
 import com.github.ljtfreitas.restify.http.client.message.HttpMessageConverters;
 import com.github.ljtfreitas.restify.http.client.message.converter.ByteArrayMessageConverter;
 import com.github.ljtfreitas.restify.http.client.message.converter.InputStreamMessageConverter;
-import com.github.ljtfreitas.restify.http.client.message.converter.form.FormURLEncodedFormObjectMessageConverter;
-import com.github.ljtfreitas.restify.http.client.message.converter.form.FormURLEncodedMapMessageConverter;
-import com.github.ljtfreitas.restify.http.client.message.converter.form.FormURLEncodedParametersMessageConverter;
-import com.github.ljtfreitas.restify.http.client.message.converter.form.multipart.MultipartFormFileObjectMessageWriter;
-import com.github.ljtfreitas.restify.http.client.message.converter.form.multipart.MultipartFormMapMessageWriter;
-import com.github.ljtfreitas.restify.http.client.message.converter.form.multipart.MultipartFormObjectMessageWriter;
-import com.github.ljtfreitas.restify.http.client.message.converter.form.multipart.MultipartFormParametersMessageWriter;
+import com.github.ljtfreitas.restify.http.client.message.converter.form.FormURLEncodedMessageConverter;
+import com.github.ljtfreitas.restify.http.client.message.converter.form.multipart.MultipartFormMessageWriter;
 import com.github.ljtfreitas.restify.http.client.message.converter.json.JsonMessageConverter;
 import com.github.ljtfreitas.restify.http.client.message.converter.octet.OctetByteArrayMessageConverter;
 import com.github.ljtfreitas.restify.http.client.message.converter.octet.OctetInputStreamMessageConverter;
@@ -348,13 +343,8 @@ public class RestifyProxyBuilder {
 		}
 
 		public HttpMessageConvertersBuilder form() {
-			converters.add(new FormURLEncodedParametersMessageConverter());
-			converters.add(new FormURLEncodedFormObjectMessageConverter());
-			converters.add(new FormURLEncodedMapMessageConverter());
-			converters.add(new MultipartFormParametersMessageWriter());
-			converters.add(new MultipartFormObjectMessageWriter());
-			converters.add(new MultipartFormFileObjectMessageWriter());
-			converters.add(new MultipartFormMapMessageWriter());
+			converters.addAll(componentLoader.load(FormURLEncodedMessageConverter.class));
+			converters.addAll(componentLoader.load(MultipartFormMessageWriter.class));
 			return this;
 		}
 

@@ -23,25 +23,42 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.http.client.message.converter.form;
+package com.github.ljtfreitas.restify.http.client.message.converter.form.multipart;
 
-import java.lang.reflect.Type;
+import java.io.IOException;
+import java.util.LinkedHashMap;
 import java.util.Map;
 
-public class FormURLEncodedMapMessageConverter extends FormURLEncodedMessageConverter<Map<String, ?>> {
+import com.github.ljtfreitas.restify.http.client.request.HttpRequestMessage;
+import com.github.ljtfreitas.restify.http.contract.MultipartForm;
+import com.github.ljtfreitas.restify.http.contract.metadata.MultipartFormObjects;
+import com.github.ljtfreitas.restify.http.contract.metadata.reflection.JavaAnnotationScanner;
 
-	@Override
-	public boolean canRead(Type type) {
-		return false;
+public class MultipartFormObjectMessageWriter extends BaseMultipartFormMessageWriter<Object> {
+
+	private final MultipartFormObjects multipartFormObjects = MultipartFormObjects.cache();
+
+	private final MultipartFormMapMessageWriter mapMessageConverter = new MultipartFormMapMessageWriter();
+
+	public MultipartFormObjectMessageWriter() {
 	}
 
-	@Override
-	protected Map<String, ?> doRead(Type expectedType, ParameterPair[] pairs) {
-		throw new UnsupportedOperationException("Cannot read HTTP response to Map type.");
+	protected MultipartFormObjectMessageWriter(MultipartFormBoundaryGenerator boundaryGenerator) {
+		super(boundaryGenerator);
 	}
 
 	@Override
 	public boolean canWrite(Class<?> type) {
-		return Map.class.isAssignableFrom(type);
+		return new JavaAnnotationScanner(type).contains(MultipartForm.class);
+	}
+
+	@Override
+	protected void doWrite(String boundary, Object body, HttpRequestMessage httpRequestMessage) throws IOException {
+		Map<String, Object> bodyAsMap = new LinkedHashMap<>();
+
+		multipartFormObjects.of(body.getClass()).fields()
+				.forEach(field -> bodyAsMap.put(field.name(), field.valueOn(body)));
+
+		mapMessageConverter.doWrite(boundary, bodyAsMap, httpRequestMessage);
 	}
 }

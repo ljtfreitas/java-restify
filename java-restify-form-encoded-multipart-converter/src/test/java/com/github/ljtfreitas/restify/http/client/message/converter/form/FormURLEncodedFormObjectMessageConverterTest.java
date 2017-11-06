@@ -9,9 +9,7 @@ import java.io.ByteArrayOutputStream;
 import org.junit.Test;
 
 import com.github.ljtfreitas.restify.http.client.message.converter.form.FormURLEncodedFormObjectMessageConverter;
-import com.github.ljtfreitas.restify.http.client.request.SimpleHttpRequestMessage;
 import com.github.ljtfreitas.restify.http.client.response.HttpResponseMessage;
-import com.github.ljtfreitas.restify.http.client.response.SimpleHttpResponseMessage;
 import com.github.ljtfreitas.restify.http.contract.Form;
 import com.github.ljtfreitas.restify.http.contract.Form.Field;
 

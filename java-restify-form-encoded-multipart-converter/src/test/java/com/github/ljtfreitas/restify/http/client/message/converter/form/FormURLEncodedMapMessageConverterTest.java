@@ -11,8 +11,6 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.github.ljtfreitas.restify.http.client.message.converter.form.FormURLEncodedMapMessageConverter;
-import com.github.ljtfreitas.restify.http.client.request.SimpleHttpRequestMessage;
-import com.github.ljtfreitas.restify.http.client.response.SimpleHttpResponseMessage;
 
 public class FormURLEncodedMapMessageConverterTest {
 

@@ -8,21 +8,22 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.util.Arrays;
+import java.util.LinkedHashMap;
+import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
 
-import com.github.ljtfreitas.restify.http.client.message.converter.form.multipart.MultipartFormParametersMessageWriter;
-import com.github.ljtfreitas.restify.http.client.request.SimpleHttpRequestMessage;
+import com.github.ljtfreitas.restify.http.client.message.converter.form.SimpleHttpRequestMessage;
 import com.github.ljtfreitas.restify.http.contract.ContentType;
 import com.github.ljtfreitas.restify.http.contract.MultipartFile;
-import com.github.ljtfreitas.restify.http.contract.MultipartParameters;
 
-public class MultipartFormParametersMessageWriterTest {
+public class MultipartFormMapMessageWriterTest {
 
-	private MultipartFormParametersMessageWriter converter;
+	private MultipartFormMapMessageWriter converter;
 
-	private MultipartParameters parameters;
+	private Map<String, Object> parameters;
 
 	private SimpleHttpRequestMessage httpRequestMessage;
 	private ByteArrayOutputStream output;
@@ -31,9 +32,7 @@ public class MultipartFormParametersMessageWriterTest {
 
 	@Before
 	public void setup() throws IOException {
-		converter = new MultipartFormParametersMessageWriter(new SimpleMultipartFormBoundaryGenerator("myBoundary"));
-
-		parameters = new MultipartParameters();
+		converter = new MultipartFormMapMessageWriter(new SimpleMultipartFormBoundaryGenerator("myBoundary"));
 
 		file = File.createTempFile("myTextFile", ".txt");
 
@@ -44,15 +43,16 @@ public class MultipartFormParametersMessageWriterTest {
 		fileWriter.flush();
 		fileWriter.close();
 
+		parameters = new LinkedHashMap<>();
+
 		output = new ByteArrayOutputStream();
 		httpRequestMessage = new SimpleHttpRequestMessage(output);
 	}
 
 	@Test
-	public void shouldSerializeMultipartParametersAsFormMultipartDataWithTextFields() throws IOException {
+	public void shouldSerializeMapAsFormMultipartDataWithTextFields() throws IOException {
 		parameters.put("name", "Tiago de Freitas Lima");
-		parameters.put("numeric", "1");
-		parameters.put("numeric", "2");
+		parameters.put("numeric", Arrays.asList(1, 2));
 
 		String body = "------myBoundary"
 			 + "\r\n"
@@ -90,7 +90,7 @@ public class MultipartFormParametersMessageWriterTest {
 	}
 
 	@Test
-	public void shouldSerializeMultipartParametersAsFormMultipartDataWithFileField() throws IOException {
+	public void shouldSerializeMapAsFormMultipartDataWithFileField() throws IOException {
 		parameters.put("file", file);
 
 		String body = "------myBoundary"
@@ -113,8 +113,8 @@ public class MultipartFormParametersMessageWriterTest {
 	}
 
 	@Test
-	public void shouldSerializeMultipartParametersAsFormMultipartDataWithInputStreamField() throws IOException {
-		parameters.put("inputStream", file.getName(), new FileInputStream(file));
+	public void shouldSerializeMapAsFormMultipartDataWithInputStreamField() throws IOException {
+		parameters.put("inputStream", new FileInputStream(file));
 
 		String body = "------myBoundary"
 				+ "\r\n"
@@ -134,7 +134,7 @@ public class MultipartFormParametersMessageWriterTest {
 	}
 
 	@Test
-	public void shouldSerializeMultipartParametersAsFormMultipartDataWithPathField() throws IOException {
+	public void shouldSerializeMapAsFormMultipartDataWithPathField() throws IOException {
 		parameters.put("path", file.toPath());
 
 		String body = "------myBoundary"
@@ -157,8 +157,8 @@ public class MultipartFormParametersMessageWriterTest {
 	}
 
 	@Test
-	public void shouldSerializeMultipartParametersAsFormMultipartDataWithMultipartFileField() throws IOException {
-		parameters.put(MultipartFile.create("myMultipartFile", file));
+	public void shouldSerializeMapAsFormMultipartDataWithMultipartFileField() throws IOException {
+		parameters.put("myMultipartFile", MultipartFile.create("", file));
 
 		String body = "------myBoundary"
 				+ "\r\n"
@@ -180,8 +180,8 @@ public class MultipartFormParametersMessageWriterTest {
 	}
 
 	@Test
-	public void shouldSerializeMultipartParametersAsFormMultipartDataWithMultipartFilePathField() throws IOException {
-		parameters.put(MultipartFile.create("myMultipartFileAsPath", file.toPath()));
+	public void shouldSerializeMapAsFormMultipartDataWithMultipartFilePathField() throws IOException {
+		parameters.put("myMultipartFileAsPath", MultipartFile.create("", file.toPath()));
 
 		String body = "------myBoundary"
 				+ "\r\n"
@@ -203,8 +203,8 @@ public class MultipartFormParametersMessageWriterTest {
 	}
 
 	@Test
-	public void shouldSerializeMultipartParametersAsFormMultipartDataWithMultipartFileInputStreamField() throws IOException {
-		parameters.put(MultipartFile.create("myMultipartFileAsInputStream", file.getName(),
+	public void shouldSerializeMapAsFormMultipartDataWithMultipartFileInputStreamField() throws IOException {
+		parameters.put("myMultipartFileAsInputStream", MultipartFile.create("", file.getName(),
 				ContentType.of("text/plain"), new FileInputStream(file)));
 
 		String body = "------myBoundary"

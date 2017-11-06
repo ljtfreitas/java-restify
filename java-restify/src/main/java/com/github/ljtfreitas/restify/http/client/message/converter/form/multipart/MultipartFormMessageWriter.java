@@ -25,69 +25,15 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.message.converter.form.multipart;
 
-import static com.github.ljtfreitas.restify.http.client.header.Headers.CONTENT_TYPE;
-
-import java.io.IOException;
-import java.io.OutputStream;
-
-import com.github.ljtfreitas.restify.http.client.header.Header;
 import com.github.ljtfreitas.restify.http.client.message.HttpMessageWriter;
-import com.github.ljtfreitas.restify.http.client.request.HttpRequestMessage;
-import com.github.ljtfreitas.restify.http.client.request.RestifyHttpMessageWriteException;
 import com.github.ljtfreitas.restify.http.contract.ContentType;
 
-abstract class MultipartFormMessageWriter<T> implements HttpMessageWriter<T> {
+public interface MultipartFormMessageWriter<T> extends HttpMessageWriter<T> {
 
-	private static final String MULTIPART_FORM_DATA = "multipart/form-data";
-	private static final ContentType MULTIPART_FORM_DATA_CONTENT_TYPE = ContentType.of(MULTIPART_FORM_DATA);
-
-	protected final MultipartFieldSerializers serializers = new MultipartFieldSerializers();
-
-	private final MultipartFormBoundaryGenerator boundaryGenerator;
-
-	public MultipartFormMessageWriter() {
-		this.boundaryGenerator = new UUIDMultipartFormBoundaryGenerator();
-	}
-
-	protected MultipartFormMessageWriter(MultipartFormBoundaryGenerator boundaryGenerator) {
-		this.boundaryGenerator = boundaryGenerator;
-	}
+	public static final ContentType MULTIPART_FORM_DATA_CONTENT_TYPE = ContentType.of("multipart/form-data");
 
 	@Override
-	public ContentType contentType() {
+	public default ContentType contentType() {
 		return MULTIPART_FORM_DATA_CONTENT_TYPE;
 	}
-
-	@Override
-	public void write(T body, HttpRequestMessage httpRequestMessage) throws RestifyHttpMessageWriteException {
-		try {
-			String boundary = boundaryGenerator.generate();
-
-			httpRequestMessage = addToContentType(boundary, httpRequestMessage);
-
-			doWrite("------" + boundary, body, httpRequestMessage);
-
-			OutputStream output = httpRequestMessage.output();
-			output.write('\r');
-			output.write('\n');
-			output.write(("------" + boundary + "--").getBytes());
-
-			output.flush();
-			output.close();
-
-		} catch (IOException e) {
-			throw new RestifyHttpMessageWriteException(e);
-		}
-	}
-
-	private HttpRequestMessage addToContentType(String boundary, HttpRequestMessage httpRequestMessage) {
-		Header contentTypeHeader = httpRequestMessage.headers().get(CONTENT_TYPE)
-				.orElseGet(() -> Header.contentType(MULTIPART_FORM_DATA));
-
-		ContentType contentType = ContentType.of(contentTypeHeader.value());
-
-		return httpRequestMessage.replace(Header.contentType(contentType.append("boundary", "----" + boundary)));
-	}
-
-	protected abstract void doWrite(String boundary, T body, HttpRequestMessage httpRequestMessage) throws IOException;
 }

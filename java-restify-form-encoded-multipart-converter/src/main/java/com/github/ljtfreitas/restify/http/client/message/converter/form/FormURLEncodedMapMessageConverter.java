@@ -23,48 +23,25 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.http.client.message.converter.form.multipart;
+package com.github.ljtfreitas.restify.http.client.message.converter.form;
 
-import java.io.IOException;
-import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Map;
 
-import com.github.ljtfreitas.restify.http.client.request.HttpRequestMessage;
+public class FormURLEncodedMapMessageConverter extends BaseFormURLEncodedMessageConverter<Map<String, ?>> {
 
-public class MultipartFormMapMessageWriter extends MultipartFormMessageWriter<Map<String, ?>> {
-
-	public MultipartFormMapMessageWriter() {
+	@Override
+	public boolean canRead(Type type) {
+		return false;
 	}
 
-	protected MultipartFormMapMessageWriter(MultipartFormBoundaryGenerator boundaryGenerator) {
-		super(boundaryGenerator);
+	@Override
+	protected Map<String, ?> doRead(Type expectedType, ParameterPair[] pairs) {
+		throw new UnsupportedOperationException("Cannot read HTTP response to Map type.");
 	}
 
 	@Override
 	public boolean canWrite(Class<?> type) {
-		return Map.class.isAssignableFrom(type) && supportedMapKey(type);
-	}
-
-	private boolean supportedMapKey(Type type) {
-		if (type instanceof ParameterizedType) {
-			ParameterizedType parameterizedType = (ParameterizedType) type;
-
-			Type mapKeyType = parameterizedType.getActualTypeArguments()[0];
-
-			return (mapKeyType == String.class);
-
-		} else {
-			return true;
-		}
-	}
-
-	@SuppressWarnings({ "unchecked", "rawtypes" })
-	@Override
-	protected void doWrite(String boundary, Map<String, ?> body, HttpRequestMessage httpRequestMessage) throws IOException {
-		body.forEach((key, value) -> {
-			serializers.of(value.getClass())
-				.write(boundary, new MultipartField(key, value), httpRequestMessage);
-		});
+		return Map.class.isAssignableFrom(type);
 	}
 }

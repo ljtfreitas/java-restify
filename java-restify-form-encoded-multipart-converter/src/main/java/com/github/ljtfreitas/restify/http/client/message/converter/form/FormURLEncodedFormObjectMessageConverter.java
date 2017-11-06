@@ -34,7 +34,7 @@ import com.github.ljtfreitas.restify.http.contract.metadata.FormObjects;
 import com.github.ljtfreitas.restify.http.contract.metadata.FormObjects.FormObject;
 import com.github.ljtfreitas.restify.http.contract.metadata.reflection.JavaAnnotationScanner;
 
-public class FormURLEncodedFormObjectMessageConverter extends FormURLEncodedMessageConverter<Object> {
+public class FormURLEncodedFormObjectMessageConverter extends BaseFormURLEncodedMessageConverter<Object> {
 
 	private final FormObjects formObjects = FormObjects.cache();
 
