@@ -41,7 +41,7 @@ import com.github.ljtfreitas.restify.http.client.request.RestifyHttpMessageWrite
 import com.github.ljtfreitas.restify.http.client.response.HttpResponseMessage;
 import com.github.ljtfreitas.restify.http.client.response.RestifyHttpMessageReadException;
 
-public class JsonpMessageConverter extends JsonMessageConverter<JsonStructure> {
+public class JsonpMessageConverter implements JsonMessageConverter<JsonStructure> {
 
 	private final JsonReaderFactory jsonReaderFactory;
 	private final JsonWriterFactory jsonWriterFactory;

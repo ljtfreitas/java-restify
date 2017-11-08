@@ -9,16 +9,16 @@ import java.util.Collection;
 import org.junit.Test;
 
 import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutableProvider;
-import com.github.ljtfreitas.restify.http.spi.ComponentLoader;
+import com.github.ljtfreitas.restify.http.spi.Provider;
 
 public class RxJava2EndpointCallExecutableProviderSpiTest {
 
-	private ComponentLoader loader = new ComponentLoader();
+	private Provider loader = new Provider();
 
 	@SuppressWarnings("unchecked")
 	@Test
 	public void shouldDiscoveryRxJava2ExecutableProviders() {
-		Collection<EndpointCallExecutableProvider> services = loader.load(EndpointCallExecutableProvider.class);
+		Collection<EndpointCallExecutableProvider> services = loader.all(EndpointCallExecutableProvider.class);
 
 		assertThat(services, contains(
 				instanceOf(RxJava2CompletableEndpointCallExecutableFactory.class),

@@ -8,13 +8,13 @@ import java.util.Collection;
 
 import org.junit.Test;
 
-public class ComponentLoaderTest {
+public class ProviderTest {
 
 	@Test
 	public void test() {
-		ComponentLoader loader = new ComponentLoader();
+		Provider loader = new Provider();
 
-		Collection<MyService> services = loader.load(MyService.class);
+		Collection<MyService> services = loader.all(MyService.class);
 
 		assertThat(services, contains(instanceOf(DefaultMyService.class)));
 	}

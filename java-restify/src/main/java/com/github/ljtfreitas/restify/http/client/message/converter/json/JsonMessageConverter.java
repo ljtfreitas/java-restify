@@ -28,21 +28,14 @@ package com.github.ljtfreitas.restify.http.client.message.converter.json;
 import com.github.ljtfreitas.restify.http.client.message.HttpMessageReader;
 import com.github.ljtfreitas.restify.http.client.message.HttpMessageWriter;
 import com.github.ljtfreitas.restify.http.contract.ContentType;
-import com.github.ljtfreitas.restify.http.contract.metadata.reflection.JavaClassDiscovery;
 
-public abstract class JsonMessageConverter<T> implements HttpMessageReader<T>, HttpMessageWriter<T> {
+public interface JsonMessageConverter<T> extends HttpMessageReader<T>, HttpMessageWriter<T> {
 
-	private static final ContentType APPLICATION_JSON = ContentType.of("application/json");
+	public static final ContentType APPLICATION_JSON_CONTENT_TYPE = ContentType.of("application/json");
 
 	@Override
-	public ContentType contentType() {
-		return APPLICATION_JSON;
+	public default ContentType contentType() {
+		return APPLICATION_JSON_CONTENT_TYPE;
 	}
 
-	public static JsonMessageConverter<?> available() {
-		return JavaClassDiscovery.present("com.fasterxml.jackson.databind.ObjectMapper") ? new JacksonMessageConverter<>()
-					: JavaClassDiscovery.present("com.google.gson.Gson") ? new GsonMessageConverter<>()
-						: JavaClassDiscovery.present("javax.json.Json") ? new JsonpMessageConverter()
-								:  new FallbackJsonMessageConverter<>();
-	}
 }

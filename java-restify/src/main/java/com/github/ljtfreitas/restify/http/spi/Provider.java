@@ -23,34 +23,37 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.http.client.message.converter.json;
+package com.github.ljtfreitas.restify.http.spi;
 
-import java.lang.reflect.Type;
+import static com.github.ljtfreitas.restify.http.util.Preconditions.isFalse;
+import static com.github.ljtfreitas.restify.http.util.Preconditions.isTrue;
 
-import com.github.ljtfreitas.restify.http.client.request.HttpRequestMessage;
-import com.github.ljtfreitas.restify.http.client.request.RestifyHttpMessageWriteException;
-import com.github.ljtfreitas.restify.http.client.response.HttpResponseMessage;
-import com.github.ljtfreitas.restify.http.client.response.RestifyHttpMessageReadException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.ServiceLoader;
 
-public class FallbackJsonMessageConverter<T> extends JsonMessageConverter<T> {
+public class Provider {
 
-	@Override
-	public boolean canRead(Type type) {
-		return false;
+	public <T> T single(Class<T> type) {
+		Collection<T> all = doFind(type);
+	
+		isFalse(all.isEmpty(), "There is no implementation available for type " + type);
+		isTrue(all.size() == 1, "There are multiple implementations available for the type " + type);
+
+		return all.stream().findFirst().get(); 
 	}
 
-	@Override
-	public T read(HttpResponseMessage httpResponseMessage, Type expectedType) {
-		throw new RestifyHttpMessageReadException("This converter is not able to read your JSON message.");
+	public <T> Collection<T> all(Class<T> type) {
+		return doFind(type);
 	}
 
-	@Override
-	public boolean canWrite(Class<?> type) {
-		return false;
-	}
+	private <T> Collection<T> doFind(Class<T> type) {
+		ServiceLoader<T> loader = ServiceLoader.load(type);
 
-	@Override
-	public void write(T body, HttpRequestMessage httpRequestMessage) {
-		throw new RestifyHttpMessageWriteException("This converter is not able to write your JSON message.");
+		Collection<T> components = new ArrayList<>();
+		loader.forEach(components::add);
+
+		return Collections.unmodifiableCollection(components);
 	}
 }

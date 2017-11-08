@@ -40,7 +40,7 @@ import com.google.gson.JsonIOException;
 import com.google.gson.JsonSyntaxException;
 import com.google.gson.reflect.TypeToken;
 
-public class GsonMessageConverter<T> extends JsonMessageConverter<T> {
+public class GsonMessageConverter<T> implements JsonMessageConverter<T> {
 
 	private final Gson gson;
 

@@ -47,6 +47,7 @@ import com.github.ljtfreitas.restify.http.client.request.EndpointRequestExecutor
 import com.github.ljtfreitas.restify.http.client.request.HttpClientRequestFactory;
 import com.github.ljtfreitas.restify.http.contract.Cookie;
 import com.github.ljtfreitas.restify.http.contract.Cookies;
+import com.github.ljtfreitas.restify.http.spi.Provider;
 
 public class OAuth2AuthenticationBuilder {
 
@@ -191,7 +192,7 @@ public class OAuth2AuthenticationBuilder {
 			}
 
 			public OAuth2AuthorizationServerHttpMessageConvertersBuilder json() {
-				converters.add(JsonMessageConverter.available());
+				converters.add(new Provider().single(JsonMessageConverter.class));
 				return this;
 			}
 

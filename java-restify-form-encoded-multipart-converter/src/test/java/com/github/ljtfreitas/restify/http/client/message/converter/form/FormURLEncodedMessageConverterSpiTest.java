@@ -8,16 +8,16 @@ import java.util.Collection;
 
 import org.junit.Test;
 
-import com.github.ljtfreitas.restify.http.spi.ComponentLoader;
+import com.github.ljtfreitas.restify.http.spi.Provider;
 
 public class FormURLEncodedMessageConverterSpiTest {
 
-	private ComponentLoader loader = new ComponentLoader();
+	private Provider loader = new Provider();
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Test
 	public void shouldDiscoveryGuavaExecutableProviders() {
-		Collection<FormURLEncodedMessageConverter> services = loader.load(FormURLEncodedMessageConverter.class);
+		Collection<FormURLEncodedMessageConverter> services = loader.all(FormURLEncodedMessageConverter.class);
 
 		assertThat(services, contains(
 				instanceOf(FormURLEncodedFormObjectMessageConverter.class),

@@ -9,15 +9,15 @@ import java.util.Collection;
 import org.junit.Test;
 
 import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutableProvider;
-import com.github.ljtfreitas.restify.http.spi.ComponentLoader;
+import com.github.ljtfreitas.restify.http.spi.Provider;
 
 public class JsoupEndpointCallExecutableProviderSpiTest {
 
-	private ComponentLoader loader = new ComponentLoader();
+	private Provider loader = new Provider();
 
 	@Test
 	public void shouldDiscoveryJsoupExecutableProviders() {
-		Collection<EndpointCallExecutableProvider> services = loader.load(EndpointCallExecutableProvider.class);
+		Collection<EndpointCallExecutableProvider> services = loader.all(EndpointCallExecutableProvider.class);
 
 		assertThat(services, contains(
 				instanceOf(JsoupDocumentEndpointCallExecutableFactory.class)));

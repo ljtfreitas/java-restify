@@ -32,7 +32,6 @@ import java.net.URI;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
-import java.util.List;
 
 import com.github.ljtfreitas.restify.http.client.authentication.BasicAuthentication;
 import com.github.ljtfreitas.restify.http.client.header.Header;
@@ -54,6 +53,7 @@ import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponseReader;
 import com.github.ljtfreitas.restify.http.contract.Parameters;
 import com.github.ljtfreitas.restify.http.contract.Parameters.Parameter;
+import com.github.ljtfreitas.restify.http.spi.Provider;
 
 public class DefaultAuthorizationServer implements AuthorizationServer {
 
@@ -202,8 +202,11 @@ public class DefaultAuthorizationServer implements AuthorizationServer {
 		}
 
 		private HttpMessageConverters converters() {
-			List<HttpMessageConverter> converters = Arrays.asList(new TextPlainMessageConverter(),
-					new FormURLEncodedParametersMessageConverter(), JsonMessageConverter.available(), new JaxbXmlMessageConverter<>());
+			HttpMessageConverter jsonMessageConverter = new Provider().single(JsonMessageConverter.class);
+
+			Collection<HttpMessageConverter> converters = Arrays.asList(new TextPlainMessageConverter(),
+					new FormURLEncodedParametersMessageConverter(), jsonMessageConverter, new JaxbXmlMessageConverter<>());
+
 			return new HttpMessageConverters(converters);
 		}
 	}

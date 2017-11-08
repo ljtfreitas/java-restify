@@ -8,16 +8,16 @@ import java.util.Collection;
 
 import org.junit.Test;
 
-import com.github.ljtfreitas.restify.http.spi.ComponentLoader;
+import com.github.ljtfreitas.restify.http.spi.Provider;
 
 public class MultipartFormMessageWriterSpiTest {
 
-	private ComponentLoader loader = new ComponentLoader();
+	private Provider loader = new Provider();
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	@Test
 	public void shouldDiscoveryGuavaExecutableProviders() {
-		Collection<MultipartFormMessageWriter> services = loader.load(MultipartFormMessageWriter.class);
+		Collection<MultipartFormMessageWriter> services = loader.all(MultipartFormMessageWriter.class);
 
 		assertThat(services, contains(
 				instanceOf(MultipartFormFileObjectMessageWriter.class),

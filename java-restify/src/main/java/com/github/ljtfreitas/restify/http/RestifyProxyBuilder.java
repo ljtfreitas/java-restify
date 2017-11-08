@@ -109,7 +109,7 @@ import com.github.ljtfreitas.restify.http.contract.metadata.EndpointTarget;
 import com.github.ljtfreitas.restify.http.contract.metadata.RestifyContractExpressionResolver;
 import com.github.ljtfreitas.restify.http.contract.metadata.RestifyContractReader;
 import com.github.ljtfreitas.restify.http.contract.metadata.SimpleRestifyContractExpressionResolver;
-import com.github.ljtfreitas.restify.http.spi.ComponentLoader;
+import com.github.ljtfreitas.restify.http.spi.Provider;
 
 public class RestifyProxyBuilder {
 
@@ -133,7 +133,7 @@ public class RestifyProxyBuilder {
 
 	private RetryBuilder retryBuilder = new RetryBuilder(this);
 
-	private ComponentLoader componentLoader = new ComponentLoader();
+	private Provider provider = new Provider();
 
 	public RestifyProxyBuilder client(HttpClientRequestFactory httpClientRequestFactory) {
 		this.httpClientRequestFactory = httpClientRequestFactory;
@@ -326,7 +326,7 @@ public class RestifyProxyBuilder {
 		}
 
 		public HttpMessageConvertersBuilder json() {
-			converters.add(JsonMessageConverter.available());
+			converters.add(provider.single(JsonMessageConverter.class));
 			return this;
 		}
 
@@ -343,8 +343,8 @@ public class RestifyProxyBuilder {
 		}
 
 		public HttpMessageConvertersBuilder form() {
-			converters.addAll(componentLoader.load(FormURLEncodedMessageConverter.class));
-			converters.addAll(componentLoader.load(MultipartFormMessageWriter.class));
+			converters.addAll(provider.all(FormURLEncodedMessageConverter.class));
+			converters.addAll(provider.all(MultipartFormMessageWriter.class));
 			return this;
 		}
 
@@ -488,7 +488,7 @@ public class RestifyProxyBuilder {
 			providers.addAll(async.build());
 
 			if (discoveryComponentConfiguration.enabled) {
-				providers.addAll(componentLoader.load(EndpointCallExecutableProvider.class));
+				providers.addAll(provider.all(EndpointCallExecutableProvider.class));
 			}
 
 			return new EndpointCallExecutables(providers);

@@ -1,4 +1,4 @@
-package com.github.ljtfreitas.restify.http.client.message.converter.form;
+package com.github.ljtfreitas.restify.http.client.message.converter.json;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
@@ -6,6 +6,7 @@ import java.io.InputStream;
 
 import com.github.ljtfreitas.restify.http.client.header.Headers;
 import com.github.ljtfreitas.restify.http.client.request.HttpRequestMessage;
+import com.github.ljtfreitas.restify.http.client.request.SimpleHttpRequestMessage;
 import com.github.ljtfreitas.restify.http.client.response.BaseHttpResponseMessage;
 import com.github.ljtfreitas.restify.http.client.response.HttpResponseMessage;
 import com.github.ljtfreitas.restify.http.client.response.StatusCode;
