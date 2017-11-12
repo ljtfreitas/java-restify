@@ -8,6 +8,8 @@ import static org.mockito.Matchers.anyVararg;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.lang.reflect.Method;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -17,6 +19,8 @@ import org.mockito.runners.MockitoJUnitRunner;
 import com.github.ljtfreitas.restify.http.client.call.EndpointCall;
 import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutable;
 import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallObjectExecutableFactory;
+import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethod;
+import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethodParameters;
 import com.github.ljtfreitas.restify.reflection.JavaType;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -82,4 +86,16 @@ public class EndpointCallObjectExecutableFactoryTest {
 
 		String string();
 	}
+	
+	private class SimpleEndpointMethod extends EndpointMethod {
+
+		public SimpleEndpointMethod(Method javaMethod) {
+			super(javaMethod, "/", "GET");
+		}
+
+		public SimpleEndpointMethod(Method javaMethod, EndpointMethodParameters parameters) {
+			super(javaMethod, "/", "GET", parameters);
+		}
+	}
+
 }

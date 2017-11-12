@@ -67,6 +67,6 @@ public class Credentials {
 
 	@Override
 	public String toString() {
-		return username + " : " + Stream.generate(() -> "*").limit(password.length()).collect(Collectors.joining(" "));
+		return username + " : " + Stream.generate(() -> "*").limit(password.length()).collect(Collectors.joining(""));
 	}
 }

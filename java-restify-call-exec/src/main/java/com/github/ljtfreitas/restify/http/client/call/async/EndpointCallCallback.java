@@ -23,9 +23,8 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.http.client.request.async;
+package com.github.ljtfreitas.restify.http.client.call.async;
 
-public interface EndpointCallSuccessCallback<T> {
+public interface EndpointCallCallback<T> extends EndpointCallSuccessCallback<T>, EndpointCallFailureCallback {
 
-	public void onSuccess(T response);
 }

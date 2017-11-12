@@ -10,11 +10,6 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import com.github.ljtfreitas.restify.http.client.call.async.DefaultAsyncEndpointCall;
-import com.github.ljtfreitas.restify.http.client.request.async.EndpointCallCallback;
-import com.github.ljtfreitas.restify.http.client.request.async.EndpointCallFailureCallback;
-import com.github.ljtfreitas.restify.http.client.request.async.EndpointCallSuccessCallback;
-
 @RunWith(MockitoJUnitRunner.class)
 public class DefaultAsyncEndpointCallTest {
 

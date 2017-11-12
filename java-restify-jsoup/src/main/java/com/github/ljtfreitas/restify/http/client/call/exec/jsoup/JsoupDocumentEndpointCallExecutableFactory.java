@@ -25,26 +25,16 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.call.exec.jsoup;
 
-import static com.github.ljtfreitas.restify.util.Preconditions.isTrue;
-
-import java.util.Optional;
-
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 
 import com.github.ljtfreitas.restify.http.client.call.EndpointCall;
 import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutable;
-import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutableDecoratorFactory;
-import com.github.ljtfreitas.restify.http.client.message.ContentType;
-import com.github.ljtfreitas.restify.http.client.message.Headers;
-import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
+import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutableFactory;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethod;
 import com.github.ljtfreitas.restify.reflection.JavaType;
-import com.github.ljtfreitas.restify.reflection.SimpleParameterizedType;
 
-public class JsoupDocumentEndpointCallExecutableFactory implements EndpointCallExecutableDecoratorFactory<Document, EndpointResponse<String>, String> {
-
-	private static final JavaType DEFAULT_RETURN_TYPE = JavaType.of(new SimpleParameterizedType(EndpointResponse.class, null, String.class));
+public class JsoupDocumentEndpointCallExecutableFactory implements EndpointCallExecutableFactory<Document, String> {
 
 	@Override
 	public boolean supports(EndpointMethod endpointMethod) {
@@ -52,37 +42,26 @@ public class JsoupDocumentEndpointCallExecutableFactory implements EndpointCallE
 	}
 
 	@Override
-	public JavaType returnType(EndpointMethod endpointMethod) {
-		return DEFAULT_RETURN_TYPE;
-	}
-
-	@Override
-	public EndpointCallExecutable<Document, String> create(EndpointMethod endpointMethod, EndpointCallExecutable<EndpointResponse<String>, String> delegate) {
-		return new JsoupDocumentEndpointCallExecutable(delegate);
+	public EndpointCallExecutable<Document, String> create(EndpointMethod endpointMethod) {
+		return new JsoupDocumentEndpointCallExecutable(endpointMethod.returnType());
 	}
 
 	private class JsoupDocumentEndpointCallExecutable implements EndpointCallExecutable<Document, String> {
 
-		private final EndpointCallExecutable<EndpointResponse<String>, String> delegate;
+		private final JavaType returnType;
 
-		private JsoupDocumentEndpointCallExecutable(EndpointCallExecutable<EndpointResponse<String>, String> delegate) {
-			this.delegate = delegate;
+		private JsoupDocumentEndpointCallExecutable(JavaType returnType) {
+			this.returnType = returnType;
 		}
 
 		@Override
 		public JavaType returnType() {
-			return delegate.returnType();
+			return returnType;
 		}
 
 		@Override
 		public Document execute(EndpointCall<String> call, Object[] args) {
-			EndpointResponse<String> response = delegate.execute(call, args);
-
-			Optional<ContentType> contentType = response.headers().get(Headers.CONTENT_TYPE).map(h -> ContentType.of(h.value()));
-			isTrue(contentType.isPresent() && contentType.get().is("text/html"),
-					"Only Content-Type [text/html] is acceptable from Jsoup. The Content-Type of HTTP response is [" + contentType.get() + "]");
-
-			return Jsoup.parse(response.body());
+			return Jsoup.parse(call.execute());
 		}
 	}
 }

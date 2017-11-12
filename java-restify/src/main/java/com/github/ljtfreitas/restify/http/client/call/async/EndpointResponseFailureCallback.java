@@ -23,7 +23,7 @@
 * SOFTWARE.
 *
 *******************************************************************************/
-package com.github.ljtfreitas.restify.http.client.request.async;
+package com.github.ljtfreitas.restify.http.client.call.async;
 
 import com.github.ljtfreitas.restify.http.HttpException;
 import com.github.ljtfreitas.restify.http.client.message.response.StatusCode;

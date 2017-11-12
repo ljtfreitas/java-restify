@@ -23,18 +23,11 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.http;
+package com.github.ljtfreitas.restify.http.client.call.async;
 
-public class RestifyProxyMethodException extends RuntimeException {
+public interface AsyncEndpointCall<T> {
 
-	private static final long serialVersionUID = 1L;
+	public void execute(EndpointCallCallback<T> callback);
 
-	public RestifyProxyMethodException(Throwable cause) {
-		super(cause);
-	}
-
-	public RestifyProxyMethodException(String message, Throwable cause) {
-		super(message, cause);
-	}
-
+	public void execute(EndpointCallSuccessCallback<T> success, EndpointCallFailureCallback failure);
 }

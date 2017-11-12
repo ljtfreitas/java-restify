@@ -22,6 +22,7 @@
 		<module>java-restify</module>
 		<module>java-restify-reflection</module>
 		<module>java-restify-contract</module>
+		<module>java-restify-call-exec</module>
 
 		<module>java-restify-guava</module>
 		<module>java-restify-rxjava</module>

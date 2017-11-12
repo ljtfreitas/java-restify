@@ -30,9 +30,6 @@ import java.util.concurrent.CompletionException;
 import java.util.concurrent.Executor;
 
 import com.github.ljtfreitas.restify.http.client.call.EndpointCall;
-import com.github.ljtfreitas.restify.http.client.request.async.EndpointCallCallback;
-import com.github.ljtfreitas.restify.http.client.request.async.EndpointCallFailureCallback;
-import com.github.ljtfreitas.restify.http.client.request.async.EndpointCallSuccessCallback;
 
 class DefaultAsyncEndpointCall<T> implements AsyncEndpointCall<T> {
 

@@ -1,4 +1,4 @@
-package com.github.ljtfreitas.restify.http.client.request.async;
+package com.github.ljtfreitas.restify.http.client.call.async;
 
 import static org.mockito.Matchers.argThat;
 import static org.mockito.Mockito.verify;
@@ -12,6 +12,7 @@ import org.mockito.ArgumentMatcher;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import com.github.ljtfreitas.restify.http.client.call.async.EndpointResponseFailureCallback;
 import com.github.ljtfreitas.restify.http.client.message.Headers;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponseBadGatewayException;

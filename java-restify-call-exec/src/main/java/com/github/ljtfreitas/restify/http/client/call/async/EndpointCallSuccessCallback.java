@@ -25,13 +25,7 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.call.async;
 
-import com.github.ljtfreitas.restify.http.client.request.async.EndpointCallCallback;
-import com.github.ljtfreitas.restify.http.client.request.async.EndpointCallFailureCallback;
-import com.github.ljtfreitas.restify.http.client.request.async.EndpointCallSuccessCallback;
+public interface EndpointCallSuccessCallback<T> {
 
-public interface AsyncEndpointCall<T> {
-
-	public void execute(EndpointCallCallback<T> callback);
-
-	public void execute(EndpointCallSuccessCallback<T> success, EndpointCallFailureCallback failure);
+	public void onSuccess(T response);
 }
