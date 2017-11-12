@@ -30,15 +30,15 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
+import com.github.ljtfreitas.restify.http.contract.metadata.ContractExpressionResolver;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointHeader;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethod;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethodParameter;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointTarget;
-import com.github.ljtfreitas.restify.http.contract.metadata.RestifyContractExpressionResolver;
-import com.github.ljtfreitas.restify.http.contract.metadata.reflection.JavaType;
-import com.github.ljtfreitas.restify.http.contract.metadata.reflection.SimpleGenericArrayType;
-import com.github.ljtfreitas.restify.http.contract.metadata.reflection.SimpleParameterizedType;
-import com.github.ljtfreitas.restify.http.contract.metadata.reflection.SimpleWildcardType;
+import com.github.ljtfreitas.restify.reflection.JavaType;
+import com.github.ljtfreitas.restify.reflection.SimpleGenericArrayType;
+import com.github.ljtfreitas.restify.reflection.SimpleParameterizedType;
+import com.github.ljtfreitas.restify.reflection.SimpleWildcardType;
 
 @RunWith(MockitoJUnitRunner.class)
 public class SpringWebContractReaderTest {
@@ -54,7 +54,7 @@ public class SpringWebContractReaderTest {
 	private EndpointTarget mySimpleCrudApiTarget;
 
 	@Mock
-	private RestifyContractExpressionResolver expressionResolverMock;
+	private ContractExpressionResolver expressionResolverMock;
 
 	@InjectMocks
 	private SpringWebContractReader springMvcContractReader;

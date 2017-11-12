@@ -25,7 +25,7 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.authentication;
 
-import static com.github.ljtfreitas.restify.http.util.Preconditions.nonNull;
+import static com.github.ljtfreitas.restify.util.Preconditions.nonNull;
 
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
 

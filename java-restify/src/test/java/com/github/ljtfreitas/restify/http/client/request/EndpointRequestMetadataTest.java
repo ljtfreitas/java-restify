@@ -15,14 +15,14 @@ import java.util.Optional;
 
 import org.junit.Test;
 
+import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethodMetadata;
 import com.github.ljtfreitas.restify.http.contract.metadata.Metadata;
-import com.github.ljtfreitas.restify.http.contract.metadata.reflection.MethodMetadata;
 
 public class EndpointRequestMetadataTest {
 
 	@Test
 	public void shouldGetAnnotationByType() throws Exception {
-		MethodMetadata methodMetadata = MethodMetadata.of(MyType.class.getMethod("bla"));
+		EndpointMethodMetadata methodMetadata = EndpointMethodMetadata.of(MyType.class.getMethod("bla"));
 
 		EndpointRequestMetadata endpointRequestMetadata = new EndpointRequestMetadata(methodMetadata.all());
 
@@ -34,7 +34,7 @@ public class EndpointRequestMetadataTest {
 
 	@Test
 	public void shouldGetAllAnnotationsByType() throws Exception {
-		MethodMetadata methodMetadata = MethodMetadata.of(MyType.class.getMethod("bla"));
+		EndpointMethodMetadata methodMetadata = EndpointMethodMetadata.of(MyType.class.getMethod("bla"));
 
 		EndpointRequestMetadata endpointRequestMetadata = new EndpointRequestMetadata(methodMetadata.all());
 

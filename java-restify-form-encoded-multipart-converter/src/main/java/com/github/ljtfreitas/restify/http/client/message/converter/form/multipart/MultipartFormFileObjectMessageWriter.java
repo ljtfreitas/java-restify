@@ -27,7 +27,7 @@ package com.github.ljtfreitas.restify.http.client.message.converter.form.multipa
 
 import java.io.IOException;
 
-import com.github.ljtfreitas.restify.http.client.request.HttpRequestMessage;
+import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
 import com.github.ljtfreitas.restify.http.contract.MultipartFile;
 
 public class MultipartFormFileObjectMessageWriter extends BaseMultipartFormMessageWriter<MultipartFile> {

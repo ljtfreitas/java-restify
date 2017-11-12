@@ -25,8 +25,8 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.jaxrs.contract.metadata.reflection;
 
-import static com.github.ljtfreitas.restify.http.util.Preconditions.isFalse;
-import static com.github.ljtfreitas.restify.http.util.Preconditions.isTrue;
+import static com.github.ljtfreitas.restify.util.Preconditions.isFalse;
+import static com.github.ljtfreitas.restify.util.Preconditions.isTrue;
 
 import java.lang.annotation.Annotation;
 import java.util.Arrays;
@@ -36,18 +36,18 @@ import javax.ws.rs.HeaderParam;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
 
-import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethodParameterSerializer;
-import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethodQueryParameterSerializer;
-import com.github.ljtfreitas.restify.http.contract.metadata.SimpleEndpointMethodParameterSerializer;
-import com.github.ljtfreitas.restify.http.contract.metadata.reflection.JavaType;
-import com.github.ljtfreitas.restify.http.contract.metadata.reflection.JavaTypeResolver;
+import com.github.ljtfreitas.restify.http.contract.ParameterSerializer;
+import com.github.ljtfreitas.restify.http.contract.QueryParameterSerializer;
+import com.github.ljtfreitas.restify.http.contract.SimpleParameterSerializer;
+import com.github.ljtfreitas.restify.reflection.JavaType;
+import com.github.ljtfreitas.restify.reflection.JavaTypeResolver;
 
 public class JaxRsJavaMethodParameterMetadata {
 
 	private final JavaType type;
 	private final String name;
 	private final Annotation annotationParameter;
-	private final EndpointMethodParameterSerializer serializer;
+	private final ParameterSerializer serializer;
 
 	public JaxRsJavaMethodParameterMetadata(java.lang.reflect.Parameter javaMethodParameter, Class<?> targetClassType) {
 		this.type = JavaType.of(new JavaTypeResolver(targetClassType).parameterizedTypeOf(javaMethodParameter));
@@ -75,8 +75,8 @@ public class JaxRsJavaMethodParameterMetadata {
 				+ "from method [" + javaMethodParameter.getDeclaringExecutable() + "]");
 		this.name = name;
 
-		this.serializer = (queryParameter != null) ? new EndpointMethodQueryParameterSerializer()
-				: new SimpleEndpointMethodParameterSerializer();
+		this.serializer = (queryParameter != null) ? new QueryParameterSerializer()
+				: new SimpleParameterSerializer();
 	}
 
 	private boolean needName() {
@@ -109,7 +109,7 @@ public class JaxRsJavaMethodParameterMetadata {
 		return annotationParameter instanceof QueryParam;
 	}
 
-	public EndpointMethodParameterSerializer serializer() {
+	public ParameterSerializer serializer() {
 		return serializer;
 	}
 

@@ -12,32 +12,32 @@ import org.mockito.ArgumentMatcher;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import com.github.ljtfreitas.restify.http.client.header.Headers;
+import com.github.ljtfreitas.restify.http.client.message.Headers;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
-import com.github.ljtfreitas.restify.http.client.response.RestifyEndpointResponseBadGatewayException;
-import com.github.ljtfreitas.restify.http.client.response.RestifyEndpointResponseBadRequestException;
-import com.github.ljtfreitas.restify.http.client.response.RestifyEndpointResponseConflictException;
-import com.github.ljtfreitas.restify.http.client.response.RestifyEndpointResponseException;
-import com.github.ljtfreitas.restify.http.client.response.RestifyEndpointResponseExpectationFailedException;
-import com.github.ljtfreitas.restify.http.client.response.RestifyEndpointResponseForbiddenException;
-import com.github.ljtfreitas.restify.http.client.response.RestifyEndpointResponseGatewayTimeoutException;
-import com.github.ljtfreitas.restify.http.client.response.RestifyEndpointResponseGoneException;
-import com.github.ljtfreitas.restify.http.client.response.RestifyEndpointResponseHttpVersionNotSupportedException;
-import com.github.ljtfreitas.restify.http.client.response.RestifyEndpointResponseInternalServerErrorException;
-import com.github.ljtfreitas.restify.http.client.response.RestifyEndpointResponseLengthRequiredException;
-import com.github.ljtfreitas.restify.http.client.response.RestifyEndpointResponseMethodNotAllowedException;
-import com.github.ljtfreitas.restify.http.client.response.RestifyEndpointResponseNotAcceptableException;
-import com.github.ljtfreitas.restify.http.client.response.RestifyEndpointResponseNotFoundException;
-import com.github.ljtfreitas.restify.http.client.response.RestifyEndpointResponseNotImplementedException;
-import com.github.ljtfreitas.restify.http.client.response.RestifyEndpointResponsePreconditionFailedException;
-import com.github.ljtfreitas.restify.http.client.response.RestifyEndpointResponseProxyAuthenticationRequiredException;
-import com.github.ljtfreitas.restify.http.client.response.RestifyEndpointResponseRequestEntityTooLargeException;
-import com.github.ljtfreitas.restify.http.client.response.RestifyEndpointResponseRequestTimeoutException;
-import com.github.ljtfreitas.restify.http.client.response.RestifyEndpointResponseRequestUriTooLongException;
-import com.github.ljtfreitas.restify.http.client.response.RestifyEndpointResponseRequestedRangeNotSatisfiableException;
-import com.github.ljtfreitas.restify.http.client.response.RestifyEndpointResponseServiceUnavailableException;
-import com.github.ljtfreitas.restify.http.client.response.RestifyEndpointResponseUnauthorizedException;
-import com.github.ljtfreitas.restify.http.client.response.RestifyEndpointResponseUnsupportedMediaTypeException;
+import com.github.ljtfreitas.restify.http.client.response.EndpointResponseBadGatewayException;
+import com.github.ljtfreitas.restify.http.client.response.EndpointResponseBadRequestException;
+import com.github.ljtfreitas.restify.http.client.response.EndpointResponseConflictException;
+import com.github.ljtfreitas.restify.http.client.response.EndpointResponseException;
+import com.github.ljtfreitas.restify.http.client.response.EndpointResponseExpectationFailedException;
+import com.github.ljtfreitas.restify.http.client.response.EndpointResponseForbiddenException;
+import com.github.ljtfreitas.restify.http.client.response.EndpointResponseGatewayTimeoutException;
+import com.github.ljtfreitas.restify.http.client.response.EndpointResponseGoneException;
+import com.github.ljtfreitas.restify.http.client.response.EndpointResponseHttpVersionNotSupportedException;
+import com.github.ljtfreitas.restify.http.client.response.EndpointResponseInternalServerErrorException;
+import com.github.ljtfreitas.restify.http.client.response.EndpointResponseLengthRequiredException;
+import com.github.ljtfreitas.restify.http.client.response.EndpointResponseMethodNotAllowedException;
+import com.github.ljtfreitas.restify.http.client.response.EndpointResponseNotAcceptableException;
+import com.github.ljtfreitas.restify.http.client.response.EndpointResponseNotFoundException;
+import com.github.ljtfreitas.restify.http.client.response.EndpointResponseNotImplementedException;
+import com.github.ljtfreitas.restify.http.client.response.EndpointResponsePreconditionFailedException;
+import com.github.ljtfreitas.restify.http.client.response.EndpointResponseProxyAuthenticationRequiredException;
+import com.github.ljtfreitas.restify.http.client.response.EndpointResponseRequestEntityTooLargeException;
+import com.github.ljtfreitas.restify.http.client.response.EndpointResponseRequestTimeoutException;
+import com.github.ljtfreitas.restify.http.client.response.EndpointResponseRequestUriTooLongException;
+import com.github.ljtfreitas.restify.http.client.response.EndpointResponseRequestedRangeNotSatisfiableException;
+import com.github.ljtfreitas.restify.http.client.response.EndpointResponseServiceUnavailableException;
+import com.github.ljtfreitas.restify.http.client.response.EndpointResponseUnauthorizedException;
+import com.github.ljtfreitas.restify.http.client.response.EndpointResponseUnsupportedMediaTypeException;
 
 @RunWith(MockitoJUnitRunner.class)
 public class EndpointResponseFailureCallbackTest {
@@ -47,7 +47,7 @@ public class EndpointResponseFailureCallbackTest {
 
 	@Test
 	public void shouldCallBadRequestCallbackWhenBadRequestErrorOcurred() {
-		RestifyEndpointResponseBadRequestException exception = new RestifyEndpointResponseBadRequestException(
+		EndpointResponseBadRequestException exception = new EndpointResponseBadRequestException(
 				"http error", new Headers(), "bad request");
 		callback.onFailure(exception);
 
@@ -56,7 +56,7 @@ public class EndpointResponseFailureCallbackTest {
 
 	@Test
 	public void shouldCallUnauthorizedCallbackWhenUnauthorizedErrorOcurred() {
-		RestifyEndpointResponseUnauthorizedException exception = new RestifyEndpointResponseUnauthorizedException(
+		EndpointResponseUnauthorizedException exception = new EndpointResponseUnauthorizedException(
 				"http error", new Headers(), "unauthorized");
 		callback.onFailure(exception);
 
@@ -65,7 +65,7 @@ public class EndpointResponseFailureCallbackTest {
 
 	@Test
 	public void shouldCallForbiddenCallbackWhenForbiddenErrorOcurred() {
-		RestifyEndpointResponseForbiddenException exception = new RestifyEndpointResponseForbiddenException(
+		EndpointResponseForbiddenException exception = new EndpointResponseForbiddenException(
 				"http error", new Headers(), "forbidden");
 		callback.onFailure(exception);
 
@@ -74,7 +74,7 @@ public class EndpointResponseFailureCallbackTest {
 
 	@Test
 	public void shouldCallNotFoundCallbackWhenNotFoundErrorOcurred() {
-		RestifyEndpointResponseNotFoundException exception = new RestifyEndpointResponseNotFoundException("http error",
+		EndpointResponseNotFoundException exception = new EndpointResponseNotFoundException("http error",
 				new Headers(), "not found");
 		callback.onFailure(exception);
 
@@ -83,7 +83,7 @@ public class EndpointResponseFailureCallbackTest {
 
 	@Test
 	public void shouldCallMethodNotAllowedCallbackWhenMethodNotAllowedErrorOcurred() {
-		RestifyEndpointResponseMethodNotAllowedException exception = new RestifyEndpointResponseMethodNotAllowedException(
+		EndpointResponseMethodNotAllowedException exception = new EndpointResponseMethodNotAllowedException(
 				"http error", new Headers(), "method not allowed");
 		callback.onFailure(exception);
 
@@ -92,7 +92,7 @@ public class EndpointResponseFailureCallbackTest {
 
 	@Test
 	public void shouldCallNotAcceptableCallbackWhenNotAcceptableErrorOcurred() {
-		RestifyEndpointResponseNotAcceptableException exception = new RestifyEndpointResponseNotAcceptableException(
+		EndpointResponseNotAcceptableException exception = new EndpointResponseNotAcceptableException(
 				"http error", new Headers(), "not acceptable");
 		callback.onFailure(exception);
 
@@ -101,7 +101,7 @@ public class EndpointResponseFailureCallbackTest {
 
 	@Test
 	public void shouldCallProxyAuthenticationRequiredCallbackWhenProxyAuthenticationRequiredErrorOcurred() {
-		RestifyEndpointResponseProxyAuthenticationRequiredException exception = new RestifyEndpointResponseProxyAuthenticationRequiredException(
+		EndpointResponseProxyAuthenticationRequiredException exception = new EndpointResponseProxyAuthenticationRequiredException(
 				"http error", new Headers(), "proxy authentication required");
 		callback.onFailure(exception);
 
@@ -110,7 +110,7 @@ public class EndpointResponseFailureCallbackTest {
 
 	@Test
 	public void shouldCallRequestTimeoutCallbackWhenRequestTimeoutErrorOcurred() {
-		RestifyEndpointResponseRequestTimeoutException exception = new RestifyEndpointResponseRequestTimeoutException(
+		EndpointResponseRequestTimeoutException exception = new EndpointResponseRequestTimeoutException(
 				"http error", new Headers(), "request timeout");
 		callback.onFailure(exception);
 
@@ -119,7 +119,7 @@ public class EndpointResponseFailureCallbackTest {
 
 	@Test
 	public void shouldCallConflictCallbackWhenConflictErrorOcurred() {
-		RestifyEndpointResponseConflictException exception = new RestifyEndpointResponseConflictException("http error",
+		EndpointResponseConflictException exception = new EndpointResponseConflictException("http error",
 				new Headers(), "conflict");
 		callback.onFailure(exception);
 
@@ -128,7 +128,7 @@ public class EndpointResponseFailureCallbackTest {
 
 	@Test
 	public void shouldCallGoneCallbackWhenGoneErrorOcurred() {
-		RestifyEndpointResponseGoneException exception = new RestifyEndpointResponseGoneException("http error",
+		EndpointResponseGoneException exception = new EndpointResponseGoneException("http error",
 				new Headers(), "gone");
 		callback.onFailure(exception);
 
@@ -137,7 +137,7 @@ public class EndpointResponseFailureCallbackTest {
 
 	@Test
 	public void shouldCallLenghtRequiredCallbackWhenLenghtRequiredErrorOcurred() {
-		RestifyEndpointResponseLengthRequiredException exception = new RestifyEndpointResponseLengthRequiredException(
+		EndpointResponseLengthRequiredException exception = new EndpointResponseLengthRequiredException(
 				"http error", new Headers(), "length required");
 		callback.onFailure(exception);
 
@@ -146,7 +146,7 @@ public class EndpointResponseFailureCallbackTest {
 
 	@Test
 	public void shouldCallPreconditionFailedCallbackWhenPreconditionFailedErrorOcurred() {
-		RestifyEndpointResponsePreconditionFailedException exception = new RestifyEndpointResponsePreconditionFailedException(
+		EndpointResponsePreconditionFailedException exception = new EndpointResponsePreconditionFailedException(
 				"http error", new Headers(), "precondition failed");
 		callback.onFailure(exception);
 
@@ -155,7 +155,7 @@ public class EndpointResponseFailureCallbackTest {
 
 	@Test
 	public void shouldCallRequestEntityTooLargeCallbackWhenRequestEntityTooLargeErrorOcurred() {
-		RestifyEndpointResponseRequestEntityTooLargeException exception = new RestifyEndpointResponseRequestEntityTooLargeException(
+		EndpointResponseRequestEntityTooLargeException exception = new EndpointResponseRequestEntityTooLargeException(
 				"http error", new Headers(), "request entity too large");
 		callback.onFailure(exception);
 
@@ -164,7 +164,7 @@ public class EndpointResponseFailureCallbackTest {
 
 	@Test
 	public void shouldCallRequestUriTooLongCallbackWhenRequestUriTooLongErrorOcurred() {
-		RestifyEndpointResponseRequestUriTooLongException exception = new RestifyEndpointResponseRequestUriTooLongException(
+		EndpointResponseRequestUriTooLongException exception = new EndpointResponseRequestUriTooLongException(
 				"http error", new Headers(), "request uri too long");
 		callback.onFailure(exception);
 
@@ -173,7 +173,7 @@ public class EndpointResponseFailureCallbackTest {
 
 	@Test
 	public void shouldCallUnsupportedMediaTypeCallbackWhenUnsupportedMediaTypeErrorOcurred() {
-		RestifyEndpointResponseUnsupportedMediaTypeException exception = new RestifyEndpointResponseUnsupportedMediaTypeException(
+		EndpointResponseUnsupportedMediaTypeException exception = new EndpointResponseUnsupportedMediaTypeException(
 				"http error", new Headers(), "unsupported media type");
 		callback.onFailure(exception);
 
@@ -182,7 +182,7 @@ public class EndpointResponseFailureCallbackTest {
 
 	@Test
 	public void shouldCallRequestedRangeNotSatisfiableCallbackWhenRequestedRangeNotSatisfiableErrorOcurred() {
-		RestifyEndpointResponseRequestedRangeNotSatisfiableException exception = new RestifyEndpointResponseRequestedRangeNotSatisfiableException(
+		EndpointResponseRequestedRangeNotSatisfiableException exception = new EndpointResponseRequestedRangeNotSatisfiableException(
 				"http error", new Headers(), "requested range not satisfiable");
 		callback.onFailure(exception);
 
@@ -191,7 +191,7 @@ public class EndpointResponseFailureCallbackTest {
 
 	@Test
 	public void shouldCallExpectationFailedCallbackWhenExpectationFailedErrorOcurred() {
-		RestifyEndpointResponseExpectationFailedException exception = new RestifyEndpointResponseExpectationFailedException(
+		EndpointResponseExpectationFailedException exception = new EndpointResponseExpectationFailedException(
 				"http error", new Headers(), "expectation failed");
 		callback.onFailure(exception);
 
@@ -200,7 +200,7 @@ public class EndpointResponseFailureCallbackTest {
 
 	@Test
 	public void shouldCallInternalServerErrorCallbackWhenInternalServerErrorErrorOcurred() {
-		RestifyEndpointResponseInternalServerErrorException exception = new RestifyEndpointResponseInternalServerErrorException(
+		EndpointResponseInternalServerErrorException exception = new EndpointResponseInternalServerErrorException(
 				"http error", new Headers(), "internal server error");
 		callback.onFailure(exception);
 
@@ -209,7 +209,7 @@ public class EndpointResponseFailureCallbackTest {
 
 	@Test
 	public void shouldCallNotImplementedCallbackWhenNotImplementedErrorOcurred() {
-		RestifyEndpointResponseNotImplementedException exception = new RestifyEndpointResponseNotImplementedException(
+		EndpointResponseNotImplementedException exception = new EndpointResponseNotImplementedException(
 				"http error", new Headers(), "not implemented");
 		callback.onFailure(exception);
 
@@ -218,7 +218,7 @@ public class EndpointResponseFailureCallbackTest {
 
 	@Test
 	public void shouldCallBadGatewayCallbackWhenBadGatewayErrorOcurred() {
-		RestifyEndpointResponseBadGatewayException exception = new RestifyEndpointResponseBadGatewayException(
+		EndpointResponseBadGatewayException exception = new EndpointResponseBadGatewayException(
 				"http error", new Headers(), "bad gateway");
 		callback.onFailure(exception);
 
@@ -227,7 +227,7 @@ public class EndpointResponseFailureCallbackTest {
 
 	@Test
 	public void shouldCallServiceUnavailableCallbackWhenServiceUnavailableOcurred() {
-		RestifyEndpointResponseServiceUnavailableException exception = new RestifyEndpointResponseServiceUnavailableException(
+		EndpointResponseServiceUnavailableException exception = new EndpointResponseServiceUnavailableException(
 				"http error", new Headers(), "service unavailable");
 		callback.onFailure(exception);
 
@@ -236,7 +236,7 @@ public class EndpointResponseFailureCallbackTest {
 
 	@Test
 	public void shouldCallGatewayTimeoutCallbackWhenGatewayTimeoutOcurred() {
-		RestifyEndpointResponseGatewayTimeoutException exception = new RestifyEndpointResponseGatewayTimeoutException(
+		EndpointResponseGatewayTimeoutException exception = new EndpointResponseGatewayTimeoutException(
 				"http error", new Headers(), "gateway timeout");
 		callback.onFailure(exception);
 
@@ -245,14 +245,14 @@ public class EndpointResponseFailureCallbackTest {
 
 	@Test
 	public void shouldCallHttpVersionNotSupportedCallbackWhenHttpVersionNotSupportedOcurred() {
-		RestifyEndpointResponseHttpVersionNotSupportedException exception = new RestifyEndpointResponseHttpVersionNotSupportedException(
+		EndpointResponseHttpVersionNotSupportedException exception = new EndpointResponseHttpVersionNotSupportedException(
 				"http error", new Headers(), "http version not supported");
 		callback.onFailure(exception);
 
 		verify(callback).onHttpVersionNotSupported(argThat(responseMatchWith(exception)));
 	}
 
-	private Matcher<EndpointResponse<String>> responseMatchWith(RestifyEndpointResponseException exception) {
+	private Matcher<EndpointResponse<String>> responseMatchWith(EndpointResponseException exception) {
 		return new ArgumentMatcher<EndpointResponse<String>>() {
 			@SuppressWarnings("unchecked")
 			@Override

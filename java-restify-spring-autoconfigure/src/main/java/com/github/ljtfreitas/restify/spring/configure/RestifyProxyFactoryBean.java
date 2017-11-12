@@ -35,12 +35,12 @@ import org.springframework.beans.factory.FactoryBean;
 import com.github.ljtfreitas.restify.http.RestifyProxyBuilder;
 import com.github.ljtfreitas.restify.http.client.authentication.Authentication;
 import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutableProvider;
-import com.github.ljtfreitas.restify.http.client.message.HttpMessageConverter;
+import com.github.ljtfreitas.restify.http.client.message.converter.HttpMessageConverter;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequestExecutor;
 import com.github.ljtfreitas.restify.http.client.request.HttpClientRequestFactory;
 import com.github.ljtfreitas.restify.http.client.request.interceptor.EndpointRequestInterceptor;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponseErrorFallback;
-import com.github.ljtfreitas.restify.http.contract.metadata.RestifyContractReader;
+import com.github.ljtfreitas.restify.http.contract.metadata.ContractReader;
 
 public class RestifyProxyFactoryBean implements FactoryBean<Object> {
 
@@ -50,7 +50,7 @@ public class RestifyProxyFactoryBean implements FactoryBean<Object> {
 
 	private HttpClientRequestFactory httpClientRequestFactory;
 
-	private RestifyContractReader restifyContractReader;
+	private ContractReader restifyContractReader;
 
 	private EndpointRequestExecutor endpointRequestExecutor;
 
@@ -122,7 +122,7 @@ public class RestifyProxyFactoryBean implements FactoryBean<Object> {
 		this.endpoint = endpoint;
 	}
 
-	public void setRestifyContractReader(RestifyContractReader restifyContractReader) {
+	public void setRestifyContractReader(ContractReader restifyContractReader) {
 		this.restifyContractReader = restifyContractReader;
 	}
 

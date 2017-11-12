@@ -34,12 +34,12 @@ import java.nio.charset.Charset;
 
 import javax.ws.rs.core.Response;
 
-import com.github.ljtfreitas.restify.http.client.header.Header;
-import com.github.ljtfreitas.restify.http.client.header.Headers;
+import com.github.ljtfreitas.restify.http.client.message.Header;
+import com.github.ljtfreitas.restify.http.client.message.Headers;
+import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
+import com.github.ljtfreitas.restify.http.client.message.response.BaseHttpResponseMessage;
+import com.github.ljtfreitas.restify.http.client.message.response.StatusCode;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
-import com.github.ljtfreitas.restify.http.client.request.HttpRequestMessage;
-import com.github.ljtfreitas.restify.http.client.response.BaseHttpResponseMessage;
-import com.github.ljtfreitas.restify.http.client.response.StatusCode;
 
 class ErrorHttpResponseMessage extends BaseHttpResponseMessage {
 

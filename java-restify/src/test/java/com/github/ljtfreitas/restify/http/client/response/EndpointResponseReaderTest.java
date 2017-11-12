@@ -18,15 +18,18 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import com.github.ljtfreitas.restify.http.client.header.Header;
-import com.github.ljtfreitas.restify.http.client.header.Headers;
-import com.github.ljtfreitas.restify.http.client.message.HttpMessageConverters;
-import com.github.ljtfreitas.restify.http.client.message.HttpMessageReader;
+import com.github.ljtfreitas.restify.http.client.message.ContentType;
+import com.github.ljtfreitas.restify.http.client.message.Header;
+import com.github.ljtfreitas.restify.http.client.message.Headers;
+import com.github.ljtfreitas.restify.http.client.message.converter.HttpMessageConverters;
+import com.github.ljtfreitas.restify.http.client.message.converter.HttpMessageReadException;
+import com.github.ljtfreitas.restify.http.client.message.converter.HttpMessageReader;
+import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
+import com.github.ljtfreitas.restify.http.client.message.response.HttpResponseMessage;
+import com.github.ljtfreitas.restify.http.client.message.response.StatusCode;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
-import com.github.ljtfreitas.restify.http.client.request.HttpRequestMessage;
 import com.github.ljtfreitas.restify.http.client.request.SimpleHttpRequestMessage;
-import com.github.ljtfreitas.restify.http.contract.ContentType;
-import com.github.ljtfreitas.restify.http.contract.metadata.reflection.JavaType;
+import com.github.ljtfreitas.restify.reflection.JavaType;
 
 @RunWith(MockitoJUnitRunner.class)
 public class EndpointResponseReaderTest {
@@ -76,7 +79,7 @@ public class EndpointResponseReaderTest {
 		assertEquals(endpointResult, response.body());
 	}
 
-	@Test(expected = RestifyHttpMessageReadException.class)
+	@Test(expected = HttpMessageReadException.class)
 	public void shouldThrowExceptionWhenTheContentTypeCantBeRead() {
 		HttpResponseMessage httpResponseMessage = new SimpleHttpResponseMessage(new ByteArrayInputStream(endpointResult.getBytes()),
 				httpRequestMessage, new Headers(Header.contentType("application/json")));

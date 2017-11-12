@@ -10,8 +10,8 @@ import java.net.URI;
 
 import org.junit.Test;
 
-import com.github.ljtfreitas.restify.http.client.header.Header;
-import com.github.ljtfreitas.restify.http.client.header.Headers;
+import com.github.ljtfreitas.restify.http.client.message.Header;
+import com.github.ljtfreitas.restify.http.client.message.Headers;
 import com.github.ljtfreitas.restify.http.contract.Parameters;
 
 public class EndpointRequestTest {

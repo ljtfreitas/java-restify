@@ -4,8 +4,11 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 
-import com.github.ljtfreitas.restify.http.client.header.Headers;
-import com.github.ljtfreitas.restify.http.client.request.HttpRequestMessage;
+import com.github.ljtfreitas.restify.http.client.message.Headers;
+import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
+import com.github.ljtfreitas.restify.http.client.message.response.BaseHttpResponseMessage;
+import com.github.ljtfreitas.restify.http.client.message.response.HttpResponseMessage;
+import com.github.ljtfreitas.restify.http.client.message.response.StatusCode;
 import com.github.ljtfreitas.restify.http.client.request.SimpleHttpRequestMessage;
 
 public class SimpleHttpResponseMessage implements HttpResponseMessage {
@@ -74,8 +77,8 @@ public class SimpleHttpResponseMessage implements HttpResponseMessage {
 	}
 
 	@Override
-	public boolean isReadable() {
-		return delegate.isReadable();
+	public boolean readable() {
+		return delegate.readable();
 	}
 
 	@Override

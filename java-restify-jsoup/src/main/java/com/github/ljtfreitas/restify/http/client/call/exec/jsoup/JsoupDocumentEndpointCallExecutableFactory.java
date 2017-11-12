@@ -25,7 +25,7 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.call.exec.jsoup;
 
-import static com.github.ljtfreitas.restify.http.util.Preconditions.isTrue;
+import static com.github.ljtfreitas.restify.util.Preconditions.isTrue;
 
 import java.util.Optional;
 
@@ -35,12 +35,12 @@ import org.jsoup.nodes.Document;
 import com.github.ljtfreitas.restify.http.client.call.EndpointCall;
 import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutable;
 import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutableDecoratorFactory;
-import com.github.ljtfreitas.restify.http.client.header.Headers;
+import com.github.ljtfreitas.restify.http.client.message.ContentType;
+import com.github.ljtfreitas.restify.http.client.message.Headers;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
-import com.github.ljtfreitas.restify.http.contract.ContentType;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethod;
-import com.github.ljtfreitas.restify.http.contract.metadata.reflection.JavaType;
-import com.github.ljtfreitas.restify.http.contract.metadata.reflection.SimpleParameterizedType;
+import com.github.ljtfreitas.restify.reflection.JavaType;
+import com.github.ljtfreitas.restify.reflection.SimpleParameterizedType;
 
 public class JsoupDocumentEndpointCallExecutableFactory implements EndpointCallExecutableDecoratorFactory<Document, EndpointResponse<String>, String> {
 

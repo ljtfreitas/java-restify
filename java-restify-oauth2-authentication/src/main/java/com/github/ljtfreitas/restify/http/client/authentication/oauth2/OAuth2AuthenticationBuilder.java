@@ -25,7 +25,7 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.authentication.oauth2;
 
-import static com.github.ljtfreitas.restify.http.util.Preconditions.nonNull;
+import static com.github.ljtfreitas.restify.util.Preconditions.nonNull;
 
 import java.net.URI;
 import java.net.URL;
@@ -35,14 +35,14 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Optional;
 
-import com.github.ljtfreitas.restify.http.client.header.Header;
-import com.github.ljtfreitas.restify.http.client.header.Headers;
-import com.github.ljtfreitas.restify.http.client.message.HttpMessageConverter;
-import com.github.ljtfreitas.restify.http.client.message.HttpMessageConverters;
+import com.github.ljtfreitas.restify.http.client.message.Header;
+import com.github.ljtfreitas.restify.http.client.message.Headers;
+import com.github.ljtfreitas.restify.http.client.message.converter.HttpMessageConverter;
+import com.github.ljtfreitas.restify.http.client.message.converter.HttpMessageConverters;
 import com.github.ljtfreitas.restify.http.client.message.converter.form.FormURLEncodedParametersMessageConverter;
 import com.github.ljtfreitas.restify.http.client.message.converter.json.JsonMessageConverter;
 import com.github.ljtfreitas.restify.http.client.message.converter.text.TextPlainMessageConverter;
-import com.github.ljtfreitas.restify.http.client.message.converter.xml.JaxbXmlMessageConverter;
+import com.github.ljtfreitas.restify.http.client.message.converter.xml.XmlMessageConverter;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequestExecutor;
 import com.github.ljtfreitas.restify.http.client.request.HttpClientRequestFactory;
 import com.github.ljtfreitas.restify.http.contract.Cookie;
@@ -181,6 +181,8 @@ public class OAuth2AuthenticationBuilder {
 			private final Collection<HttpMessageConverter> converters = new ArrayList<>(Arrays.asList(
 					new TextPlainMessageConverter(), new FormURLEncodedParametersMessageConverter()));
 
+			private final Provider provider = new Provider();
+
 			private OAuth2AuthorizationServerHttpMessageConvertersBuilder(OAuth2AuthorizationServerBuilder context) {
 				this.delegate = context;
 			}
@@ -192,12 +194,12 @@ public class OAuth2AuthenticationBuilder {
 			}
 
 			public OAuth2AuthorizationServerHttpMessageConvertersBuilder json() {
-				converters.add(new Provider().single(JsonMessageConverter.class));
+				provider.single(JsonMessageConverter.class).ifPresent(converters::add);
 				return this;
 			}
 
 			public OAuth2AuthorizationServerHttpMessageConvertersBuilder xml() {
-				converters.add(new JaxbXmlMessageConverter<>());
+				provider.single(XmlMessageConverter.class).ifPresent(converters::add);
 				return this;
 			}
 

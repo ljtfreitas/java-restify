@@ -10,11 +10,10 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 
-import com.github.ljtfreitas.restify.http.client.header.Header;
-import com.github.ljtfreitas.restify.http.client.header.Headers;
+import com.github.ljtfreitas.restify.http.client.message.Header;
+import com.github.ljtfreitas.restify.http.client.message.Headers;
+import com.github.ljtfreitas.restify.http.client.message.response.StatusCode;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
-import com.github.ljtfreitas.restify.http.client.response.StatusCode;
-import com.github.ljtfreitas.restify.http.spring.client.call.exec.ResponseEntityConverter;
 
 public class ResponseEntityConverterTest {
 

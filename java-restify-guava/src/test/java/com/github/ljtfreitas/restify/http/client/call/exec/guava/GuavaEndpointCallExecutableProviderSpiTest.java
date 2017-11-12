@@ -17,7 +17,7 @@ public class GuavaEndpointCallExecutableProviderSpiTest {
 
 	@SuppressWarnings("unchecked")
 	@Test
-	public void shouldDiscoveryGuavaExecutableProviders() {
+	public void shouldDiscoveryServiceProviders() {
 		Collection<EndpointCallExecutableProvider> services = loader.all(EndpointCallExecutableProvider.class);
 
 		assertThat(services, contains(

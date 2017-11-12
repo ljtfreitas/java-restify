@@ -1,6 +1,8 @@
 package com.github.ljtfreitas.restify.http.client.message.converter.form.multipart;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -11,18 +13,25 @@ import java.io.OutputStreamWriter;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 
-import com.github.ljtfreitas.restify.http.client.message.converter.form.SimpleHttpRequestMessage;
-import com.github.ljtfreitas.restify.http.contract.ContentType;
+import com.github.ljtfreitas.restify.http.client.message.Header;
+import com.github.ljtfreitas.restify.http.client.message.Headers;
+import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
 import com.github.ljtfreitas.restify.http.contract.MultipartFile;
 
+@RunWith(MockitoJUnitRunner.class)
 public class MultipartFormFileObjectMessageWriterTest {
+
+	@Mock
+	private HttpRequestMessage request;
 
 	private MultipartFormFileObjectMessageWriter converter;
 
 	private MultipartFile multipartFile;
 
-	private SimpleHttpRequestMessage httpRequestMessage;
 	private ByteArrayOutputStream output;
 
 	private File file;
@@ -41,7 +50,10 @@ public class MultipartFormFileObjectMessageWriterTest {
 		fileWriter.close();
 
 		output = new ByteArrayOutputStream();
-		httpRequestMessage = new SimpleHttpRequestMessage(output);
+
+		when(request.output()).thenReturn(output);
+		when(request.headers()).thenReturn(new Headers(Header.contentType("multipart/form-data")));
+		when(request.replace(any())).thenReturn(request);
 	}
 
 	@Test
@@ -62,7 +74,7 @@ public class MultipartFormFileObjectMessageWriterTest {
 				+ "\r\n"
 				+ "------myBoundary--";
 
-		converter.write(multipartFile, httpRequestMessage);
+		converter.write(multipartFile, request);
 
 		assertEquals(body, output.toString());
 	}
@@ -85,14 +97,14 @@ public class MultipartFormFileObjectMessageWriterTest {
 				+ "\r\n"
 				+ "------myBoundary--";
 
-		converter.write(multipartFile, httpRequestMessage);
+		converter.write(multipartFile, request);
 
 		assertEquals(body, output.toString());
 	}
 
 	@Test
 	public void shouldSerializeMultipartFileObjectWithInputStreamAsFormMultipartData() throws IOException {
-		multipartFile = MultipartFile.create("myFileAsInputStream", "whateverFileName", ContentType.of("text/plain"),
+		multipartFile = MultipartFile.create("myFileAsInputStream", "whateverFileName", "text/plain",
 				new FileInputStream(file));
 
 		String body = "------myBoundary"
@@ -109,7 +121,7 @@ public class MultipartFormFileObjectMessageWriterTest {
 				+ "\r\n"
 				+ "------myBoundary--";
 
-		converter.write(multipartFile, httpRequestMessage);
+		converter.write(multipartFile, request);
 
 		assertEquals(body, output.toString());
 	}

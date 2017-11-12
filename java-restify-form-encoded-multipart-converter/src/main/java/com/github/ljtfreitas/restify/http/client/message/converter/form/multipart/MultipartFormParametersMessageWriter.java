@@ -29,7 +29,7 @@ import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import com.github.ljtfreitas.restify.http.client.request.HttpRequestMessage;
+import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
 import com.github.ljtfreitas.restify.http.contract.MultipartParameters;
 
 public class MultipartFormParametersMessageWriter extends BaseMultipartFormMessageWriter<MultipartParameters> {

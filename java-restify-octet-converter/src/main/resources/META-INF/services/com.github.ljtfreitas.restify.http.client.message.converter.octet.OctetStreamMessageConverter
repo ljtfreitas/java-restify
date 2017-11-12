@@ -1,0 +1,3 @@
+com.github.ljtfreitas.restify.http.client.message.converter.octet.OctetByteArrayMessageConverter
+com.github.ljtfreitas.restify.http.client.message.converter.octet.OctetInputStreamMessageConverter
+com.github.ljtfreitas.restify.http.client.message.converter.octet.OctetSerializableMessageConverter

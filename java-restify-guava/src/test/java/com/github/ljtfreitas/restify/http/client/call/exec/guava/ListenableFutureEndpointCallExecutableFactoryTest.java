@@ -16,8 +16,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import com.github.ljtfreitas.restify.http.client.call.EndpointCall;
 import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutable;
-import com.github.ljtfreitas.restify.http.client.call.exec.guava.ListenableFutureEndpointCallExecutableFactory;
-import com.github.ljtfreitas.restify.http.contract.metadata.reflection.JavaType;
+import com.github.ljtfreitas.restify.reflection.JavaType;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.MoreExecutors;
 

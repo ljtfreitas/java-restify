@@ -25,7 +25,7 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.spring.contract.metadata.reflection;
 
-import static com.github.ljtfreitas.restify.http.util.Preconditions.nonNull;
+import static com.github.ljtfreitas.restify.util.Preconditions.nonNull;
 
 import java.util.ArrayList;
 import java.util.Arrays;

@@ -6,9 +6,10 @@ import java.nio.charset.Charset;
 
 import org.apache.commons.io.output.ByteArrayOutputStream;
 
-import com.github.ljtfreitas.restify.http.client.charset.Encoding;
-import com.github.ljtfreitas.restify.http.client.header.Header;
-import com.github.ljtfreitas.restify.http.client.header.Headers;
+import com.github.ljtfreitas.restify.http.client.message.Encoding;
+import com.github.ljtfreitas.restify.http.client.message.Header;
+import com.github.ljtfreitas.restify.http.client.message.Headers;
+import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
 
 public class SimpleHttpRequestMessage implements HttpRequestMessage {
 

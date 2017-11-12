@@ -28,7 +28,6 @@ package com.github.ljtfreitas.restify.http.client.message.converter.form.multipa
 import java.io.IOException;
 import java.nio.charset.Charset;
 
-import com.github.ljtfreitas.restify.http.contract.ContentType;
 import com.github.ljtfreitas.restify.http.contract.MultipartFile;
 
 class MultipartFileFieldSerializer extends BaseMultipartFieldSerializer<MultipartFile> {
@@ -45,7 +44,7 @@ class MultipartFileFieldSerializer extends BaseMultipartFieldSerializer<Multipar
 
 	@Override
 	protected String contentTypeOf(MultipartFile value) {
-		return value.contentType().map(ContentType::name).orElse(null);
+		return value.contentType().orElse(null);
 	}
 
 	@Override

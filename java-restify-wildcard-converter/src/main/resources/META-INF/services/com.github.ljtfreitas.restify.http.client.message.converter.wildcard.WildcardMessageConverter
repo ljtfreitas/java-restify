@@ -1,0 +1,3 @@
+com.github.ljtfreitas.restify.http.client.message.converter.wildcard.ByteArrayMessageConverter
+com.github.ljtfreitas.restify.http.client.message.converter.wildcard.InputStreamMessageConverter
+com.github.ljtfreitas.restify.http.client.message.converter.wildcard.SimpleTextMessageConverter

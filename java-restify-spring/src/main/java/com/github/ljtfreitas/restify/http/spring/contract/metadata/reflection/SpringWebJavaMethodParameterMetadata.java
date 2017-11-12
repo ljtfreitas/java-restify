@@ -25,7 +25,7 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.spring.contract.metadata.reflection;
 
-import static com.github.ljtfreitas.restify.http.util.Preconditions.isFalse;
+import static com.github.ljtfreitas.restify.util.Preconditions.isFalse;
 
 import java.util.Optional;
 import java.util.stream.Stream;
@@ -36,10 +36,10 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethodParameterSerializer;
-import com.github.ljtfreitas.restify.http.contract.metadata.reflection.JavaType;
-import com.github.ljtfreitas.restify.http.contract.metadata.reflection.JavaTypeResolver;
+import com.github.ljtfreitas.restify.http.contract.ParameterSerializer;
 import com.github.ljtfreitas.restify.http.spring.contract.metadata.SpringWebEndpointMethodParameterSerializer;
+import com.github.ljtfreitas.restify.reflection.JavaType;
+import com.github.ljtfreitas.restify.reflection.JavaTypeResolver;
 
 public class SpringWebJavaMethodParameterMetadata {
 
@@ -49,7 +49,7 @@ public class SpringWebJavaMethodParameterMetadata {
 	private final RequestHeader headerParameter;
 	private final RequestBody bodyParameter;
 	private final RequestParam queryParameter;
-	private final Class<? extends EndpointMethodParameterSerializer> serializerType;
+	private final Class<? extends ParameterSerializer> serializerType;
 
 	public SpringWebJavaMethodParameterMetadata(java.lang.reflect.Parameter javaMethodParameter) {
 		this(javaMethodParameter, javaMethodParameter.getDeclaringExecutable().getDeclaringClass());
@@ -119,7 +119,7 @@ public class SpringWebJavaMethodParameterMetadata {
 		return queryParameter != null;
 	}
 
-	public Class<? extends EndpointMethodParameterSerializer> serializer() {
+	public Class<? extends ParameterSerializer> serializer() {
 		return serializerType;
 	}
 }

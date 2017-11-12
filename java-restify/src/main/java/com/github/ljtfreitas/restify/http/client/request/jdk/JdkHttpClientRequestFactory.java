@@ -34,8 +34,8 @@ import java.nio.charset.Charset;
 
 import javax.net.ssl.HttpsURLConnection;
 
-import com.github.ljtfreitas.restify.http.RestifyHttpException;
-import com.github.ljtfreitas.restify.http.client.charset.Encoding;
+import com.github.ljtfreitas.restify.http.HttpException;
+import com.github.ljtfreitas.restify.http.client.message.Encoding;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
 import com.github.ljtfreitas.restify.http.client.request.HttpClientRequestFactory;
 import com.github.ljtfreitas.restify.http.client.request.Timeout;
@@ -72,7 +72,7 @@ public class JdkHttpClientRequestFactory implements HttpClientRequestFactory {
 			return new JdkHttpClientRequest(connection, charset, request.headers());
 
 		} catch (IOException e) {
-			throw new RestifyHttpException(e);
+			throw new HttpException(e);
 		}
 	}
 

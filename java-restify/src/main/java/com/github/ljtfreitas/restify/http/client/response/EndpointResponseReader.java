@@ -28,12 +28,15 @@ package com.github.ljtfreitas.restify.http.client.response;
 import java.io.IOException;
 import java.lang.reflect.Type;
 
-import com.github.ljtfreitas.restify.http.client.header.Header;
-import com.github.ljtfreitas.restify.http.client.header.Headers;
-import com.github.ljtfreitas.restify.http.client.message.HttpMessageConverters;
-import com.github.ljtfreitas.restify.http.client.message.HttpMessageReader;
-import com.github.ljtfreitas.restify.http.contract.ContentType;
-import com.github.ljtfreitas.restify.http.contract.metadata.reflection.JavaType;
+import com.github.ljtfreitas.restify.http.client.message.ContentType;
+import com.github.ljtfreitas.restify.http.client.message.Header;
+import com.github.ljtfreitas.restify.http.client.message.Headers;
+import com.github.ljtfreitas.restify.http.client.message.converter.HttpMessageConverters;
+import com.github.ljtfreitas.restify.http.client.message.converter.HttpMessageReadException;
+import com.github.ljtfreitas.restify.http.client.message.converter.HttpMessageReader;
+import com.github.ljtfreitas.restify.http.client.message.response.HttpResponseMessage;
+import com.github.ljtfreitas.restify.http.client.message.response.StatusCode;
+import com.github.ljtfreitas.restify.reflection.JavaType;
 
 public class EndpointResponseReader {
 
@@ -53,11 +56,11 @@ public class EndpointResponseReader {
 		if (response.status().isError()) {
 			return endpointResponseErrorFallback.onError(response, responseType);
 
-		} else if (readableType(responseType) && response.isReadable()) {
+		} else if (readableType(responseType) && response.readable()) {
 			return doRead(response, responseType);
 
 		} else {
-			return EndpointResponse.empty(response.status(), response.headers());
+			return empty(response);
 		}
 	}
 
@@ -71,13 +74,13 @@ public class EndpointResponseReader {
 
 	private class EndpointResponseContentReader<T> {
 		private EndpointResponse<T> read(HttpResponseMessage response, JavaType responseType) {
-			StatusCode responseStatusCode = response.status();
+			StatusCode responseStatus = response.status();
 
-			if (responseStatusCode.isSucessful()) {
+			if (responseStatus.isSucessful()) {
 				return doRead(response, responseType.unwrap());
 
-			} else if (responseStatusCode.isRedirection()) {
-				return EndpointResponse.empty(responseStatusCode, response.headers());
+			} else if (responseStatus.isRedirection()) {
+				return empty(response);
 
 			} else {
 				return endpointResponseErrorFallback.onError(response, null);
@@ -86,13 +89,14 @@ public class EndpointResponseReader {
 
 		@SuppressWarnings("unchecked")
 		private EndpointResponse<T> doRead(HttpResponseMessage response, Type responseType) {
-			ContentType contentType = ContentType
-					.of(response.headers().get("Content-Type").map(Header::value)
+			ContentType contentType = response.headers().get("Content-Type")
+					.map(Header::value)
+					.map(ContentType::of)
 						.orElseThrow(
-							() -> new RestifyHttpMessageReadException("Your request responded a content, but Content-Type header is not present.")));
+							() -> new HttpMessageReadException("Your request responded a content, but Content-Type header is not present."));
 
 			HttpMessageReader<Object> converter = converters.readerOf(contentType, responseType).orElseThrow(
-					() -> new RestifyHttpMessageReadException("Your request responded a content " + "of type ["
+					() -> new HttpMessageReadException("Your request responded a content " + "of type ["
 							+ contentType + "], but there is no MessageConverter able to read this message."));
 
 			try {
@@ -102,9 +106,13 @@ public class EndpointResponseReader {
 				return new EndpointResponse<>(response.status(), response.headers(), responseObject);
 
 			} catch (IOException e) {
-				throw new RestifyHttpMessageReadException(
+				throw new HttpMessageReadException(
 						"Error on read HTTP response body of type [" + contentType + "]", e);
 			}
 		}
+	}
+	
+	private <T> EndpointResponse<T> empty(HttpResponseMessage response) {
+		return EndpointResponse.empty(response.status(), response.headers());
 	}
 }

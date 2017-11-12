@@ -25,7 +25,8 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.response;
 
-import com.github.ljtfreitas.restify.http.contract.metadata.reflection.JavaType;
+import com.github.ljtfreitas.restify.http.client.message.response.HttpResponseMessage;
+import com.github.ljtfreitas.restify.reflection.JavaType;
 
 public interface EndpointResponseErrorFallback {
 

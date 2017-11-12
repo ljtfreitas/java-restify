@@ -25,7 +25,7 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.authentication.oauth2;
 
-import static com.github.ljtfreitas.restify.http.util.Preconditions.isTrue;
+import static com.github.ljtfreitas.restify.util.Preconditions.isTrue;
 
 import com.github.ljtfreitas.restify.http.client.authentication.oauth2.AccessTokenRequest.Builder;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;

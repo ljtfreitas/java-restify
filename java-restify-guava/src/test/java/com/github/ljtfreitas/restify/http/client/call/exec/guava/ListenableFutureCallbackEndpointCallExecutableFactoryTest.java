@@ -17,12 +17,11 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import com.github.ljtfreitas.restify.http.client.call.EndpointCall;
 import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutable;
-import com.github.ljtfreitas.restify.http.client.call.exec.guava.ListenableFutureCallbackEndpointCallExecutableFactory;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethodParameter;
-import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethodParameters;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethodParameter.EndpointMethodParameterType;
-import com.github.ljtfreitas.restify.http.contract.metadata.reflection.JavaType;
-import com.github.ljtfreitas.restify.http.contract.metadata.reflection.SimpleParameterizedType;
+import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethodParameters;
+import com.github.ljtfreitas.restify.reflection.JavaType;
+import com.github.ljtfreitas.restify.reflection.SimpleParameterizedType;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.MoreExecutors;
 

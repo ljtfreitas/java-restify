@@ -33,8 +33,6 @@ import java.util.Optional;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLSocketFactory;
 
-import com.github.ljtfreitas.restify.http.client.charset.Encoding;
-
 public class HttpClientRequestConfiguration {
 
 	private int connectionTimeout = 0;
@@ -42,7 +40,7 @@ public class HttpClientRequestConfiguration {
 	private boolean followRedirects = true;
 	private boolean useCaches = true;
 
-	private Charset charset = Encoding.UTF_8.charset();
+	private Charset charset = Charset.forName("UTF-8");
 	private Proxy proxy = null;
 
 	private HttpClientRequestSsl ssl = new HttpClientRequestSsl();

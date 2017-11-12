@@ -39,8 +39,8 @@ import org.springframework.web.client.RestTemplate;
 
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequestExecutor;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponseErrorFallback;
-import com.github.ljtfreitas.restify.http.contract.metadata.RestifyContractExpressionResolver;
-import com.github.ljtfreitas.restify.http.contract.metadata.RestifyContractReader;
+import com.github.ljtfreitas.restify.http.contract.metadata.ContractExpressionResolver;
+import com.github.ljtfreitas.restify.http.contract.metadata.ContractReader;
 import com.github.ljtfreitas.restify.http.spring.client.request.RestOperationsEndpointRequestExecutor;
 import com.github.ljtfreitas.restify.http.spring.contract.SpringWebContractReader;
 import com.github.ljtfreitas.restify.http.spring.contract.metadata.SpelDynamicParameterExpressionResolver;
@@ -71,13 +71,13 @@ public class RestifySpringWebConfiguration {
 
 		@ConditionalOnMissingBean
 		@Bean
-		public RestifyContractReader restifyContractReader(RestifyContractExpressionResolver expressionResolver) {
+		public ContractReader restifyContractReader(ContractExpressionResolver expressionResolver) {
 			return new SpringWebContractReader(expressionResolver);
 		}
 
 		@ConditionalOnMissingBean
 		@Bean
-		public RestifyContractExpressionResolver expressionResolver(ConfigurableBeanFactory beanFactory) {
+		public ContractExpressionResolver expressionResolver(ConfigurableBeanFactory beanFactory) {
 			return new SpelDynamicParameterExpressionResolver(beanFactory);
 		}
 	}

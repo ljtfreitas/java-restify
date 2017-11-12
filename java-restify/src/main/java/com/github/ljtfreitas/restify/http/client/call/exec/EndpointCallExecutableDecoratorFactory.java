@@ -26,7 +26,7 @@
 package com.github.ljtfreitas.restify.http.client.call.exec;
 
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethod;
-import com.github.ljtfreitas.restify.http.contract.metadata.reflection.JavaType;
+import com.github.ljtfreitas.restify.reflection.JavaType;
 
 public interface EndpointCallExecutableDecoratorFactory<M, T, O> extends EndpointCallExecutableProvider {
 

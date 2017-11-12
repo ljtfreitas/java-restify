@@ -36,12 +36,12 @@ import org.mockserver.socket.SSLFactory;
 import org.mockserver.verify.VerificationTimes;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.github.ljtfreitas.restify.http.RestifyHttpException;
+import com.github.ljtfreitas.restify.http.HttpException;
 import com.github.ljtfreitas.restify.http.RestifyProxyBuilder;
-import com.github.ljtfreitas.restify.http.client.response.HttpStatusCode;
-import com.github.ljtfreitas.restify.http.client.response.StatusCode;
-import com.github.ljtfreitas.restify.http.client.retry.Retry;
+import com.github.ljtfreitas.restify.http.client.message.response.HttpStatusCode;
+import com.github.ljtfreitas.restify.http.client.message.response.StatusCode;
 import com.github.ljtfreitas.restify.http.client.request.Timeout;
+import com.github.ljtfreitas.restify.http.client.retry.Retry;
 import com.github.ljtfreitas.restify.http.contract.BodyParameter;
 import com.github.ljtfreitas.restify.http.contract.Get;
 import com.github.ljtfreitas.restify.http.contract.Header;
@@ -234,7 +234,7 @@ public class JdkHttpClientRequestTest {
 			.respond(response()
 				.withDelay(TimeUnit.MILLISECONDS, 3000));
 
-		expectedException.expect(isA(RestifyHttpException.class));
+		expectedException.expect(isA(HttpException.class));
 		expectedException.expectCause(isA(SocketTimeoutException.class));
 
 		myApi.json();
@@ -253,7 +253,7 @@ public class JdkHttpClientRequestTest {
 				.target(MyApi.class, "http://localhost:7080")
 				.build();
 
-		expectedException.expect(isA(RestifyHttpException.class));
+		expectedException.expect(isA(HttpException.class));
 		expectedException.expectCause(isA(SocketTimeoutException.class));
 
 		myApi.jsonWithTimeout();

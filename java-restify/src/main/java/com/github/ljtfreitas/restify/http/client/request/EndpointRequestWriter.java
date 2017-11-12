@@ -25,14 +25,16 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.request;
 
-import static com.github.ljtfreitas.restify.http.client.header.Headers.CONTENT_TYPE;
+import static com.github.ljtfreitas.restify.http.client.message.Headers.CONTENT_TYPE;
 
 import java.io.IOException;
 
-import com.github.ljtfreitas.restify.http.client.header.Header;
-import com.github.ljtfreitas.restify.http.client.message.HttpMessageConverters;
-import com.github.ljtfreitas.restify.http.client.message.HttpMessageWriter;
-import com.github.ljtfreitas.restify.http.contract.ContentType;
+import com.github.ljtfreitas.restify.http.client.message.ContentType;
+import com.github.ljtfreitas.restify.http.client.message.Header;
+import com.github.ljtfreitas.restify.http.client.message.converter.HttpMessageConverters;
+import com.github.ljtfreitas.restify.http.client.message.converter.HttpMessageWriteException;
+import com.github.ljtfreitas.restify.http.client.message.converter.HttpMessageWriter;
+import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
 
 public class EndpointRequestWriter {
 
@@ -61,21 +63,22 @@ public class EndpointRequestWriter {
 			httpRequestMessage.output().close();
 
 		} catch (IOException e) {
-			throw new RestifyHttpMessageWriteException("Error on write HTTP body of type [" + contentType + "].", e);
+			throw new HttpMessageWriteException("Error on write HTTP body of type [" + contentType + "].", e);
 		}
 	}
 
 	private ContentType contentTypeOf(HttpRequestMessage httpRequestMessage) {
-		Header contentTypeHeader = httpRequestMessage.headers().get(CONTENT_TYPE)
-				.orElseThrow(() -> new RestifyHttpMessageWriteException("Your request has a body, but the header [Content-Type] "
-						+ "it was not provided."));
+		String contentTypeHeader = httpRequestMessage.headers().get(CONTENT_TYPE)
+			.map(Header::value)
+				.orElseThrow(() -> new HttpMessageWriteException("Your request has a body, but the header [Content-Type] "
+					+ "it was not provided."));
 
-		return ContentType.of(contentTypeHeader.value());
+		return ContentType.of(contentTypeHeader);
 	}
 
 	private HttpMessageWriter<Object> writerOf(ContentType contentType, Object body) {
 		return messageConverters.writerOf(contentType, body.getClass())
-				.orElseThrow(() -> new RestifyHttpMessageWriteException("Your request has a [Content-Type] "
+				.orElseThrow(() -> new HttpMessageWriteException("Your request has a [Content-Type] "
 					+ "of type [" + contentType.name() + "], but there is no MessageConverter able to write your message."));
 	}
 }

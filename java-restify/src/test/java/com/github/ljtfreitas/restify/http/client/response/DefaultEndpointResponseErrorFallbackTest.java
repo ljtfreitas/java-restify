@@ -19,7 +19,9 @@ import org.junit.Rule;
 import org.junit.Test;
 import org.junit.rules.ExpectedException;
 
-import com.github.ljtfreitas.restify.http.client.header.Headers;
+import com.github.ljtfreitas.restify.http.client.message.Headers;
+import com.github.ljtfreitas.restify.http.client.message.response.HttpResponseMessage;
+import com.github.ljtfreitas.restify.http.client.message.response.StatusCode;
 
 public class DefaultEndpointResponseErrorFallbackTest {
 
@@ -39,7 +41,7 @@ public class DefaultEndpointResponseErrorFallbackTest {
 
 		HttpResponseMessage response = new SimpleHttpResponseMessage(StatusCode.internalServerError(), new Headers(), new ByteArrayInputStream(body.getBytes()));
 
-		expectedException.expect(RestifyEndpointResponseException.class);
+		expectedException.expect(EndpointResponseException.class);
 		expectedException.expectMessage(allOf(containsString(response.status().toString()), endsWith(body)));
 
 		expectedException.expect(method(e -> e.status(), is(response.status())));
@@ -55,7 +57,7 @@ public class DefaultEndpointResponseErrorFallbackTest {
 
 		HttpResponseMessage response = new SimpleHttpResponseMessage(StatusCode.notFound(), new Headers(), new ByteArrayInputStream(body.getBytes()));
 
-		expectedException.expect(RestifyEndpointResponseException.class);
+		expectedException.expect(EndpointResponseException.class);
 		expectedException.expectMessage(allOf(containsString(response.status().toString()), endsWith(body)));
 
 		expectedException.expect(method(e -> e.status(), is(response.status())));
@@ -80,10 +82,10 @@ public class DefaultEndpointResponseErrorFallbackTest {
 		assertNull(newEndpointResponse.body());
 	}
 
-	private <T> FeatureMatcher<RestifyEndpointResponseException, T> method(Function<RestifyEndpointResponseException, T> function, Matcher<T> matcher) {
-		return new FeatureMatcher<RestifyEndpointResponseException, T>(matcher, "method", "value") {
+	private <T> FeatureMatcher<EndpointResponseException, T> method(Function<EndpointResponseException, T> function, Matcher<T> matcher) {
+		return new FeatureMatcher<EndpointResponseException, T>(matcher, "method", "value") {
 			@Override
-			protected T featureValueOf(RestifyEndpointResponseException actual) {
+			protected T featureValueOf(EndpointResponseException actual) {
 				return function.apply(actual);
 			}
 		};

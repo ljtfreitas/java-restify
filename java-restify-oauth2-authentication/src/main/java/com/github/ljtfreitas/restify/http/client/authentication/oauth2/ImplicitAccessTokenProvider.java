@@ -25,13 +25,13 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.authentication.oauth2;
 
-import static com.github.ljtfreitas.restify.http.util.Preconditions.isTrue;
+import static com.github.ljtfreitas.restify.util.Preconditions.isTrue;
 
 import java.net.URI;
 
-import com.github.ljtfreitas.restify.http.client.header.Header;
+import com.github.ljtfreitas.restify.http.client.message.Header;
+import com.github.ljtfreitas.restify.http.client.message.response.StatusCode;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
-import com.github.ljtfreitas.restify.http.client.response.StatusCode;
 import com.github.ljtfreitas.restify.http.contract.Parameters;
 
 public class ImplicitAccessTokenProvider implements AccessTokenProvider {

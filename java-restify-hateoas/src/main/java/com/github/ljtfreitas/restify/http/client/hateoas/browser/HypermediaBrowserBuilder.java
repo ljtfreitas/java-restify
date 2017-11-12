@@ -46,15 +46,15 @@ import com.github.ljtfreitas.restify.http.client.hateoas.browser.discovery.Hyper
 import com.github.ljtfreitas.restify.http.client.hateoas.browser.discovery.JsonPathLinkDiscovery;
 import com.github.ljtfreitas.restify.http.client.hateoas.browser.discovery.LinkDiscovery;
 import com.github.ljtfreitas.restify.http.client.hateoas.hal.JacksonHypermediaHalJsonMessageConverter;
-import com.github.ljtfreitas.restify.http.client.header.Header;
-import com.github.ljtfreitas.restify.http.client.header.Headers;
-import com.github.ljtfreitas.restify.http.client.message.HttpMessageConverter;
-import com.github.ljtfreitas.restify.http.client.message.HttpMessageConverters;
-import com.github.ljtfreitas.restify.http.client.message.converter.text.SimpleTextMessageConverter;
+import com.github.ljtfreitas.restify.http.client.message.Header;
+import com.github.ljtfreitas.restify.http.client.message.Headers;
+import com.github.ljtfreitas.restify.http.client.message.converter.HttpMessageConverter;
+import com.github.ljtfreitas.restify.http.client.message.converter.HttpMessageConverters;
+import com.github.ljtfreitas.restify.http.client.message.converter.wildcard.SimpleTextMessageConverter;
+import com.github.ljtfreitas.restify.http.client.request.DefaultEndpointRequestExecutor;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequestExecutor;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequestWriter;
 import com.github.ljtfreitas.restify.http.client.request.HttpClientRequestFactory;
-import com.github.ljtfreitas.restify.http.client.request.RestifyEndpointRequestExecutor;
 import com.github.ljtfreitas.restify.http.client.request.interceptor.EndpointRequestInterceptor;
 import com.github.ljtfreitas.restify.http.client.request.interceptor.EndpointRequestInterceptorStack;
 import com.github.ljtfreitas.restify.http.client.request.interceptor.HeaderEndpointRequestInterceptor;
@@ -64,7 +64,7 @@ import com.github.ljtfreitas.restify.http.client.request.jdk.JdkHttpClientReques
 import com.github.ljtfreitas.restify.http.client.response.DefaultEndpointResponseErrorFallback;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponseErrorFallback;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponseReader;
-import com.github.ljtfreitas.restify.http.util.Tryable;
+import com.github.ljtfreitas.restify.util.Tryable;
 
 public class HypermediaBrowserBuilder {
 
@@ -161,7 +161,7 @@ public class HypermediaBrowserBuilder {
 		EndpointResponseReader reader = new EndpointResponseReader(messageConverters, endpointResponseErrorFallbackBuilder.build());
 
 		return Optional.ofNullable(endpointRequestExecutor)
-				.orElseGet(() -> new RestifyEndpointRequestExecutor(httpClientRequestFactory(), writer, reader));
+				.orElseGet(() -> new DefaultEndpointRequestExecutor(httpClientRequestFactory(), writer, reader));
 	}
 
 	private HttpClientRequestFactory httpClientRequestFactory() {

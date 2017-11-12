@@ -31,10 +31,10 @@ import javax.ws.rs.client.Invocation;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
 
-import com.github.ljtfreitas.restify.http.client.header.Header;
-import com.github.ljtfreitas.restify.http.client.header.Headers;
+import com.github.ljtfreitas.restify.http.client.message.Header;
+import com.github.ljtfreitas.restify.http.client.message.Headers;
+import com.github.ljtfreitas.restify.http.client.message.converter.HttpMessageWriteException;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
-import com.github.ljtfreitas.restify.http.client.request.RestifyHttpMessageWriteException;
 
 class InvocationConverter {
 
@@ -63,7 +63,7 @@ class InvocationConverter {
 
 	private Entity<Object> entity(Object body, Headers headers) {
 		String contentType =  headers.get(Headers.CONTENT_TYPE).map(Header::value)
-				.orElseThrow(() ->  new RestifyHttpMessageWriteException("Your request has a body, but the header [Content-Type] "
+				.orElseThrow(() ->  new HttpMessageWriteException("Your request has a body, but the header [Content-Type] "
 						+ "it was not provided."));
 
 		return Entity.entity(body, MediaType.valueOf(contentType));

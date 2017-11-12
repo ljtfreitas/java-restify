@@ -23,7 +23,7 @@ import org.mockserver.junit.MockServerRule;
 import org.mockserver.model.HttpRequest;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.github.ljtfreitas.restify.http.RestifyHttpException;
+import com.github.ljtfreitas.restify.http.HttpException;
 import com.github.ljtfreitas.restify.http.RestifyProxyBuilder;
 import com.github.ljtfreitas.restify.http.client.request.Timeout;
 import com.github.ljtfreitas.restify.http.contract.BodyParameter;
@@ -108,7 +108,7 @@ public class NettyHttpClientRequestTest {
 			.respond(response()
 				.withDelay(TimeUnit.MILLISECONDS, 3000));
 
-		expectedException.expect(isA(RestifyHttpException.class));
+		expectedException.expect(isA(HttpException.class));
 		expectedException.expectCause(deeply(ReadTimeoutException.class));
 
 		myApi.json();
@@ -128,7 +128,7 @@ public class NettyHttpClientRequestTest {
 				.target(MyApi.class, "http://localhost:7080")
 				.build();
 
-		expectedException.expect(isA(RestifyHttpException.class));
+		expectedException.expect(isA(HttpException.class));
 		expectedException.expectCause(deeply(ReadTimeoutException.class));
 
 		myApi.jsonWithTimeout();

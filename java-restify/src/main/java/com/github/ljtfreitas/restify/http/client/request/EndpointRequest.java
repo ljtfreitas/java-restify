@@ -30,12 +30,12 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.Optional;
 
-import com.github.ljtfreitas.restify.http.RestifyHttpException;
-import com.github.ljtfreitas.restify.http.client.header.Header;
-import com.github.ljtfreitas.restify.http.client.header.Headers;
+import com.github.ljtfreitas.restify.http.HttpException;
+import com.github.ljtfreitas.restify.http.client.message.Header;
+import com.github.ljtfreitas.restify.http.client.message.Headers;
 import com.github.ljtfreitas.restify.http.contract.Parameters;
-import com.github.ljtfreitas.restify.http.contract.metadata.reflection.JavaType;
-import com.github.ljtfreitas.restify.http.util.Tryable;
+import com.github.ljtfreitas.restify.reflection.JavaType;
+import com.github.ljtfreitas.restify.util.Tryable;
 
 public class EndpointRequest {
 
@@ -156,7 +156,6 @@ public class EndpointRequest {
 
 	public EndpointRequestMetadata metadata() {
 		return metadata;
-
 	}
 
 	public EndpointRequest append(Parameters parameters) {
@@ -165,9 +164,9 @@ public class EndpointRequest {
 	}
 
 	public EndpointRequest add(Header header) {
-		Headers headers = new Headers(this.headers).add(header);
+		Headers newheaders = headers.add(header);
 
-		return new EndpointRequest(endpoint, method, headers, body, responseType, version, metadata);
+		return new EndpointRequest(endpoint, method, newheaders, body, responseType, version, metadata);
 	}
 
 	public EndpointRequest add(Headers headers) {
@@ -175,6 +174,12 @@ public class EndpointRequest {
 				metadata);
 	}
 
+	public EndpointRequest replace(Header header) {
+		Headers newheaders = headers.replace(header);
+
+		return new EndpointRequest(endpoint, method, newheaders, body, responseType, version, metadata);
+	}
+	
 	private EndpointRequest appendOnQuery(String query) {
 		String appender = endpoint.getQuery() == null ? "" : "&";
 
@@ -183,7 +188,7 @@ public class EndpointRequest {
 					.concat(appender)
 						.concat(query);
 
-		return Tryable.of(() -> cloneWithQuery(newQuery), (e) -> new RestifyHttpException(e));
+		return Tryable.of(() -> cloneWithQuery(newQuery), (e) -> new HttpException(e));
 	}
 
 	private EndpointRequest cloneWithQuery(String query) throws URISyntaxException {

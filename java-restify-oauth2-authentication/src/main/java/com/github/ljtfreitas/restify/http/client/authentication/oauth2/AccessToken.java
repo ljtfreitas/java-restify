@@ -25,7 +25,7 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.authentication.oauth2;
 
-import static com.github.ljtfreitas.restify.http.util.Preconditions.nonNull;
+import static com.github.ljtfreitas.restify.util.Preconditions.nonNull;
 
 import java.io.Serializable;
 import java.time.Duration;
@@ -36,7 +36,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import com.github.ljtfreitas.restify.http.util.Tryable;
+import com.github.ljtfreitas.restify.util.Tryable;
 
 public class AccessToken implements Serializable {
 

@@ -31,8 +31,8 @@ import java.security.Principal;
 import java.util.Collection;
 import java.util.Optional;
 
-import com.github.ljtfreitas.restify.http.client.header.Header;
-import com.github.ljtfreitas.restify.http.client.header.Headers;
+import com.github.ljtfreitas.restify.http.client.message.Header;
+import com.github.ljtfreitas.restify.http.client.message.Headers;
 import com.github.ljtfreitas.restify.http.contract.Cookie;
 import com.github.ljtfreitas.restify.http.contract.Cookies;
 

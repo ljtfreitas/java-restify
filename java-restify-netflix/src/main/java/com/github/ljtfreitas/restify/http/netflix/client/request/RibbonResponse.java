@@ -30,8 +30,8 @@ import java.net.URI;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-import com.github.ljtfreitas.restify.http.client.header.Header;
-import com.github.ljtfreitas.restify.http.client.response.HttpResponseMessage;
+import com.github.ljtfreitas.restify.http.client.message.Header;
+import com.github.ljtfreitas.restify.http.client.message.response.HttpResponseMessage;
 import com.netflix.client.ClientException;
 import com.netflix.client.IResponse;
 
@@ -55,7 +55,7 @@ public class RibbonResponse implements IResponse {
 
 	@Override
 	public boolean hasPayload() {
-		return response.isReadable();
+		return response.readable();
 	}
 
 	@Override

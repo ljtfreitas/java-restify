@@ -34,7 +34,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import com.github.ljtfreitas.restify.http.client.charset.Encoding;
+import com.github.ljtfreitas.restify.http.client.message.Encoding;
 
 public class LinkURITemplate {
 

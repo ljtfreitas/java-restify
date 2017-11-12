@@ -34,7 +34,7 @@ import java.util.Optional;
 import com.github.ljtfreitas.restify.http.client.call.EndpointMethodExecutor;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethod;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointType;
-import com.github.ljtfreitas.restify.http.contract.metadata.reflection.JavaDefaultMethodExecutor;
+import com.github.ljtfreitas.restify.reflection.JavaDefaultMethodExecutor;
 
 public class RestifyProxyHandler implements InvocationHandler {
 

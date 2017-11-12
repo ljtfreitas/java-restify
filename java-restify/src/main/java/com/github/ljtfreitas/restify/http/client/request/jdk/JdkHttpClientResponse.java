@@ -29,17 +29,17 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 
-import com.github.ljtfreitas.restify.http.client.header.Headers;
-import com.github.ljtfreitas.restify.http.client.request.HttpRequestMessage;
-import com.github.ljtfreitas.restify.http.client.response.BaseHttpResponseMessage;
-import com.github.ljtfreitas.restify.http.client.response.StatusCode;
+import com.github.ljtfreitas.restify.http.client.message.Headers;
+import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
+import com.github.ljtfreitas.restify.http.client.message.response.BaseHttpResponseMessage;
+import com.github.ljtfreitas.restify.http.client.message.response.StatusCode;
 
 class JdkHttpClientResponse extends BaseHttpResponseMessage {
 
 	private final HttpURLConnection connection;
 
-	JdkHttpClientResponse(StatusCode statusCode, Headers headers, InputStream body, HttpURLConnection connection, HttpRequestMessage httpRequest) {
-		super(statusCode, headers, body, httpRequest);
+	JdkHttpClientResponse(StatusCode status, Headers headers, InputStream body, HttpURLConnection connection, HttpRequestMessage httpRequest) {
+		super(status, headers, body, httpRequest);
 		this.connection = connection;
 	}
 

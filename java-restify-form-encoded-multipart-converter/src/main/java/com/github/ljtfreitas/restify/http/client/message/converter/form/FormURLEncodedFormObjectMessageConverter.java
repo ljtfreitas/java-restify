@@ -28,16 +28,21 @@ package com.github.ljtfreitas.restify.http.client.message.converter.form;
 import java.lang.reflect.Type;
 import java.util.Arrays;
 
-import com.github.ljtfreitas.restify.http.client.response.RestifyHttpMessageReadException;
+import com.github.ljtfreitas.restify.http.client.message.converter.HttpMessageReadException;
 import com.github.ljtfreitas.restify.http.contract.Form;
-import com.github.ljtfreitas.restify.http.contract.metadata.FormObjects;
-import com.github.ljtfreitas.restify.http.contract.metadata.FormObjects.FormObject;
-import com.github.ljtfreitas.restify.http.contract.metadata.reflection.JavaAnnotationScanner;
+import com.github.ljtfreitas.restify.http.contract.FormObject;
+import com.github.ljtfreitas.restify.http.contract.FormObjectParameterSerializer;
+import com.github.ljtfreitas.restify.http.contract.FormObjects;
+import com.github.ljtfreitas.restify.reflection.JavaAnnotationScanner;
 
 public class FormURLEncodedFormObjectMessageConverter extends BaseFormURLEncodedMessageConverter<Object> {
 
 	private final FormObjects formObjects = FormObjects.cache();
 
+	public FormURLEncodedFormObjectMessageConverter() {
+		super(new FormObjectParameterSerializer());
+	}
+	
 	@Override
 	public boolean canRead(Type type) {
 		return type instanceof Class && ((Class<?>) type).isAnnotationPresent(Form.class);
@@ -58,7 +63,7 @@ public class FormURLEncodedFormObjectMessageConverter extends BaseFormURLEncoded
 			return result;
 
 		} catch (InstantiationException | IllegalAccessException e) {
-			throw new RestifyHttpMessageReadException(e);
+			throw new HttpMessageReadException(e);
 		}
 	}
 

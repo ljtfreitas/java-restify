@@ -28,10 +28,10 @@ package com.github.ljtfreitas.restify.http.client.retry;
 import java.util.Collection;
 import java.util.stream.Collectors;
 
-import com.github.ljtfreitas.restify.http.client.header.Headers;
+import com.github.ljtfreitas.restify.http.client.message.Headers;
+import com.github.ljtfreitas.restify.http.client.message.response.StatusCode;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
-import com.github.ljtfreitas.restify.http.client.response.RestifyEndpointResponseException;
-import com.github.ljtfreitas.restify.http.client.response.StatusCode;
+import com.github.ljtfreitas.restify.http.client.response.EndpointResponseException;
 import com.github.ljtfreitas.restify.http.client.retry.RetryCondition.EndpointResponseRetryCondition;
 import com.github.ljtfreitas.restify.http.client.retry.RetryCondition.HeadersRetryCondition;
 import com.github.ljtfreitas.restify.http.client.retry.RetryCondition.StatusCodeRetryCondition;
@@ -56,8 +56,8 @@ class RetryConditionMatcher {
 	}
 
 	public boolean match(Throwable throwable) {
-		if (throwable instanceof RestifyEndpointResponseException) {
-			RestifyEndpointResponseException exception = (RestifyEndpointResponseException) throwable;
+		if (throwable instanceof EndpointResponseException) {
+			EndpointResponseException exception = (EndpointResponseException) throwable;
 			return doMatch(exception.status()) || doMatch(exception.headers()) || doMatch(exception.response());
 		} else {
 			return doMatch(throwable);

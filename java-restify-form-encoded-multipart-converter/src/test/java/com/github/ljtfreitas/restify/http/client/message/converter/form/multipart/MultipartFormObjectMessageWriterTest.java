@@ -1,28 +1,39 @@
 package com.github.ljtfreitas.restify.http.client.message.converter.form.multipart;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.nio.charset.Charset;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 
-import com.github.ljtfreitas.restify.http.client.message.converter.form.SimpleHttpRequestMessage;
+import com.github.ljtfreitas.restify.http.client.message.Header;
+import com.github.ljtfreitas.restify.http.client.message.Headers;
+import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
 import com.github.ljtfreitas.restify.http.contract.Form.Field;
 import com.github.ljtfreitas.restify.http.contract.MultipartForm;
 import com.github.ljtfreitas.restify.http.contract.MultipartForm.MultipartField;
 
+@RunWith(MockitoJUnitRunner.class)
 public class MultipartFormObjectMessageWriterTest {
 
+	@Mock
+	private HttpRequestMessage request;
+	
 	private MultipartFormObjectMessageWriter converter;
 
 	private MyMultipartFormObject myMultipartFormObject;
 
-	private SimpleHttpRequestMessage httpRequestMessage;
 	private ByteArrayOutputStream output;
 
 	private File file;
@@ -43,7 +54,11 @@ public class MultipartFormObjectMessageWriterTest {
 		fileWriter.close();
 
 		output = new ByteArrayOutputStream();
-		httpRequestMessage = new SimpleHttpRequestMessage(output);
+		
+		when(request.output()).thenReturn(output);
+		when(request.headers()).thenReturn(new Headers(Header.contentType("multipart/form-data")));
+		when(request.replace(any())).thenReturn(request);
+		when(request.charset()).thenReturn(Charset.forName("UTF-8"));
 	}
 
 	@Test
@@ -74,7 +89,7 @@ public class MultipartFormObjectMessageWriterTest {
 			 + "\r\n"
 			 + "------myBoundary--";
 
-		converter.write(myMultipartFormObject, httpRequestMessage);
+		converter.write(myMultipartFormObject, request);
 
 		assertEquals(body, output.toString());
 	}

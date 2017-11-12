@@ -25,9 +25,10 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.response;
 
-import static com.github.ljtfreitas.restify.http.util.Preconditions.isTrue;
+import static com.github.ljtfreitas.restify.util.Preconditions.isTrue;
 
-import com.github.ljtfreitas.restify.http.client.header.Headers;
+import com.github.ljtfreitas.restify.http.client.message.Headers;
+import com.github.ljtfreitas.restify.http.client.message.response.StatusCode;
 
 public class EndpointResponse<T> {
 
@@ -96,7 +97,7 @@ public class EndpointResponse<T> {
 						.append(body)
 							.toString();
 
-				throw new RestifyEndpointResponseException(message, statusCode, headers, body);
+				throw new EndpointResponseException(message, statusCode, headers, body);
 			}
 		};
 	}

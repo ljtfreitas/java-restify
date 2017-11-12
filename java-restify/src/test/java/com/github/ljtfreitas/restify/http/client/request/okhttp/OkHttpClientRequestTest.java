@@ -24,7 +24,7 @@ import org.mockserver.junit.MockServerRule;
 import org.mockserver.model.HttpRequest;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.github.ljtfreitas.restify.http.RestifyHttpException;
+import com.github.ljtfreitas.restify.http.HttpException;
 import com.github.ljtfreitas.restify.http.RestifyProxyBuilder;
 import com.github.ljtfreitas.restify.http.contract.BodyParameter;
 import com.github.ljtfreitas.restify.http.contract.Get;
@@ -145,7 +145,7 @@ public class OkHttpClientRequestTest {
 			.respond(response()
 				.withDelay(TimeUnit.MILLISECONDS, 3000));
 
-		expectedException.expect(isA(RestifyHttpException.class));
+		expectedException.expect(isA(HttpException.class));
 		expectedException.expectCause(isA(SocketTimeoutException.class));
 
 		myApi.json();

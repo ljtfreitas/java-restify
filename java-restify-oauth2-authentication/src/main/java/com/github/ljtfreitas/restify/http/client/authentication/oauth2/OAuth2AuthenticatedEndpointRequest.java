@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
-import com.github.ljtfreitas.restify.http.util.Tryable;
+import com.github.ljtfreitas.restify.util.Tryable;
 
 public class OAuth2AuthenticatedEndpointRequest {
 

@@ -29,8 +29,8 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
 
-import com.github.ljtfreitas.restify.http.client.request.HttpRequestMessage;
-import com.github.ljtfreitas.restify.http.client.request.RestifyHttpMessageWriteException;
+import com.github.ljtfreitas.restify.http.client.message.converter.HttpMessageWriteException;
+import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
 
 abstract class BaseMultipartFieldSerializer<T> implements MultipartFieldSerializer<T> {
 
@@ -55,7 +55,7 @@ abstract class BaseMultipartFieldSerializer<T> implements MultipartFieldSerializ
 			output.flush();
 
 		} catch (IOException e) {
-			throw new RestifyHttpMessageWriteException("Cannot write multipart/form-data field [" + field.name() + "]", e);
+			throw new HttpMessageWriteException("Cannot write multipart/form-data field [" + field.name() + "]", e);
 		}
 	}
 

@@ -34,14 +34,14 @@ import java.net.URI;
 import java.nio.charset.Charset;
 import java.util.Collection;
 
-import com.github.ljtfreitas.restify.http.RestifyHttpException;
-import com.github.ljtfreitas.restify.http.client.header.Header;
-import com.github.ljtfreitas.restify.http.client.header.Headers;
+import com.github.ljtfreitas.restify.http.HttpException;
+import com.github.ljtfreitas.restify.http.client.message.Header;
+import com.github.ljtfreitas.restify.http.client.message.Headers;
+import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
+import com.github.ljtfreitas.restify.http.client.message.response.HttpResponseMessage;
+import com.github.ljtfreitas.restify.http.client.message.response.StatusCode;
 import com.github.ljtfreitas.restify.http.client.request.HttpClientRequest;
-import com.github.ljtfreitas.restify.http.client.request.HttpRequestMessage;
-import com.github.ljtfreitas.restify.http.client.response.HttpResponseMessage;
-import com.github.ljtfreitas.restify.http.client.response.StatusCode;
-import com.github.ljtfreitas.restify.http.util.Tryable;
+import com.github.ljtfreitas.restify.util.Tryable;
 
 class JdkHttpClientRequest implements HttpClientRequest {
 
@@ -63,22 +63,24 @@ class JdkHttpClientRequest implements HttpClientRequest {
 			return responseOf(connection);
 
 		} catch (IOException e) {
-			throw new RestifyHttpException("I/O error on HTTP request: [" + connection.getRequestMethod() + " " +
+			throw new HttpException("I/O error on HTTP request: [" + connection.getRequestMethod() + " " +
 					connection.getURL() + "]", e);
 		}
 	}
 
 	private JdkHttpClientResponse responseOf(HttpURLConnection connection) throws IOException {
-		StatusCode statusCode = StatusCode.of(connection.getResponseCode(), connection.getResponseMessage());
+		StatusCode status = StatusCode.of(connection.getResponseCode(), connection.getResponseMessage());
 
 		Headers headers = connection.getHeaderFields().entrySet().stream()
-			.filter(e -> e.getKey() != null && !e.getKey().equals(""))
-				.reduce(new Headers(), (a, b) -> a.add(b.getKey(), b.getValue()), (a, b) -> b);
+			.filter(e -> e.getKey() != null && !e.getKey().equals("") && e.getValue().size() >= 1)
+				.reduce(new Headers(),
+					(a, b) -> a.add(new Header(b.getKey(), b.getValue().stream().findFirst().get())),
+						(a, b) -> b);
 
 		InputStream stream = Tryable.or(() -> connection.getErrorStream() == null ? connection.getInputStream() : connection.getErrorStream(),
 				new ByteArrayInputStream(new byte[0]));
 
-		return new JdkHttpClientResponse(statusCode, headers, stream, connection, this);
+		return new JdkHttpClientResponse(status, headers, stream, connection, this);
 	}
 
 	@Override
@@ -143,6 +145,12 @@ class JdkHttpClientRequest implements HttpClientRequest {
 		public Headers replace(String name, String value) {
 			connection.setRequestProperty(name, value);
 			return new JdkHttpClientHeadersDecorator(connection, super.replace(name, value));
+		}
+		
+		@Override
+		public Headers replace(Header header) {
+			connection.setRequestProperty(header.name(), header.value());
+			return new JdkHttpClientHeadersDecorator(connection, super.replace(header));
 		}
 	}
 }

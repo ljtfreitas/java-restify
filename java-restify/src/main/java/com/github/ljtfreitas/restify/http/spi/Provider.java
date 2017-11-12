@@ -25,23 +25,18 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.spi;
 
-import static com.github.ljtfreitas.restify.http.util.Preconditions.isFalse;
-import static com.github.ljtfreitas.restify.http.util.Preconditions.isTrue;
-
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.Optional;
 import java.util.ServiceLoader;
 
 public class Provider {
 
-	public <T> T single(Class<T> type) {
+	public <T> Optional<T> single(Class<T> type) {
 		Collection<T> all = doFind(type);
-	
-		isFalse(all.isEmpty(), "There is no implementation available for type " + type);
-		isTrue(all.size() == 1, "There are multiple implementations available for the type " + type);
 
-		return all.stream().findFirst().get(); 
+		return all.stream().findFirst(); 
 	}
 
 	public <T> Collection<T> all(Class<T> type) {

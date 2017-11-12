@@ -25,7 +25,7 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.jaxrs.contract.metadata.reflection;
 
-import static com.github.ljtfreitas.restify.http.util.Preconditions.isTrue;
+import static com.github.ljtfreitas.restify.util.Preconditions.isTrue;
 
 import java.lang.reflect.Type;
 import java.util.Arrays;
@@ -40,9 +40,9 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.HttpHeaders;
 
-import com.github.ljtfreitas.restify.http.contract.metadata.reflection.JavaAnnotationScanner;
-import com.github.ljtfreitas.restify.http.contract.metadata.reflection.JavaTypeResolver;
 import com.github.ljtfreitas.restify.http.jaxrs.contract.metadata.JaxRsEndpointHeader;
+import com.github.ljtfreitas.restify.reflection.JavaAnnotationScanner;
+import com.github.ljtfreitas.restify.reflection.JavaTypeResolver;
 
 public class JaxRsJavaMethodMetadata {
 

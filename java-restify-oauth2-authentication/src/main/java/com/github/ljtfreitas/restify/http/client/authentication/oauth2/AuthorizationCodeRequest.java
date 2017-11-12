@@ -28,7 +28,7 @@ package com.github.ljtfreitas.restify.http.client.authentication.oauth2;
 import java.net.URI;
 import java.util.Optional;
 
-import com.github.ljtfreitas.restify.http.client.header.Headers;
+import com.github.ljtfreitas.restify.http.client.message.Headers;
 
 public class AuthorizationCodeRequest {
 

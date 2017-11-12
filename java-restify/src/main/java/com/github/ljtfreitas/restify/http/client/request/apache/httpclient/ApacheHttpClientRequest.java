@@ -44,13 +44,13 @@ import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.entity.ByteArrayEntity;
 import org.apache.http.protocol.HttpContext;
 
-import com.github.ljtfreitas.restify.http.RestifyHttpException;
-import com.github.ljtfreitas.restify.http.client.header.Header;
-import com.github.ljtfreitas.restify.http.client.header.Headers;
+import com.github.ljtfreitas.restify.http.HttpException;
+import com.github.ljtfreitas.restify.http.client.message.Header;
+import com.github.ljtfreitas.restify.http.client.message.Headers;
+import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
+import com.github.ljtfreitas.restify.http.client.message.response.HttpResponseMessage;
+import com.github.ljtfreitas.restify.http.client.message.response.StatusCode;
 import com.github.ljtfreitas.restify.http.client.request.HttpClientRequest;
-import com.github.ljtfreitas.restify.http.client.request.HttpRequestMessage;
-import com.github.ljtfreitas.restify.http.client.response.HttpResponseMessage;
-import com.github.ljtfreitas.restify.http.client.response.StatusCode;
 
 class ApacheHttpClientRequest implements HttpClientRequest {
 
@@ -86,7 +86,7 @@ class ApacheHttpClientRequest implements HttpClientRequest {
 	}
 
 	@Override
-	public HttpResponseMessage execute() throws RestifyHttpException {
+	public HttpResponseMessage execute() throws HttpException {
 		headers.all().forEach(h -> httpRequest.addHeader(h.name(), h.value()));
 
 		if (httpRequest instanceof HttpEntityEnclosingRequest) {
@@ -101,7 +101,7 @@ class ApacheHttpClientRequest implements HttpClientRequest {
 			return responseOf(httpResponse);
 
 		} catch (IOException e) {
-			throw new RestifyHttpException("I/O error on HTTP request: [" + httpRequest.getMethod() + " " +
+			throw new HttpException("I/O error on HTTP request: [" + httpRequest.getMethod() + " " +
 					httpRequest.getURI() + "]", e);
 		}
 

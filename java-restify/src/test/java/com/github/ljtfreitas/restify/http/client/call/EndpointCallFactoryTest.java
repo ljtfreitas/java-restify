@@ -23,8 +23,8 @@ import com.github.ljtfreitas.restify.http.client.request.EndpointRequestExecutor
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequestFactory;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethod;
-import com.github.ljtfreitas.restify.http.contract.metadata.reflection.JavaType;
-import com.github.ljtfreitas.restify.http.contract.metadata.reflection.SimpleParameterizedType;
+import com.github.ljtfreitas.restify.reflection.JavaType;
+import com.github.ljtfreitas.restify.reflection.SimpleParameterizedType;
 
 @RunWith(MockitoJUnitRunner.class)
 public class EndpointCallFactoryTest {

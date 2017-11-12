@@ -31,14 +31,14 @@ import java.io.OutputStream;
 import java.net.URI;
 import java.nio.charset.Charset;
 
-import com.github.ljtfreitas.restify.http.RestifyHttpException;
-import com.github.ljtfreitas.restify.http.client.header.Header;
-import com.github.ljtfreitas.restify.http.client.header.Headers;
+import com.github.ljtfreitas.restify.http.HttpException;
+import com.github.ljtfreitas.restify.http.client.message.Header;
+import com.github.ljtfreitas.restify.http.client.message.Headers;
+import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
+import com.github.ljtfreitas.restify.http.client.message.response.HttpResponseMessage;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
 import com.github.ljtfreitas.restify.http.client.request.HttpClientRequest;
-import com.github.ljtfreitas.restify.http.client.request.HttpRequestMessage;
-import com.github.ljtfreitas.restify.http.client.response.HttpResponseMessage;
-import com.github.ljtfreitas.restify.http.util.Tryable;
+import com.github.ljtfreitas.restify.util.Tryable;
 import com.netflix.client.ClientException;
 
 public class RibbonHttpClientRequest implements HttpClientRequest {
@@ -90,7 +90,7 @@ public class RibbonHttpClientRequest implements HttpClientRequest {
 
 	@Override
 	public HttpRequestMessage replace(Header header) {
-		return new RibbonHttpClientRequest(endpointRequest.add(header), ribbonLoadBalancedClient, charset,
+		return new RibbonHttpClientRequest(endpointRequest.replace(header), ribbonLoadBalancedClient, charset,
 				byteArrayOutputStream, bufferedOutputStream);
 	}
 
@@ -100,14 +100,14 @@ public class RibbonHttpClientRequest implements HttpClientRequest {
 	}
 
 	@Override
-	public HttpResponseMessage execute() throws RestifyHttpException {
+	public HttpResponseMessage execute() throws HttpException {
 		try {
 			RibbonResponse response = ribbonLoadBalancedClient.executeWithLoadBalancer(new RibbonRequest(this));
 
 			return response.unwrap();
 
 		} catch (ClientException e) {
-			throw new RestifyHttpException("Error on HTTP request: [" + endpointRequest.method() + " " +
+			throw new HttpException("Error on HTTP request: [" + endpointRequest.method() + " " +
 					endpointRequest.endpoint() + "]", e);
 		}
 	}

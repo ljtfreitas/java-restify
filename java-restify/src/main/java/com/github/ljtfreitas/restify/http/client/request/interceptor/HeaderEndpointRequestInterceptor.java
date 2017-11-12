@@ -27,8 +27,8 @@ package com.github.ljtfreitas.restify.http.client.request.interceptor;
 
 import java.util.Collection;
 
-import com.github.ljtfreitas.restify.http.client.header.Header;
-import com.github.ljtfreitas.restify.http.client.header.Headers;
+import com.github.ljtfreitas.restify.http.client.message.Header;
+import com.github.ljtfreitas.restify.http.client.message.Headers;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
 
 public class HeaderEndpointRequestInterceptor implements EndpointRequestInterceptor {

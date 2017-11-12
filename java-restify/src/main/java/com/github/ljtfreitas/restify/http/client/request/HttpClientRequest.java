@@ -25,11 +25,12 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.request;
 
-import com.github.ljtfreitas.restify.http.RestifyHttpException;
-import com.github.ljtfreitas.restify.http.client.response.HttpResponseMessage;
+import com.github.ljtfreitas.restify.http.HttpException;
+import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
+import com.github.ljtfreitas.restify.http.client.message.response.HttpResponseMessage;
 
 public interface HttpClientRequest extends HttpRequestMessage {
 
-	HttpResponseMessage execute() throws RestifyHttpException;
+	HttpResponseMessage execute() throws HttpException;
 
 }

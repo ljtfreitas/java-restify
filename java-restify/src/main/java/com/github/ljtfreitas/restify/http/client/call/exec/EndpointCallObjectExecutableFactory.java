@@ -30,7 +30,7 @@ import java.lang.reflect.Type;
 
 import com.github.ljtfreitas.restify.http.client.call.EndpointCall;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethod;
-import com.github.ljtfreitas.restify.http.contract.metadata.reflection.JavaType;
+import com.github.ljtfreitas.restify.reflection.JavaType;
 
 public class EndpointCallObjectExecutableFactory<T, O> implements EndpointCallExecutableDecoratorFactory<EndpointCall<T>, T, O> {
 

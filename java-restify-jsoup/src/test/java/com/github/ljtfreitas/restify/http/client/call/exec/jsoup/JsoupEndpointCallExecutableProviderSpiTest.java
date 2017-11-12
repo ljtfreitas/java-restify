@@ -16,7 +16,7 @@ public class JsoupEndpointCallExecutableProviderSpiTest {
 	private Provider loader = new Provider();
 
 	@Test
-	public void shouldDiscoveryJsoupExecutableProviders() {
+	public void shouldDiscoveryServiceProviders() {
 		Collection<EndpointCallExecutableProvider> services = loader.all(EndpointCallExecutableProvider.class);
 
 		assertThat(services, contains(

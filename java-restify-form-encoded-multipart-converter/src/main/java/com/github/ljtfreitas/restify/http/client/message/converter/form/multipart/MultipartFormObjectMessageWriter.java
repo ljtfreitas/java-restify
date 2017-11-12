@@ -29,10 +29,10 @@ import java.io.IOException;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
-import com.github.ljtfreitas.restify.http.client.request.HttpRequestMessage;
+import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
 import com.github.ljtfreitas.restify.http.contract.MultipartForm;
-import com.github.ljtfreitas.restify.http.contract.metadata.MultipartFormObjects;
-import com.github.ljtfreitas.restify.http.contract.metadata.reflection.JavaAnnotationScanner;
+import com.github.ljtfreitas.restify.http.contract.MultipartFormObjects;
+import com.github.ljtfreitas.restify.reflection.JavaAnnotationScanner;
 
 public class MultipartFormObjectMessageWriter extends BaseMultipartFormMessageWriter<Object> {
 

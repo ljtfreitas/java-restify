@@ -19,20 +19,18 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
-import com.github.ljtfreitas.restify.http.client.request.EndpointRequestFactory;
 import com.github.ljtfreitas.restify.http.client.request.interceptor.EndpointRequestInterceptorStack;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
 import com.github.ljtfreitas.restify.http.contract.Parameters;
+import com.github.ljtfreitas.restify.http.contract.QueryParameterSerializer;
+import com.github.ljtfreitas.restify.http.contract.QueryParametersSerializer;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointHeader;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointHeaders;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethod;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethodParameter;
-import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethodParameters;
-import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethodQueryParameterSerializer;
-import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethodQueryParametersSerializer;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethodParameter.EndpointMethodParameterType;
-import com.github.ljtfreitas.restify.http.contract.metadata.reflection.JavaType;
+import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethodParameters;
+import com.github.ljtfreitas.restify.reflection.JavaType;
 
 @RunWith(MockitoJUnitRunner.class)
 public class EndpointRequestFactoryTest {
@@ -166,7 +164,7 @@ public class EndpointRequestFactoryTest {
 	public void shouldCreateEndpointRequestUsingEndpointMethodWithQueryStringParameter() throws Exception {
 		EndpointMethodParameters endpointMethodParameters = new EndpointMethodParameters();
 		endpointMethodParameters.put(new EndpointMethodParameter(0, "parameters", Parameters.class, EndpointMethodParameterType.QUERY_STRING,
-				new EndpointMethodQueryParametersSerializer()));
+				new QueryParametersSerializer()));
 
 		EndpointMethod endpointMethod = new EndpointMethod(TargetType.class.getMethod("queryString", new Class[]{Parameters.class}),
 				"http://my.api.com/query", "GET", endpointMethodParameters);
@@ -191,7 +189,7 @@ public class EndpointRequestFactoryTest {
 	public void shouldCreateEndpointRequestUsingEndpointMethodWithQueryStringParameterAsMap() throws Exception {
 		EndpointMethodParameters endpointMethodParameters = new EndpointMethodParameters();
 		endpointMethodParameters.put(new EndpointMethodParameter(0, "parameters", Map.class, EndpointMethodParameterType.QUERY_STRING,
-				new EndpointMethodQueryParametersSerializer()));
+				new QueryParametersSerializer()));
 
 		EndpointMethod endpointMethod = new EndpointMethod(TargetType.class.getMethod("queryStringAsMap", new Class[]{Map.class}),
 				"http://my.api.com/query", "GET", endpointMethodParameters);
@@ -216,7 +214,7 @@ public class EndpointRequestFactoryTest {
 	public void shouldCreateEndpointRequestUsingEndpointMethodWithQueryStringParameterAsMapWithMultiplesValues() throws Exception {
 		EndpointMethodParameters endpointMethodParameters = new EndpointMethodParameters();
 		endpointMethodParameters.put(new EndpointMethodParameter(0, "parameters", Map.class, EndpointMethodParameterType.QUERY_STRING,
-				new EndpointMethodQueryParametersSerializer()));
+				new QueryParametersSerializer()));
 
 		EndpointMethod endpointMethod = new EndpointMethod(TargetType.class.getMethod("queryStringAsMultiValueMap", new Class[]{Map.class}),
 				"http://my.api.com/query", "GET", endpointMethodParameters);
@@ -243,7 +241,7 @@ public class EndpointRequestFactoryTest {
 	public void shouldCreateEndpointRequestUsingEndpointMethodWithSimpleQueryStringParameter() throws Exception {
 		EndpointMethodParameters endpointMethodParameters = new EndpointMethodParameters();
 		endpointMethodParameters.put(new EndpointMethodParameter(0, "parameter", String.class, EndpointMethodParameterType.QUERY_STRING,
-				new EndpointMethodQueryParameterSerializer()));
+				new QueryParameterSerializer()));
 
 		EndpointMethod endpointMethod = new EndpointMethod(TargetType.class.getMethod("simpleQueryString", new Class[]{String.class}),
 				"http://my.api.com/query", "GET", endpointMethodParameters);

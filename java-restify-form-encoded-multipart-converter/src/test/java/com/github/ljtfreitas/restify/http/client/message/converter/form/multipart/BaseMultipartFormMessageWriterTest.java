@@ -1,10 +1,11 @@
 package com.github.ljtfreitas.restify.http.client.message.converter.form.multipart;
 
-import static com.github.ljtfreitas.restify.http.client.header.Headers.CONTENT_TYPE;
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.notNull;
+import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doReturn;
-import static org.mockito.Mockito.spy;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
 
 import java.io.IOException;
 import java.io.OutputStream;
@@ -12,13 +13,21 @@ import java.io.OutputStream;
 import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.invocation.InvocationOnMock;
+import org.mockito.runners.MockitoJUnitRunner;
+import org.mockito.stubbing.Answer;
 
-import com.github.ljtfreitas.restify.http.client.header.Header;
-import com.github.ljtfreitas.restify.http.client.header.Headers;
-import com.github.ljtfreitas.restify.http.client.message.converter.form.SimpleHttpRequestMessage;
-import com.github.ljtfreitas.restify.http.client.request.HttpRequestMessage;
+import com.github.ljtfreitas.restify.http.client.message.Header;
+import com.github.ljtfreitas.restify.http.client.message.Headers;
+import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
 
+@RunWith(MockitoJUnitRunner.class)
 public class BaseMultipartFormMessageWriterTest {
+
+	@Mock
+	private HttpRequestMessage request;
 
 	private BaseMultipartFormMessageWriter<Object> writer;
 
@@ -39,33 +48,52 @@ public class BaseMultipartFormMessageWriterTest {
 				output.flush();
 			}
 		};
+
+		when(request.headers()).thenReturn(new Headers(Header.contentType("multipart/form-data")));
+		when(request.replace(notNull(Header.class))).thenReturn(request);
 	}
 
 	@Test
 	public void shouldAddBoundaryParameterToContentTypeHeader() {
-		Headers headers = new Headers(new Header(CONTENT_TYPE, "multipart/form-data"));
+		String expectedContentType = "multipart/form-data; boundary=----abc1234";
+		
+		Header expectedHeader = Header.contentType("multipart/form-data; boundary=----abc1234");
 
-		Header expected = Header.contentType("multipart/form-data; boundary=----abc1234");
+		Headers headers = new Headers(Header.contentType("multipart/form-data"));
 
-		SimpleHttpRequestMessage source = spy(new SimpleHttpRequestMessage(headers));
-		SimpleHttpRequestMessage modified = new SimpleHttpRequestMessage(new Headers(expected));
+		when(request.headers()).thenReturn(headers);
+		
+		HttpRequestMessage newRequest = mock(HttpRequestMessage.class);
+		when(newRequest.output()).thenReturn(new ByteArrayOutputStream());
 
-		doReturn(modified).when(source).replace(expected);
+		Answer<HttpRequestMessage> answer = new Answer<HttpRequestMessage>() {
+			@Override
+			public HttpRequestMessage answer(InvocationOnMock invocation) throws Throwable {
+				Header header = invocation.getArgumentAt(0, Header.class);
 
-		writer.write("MultipartFormMessageWriterTest", source);
+				Headers newHeaders = ((HttpRequestMessage) invocation.getMock()).headers().replace(header);
+				when(newRequest.headers()).thenReturn(newHeaders);
 
-		verify(source).replace(expected);
+				return newRequest;
+			}
+		};
 
-		assertEquals(expected, modified.headers().get(CONTENT_TYPE).get());
+		doAnswer(answer).when(request).replace(expectedHeader);
+
+		writer.write("MultipartFormMessageWriterTest", request);
+
+		doReturn(newRequest).when(request).replace(expectedHeader);
+
+		assertEquals(expectedContentType, newRequest.headers().get("Content-Type").map(Header::value).get());
 	}
 
 	@Test
 	public void shouldWriteHttpRequestBody() {
 		ByteArrayOutputStream output = new ByteArrayOutputStream();
 
-		HttpRequestMessage httpRequestMessage = new SimpleHttpRequestMessage(output);
+		when(request.output()).thenReturn(output);
 
-		writer.write("MultipartFormMessageWriterTest", httpRequestMessage);
+		writer.write("MultipartFormMessageWriterTest", request);
 
 		String expectedBody = "MultipartFormMessageWriterTest\r\n------abc1234--";
 

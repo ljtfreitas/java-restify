@@ -30,7 +30,7 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Map;
 
-import com.github.ljtfreitas.restify.http.client.request.HttpRequestMessage;
+import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
 
 public class MultipartFormMapMessageWriter extends BaseMultipartFormMessageWriter<Map<String, ?>> {
 

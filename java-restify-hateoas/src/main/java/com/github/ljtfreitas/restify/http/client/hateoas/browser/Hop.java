@@ -27,9 +27,9 @@ package com.github.ljtfreitas.restify.http.client.hateoas.browser;
 
 import java.util.Map;
 
-import com.github.ljtfreitas.restify.http.client.header.Header;
-import com.github.ljtfreitas.restify.http.client.header.Headers;
-import com.github.ljtfreitas.restify.http.contract.ContentType;
+import com.github.ljtfreitas.restify.http.client.message.ContentType;
+import com.github.ljtfreitas.restify.http.client.message.Header;
+import com.github.ljtfreitas.restify.http.client.message.Headers;
 
 public class Hop {
 

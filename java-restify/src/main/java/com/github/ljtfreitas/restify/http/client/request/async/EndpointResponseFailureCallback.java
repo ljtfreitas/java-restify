@@ -25,17 +25,17 @@
 *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.request.async;
 
-import com.github.ljtfreitas.restify.http.RestifyHttpException;
+import com.github.ljtfreitas.restify.http.HttpException;
+import com.github.ljtfreitas.restify.http.client.message.response.StatusCode;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
-import com.github.ljtfreitas.restify.http.client.response.RestifyEndpointResponseException;
-import com.github.ljtfreitas.restify.http.client.response.StatusCode;
+import com.github.ljtfreitas.restify.http.client.response.EndpointResponseException;
 
 public abstract class EndpointResponseFailureCallback implements EndpointCallFailureCallback {
 
 	@Override
 	public final void onFailure(Throwable throwable) {
-		if (throwable instanceof RestifyEndpointResponseException) {
-			RestifyEndpointResponseException exception = (RestifyEndpointResponseException) throwable;
+		if (throwable instanceof EndpointResponseException) {
+			EndpointResponseException exception = (EndpointResponseException) throwable;
 			onResponseFailure(exception);
 
 		} else {
@@ -44,12 +44,12 @@ public abstract class EndpointResponseFailureCallback implements EndpointCallFai
 	}
 
 	protected void onException(Throwable throwable) {
-		RestifyHttpException newException = (throwable instanceof RestifyHttpException) ?
-				(RestifyHttpException) throwable : new RestifyHttpException(throwable);
+		HttpException newException = (throwable instanceof HttpException) ?
+				(HttpException) throwable : new HttpException(throwable);
 		throw newException;
 	}
 
-	protected void onResponseFailure(RestifyEndpointResponseException exception) {
+	protected void onResponseFailure(EndpointResponseException exception) {
 		StatusCode responseStatusCode = exception.status();
 
 		EndpointResponse<String> response = exception.response();

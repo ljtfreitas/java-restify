@@ -31,12 +31,12 @@ import java.nio.charset.Charset;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 
-import com.github.ljtfreitas.restify.http.RestifyHttpException;
-import com.github.ljtfreitas.restify.http.client.header.Header;
-import com.github.ljtfreitas.restify.http.client.header.Headers;
+import com.github.ljtfreitas.restify.http.HttpException;
+import com.github.ljtfreitas.restify.http.client.message.Header;
+import com.github.ljtfreitas.restify.http.client.message.Headers;
+import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
+import com.github.ljtfreitas.restify.http.client.message.response.HttpResponseMessage;
 import com.github.ljtfreitas.restify.http.client.request.HttpClientRequest;
-import com.github.ljtfreitas.restify.http.client.request.HttpRequestMessage;
-import com.github.ljtfreitas.restify.http.client.response.HttpResponseMessage;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
@@ -108,7 +108,7 @@ class NettyHttpClientRequest implements HttpClientRequest {
 	}
 
 	@Override
-	public HttpResponseMessage execute() throws RestifyHttpException {
+	public HttpResponseMessage execute() throws HttpException {
 		final CompletableFuture<NettyHttpClientResponse> responseOnFuture = new CompletableFuture<>();
 
 		NettyRequestExecuteHandler nettyRequestExecuteHandler = new NettyRequestExecuteHandler(responseOnFuture, this);
@@ -122,7 +122,7 @@ class NettyHttpClientRequest implements HttpClientRequest {
 			return responseOnFuture.get();
 
 		} catch (InterruptedException | ExecutionException e) {
-			throw new RestifyHttpException("I/O error on HTTP request: [" + method + " " + uri + "]", e);
+			throw new HttpException("I/O error on HTTP request: [" + method + " " + uri + "]", e);
 		}
 	}
 

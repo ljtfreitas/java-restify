@@ -17,11 +17,12 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import com.github.ljtfreitas.restify.http.client.header.Header;
-import com.github.ljtfreitas.restify.http.client.header.Headers;
-import com.github.ljtfreitas.restify.http.client.message.HttpMessageConverters;
-import com.github.ljtfreitas.restify.http.client.message.HttpMessageWriter;
-import com.github.ljtfreitas.restify.http.contract.ContentType;
+import com.github.ljtfreitas.restify.http.client.message.ContentType;
+import com.github.ljtfreitas.restify.http.client.message.Header;
+import com.github.ljtfreitas.restify.http.client.message.Headers;
+import com.github.ljtfreitas.restify.http.client.message.converter.HttpMessageConverters;
+import com.github.ljtfreitas.restify.http.client.message.converter.HttpMessageWriter;
+import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
 
 @RunWith(MockitoJUnitRunner.class)
 public class EndpointRequestWriterTest {

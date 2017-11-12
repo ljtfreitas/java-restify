@@ -26,7 +26,7 @@
 package com.github.ljtfreitas.restify.http.client.request.interceptor.authentication;
 
 import com.github.ljtfreitas.restify.http.client.authentication.Authentication;
-import com.github.ljtfreitas.restify.http.client.header.Header;
+import com.github.ljtfreitas.restify.http.client.message.Header;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
 import com.github.ljtfreitas.restify.http.client.request.interceptor.EndpointRequestInterceptor;
 

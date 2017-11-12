@@ -31,9 +31,9 @@ import java.net.URL;
 import java.util.Optional;
 
 import com.github.ljtfreitas.restify.http.client.hateoas.Link;
-import com.github.ljtfreitas.restify.http.client.header.Headers;
+import com.github.ljtfreitas.restify.http.client.message.Headers;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
-import com.github.ljtfreitas.restify.http.util.Tryable;
+import com.github.ljtfreitas.restify.util.Tryable;
 
 public class LinkEndpointRequest {
 

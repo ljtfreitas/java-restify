@@ -17,7 +17,7 @@ import org.springframework.web.context.request.async.DeferredResult;
 
 import com.github.ljtfreitas.restify.http.client.call.EndpointCall;
 import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutable;
-import com.github.ljtfreitas.restify.http.contract.metadata.reflection.JavaType;
+import com.github.ljtfreitas.restify.reflection.JavaType;
 import com.github.ljtfreitas.restify.http.spring.client.call.exec.DeferredResultEndpointCallExecutableFactory;
 
 @RunWith(MockitoJUnitRunner.class)

@@ -2,21 +2,39 @@ package com.github.ljtfreitas.restify.http.client.message.converter.form;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.nio.charset.Charset;
 
+import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 
-import com.github.ljtfreitas.restify.http.client.message.converter.form.FormURLEncodedFormObjectMessageConverter;
-import com.github.ljtfreitas.restify.http.client.response.HttpResponseMessage;
+import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
+import com.github.ljtfreitas.restify.http.client.message.response.HttpResponseMessage;
 import com.github.ljtfreitas.restify.http.contract.Form;
 import com.github.ljtfreitas.restify.http.contract.Form.Field;
 
+@RunWith(MockitoJUnitRunner.class)
 public class FormURLEncodedFormObjectMessageConverterTest {
+
+	@Mock
+	private HttpRequestMessage request;
+
+	@Mock
+	private HttpResponseMessage response;
 
 	private FormURLEncodedFormObjectMessageConverter converter = new FormURLEncodedFormObjectMessageConverter();
 
+	@Before
+	public void setup() {
+		when(request.charset()).thenReturn(Charset.forName("UTF-8"));
+	}
+	
 	@Test
 	public void shouldCanReadFormObjectType() {
 		assertTrue(converter.canRead(MyFormObject.class));
@@ -31,7 +49,7 @@ public class FormURLEncodedFormObjectMessageConverterTest {
 	public void shouldReadFormUrlEncodedMessageToFormObject() {
 		String source = "name=Tiago de Freitas&customFieldName=31";
 
-		HttpResponseMessage response = new SimpleHttpResponseMessage(new ByteArrayInputStream(source.getBytes()));
+		when(response.body()).thenReturn(new ByteArrayInputStream(source.getBytes()));
 
 		MyFormObject myFormObject = (MyFormObject) converter.read(response, MyFormObject.class);
 
@@ -42,7 +60,8 @@ public class FormURLEncodedFormObjectMessageConverterTest {
 	@Test
 	public void shouldWriteFormUrlEncodedMessageWithFormObjectSource() {
 		ByteArrayOutputStream output = new ByteArrayOutputStream();
-		SimpleHttpRequestMessage request = new SimpleHttpRequestMessage(output);
+		
+		when(request.output()).thenReturn(output);
 
 		MyFormObject myFormObject = new MyFormObject();
 		myFormObject.name = "Tiago de Freitas";

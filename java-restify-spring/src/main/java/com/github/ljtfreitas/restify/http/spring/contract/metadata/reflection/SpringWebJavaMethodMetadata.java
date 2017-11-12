@@ -25,7 +25,7 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.spring.contract.metadata.reflection;
 
-import static com.github.ljtfreitas.restify.http.util.Preconditions.isTrue;
+import static com.github.ljtfreitas.restify.util.Preconditions.isTrue;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
@@ -35,7 +35,7 @@ import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-import com.github.ljtfreitas.restify.http.contract.metadata.reflection.JavaTypeResolver;
+import com.github.ljtfreitas.restify.reflection.JavaTypeResolver;
 
 public class SpringWebJavaMethodMetadata {
 

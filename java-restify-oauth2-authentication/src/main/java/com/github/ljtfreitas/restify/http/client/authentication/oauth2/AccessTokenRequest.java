@@ -25,16 +25,16 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.authentication.oauth2;
 
-import static com.github.ljtfreitas.restify.http.util.Preconditions.nonNull;
+import static com.github.ljtfreitas.restify.util.Preconditions.nonNull;
 
 import java.net.URI;
 import java.net.URL;
 
-import com.github.ljtfreitas.restify.http.client.header.Header;
-import com.github.ljtfreitas.restify.http.client.header.Headers;
+import com.github.ljtfreitas.restify.http.client.message.Header;
+import com.github.ljtfreitas.restify.http.client.message.Headers;
 import com.github.ljtfreitas.restify.http.contract.Parameters;
 import com.github.ljtfreitas.restify.http.contract.Parameters.Parameter;
-import com.github.ljtfreitas.restify.http.util.Tryable;
+import com.github.ljtfreitas.restify.util.Tryable;
 
 public class AccessTokenRequest {
 

@@ -1,6 +1,8 @@
 package com.github.ljtfreitas.restify.http.client.message.converter.form.multipart;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -8,28 +10,36 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 
-import com.github.ljtfreitas.restify.http.client.message.converter.form.SimpleHttpRequestMessage;
-import com.github.ljtfreitas.restify.http.contract.ContentType;
+import com.github.ljtfreitas.restify.http.client.message.Header;
+import com.github.ljtfreitas.restify.http.client.message.Headers;
+import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
 import com.github.ljtfreitas.restify.http.contract.MultipartFile;
 
+@RunWith(MockitoJUnitRunner.class)
 public class MultipartFormMapMessageWriterTest {
 
 	private MultipartFormMapMessageWriter converter;
 
 	private Map<String, Object> parameters;
 
-	private SimpleHttpRequestMessage httpRequestMessage;
 	private ByteArrayOutputStream output;
 
 	private File file;
 
+	@Mock
+	private HttpRequestMessage request;
+	
 	@Before
 	public void setup() throws IOException {
 		converter = new MultipartFormMapMessageWriter(new SimpleMultipartFormBoundaryGenerator("myBoundary"));
@@ -46,7 +56,11 @@ public class MultipartFormMapMessageWriterTest {
 		parameters = new LinkedHashMap<>();
 
 		output = new ByteArrayOutputStream();
-		httpRequestMessage = new SimpleHttpRequestMessage(output);
+
+		when(request.output()).thenReturn(output);
+		when(request.headers()).thenReturn(new Headers(Header.contentType("multipart/form-data")));
+		when(request.replace(any())).thenReturn(request);
+		when(request.charset()).thenReturn(Charset.forName("UTF-8"));
 	}
 
 	@Test
@@ -84,7 +98,7 @@ public class MultipartFormMapMessageWriterTest {
 			 + "\r\n"
 			 + "------myBoundary--";
 
-		converter.write(parameters, httpRequestMessage);
+		converter.write(parameters, request);
 
 		assertEquals(body, output.toString());
 	}
@@ -107,7 +121,7 @@ public class MultipartFormMapMessageWriterTest {
 				+ "\r\n"
 				+ "------myBoundary--";
 
-		converter.write(parameters, httpRequestMessage);
+		converter.write(parameters, request);
 
 		assertEquals(body, output.toString());
 	}
@@ -128,7 +142,7 @@ public class MultipartFormMapMessageWriterTest {
 				+ "\r\n"
 				+ "------myBoundary--";
 
-		converter.write(parameters, httpRequestMessage);
+		converter.write(parameters, request);
 
 		assertEquals(body, output.toString());
 	}
@@ -151,7 +165,7 @@ public class MultipartFormMapMessageWriterTest {
 				+ "\r\n"
 				+ "------myBoundary--";
 
-		converter.write(parameters, httpRequestMessage);
+		converter.write(parameters, request);
 
 		assertEquals(body, output.toString());
 	}
@@ -174,7 +188,7 @@ public class MultipartFormMapMessageWriterTest {
 				+ "\r\n"
 				+ "------myBoundary--";
 
-		converter.write(parameters, httpRequestMessage);
+		converter.write(parameters, request);
 
 		assertEquals(body, output.toString());
 	}
@@ -197,15 +211,15 @@ public class MultipartFormMapMessageWriterTest {
 				+ "\r\n"
 				+ "------myBoundary--";
 
-		converter.write(parameters, httpRequestMessage);
+		converter.write(parameters, request);
 
 		assertEquals(body, output.toString());
 	}
 
 	@Test
 	public void shouldSerializeMapAsFormMultipartDataWithMultipartFileInputStreamField() throws IOException {
-		parameters.put("myMultipartFileAsInputStream", MultipartFile.create("", file.getName(),
-				ContentType.of("text/plain"), new FileInputStream(file)));
+		parameters.put("myMultipartFileAsInputStream", MultipartFile.create("", file.getName(), "text/plain",
+				new FileInputStream(file)));
 
 		String body = "------myBoundary"
 				+ "\r\n"
@@ -221,7 +235,7 @@ public class MultipartFormMapMessageWriterTest {
 				+ "\r\n"
 				+ "------myBoundary--";
 
-		converter.write(parameters, httpRequestMessage);
+		converter.write(parameters, request);
 
 		assertEquals(body, output.toString());
 	}

@@ -24,11 +24,11 @@ import org.mockserver.junit.MockServerRule;
 import org.mockserver.model.HttpRequest;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.github.ljtfreitas.restify.http.client.header.Header;
-import com.github.ljtfreitas.restify.http.client.header.Headers;
+import com.github.ljtfreitas.restify.http.client.message.Header;
+import com.github.ljtfreitas.restify.http.client.message.Headers;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
-import com.github.ljtfreitas.restify.http.client.response.RestifyEndpointResponseInternalServerErrorException;
+import com.github.ljtfreitas.restify.http.client.response.EndpointResponseInternalServerErrorException;
 
 public class JaxRsHttpClientEndpointRequestExecutorTest {
 
@@ -159,7 +159,7 @@ public class JaxRsHttpClientEndpointRequestExecutorTest {
 		mockServerClient.verify(httpRequest, once());
 	}
 
-	@Test(expected = RestifyEndpointResponseInternalServerErrorException.class)
+	@Test(expected = EndpointResponseInternalServerErrorException.class)
 	public void shouldReadServerErrorResponse() {
 		mockServerClient
 			.when(request()

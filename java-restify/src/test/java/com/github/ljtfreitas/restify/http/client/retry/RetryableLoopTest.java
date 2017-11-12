@@ -16,10 +16,10 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import com.github.ljtfreitas.restify.http.client.header.Headers;
-import com.github.ljtfreitas.restify.http.client.response.HttpStatusCode;
-import com.github.ljtfreitas.restify.http.client.response.RestifyEndpointResponseGatewayTimeoutException;
-import com.github.ljtfreitas.restify.http.client.response.RestifyEndpointResponseInternalServerErrorException;
+import com.github.ljtfreitas.restify.http.client.message.Headers;
+import com.github.ljtfreitas.restify.http.client.message.response.HttpStatusCode;
+import com.github.ljtfreitas.restify.http.client.response.EndpointResponseGatewayTimeoutException;
+import com.github.ljtfreitas.restify.http.client.response.EndpointResponseInternalServerErrorException;
 
 @RunWith(MockitoJUnitRunner.class)
 public class RetryableLoopTest {
@@ -64,8 +64,8 @@ public class RetryableLoopTest {
 	@Test
 	public void shouldRepeatRetryableBlockWhenTheResponseExceptionIsARetryableStatusCode() {
 		when(myObject.bla())
-			.thenThrow(new RestifyEndpointResponseInternalServerErrorException("Buuuuuu", Headers.empty(), "server error..."))
-			.thenThrow(new RestifyEndpointResponseGatewayTimeoutException("Buuuuuu", Headers.empty(), "gateway timeout..."))
+			.thenThrow(new EndpointResponseInternalServerErrorException("Buuuuuu", Headers.empty(), "server error..."))
+			.thenThrow(new EndpointResponseGatewayTimeoutException("Buuuuuu", Headers.empty(), "gateway timeout..."))
 			.thenReturn("success");
 
 		String output = retryableLoop.repeat(3, myObject::bla);

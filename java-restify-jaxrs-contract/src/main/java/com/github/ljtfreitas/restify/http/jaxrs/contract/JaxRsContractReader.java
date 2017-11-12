@@ -34,24 +34,24 @@ import java.util.stream.Collectors;
 
 import javax.ws.rs.Path;
 
+import com.github.ljtfreitas.restify.http.contract.ParameterSerializer;
+import com.github.ljtfreitas.restify.http.contract.metadata.ContractReader;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointHeader;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointHeaders;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethod;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethodParameter;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethodParameter.EndpointMethodParameterType;
-import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethodParameterSerializer;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethodParameters;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethods;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointTarget;
-import com.github.ljtfreitas.restify.http.contract.metadata.RestifyContractReader;
 import com.github.ljtfreitas.restify.http.jaxrs.contract.metadata.JaxRsEndpointHeader;
 import com.github.ljtfreitas.restify.http.jaxrs.contract.metadata.reflection.JaxRsJavaMethodMetadata;
 import com.github.ljtfreitas.restify.http.jaxrs.contract.metadata.reflection.JaxRsJavaMethodParameterMetadata;
 import com.github.ljtfreitas.restify.http.jaxrs.contract.metadata.reflection.JaxRsJavaMethodParameters;
 import com.github.ljtfreitas.restify.http.jaxrs.contract.metadata.reflection.JaxRsJavaTypeMetadata;
-import com.github.ljtfreitas.restify.http.util.Tryable;
+import com.github.ljtfreitas.restify.util.Tryable;
 
-public class JaxRsContractReader implements RestifyContractReader {
+public class JaxRsContractReader implements ContractReader {
 
 	@Override
 	public EndpointMethods read(EndpointTarget endpointTarget) {
@@ -116,7 +116,7 @@ public class JaxRsContractReader implements RestifyContractReader {
 					javaMethodParameterMetadata.query() ? EndpointMethodParameterType.QUERY_STRING :
 						EndpointMethodParameterType.BODY;
 
-			EndpointMethodParameterSerializer serializer = javaMethodParameterMetadata.serializer();
+			ParameterSerializer serializer = javaMethodParameterMetadata.serializer();
 
 			parameters.put(new EndpointMethodParameter(position, javaMethodParameterMetadata.name(), javaMethodParameterMetadata.javaType(), type, serializer));
 		}

@@ -25,19 +25,19 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.message.converter.form.multipart;
 
-import static com.github.ljtfreitas.restify.http.client.header.Headers.CONTENT_TYPE;
+import static com.github.ljtfreitas.restify.http.client.message.Headers.CONTENT_TYPE;
 
 import java.io.IOException;
 import java.io.OutputStream;
 
-import com.github.ljtfreitas.restify.http.client.header.Header;
-import com.github.ljtfreitas.restify.http.client.request.HttpRequestMessage;
-import com.github.ljtfreitas.restify.http.client.request.RestifyHttpMessageWriteException;
-import com.github.ljtfreitas.restify.http.contract.ContentType;
+import com.github.ljtfreitas.restify.http.client.message.ContentType;
+import com.github.ljtfreitas.restify.http.client.message.Header;
+import com.github.ljtfreitas.restify.http.client.message.converter.HttpMessageWriteException;
+import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
 
 abstract class BaseMultipartFormMessageWriter<T> implements MultipartFormMessageWriter<T> {
 
-	private static final String MULTIPART_FORM_DATA = "multipart/form-data";
+	private static final String MULTIPART_FORM_DATA_CONTENT_TYPE = "multipart/form-data";
 
 	protected final MultipartFieldSerializers serializers = new MultipartFieldSerializers();
 
@@ -52,7 +52,7 @@ abstract class BaseMultipartFormMessageWriter<T> implements MultipartFormMessage
 	}
 
 	@Override
-	public void write(T body, HttpRequestMessage httpRequestMessage) throws RestifyHttpMessageWriteException {
+	public void write(T body, HttpRequestMessage httpRequestMessage) throws HttpMessageWriteException {
 		try {
 			String boundary = boundaryGenerator.generate();
 
@@ -69,15 +69,16 @@ abstract class BaseMultipartFormMessageWriter<T> implements MultipartFormMessage
 			output.close();
 
 		} catch (IOException e) {
-			throw new RestifyHttpMessageWriteException(e);
+			throw new HttpMessageWriteException(e);
 		}
 	}
 
 	private HttpRequestMessage addToContentType(String boundary, HttpRequestMessage httpRequestMessage) {
-		Header contentTypeHeader = httpRequestMessage.headers().get(CONTENT_TYPE)
-				.orElseGet(() -> Header.contentType(MULTIPART_FORM_DATA));
+		String contentTypeHeader = httpRequestMessage.headers().get(CONTENT_TYPE)
+				.map(Header::value)
+					.orElse(MULTIPART_FORM_DATA_CONTENT_TYPE);
 
-		ContentType contentType = ContentType.of(contentTypeHeader.value());
+		ContentType contentType = ContentType.of(contentTypeHeader);
 
 		return httpRequestMessage.replace(Header.contentType(contentType.append("boundary", "----" + boundary)));
 	}

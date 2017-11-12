@@ -29,7 +29,7 @@ import java.nio.charset.Charset;
 import java.time.Duration;
 import java.util.Optional;
 
-import com.github.ljtfreitas.restify.http.client.charset.Encoding;
+import com.github.ljtfreitas.restify.http.client.message.Encoding;
 
 import io.netty.handler.ssl.SslContext;
 

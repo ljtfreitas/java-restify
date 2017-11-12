@@ -25,9 +25,9 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.authentication.oauth2;
 
-import com.github.ljtfreitas.restify.http.RestifyHttpException;
+import com.github.ljtfreitas.restify.http.HttpException;
 
-public class OAuth2Exception extends RestifyHttpException {
+public class OAuth2Exception extends HttpException {
 
 	private static final long serialVersionUID = 1L;
 

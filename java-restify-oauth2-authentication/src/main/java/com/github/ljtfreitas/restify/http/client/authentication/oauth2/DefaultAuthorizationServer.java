@@ -25,28 +25,27 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.authentication.oauth2;
 
-import static com.github.ljtfreitas.restify.http.client.header.Headers.AUTHORIZATION;
-import static com.github.ljtfreitas.restify.http.util.Preconditions.nonNull;
+import static com.github.ljtfreitas.restify.http.client.message.Headers.AUTHORIZATION;
+import static com.github.ljtfreitas.restify.util.Preconditions.nonNull;
 
 import java.net.URI;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 
 import com.github.ljtfreitas.restify.http.client.authentication.BasicAuthentication;
-import com.github.ljtfreitas.restify.http.client.header.Header;
-import com.github.ljtfreitas.restify.http.client.header.Headers;
-import com.github.ljtfreitas.restify.http.client.message.HttpMessageConverter;
-import com.github.ljtfreitas.restify.http.client.message.HttpMessageConverters;
+import com.github.ljtfreitas.restify.http.client.message.Header;
+import com.github.ljtfreitas.restify.http.client.message.Headers;
+import com.github.ljtfreitas.restify.http.client.message.converter.HttpMessageConverter;
+import com.github.ljtfreitas.restify.http.client.message.converter.HttpMessageConverters;
 import com.github.ljtfreitas.restify.http.client.message.converter.form.FormURLEncodedParametersMessageConverter;
 import com.github.ljtfreitas.restify.http.client.message.converter.json.JsonMessageConverter;
 import com.github.ljtfreitas.restify.http.client.message.converter.text.TextPlainMessageConverter;
-import com.github.ljtfreitas.restify.http.client.message.converter.xml.JaxbXmlMessageConverter;
+import com.github.ljtfreitas.restify.http.client.message.converter.xml.XmlMessageConverter;
+import com.github.ljtfreitas.restify.http.client.request.DefaultEndpointRequestExecutor;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequestExecutor;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequestWriter;
 import com.github.ljtfreitas.restify.http.client.request.HttpClientRequestFactory;
-import com.github.ljtfreitas.restify.http.client.request.RestifyEndpointRequestExecutor;
 import com.github.ljtfreitas.restify.http.client.request.jdk.HttpClientRequestConfiguration;
 import com.github.ljtfreitas.restify.http.client.request.jdk.JdkHttpClientRequestFactory;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
@@ -178,7 +177,7 @@ public class DefaultAuthorizationServer implements AuthorizationServer {
 		}
 
 		public EndpointRequestExecutor create() {
-			return new RestifyEndpointRequestExecutor(httpClientRequestFactory, endpointRequestWriter(converters),
+			return new DefaultEndpointRequestExecutor(httpClientRequestFactory, endpointRequestWriter(converters),
 					endpointResponseReader(converters));
 		}
 
@@ -202,10 +201,14 @@ public class DefaultAuthorizationServer implements AuthorizationServer {
 		}
 
 		private HttpMessageConverters converters() {
-			HttpMessageConverter jsonMessageConverter = new Provider().single(JsonMessageConverter.class);
-
-			Collection<HttpMessageConverter> converters = Arrays.asList(new TextPlainMessageConverter(),
-					new FormURLEncodedParametersMessageConverter(), jsonMessageConverter, new JaxbXmlMessageConverter<>());
+			Collection<HttpMessageConverter> converters = new ArrayList<>();
+			
+			converters.add(new TextPlainMessageConverter());
+			converters.add(new FormURLEncodedParametersMessageConverter());
+			
+			Provider provider = new Provider();
+			provider.single(JsonMessageConverter.class).ifPresent(converters::add);
+			provider.single(XmlMessageConverter.class).ifPresent(converters::add);
 
 			return new HttpMessageConverters(converters);
 		}

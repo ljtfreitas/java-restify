@@ -35,7 +35,7 @@ import org.apache.curator.x.discovery.details.InstanceSerializer;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
 
-import com.github.ljtfreitas.restify.http.util.Tryable;
+import com.github.ljtfreitas.restify.util.Tryable;
 
 public class ZookeeperInstanceSerializer implements InstanceSerializer<ZookeeperServiceInstance> {
 

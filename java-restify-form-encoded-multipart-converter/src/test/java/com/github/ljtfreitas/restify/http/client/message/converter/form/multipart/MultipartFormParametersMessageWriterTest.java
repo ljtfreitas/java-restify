@@ -1,6 +1,8 @@
 package com.github.ljtfreitas.restify.http.client.message.converter.form.multipart;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.any;
+import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -8,22 +10,30 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStreamWriter;
+import java.nio.charset.Charset;
 
 import org.junit.Before;
 import org.junit.Test;
+import org.junit.runner.RunWith;
+import org.mockito.Mock;
+import org.mockito.runners.MockitoJUnitRunner;
 
-import com.github.ljtfreitas.restify.http.client.message.converter.form.SimpleHttpRequestMessage;
-import com.github.ljtfreitas.restify.http.contract.ContentType;
+import com.github.ljtfreitas.restify.http.client.message.Header;
+import com.github.ljtfreitas.restify.http.client.message.Headers;
+import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
 import com.github.ljtfreitas.restify.http.contract.MultipartFile;
 import com.github.ljtfreitas.restify.http.contract.MultipartParameters;
 
+@RunWith(MockitoJUnitRunner.class)
 public class MultipartFormParametersMessageWriterTest {
 
+	@Mock
+	private HttpRequestMessage request;
+	
 	private MultipartFormParametersMessageWriter converter;
 
 	private MultipartParameters parameters;
 
-	private SimpleHttpRequestMessage httpRequestMessage;
 	private ByteArrayOutputStream output;
 
 	private File file;
@@ -44,7 +54,11 @@ public class MultipartFormParametersMessageWriterTest {
 		fileWriter.close();
 
 		output = new ByteArrayOutputStream();
-		httpRequestMessage = new SimpleHttpRequestMessage(output);
+		
+		when(request.output()).thenReturn(output);
+		when(request.headers()).thenReturn(new Headers(Header.contentType("multipart/form-data")));
+		when(request.replace(any())).thenReturn(request);
+		when(request.charset()).thenReturn(Charset.forName("UTF-8"));
 	}
 
 	@Test
@@ -83,7 +97,7 @@ public class MultipartFormParametersMessageWriterTest {
 			 + "\r\n"
 			 + "------myBoundary--";
 
-		converter.write(parameters, httpRequestMessage);
+		converter.write(parameters, request);
 
 		assertEquals(body, output.toString());
 	}
@@ -106,7 +120,7 @@ public class MultipartFormParametersMessageWriterTest {
 				+ "\r\n"
 				+ "------myBoundary--";
 
-		converter.write(parameters, httpRequestMessage);
+		converter.write(parameters, request);
 
 		assertEquals(body, output.toString());
 	}
@@ -127,7 +141,7 @@ public class MultipartFormParametersMessageWriterTest {
 				+ "\r\n"
 				+ "------myBoundary--";
 
-		converter.write(parameters, httpRequestMessage);
+		converter.write(parameters, request);
 
 		assertEquals(body, output.toString());
 	}
@@ -150,7 +164,7 @@ public class MultipartFormParametersMessageWriterTest {
 				+ "\r\n"
 				+ "------myBoundary--";
 
-		converter.write(parameters, httpRequestMessage);
+		converter.write(parameters, request);
 
 		assertEquals(body, output.toString());
 	}
@@ -173,7 +187,7 @@ public class MultipartFormParametersMessageWriterTest {
 				+ "\r\n"
 				+ "------myBoundary--";
 
-		converter.write(parameters, httpRequestMessage);
+		converter.write(parameters, request);
 
 		assertEquals(body, output.toString());
 	}
@@ -196,15 +210,14 @@ public class MultipartFormParametersMessageWriterTest {
 				+ "\r\n"
 				+ "------myBoundary--";
 
-		converter.write(parameters, httpRequestMessage);
+		converter.write(parameters, request);
 
 		assertEquals(body, output.toString());
 	}
 
 	@Test
 	public void shouldSerializeMultipartParametersAsFormMultipartDataWithMultipartFileInputStreamField() throws IOException {
-		parameters.put(MultipartFile.create("myMultipartFileAsInputStream", file.getName(),
-				ContentType.of("text/plain"), new FileInputStream(file)));
+		parameters.put(MultipartFile.create("myMultipartFileAsInputStream", file.getName(), "text/plain", new FileInputStream(file)));
 
 		String body = "------myBoundary"
 				+ "\r\n"
@@ -220,7 +233,7 @@ public class MultipartFormParametersMessageWriterTest {
 				+ "\r\n"
 				+ "------myBoundary--";
 
-		converter.write(parameters, httpRequestMessage);
+		converter.write(parameters, request);
 
 		assertEquals(body, output.toString());
 	}

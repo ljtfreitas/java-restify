@@ -25,7 +25,7 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.spring.contract;
 
-import static com.github.ljtfreitas.restify.http.util.Preconditions.nonNull;
+import static com.github.ljtfreitas.restify.util.Preconditions.nonNull;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
@@ -37,32 +37,32 @@ import java.util.LinkedHashSet;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.github.ljtfreitas.restify.http.contract.ParameterSerializer;
+import com.github.ljtfreitas.restify.http.contract.metadata.ContractExpressionResolver;
+import com.github.ljtfreitas.restify.http.contract.metadata.ContractReader;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointHeader;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointHeaders;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethod;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethodParameter;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethodParameter.EndpointMethodParameterType;
-import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethodParameterSerializer;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethodParameters;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethods;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointTarget;
-import com.github.ljtfreitas.restify.http.contract.metadata.RestifyContractExpressionResolver;
-import com.github.ljtfreitas.restify.http.contract.metadata.RestifyContractReader;
-import com.github.ljtfreitas.restify.http.contract.metadata.SimpleRestifyContractExpressionResolver;
+import com.github.ljtfreitas.restify.http.contract.metadata.SimpleContractExpressionResolver;
 import com.github.ljtfreitas.restify.http.spring.contract.metadata.reflection.SpringWebJavaMethodMetadata;
 import com.github.ljtfreitas.restify.http.spring.contract.metadata.reflection.SpringWebJavaMethodParameterMetadata;
 import com.github.ljtfreitas.restify.http.spring.contract.metadata.reflection.SpringWebJavaTypeMetadata;
-import com.github.ljtfreitas.restify.http.util.Tryable;
+import com.github.ljtfreitas.restify.util.Tryable;
 
-public class SpringWebContractReader implements RestifyContractReader {
+public class SpringWebContractReader implements ContractReader {
 
-	private final RestifyContractExpressionResolver expressionsolver;
+	private final ContractExpressionResolver expressionsolver;
 
 	public SpringWebContractReader() {
-		this(new SimpleRestifyContractExpressionResolver());
+		this(new SimpleContractExpressionResolver());
 	}
 
-	public SpringWebContractReader(RestifyContractExpressionResolver expressionResolver) {
+	public SpringWebContractReader(ContractExpressionResolver expressionResolver) {
 		this.expressionsolver = expressionResolver;
 	}
 
@@ -135,7 +135,7 @@ public class SpringWebContractReader implements RestifyContractReader {
 								"The parameter [" + javaMethodParameterMetadata.name() + "] of method [" + javaMethod + "] "
 										+ "is not annotated with @PathVariable, @RequestHeader, @RequestBody or @RequestParam"); 
 
-			EndpointMethodParameterSerializer serializer = serializerOf(javaMethodParameterMetadata);
+			ParameterSerializer serializer = serializerOf(javaMethodParameterMetadata);
 
 			parameters.put(new EndpointMethodParameter(position, javaMethodParameterMetadata.name(), javaMethodParameterMetadata.javaType(), 
 					type, serializer));
@@ -144,7 +144,7 @@ public class SpringWebContractReader implements RestifyContractReader {
 		return parameters;
 	}
 
-	private EndpointMethodParameterSerializer serializerOf(SpringWebJavaMethodParameterMetadata javaMethodParameterMetadata) {
+	private ParameterSerializer serializerOf(SpringWebJavaMethodParameterMetadata javaMethodParameterMetadata) {
 		try {
 			return javaMethodParameterMetadata.serializer().newInstance();
 		} catch (InstantiationException | IllegalAccessException e) {

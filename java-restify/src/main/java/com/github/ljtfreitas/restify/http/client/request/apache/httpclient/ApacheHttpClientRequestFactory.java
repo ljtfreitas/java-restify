@@ -48,7 +48,7 @@ import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.protocol.HttpContext;
 
-import com.github.ljtfreitas.restify.http.client.charset.Encoding;
+import com.github.ljtfreitas.restify.http.client.message.Encoding;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
 import com.github.ljtfreitas.restify.http.client.request.HttpClientRequestFactory;
 import com.github.ljtfreitas.restify.http.client.request.Timeout;

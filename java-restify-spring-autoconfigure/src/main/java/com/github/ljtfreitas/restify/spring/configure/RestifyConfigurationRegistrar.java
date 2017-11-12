@@ -43,7 +43,7 @@ import org.springframework.core.type.filter.AssignableTypeFilter;
 import org.springframework.core.type.filter.RegexPatternTypeFilter;
 import org.springframework.core.type.filter.TypeFilter;
 
-import com.github.ljtfreitas.restify.http.util.Tryable;
+import com.github.ljtfreitas.restify.util.Tryable;
 
 class RestifyConfigurationRegistrar extends BaseRestifyConfigurationRegistrar {
 

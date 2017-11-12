@@ -30,7 +30,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.github.ljtfreitas.restify.http.contract.metadata.RestifyContractReader;
+import com.github.ljtfreitas.restify.http.contract.metadata.ContractReader;
 import com.github.ljtfreitas.restify.http.jaxrs.contract.JaxRsContractReader;
 
 @Configuration
@@ -39,7 +39,7 @@ public class RestifyJaxRsConfiguration {
 
 	@ConditionalOnMissingBean
 	@Bean
-	public RestifyContractReader restifyContractReader() {
+	public ContractReader restifyContractReader() {
 		return new JaxRsContractReader();
 	}
 }

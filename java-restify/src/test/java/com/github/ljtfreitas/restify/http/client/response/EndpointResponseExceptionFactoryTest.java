@@ -11,7 +11,9 @@ import java.io.ByteArrayInputStream;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.github.ljtfreitas.restify.http.client.header.Headers;
+import com.github.ljtfreitas.restify.http.client.message.Headers;
+import com.github.ljtfreitas.restify.http.client.message.response.HttpResponseMessage;
+import com.github.ljtfreitas.restify.http.client.message.response.StatusCode;
 
 public class EndpointResponseExceptionFactoryTest {
 
@@ -32,9 +34,9 @@ public class EndpointResponseExceptionFactoryTest {
 	public void shouldThrowExceptionWhenStatusCodeIsBadRequest() {
 		HttpResponseMessage response = new SimpleHttpResponseMessage(StatusCode.badRequest(), headers, responseBody);
 
-		RestifyEndpointResponseException exception = exceptionFactory.create(response);
+		EndpointResponseException exception = exceptionFactory.create(response);
 
-		assertThat(exception, instanceOf(RestifyEndpointResponseBadRequestException.class));
+		assertThat(exception, instanceOf(EndpointResponseBadRequestException.class));
 		assertThat(exception.status(), equalTo(response.status()));
 		assertThat(exception.headers(), sameInstance(response.headers()));
 		assertThat(exception.bodyAsString(), isEmptyString());
@@ -44,9 +46,9 @@ public class EndpointResponseExceptionFactoryTest {
 	public void shouldThrowExceptionWhenStatusCodeIsUnauthorized() {
 		HttpResponseMessage response = new SimpleHttpResponseMessage(StatusCode.unauthorized(), headers, responseBody);
 
-		RestifyEndpointResponseException exception = exceptionFactory.create(response);
+		EndpointResponseException exception = exceptionFactory.create(response);
 
-		assertThat(exception, instanceOf(RestifyEndpointResponseUnauthorizedException.class));
+		assertThat(exception, instanceOf(EndpointResponseUnauthorizedException.class));
 		assertThat(exception.status(), equalTo(response.status()));
 		assertThat(exception.headers(), sameInstance(response.headers()));
 		assertThat(exception.bodyAsString(), isEmptyString());
@@ -56,9 +58,9 @@ public class EndpointResponseExceptionFactoryTest {
 	public void shouldThrowExceptionWhenStatusCodeIsForbidden() {
 		HttpResponseMessage response = new SimpleHttpResponseMessage(StatusCode.forbidden(), headers, responseBody);
 
-		RestifyEndpointResponseException exception = exceptionFactory.create(response);
+		EndpointResponseException exception = exceptionFactory.create(response);
 
-		assertThat(exception, instanceOf(RestifyEndpointResponseForbiddenException.class));
+		assertThat(exception, instanceOf(EndpointResponseForbiddenException.class));
 		assertThat(exception.status(), equalTo(response.status()));
 		assertThat(exception.headers(), sameInstance(response.headers()));
 		assertThat(exception.bodyAsString(), isEmptyString());
@@ -68,9 +70,9 @@ public class EndpointResponseExceptionFactoryTest {
 	public void shouldThrowExceptionWhenStatusCodeIsNotFound() {
 		HttpResponseMessage response = new SimpleHttpResponseMessage(StatusCode.notFound(), headers, responseBody);
 
-		RestifyEndpointResponseException exception = exceptionFactory.create(response);
+		EndpointResponseException exception = exceptionFactory.create(response);
 
-		assertThat(exception, instanceOf(RestifyEndpointResponseNotFoundException.class));
+		assertThat(exception, instanceOf(EndpointResponseNotFoundException.class));
 		assertThat(exception.status(), equalTo(response.status()));
 		assertThat(exception.headers(), sameInstance(response.headers()));
 		assertThat(exception.bodyAsString(), isEmptyString());
@@ -81,9 +83,9 @@ public class EndpointResponseExceptionFactoryTest {
 		HttpResponseMessage response = new SimpleHttpResponseMessage(StatusCode.methodNotAllowed(), headers,
 				responseBody);
 
-		RestifyEndpointResponseException exception = exceptionFactory.create(response);
+		EndpointResponseException exception = exceptionFactory.create(response);
 
-		assertThat(exception, instanceOf(RestifyEndpointResponseMethodNotAllowedException.class));
+		assertThat(exception, instanceOf(EndpointResponseMethodNotAllowedException.class));
 		assertThat(exception.status(), equalTo(response.status()));
 		assertThat(exception.headers(), sameInstance(response.headers()));
 		assertThat(exception.bodyAsString(), isEmptyString());
@@ -93,9 +95,9 @@ public class EndpointResponseExceptionFactoryTest {
 	public void shouldThrowExceptionWhenStatusCodeIsNotAcceptable() {
 		HttpResponseMessage response = new SimpleHttpResponseMessage(StatusCode.notAcceptable(), headers, responseBody);
 
-		RestifyEndpointResponseException exception = exceptionFactory.create(response);
+		EndpointResponseException exception = exceptionFactory.create(response);
 
-		assertThat(exception, instanceOf(RestifyEndpointResponseNotAcceptableException.class));
+		assertThat(exception, instanceOf(EndpointResponseNotAcceptableException.class));
 		assertThat(exception.status(), equalTo(response.status()));
 		assertThat(exception.headers(), sameInstance(response.headers()));
 		assertThat(exception.bodyAsString(), isEmptyString());
@@ -106,9 +108,9 @@ public class EndpointResponseExceptionFactoryTest {
 		HttpResponseMessage response = new SimpleHttpResponseMessage(StatusCode.proxyAuthenticationRequired(), headers,
 				responseBody);
 
-		RestifyEndpointResponseException exception = exceptionFactory.create(response);
+		EndpointResponseException exception = exceptionFactory.create(response);
 
-		assertThat(exception, instanceOf(RestifyEndpointResponseProxyAuthenticationRequiredException.class));
+		assertThat(exception, instanceOf(EndpointResponseProxyAuthenticationRequiredException.class));
 		assertThat(exception.status(), equalTo(response.status()));
 		assertThat(exception.headers(), sameInstance(response.headers()));
 		assertThat(exception.bodyAsString(), isEmptyString());
@@ -119,9 +121,9 @@ public class EndpointResponseExceptionFactoryTest {
 		HttpResponseMessage response = new SimpleHttpResponseMessage(StatusCode.requestTimeout(), headers,
 				responseBody);
 
-		RestifyEndpointResponseException exception = exceptionFactory.create(response);
+		EndpointResponseException exception = exceptionFactory.create(response);
 
-		assertThat(exception, instanceOf(RestifyEndpointResponseRequestTimeoutException.class));
+		assertThat(exception, instanceOf(EndpointResponseRequestTimeoutException.class));
 		assertThat(exception.status(), equalTo(response.status()));
 		assertThat(exception.headers(), sameInstance(response.headers()));
 		assertThat(exception.bodyAsString(), isEmptyString());
@@ -131,9 +133,9 @@ public class EndpointResponseExceptionFactoryTest {
 	public void shouldThrowExceptionWhenStatusCodeIsConflict() {
 		HttpResponseMessage response = new SimpleHttpResponseMessage(StatusCode.conflict(), headers, responseBody);
 
-		RestifyEndpointResponseException exception = exceptionFactory.create(response);
+		EndpointResponseException exception = exceptionFactory.create(response);
 
-		assertThat(exception, instanceOf(RestifyEndpointResponseConflictException.class));
+		assertThat(exception, instanceOf(EndpointResponseConflictException.class));
 		assertThat(exception.status(), equalTo(response.status()));
 		assertThat(exception.headers(), sameInstance(response.headers()));
 		assertThat(exception.bodyAsString(), isEmptyString());
@@ -143,9 +145,9 @@ public class EndpointResponseExceptionFactoryTest {
 	public void shouldThrowExceptionWhenStatusCodeIsGone() {
 		HttpResponseMessage response = new SimpleHttpResponseMessage(StatusCode.gone(), headers, responseBody);
 
-		RestifyEndpointResponseException exception = exceptionFactory.create(response);
+		EndpointResponseException exception = exceptionFactory.create(response);
 
-		assertThat(exception, instanceOf(RestifyEndpointResponseGoneException.class));
+		assertThat(exception, instanceOf(EndpointResponseGoneException.class));
 		assertThat(exception.status(), equalTo(response.status()));
 		assertThat(exception.headers(), sameInstance(response.headers()));
 		assertThat(exception.bodyAsString(), isEmptyString());
@@ -156,9 +158,9 @@ public class EndpointResponseExceptionFactoryTest {
 		HttpResponseMessage response = new SimpleHttpResponseMessage(StatusCode.lengthRequired(), headers,
 				responseBody);
 
-		RestifyEndpointResponseException exception = exceptionFactory.create(response);
+		EndpointResponseException exception = exceptionFactory.create(response);
 
-		assertThat(exception, instanceOf(RestifyEndpointResponseLengthRequiredException.class));
+		assertThat(exception, instanceOf(EndpointResponseLengthRequiredException.class));
 		assertThat(exception.status(), equalTo(response.status()));
 		assertThat(exception.headers(), sameInstance(response.headers()));
 		assertThat(exception.bodyAsString(), isEmptyString());
@@ -169,9 +171,9 @@ public class EndpointResponseExceptionFactoryTest {
 		HttpResponseMessage response = new SimpleHttpResponseMessage(StatusCode.requestEntityTooLarge(), headers,
 				responseBody);
 
-		RestifyEndpointResponseException exception = exceptionFactory.create(response);
+		EndpointResponseException exception = exceptionFactory.create(response);
 
-		assertThat(exception, instanceOf(RestifyEndpointResponseRequestEntityTooLargeException.class));
+		assertThat(exception, instanceOf(EndpointResponseRequestEntityTooLargeException.class));
 		assertThat(exception.status(), equalTo(response.status()));
 		assertThat(exception.headers(), sameInstance(response.headers()));
 		assertThat(exception.bodyAsString(), isEmptyString());
@@ -182,9 +184,9 @@ public class EndpointResponseExceptionFactoryTest {
 		HttpResponseMessage response = new SimpleHttpResponseMessage(StatusCode.requestUriTooLong(), headers,
 				responseBody);
 
-		RestifyEndpointResponseException exception = exceptionFactory.create(response);
+		EndpointResponseException exception = exceptionFactory.create(response);
 
-		assertThat(exception, instanceOf(RestifyEndpointResponseRequestUriTooLongException.class));
+		assertThat(exception, instanceOf(EndpointResponseRequestUriTooLongException.class));
 		assertThat(exception.status(), equalTo(response.status()));
 		assertThat(exception.headers(), sameInstance(response.headers()));
 		assertThat(exception.bodyAsString(), isEmptyString());
@@ -195,9 +197,9 @@ public class EndpointResponseExceptionFactoryTest {
 		HttpResponseMessage response = new SimpleHttpResponseMessage(StatusCode.unsupportedMediaType(), headers,
 				responseBody);
 
-		RestifyEndpointResponseException exception = exceptionFactory.create(response);
+		EndpointResponseException exception = exceptionFactory.create(response);
 
-		assertThat(exception, instanceOf(RestifyEndpointResponseUnsupportedMediaTypeException.class));
+		assertThat(exception, instanceOf(EndpointResponseUnsupportedMediaTypeException.class));
 		assertThat(exception.status(), equalTo(response.status()));
 		assertThat(exception.headers(), sameInstance(response.headers()));
 		assertThat(exception.bodyAsString(), isEmptyString());
@@ -208,9 +210,9 @@ public class EndpointResponseExceptionFactoryTest {
 		HttpResponseMessage response = new SimpleHttpResponseMessage(StatusCode.requestedRangeNotSatisfiable(), headers,
 				responseBody);
 
-		RestifyEndpointResponseException exception = exceptionFactory.create(response);
+		EndpointResponseException exception = exceptionFactory.create(response);
 
-		assertThat(exception, instanceOf(RestifyEndpointResponseRequestedRangeNotSatisfiableException.class));
+		assertThat(exception, instanceOf(EndpointResponseRequestedRangeNotSatisfiableException.class));
 		assertThat(exception.status(), equalTo(response.status()));
 		assertThat(exception.headers(), sameInstance(response.headers()));
 		assertThat(exception.bodyAsString(), isEmptyString());
@@ -221,9 +223,9 @@ public class EndpointResponseExceptionFactoryTest {
 		HttpResponseMessage response = new SimpleHttpResponseMessage(StatusCode.expectationFailed(), headers,
 				responseBody);
 
-		RestifyEndpointResponseException exception = exceptionFactory.create(response);
+		EndpointResponseException exception = exceptionFactory.create(response);
 
-		assertThat(exception, instanceOf(RestifyEndpointResponseExpectationFailedException.class));
+		assertThat(exception, instanceOf(EndpointResponseExpectationFailedException.class));
 		assertThat(exception.status(), equalTo(response.status()));
 		assertThat(exception.headers(), sameInstance(response.headers()));
 		assertThat(exception.bodyAsString(), isEmptyString());
@@ -234,9 +236,9 @@ public class EndpointResponseExceptionFactoryTest {
 		HttpResponseMessage response = new SimpleHttpResponseMessage(StatusCode.internalServerError(), headers,
 				responseBody);
 
-		RestifyEndpointResponseException exception = exceptionFactory.create(response);
+		EndpointResponseException exception = exceptionFactory.create(response);
 
-		assertThat(exception, instanceOf(RestifyEndpointResponseInternalServerErrorException.class));
+		assertThat(exception, instanceOf(EndpointResponseInternalServerErrorException.class));
 		assertThat(exception.status(), equalTo(response.status()));
 		assertThat(exception.headers(), sameInstance(response.headers()));
 		assertThat(exception.bodyAsString(), isEmptyString());
@@ -247,9 +249,9 @@ public class EndpointResponseExceptionFactoryTest {
 		HttpResponseMessage response = new SimpleHttpResponseMessage(StatusCode.notImplemented(), headers,
 				responseBody);
 
-		RestifyEndpointResponseException exception = exceptionFactory.create(response);
+		EndpointResponseException exception = exceptionFactory.create(response);
 
-		assertThat(exception, instanceOf(RestifyEndpointResponseNotImplementedException.class));
+		assertThat(exception, instanceOf(EndpointResponseNotImplementedException.class));
 		assertThat(exception.status(), equalTo(response.status()));
 		assertThat(exception.headers(), sameInstance(response.headers()));
 		assertThat(exception.bodyAsString(), isEmptyString());
@@ -259,9 +261,9 @@ public class EndpointResponseExceptionFactoryTest {
 	public void shouldThrowExceptionWhenStatusCodeIsBadGateway() {
 		HttpResponseMessage response = new SimpleHttpResponseMessage(StatusCode.badGateway(), headers, responseBody);
 
-		RestifyEndpointResponseException exception = exceptionFactory.create(response);
+		EndpointResponseException exception = exceptionFactory.create(response);
 
-		assertThat(exception, instanceOf(RestifyEndpointResponseBadGatewayException.class));
+		assertThat(exception, instanceOf(EndpointResponseBadGatewayException.class));
 		assertThat(exception.status(), equalTo(response.status()));
 		assertThat(exception.headers(), sameInstance(response.headers()));
 		assertThat(exception.bodyAsString(), isEmptyString());
@@ -272,9 +274,9 @@ public class EndpointResponseExceptionFactoryTest {
 		HttpResponseMessage response = new SimpleHttpResponseMessage(StatusCode.serviceUnavailable(), headers,
 				responseBody);
 
-		RestifyEndpointResponseException exception = exceptionFactory.create(response);
+		EndpointResponseException exception = exceptionFactory.create(response);
 
-		assertThat(exception, instanceOf(RestifyEndpointResponseServiceUnavailableException.class));
+		assertThat(exception, instanceOf(EndpointResponseServiceUnavailableException.class));
 		assertThat(exception.status(), equalTo(response.status()));
 		assertThat(exception.headers(), sameInstance(response.headers()));
 		assertThat(exception.bodyAsString(), isEmptyString());
@@ -285,9 +287,9 @@ public class EndpointResponseExceptionFactoryTest {
 		HttpResponseMessage response = new SimpleHttpResponseMessage(StatusCode.gatewayTimeout(), headers,
 				responseBody);
 
-		RestifyEndpointResponseException exception = exceptionFactory.create(response);
+		EndpointResponseException exception = exceptionFactory.create(response);
 
-		assertThat(exception, instanceOf(RestifyEndpointResponseGatewayTimeoutException.class));
+		assertThat(exception, instanceOf(EndpointResponseGatewayTimeoutException.class));
 		assertThat(exception.status(), equalTo(response.status()));
 		assertThat(exception.headers(), sameInstance(response.headers()));
 		assertThat(exception.bodyAsString(), isEmptyString());
@@ -298,9 +300,9 @@ public class EndpointResponseExceptionFactoryTest {
 		HttpResponseMessage response = new SimpleHttpResponseMessage(StatusCode.httpVersionNotSupported(), headers,
 				responseBody);
 
-		RestifyEndpointResponseException exception = exceptionFactory.create(response);
+		EndpointResponseException exception = exceptionFactory.create(response);
 
-		assertThat(exception, instanceOf(RestifyEndpointResponseHttpVersionNotSupportedException.class));
+		assertThat(exception, instanceOf(EndpointResponseHttpVersionNotSupportedException.class));
 		assertThat(exception.status(), equalTo(response.status()));
 		assertThat(exception.headers(), sameInstance(response.headers()));
 		assertThat(exception.bodyAsString(), isEmptyString());
@@ -310,9 +312,9 @@ public class EndpointResponseExceptionFactoryTest {
 	public void shouldThrowExceptionWhenStatusCodeIsUnhandled() {
 		HttpResponseMessage response = new SimpleHttpResponseMessage(StatusCode.of(999), headers, responseBody);
 
-		RestifyEndpointResponseException exception = exceptionFactory.create(response);
+		EndpointResponseException exception = exceptionFactory.create(response);
 
-		assertThat(exception, instanceOf(RestifyEndpointResponseException.class));
+		assertThat(exception, instanceOf(EndpointResponseException.class));
 		assertThat(exception.status(), equalTo(response.status()));
 		assertThat(exception.headers(), sameInstance(response.headers()));
 		assertThat(exception.bodyAsString(), isEmptyString());

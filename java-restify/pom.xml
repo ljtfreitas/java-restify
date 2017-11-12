@@ -13,6 +13,40 @@
 
 	<dependencies>
 		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>java-restify-contract</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>java-restify-http-message</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>java-restify-util</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>java-restify-json-jackson-converter</artifactId>
+			<version>${project.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>java-restify-xml-jaxb-converter</artifactId>
+			<version>${project.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>java-restify-wildcard-converter</artifactId>
+			<version>${project.version}</version>
+			<scope>test</scope>
+		</dependency>
+
+		<dependency>
 			<groupId>org.apache.httpcomponents</groupId>
 			<artifactId>httpclient</artifactId>
 			<version>4.5.2</version>
@@ -26,20 +60,7 @@
 			<scope>provided</scope>
 			<optional>true</optional>
 		</dependency>
-		<dependency>
-			<groupId>com.google.code.gson</groupId>
-			<artifactId>gson</artifactId>
-			<version>2.7</version>
-			<scope>provided</scope>
-			<optional>true</optional>
-		</dependency>
-		<dependency>
-			<groupId>javax.json</groupId>
-			<artifactId>javax.json-api</artifactId>
-			<version>1.0</version>
-			<optional>true</optional>
-			<scope>provided</scope>
-		</dependency>
+		
 		<dependency>
 			<groupId>io.netty</groupId>
 			<artifactId>netty-transport</artifactId>
@@ -67,12 +88,6 @@
 			<version>4.0.34.Final</version>
 			<optional>true</optional>
 			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.glassfish</groupId>
-			<artifactId>javax.json</artifactId>
-			<version>1.0.4</version>
-			<scope>test</scope>
 		</dependency>
 	</dependencies>
 </project>

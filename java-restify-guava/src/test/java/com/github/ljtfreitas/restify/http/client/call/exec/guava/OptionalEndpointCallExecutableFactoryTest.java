@@ -9,7 +9,7 @@ import org.junit.Test;
 
 import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutable;
 import com.github.ljtfreitas.restify.http.client.call.exec.guava.OptionalEndpointCallExecutableFactory;
-import com.github.ljtfreitas.restify.http.contract.metadata.reflection.JavaType;
+import com.github.ljtfreitas.restify.reflection.JavaType;
 import com.google.common.base.Optional;
 
 public class OptionalEndpointCallExecutableFactoryTest {

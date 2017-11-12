@@ -17,7 +17,7 @@ public class RxJava2EndpointCallExecutableProviderSpiTest {
 
 	@SuppressWarnings("unchecked")
 	@Test
-	public void shouldDiscoveryRxJava2ExecutableProviders() {
+	public void shouldDiscoveryServiceProviders() {
 		Collection<EndpointCallExecutableProvider> services = loader.all(EndpointCallExecutableProvider.class);
 
 		assertThat(services, contains(

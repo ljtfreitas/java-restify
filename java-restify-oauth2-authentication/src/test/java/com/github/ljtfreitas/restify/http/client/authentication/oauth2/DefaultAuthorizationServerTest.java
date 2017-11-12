@@ -15,9 +15,9 @@ import org.mockserver.client.server.MockServerClient;
 import org.mockserver.junit.MockServerRule;
 import org.mockserver.model.Parameter;
 
+import com.github.ljtfreitas.restify.http.client.message.response.HttpStatusCode;
+import com.github.ljtfreitas.restify.http.client.message.response.StatusCode;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
-import com.github.ljtfreitas.restify.http.client.response.HttpStatusCode;
-import com.github.ljtfreitas.restify.http.client.response.StatusCode;
 
 public class DefaultAuthorizationServerTest {
 

@@ -25,8 +25,8 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.jaxrs.contract.metadata.reflection;
 
-import static com.github.ljtfreitas.restify.http.util.Preconditions.isFalse;
-import static com.github.ljtfreitas.restify.http.util.Preconditions.isTrue;
+import static com.github.ljtfreitas.restify.util.Preconditions.isFalse;
+import static com.github.ljtfreitas.restify.util.Preconditions.isTrue;
 
 import java.util.ArrayList;
 import java.util.Arrays;

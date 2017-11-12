@@ -25,7 +25,7 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.netflix.client.request.discovery.zookeeper;
 
-import static com.github.ljtfreitas.restify.http.util.Preconditions.isTrue;
+import static com.github.ljtfreitas.restify.util.Preconditions.isTrue;
 
 import java.io.IOException;
 import java.util.Collection;
@@ -39,7 +39,7 @@ import org.apache.curator.x.discovery.details.InstanceSerializer;
 import org.apache.curator.x.discovery.strategies.RoundRobinStrategy;
 
 import com.github.ljtfreitas.restify.http.netflix.client.request.discovery.ServiceInstance;
-import com.github.ljtfreitas.restify.http.util.Tryable;
+import com.github.ljtfreitas.restify.util.Tryable;
 
 public class ZookeeperServiceProviderDiscovery<T> implements ZookeeperServiceDiscovery<T> {
 

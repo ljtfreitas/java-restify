@@ -34,7 +34,7 @@ import java.util.Collections;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import com.github.ljtfreitas.restify.http.util.Tryable;
+import com.github.ljtfreitas.restify.util.Tryable;
 
 public class GrantProperties {
 

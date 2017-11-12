@@ -32,13 +32,14 @@ import javax.ws.rs.client.Invocation;
 import javax.ws.rs.core.Configuration;
 import javax.ws.rs.core.Response;
 
-import com.github.ljtfreitas.restify.http.RestifyHttpException;
+import com.github.ljtfreitas.restify.http.HttpException;
+import com.github.ljtfreitas.restify.http.client.message.HttpMessageException;
+import com.github.ljtfreitas.restify.http.client.message.converter.HttpMessageReadException;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequestExecutor;
 import com.github.ljtfreitas.restify.http.client.response.DefaultEndpointResponseErrorFallback;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponseErrorFallback;
-import com.github.ljtfreitas.restify.http.client.response.RestifyHttpMessageReadException;
 
 public class JaxRsHttpClientEndpointRequestExecutor implements EndpointRequestExecutor {
 
@@ -83,14 +84,14 @@ public class JaxRsHttpClientEndpointRequestExecutor implements EndpointRequestEx
 
 			return endpointResponse;
 
-		} catch (RestifyHttpException e) {
+		} catch (HttpException | HttpMessageException e) {
 			throw e;
 
 		} catch (WebApplicationException e) {
-			throw new RestifyHttpMessageReadException(e);
+			throw new HttpMessageReadException(e);
 
 		} catch (Exception e) {
-			throw new RestifyHttpException("Error on HTTP request: [" + endpointRequest.method() + " " + endpointRequest.endpoint() + "]", e);
+			throw new HttpException("Error on HTTP request: [" + endpointRequest.method() + " " + endpointRequest.endpoint() + "]", e);
 		}
 	}
 }
