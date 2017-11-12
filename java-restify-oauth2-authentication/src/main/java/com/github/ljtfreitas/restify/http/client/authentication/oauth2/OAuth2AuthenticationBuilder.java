@@ -35,6 +35,8 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Optional;
 
+import com.github.ljtfreitas.restify.http.client.message.Cookie;
+import com.github.ljtfreitas.restify.http.client.message.Cookies;
 import com.github.ljtfreitas.restify.http.client.message.Header;
 import com.github.ljtfreitas.restify.http.client.message.Headers;
 import com.github.ljtfreitas.restify.http.client.message.converter.HttpMessageConverter;
@@ -45,8 +47,6 @@ import com.github.ljtfreitas.restify.http.client.message.converter.text.TextPlai
 import com.github.ljtfreitas.restify.http.client.message.converter.xml.XmlMessageConverter;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequestExecutor;
 import com.github.ljtfreitas.restify.http.client.request.HttpClientRequestFactory;
-import com.github.ljtfreitas.restify.http.contract.Cookie;
-import com.github.ljtfreitas.restify.http.contract.Cookies;
 import com.github.ljtfreitas.restify.http.spi.Provider;
 
 public class OAuth2AuthenticationBuilder {

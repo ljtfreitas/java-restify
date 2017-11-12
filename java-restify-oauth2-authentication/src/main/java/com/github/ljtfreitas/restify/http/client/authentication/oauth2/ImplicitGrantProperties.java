@@ -30,10 +30,10 @@ import java.net.URL;
 import java.security.Principal;
 import java.util.Collection;
 
+import com.github.ljtfreitas.restify.http.client.message.Cookie;
+import com.github.ljtfreitas.restify.http.client.message.Cookies;
 import com.github.ljtfreitas.restify.http.client.message.Header;
 import com.github.ljtfreitas.restify.http.client.message.Headers;
-import com.github.ljtfreitas.restify.http.contract.Cookie;
-import com.github.ljtfreitas.restify.http.contract.Cookies;
 
 public class ImplicitGrantProperties extends AuthorizationCodeGrantProperties {
 
