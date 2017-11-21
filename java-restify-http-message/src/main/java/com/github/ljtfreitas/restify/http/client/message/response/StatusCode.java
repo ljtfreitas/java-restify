@@ -292,6 +292,10 @@ public class StatusCode {
 		return new StatusCode(OK);
 	}
 
+	public static StatusCode created() {
+		return new StatusCode(CREATED);
+	}
+	
 	public static StatusCode noContent() {
 		return new StatusCode(NO_CONTENT);
 	}

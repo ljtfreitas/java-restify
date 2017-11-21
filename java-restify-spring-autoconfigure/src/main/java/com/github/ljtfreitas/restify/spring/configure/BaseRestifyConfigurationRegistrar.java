@@ -40,8 +40,8 @@ import org.springframework.context.EnvironmentAware;
 import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
 import org.springframework.core.env.Environment;
 
-import com.github.ljtfreitas.restify.http.client.authentication.Authentication;
-import com.github.ljtfreitas.restify.http.client.authentication.BasicAuthentication;
+import com.github.ljtfreitas.restify.http.client.request.authentication.Authentication;
+import com.github.ljtfreitas.restify.http.client.request.authentication.BasicAuthentication;
 import com.github.ljtfreitas.restify.spring.configure.RestifyApiClient.Basic;
 import com.github.ljtfreitas.restify.spring.configure.RestifyApiClient.RestifyApiAuthentication;
 

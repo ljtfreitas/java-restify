@@ -20,9 +20,15 @@
 
 	<modules>
 		<module>java-restify</module>
+		<module>java-restify-spi</module>
 		<module>java-restify-reflection</module>
 		<module>java-restify-contract</module>
 		<module>java-restify-call-exec</module>
+		
+		<module>java-restify-http-client</module>
+		<module>java-restify-http-client-apache-httpclient</module>
+		<module>java-restify-http-client-okhttp</module>
+		<module>java-restify-http-client-netty</module>
 
 		<module>java-restify-guava</module>
 		<module>java-restify-rxjava</module>
@@ -51,12 +57,10 @@
 		<module>java-restify-netflix-spring-starter</module>
 
 		<module>java-restify-cdi</module>		
-
 		<module>java-restify-jaxrs-contract</module>
 		<module>java-restify-jaxrs-http-client</module>
 
 		<module>java-restify-hateoas</module>
-
 		<module>java-restify-oauth2-authentication</module>
 
 		<module>java-restify-util</module>

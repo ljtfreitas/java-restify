@@ -25,9 +25,11 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.message.io;
 
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.io.UncheckedIOException;
 
 public class InputStreamContent {
 
@@ -45,10 +47,31 @@ public class InputStreamContent {
 		this.bufferSize = bufferSize;
 	}
 
-	public void transferTo(OutputStream output) throws IOException {
+	public void transferTo(OutputStream output) {
+		try {
+			doTransfer(output);
+		} catch (IOException e) {
+			throw new UncheckedIOException(e);
+		}
+	}
+
+	public String asString() {
+		try {
+			ByteArrayOutputStream output = new ByteArrayOutputStream(bufferSize);
+			doTransfer(output);
+			output.flush();
+			output.close();
+	
+			return new String(output.toByteArray());
+		} catch (IOException e) {
+			throw new UncheckedIOException(e);
+		}
+	}
+
+	private void doTransfer(OutputStream output) throws IOException {
 		int len = 0;
 		byte[] data = new byte[bufferSize];
-
+		
 		while ((len = source.read(data, 0, data.length)) != -1) {
 			output.write(data, 0, len);
 		}

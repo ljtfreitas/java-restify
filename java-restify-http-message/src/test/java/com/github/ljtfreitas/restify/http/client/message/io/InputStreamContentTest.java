@@ -31,16 +31,21 @@ import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 
+import org.junit.Before;
 import org.junit.Test;
 
 public class InputStreamContentTest {
 
+	private InputStreamContent content;
+
+	@Before
+	public void setup() {		
+		ByteArrayInputStream source = new ByteArrayInputStream("source".getBytes());
+		content = new InputStreamContent(source);
+	}
+	
 	@Test
 	public void shouldWriteStreamContentToOutput() throws IOException {
-		ByteArrayInputStream source = new ByteArrayInputStream("source".getBytes());
-
-		InputStreamContent content = new InputStreamContent(source);
-
 		ByteArrayOutputStream output = new ByteArrayOutputStream();
 		content.transferTo(output);
 
@@ -50,5 +55,8 @@ public class InputStreamContentTest {
 		assertEquals("source", new String(output.toByteArray()));
 	}
 
-
+	@Test
+	public void shouldConvertStreamContentToString() throws IOException {
+		assertEquals("source", content.asString());
+	}
 }
