@@ -2,6 +2,10 @@ package com.github.ljtfreitas.restify.http.contract.metadata;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
+
+import java.util.ArrayList;
+import java.util.List;
 
 import org.junit.Test;
 
@@ -23,9 +27,12 @@ public class ContractMethodMetadataTest {
 		assertEquals("/path", contractMethodMetadata.path().get().value());
 		assertEquals("GET", contractMethodMetadata.httpMethod().value());
 
-		assertEquals(1, contractMethodMetadata.headers().length);
-		assertEquals("X-My-Header", contractMethodMetadata.headers()[0].name());
-		assertEquals("MyHeader", contractMethodMetadata.headers()[0].value());
+		assertEquals(1, contractMethodMetadata.headers().size());
+		
+		List<Header> headers = new ArrayList<>(contractMethodMetadata.headers());
+		
+		assertEquals("X-My-Header", headers.get(0).name());
+		assertEquals("MyHeader", headers.get(0).value());
 	}
 
 	@Test
@@ -37,7 +44,7 @@ public class ContractMethodMetadataTest {
 		assertEquals("/path", contractMethodMetadata.path().get().value());
 		assertEquals("POST", contractMethodMetadata.httpMethod().value());
 
-		assertEquals(0, contractMethodMetadata.headers().length);
+		assertTrue(contractMethodMetadata.headers().isEmpty());
 	}
 
 	@Test
@@ -49,13 +56,15 @@ public class ContractMethodMetadataTest {
 		assertEquals("/path", contractMethodMetadata.path().get().value());
 		assertEquals("GET", contractMethodMetadata.httpMethod().value());
 
-		assertEquals(2, contractMethodMetadata.headers().length);
+		assertEquals(2, contractMethodMetadata.headers().size());
 
-		assertEquals("X-My-Header-1", contractMethodMetadata.headers()[0].name());
-		assertEquals("MyHeader1", contractMethodMetadata.headers()[0].value());
+		List<Header> headers = new ArrayList<>(contractMethodMetadata.headers());
 
-		assertEquals("X-My-Header-2", contractMethodMetadata.headers()[1].name());
-		assertEquals("MyHeader2", contractMethodMetadata.headers()[1].value());
+		assertEquals("X-My-Header-1", headers.get(0).name());
+		assertEquals("MyHeader1", headers.get(0).value());
+
+		assertEquals("X-My-Header-2", headers.get(1).name());
+		assertEquals("MyHeader2", headers.get(1).value());
 	}
 
 	@Test

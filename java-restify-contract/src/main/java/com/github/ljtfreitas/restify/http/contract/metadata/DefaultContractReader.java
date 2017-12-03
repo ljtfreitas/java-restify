@@ -179,7 +179,7 @@ public class DefaultContractReader implements ContractReader {
 
 	private EndpointHeaders endpointMethodHeaders(ContractTypeMetadata javaTypeMetadata, ContractMethodMetadata javaMethodMetadata) {
 		return new EndpointHeaders(
-				Stream.concat(Arrays.stream(javaTypeMetadata.headers()), Arrays.stream(javaMethodMetadata.headers()))
+				Stream.concat(javaTypeMetadata.headers().stream(), javaMethodMetadata.headers().stream())
 					.map(h -> new EndpointHeader(h.name(), h.value()))
 						.collect(Collectors.toSet()));
 	}

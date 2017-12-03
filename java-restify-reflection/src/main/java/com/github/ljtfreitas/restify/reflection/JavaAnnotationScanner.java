@@ -27,8 +27,8 @@ package com.github.ljtfreitas.restify.reflection;
 
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
-import java.lang.reflect.Array;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -41,53 +41,48 @@ public class JavaAnnotationScanner {
 		this.javaAnnotatedElement = javaAnnotatedElement;
 	}
 
-	public <T extends Annotation> Annotation with(Class<T> javaAnnotationType) {
-		return Arrays.stream(javaAnnotatedElement.getAnnotations())
-				.filter(a -> a.annotationType().isAnnotationPresent(javaAnnotationType))
-					.findFirst()
-						.orElse(null);
+	public <T extends Annotation> Optional<Annotation> with(Class<T> javaAnnotationType) {
+		return doWith(javaAnnotationType).findFirst();
 	}
 
-	public <T extends Annotation> Annotation[] allWith(Class<T> javaAnnotationType) {
-		return Arrays.stream(javaAnnotatedElement.getAnnotations())
-				.filter(a -> a.annotationType().isAnnotationPresent(javaAnnotationType))
-					.toArray(Annotation[]::new);
+	public <T extends Annotation> Collection<Annotation> allWith(Class<T> javaAnnotationType) {
+		return doWith(javaAnnotationType).collect(Collectors.toList());
 	}
 
-	public <T extends Annotation> T scan(Class<T> javaAnnotationType) {
+	private <T extends Annotation> Stream<Annotation> doWith(Class<T> javaAnnotationType) {
+		return Arrays.stream(javaAnnotatedElement.getAnnotations())
+				.filter(a -> a.annotationType().isAnnotationPresent(javaAnnotationType));
+	}
+
+	public <T extends Annotation> Optional<T> scan(Class<T> javaAnnotationType) {
 		return doScan(javaAnnotationType);
 	}
 
-	public <T extends Annotation> T[] scanAll(Class<T> javaAnnotationType) {
+	public <T extends Annotation> Collection<T> scanAll(Class<T> javaAnnotationType) {
 		return doScanAll(javaAnnotationType);
 	}
 
-	private <T extends Annotation> T doScan(Class<T> javaAnnotationType) {
+	private <T extends Annotation> Optional<T> doScan(Class<T> javaAnnotationType) {
 		Optional<T> annotation = Optional.ofNullable(javaAnnotatedElement.getAnnotation(javaAnnotationType));
 
-		return annotation.orElseGet(() -> {
-			return Arrays.stream(javaAnnotatedElement.getAnnotations())
-					.filter(a -> a.annotationType().isAnnotationPresent(javaAnnotationType))
-						.findFirst()
-							.map(a -> a.annotationType().getAnnotation(javaAnnotationType))
-								.orElse(null);
-		});
+		return Optional.ofNullable(annotation.orElseGet(() -> {
+			return doWith(javaAnnotationType)
+					.findFirst()
+						.map(a -> a.annotationType().getAnnotation(javaAnnotationType))
+							.orElse(null);
+		}));
 	}
 
-	@SuppressWarnings("unchecked")
-	private <T extends Annotation> T[] doScanAll(Class<T> javaAnnotationType) {
-		T[] array = (T[]) Array.newInstance(javaAnnotationType, 0);
-
+	private <T extends Annotation> Collection<T> doScanAll(Class<T> javaAnnotationType) {
 		return Stream.concat(
 					Arrays.stream(javaAnnotatedElement.getAnnotationsByType(javaAnnotationType)),
 					Arrays.stream(javaAnnotatedElement.getAnnotations())
 						.filter(a -> a.annotationType().isAnnotationPresent(javaAnnotationType))
 						.map(a -> a.annotationType().getAnnotation(javaAnnotationType)))
-				.collect(Collectors.toSet())
-					.toArray(array);
+				.collect(Collectors.toList());
 	}
 
 	public boolean contains(Class<? extends Annotation> javaAnnotationType) {
-		return doScan(javaAnnotationType) != null;
+		return doScan(javaAnnotationType).isPresent();
 	}
 }

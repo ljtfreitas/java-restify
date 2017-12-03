@@ -28,6 +28,8 @@ package com.github.ljtfreitas.restify.http.contract.metadata;
 import static com.github.ljtfreitas.restify.util.Preconditions.isTrue;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.Optional;
 
@@ -41,7 +43,7 @@ class ContractTypeMetadata {
 
 	private final Class<?> javaType;
 	private final Path path;
-	private final Header[] headers;
+	private final Collection<Header> headers;
 	private final Version version;
 	private final ContractTypeMetadata parent;
 
@@ -52,11 +54,14 @@ class ContractTypeMetadata {
 		this.javaType = javaType;
 		this.parent = javaType.getInterfaces().length == 1 ? new ContractTypeMetadata(javaType.getInterfaces()[0]) : null;
 
-		this.path = javaType.getAnnotation(Path.class);
+		JavaAnnotationScanner annotationScanner = new JavaAnnotationScanner(javaType);
+		
+		this.path = annotationScanner.scan(Path.class).orElse(null);
 
 		this.headers = Optional.ofNullable(javaType.getAnnotation(Headers.class))
 				.map(Headers::value)
-					.orElseGet(() -> new JavaAnnotationScanner(javaType).scanAll(Header.class));
+					.map(array -> Arrays.asList(array))
+						.orElseGet(() -> new ArrayList<>(annotationScanner.scanAll(Header.class)));
 
 		this.version = javaType.getAnnotation(Version.class);
 	}
@@ -78,16 +83,16 @@ class ContractTypeMetadata {
 		return paths.toArray(new Path[0]);
 	}
 
-	public Header[] headers() {
-		ArrayList<Header> headers = new ArrayList<>();
+	public Collection<Header> headers() {
+		Collection<Header> headers = new ArrayList<>();
 
 		Optional.ofNullable(parent)
 			.map(p -> p.headers())
-				.ifPresent(array -> Collections.addAll(headers, array));
+				.ifPresent(h -> headers.addAll(h));
 
-		Collections.addAll(headers, this.headers);
+		headers.addAll(this.headers);
 
-		return headers.toArray(new Header[0]);
+		return headers;
 	}
 
 	public Class<?> javaType() {

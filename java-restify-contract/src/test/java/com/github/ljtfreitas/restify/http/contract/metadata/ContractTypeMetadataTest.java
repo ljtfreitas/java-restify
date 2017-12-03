@@ -4,6 +4,9 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertSame;
 import static org.junit.Assert.assertTrue;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import org.junit.Test;
 
 import com.github.ljtfreitas.restify.http.contract.Header;
@@ -23,13 +26,15 @@ public class ContractTypeMetadataTest {
 
 		assertEquals(1, contractTypeMetadata.paths().length);
 
-		assertEquals(2, contractTypeMetadata.headers().length);
+		assertEquals(2, contractTypeMetadata.headers().size());
 
-		assertEquals("X-My-Header-1", contractTypeMetadata.headers()[0].name());
-		assertEquals("MyHeader1", contractTypeMetadata.headers()[0].value());
+		List<Header> headers = new ArrayList<>(contractTypeMetadata.headers());
 
-		assertEquals("X-My-Header-2", contractTypeMetadata.headers()[1].name());
-		assertEquals("MyHeader2", contractTypeMetadata.headers()[1].value());
+		assertEquals("X-My-Header-1", headers.get(0).name());
+		assertEquals("MyHeader1", headers.get(0).value());
+
+		assertEquals("X-My-Header-2", headers.get(1).name());
+		assertEquals("MyHeader2", headers.get(1).value());
 	}
 
 	@Test
@@ -42,14 +47,15 @@ public class ContractTypeMetadataTest {
 		assertEquals("http://my.api.com", contractTypeMetadata.path().get().value());
 
 		assertEquals(1, contractTypeMetadata.paths().length);
+		assertEquals(2, contractTypeMetadata.headers().size());
 
-		assertEquals(2, contractTypeMetadata.headers().length);
+		List<Header> headers = new ArrayList<>(contractTypeMetadata.headers());
+		
+		assertEquals("X-My-Header-1", headers.get(0).name());
+		assertEquals("MyHeader1", headers.get(0).value());
 
-		assertEquals("X-My-Header-1", contractTypeMetadata.headers()[0].name());
-		assertEquals("MyHeader1", contractTypeMetadata.headers()[0].value());
-
-		assertEquals("X-My-Header-2", contractTypeMetadata.headers()[1].name());
-		assertEquals("MyHeader2", contractTypeMetadata.headers()[1].value());
+		assertEquals("X-My-Header-2", headers.get(1).name());
+		assertEquals("MyHeader2", headers.get(1).value());
 	}
 
 	@Test
@@ -63,17 +69,18 @@ public class ContractTypeMetadataTest {
 		assertEquals("http://my.api.com", contractTypeMetadata.paths()[0].value());
 		assertEquals("/specific", contractTypeMetadata.paths()[1].value());
 
-		assertEquals(3, contractTypeMetadata.headers().length);
+		List<Header> headers = new ArrayList<>(contractTypeMetadata.headers());
 
-		assertEquals("X-Basic-Header", contractTypeMetadata.headers()[0].name());
-		assertEquals("Any", contractTypeMetadata.headers()[0].value());
+		assertEquals(3, contractTypeMetadata.headers().size());
 
-		assertEquals("X-My-Generic-Header", contractTypeMetadata.headers()[1].name());
-		assertEquals("MyGenericHeader", contractTypeMetadata.headers()[1].value());
+		assertEquals("X-Basic-Header", headers.get(0).name());
+		assertEquals("Any", headers.get(0).value());
 
-		assertEquals("X-My-Specific-Header", contractTypeMetadata.headers()[2].name());
-		assertEquals("MySpecificHeader", contractTypeMetadata.headers()[2].value());
+		assertEquals("X-My-Generic-Header", headers.get(1).name());
+		assertEquals("MyGenericHeader", headers.get(1).value());
 
+		assertEquals("X-My-Specific-Header", headers.get(2).name());
+		assertEquals("MySpecificHeader", headers.get(2).value());
 	}
 
 	@Path("http://my.api.com")

@@ -28,7 +28,6 @@ package com.github.ljtfreitas.restify.http.contract.metadata;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -36,7 +35,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import com.github.ljtfreitas.restify.http.contract.metadata.Metadata;
 import com.github.ljtfreitas.restify.reflection.JavaAnnotationScanner;
 
 public class EndpointMethodMetadata {
@@ -49,8 +47,8 @@ public class EndpointMethodMetadata {
 
 	private List<Annotation> scan(Method javaMethod) {
 		List<Annotation> annotations = new ArrayList<>();
-		annotations.addAll(Arrays.asList(new JavaAnnotationScanner(javaMethod).allWith(Metadata.class)));
-		annotations.addAll(Arrays.asList(new JavaAnnotationScanner(javaMethod.getDeclaringClass()).allWith(Metadata.class)));
+		annotations.addAll(new JavaAnnotationScanner(javaMethod).allWith(Metadata.class));
+		annotations.addAll(new JavaAnnotationScanner(javaMethod.getDeclaringClass()).allWith(Metadata.class));
 		return annotations;
 	}
 

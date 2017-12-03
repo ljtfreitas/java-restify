@@ -26,10 +26,10 @@
 package com.github.ljtfreitas.restify.http.contract.metadata;
 
 import java.lang.reflect.Type;
+import java.util.Collection;
 import java.util.Optional;
 
 import com.github.ljtfreitas.restify.http.contract.Header;
-import com.github.ljtfreitas.restify.http.contract.Headers;
 import com.github.ljtfreitas.restify.http.contract.Method;
 import com.github.ljtfreitas.restify.http.contract.Path;
 import com.github.ljtfreitas.restify.http.contract.Version;
@@ -41,7 +41,7 @@ class ContractMethodMetadata {
 	private final java.lang.reflect.Method javaMethod;
 	private final Path path;
 	private final Method httpMethod;
-	private final Header[] headers;
+	private final Collection<Header> headers;
 	private final Version version;
 
 	public ContractMethodMetadata(java.lang.reflect.Method javaMethod) {
@@ -49,14 +49,13 @@ class ContractMethodMetadata {
 
 		this.path = javaMethod.getAnnotation(Path.class);
 
-		this.httpMethod = Optional.ofNullable(new JavaAnnotationScanner(javaMethod).scan(Method.class))
+		JavaAnnotationScanner annotationScanner = new JavaAnnotationScanner(javaMethod);
+
+		this.httpMethod = annotationScanner.scan(Method.class)
 				.orElseThrow(() -> new IllegalArgumentException("Method " + javaMethod + " does not have a @Method annotation"));
 
-		this.headers = Optional.ofNullable(javaMethod.getAnnotation(Headers.class))
-				.map(Headers::value)
-					.orElseGet(() -> new JavaAnnotationScanner(javaMethod).scanAll(Header.class));
-
-		this.version = javaMethod.getAnnotation(Version.class);
+		this.headers = annotationScanner.scanAll(Header.class);
+		this.version = annotationScanner.scan(Version.class).orElse(null);
 	}
 
 	public Optional<Path> path() {
@@ -71,7 +70,7 @@ class ContractMethodMetadata {
 		return javaMethod;
 	}
 
-	public Header[] headers() {
+	public Collection<Header> headers() {
 		return headers;
 	}
 

@@ -91,26 +91,22 @@ public class JavaTypeResolver {
 		Type[] lowerBounds = wildcardType.getLowerBounds();
 		Type[] upperBounds = wildcardType.getUpperBounds();
 
-		if (lowerBounds.length != 0) {
-			Type[] newLowerBounds = new Type[lowerBounds.length];
+		Type[] newLowerBounds = lowerBounds;
+		Type[] newUpperBounds = upperBounds;
 
+		if (lowerBounds.length != 0) {
 			for (int position = 0; position < lowerBounds.length; position++) {
 				newLowerBounds[position] = doResolve(lowerBounds[position]);
 			}
-
-			return new SimpleWildcardType(new Type[] { Object.class }, newLowerBounds);
-
-		} else if (upperBounds.length != 0) {
-			Type[] newUpperBounds = new Type[upperBounds.length];
-
+		} 
+		
+		if (upperBounds.length != 0) {
 			for (int position = 0; position < upperBounds.length; position++) {
 				newUpperBounds[position] = doResolve(upperBounds[position]);
 			}
-
-			return new SimpleWildcardType(newUpperBounds, new Type[0]);
 		}
 
-		return wildcardType;
+		return new SimpleWildcardType(newUpperBounds, newLowerBounds);
 	}
 
 	private Type doResolveGenericArrayType(GenericArrayType genericArrayType) {

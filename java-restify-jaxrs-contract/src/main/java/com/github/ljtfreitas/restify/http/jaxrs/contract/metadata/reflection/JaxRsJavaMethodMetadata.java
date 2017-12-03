@@ -55,9 +55,11 @@ public class JaxRsJavaMethodMetadata {
 	public JaxRsJavaMethodMetadata(java.lang.reflect.Method javaMethod) {
 		this.javaMethod = javaMethod;
 
-		this.path = javaMethod.getAnnotation(Path.class);
+		JavaAnnotationScanner annotationScanner = new JavaAnnotationScanner(javaMethod);
+		
+		this.path = annotationScanner.scan(Path.class).orElse(null);
 
-		this.httpMethod = Optional.ofNullable(new JavaAnnotationScanner(javaMethod).scan(HttpMethod.class))
+		this.httpMethod = annotationScanner.scan(HttpMethod.class)
 				.orElseThrow(() -> new IllegalArgumentException("Method " + javaMethod + " does not have a @HttpMethod annotation"));
 
 		this.consumes = javaMethod.getAnnotation(Consumes.class);

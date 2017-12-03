@@ -59,38 +59,36 @@ class ContractMethodParameterMetadata {
 	public ContractMethodParameterMetadata(java.lang.reflect.Parameter javaMethodParameter, Class<?> targetClassType) {
 		this.type = JavaType.of(new JavaTypeResolver(targetClassType).parameterizedTypeOf(javaMethodParameter));
 
-		PathParameter pathParameter = javaMethodParameter.getAnnotation(PathParameter.class);
-		HeaderParameter headerParameter = javaMethodParameter.getAnnotation(HeaderParameter.class);
-		QueryParameter queryParameter = javaMethodParameter.getAnnotation(QueryParameter.class);
-		QueryParameters queryParameters = javaMethodParameter.getAnnotation(QueryParameters.class);
-		CallbackParameter callbackParameter = javaMethodParameter.getAnnotation(CallbackParameter.class);
+		JavaAnnotationScanner annotationScanner = new JavaAnnotationScanner(javaMethodParameter);
+
+		Optional<PathParameter> pathParameter = annotationScanner.scan(PathParameter.class);
+		Optional<HeaderParameter> headerParameter = annotationScanner.scan(HeaderParameter.class);
+		Optional<QueryParameter> queryParameter = annotationScanner.scan(QueryParameter.class);
+		Optional<QueryParameters> queryParameters = annotationScanner.scan(QueryParameters.class);
+		Optional<CallbackParameter> callbackParameter = annotationScanner.scan(CallbackParameter.class);
 
 		isTrue(Stream.of(javaMethodParameter.getAnnotations())
 				.filter(a -> a.annotationType().isAnnotationPresent(Parameter.class))
 					.count() <= 1, "Parameter [" + javaMethodParameter + "], of method [" + javaMethodParameter.getDeclaringExecutable() + "] "
 							+ "has more than one annotation.");
 
-		this.annotationParameter = new JavaAnnotationScanner(javaMethodParameter).with(Parameter.class);
+		this.annotationParameter = annotationScanner.with(Parameter.class).orElse(null);
 
-		String name = Optional.ofNullable(pathParameter)
-				.map(PathParameter::value).filter(s -> !s.trim().isEmpty())
-					.orElseGet(() -> Optional.ofNullable(headerParameter)
-						.map(HeaderParameter::value).filter(s -> !s.trim().isEmpty())
-							.orElseGet(() -> Optional.ofNullable(queryParameter)
-								.map(QueryParameter::value).filter(s -> !s.trim().isEmpty())
-									.orElseGet(() -> Optional.ofNullable(javaMethodParameter.getName())
-											.filter(n -> javaMethodParameter.isNamePresent() && !n.isEmpty())
-												.orElse(null))));
+		String name = pathParameter.map(PathParameter::value).filter(s -> !s.trim().isEmpty())
+				.orElseGet(() -> headerParameter.map(HeaderParameter::value).filter(s -> !s.trim().isEmpty())
+					.orElseGet(() -> queryParameter.map(QueryParameter::value).filter(s -> !s.trim().isEmpty())
+						.orElseGet(() -> Optional.ofNullable(javaMethodParameter.getName())
+							.filter(n -> javaMethodParameter.isNamePresent() && !n.isEmpty())
+								.orElse(null))));
 
 		isFalse(needName() && name == null, "Could not get the name of the parameter [" + javaMethodParameter + "], "
 				+ "of method [" + javaMethodParameter.getDeclaringExecutable() + "]");
 		this.name = name;
 
-		this.serializerType = pathParameter != null ? pathParameter.serializer()
-				: queryParameter != null ? queryParameter.serializer()
-						: queryParameters != null ? queryParameters.serializer()
-								: callbackParameter != null ? null
-										: SimpleParameterSerializer.class;
+		this.serializerType = pathParameter.isPresent() ? pathParameter.map(PathParameter::serializer).get() :
+				queryParameter.isPresent() ? queryParameter.map(QueryParameter::serializer).get() :
+					queryParameters.isPresent() ? queryParameters.map(QueryParameters::serializer).get() :
+						callbackParameter.isPresent() ? null : SimpleParameterSerializer.class;
 	}
 
 	private boolean needName() {
