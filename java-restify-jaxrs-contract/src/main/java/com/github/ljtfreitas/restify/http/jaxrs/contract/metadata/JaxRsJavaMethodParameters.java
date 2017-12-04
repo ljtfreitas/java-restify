@@ -23,27 +23,38 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.http.spring.client;
+package com.github.ljtfreitas.restify.http.jaxrs.contract.metadata;
 
-import org.springframework.core.convert.converter.Converter;
-import org.springframework.http.HttpHeaders;
-import org.springframework.http.ResponseEntity;
+import java.lang.reflect.Method;
+import java.util.Arrays;
+import java.util.List;
+import java.util.stream.Collectors;
 
-import com.github.ljtfreitas.restify.http.client.message.Headers;
-import com.github.ljtfreitas.restify.http.client.message.response.StatusCode;
-import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
+import javax.ws.rs.HeaderParam;
 
-class EndpointResponseConverter implements Converter<ResponseEntity<Object>, EndpointResponse<Object>> {
+class JaxRsJavaMethodParameters {
 
-	@Override
-	public EndpointResponse<Object> convert(ResponseEntity<Object> source) {
-		StatusCode status = StatusCode.of(source.getStatusCodeValue(), source.getStatusCode().getReasonPhrase());
-		Headers headers = headersOf(source.getHeaders());
-		return new EndpointResponse<>(status, headers, source.getBody());
+	private final List<JaxRsJavaMethodParameterMetadata> parameters;
+
+	public JaxRsJavaMethodParameters(Method javaMethod, Class<?> javaType) {
+		this.parameters = Arrays.stream(javaMethod.getParameters())
+				.map(p -> new JaxRsJavaMethodParameterMetadata(p, javaType))
+					.collect(Collectors.toList());
 	}
 
-	private Headers headersOf(HttpHeaders httpHeaders) {
-		return httpHeaders.entrySet().stream()
-				.reduce(new Headers(), (a, b) -> a.add(b.getKey(), b.getValue()), (a, b) -> b);
+	public int size() {
+		return parameters.size();
+	}
+
+	public JaxRsJavaMethodParameterMetadata get(int position) {
+		return parameters.get(position);
+	}
+
+	public JaxRsEndpointHeader[] headers() {
+		return parameters.stream().filter(p -> p.header())
+			.map(p -> p.annotation(HeaderParam.class))
+				.filter(a -> a.value() != null && !"".equals(a.value()))
+					.map(a -> new JaxRsEndpointHeader(a.value(), "{" + a.value() + "}"))
+						.toArray(s -> new JaxRsEndpointHeader[s]);
 	}
 }

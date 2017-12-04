@@ -23,35 +23,27 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.http.spring.client;
+package com.github.ljtfreitas.restify.http.spring.client.request;
 
 import org.springframework.core.convert.converter.Converter;
 import org.springframework.http.HttpHeaders;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.RequestEntity;
+import org.springframework.http.ResponseEntity;
 
 import com.github.ljtfreitas.restify.http.client.message.Headers;
-import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
+import com.github.ljtfreitas.restify.http.client.message.response.StatusCode;
+import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
 
-class RequestEntityConverter implements Converter<EndpointRequest, RequestEntity<Object>> {
+class EndpointResponseConverter implements Converter<ResponseEntity<Object>, EndpointResponse<Object>> {
 
 	@Override
-	public RequestEntity<Object> convert(EndpointRequest source) {
-		Object body = source.body().orElse(null);
-
-		HttpHeaders headers = headersOf(source.headers());
-
-		HttpMethod method = HttpMethod.resolve(source.method());
-
-		return new RequestEntity<>(body, headers, method, source.endpoint());
+	public EndpointResponse<Object> convert(ResponseEntity<Object> source) {
+		StatusCode status = StatusCode.of(source.getStatusCodeValue(), source.getStatusCode().getReasonPhrase());
+		Headers headers = headersOf(source.getHeaders());
+		return new EndpointResponse<>(status, headers, source.getBody());
 	}
 
-	private HttpHeaders headersOf(Headers headers) {
-		HttpHeaders httpHeaders = new HttpHeaders();
-
-		headers.all().forEach(h -> httpHeaders.add(h.name(), h.value()));
-
-		return httpHeaders;
+	private Headers headersOf(HttpHeaders httpHeaders) {
+		return httpHeaders.entrySet().stream()
+				.reduce(new Headers(), (a, b) -> a.add(b.getKey(), b.getValue()), (a, b) -> b);
 	}
-
 }

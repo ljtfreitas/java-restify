@@ -1,4 +1,4 @@
-package com.github.ljtfreitas.restify.http.spring.client;
+package com.github.ljtfreitas.restify.http.spring.client.request;
 
 import static org.junit.Assert.assertEquals;
 import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
@@ -17,7 +17,7 @@ import org.springframework.web.client.RestTemplate;
 
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
-import com.github.ljtfreitas.restify.http.spring.client.RestOperationsEndpointRequestExecutor;
+import com.github.ljtfreitas.restify.http.spring.client.request.RestOperationsEndpointRequestExecutor;
 
 public class RestTemplateEndpointRequestExecutorTest {
 

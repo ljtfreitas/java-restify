@@ -23,7 +23,7 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.http.spring.client;
+package com.github.ljtfreitas.restify.http.spring.client.request;
 
 import java.lang.reflect.Type;
 

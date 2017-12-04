@@ -1,4 +1,4 @@
-package com.github.ljtfreitas.restify.http.spring.client;
+package com.github.ljtfreitas.restify.http.spring.client.request;
 
 import static org.junit.Assert.assertEquals;
 
@@ -10,7 +10,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
-import com.github.ljtfreitas.restify.http.spring.client.EndpointResponseConverter;
+import com.github.ljtfreitas.restify.http.spring.client.request.EndpointResponseConverter;
 
 public class EndpointResponseConverterTest {
 

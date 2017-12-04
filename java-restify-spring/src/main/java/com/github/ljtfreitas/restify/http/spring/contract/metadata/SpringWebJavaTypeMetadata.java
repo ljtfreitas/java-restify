@@ -23,50 +23,60 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.http.spring.contract.metadata.reflection;
+package com.github.ljtfreitas.restify.http.spring.contract.metadata;
 
 import static com.github.ljtfreitas.restify.util.Preconditions.isTrue;
 
-import java.lang.reflect.Method;
-import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.Optional;
 
 import org.springframework.core.annotation.AnnotatedElementUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestMethod;
 
-import com.github.ljtfreitas.restify.reflection.JavaTypeResolver;
+class SpringWebJavaTypeMetadata {
 
-public class SpringWebJavaMethodMetadata {
+	private final Class<?> javaType;
+	private final Optional<SpringWebRequestMappingMetadata> mapping;
+	private final SpringWebJavaTypeMetadata parent;
 
-	private final Method javaMethod;
-	private final SpringWebRequestMappingMetadata mapping;
+	public SpringWebJavaTypeMetadata(Class<?> javaType) {
+		isTrue(javaType.isInterface(), "Your type must be a Java interface.");
+		isTrue(javaType.getInterfaces().length <= 1, "Only single inheritance is supported.");
 
-	public SpringWebJavaMethodMetadata(Method javaMethod) {
-		this.javaMethod = javaMethod;
+		RequestMapping mapping = AnnotatedElementUtils.getMergedAnnotation(javaType, RequestMapping.class);
+		if (mapping != null) {
+			isTrue(mapping.value().length <= 1, "Only single path is allowed.");
+			isTrue(mapping.method().length ==  0, "You must not set the HTTP method at the class level, only at the method level.");
+		}
 
-		RequestMapping mapping = Optional.ofNullable(AnnotatedElementUtils.findMergedAnnotation(javaMethod, RequestMapping.class))
-				.orElseThrow(() -> new IllegalArgumentException("Method [" + javaMethod + "] does not have a @RequestMapping annotation."));
+		this.mapping = Optional.ofNullable(mapping).map(m -> new SpringWebRequestMappingMetadata(m));
+		this.javaType = javaType;
+		this.parent = javaType.getInterfaces().length == 1 ? new SpringWebJavaTypeMetadata(javaType.getInterfaces()[0]) : null;
+	}
 
-		isTrue(mapping.value().length <= 1, "Only single path is allowed.");
-		isTrue(mapping.method().length == 1, "You must set the HTTP method (only one!) of your Java method [" + javaMethod + "].");
-
-		this.mapping = new SpringWebRequestMappingMetadata(mapping);
+	public Class<?> javaType() {
+		return javaType;
 	}
 
 	public Optional<String> path() {
-		return mapping.path();
+		return mapping.flatMap(m -> m.path());
 	}
 
-	public RequestMethod httpMethod() {
-		return mapping.method()[0];
-	}
+	public String[] paths() {
+		ArrayList<String> paths = new ArrayList<>();
 
-	public Type returnType(Class<?> rawType) {
-		return new JavaTypeResolver(rawType).returnTypeOf(javaMethod);
+		Optional.ofNullable(parent)
+			.map(p -> p.paths())
+				.ifPresent(array -> Collections.addAll(paths, array));
+
+		mapping.flatMap(m -> m.path())
+			.ifPresent(p -> paths.add(p));
+
+		return paths.toArray(new String[0]);
 	}
 
 	public String[] headers() {
-		return mapping.headers();
+		return mapping.map(m -> m.headers()).orElseGet(() -> new String[0]);
 	}
 }

@@ -23,40 +23,35 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.http.jaxrs.contract.metadata.reflection;
+package com.github.ljtfreitas.restify.http.spring.client.request;
 
-import java.lang.reflect.Method;
-import java.util.Arrays;
-import java.util.List;
-import java.util.stream.Collectors;
+import org.springframework.core.convert.converter.Converter;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
+import org.springframework.http.RequestEntity;
 
-import javax.ws.rs.HeaderParam;
+import com.github.ljtfreitas.restify.http.client.message.Headers;
+import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
 
-import com.github.ljtfreitas.restify.http.jaxrs.contract.metadata.JaxRsEndpointHeader;
+class RequestEntityConverter implements Converter<EndpointRequest, RequestEntity<Object>> {
 
-public class JaxRsJavaMethodParameters {
+	@Override
+	public RequestEntity<Object> convert(EndpointRequest source) {
+		Object body = source.body().orElse(null);
 
-	private final List<JaxRsJavaMethodParameterMetadata> parameters;
+		HttpHeaders headers = headersOf(source.headers());
 
-	public JaxRsJavaMethodParameters(Method javaMethod, Class<?> javaType) {
-		this.parameters = Arrays.stream(javaMethod.getParameters())
-				.map(p -> new JaxRsJavaMethodParameterMetadata(p, javaType))
-					.collect(Collectors.toList());
+		HttpMethod method = HttpMethod.resolve(source.method());
+
+		return new RequestEntity<>(body, headers, method, source.endpoint());
 	}
 
-	public int size() {
-		return parameters.size();
+	private HttpHeaders headersOf(Headers headers) {
+		HttpHeaders httpHeaders = new HttpHeaders();
+
+		headers.all().forEach(h -> httpHeaders.add(h.name(), h.value()));
+
+		return httpHeaders;
 	}
 
-	public JaxRsJavaMethodParameterMetadata get(int position) {
-		return parameters.get(position);
-	}
-
-	public JaxRsEndpointHeader[] headers() {
-		return parameters.stream().filter(p -> p.header())
-			.map(p -> p.annotation(HeaderParam.class))
-				.filter(a -> a.value() != null && !"".equals(a.value()))
-					.map(a -> new JaxRsEndpointHeader(a.value(), "{" + a.value() + "}"))
-						.toArray(s -> new JaxRsEndpointHeader[s]);
-	}
 }

@@ -37,7 +37,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestTemplate;
 
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequestExecutor;
-import com.github.ljtfreitas.restify.http.spring.client.RestOperationsEndpointRequestExecutor;
+import com.github.ljtfreitas.restify.http.spring.client.request.RestOperationsEndpointRequestExecutor;
 import com.github.ljtfreitas.restify.spring.autoconfigure.RestifyAutoConfiguration;
 import com.netflix.loadbalancer.ILoadBalancer;
 

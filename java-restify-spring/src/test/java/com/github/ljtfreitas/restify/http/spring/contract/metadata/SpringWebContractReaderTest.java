@@ -1,4 +1,4 @@
-package com.github.ljtfreitas.restify.http.spring.contract;
+package com.github.ljtfreitas.restify.http.spring.contract.metadata;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -35,6 +35,7 @@ import com.github.ljtfreitas.restify.http.contract.metadata.EndpointHeader;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethod;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethodParameter;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointTarget;
+import com.github.ljtfreitas.restify.http.spring.contract.metadata.SpringWebContractReader;
 import com.github.ljtfreitas.restify.reflection.JavaType;
 import com.github.ljtfreitas.restify.reflection.SimpleGenericArrayType;
 import com.github.ljtfreitas.restify.reflection.SimpleParameterizedType;

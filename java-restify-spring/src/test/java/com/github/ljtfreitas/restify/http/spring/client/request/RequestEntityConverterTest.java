@@ -1,4 +1,4 @@
-package com.github.ljtfreitas.restify.http.spring.client;
+package com.github.ljtfreitas.restify.http.spring.client.request;
 
 import static org.junit.Assert.assertEquals;
 
@@ -14,7 +14,7 @@ import org.springframework.http.RequestEntity;
 import com.github.ljtfreitas.restify.http.client.message.Header;
 import com.github.ljtfreitas.restify.http.client.message.Headers;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
-import com.github.ljtfreitas.restify.http.spring.client.RequestEntityConverter;
+import com.github.ljtfreitas.restify.http.spring.client.request.RequestEntityConverter;
 
 public class RequestEntityConverterTest {
 

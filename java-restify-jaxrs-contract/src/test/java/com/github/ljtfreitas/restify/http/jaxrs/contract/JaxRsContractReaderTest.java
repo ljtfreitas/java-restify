@@ -29,6 +29,7 @@ import com.github.ljtfreitas.restify.http.contract.metadata.EndpointHeader;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethod;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethodParameter;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointTarget;
+import com.github.ljtfreitas.restify.http.jaxrs.contract.metadata.JaxRsContractReader;
 import com.github.ljtfreitas.restify.reflection.SimpleGenericArrayType;
 import com.github.ljtfreitas.restify.reflection.SimpleParameterizedType;
 import com.github.ljtfreitas.restify.reflection.SimpleWildcardType;

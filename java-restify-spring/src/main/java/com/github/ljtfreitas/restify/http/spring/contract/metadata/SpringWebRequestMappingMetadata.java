@@ -23,7 +23,7 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.http.spring.contract.metadata.reflection;
+package com.github.ljtfreitas.restify.http.spring.contract.metadata;
 
 import static com.github.ljtfreitas.restify.util.Preconditions.nonNull;
 
@@ -37,7 +37,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 
-public class SpringWebRequestMappingMetadata {
+class SpringWebRequestMappingMetadata {
 
 	private final RequestMapping mapping;
 

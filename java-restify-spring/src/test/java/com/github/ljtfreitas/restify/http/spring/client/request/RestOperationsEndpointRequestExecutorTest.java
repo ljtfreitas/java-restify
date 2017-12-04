@@ -1,4 +1,4 @@
-package com.github.ljtfreitas.restify.http.spring.client;
+package com.github.ljtfreitas.restify.http.spring.client.request;
 
 import static org.hamcrest.CoreMatchers.isA;
 import static org.junit.Assert.assertEquals;
@@ -33,9 +33,9 @@ import com.github.ljtfreitas.restify.http.HttpException;
 import com.github.ljtfreitas.restify.http.client.message.response.StatusCode;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
-import com.github.ljtfreitas.restify.http.spring.client.EndpointResponseConverter;
-import com.github.ljtfreitas.restify.http.spring.client.RequestEntityConverter;
-import com.github.ljtfreitas.restify.http.spring.client.RestOperationsEndpointRequestExecutor;
+import com.github.ljtfreitas.restify.http.spring.client.request.EndpointResponseConverter;
+import com.github.ljtfreitas.restify.http.spring.client.request.RequestEntityConverter;
+import com.github.ljtfreitas.restify.http.spring.client.request.RestOperationsEndpointRequestExecutor;
 import com.github.ljtfreitas.restify.reflection.JavaType;
 
 @RunWith(MockitoJUnitRunner.class)

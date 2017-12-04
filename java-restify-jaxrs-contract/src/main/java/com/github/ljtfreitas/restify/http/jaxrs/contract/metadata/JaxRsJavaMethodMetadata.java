@@ -23,7 +23,7 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.http.jaxrs.contract.metadata.reflection;
+package com.github.ljtfreitas.restify.http.jaxrs.contract.metadata;
 
 import static com.github.ljtfreitas.restify.util.Preconditions.isTrue;
 
@@ -40,11 +40,10 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.HttpHeaders;
 
-import com.github.ljtfreitas.restify.http.jaxrs.contract.metadata.JaxRsEndpointHeader;
 import com.github.ljtfreitas.restify.reflection.JavaAnnotationScanner;
 import com.github.ljtfreitas.restify.reflection.JavaTypeResolver;
 
-public class JaxRsJavaMethodMetadata {
+class JaxRsJavaMethodMetadata {
 
 	private final java.lang.reflect.Method javaMethod;
 	private final Path path;

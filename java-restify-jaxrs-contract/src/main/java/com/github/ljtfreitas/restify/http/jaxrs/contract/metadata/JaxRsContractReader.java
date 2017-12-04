@@ -23,7 +23,7 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.http.jaxrs.contract;
+package com.github.ljtfreitas.restify.http.jaxrs.contract.metadata;
 
 import java.lang.reflect.Type;
 import java.net.URL;
@@ -44,11 +44,6 @@ import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethodParame
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethodParameters;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethods;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointTarget;
-import com.github.ljtfreitas.restify.http.jaxrs.contract.metadata.JaxRsEndpointHeader;
-import com.github.ljtfreitas.restify.http.jaxrs.contract.metadata.reflection.JaxRsJavaMethodMetadata;
-import com.github.ljtfreitas.restify.http.jaxrs.contract.metadata.reflection.JaxRsJavaMethodParameterMetadata;
-import com.github.ljtfreitas.restify.http.jaxrs.contract.metadata.reflection.JaxRsJavaMethodParameters;
-import com.github.ljtfreitas.restify.http.jaxrs.contract.metadata.reflection.JaxRsJavaTypeMetadata;
 import com.github.ljtfreitas.restify.util.Tryable;
 
 public class JaxRsContractReader implements ContractReader {

@@ -23,7 +23,7 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.http.spring.contract;
+package com.github.ljtfreitas.restify.http.spring.contract.metadata;
 
 import static com.github.ljtfreitas.restify.util.Preconditions.nonNull;
 
@@ -49,9 +49,6 @@ import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethodParame
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethods;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointTarget;
 import com.github.ljtfreitas.restify.http.contract.metadata.SimpleContractExpressionResolver;
-import com.github.ljtfreitas.restify.http.spring.contract.metadata.reflection.SpringWebJavaMethodMetadata;
-import com.github.ljtfreitas.restify.http.spring.contract.metadata.reflection.SpringWebJavaMethodParameterMetadata;
-import com.github.ljtfreitas.restify.http.spring.contract.metadata.reflection.SpringWebJavaTypeMetadata;
 import com.github.ljtfreitas.restify.util.Tryable;
 
 public class SpringWebContractReader implements ContractReader {
