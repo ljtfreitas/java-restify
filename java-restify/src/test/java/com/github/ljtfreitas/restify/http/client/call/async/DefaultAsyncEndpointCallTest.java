@@ -33,7 +33,7 @@ public class DefaultAsyncEndpointCallTest {
 	private DefaultAsyncEndpointCall<String> asyncCall;
 
 	@Test
-	public void shouldCallSuccessCallbackOnEndpointCallReturnsSomeResult() throws Exception {
+	public void shouldCallSuccessCallbackOnEndpointCallWhenReturnsSomeResult() throws Exception {
 		asyncCall = new DefaultAsyncEndpointCall<>(r -> r.run(), () -> "result");
 
 		asyncCall.execute(callback);
@@ -41,6 +41,15 @@ public class DefaultAsyncEndpointCallTest {
 		verify(callback).onSuccess("result");
 	}
 
+	@Test
+	public void shouldCallSuccessCallbackOnEndpointCallWhenNotReturnsResult() throws Exception {
+		asyncCall = new DefaultAsyncEndpointCall<>(r -> r.run(), () -> null);
+
+		asyncCall.execute(callback);
+
+		verify(callback).onSuccess(null);
+	}
+	
 	@Test
 	public void shouldCallFailureCallbackWhenEndpointCallThrowException() throws Exception {
 		RuntimeException exception = new RuntimeException("some exception");

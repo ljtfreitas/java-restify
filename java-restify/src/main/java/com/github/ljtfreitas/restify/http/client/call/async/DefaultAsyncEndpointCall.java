@@ -59,13 +59,15 @@ class DefaultAsyncEndpointCall<T> implements AsyncEndpointCall<T> {
 	}
 
 	private void handle(T value, Throwable throwable, EndpointCallSuccessCallback<T> successCallback, EndpointCallFailureCallback failureCallback) {
-		if (value != null && successCallback != null) {
+		if (throwable != null) {
+			if (failureCallback != null) {
+				Throwable cause = deepCause(throwable);
+
+				failureCallback.onFailure(cause);
+			}
+
+		} else if (successCallback != null) {
 			successCallback.onSuccess(value);
-
-		} else if (throwable != null && failureCallback != null) {
-			Throwable cause = deepCause(throwable);
-
-			failureCallback.onFailure(cause);
 		}
 	}
 
