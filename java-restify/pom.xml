@@ -29,6 +29,11 @@
 		</dependency>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
+			<artifactId>java-restify-wildcard-converter</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
 			<artifactId>java-restify-util</artifactId>
 			<version>${project.version}</version>
 		</dependency>
