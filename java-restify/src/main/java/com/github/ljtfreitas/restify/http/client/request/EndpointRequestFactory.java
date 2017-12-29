@@ -28,13 +28,13 @@ package com.github.ljtfreitas.restify.http.client.request;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-import com.github.ljtfreitas.restify.http.RestifyHttpException;
-import com.github.ljtfreitas.restify.http.client.header.Header;
-import com.github.ljtfreitas.restify.http.client.header.Headers;
+import com.github.ljtfreitas.restify.http.client.HttpException;
+import com.github.ljtfreitas.restify.http.client.message.Header;
+import com.github.ljtfreitas.restify.http.client.message.Headers;
 import com.github.ljtfreitas.restify.http.client.request.interceptor.EndpointRequestInterceptorStack;
-import com.github.ljtfreitas.restify.http.contract.metadata.EndpointHeaderParameterResolver;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethod;
-import com.github.ljtfreitas.restify.http.contract.metadata.reflection.JavaType;
+import com.github.ljtfreitas.restify.http.contract.metadata.HeaderParameterResolver;
+import com.github.ljtfreitas.restify.reflection.JavaType;
 
 public class EndpointRequestFactory {
 
@@ -67,7 +67,7 @@ public class EndpointRequestFactory {
 			return new EndpointRequest(endpoint, endpointMethod.httpMethod(), headers, body, responseType, version, metadata);
 
 		} catch (URISyntaxException e) {
-			throw new RestifyHttpException(e);
+			throw new HttpException(e);
 		}
 	}
 
@@ -80,7 +80,7 @@ public class EndpointRequestFactory {
 	private Headers headersOf(EndpointMethod endpointMethod, Object[] args) {
 		return endpointMethod.headers().all().stream()
 				.map(h -> new Header(h.name(),
-						new EndpointHeaderParameterResolver(h.value(), endpointMethod.parameters()).resolve(args)))
+						new HeaderParameterResolver(h.value(), endpointMethod.parameters()).resolve(args)))
 				.reduce(new Headers(), (a, b) -> a.add(b), (a, b) -> b);
 	}
 }

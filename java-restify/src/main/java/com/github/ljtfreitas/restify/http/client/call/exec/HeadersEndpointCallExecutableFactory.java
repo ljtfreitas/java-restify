@@ -26,13 +26,15 @@
 package com.github.ljtfreitas.restify.http.client.call.exec;
 
 import com.github.ljtfreitas.restify.http.client.call.EndpointCall;
-import com.github.ljtfreitas.restify.http.client.header.Headers;
+import com.github.ljtfreitas.restify.http.client.message.Headers;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethod;
-import com.github.ljtfreitas.restify.http.contract.metadata.reflection.JavaType;
-import com.github.ljtfreitas.restify.http.contract.metadata.reflection.SimpleParameterizedType;
+import com.github.ljtfreitas.restify.reflection.JavaType;
+import com.github.ljtfreitas.restify.reflection.SimpleParameterizedType;
 
 public class HeadersEndpointCallExecutableFactory implements EndpointCallExecutableDecoratorFactory<Headers, EndpointResponse<Void>, Void> {
+
+	private static final HeadersEndpointCallExecutableFactory DEFAULT_INSTANCE = new HeadersEndpointCallExecutableFactory();
 
 	private static final JavaType DEFAULT_RETURN_TYPE = JavaType.of(new SimpleParameterizedType(EndpointResponse.class, null, Void.class));
 
@@ -68,5 +70,9 @@ public class HeadersEndpointCallExecutableFactory implements EndpointCallExecuta
 		public Headers execute(EndpointCall<Void> call, Object[] args) {
 			return delegate.execute(call, args).headers();
 		}
+	}
+
+	public static HeadersEndpointCallExecutableFactory instance() {
+		return DEFAULT_INSTANCE;
 	}
 }

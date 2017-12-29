@@ -35,9 +35,9 @@ import com.fasterxml.jackson.databind.JsonMappingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.SerializerProvider;
 import com.fasterxml.jackson.databind.jsonFormatVisitors.JsonFormatVisitorWrapper;
-import com.fasterxml.jackson.databind.ser.std.NonTypedScalarSerializerBase;
+import com.fasterxml.jackson.databind.ser.std.StdScalarSerializer;
 
-class BooleanTrueSerializer extends NonTypedScalarSerializerBase<Boolean> {
+class BooleanTrueSerializer extends StdScalarSerializer<Boolean> {
 
 	private static final long serialVersionUID = 5817795880782727569L;
 

@@ -33,14 +33,14 @@ import java.util.concurrent.Executors;
 import com.github.ljtfreitas.restify.http.client.call.EndpointCall;
 import com.github.ljtfreitas.restify.http.client.call.async.AsyncEndpointCall;
 import com.github.ljtfreitas.restify.http.client.call.async.AsyncEndpointCallFactory;
+import com.github.ljtfreitas.restify.http.client.call.async.EndpointCallFailureCallback;
+import com.github.ljtfreitas.restify.http.client.call.async.EndpointCallSuccessCallback;
 import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutable;
 import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutableDecoratorFactory;
-import com.github.ljtfreitas.restify.http.client.request.async.EndpointCallFailureCallback;
-import com.github.ljtfreitas.restify.http.client.request.async.EndpointCallSuccessCallback;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethod;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethodParameter;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethodParameters;
-import com.github.ljtfreitas.restify.http.contract.metadata.reflection.JavaType;
+import com.github.ljtfreitas.restify.reflection.JavaType;
 
 public class AsyncCallbackEndpointCallExecutableFactory<T, O> implements EndpointCallExecutableDecoratorFactory<Void, T, O> {
 

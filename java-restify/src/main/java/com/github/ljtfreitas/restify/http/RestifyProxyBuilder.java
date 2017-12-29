@@ -41,7 +41,6 @@ import java.util.concurrent.Executors;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLSocketFactory;
 
-import com.github.ljtfreitas.restify.http.client.authentication.Authentication;
 import com.github.ljtfreitas.restify.http.client.call.EndpointCallFactory;
 import com.github.ljtfreitas.restify.http.client.call.EndpointMethodExecutor;
 import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutableProvider;
@@ -63,63 +62,54 @@ import com.github.ljtfreitas.restify.http.client.call.exec.jdk.IteratorEndpointC
 import com.github.ljtfreitas.restify.http.client.call.exec.jdk.ListIteratorEndpointCallExecutableFactory;
 import com.github.ljtfreitas.restify.http.client.call.exec.jdk.OptionalEndpointCallExecutableFactory;
 import com.github.ljtfreitas.restify.http.client.call.exec.jdk.RunnableEndpointCallExecutableFactory;
-import com.github.ljtfreitas.restify.http.client.header.Header;
-import com.github.ljtfreitas.restify.http.client.header.Headers;
-import com.github.ljtfreitas.restify.http.client.message.HttpMessageConverter;
-import com.github.ljtfreitas.restify.http.client.message.HttpMessageConverters;
-import com.github.ljtfreitas.restify.http.client.message.converter.ByteArrayMessageConverter;
-import com.github.ljtfreitas.restify.http.client.message.converter.InputStreamMessageConverter;
-import com.github.ljtfreitas.restify.http.client.message.converter.form.FormURLEncodedFormObjectMessageConverter;
-import com.github.ljtfreitas.restify.http.client.message.converter.form.FormURLEncodedMapMessageConverter;
-import com.github.ljtfreitas.restify.http.client.message.converter.form.FormURLEncodedParametersMessageConverter;
-import com.github.ljtfreitas.restify.http.client.message.converter.form.multipart.MultipartFormFileObjectMessageWriter;
-import com.github.ljtfreitas.restify.http.client.message.converter.form.multipart.MultipartFormMapMessageWriter;
-import com.github.ljtfreitas.restify.http.client.message.converter.form.multipart.MultipartFormObjectMessageWriter;
-import com.github.ljtfreitas.restify.http.client.message.converter.form.multipart.MultipartFormParametersMessageWriter;
+import com.github.ljtfreitas.restify.http.client.jdk.HttpClientRequestConfiguration;
+import com.github.ljtfreitas.restify.http.client.jdk.JdkHttpClientRequestFactory;
+import com.github.ljtfreitas.restify.http.client.message.Header;
+import com.github.ljtfreitas.restify.http.client.message.Headers;
+import com.github.ljtfreitas.restify.http.client.message.converter.HttpMessageConverter;
+import com.github.ljtfreitas.restify.http.client.message.converter.HttpMessageConverters;
+import com.github.ljtfreitas.restify.http.client.message.converter.form.FormURLEncodedMessageConverter;
+import com.github.ljtfreitas.restify.http.client.message.converter.form.multipart.MultipartFormMessageWriter;
 import com.github.ljtfreitas.restify.http.client.message.converter.json.JsonMessageConverter;
-import com.github.ljtfreitas.restify.http.client.message.converter.octet.OctetByteArrayMessageConverter;
-import com.github.ljtfreitas.restify.http.client.message.converter.octet.OctetInputStreamMessageConverter;
-import com.github.ljtfreitas.restify.http.client.message.converter.octet.OctetSerializableMessageConverter;
-import com.github.ljtfreitas.restify.http.client.message.converter.text.ScalarMessageConverter;
-import com.github.ljtfreitas.restify.http.client.message.converter.text.TextHtmlMessageConverter;
-import com.github.ljtfreitas.restify.http.client.message.converter.text.TextPlainMessageConverter;
-import com.github.ljtfreitas.restify.http.client.message.converter.xml.JaxbXmlMessageConverter;
+import com.github.ljtfreitas.restify.http.client.message.converter.octet.OctetStreamMessageConverter;
+import com.github.ljtfreitas.restify.http.client.message.converter.text.TextMessageConverter;
+import com.github.ljtfreitas.restify.http.client.message.converter.wildcard.WildcardMessageConverter;
+import com.github.ljtfreitas.restify.http.client.message.converter.xml.XmlMessageConverter;
+import com.github.ljtfreitas.restify.http.client.message.response.HttpStatusCode;
+import com.github.ljtfreitas.restify.http.client.request.DefaultEndpointRequestExecutor;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequestExecutor;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequestFactory;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequestWriter;
 import com.github.ljtfreitas.restify.http.client.request.EndpointVersion;
 import com.github.ljtfreitas.restify.http.client.request.HttpClientRequestFactory;
-import com.github.ljtfreitas.restify.http.client.request.RestifyEndpointRequestExecutor;
+import com.github.ljtfreitas.restify.http.client.request.authentication.Authentication;
 import com.github.ljtfreitas.restify.http.client.request.interceptor.AcceptVersionHeaderEndpointRequestInterceptor;
 import com.github.ljtfreitas.restify.http.client.request.interceptor.EndpointRequestInterceptor;
 import com.github.ljtfreitas.restify.http.client.request.interceptor.EndpointRequestInterceptorStack;
 import com.github.ljtfreitas.restify.http.client.request.interceptor.HeaderEndpointRequestInterceptor;
 import com.github.ljtfreitas.restify.http.client.request.interceptor.authentication.AuthenticationEndpoinRequestInterceptor;
-import com.github.ljtfreitas.restify.http.client.request.jdk.HttpClientRequestConfiguration;
-import com.github.ljtfreitas.restify.http.client.request.jdk.JdkHttpClientRequestFactory;
 import com.github.ljtfreitas.restify.http.client.response.DefaultEndpointResponseErrorFallback;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponseErrorFallback;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponseReader;
-import com.github.ljtfreitas.restify.http.client.response.HttpStatusCode;
 import com.github.ljtfreitas.restify.http.client.retry.RetryCondition.EndpointResponseRetryCondition;
 import com.github.ljtfreitas.restify.http.client.retry.RetryCondition.HeadersRetryCondition;
 import com.github.ljtfreitas.restify.http.client.retry.RetryCondition.StatusCodeRetryCondition;
 import com.github.ljtfreitas.restify.http.client.retry.RetryCondition.ThrowableRetryCondition;
 import com.github.ljtfreitas.restify.http.client.retry.RetryConfiguration;
 import com.github.ljtfreitas.restify.http.client.retry.RetryableEndpointRequestExecutor;
-import com.github.ljtfreitas.restify.http.contract.DefaultRestifyContract;
-import com.github.ljtfreitas.restify.http.contract.RestifyContract;
-import com.github.ljtfreitas.restify.http.contract.metadata.DefaultRestifyContractReader;
+import com.github.ljtfreitas.restify.http.contract.metadata.Contract;
+import com.github.ljtfreitas.restify.http.contract.metadata.ContractExpressionResolver;
+import com.github.ljtfreitas.restify.http.contract.metadata.ContractReader;
+import com.github.ljtfreitas.restify.http.contract.metadata.DefaultContractReader;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointTarget;
-import com.github.ljtfreitas.restify.http.contract.metadata.RestifyContractExpressionResolver;
-import com.github.ljtfreitas.restify.http.contract.metadata.RestifyContractReader;
-import com.github.ljtfreitas.restify.http.contract.metadata.SimpleRestifyContractExpressionResolver;
+import com.github.ljtfreitas.restify.http.contract.metadata.SimpleContractExpressionResolver;
+import com.github.ljtfreitas.restify.spi.Provider;
 
 public class RestifyProxyBuilder {
 
-	private RestifyContractReader contractReader;
+	private ContractReader contractReader;
 
-	private RestifyContractExpressionResolver expressionResolver;
+	private ContractExpressionResolver expressionResolver;
 
 	private HttpClientRequestFactory httpClientRequestFactory;
 
@@ -137,6 +127,8 @@ public class RestifyProxyBuilder {
 
 	private RetryBuilder retryBuilder = new RetryBuilder(this);
 
+	private Provider provider = new Provider();
+
 	public RestifyProxyBuilder client(HttpClientRequestFactory httpClientRequestFactory) {
 		this.httpClientRequestFactory = httpClientRequestFactory;
 		return this;
@@ -146,12 +138,12 @@ public class RestifyProxyBuilder {
 		return httpClientRequestConfigurationBuilder;
 	}
 
-	public RestifyProxyBuilder contract(RestifyContractReader contract) {
+	public RestifyProxyBuilder contract(ContractReader contract) {
 		this.contractReader = contract;
 		return this;
 	}
 
-	public RestifyProxyBuilder expression(RestifyContractExpressionResolver expression) {
+	public RestifyProxyBuilder expression(ContractExpressionResolver expression) {
 		this.expressionResolver = expression;
 		return this;
 	}
@@ -237,9 +229,9 @@ public class RestifyProxyBuilder {
 
 			EndpointMethodExecutor endpointMethodExecutor = new EndpointMethodExecutor(endpointCallExecutables(), endpointMethodCallFactory()); 
 
-			RestifyContract restifyContract = contract();
+			Contract contract = contract();
 
-			return new RestifyProxyHandler(restifyContract.read(target), endpointMethodExecutor);
+			return new RestifyProxyHandler(contract.read(target), endpointMethodExecutor);
 		}
 
 		private EndpointCallExecutables endpointCallExecutables() {
@@ -257,7 +249,7 @@ public class RestifyProxyBuilder {
 		private EndpointRequestExecutor endpointRequestExecutor() {
 			HttpMessageConverters messageConverters = httpMessageConvertersBuilder.build();
 			return Optional.ofNullable(endpointRequestExecutor)
-					.orElseGet(() -> new RestifyEndpointRequestExecutor(httpClientRequestFactory(), 
+					.orElseGet(() -> new DefaultEndpointRequestExecutor(httpClientRequestFactory(), 
 							new EndpointRequestWriter(messageConverters),
 							new EndpointResponseReader(messageConverters, endpointResponseErrorFallbackBuilder())));
 		}
@@ -280,15 +272,15 @@ public class RestifyProxyBuilder {
 			return httpClientRequestConfigurationBuilder.build();
 		}
 
-		private RestifyContract contract() {
+		private Contract contract() {
 			return Optional.ofNullable(contractReader)
-					.map(c -> new DefaultRestifyContract(c))
-					.orElseGet(() -> new DefaultRestifyContract(new DefaultRestifyContractReader(expressionResolver())));
+					.map(c -> new Contract(c))
+					.orElseGet(() -> new Contract(new DefaultContractReader(expressionResolver())));
 		}
 
-		private RestifyContractExpressionResolver expressionResolver() {
+		private ContractExpressionResolver expressionResolver() {
 			return Optional.ofNullable(expressionResolver)
-					.orElseGet(() -> new SimpleRestifyContractExpressionResolver());
+					.orElseGet(() -> new SimpleContractExpressionResolver());
 		}
 	}
 
@@ -297,79 +289,72 @@ public class RestifyProxyBuilder {
 		private final RestifyProxyBuilder context;
 		private final Collection<HttpMessageConverter> converters = new ArrayList<>();
 
+		private final DiscoveryComponentConfigurationBuilder<HttpMessageConvertersBuilder> discoveryComponentConfiguration =
+				new DiscoveryComponentConfigurationBuilder<>(this);
+		
 		private HttpMessageConvertersBuilder(RestifyProxyBuilder context) {
 			this.context = context;
 		}
 
 		public HttpMessageConvertersBuilder wildcard() {
-			converters.add(new InputStreamMessageConverter());
-			converters.add(new ByteArrayMessageConverter());
-			return this;
-		}
-
-		public HttpMessageConvertersBuilder wildcard(int bufferSize) {
-			converters.add(new InputStreamMessageConverter(bufferSize));
-			converters.add(new ByteArrayMessageConverter(bufferSize));
+			converters.addAll(provider.all(WildcardMessageConverter.class));
 			return this;
 		}
 
 		public HttpMessageConvertersBuilder octetStream() {
-			converters.add(new OctetInputStreamMessageConverter());
-			converters.add(new OctetByteArrayMessageConverter());
-			converters.add(new OctetSerializableMessageConverter<>());
-			return this;
-		}
-
-		public HttpMessageConvertersBuilder octetStream(int bufferSize) {
-			converters.add(new OctetInputStreamMessageConverter(bufferSize));
-			converters.add(new OctetByteArrayMessageConverter(bufferSize));
-			converters.add(new OctetSerializableMessageConverter<>());
+			converters.addAll(provider.all(OctetStreamMessageConverter.class));
 			return this;
 		}
 
 		public HttpMessageConvertersBuilder json() {
-			converters.add(JsonMessageConverter.available());
+			provider.single(JsonMessageConverter.class).ifPresent(converters::add);
 			return this;
 		}
 
 		public HttpMessageConvertersBuilder xml() {
-			converters.add(new JaxbXmlMessageConverter<Object>());
+			provider.single(XmlMessageConverter.class).ifPresent(converters::add);
 			return this;
 		}
 
 		public HttpMessageConvertersBuilder text() {
-			converters.add(new TextPlainMessageConverter());
-			converters.add(new TextHtmlMessageConverter());
-			converters.add(new ScalarMessageConverter());
+			converters.addAll(provider.all(TextMessageConverter.class));
 			return this;
 		}
 
 		public HttpMessageConvertersBuilder form() {
-			converters.add(new FormURLEncodedParametersMessageConverter());
-			converters.add(new FormURLEncodedFormObjectMessageConverter());
-			converters.add(new FormURLEncodedMapMessageConverter());
-			converters.add(new MultipartFormParametersMessageWriter());
-			converters.add(new MultipartFormObjectMessageWriter());
-			converters.add(new MultipartFormFileObjectMessageWriter());
-			converters.add(new MultipartFormMapMessageWriter());
+			converters.addAll(provider.all(FormURLEncodedMessageConverter.class));
+			converters.addAll(provider.all(MultipartFormMessageWriter.class));
 			return this;
 		}
 
 		public HttpMessageConvertersBuilder all() {
-			return wildcard().json().xml().text().form().octetStream();
+			return discoveryComponentConfiguration.enabled ? wildcard().json().xml().text().form().octetStream().auto() : this;
 		}
+		
+		private HttpMessageConvertersBuilder auto() {
+			converters.addAll(provider.all(HttpMessageConverter.class));
+			return this;
+		} 
 
 		public HttpMessageConvertersBuilder add(HttpMessageConverter...converters) {
 			this.converters.addAll(Arrays.asList(converters));
 			return this;
 		}
 
+		public DiscoveryComponentConfigurationBuilder<HttpMessageConvertersBuilder> discovery() {
+			return discoveryComponentConfiguration;
+		}
+		
 		public RestifyProxyBuilder and() {
 			return context;
 		}
 
 		private HttpMessageConverters build() {
-			return converters.isEmpty() ? all().build() : new HttpMessageConverters(converters);
+			return converters.isEmpty() ? all().doBuild() : doBuild();
+		}
+
+		private HttpMessageConverters doBuild() {
+			return new HttpMessageConverters(converters);
 		}
 	}
 
@@ -439,19 +424,22 @@ public class RestifyProxyBuilder {
 		private final Collection<EndpointCallExecutableProvider> built = new ArrayList<>();
 		private final Collection<EndpointCallExecutableProvider> providers = new ArrayList<>();
 
+		private final DiscoveryComponentConfigurationBuilder<EndpointCallExecutablesBuilder> discoveryComponentConfiguration =
+				new DiscoveryComponentConfigurationBuilder<>(this);
+
 		private EndpointCallExecutablesBuilder(RestifyProxyBuilder context) {
 			this.context = context;
-			this.built.add(new OptionalEndpointCallExecutableFactory<Object>());
-			this.built.add(new CallableEndpointCallExecutableFactory<Object, Object>());
-			this.built.add(new RunnableEndpointCallExecutableFactory());
-			this.built.add(new CollectionEndpointCallExecutableFactory<>());
-			this.built.add(new EnumerationEndpointCallExecutableFactory<>());
-			this.built.add(new IteratorEndpointCallExecutableFactory<>());
-			this.built.add(new ListIteratorEndpointCallExecutableFactory<>());
-			this.built.add(new IterableEndpointCallExecutableFactory<>());
-			this.built.add(new EndpointCallObjectExecutableFactory<Object, Object>());
-			this.built.add(new HeadersEndpointCallExecutableFactory());
-			this.built.add(new StatusCodeEndpointCallExecutableFactory());
+			this.built.add(OptionalEndpointCallExecutableFactory.instance());
+			this.built.add(CallableEndpointCallExecutableFactory.instance());
+			this.built.add(RunnableEndpointCallExecutableFactory.instance());
+			this.built.add(CollectionEndpointCallExecutableFactory.instance());
+			this.built.add(EnumerationEndpointCallExecutableFactory.instance());
+			this.built.add(IteratorEndpointCallExecutableFactory.instance());
+			this.built.add(ListIteratorEndpointCallExecutableFactory.instance());
+			this.built.add(IterableEndpointCallExecutableFactory.instance());
+			this.built.add(EndpointCallObjectExecutableFactory.instance());
+			this.built.add(HeadersEndpointCallExecutableFactory.instance());
+			this.built.add(StatusCodeEndpointCallExecutableFactory.instance());
 		}
 
 		public EndpointCallExecutablesBuilder async() {
@@ -479,6 +467,10 @@ public class RestifyProxyBuilder {
 			return this;
 		}
 
+		public DiscoveryComponentConfigurationBuilder<EndpointCallExecutablesBuilder> discovery() {
+			return discoveryComponentConfiguration;
+		}
+
 		public RestifyProxyBuilder and() {
 			return context;
 		}
@@ -486,6 +478,9 @@ public class RestifyProxyBuilder {
 		private EndpointCallExecutables build() {
 			providers.addAll(built);
 			providers.addAll(async.build());
+
+			if (discoveryComponentConfiguration.enabled) providers.addAll(provider.all(EndpointCallExecutableProvider.class));
+
 			return new EndpointCallExecutables(providers);
 		}
 	}
@@ -791,6 +786,26 @@ public class RestifyProxyBuilder {
 					return context;
 				}
 			}
+		}
+	}
+
+	public class DiscoveryComponentConfigurationBuilder<C> {
+
+		private final C context;
+		private boolean enabled = true;
+
+		private DiscoveryComponentConfigurationBuilder(C context) {
+			this.context = context;
+		}
+
+		public C enabled() {
+			this.enabled = true;
+			return context;
+		}
+
+		public C disabled() {
+			this.enabled = false;
+			return context;
 		}
 	}
 }

@@ -33,7 +33,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
 
-import com.github.ljtfreitas.restify.http.client.response.HttpStatusCode;
+import com.github.ljtfreitas.restify.http.client.message.response.HttpStatusCode;
 import com.github.ljtfreitas.restify.http.client.retry.RetryCondition.EndpointResponseRetryCondition;
 import com.github.ljtfreitas.restify.http.client.retry.RetryCondition.HeadersRetryCondition;
 import com.github.ljtfreitas.restify.http.client.retry.RetryCondition.StatusCodeRetryCondition;

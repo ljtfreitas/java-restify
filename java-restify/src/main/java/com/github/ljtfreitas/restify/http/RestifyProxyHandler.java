@@ -34,7 +34,7 @@ import java.util.Optional;
 import com.github.ljtfreitas.restify.http.client.call.EndpointMethodExecutor;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethod;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointType;
-import com.github.ljtfreitas.restify.http.contract.metadata.reflection.JavaDefaultMethodExecutor;
+import com.github.ljtfreitas.restify.reflection.JavaDefaultMethodExecutor;
 
 public class RestifyProxyHandler implements InvocationHandler {
 
@@ -60,7 +60,7 @@ public class RestifyProxyHandler implements InvocationHandler {
 		try {
 			return JavaDefaultMethodExecutor.execute(method, proxy, args);
 		} catch (Throwable e) {
-			throw new RestifyProxyMethodException("Error on execution method [" + method + "], "
+			throw new ProxyMethodException("Error on execution method [" + method + "], "
 					+ "on proxy object type [" + proxy.getClass() + "], with method args " + Arrays.toString(args), e);
 		}
 	}
@@ -69,7 +69,7 @@ public class RestifyProxyHandler implements InvocationHandler {
 		try {
 			return method.invoke(this, args);
 		} catch (Exception e) {
-			throw new RestifyProxyMethodException("Error on execution Object method [" + method + "], "
+			throw new ProxyMethodException("Error on execution Object method [" + method + "], "
 					+ "with method args " + Arrays.toString(args) + ". Method " + method + " is a Object method?", e);
 		}
 	}

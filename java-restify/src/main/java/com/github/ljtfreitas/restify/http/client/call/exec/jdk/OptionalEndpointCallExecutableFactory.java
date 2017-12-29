@@ -33,9 +33,11 @@ import com.github.ljtfreitas.restify.http.client.call.EndpointCall;
 import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutable;
 import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutableFactory;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethod;
-import com.github.ljtfreitas.restify.http.contract.metadata.reflection.JavaType;
+import com.github.ljtfreitas.restify.reflection.JavaType;
 
 public class OptionalEndpointCallExecutableFactory<T> implements EndpointCallExecutableFactory<Optional<T>, T> {
+
+	private static final OptionalEndpointCallExecutableFactory<Object> DEFAULT_INSTANCE = new OptionalEndpointCallExecutableFactory<>();
 
 	@Override
 	public boolean supports(EndpointMethod endpointMethod) {
@@ -68,5 +70,9 @@ public class OptionalEndpointCallExecutableFactory<T> implements EndpointCallExe
 		public Optional<T> execute(EndpointCall<T> call, Object[] args) {
 			return Optional.ofNullable(call.execute());
 		}
+	}
+
+	public static OptionalEndpointCallExecutableFactory<Object> instance() {
+		return DEFAULT_INSTANCE;
 	}
 }

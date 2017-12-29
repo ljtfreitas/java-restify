@@ -29,14 +29,11 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestOperations;
 
-import com.github.ljtfreitas.restify.http.RestifyHttpException;
+import com.github.ljtfreitas.restify.http.client.HttpException;
+import com.github.ljtfreitas.restify.http.client.message.response.StatusCode;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
-import com.github.ljtfreitas.restify.http.client.response.StatusCode;
-import com.github.ljtfreitas.restify.http.contract.metadata.reflection.JavaType;
-import com.github.ljtfreitas.restify.http.spring.client.request.EndpointResponseConverter;
-import com.github.ljtfreitas.restify.http.spring.client.request.RequestEntityConverter;
-import com.github.ljtfreitas.restify.http.spring.client.request.RestOperationsEndpointRequestExecutor;
+import com.github.ljtfreitas.restify.reflection.JavaType;
 
 @RunWith(MockitoJUnitRunner.class)
 public class RestOperationsEndpointRequestExecutorTest {
@@ -103,7 +100,7 @@ public class RestOperationsEndpointRequestExecutorTest {
 		when(restOperationsMock.exchange(any(RequestEntity.class), any(ParameterizedTypeReference.class)))
 			.thenThrow(new RestClientException("Spring RestClientException"));
 
-		expectedException.expect(RestifyHttpException.class);
+		expectedException.expect(HttpException.class);
 		expectedException.expectCause(isA(RestClientException.class));
 
 		executor.execute(new EndpointRequest(endpointUri, "GET", String.class));

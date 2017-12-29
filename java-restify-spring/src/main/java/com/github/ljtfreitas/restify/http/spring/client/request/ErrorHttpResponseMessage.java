@@ -35,11 +35,11 @@ import java.nio.charset.Charset;
 import org.springframework.http.RequestEntity;
 import org.springframework.web.client.RestClientResponseException;
 
-import com.github.ljtfreitas.restify.http.client.header.Header;
-import com.github.ljtfreitas.restify.http.client.header.Headers;
-import com.github.ljtfreitas.restify.http.client.request.HttpRequestMessage;
-import com.github.ljtfreitas.restify.http.client.response.BaseHttpResponseMessage;
-import com.github.ljtfreitas.restify.http.client.response.StatusCode;
+import com.github.ljtfreitas.restify.http.client.message.Header;
+import com.github.ljtfreitas.restify.http.client.message.Headers;
+import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
+import com.github.ljtfreitas.restify.http.client.message.response.BaseHttpResponseMessage;
+import com.github.ljtfreitas.restify.http.client.message.response.StatusCode;
 
 class ErrorHttpResponseMessage extends BaseHttpResponseMessage {
 

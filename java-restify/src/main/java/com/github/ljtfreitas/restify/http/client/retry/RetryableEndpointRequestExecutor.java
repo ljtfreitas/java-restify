@@ -29,10 +29,10 @@ import static com.github.ljtfreitas.restify.http.client.retry.RetryCondition.Thr
 
 import java.util.Optional;
 
+import com.github.ljtfreitas.restify.http.client.message.response.StatusCode;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequestExecutor;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
-import com.github.ljtfreitas.restify.http.client.response.StatusCode;
 
 public class RetryableEndpointRequestExecutor implements EndpointRequestExecutor {
 

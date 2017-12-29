@@ -40,7 +40,7 @@ import com.fasterxml.jackson.databind.introspect.Annotated;
 import com.fasterxml.jackson.databind.jsontype.TypeIdResolver;
 import com.fasterxml.jackson.databind.jsontype.TypeResolverBuilder;
 import com.github.ljtfreitas.restify.http.client.hateoas.browser.HypermediaBrowser;
-import com.github.ljtfreitas.restify.http.util.Tryable;
+import com.github.ljtfreitas.restify.util.Tryable;
 
 class HypermediaHandlerInstantiator extends HandlerInstantiator {
 
