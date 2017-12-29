@@ -52,7 +52,6 @@ public class JacksonHypermediaJsonMessageConverter<T> extends JacksonMessageConv
 	private static ObjectMapper configure(ObjectMapper objectMapper, HypermediaBrowser hypermediaBrowser) {
 		objectMapper.setHandlerInstantiator(new HypermediaHandlerInstantiator(hypermediaBrowser));
 		objectMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
-		objectMapper.setHandlerInstantiator(new HypermediaHandlerInstantiator(hypermediaBrowser));
 		return objectMapper;
 	}
 

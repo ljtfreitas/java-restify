@@ -1,0 +1,3 @@
+com.github.ljtfreitas.restify.http.client.message.converter.text.ScalarMessageConverter
+com.github.ljtfreitas.restify.http.client.message.converter.text.TextHtmlMessageConverter
+com.github.ljtfreitas.restify.http.client.message.converter.text.TextPlainMessageConverter

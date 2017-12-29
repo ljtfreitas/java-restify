@@ -36,10 +36,12 @@ import com.github.ljtfreitas.restify.http.client.call.EndpointCall;
 import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutable;
 import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutableDecoratorFactory;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethod;
-import com.github.ljtfreitas.restify.http.contract.metadata.reflection.JavaType;
-import com.github.ljtfreitas.restify.http.contract.metadata.reflection.SimpleParameterizedType;
+import com.github.ljtfreitas.restify.reflection.JavaType;
+import com.github.ljtfreitas.restify.reflection.SimpleParameterizedType;
 
 public class ListIteratorEndpointCallExecutableFactory<T> implements EndpointCallExecutableDecoratorFactory<ListIterator<T>, List<T>, List<T>> {
+
+	private static final ListIteratorEndpointCallExecutableFactory<Object> DEFAULT_INSTANCE = new ListIteratorEndpointCallExecutableFactory<>();
 
 	@Override
 	public boolean supports(EndpointMethod endpointMethod) {
@@ -80,5 +82,9 @@ public class ListIteratorEndpointCallExecutableFactory<T> implements EndpointCal
 				.map(c -> c.listIterator())
 					.orElseGet(Collections::emptyListIterator);
 		}
+	}
+
+	public static ListIteratorEndpointCallExecutableFactory<Object> instance() {
+		return DEFAULT_INSTANCE;
 	}
 }

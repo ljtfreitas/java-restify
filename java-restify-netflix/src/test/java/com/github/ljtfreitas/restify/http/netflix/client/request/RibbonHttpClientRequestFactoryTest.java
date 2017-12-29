@@ -7,6 +7,7 @@ import static org.mockserver.model.JsonBody.json;
 import static org.mockserver.model.StringBody.exact;
 import static org.mockserver.verify.VerificationTimes.once;
 
+import java.net.URI;
 import java.util.Arrays;
 
 import javax.xml.bind.annotation.XmlAccessType;
@@ -21,12 +22,17 @@ import org.mockserver.junit.MockServerRule;
 import org.mockserver.model.HttpRequest;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.github.ljtfreitas.restify.http.RestifyProxyBuilder;
-import com.github.ljtfreitas.restify.http.contract.BodyParameter;
-import com.github.ljtfreitas.restify.http.contract.Get;
-import com.github.ljtfreitas.restify.http.contract.Header;
-import com.github.ljtfreitas.restify.http.contract.Path;
-import com.github.ljtfreitas.restify.http.contract.Post;
+import com.github.ljtfreitas.restify.http.client.message.Header;
+import com.github.ljtfreitas.restify.http.client.message.Headers;
+import com.github.ljtfreitas.restify.http.client.message.converter.HttpMessageConverters;
+import com.github.ljtfreitas.restify.http.client.message.converter.json.JacksonMessageConverter;
+import com.github.ljtfreitas.restify.http.client.message.converter.xml.JaxbXmlMessageConverter;
+import com.github.ljtfreitas.restify.http.client.request.DefaultEndpointRequestExecutor;
+import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
+import com.github.ljtfreitas.restify.http.client.request.EndpointRequestExecutor;
+import com.github.ljtfreitas.restify.http.client.request.EndpointRequestWriter;
+import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
+import com.github.ljtfreitas.restify.http.client.response.EndpointResponseReader;
 import com.netflix.client.config.DefaultClientConfigImpl;
 import com.netflix.client.config.IClientConfig;
 import com.netflix.loadbalancer.BaseLoadBalancer;
@@ -38,9 +44,9 @@ public class RibbonHttpClientRequestFactoryTest {
 	@Rule
 	public MockServerRule mockServerRule = new MockServerRule(this, 7080, 7081, 7082);
 
-	private MyApi myApi;
-
 	private MockServerClient mockServerClient;
+
+	private EndpointRequestExecutor requestExecutor;
 
 	@Before
 	public void setup() {
@@ -53,10 +59,10 @@ public class RibbonHttpClientRequestFactoryTest {
 
 		RibbonHttpClientRequestFactory ribbonHttpClientRequestFactory = new RibbonHttpClientRequestFactory(loadBalancer, clientConfig);
 
-		myApi = new RestifyProxyBuilder()
-				.client(ribbonHttpClientRequestFactory)
-				.target(MyApi.class, "http://myApi")
-				.build();
+		HttpMessageConverters messageConverters = new HttpMessageConverters(Arrays.asList(new JacksonMessageConverter<>(), new JaxbXmlMessageConverter<>()));
+
+		requestExecutor = new DefaultEndpointRequestExecutor(ribbonHttpClientRequestFactory, new EndpointRequestWriter(messageConverters),
+				new EndpointResponseReader(messageConverters));
 	}
 
 	@Test
@@ -72,7 +78,9 @@ public class RibbonHttpClientRequestFactoryTest {
 					.withHeader("Content-Type", "application/json")
 					.withBody(json("{\"name\": \"Tiago de Freitas Lima\",\"age\":31}")));
 
-		MyModel myModel = myApi.json();
+		EndpointResponse<MyModel> response = requestExecutor.execute(new EndpointRequest(URI.create("http://myApi/json"), "GET", MyModel.class));
+
+		MyModel myModel = response.body();
 
 		assertEquals("Tiago de Freitas Lima", myModel.name);
 		assertEquals(31, myModel.age);
@@ -95,7 +103,8 @@ public class RibbonHttpClientRequestFactoryTest {
 				.withHeader("Content-Type", "text/plain")
 				.withBody(exact("OK")));
 
-		myApi.json(new MyModel("Tiago de Freitas Lima", 31));
+		requestExecutor.execute(new EndpointRequest(URI.create("http://myApi/json"), "POST",
+				new Headers(Arrays.asList(Header.contentType("application/json"))), new MyModel("Tiago de Freitas Lima", 31)));
 
 		mockServerClient.verify(httpRequest, once());
 	}
@@ -113,7 +122,9 @@ public class RibbonHttpClientRequestFactoryTest {
 					.withHeader("Content-Type", "application/xml")
 					.withBody(exact("<model><name>Tiago de Freitas Lima</name><age>31</age></model>")));
 
-		MyModel myModel = myApi.xml();
+		EndpointResponse<MyModel> response = requestExecutor.execute(new EndpointRequest(URI.create("http://myApi/xml"), "GET", MyModel.class));
+
+		MyModel myModel = response.body();
 
 		assertEquals("Tiago de Freitas Lima", myModel.name);
 		assertEquals(31, myModel.age);
@@ -136,31 +147,15 @@ public class RibbonHttpClientRequestFactoryTest {
 				.withHeader("Content-Type", "text/plain")
 				.withBody(exact("OK")));
 
-		myApi.xml(new MyModel("Tiago de Freitas Lima", 31));
+		requestExecutor.execute(new EndpointRequest(URI.create("http://myApi/xml"), "POST",
+				new Headers(Arrays.asList(Header.contentType("application/xml"))), new MyModel("Tiago de Freitas Lima", 31)));
 
 		mockServerClient.verify(httpRequest, once());
 	}
 
-	interface MyApi {
-
-		@Path("/json") @Get
-		public MyModel json();
-
-		@Path("/json") @Post
-		@Header(name = "Content-Type", value = "application/json")
-		public void json(@BodyParameter MyModel myModel);
-
-		@Path("/xml") @Get
-		public MyModel xml();
-
-		@Path("/xml") @Post
-		@Header(name = "Content-Type", value = "application/xml")
-		public void xml(@BodyParameter MyModel myModel);
-	}
-
 	@XmlRootElement(name = "model")
 	@XmlAccessorType(XmlAccessType.FIELD)
-	public static class MyModel {
+	private static class MyModel {
 
 		@JsonProperty
 		String name;
@@ -168,10 +163,10 @@ public class RibbonHttpClientRequestFactoryTest {
 		@JsonProperty
 		int age;
 
-		public MyModel() {
+		private MyModel() {
 		}
 
-		public MyModel(String name, int age) {
+		private MyModel(String name, int age) {
 			this.name = name;
 			this.age = age;
 		}

@@ -35,10 +35,12 @@ import com.github.ljtfreitas.restify.http.client.call.EndpointCall;
 import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutable;
 import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutableDecoratorFactory;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethod;
-import com.github.ljtfreitas.restify.http.contract.metadata.reflection.JavaType;
-import com.github.ljtfreitas.restify.http.contract.metadata.reflection.SimpleParameterizedType;
+import com.github.ljtfreitas.restify.reflection.JavaType;
+import com.github.ljtfreitas.restify.reflection.SimpleParameterizedType;
 
 public class IterableEndpointCallExecutableFactory<T> implements EndpointCallExecutableDecoratorFactory<Iterable<T>, Collection<T>, Collection<T>> {
+
+	private static final IterableEndpointCallExecutableFactory<Object> DEFAULT_INSTANCE = new IterableEndpointCallExecutableFactory<>();
 
 	@Override
 	public boolean supports(EndpointMethod endpointMethod) {
@@ -78,5 +80,9 @@ public class IterableEndpointCallExecutableFactory<T> implements EndpointCallExe
 			return Optional.ofNullable(delegate.execute(call, args))
 				.orElseGet(Collections::emptyList);
 		}
+	}
+
+	public static IterableEndpointCallExecutableFactory<Object> instance() {
+		return DEFAULT_INSTANCE;
 	}
 }

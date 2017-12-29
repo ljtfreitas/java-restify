@@ -34,13 +34,14 @@ import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestOperations;
 
-import com.github.ljtfreitas.restify.http.RestifyHttpException;
+import com.github.ljtfreitas.restify.http.client.HttpClientException;
+import com.github.ljtfreitas.restify.http.client.HttpException;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequestExecutor;
 import com.github.ljtfreitas.restify.http.client.response.DefaultEndpointResponseErrorFallback;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponseErrorFallback;
-import com.github.ljtfreitas.restify.http.contract.metadata.reflection.JavaType;
+import com.github.ljtfreitas.restify.reflection.JavaType;
 
 public class RestOperationsEndpointRequestExecutor implements EndpointRequestExecutor {
 
@@ -79,10 +80,10 @@ public class RestOperationsEndpointRequestExecutor implements EndpointRequestExe
 			return endpointResponseErrorFallback.onError(ErrorHttpResponseMessage.from(request, e), endpointRequest.responseType());
 
 		} catch (ResourceAccessException e) {
-			throw new RestifyHttpException("I/O error on HTTP request: [" + request.getMethod() + " " + request.getUrl() + "]", e);
+			throw new HttpClientException("I/O error on HTTP request: [" + request.getMethod() + " " + request.getUrl() + "]", e);
 
 		} catch (Exception e) {
-			throw new RestifyHttpException("Error on HTTP request: [" + request.getMethod() + " " + request.getUrl() + "]", e);
+			throw new HttpException("Error on HTTP request: [" + request.getMethod() + " " + request.getUrl() + "]", e);
 		}
 	}
 

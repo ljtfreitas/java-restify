@@ -28,7 +28,7 @@ package com.github.ljtfreitas.restify.http.client.hateoas.browser.discovery;
 import java.util.Optional;
 
 import com.github.ljtfreitas.restify.http.client.hateoas.Link;
-import com.github.ljtfreitas.restify.http.contract.ContentType;
+import com.github.ljtfreitas.restify.http.client.message.ContentType;
 import com.jayway.jsonpath.JsonPath;
 
 import net.minidev.json.JSONArray;

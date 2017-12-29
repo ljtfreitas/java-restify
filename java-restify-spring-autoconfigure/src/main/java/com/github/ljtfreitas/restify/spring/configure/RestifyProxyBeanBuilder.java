@@ -29,7 +29,7 @@ import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
 
-import com.github.ljtfreitas.restify.http.client.authentication.Authentication;
+import com.github.ljtfreitas.restify.http.client.request.authentication.Authentication;
 
 class RestifyProxyBeanBuilder {
 

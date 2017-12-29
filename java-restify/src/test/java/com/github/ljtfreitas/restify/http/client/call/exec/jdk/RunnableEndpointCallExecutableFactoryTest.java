@@ -12,8 +12,8 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import com.github.ljtfreitas.restify.http.client.call.EndpointCall;
 import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutable;
+import com.github.ljtfreitas.restify.http.client.call.exec.SimpleEndpointMethod;
 import com.github.ljtfreitas.restify.http.client.call.exec.jdk.RunnableEndpointCallExecutableFactory;
-import com.github.ljtfreitas.restify.http.contract.metadata.SimpleEndpointMethod;
 
 @RunWith(MockitoJUnitRunner.class)
 public class RunnableEndpointCallExecutableFactoryTest {

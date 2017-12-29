@@ -5,9 +5,9 @@ import java.util.regex.Pattern;
 
 import org.apache.deltaspike.core.api.config.ConfigResolver;
 
-import com.github.ljtfreitas.restify.http.contract.metadata.RestifyContractExpressionResolver;
+import com.github.ljtfreitas.restify.http.contract.metadata.ContractExpressionResolver;
 
-class DeltaSpikeExpressionResolver implements RestifyContractExpressionResolver {
+class DeltaSpikeExpressionResolver implements ContractExpressionResolver {
 
 	private static final Pattern DYNAMIC_PATTERN = Pattern.compile("\\@\\[([a-zA-Z\\.]+)\\]");
 

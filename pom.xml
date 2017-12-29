@@ -20,20 +20,50 @@
 
 	<modules>
 		<module>java-restify</module>
+		<module>java-restify-spi</module>
+		<module>java-restify-reflection</module>
+		<module>java-restify-contract</module>
+		<module>java-restify-call-exec</module>
+
+		<module>java-restify-http-client</module>
+		<module>java-restify-http-client-apache-httpclient</module>
+		<module>java-restify-http-client-okhttp</module>
+		<module>java-restify-http-client-netty</module>
+		<module>java-restify-http-client-jersey</module>
+
+		<module>java-restify-guava</module>
+		<module>java-restify-rxjava</module>
+		<module>java-restify-rxjava-2</module>
+		<module>java-restify-jsoup</module>
+
+		<module>java-restify-http-message</module>
+		<module>java-restify-wildcard-converter</module>
+		<module>java-restify-text-converter</module>
+		<module>java-restify-form-encoded-multipart-converter</module>
+		<module>java-restify-json-jackson-converter</module>
+		<module>java-restify-json-gson-converter</module>
+		<module>java-restify-json-jsonp-converter</module>
+		<module>java-restify-octet-converter</module>
+		<module>java-restify-xml-jaxb-converter</module>
+
 		<module>java-restify-spring</module>
 		<module>java-restify-spring-autoconfigure</module>
 		<module>java-restify-spring-starter</module>
+
 		<module>java-restify-netflix</module>
 		<module>java-restify-netflix-service-discovery</module>
 		<module>java-restify-netflix-zookeeper-service-discovery</module>
 		<module>java-restify-netflix-kubernetes-service-discovery</module>
 		<module>java-restify-netflix-spring-autoconfigure</module>
 		<module>java-restify-netflix-spring-starter</module>
-		<module>java-restify-jaxrs-contract</module>
+
 		<module>java-restify-cdi</module>
-		<module>java-restify-jaxrs-http-client</module>
-		<module>java-restify-oauth2-authentication</module>
+		<module>java-restify-jaxrs-contract</module>
+
 		<module>java-restify-hateoas</module>
+		<module>java-restify-oauth2-authentication</module>
+
+		<module>java-restify-util</module>
 	</modules>
 
 	<dependencies>

@@ -12,15 +12,15 @@ import java.net.SocketException;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.github.ljtfreitas.restify.http.client.header.Header;
-import com.github.ljtfreitas.restify.http.client.header.Headers;
+import com.github.ljtfreitas.restify.http.client.message.Header;
+import com.github.ljtfreitas.restify.http.client.message.Headers;
+import com.github.ljtfreitas.restify.http.client.message.response.HttpStatusCode;
+import com.github.ljtfreitas.restify.http.client.message.response.StatusCode;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
-import com.github.ljtfreitas.restify.http.client.response.HttpStatusCode;
-import com.github.ljtfreitas.restify.http.client.response.RestifyEndpointResponseBadRequestException;
-import com.github.ljtfreitas.restify.http.client.response.RestifyEndpointResponseException;
-import com.github.ljtfreitas.restify.http.client.response.RestifyEndpointResponseGatewayTimeoutException;
-import com.github.ljtfreitas.restify.http.client.response.RestifyEndpointResponseInternalServerErrorException;
-import com.github.ljtfreitas.restify.http.client.response.StatusCode;
+import com.github.ljtfreitas.restify.http.client.response.EndpointResponseBadRequestException;
+import com.github.ljtfreitas.restify.http.client.response.EndpointResponseException;
+import com.github.ljtfreitas.restify.http.client.response.EndpointResponseGatewayTimeoutException;
+import com.github.ljtfreitas.restify.http.client.response.EndpointResponseInternalServerErrorException;
 
 public class RetryConditionMatcherTest {
 
@@ -68,21 +68,21 @@ public class RetryConditionMatcherTest {
 
 	@Test
 	public void shouldBeRetryableForStatusCodeWhenHasConfigured() {
-		RestifyEndpointResponseInternalServerErrorException internalServerErrorException = new RestifyEndpointResponseInternalServerErrorException("internal server error",
+		EndpointResponseInternalServerErrorException internalServerErrorException = new EndpointResponseInternalServerErrorException("internal server error",
 				Headers.empty(), "bla");
 		assertTrue(matcher.match(internalServerErrorException));
 	}
 
 	@Test
 	public void shouldBeRetryableForAny4xxStatusCodeWhenHasConfigured() {
-		RestifyEndpointResponseBadRequestException badRequestException = new RestifyEndpointResponseBadRequestException("bad request",
+		EndpointResponseBadRequestException badRequestException = new EndpointResponseBadRequestException("bad request",
 				Headers.empty(), "bla");
 		assertTrue(matcher.match(badRequestException));
 	}
 
 	@Test
 	public void shouldBeRetryableForHeaderWhenHasConfigured() {
-		RestifyEndpointResponseGatewayTimeoutException gatewayTimeoutException = new RestifyEndpointResponseGatewayTimeoutException("gateway timeout",
+		EndpointResponseGatewayTimeoutException gatewayTimeoutException = new EndpointResponseGatewayTimeoutException("gateway timeout",
 				new Headers(Header.of("X-Header-Retry", "retry!")), "bla");
 		assertTrue(matcher.match(gatewayTimeoutException));
 	}
@@ -91,7 +91,7 @@ public class RetryConditionMatcherTest {
 	public void shouldBeRetryableForEndpointResponseWhenHasConfigured() {
 		EndpointResponse<String> response = new EndpointResponse<>(StatusCode.of(429), new Headers(Header.of("X-Header-Retry-2", "retry!")),
 				"bla");
-		RestifyEndpointResponseException exception = new RestifyEndpointResponseException("whatever error", response);
+		EndpointResponseException exception = new EndpointResponseException("whatever error", response);
 
 		assertTrue(matcher.match(exception));
 	}

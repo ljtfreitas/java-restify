@@ -38,14 +38,14 @@ import javax.enterprise.util.AnnotationLiteral;
 
 import com.github.ljtfreitas.restify.http.RestifyProxyBuilder;
 import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutableProvider;
-import com.github.ljtfreitas.restify.http.client.message.HttpMessageConverter;
+import com.github.ljtfreitas.restify.http.client.jdk.JdkHttpClientRequestFactory;
+import com.github.ljtfreitas.restify.http.client.message.converter.HttpMessageConverter;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequestExecutor;
 import com.github.ljtfreitas.restify.http.client.request.HttpClientRequestFactory;
 import com.github.ljtfreitas.restify.http.client.request.interceptor.EndpointRequestInterceptor;
-import com.github.ljtfreitas.restify.http.client.request.jdk.JdkHttpClientRequestFactory;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponseErrorFallback;
-import com.github.ljtfreitas.restify.http.contract.metadata.RestifyContractExpressionResolver;
-import com.github.ljtfreitas.restify.http.contract.metadata.RestifyContractReader;
+import com.github.ljtfreitas.restify.http.contract.metadata.ContractExpressionResolver;
+import com.github.ljtfreitas.restify.http.contract.metadata.ContractReader;
 
 class RestifyProxyCdiBeanFactory {
 
@@ -99,12 +99,12 @@ class RestifyProxyCdiBeanFactory {
 		return get(EndpointRequestExecutor.class, () -> null);
 	}
 
-	private RestifyContractReader contractReader() {
-		return get(RestifyContractReader.class, () -> null);
+	private ContractReader contractReader() {
+		return get(ContractReader.class, () -> null);
 	}
 
-	private RestifyContractExpressionResolver expressionResolver() {
-		return get(RestifyContractExpressionResolver.class, () -> null);
+	private ContractExpressionResolver expressionResolver() {
+		return get(ContractExpressionResolver.class, () -> null);
 	}
 
 	private HttpClientRequestFactory httpClientRequestFactory() {

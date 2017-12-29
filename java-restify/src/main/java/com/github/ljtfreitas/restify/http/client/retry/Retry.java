@@ -33,7 +33,7 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 import java.lang.annotation.Retention;
 import java.lang.annotation.Target;
 
-import com.github.ljtfreitas.restify.http.client.response.HttpStatusCode;
+import com.github.ljtfreitas.restify.http.client.message.response.HttpStatusCode;
 import com.github.ljtfreitas.restify.http.contract.metadata.Metadata;
 
 @Retention(RUNTIME)

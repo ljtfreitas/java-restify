@@ -1,0 +1,4 @@
+com.github.ljtfreitas.restify.http.client.call.exec.guava.ListenableFutureCallbackEndpointCallExecutableFactory
+com.github.ljtfreitas.restify.http.client.call.exec.guava.ListenableFutureEndpointCallExecutableFactory
+com.github.ljtfreitas.restify.http.client.call.exec.guava.ListenableFutureTaskEndpointCallExecutableFactory
+com.github.ljtfreitas.restify.http.client.call.exec.guava.OptionalEndpointCallExecutableFactory

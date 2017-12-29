@@ -9,7 +9,7 @@ import org.junit.Before;
 import org.junit.Test;
 
 import com.github.ljtfreitas.restify.http.client.hateoas.Link;
-import com.github.ljtfreitas.restify.http.contract.ContentType;
+import com.github.ljtfreitas.restify.http.client.message.ContentType;
 
 public class HypermediaJsonPathLinkDiscoveryTest {
 

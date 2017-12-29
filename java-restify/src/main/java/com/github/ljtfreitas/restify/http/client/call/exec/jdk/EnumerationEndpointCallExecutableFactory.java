@@ -35,10 +35,12 @@ import com.github.ljtfreitas.restify.http.client.call.EndpointCall;
 import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutable;
 import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutableDecoratorFactory;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethod;
-import com.github.ljtfreitas.restify.http.contract.metadata.reflection.JavaType;
-import com.github.ljtfreitas.restify.http.contract.metadata.reflection.SimpleParameterizedType;
+import com.github.ljtfreitas.restify.reflection.JavaType;
+import com.github.ljtfreitas.restify.reflection.SimpleParameterizedType;
 
 public class EnumerationEndpointCallExecutableFactory<T> implements EndpointCallExecutableDecoratorFactory<Enumeration<T>, Collection<T>, Collection<T>> {
+
+	private static final EnumerationEndpointCallExecutableFactory<Object> DEFAULT_INSTANCE = new EnumerationEndpointCallExecutableFactory<>();
 
 	@Override
 	public boolean supports(EndpointMethod endpointMethod) {
@@ -77,5 +79,9 @@ public class EnumerationEndpointCallExecutableFactory<T> implements EndpointCall
 		public Enumeration<T> execute(EndpointCall<Collection<T>> call, Object[] args) {
 			return Collections.enumeration(delegate.execute(call, args));
 		}
+	}
+
+	public static EnumerationEndpointCallExecutableFactory<Object> instance() {
+		return DEFAULT_INSTANCE;
 	}
 }

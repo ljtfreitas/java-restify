@@ -24,16 +24,16 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import com.github.ljtfreitas.restify.http.client.header.Headers;
+import com.github.ljtfreitas.restify.http.client.message.Headers;
+import com.github.ljtfreitas.restify.http.client.message.response.HttpStatusCode;
+import com.github.ljtfreitas.restify.http.client.message.response.StatusCode;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequestExecutor;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequestMetadata;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
-import com.github.ljtfreitas.restify.http.client.response.HttpStatusCode;
-import com.github.ljtfreitas.restify.http.client.response.RestifyEndpointResponseConflictException;
-import com.github.ljtfreitas.restify.http.client.response.RestifyEndpointResponseInternalServerErrorException;
-import com.github.ljtfreitas.restify.http.client.response.RestifyEndpointResponseUnauthorizedException;
-import com.github.ljtfreitas.restify.http.client.response.StatusCode;
+import com.github.ljtfreitas.restify.http.client.response.EndpointResponseConflictException;
+import com.github.ljtfreitas.restify.http.client.response.EndpointResponseInternalServerErrorException;
+import com.github.ljtfreitas.restify.http.client.response.EndpointResponseUnauthorizedException;
 
 @RunWith(MockitoJUnitRunner.class)
 public class RetryableEndpointRequestExecutorTest {
@@ -130,8 +130,8 @@ public class RetryableEndpointRequestExecutorTest {
 		};
 
 		when(delegate.execute(notNull(EndpointRequest.class)))
-			.thenThrow(new RestifyEndpointResponseInternalServerErrorException("1st attempt...", Headers.empty(), "1st error..."))
-			.thenThrow(new RestifyEndpointResponseUnauthorizedException("2st attempt...", Headers.empty(), "2st error..."))
+			.thenThrow(new EndpointResponseInternalServerErrorException("1st attempt...", Headers.empty(), "1st error..."))
+			.thenThrow(new EndpointResponseUnauthorizedException("2st attempt...", Headers.empty(), "2st error..."))
 			.thenReturn(new EndpointResponse<>(StatusCode.of(HttpStatusCode.OK), "success"));;
 
 		RetryableEndpointRequest request = new RetryableEndpointRequest(retry);
@@ -211,11 +211,11 @@ public class RetryableEndpointRequestExecutorTest {
 			}
 		};
 
-		RestifyEndpointResponseUnauthorizedException unretryableException = new RestifyEndpointResponseUnauthorizedException("2st attempt...",
+		EndpointResponseUnauthorizedException unretryableException = new EndpointResponseUnauthorizedException("2st attempt...",
 				Headers.empty(), "2st error...");
 
 		when(delegate.execute(notNull(EndpointRequest.class)))
-			.thenThrow(new RestifyEndpointResponseInternalServerErrorException("1st attempt...", Headers.empty(), "1st error..."))
+			.thenThrow(new EndpointResponseInternalServerErrorException("1st attempt...", Headers.empty(), "1st error..."))
 			.thenThrow(unretryableException)
 			.thenReturn(new EndpointResponse<>(StatusCode.of(HttpStatusCode.OK), "success"));;
 
@@ -296,8 +296,8 @@ public class RetryableEndpointRequestExecutorTest {
 		};
 
 		when(delegate.execute(notNull(EndpointRequest.class)))
-			.thenThrow(new RestifyEndpointResponseInternalServerErrorException("1st attempt...", Headers.empty(), "1st error..."))
-			.thenThrow(new RestifyEndpointResponseInternalServerErrorException("2st attempt...", Headers.empty(), "2st error..."))
+			.thenThrow(new EndpointResponseInternalServerErrorException("1st attempt...", Headers.empty(), "1st error..."))
+			.thenThrow(new EndpointResponseInternalServerErrorException("2st attempt...", Headers.empty(), "2st error..."))
 			.thenReturn(new EndpointResponse<>(StatusCode.of(HttpStatusCode.OK), "success"));;
 
 		RetryableEndpointRequest request = new RetryableEndpointRequest(retry);
@@ -377,11 +377,11 @@ public class RetryableEndpointRequestExecutorTest {
 			}
 		};
 
-		RestifyEndpointResponseUnauthorizedException unretryableException = new RestifyEndpointResponseUnauthorizedException("2st attempt...",
+		EndpointResponseUnauthorizedException unretryableException = new EndpointResponseUnauthorizedException("2st attempt...",
 				Headers.empty(), "2st error...");
 
 		when(delegate.execute(notNull(EndpointRequest.class)))
-			.thenThrow(new RestifyEndpointResponseInternalServerErrorException("1st attempt...", Headers.empty(), "1st error..."))
+			.thenThrow(new EndpointResponseInternalServerErrorException("1st attempt...", Headers.empty(), "1st error..."))
 			.thenThrow(unretryableException)
 			.thenReturn(new EndpointResponse<>(StatusCode.of(HttpStatusCode.OK), "success"));;
 
@@ -462,8 +462,8 @@ public class RetryableEndpointRequestExecutorTest {
 		};
 
 		when(delegate.execute(notNull(EndpointRequest.class)))
-			.thenThrow(new RestifyEndpointResponseConflictException("1st attempt...", Headers.empty(), "1st error..."))
-			.thenThrow(new RestifyEndpointResponseConflictException("2st attempt...", Headers.empty(), "2st error..."))
+			.thenThrow(new EndpointResponseConflictException("1st attempt...", Headers.empty(), "1st error..."))
+			.thenThrow(new EndpointResponseConflictException("2st attempt...", Headers.empty(), "2st error..."))
 			.thenReturn(new EndpointResponse<>(StatusCode.of(HttpStatusCode.OK), "success"));;
 
 		RetryableEndpointRequest request = new RetryableEndpointRequest(retry);
@@ -543,11 +543,11 @@ public class RetryableEndpointRequestExecutorTest {
 			}
 		};
 
-		RestifyEndpointResponseInternalServerErrorException unretryableException = new RestifyEndpointResponseInternalServerErrorException("2st attempt...",
+		EndpointResponseInternalServerErrorException unretryableException = new EndpointResponseInternalServerErrorException("2st attempt...",
 				Headers.empty(), "2st error...");
 
 		when(delegate.execute(notNull(EndpointRequest.class)))
-			.thenThrow(new RestifyEndpointResponseConflictException("1st attempt...", Headers.empty(), "1st error..."))
+			.thenThrow(new EndpointResponseConflictException("1st attempt...", Headers.empty(), "1st error..."))
 			.thenThrow(unretryableException)
 			.thenReturn(new EndpointResponse<>(StatusCode.of(HttpStatusCode.OK), "success"));;
 
@@ -898,8 +898,8 @@ public class RetryableEndpointRequestExecutorTest {
 				.build();
 
 		when(delegate.execute(notNull(EndpointRequest.class)))
-			.thenThrow(new RestifyEndpointResponseInternalServerErrorException("1st attempt...", Headers.empty(), "1st error..."))
-			.thenThrow(new RestifyEndpointResponseUnauthorizedException("2st attempt...", Headers.empty(), "2st error..."))
+			.thenThrow(new EndpointResponseInternalServerErrorException("1st attempt...", Headers.empty(), "1st error..."))
+			.thenThrow(new EndpointResponseUnauthorizedException("2st attempt...", Headers.empty(), "2st error..."))
 			.thenReturn(new EndpointResponse<>(StatusCode.of(HttpStatusCode.OK), "success"));;
 
 		RetryableEndpointRequest request = new RetryableEndpointRequest();

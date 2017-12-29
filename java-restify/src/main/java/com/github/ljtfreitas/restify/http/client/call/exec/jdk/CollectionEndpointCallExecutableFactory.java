@@ -37,9 +37,11 @@ import com.github.ljtfreitas.restify.http.client.call.EndpointCall;
 import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutable;
 import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutableFactory;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethod;
-import com.github.ljtfreitas.restify.http.contract.metadata.reflection.JavaType;
+import com.github.ljtfreitas.restify.reflection.JavaType;
 
 public class CollectionEndpointCallExecutableFactory<T> implements EndpointCallExecutableFactory<Collection<T>, Collection<T>> {
+
+	private static final CollectionEndpointCallExecutableFactory<Object> DEFAULT_INSTANCE = new CollectionEndpointCallExecutableFactory<>();
 
 	@Override
 	public boolean supports(EndpointMethod endpointMethod) {
@@ -88,5 +90,9 @@ public class CollectionEndpointCallExecutableFactory<T> implements EndpointCallE
 				return Collections.emptyList();
 			}
 		}
+	}
+
+	public static CollectionEndpointCallExecutableFactory<Object> instance() {
+		return DEFAULT_INSTANCE;
 	}
 }

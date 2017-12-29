@@ -29,8 +29,8 @@ import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.ljtfreitas.restify.http.client.hateoas.browser.HypermediaBrowser;
 import com.github.ljtfreitas.restify.http.client.hateoas.browser.HypermediaBrowserBuilder;
+import com.github.ljtfreitas.restify.http.client.message.ContentType;
 import com.github.ljtfreitas.restify.http.client.message.converter.json.JacksonMessageConverter;
-import com.github.ljtfreitas.restify.http.contract.ContentType;
 
 public class JacksonHypermediaHalJsonMessageConverter<T> extends JacksonMessageConverter<T> {
 

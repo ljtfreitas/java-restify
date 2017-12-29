@@ -27,7 +27,7 @@ package com.github.ljtfreitas.restify.http.jaxrs.contract.metadata;
 
 import java.util.Objects;
 
-public class JaxRsEndpointHeader {
+class JaxRsEndpointHeader {
 
 	private final String name;
 	private final String value;

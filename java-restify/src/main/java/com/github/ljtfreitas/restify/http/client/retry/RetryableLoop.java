@@ -25,9 +25,9 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.retry;
 
-import static com.github.ljtfreitas.restify.http.util.Preconditions.nonNull;
+import static com.github.ljtfreitas.restify.util.Preconditions.nonNull;
 
-import com.github.ljtfreitas.restify.http.util.Tryable;
+import com.github.ljtfreitas.restify.util.Tryable;
 
 class RetryableLoop {
 

@@ -15,7 +15,12 @@
 	<dependencies>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
-			<artifactId>java-restify</artifactId>
+			<artifactId>java-restify-http-client</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>java-restify-call-exec</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
@@ -43,6 +48,18 @@
 			<artifactId>slf4j-api</artifactId>
 			<version>1.7.21</version>
 			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>java-restify-json-jackson-converter</artifactId>
+			<version>${project.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>java-restify-xml-jaxb-converter</artifactId>
+			<version>${project.version}</version>
+			<scope>test</scope>
 		</dependency>
 	</dependencies>
 </project>
