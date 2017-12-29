@@ -25,7 +25,9 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.message;
 
-public class HttpMessageException extends RuntimeException {
+import com.github.ljtfreitas.restify.http.client.HttpException;
+
+public class HttpMessageException extends HttpException {
 
 	private static final long serialVersionUID = 1L;
 

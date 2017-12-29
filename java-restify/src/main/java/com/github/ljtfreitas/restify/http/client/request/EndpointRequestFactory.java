@@ -28,7 +28,7 @@ package com.github.ljtfreitas.restify.http.client.request;
 import java.net.URI;
 import java.net.URISyntaxException;
 
-import com.github.ljtfreitas.restify.http.HttpException;
+import com.github.ljtfreitas.restify.http.client.HttpException;
 import com.github.ljtfreitas.restify.http.client.message.Header;
 import com.github.ljtfreitas.restify.http.client.message.Headers;
 import com.github.ljtfreitas.restify.http.client.request.interceptor.EndpointRequestInterceptorStack;

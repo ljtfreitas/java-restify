@@ -25,7 +25,7 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client;
 
-public class HttpClientException extends RuntimeException {
+public class HttpClientException extends HttpException {
 
 	private static final long serialVersionUID = 1L;
 

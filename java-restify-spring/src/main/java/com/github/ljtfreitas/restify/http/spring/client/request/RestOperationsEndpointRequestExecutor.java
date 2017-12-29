@@ -34,7 +34,8 @@ import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestOperations;
 
-import com.github.ljtfreitas.restify.http.HttpException;
+import com.github.ljtfreitas.restify.http.client.HttpClientException;
+import com.github.ljtfreitas.restify.http.client.HttpException;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequestExecutor;
 import com.github.ljtfreitas.restify.http.client.response.DefaultEndpointResponseErrorFallback;
@@ -79,7 +80,7 @@ public class RestOperationsEndpointRequestExecutor implements EndpointRequestExe
 			return endpointResponseErrorFallback.onError(ErrorHttpResponseMessage.from(request, e), endpointRequest.responseType());
 
 		} catch (ResourceAccessException e) {
-			throw new HttpException("I/O error on HTTP request: [" + request.getMethod() + " " + request.getUrl() + "]", e);
+			throw new HttpClientException("I/O error on HTTP request: [" + request.getMethod() + " " + request.getUrl() + "]", e);
 
 		} catch (Exception e) {
 			throw new HttpException("Error on HTTP request: [" + request.getMethod() + " " + request.getUrl() + "]", e);

@@ -32,8 +32,7 @@ import javax.ws.rs.client.Invocation;
 import javax.ws.rs.core.Configuration;
 import javax.ws.rs.core.Response;
 
-import com.github.ljtfreitas.restify.http.HttpException;
-import com.github.ljtfreitas.restify.http.client.message.HttpMessageException;
+import com.github.ljtfreitas.restify.http.client.HttpException;
 import com.github.ljtfreitas.restify.http.client.message.converter.HttpMessageReadException;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequestExecutor;
@@ -84,7 +83,7 @@ public class JaxRsHttpClientEndpointRequestExecutor implements EndpointRequestEx
 
 			return endpointResponse;
 
-		} catch (HttpException | HttpMessageException e) {
+		} catch (HttpException e) {
 			throw e;
 
 		} catch (WebApplicationException e) {

@@ -23,11 +23,15 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.http;
+package com.github.ljtfreitas.restify.http.client;
 
 public class HttpException extends RuntimeException {
 
 	private static final long serialVersionUID = 1L;
+
+	public HttpException() {
+		super();
+	}
 
 	public HttpException(String message) {
 		super(message);
