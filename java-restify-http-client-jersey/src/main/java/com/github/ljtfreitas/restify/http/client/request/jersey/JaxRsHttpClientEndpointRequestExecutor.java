@@ -23,7 +23,7 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.http.client.jaxrs;
+package com.github.ljtfreitas.restify.http.client.request.jersey;
 
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.client.Client;

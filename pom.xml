@@ -29,6 +29,7 @@
 		<module>java-restify-http-client-apache-httpclient</module>
 		<module>java-restify-http-client-okhttp</module>
 		<module>java-restify-http-client-netty</module>
+		<module>java-restify-http-client-jersey</module>
 
 		<module>java-restify-guava</module>
 		<module>java-restify-rxjava</module>
@@ -58,7 +59,6 @@
 
 		<module>java-restify-cdi</module>		
 		<module>java-restify-jaxrs-contract</module>
-		<module>java-restify-jaxrs-http-client</module>
 
 		<module>java-restify-hateoas</module>
 		<module>java-restify-oauth2-authentication</module>

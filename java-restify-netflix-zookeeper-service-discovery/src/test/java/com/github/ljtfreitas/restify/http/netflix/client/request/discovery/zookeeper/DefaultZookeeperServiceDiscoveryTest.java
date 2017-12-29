@@ -7,6 +7,9 @@ import static org.mockserver.model.JsonBody.json;
 import static org.mockserver.model.StringBody.exact;
 import static org.mockserver.verify.VerificationTimes.once;
 
+import java.net.URI;
+import java.util.Arrays;
+
 import org.apache.curator.test.TestingServer;
 import org.junit.After;
 import org.junit.Before;
@@ -17,12 +20,16 @@ import org.mockserver.junit.MockServerRule;
 import org.mockserver.model.HttpRequest;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
-import com.github.ljtfreitas.restify.http.RestifyProxyBuilder;
-import com.github.ljtfreitas.restify.http.contract.BodyParameter;
-import com.github.ljtfreitas.restify.http.contract.Get;
-import com.github.ljtfreitas.restify.http.contract.Header;
-import com.github.ljtfreitas.restify.http.contract.Path;
-import com.github.ljtfreitas.restify.http.contract.Post;
+import com.github.ljtfreitas.restify.http.client.message.Header;
+import com.github.ljtfreitas.restify.http.client.message.Headers;
+import com.github.ljtfreitas.restify.http.client.message.converter.HttpMessageConverters;
+import com.github.ljtfreitas.restify.http.client.message.converter.json.JacksonMessageConverter;
+import com.github.ljtfreitas.restify.http.client.request.DefaultEndpointRequestExecutor;
+import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
+import com.github.ljtfreitas.restify.http.client.request.EndpointRequestExecutor;
+import com.github.ljtfreitas.restify.http.client.request.EndpointRequestWriter;
+import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
+import com.github.ljtfreitas.restify.http.client.response.EndpointResponseReader;
 import com.github.ljtfreitas.restify.http.netflix.client.request.RibbonHttpClientRequestFactory;
 import com.github.ljtfreitas.restify.http.netflix.client.request.discovery.DiscoveryServerList;
 import com.github.ljtfreitas.restify.http.netflix.client.request.discovery.ServiceFailureExceptionHandler;
@@ -37,9 +44,9 @@ public class DefaultZookeeperServiceDiscoveryTest {
 
 	private TestingServer zookeeperServer;
 
-	private MyApi myApi;
-
 	private MockServerClient mockServerClient;
+
+	private EndpointRequestExecutor requestExecutor;
 
 	private DefaultZookeeperServiceDiscovery<ZookeeperServiceInstance> zookeeperServiceDiscovery;
 
@@ -74,10 +81,10 @@ public class DefaultZookeeperServiceDiscoveryTest {
 
 		RibbonHttpClientRequestFactory ribbonHttpClientRequestFactory = new RibbonHttpClientRequestFactory(loadBalancer, new ServiceFailureExceptionHandler(zookeeperServiceDiscovery));
 
-		myApi = new RestifyProxyBuilder()
-				.client(ribbonHttpClientRequestFactory)
-				.target(MyApi.class, "http://myApi")
-				.build();
+		HttpMessageConverters messageConverters = new HttpMessageConverters(Arrays.asList(new JacksonMessageConverter<>()));
+
+		requestExecutor = new DefaultEndpointRequestExecutor(ribbonHttpClientRequestFactory, new EndpointRequestWriter(messageConverters),
+				new EndpointResponseReader(messageConverters));
 	}
 
 	@After
@@ -100,7 +107,9 @@ public class DefaultZookeeperServiceDiscoveryTest {
 					.withHeader("Content-Type", "application/json")
 					.withBody(json("{\"name\": \"Tiago de Freitas Lima\",\"age\":31}")));
 
-		MyModel myModel = myApi.json();
+		EndpointResponse<MyModel> response = requestExecutor.execute(new EndpointRequest(URI.create("http://myApi/json"), "GET", MyModel.class));
+
+		MyModel myModel = response.body();
 
 		assertEquals("Tiago de Freitas Lima", myModel.name);
 		assertEquals(31, myModel.age);
@@ -123,22 +132,13 @@ public class DefaultZookeeperServiceDiscoveryTest {
 				.withHeader("Content-Type", "text/plain")
 				.withBody(exact("OK")));
 
-		myApi.json(new MyModel("Tiago de Freitas Lima", 31));
+		requestExecutor.execute(new EndpointRequest(URI.create("http://myApi/json"), "POST",
+				new Headers(Arrays.asList(Header.contentType("application/json"))), new MyModel("Tiago de Freitas Lima", 31)));
 
 		mockServerClient.verify(httpRequest, once());
 	}
 
-	interface MyApi {
-
-		@Path("/json") @Get
-		public MyModel json();
-
-		@Path("/json") @Post
-		@Header(name = "Content-Type", value = "application/json")
-		public void json(@BodyParameter MyModel myModel);
-	}
-
-	public static class MyModel {
+	private static class MyModel {
 
 		@JsonProperty
 		String name;
@@ -146,10 +146,11 @@ public class DefaultZookeeperServiceDiscoveryTest {
 		@JsonProperty
 		int age;
 
-		public MyModel() {
+		@SuppressWarnings("unused")
+		private MyModel() {
 		}
 
-		public MyModel(String name, int age) {
+		MyModel(String name, int age) {
 			this.name = name;
 			this.age = age;
 		}
