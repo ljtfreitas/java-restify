@@ -11,9 +11,19 @@
 	<description>Java Restify Spring Extension</description>
 
 	<dependencies>
+		 <dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>java-restify-contract</artifactId>
+			<version>${project.version}</version>
+		</dependency>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
-			<artifactId>java-restify</artifactId>
+			<artifactId>java-restify-call-exec</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>java-restify-http-client</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
