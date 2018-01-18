@@ -43,16 +43,24 @@ class DefaultAsyncEndpointCall<T> implements AsyncEndpointCall<T> {
 
 	@Override
 	public void execute(EndpointCallCallback<T> callback) {
-		CompletableFuture
-			.supplyAsync(() -> source.execute(), executor)
-				.whenComplete((r, e) -> handle(r, e, callback, callback));
+		doExecute()
+			.whenComplete((r, e) -> handle(r, e, callback, callback));
 	}
 
 	@Override
 	public void execute(EndpointCallSuccessCallback<T> successCallback, EndpointCallFailureCallback failureCallback) {
-		CompletableFuture
-			.supplyAsync(() -> source.execute(), executor)
-				.whenComplete((r, e) -> handle(r, e, successCallback, failureCallback));
+		doExecute()
+			.whenComplete((r, e) -> handle(r, e, successCallback, failureCallback));
+	}
+
+	@Override
+	public CompletableFuture<T> execute() {
+		return doExecute();
+	}
+
+	private CompletableFuture<T> doExecute() {
+		return CompletableFuture
+				.supplyAsync(() -> source.execute(), executor);
 	}
 
 	private void handle(T value, Throwable throwable, EndpointCallSuccessCallback<T> successCallback, EndpointCallFailureCallback failureCallback) {
