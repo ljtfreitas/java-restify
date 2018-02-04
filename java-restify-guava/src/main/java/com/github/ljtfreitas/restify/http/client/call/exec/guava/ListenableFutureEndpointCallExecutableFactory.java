@@ -43,7 +43,7 @@ public class ListenableFutureEndpointCallExecutableFactory<T, O> implements Endp
 	private final ListeningExecutorService executorService;
 
 	public ListenableFutureEndpointCallExecutableFactory() {
-		this(MoreExecutors.listeningDecorator(Executors.newSingleThreadExecutor()));
+		this(MoreExecutors.listeningDecorator(Executors.newCachedThreadPool()));
 	}
 
 	public ListenableFutureEndpointCallExecutableFactory(ListeningExecutorService executorService) {

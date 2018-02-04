@@ -48,7 +48,7 @@ public class ListenableFutureCallbackEndpointCallExecutableFactory<T, O> impleme
 	private final ListeningExecutorService executorService;
 
 	public ListenableFutureCallbackEndpointCallExecutableFactory() {
-		this(MoreExecutors.listeningDecorator(Executors.newSingleThreadExecutor()));
+		this(MoreExecutors.listeningDecorator(Executors.newCachedThreadPool()));
 	}
 
 	public ListenableFutureCallbackEndpointCallExecutableFactory(ListeningExecutorService executorService) {

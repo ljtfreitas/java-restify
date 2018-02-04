@@ -44,7 +44,7 @@ public class AsyncEndpointCallExecutableFactory<T, O> implements EndpointCallExe
 	private final AsyncEndpointCallFactory asyncEndpointCallFactory;
 
 	public AsyncEndpointCallExecutableFactory() {
-		this(Executors.newSingleThreadExecutor());
+		this(Executors.newCachedThreadPool());
 	}
 
 	public AsyncEndpointCallExecutableFactory(Executor executor) {

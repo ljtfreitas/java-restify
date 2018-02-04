@@ -42,7 +42,7 @@ public class CompletableFutureEndpointCallExecutableFactory<T, O> implements End
 	private final Executor executor;
 
 	public CompletableFutureEndpointCallExecutableFactory() {
-		this(Executors.newSingleThreadExecutor());
+		this(Executors.newCachedThreadPool());
 	}
 
 	public CompletableFutureEndpointCallExecutableFactory(Executor executor) {

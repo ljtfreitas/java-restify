@@ -48,7 +48,7 @@ public class AsyncCallbackEndpointCallExecutableFactory<T, O> implements Endpoin
 	private final AsyncEndpointCallFactory asyncEndpointCallFactory;
 
 	public AsyncCallbackEndpointCallExecutableFactory() {
-		this(Executors.newSingleThreadExecutor());
+		this(Executors.newCachedThreadPool());
 	}
 
 	public AsyncCallbackEndpointCallExecutableFactory(Executor executor) {

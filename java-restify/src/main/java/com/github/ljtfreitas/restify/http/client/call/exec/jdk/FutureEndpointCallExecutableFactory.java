@@ -42,7 +42,7 @@ public class FutureEndpointCallExecutableFactory<T, O> implements EndpointCallEx
 	private final ExecutorService executorService;
 
 	public FutureEndpointCallExecutableFactory() {
-		this.executorService = Executors.newSingleThreadExecutor();
+		this.executorService = Executors.newCachedThreadPool();
 	}
 
 	public FutureEndpointCallExecutableFactory(ExecutorService executorService) {

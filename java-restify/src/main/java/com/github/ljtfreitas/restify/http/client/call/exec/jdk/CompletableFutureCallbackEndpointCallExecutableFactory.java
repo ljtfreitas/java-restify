@@ -46,7 +46,7 @@ public class CompletableFutureCallbackEndpointCallExecutableFactory<T, O> implem
 	private final Executor executor;
 
 	public CompletableFutureCallbackEndpointCallExecutableFactory() {
-		this(Executors.newSingleThreadExecutor());
+		this(Executors.newCachedThreadPool());
 	}
 
 	public CompletableFutureCallbackEndpointCallExecutableFactory(Executor executor) {
