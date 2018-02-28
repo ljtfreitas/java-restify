@@ -27,27 +27,25 @@ package com.github.ljtfreitas.restify.http.spring.client.call.exec;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
 
-import org.springframework.core.task.AsyncListenableTaskExecutor;
-import org.springframework.core.task.SimpleAsyncTaskExecutor;
+import org.springframework.util.concurrent.CompletableToListenableFutureAdapter;
 import org.springframework.util.concurrent.ListenableFuture;
 
-import com.github.ljtfreitas.restify.http.client.call.EndpointCall;
+import com.github.ljtfreitas.restify.http.client.call.async.AsyncEndpointCall;
 import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutable;
-import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutableDecoratorFactory;
+import com.github.ljtfreitas.restify.http.client.call.exec.async.AsyncEndpointCallExecutable;
+import com.github.ljtfreitas.restify.http.client.call.exec.async.AsyncEndpointCallExecutableDecoratorFactory;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethod;
 import com.github.ljtfreitas.restify.reflection.JavaType;
 
-public class ListenableFutureEndpointCallExecutableFactory<T, O> implements EndpointCallExecutableDecoratorFactory<ListenableFuture<T>, T, O> {
+public class ListenableFutureEndpointCallExecutableFactory<T, O> implements AsyncEndpointCallExecutableDecoratorFactory<ListenableFuture<T>, T, O> {
 
-	private final AsyncListenableTaskExecutor asyncListenableTaskExecutor;
+	private final Executor executor;
 
-	public ListenableFutureEndpointCallExecutableFactory() {
-		this(new SimpleAsyncTaskExecutor("ListenableFutureEndpointCallExecutable"));
-	}
-
-	public ListenableFutureEndpointCallExecutableFactory(AsyncListenableTaskExecutor asyncTaskExecutor) {
-		this.asyncListenableTaskExecutor = asyncTaskExecutor;
+	public ListenableFutureEndpointCallExecutableFactory(Executor executor) {
+		this.executor = executor;
 	}
 
 	@Override
@@ -67,11 +65,11 @@ public class ListenableFutureEndpointCallExecutableFactory<T, O> implements Endp
 	}
 
 	@Override
-	public EndpointCallExecutable<ListenableFuture<T>, O> create(EndpointMethod endpointMethod, EndpointCallExecutable<T, O> executable) {
+	public AsyncEndpointCallExecutable<ListenableFuture<T>, O> createAsync(EndpointMethod endpointMethod, EndpointCallExecutable<T, O> executable) {
 		return new ListenableFutureEndpointCallExecutable(executable);
 	}
 
-	private class ListenableFutureEndpointCallExecutable implements EndpointCallExecutable<ListenableFuture<T>, O> {
+	private class ListenableFutureEndpointCallExecutable implements AsyncEndpointCallExecutable<ListenableFuture<T>, O> {
 
 		private final EndpointCallExecutable<T, O> delegate;
 
@@ -85,8 +83,11 @@ public class ListenableFutureEndpointCallExecutableFactory<T, O> implements Endp
 		}
 
 		@Override
-		public ListenableFuture<T> execute(EndpointCall<O> call, Object[] args) {
-			return asyncListenableTaskExecutor.submitListenable(() -> delegate.execute(call, args));
+		public ListenableFuture<T> executeAsync(AsyncEndpointCall<O> call, Object[] args) {
+			CompletableFuture<T> future = call.executeAsync()
+					.thenApplyAsync(o -> delegate.execute(() -> o, args), executor);
+
+			return new CompletableToListenableFutureAdapter<>(future);
 		}
 	}
 }

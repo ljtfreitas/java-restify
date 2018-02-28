@@ -23,17 +23,49 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.http.client.call.async;
+package com.github.ljtfreitas.restify.http.client.call.exec.async;
 
 import java.util.concurrent.CompletableFuture;
 
 import com.github.ljtfreitas.restify.http.client.call.EndpointCall;
+import com.github.ljtfreitas.restify.http.client.call.async.AsyncEndpointCall;
+import com.github.ljtfreitas.restify.http.client.call.async.EndpointCallCallback;
+import com.github.ljtfreitas.restify.http.client.call.async.EndpointCallFailureCallback;
+import com.github.ljtfreitas.restify.http.client.call.async.EndpointCallSuccessCallback;
 
-public interface AsyncEndpointCall<T> extends EndpointCall<T> {
+class AsyncEndpointCallAdapter<T> implements AsyncEndpointCall<T> {
 
-	public void executeAsync(EndpointCallCallback<T> callback);
+	private final EndpointCall<T> delegate;
 
-	public void executeAsync(EndpointCallSuccessCallback<T> success, EndpointCallFailureCallback failure);
+	public AsyncEndpointCallAdapter(EndpointCall<T> delegate) {
+		this.delegate = delegate;
+	}
 
-	public CompletableFuture<T> executeAsync();
+	@Override
+	public T execute() {
+		return delegate.execute();
+	}
+
+	@Override
+	public void executeAsync(EndpointCallCallback<T> callback) {
+		try {
+			callback.onSuccess(delegate.execute());
+		} catch (Exception e) {
+			callback.onFailure(e);
+		}
+	}
+
+	@Override
+	public void executeAsync(EndpointCallSuccessCallback<T> success, EndpointCallFailureCallback failure) {
+		try {
+			success.onSuccess(delegate.execute());
+		} catch (Exception e) {
+			failure.onFailure(e);
+		}
+	}
+
+	@Override
+	public CompletableFuture<T> executeAsync() {
+		return CompletableFuture.completedFuture(delegate.execute());
+	}
 }

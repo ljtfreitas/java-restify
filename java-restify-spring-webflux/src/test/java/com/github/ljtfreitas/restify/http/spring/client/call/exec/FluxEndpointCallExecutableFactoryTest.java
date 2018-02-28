@@ -4,8 +4,11 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Matchers.anyVararg;
+import static org.mockito.Matchers.notNull;
 import static org.mockito.Mockito.when;
+
+import java.util.concurrent.CompletableFuture;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -14,7 +17,8 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import com.github.ljtfreitas.restify.http.client.call.EndpointCall;
-import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutable;
+import com.github.ljtfreitas.restify.http.client.call.async.AsyncEndpointCall;
+import com.github.ljtfreitas.restify.http.client.call.exec.async.AsyncEndpointCallExecutable;
 import com.github.ljtfreitas.restify.reflection.JavaType;
 
 import reactor.core.publisher.Flux;
@@ -26,20 +30,31 @@ import reactor.test.StepVerifier;
 public class FluxEndpointCallExecutableFactoryTest {
 
 	@Mock
-	private EndpointCallExecutable<String, String> delegate;
+	private AsyncEndpointCallExecutable<String, String> delegate;
 
 	@Mock
-	private EndpointCall<String> endpointCallMock;
+	private AsyncEndpointCall<String> asyncEndpointCall;
 
 	private FluxEndpointCallExecutableFactory<String, String> factory;
 
 	private Scheduler scheduler;
 
+	private String expectedAsyncResult;
+
+	@SuppressWarnings("unchecked")
 	@Before
 	public void setup() {
 		scheduler = Schedulers.single();
 
 		factory = new FluxEndpointCallExecutableFactory<>(scheduler);
+
+		expectedAsyncResult = "flux result";
+
+		when(asyncEndpointCall.executeAsync())
+			.thenReturn(CompletableFuture.completedFuture(expectedAsyncResult));
+
+		when(delegate.execute(notNull(EndpointCall.class), anyVararg()))
+			.then(o -> o.getArgumentAt(0, EndpointCall.class).execute());
 	}
 
 	@Test
@@ -64,45 +79,39 @@ public class FluxEndpointCallExecutableFactoryTest {
 
 	@Test
 	public void shouldCreateExecutableFromEndpointMethodWithFluxReturnType() throws Exception {
-		EndpointCallExecutable<Flux<String>, String> executable = factory
-				.create(new SimpleEndpointMethod(SomeType.class.getMethod("flux")), delegate);
+		AsyncEndpointCallExecutable<Flux<String>, String> executable = factory
+				.createAsync(new SimpleEndpointMethod(SomeType.class.getMethod("flux")), delegate);
 
-		String result = "flux result";
-
-		when(delegate.execute(endpointCallMock, null))
-			.thenReturn(result);
-
-		Flux<String> flux = executable.execute(endpointCallMock, null);
+		Flux<String> flux = executable.executeAsync(asyncEndpointCall, null);
 
 		assertNotNull(flux);
 
 		StepVerifier.create(flux)
-			.expectNext(result)
+			.expectNext(expectedAsyncResult)
 			.expectComplete()
 			.verify();
-
-		verify(delegate).execute(endpointCallMock, null);
 	}
 
 	@Test
 	public void shouldSubscribeErrorOnObservableWhenCreatedExecutableWithRxJava2ObservableReturnTypeThrowException() throws Exception {
-		EndpointCallExecutable<Flux<String>, String> executable = factory
-				.create(new SimpleEndpointMethod(SomeType.class.getMethod("flux")), delegate);
+		AsyncEndpointCallExecutable<Flux<String>, String> executable = factory
+				.createAsync(new SimpleEndpointMethod(SomeType.class.getMethod("flux")), delegate);
 
-		RuntimeException exception = new RuntimeException();
+		RuntimeException exception = new RuntimeException("ooooops...");
 
-		when(delegate.execute(endpointCallMock, null))
-			.thenThrow(exception);
+		CompletableFuture<String> completableFuture = new CompletableFuture<>();
+		completableFuture.completeExceptionally(exception);
 
-		Flux<String> flux = executable.execute(endpointCallMock, null);
+		when(asyncEndpointCall.executeAsync())
+			.thenReturn(completableFuture);
+
+		Flux<String> flux = executable.executeAsync(asyncEndpointCall, null);
 
 		assertNotNull(flux);
 
 		StepVerifier.create(flux)
 			.expectError()
 			.verify();
-
-		verify(delegate).execute(endpointCallMock, null);
 	}
 
 	interface SomeType {

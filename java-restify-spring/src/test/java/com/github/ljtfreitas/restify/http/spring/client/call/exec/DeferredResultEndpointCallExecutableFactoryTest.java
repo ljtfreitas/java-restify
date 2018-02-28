@@ -8,29 +8,35 @@ import static org.mockito.Matchers.anyVararg;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.concurrent.CompletableFuture;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.springframework.core.task.SyncTaskExecutor;
 import org.springframework.web.context.request.async.DeferredResult;
 
 import com.github.ljtfreitas.restify.http.client.call.EndpointCall;
-import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutable;
+import com.github.ljtfreitas.restify.http.client.call.async.AsyncEndpointCall;
+import com.github.ljtfreitas.restify.http.client.call.exec.async.AsyncEndpointCallExecutable;
 import com.github.ljtfreitas.restify.reflection.JavaType;
-import com.github.ljtfreitas.restify.http.spring.client.call.exec.DeferredResultEndpointCallExecutableFactory;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DeferredResultEndpointCallExecutableFactoryTest {
 
 	@Mock
-	private EndpointCallExecutable<String, String> delegate;
+	private AsyncEndpointCallExecutable<String, String> delegate;
+
+	@Mock
+	private AsyncEndpointCall<String> asyncEndpointCall;
 
 	private DeferredResultEndpointCallExecutableFactory<String, String> factory;
 
 	@Before
 	public void setup() {
-		factory = new DeferredResultEndpointCallExecutableFactory<>(r -> r.run());
+		factory = new DeferredResultEndpointCallExecutableFactory<>(new SyncTaskExecutor());
 
 		when(delegate.execute(any(), anyVararg()))
 			.then((invocation) -> invocation.getArgumentAt(0, EndpointCall.class).execute());
@@ -63,12 +69,14 @@ public class DeferredResultEndpointCallExecutableFactoryTest {
 
 	@Test
 	public void shouldCreateExecutableFromEndpointMethodWithDeferredResultReturnType() throws Exception {
-		EndpointCallExecutable<DeferredResult<String>, String> executable = factory
-				.create(new SimpleEndpointMethod(SomeType.class.getMethod("deferredResult")), delegate);
+		AsyncEndpointCallExecutable<DeferredResult<String>, String> executable = factory
+				.createAsync(new SimpleEndpointMethod(SomeType.class.getMethod("deferredResult")), delegate);
 
 		String result = "deferred result";
 
-		DeferredResult<String> deferredResult = executable.execute(() -> result, null);
+		when(asyncEndpointCall.executeAsync()).thenReturn(CompletableFuture.completedFuture(result));
+
+		DeferredResult<String> deferredResult = executable.executeAsync(asyncEndpointCall, null);
 
 		assertEquals(result, deferredResult.getResult());
 		assertEquals(delegate.returnType(), executable.returnType());

@@ -27,37 +27,25 @@ package com.github.ljtfreitas.restify.http.client.call.exec.async;
 
 import java.lang.reflect.ParameterizedType;
 import java.util.Collection;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 
-import com.github.ljtfreitas.restify.http.client.call.EndpointCall;
 import com.github.ljtfreitas.restify.http.client.call.async.AsyncEndpointCall;
-import com.github.ljtfreitas.restify.http.client.call.async.AsyncEndpointCallFactory;
+import com.github.ljtfreitas.restify.http.client.call.async.CompletableFutureAsyncEndpointCall;
 import com.github.ljtfreitas.restify.http.client.call.async.EndpointCallFailureCallback;
 import com.github.ljtfreitas.restify.http.client.call.async.EndpointCallSuccessCallback;
 import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutable;
-import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutableDecoratorFactory;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethod;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethodParameter;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethodParameters;
 import com.github.ljtfreitas.restify.reflection.JavaType;
 
-public class AsyncCallbackEndpointCallExecutableFactory<T, O> implements EndpointCallExecutableDecoratorFactory<Void, T, O> {
+public class AsyncCallbackEndpointCallExecutableFactory<T, O> implements AsyncEndpointCallExecutableDecoratorFactory<Void, T, O> {
 
 	private final Executor executor;
-	private final AsyncEndpointCallFactory asyncEndpointCallFactory;
-
-	public AsyncCallbackEndpointCallExecutableFactory() {
-		this(Executors.newCachedThreadPool());
-	}
 
 	public AsyncCallbackEndpointCallExecutableFactory(Executor executor) {
-		this(executor, new AsyncEndpointCallFactory());
-	}
-
-	public AsyncCallbackEndpointCallExecutableFactory(Executor executor, AsyncEndpointCallFactory asyncEndpointCallFactory) {
 		this.executor = executor;
-		this.asyncEndpointCallFactory = asyncEndpointCallFactory;
 	}
 
 	@Override
@@ -74,7 +62,7 @@ public class AsyncCallbackEndpointCallExecutableFactory<T, O> implements Endpoin
 	}
 
 	@Override
-	public EndpointCallExecutable<Void, O> create(EndpointMethod endpointMethod, EndpointCallExecutable<T, O> executable) {
+	public AsyncEndpointCallExecutable<Void, O> createAsync(EndpointMethod endpointMethod, EndpointCallExecutable<T, O> executable) {
 		return new AsyncCallbackEndpointCallExecutable(endpointMethod.parameters().callbacks(), executable);
 	}
 
@@ -87,12 +75,13 @@ public class AsyncCallbackEndpointCallExecutableFactory<T, O> implements Endpoin
 								.orElseGet(() -> JavaType.of(Void.class));
 	}
 
-	private class AsyncCallbackEndpointCallExecutable implements EndpointCallExecutable<Void, O> {
+	private class AsyncCallbackEndpointCallExecutable implements AsyncEndpointCallExecutable<Void, O> {
 
 		private final Collection<EndpointMethodParameter> callbackMethodParameters;
 		private final EndpointCallExecutable<T, O> delegate;
 
-		public AsyncCallbackEndpointCallExecutable(Collection<EndpointMethodParameter> callbackMethodParameters, EndpointCallExecutable<T, O> executable) {
+		public AsyncCallbackEndpointCallExecutable(Collection<EndpointMethodParameter> callbackMethodParameters,
+				EndpointCallExecutable<T, O> executable) {
 			this.callbackMethodParameters = callbackMethodParameters;
 			this.delegate = executable;
 		}
@@ -104,13 +93,15 @@ public class AsyncCallbackEndpointCallExecutableFactory<T, O> implements Endpoin
 
 		@SuppressWarnings("unchecked")
 		@Override
-		public Void execute(EndpointCall<O> call, Object[] args) {
-			AsyncEndpointCall<T> asyncEndpointCall = asyncEndpointCallFactory.create(() -> delegate.execute(call, args), executor);
+		public Void executeAsync(AsyncEndpointCall<O> call, Object[] args) {
+			CompletableFuture<T> future = call.executeAsync().thenApply(o -> delegate.execute(() -> o, args));
+
+			AsyncEndpointCall<T> asyncEndpointCall = new CompletableFutureAsyncEndpointCall<>(future, executor);
 
 			EndpointCallSuccessCallback<T> successCallback = callback(EndpointCallSuccessCallback.class, args);
 			EndpointCallFailureCallback failureCallback = callback(EndpointCallFailureCallback.class, args);
 
-			asyncEndpointCall.execute(successCallback, failureCallback);
+			asyncEndpointCall.executeAsync(successCallback, failureCallback);
 
 			return null;
 		}

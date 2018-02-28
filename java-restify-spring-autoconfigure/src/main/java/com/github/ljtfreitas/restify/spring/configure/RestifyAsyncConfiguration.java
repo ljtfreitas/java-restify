@@ -64,15 +64,16 @@ public class RestifyAsyncConfiguration {
 
 	@ConditionalOnMissingBean
 	@Bean
-	public AsyncResultEndpointCallExecutableFactory<Object, Object> asyncResultEndpointCallExecutableFactory() {
-		return new AsyncResultEndpointCallExecutableFactory<>();
+	public AsyncResultEndpointCallExecutableFactory<Object, Object> asyncResultEndpointCallExecutableFactory(
+			@Qualifier("restifyAsyncTaskExecutor") AsyncTaskExecutor executor) {
+		return new AsyncResultEndpointCallExecutableFactory<>(executor);
 	}
 
 	@ConditionalOnMissingBean
 	@Bean
 	public DeferredResultEndpointCallExecutableFactory<Object, Object> deferredResultEndpointCallExecutableFactory(
 			@Qualifier("restifyAsyncTaskExecutor") AsyncTaskExecutor executor, RestifyConfigurationProperties properties) {
-		return new DeferredResultEndpointCallExecutableFactory<>(properties.getAsync().getTimeout(), executor);
+		return new DeferredResultEndpointCallExecutableFactory<>(executor, properties.getAsync().getTimeout());
 	}
 
 	@ConditionalOnMissingBean

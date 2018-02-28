@@ -28,51 +28,50 @@ package com.github.ljtfreitas.restify.http.client.call.async;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
-import com.github.ljtfreitas.restify.http.client.call.EndpointCall;
+import com.github.ljtfreitas.restify.http.client.call.EndpointResponseCall;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
 import com.github.ljtfreitas.restify.http.client.request.async.AsyncEndpointRequestExecutor;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
 
-class DefaultAsyncEndpointCall<T> implements AsyncEndpointCall<T> {
+class AsyncEndpointResponseCall<T> implements AsyncEndpointCall<EndpointResponse<T>> {
 
 	private final EndpointRequest endpointRequest;
 	private final AsyncEndpointRequestExecutor asyncEndpointRequestExecutor;
 	private final Executor executor;
-	private final EndpointCall<T> delegate;
+	private final EndpointResponseCall<T> delegate;
 
-	public DefaultAsyncEndpointCall(EndpointRequest endpointRequest, AsyncEndpointRequestExecutor endpointRequestExecutor,
-			Executor executor, EndpointCall<T> delegate) {
+	public AsyncEndpointResponseCall(EndpointRequest endpointRequest, AsyncEndpointRequestExecutor asyncEndpointRequestExecutor,
+			Executor executor) {
 		this.endpointRequest = endpointRequest;
-		this.asyncEndpointRequestExecutor = endpointRequestExecutor;
+		this.asyncEndpointRequestExecutor = asyncEndpointRequestExecutor;
 		this.executor = executor;
-		this.delegate = delegate;
+		this.delegate = new EndpointResponseCall<>(endpointRequest, asyncEndpointRequestExecutor);
 	}
 
 	@Override
-	public void executeAsync(EndpointCallCallback<T> callback) {
+	public EndpointResponse<T> execute() {
+		return delegate.execute();
+	}
+
+	@Override
+	public void executeAsync(EndpointCallCallback<EndpointResponse<T>> callback) {
 		new CompletableFutureAsyncEndpointCall<>(doExecuteAsync(), executor)
 			.executeAsync(callback);
 	}
 
 	@Override
-	public void executeAsync(EndpointCallSuccessCallback<T> success, EndpointCallFailureCallback failure) {
+	public void executeAsync(EndpointCallSuccessCallback<EndpointResponse<T>> success,
+			EndpointCallFailureCallback failure) {
 		new CompletableFutureAsyncEndpointCall<>(doExecuteAsync(), executor)
 			.executeAsync(success, failure);
 	}
 
 	@Override
-	public CompletableFuture<T> executeAsync() {
+	public CompletableFuture<EndpointResponse<T>> executeAsync() {
 		return doExecuteAsync();
 	}
 
-	@Override
-	public T execute() {
-		return delegate.execute();
-	}
-
-	private CompletableFuture<T> doExecuteAsync() {
-		CompletableFuture<EndpointResponse<T>> future = asyncEndpointRequestExecutor.executeAsync(endpointRequest);
-
-		return future.thenApplyAsync(response -> response.body(), executor);
+	private CompletableFuture<EndpointResponse<T>> doExecuteAsync() {
+		return asyncEndpointRequestExecutor.executeAsync(endpointRequest);
 	}
 }

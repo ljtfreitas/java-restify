@@ -25,10 +25,27 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.call.async;
 
+import java.util.concurrent.Executor;
+
+import com.github.ljtfreitas.restify.http.client.call.EndpointCall;
+import com.github.ljtfreitas.restify.http.client.call.EndpointCallFactory;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
+import com.github.ljtfreitas.restify.reflection.JavaType;
 
-public interface AsyncEndpointCallFactory {
+public class ExecutorAsyncEndpointCallFactory implements EndpointCallFactory {
 
-	public <T> AsyncEndpointCall<T> create(EndpointRequest endpointRequest);
+	private final EndpointCallFactory endpointCallFactory;
+	private final Executor executor;
 
+	public ExecutorAsyncEndpointCallFactory(EndpointCallFactory endpointCallFactory, Executor executor) {
+		this.endpointCallFactory = endpointCallFactory;
+		this.executor = executor;
+	}
+
+	@Override
+	public <T> EndpointCall<T> createWith(EndpointRequest endpointRequest, JavaType returnType) {
+		EndpointCall<T> source = endpointCallFactory.createWith(endpointRequest, returnType);
+
+		return new ExecutorAsyncEndpointCall<>(source, executor);
+	}
 }

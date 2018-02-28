@@ -5,11 +5,10 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyVararg;
-import static org.mockito.Matchers.notNull;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.util.concurrent.Executor;
+import java.util.concurrent.CompletableFuture;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -19,7 +18,6 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import com.github.ljtfreitas.restify.http.client.call.EndpointCall;
 import com.github.ljtfreitas.restify.http.client.call.async.AsyncEndpointCall;
-import com.github.ljtfreitas.restify.http.client.call.async.AsyncEndpointCallFactory;
 import com.github.ljtfreitas.restify.http.client.call.async.EndpointCallCallback;
 import com.github.ljtfreitas.restify.http.client.call.async.EndpointCallFailureCallback;
 import com.github.ljtfreitas.restify.http.client.call.async.EndpointCallSuccessCallback;
@@ -38,13 +36,25 @@ import com.github.ljtfreitas.restify.reflection.SimpleParameterizedType;
 public class AsyncCallbackEndpointCallExecutableFactoryTest {
 
 	@Mock
-	private AsyncEndpointCallFactory asyncEndpointCallFactoryMock;
-
-	@Mock
 	private AsyncEndpointCall<String> asyncEndpointCall;
 
 	@Mock
 	private EndpointCallExecutable<String, String> delegate;
+
+	@Mock
+	private EndpointCallSuccessCallback<String> successCallback;
+
+	@Mock
+	private EndpointCallFailureCallback failureCallback;
+
+	@Mock
+	private EndpointCallCallback<String> singleCallback;
+
+	@Mock
+	private EndpointResponseCallback<String> responseSuccessCallback;
+
+	@Mock
+	private EndpointResponseFailureCallback responseFailureCallback;
 
 	private AsyncCallbackEndpointCallExecutableFactory<String, String> factory;
 
@@ -60,19 +70,21 @@ public class AsyncCallbackEndpointCallExecutableFactoryTest {
 
 	private EndpointMethod asyncEndpointMethodWithResponseFailureCallback;
 
-	@SuppressWarnings("unchecked")
+	private String asyncResult;
+
 	@Before
 	public void setup() throws Exception {
-		factory = new AsyncCallbackEndpointCallExecutableFactory<>(r -> r.run(), asyncEndpointCallFactoryMock);
-
-		when(asyncEndpointCallFactoryMock.create(notNull(EndpointCall.class), notNull(Executor.class)))
-			.thenReturn(asyncEndpointCall);
+		factory = new AsyncCallbackEndpointCallExecutableFactory<>(r -> r.run());
 
 		when(delegate.execute(any(), anyVararg()))
 			.then((invocation) -> invocation.getArgumentAt(0, EndpointCall.class).execute());
 
 		when(delegate.returnType())
 			.thenReturn(JavaType.of(String.class));
+
+		asyncResult = "async result";
+
+		when(asyncEndpointCall.executeAsync()).thenReturn(CompletableFuture.completedFuture(asyncResult));
 
 		asyncEndpointMethodWithSuccessCallback = createEndpointMethodWithSuccessCallback();
 		asyncEndpointMethodWithFailureCallback = createEndpointMethodWithFailureCallback();
@@ -172,101 +184,82 @@ public class AsyncCallbackEndpointCallExecutableFactoryTest {
 		assertEquals(JavaType.of(String.class), factory.returnType(asyncEndpointMethodWithSingleCallback));
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test
 	public void shouldCreateExecutableFromEndpointRunnableAsyncMethodWithSuccessCallbackParameter() {
-		EndpointCallExecutable<Void, String> executable = factory.create(asyncEndpointMethodWithSuccessCallback, delegate);
+		AsyncEndpointCallExecutable<Void, String> executable = factory.createAsync(asyncEndpointMethodWithSuccessCallback, delegate);
 
-		String result = "async result";
-		SimpleEndpointCallSuccessCallback callbackArgument = new SimpleEndpointCallSuccessCallback();
+		asyncResult = "async result";
 
-		executable.execute(() -> result, new Object[] { callbackArgument });
+		executable.executeAsync(asyncEndpointCall, new Object[] { successCallback });
 
 		assertEquals(JavaType.of(String.class), executable.returnType());
 
-		verify(asyncEndpointCallFactoryMock).create(notNull(EndpointCall.class), notNull(Executor.class));
-		verify(asyncEndpointCall).execute(callbackArgument, null);
+		verify(successCallback).onSuccess(asyncResult);
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test
 	public void shouldCreateExecutableFromEndpointRunnableAsyncMethodWithFailureCallbackParameter() {
-		EndpointCallExecutable<Void, String> executable = factory.create(asyncEndpointMethodWithFailureCallback, delegate);
+		AsyncEndpointCallExecutable<Void, String> executable = factory.createAsync(asyncEndpointMethodWithFailureCallback, delegate);
 
-		String result = "async result";
-		SimpleEndpointCallFailureCallback callbackArgument = new SimpleEndpointCallFailureCallback();
+		RuntimeException exception = new RuntimeException("ooops");
 
-		executable.execute(() -> result, new Object[]{callbackArgument});
+		CompletableFuture<String> future = new CompletableFuture<>();
+		future.completeExceptionally(exception);
+		when(asyncEndpointCall.executeAsync()).thenReturn(future);
+
+		executable.executeAsync(asyncEndpointCall, new Object[] { failureCallback });
 
 		assertEquals(JavaType.of(String.class), executable.returnType());
 
-		verify(asyncEndpointCallFactoryMock).create(notNull(EndpointCall.class), notNull(Executor.class));
-		verify(asyncEndpointCall).execute(null, callbackArgument);
+		verify(failureCallback).onFailure(exception);
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test
 	public void shouldCreateExecutableFromEndpointRunnableAsyncMethodWithSingleCallbackParameter() {
-		EndpointCallExecutable<Void, String> executable = factory.create(asyncEndpointMethodWithSingleCallback, delegate);
+		AsyncEndpointCallExecutable<Void, String> executable = factory.createAsync(asyncEndpointMethodWithSingleCallback, delegate);
 
-		String result = "async result";
-		SimpleEndpointCallCallback callbackArgument = new SimpleEndpointCallCallback();
-
-		executable.execute(() -> result, new Object[]{callbackArgument});
+		executable.executeAsync(asyncEndpointCall, new Object[] { singleCallback });
 
 		assertEquals(JavaType.of(String.class), executable.returnType());
 
-		verify(asyncEndpointCallFactoryMock).create(notNull(EndpointCall.class), notNull(Executor.class));
-		verify(asyncEndpointCall).execute(callbackArgument, callbackArgument);
+		verify(singleCallback).onSuccess(asyncResult);
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test
 	public void shouldCreateExecutableFromEndpointRunnableAsyncMethodWithMultiplesCallbackParameters() {
-		EndpointCallExecutable<Void, String> executable = factory.create(asyncEndpointMethodWithMultiplesCallbacks, delegate);
+		AsyncEndpointCallExecutable<Void, String> executable = factory.createAsync(asyncEndpointMethodWithMultiplesCallbacks, delegate);
 
-		String result = "async result";
-		SimpleEndpointCallSuccessCallback successCallbackArgument = new SimpleEndpointCallSuccessCallback();
-		SimpleEndpointCallFailureCallback failureCallbackArgument = new SimpleEndpointCallFailureCallback();
+		executable.executeAsync(asyncEndpointCall, new Object[] { successCallback, failureCallback });
 
-		executable.execute(() -> result, new Object[]{successCallbackArgument, failureCallbackArgument});
-
-		verify(asyncEndpointCallFactoryMock).create(notNull(EndpointCall.class), notNull(Executor.class));
-		verify(asyncEndpointCall).execute(successCallbackArgument, failureCallbackArgument);
-
-		assertEquals(JavaType.of(String.class), executable.returnType());
+		verify(successCallback).onSuccess(asyncResult);
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test
 	public void shouldCreateExecutableFromEndpointRunnableAsyncMethodWithResponseCallbackParameter() {
-		EndpointCallExecutable<Void, String> executable = factory.create(asyncEndpointMethodWithResponseCallback, delegate);
+		AsyncEndpointCallExecutable<Void, String> executable = factory.createAsync(asyncEndpointMethodWithResponseCallback, delegate);
 
-		String result = "async result";
-		SimpleEndpointResponseCallback callbackArgument = new SimpleEndpointResponseCallback();
-
-		executable.execute(() -> result, new Object[]{callbackArgument});
+		executable.executeAsync(asyncEndpointCall, new Object[] { responseSuccessCallback });
 
 		assertEquals(JavaType.of(String.class), executable.returnType());
 
-		verify(asyncEndpointCallFactoryMock).create(notNull(EndpointCall.class), notNull(Executor.class));
-		verify(asyncEndpointCall).execute(callbackArgument, callbackArgument);
+		verify(responseSuccessCallback).onSuccess(asyncResult);
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test
 	public void shouldCreateExecutableFromEndpointRunnableAsyncMethodWithResponseFailureCallbackParameter() {
-		EndpointCallExecutable<Void, String> executable = factory.create(asyncEndpointMethodWithResponseFailureCallback, delegate);
+		AsyncEndpointCallExecutable<Void, String> executable = factory.createAsync(asyncEndpointMethodWithResponseFailureCallback, delegate);
 
-		String result = "async result";
-		EndpointResponseFailureCallback callbackArgument = new EndpointResponseFailureCallback(){};
+		RuntimeException exception = new RuntimeException("ooops");
 
-		executable.execute(() -> result, new Object[]{callbackArgument});
+		CompletableFuture<String> future = new CompletableFuture<>();
+		future.completeExceptionally(exception);
+		when(asyncEndpointCall.executeAsync()).thenReturn(future);
+
+		executable.executeAsync(asyncEndpointCall, new Object[] { responseFailureCallback });
 
 		assertEquals(JavaType.of(String.class), executable.returnType());
 
-		verify(asyncEndpointCallFactoryMock).create(notNull(EndpointCall.class), notNull(Executor.class));
-		verify(asyncEndpointCall).execute(null, callbackArgument);
+		verify(responseFailureCallback).onFailure(exception);
 	}
 
 	interface SomeType {
@@ -284,33 +277,5 @@ public class AsyncCallbackEndpointCallExecutableFactoryTest {
 		void asyncWithEndpointResponseFailureCallback(EndpointResponseFailureCallback callback);
 
 		String sync();
-	}
-
-	private class SimpleEndpointCallCallback implements EndpointCallCallback<String> {
-		@Override
-		public void onSuccess(String response) {
-		}
-
-		@Override
-		public void onFailure(Throwable throwable) {
-		}
-	}
-
-	private class SimpleEndpointCallSuccessCallback implements EndpointCallSuccessCallback<String> {
-		@Override
-		public void onSuccess(String response) {
-		}
-	}
-
-	private class SimpleEndpointCallFailureCallback implements EndpointCallFailureCallback {
-		@Override
-		public void onFailure(Throwable throwable) {
-		}
-	}
-
-	private class SimpleEndpointResponseCallback extends EndpointResponseCallback<String> {
-		@Override
-		public void onSuccess(String response) {
-		}
 	}
 }

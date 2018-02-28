@@ -25,14 +25,15 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.spring.client.call.exec;
 
-import com.github.ljtfreitas.restify.http.client.call.EndpointCall;
+import com.github.ljtfreitas.restify.http.client.call.async.AsyncEndpointCall;
 import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutable;
+import com.github.ljtfreitas.restify.http.client.call.exec.async.AsyncEndpointCallExecutable;
 import com.github.ljtfreitas.restify.reflection.JavaType;
 
 import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Scheduler;
 
-class MonoEndpointCallExecutable<T, O> implements EndpointCallExecutable<Mono<T>, O> {
+class MonoEndpointCallExecutable<T, O> implements AsyncEndpointCallExecutable<Mono<T>, O> {
 
 	private final EndpointCallExecutable<T, O> delegate;
 	private final Scheduler scheduler;
@@ -48,8 +49,9 @@ class MonoEndpointCallExecutable<T, O> implements EndpointCallExecutable<Mono<T>
 	}
 
 	@Override
-	public Mono<T> execute(EndpointCall<O> call, Object[] args) {
-		return Mono.fromCallable(() -> delegate.execute(call, args))
-				.subscribeOn(scheduler);
+	public Mono<T> executeAsync(AsyncEndpointCall<O> call, Object[] args) {
+		return Mono.fromFuture(call.executeAsync())
+			.subscribeOn(scheduler)
+				.map(o -> delegate.execute(() -> o, args));
 	}
 }

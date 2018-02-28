@@ -1,4 +1,4 @@
-package com.github.ljtfreitas.restify.http.client.call.exec.jdk;
+package com.github.ljtfreitas.restify.http.client.call.exec.async;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -19,11 +19,10 @@ import org.mockito.runners.MockitoJUnitRunner;
 import com.github.ljtfreitas.restify.http.client.call.EndpointCall;
 import com.github.ljtfreitas.restify.http.client.call.async.AsyncEndpointCall;
 import com.github.ljtfreitas.restify.http.client.call.exec.SimpleEndpointMethod;
-import com.github.ljtfreitas.restify.http.client.call.exec.async.AsyncEndpointCallExecutable;
 import com.github.ljtfreitas.restify.reflection.JavaType;
 
 @RunWith(MockitoJUnitRunner.class)
-public class CompletableFutureEndpointCallExecutableFactoryTest {
+public class AsyncEndpointCallObjectExecutableFactoryTest {
 
 	@Mock
 	private AsyncEndpointCallExecutable<String, String> delegate;
@@ -31,11 +30,11 @@ public class CompletableFutureEndpointCallExecutableFactoryTest {
 	@Mock
 	private AsyncEndpointCall<String> asyncEndpointCall;
 
-	private CompletableFutureEndpointCallExecutableFactory<String, String> factory;
+	private AsyncEndpointCallObjectExecutableFactory<String, String> factory;
 
 	@Before
 	public void setup() {
-		factory = new CompletableFutureEndpointCallExecutableFactory<>(r -> r.run());
+		factory = new AsyncEndpointCallObjectExecutableFactory<>(r -> r.run());
 
 		when(delegate.execute(any(), anyVararg()))
 			.then(invocation -> invocation.getArgumentAt(0, EndpointCall.class).execute());
@@ -45,48 +44,47 @@ public class CompletableFutureEndpointCallExecutableFactoryTest {
 	}
 
 	@Test
-	public void shouldSupportsWhenEndpointMethodReturnTypeIsCompletableFuture() throws Exception {
-		assertTrue(factory.supports(new SimpleEndpointMethod(SomeType.class.getMethod("future"))));
+	public void shouldSupportsWhenEndpointMethodReturnTypeIsAsyncEndpointCall() throws Exception {
+		assertTrue(factory.supports(new SimpleEndpointMethod(SomeType.class.getMethod("call"))));
 	}
 
 	@Test
-	public void shouldNotSupportsWhenEndpointMethodReturnTypeIsNotCompletableFuture() throws Exception {
+	public void shouldNotSupportsWhenEndpointMethodReturnTypeIsNotAsyncEndpointCall() throws Exception {
 		assertFalse(factory.supports(new SimpleEndpointMethod(SomeType.class.getMethod("string"))));
 	}
 
 	@Test
-	public void shouldReturnArgumentTypeOfCompletableFuture() throws Exception {
-		assertEquals(JavaType.of(String.class), factory.returnType(new SimpleEndpointMethod(SomeType.class.getMethod("future"))));
+	public void shouldReturnArgumentTypeOfAsyncEndpointCall() throws Exception {
+		assertEquals(JavaType.of(String.class), factory.returnType(new SimpleEndpointMethod(SomeType.class.getMethod("call"))));
 	}
 
 	@Test
-	public void shouldReturnObjectTypeWhenCompletableFutureIsNotParameterized() throws Exception {
-		assertEquals(JavaType.of(Object.class), factory.returnType(new SimpleEndpointMethod(SomeType.class.getMethod("dumbFuture"))));
+	public void shouldReturnObjectTypeWhenAsyncEndpointCallIsNotParameterized() throws Exception {
+		assertEquals(JavaType.of(Object.class), factory.returnType(new SimpleEndpointMethod(SomeType.class.getMethod("dumbCall"))));
 	}
 
 	@Test
-	public void shouldCreateExecutableFromEndpointMethodWithCompletableFutureReturnType() throws Exception {
-		AsyncEndpointCallExecutable<CompletableFuture<String>, String> executable = factory
-				.createAsync(new SimpleEndpointMethod(SomeType.class.getMethod("future")), delegate);
+	public void shouldCreateExecutableFromEndpointMethodWithAsyncEndpoinCallReturnType() throws Exception {
+		AsyncEndpointCallExecutable<AsyncEndpointCall<String>, String> executable = factory
+				.createAsync(new SimpleEndpointMethod(SomeType.class.getMethod("call")), delegate);
 
 		String result = "future result";
 
 		when(asyncEndpointCall.executeAsync()).thenReturn(CompletableFuture.completedFuture(result));
 
-		CompletableFuture<String> future = executable.executeAsync(asyncEndpointCall, null);
+		AsyncEndpointCall<String> output = executable.executeAsync(asyncEndpointCall, null);
 
-		assertEquals(result, future.get());
+		assertEquals(result, output.executeAsync().get());
 		assertEquals(delegate.returnType(), executable.returnType());
 
 		verify(delegate).execute(any(), anyVararg());
 	}
-
 	interface SomeType {
 
-		CompletableFuture<String> future();
+		AsyncEndpointCall<String> call();
 
 		@SuppressWarnings("rawtypes")
-		CompletableFuture dumbFuture();
+		AsyncEndpointCall dumbCall();
 
 		String string();
 	}

@@ -23,12 +23,33 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.http.client.call.async;
+package com.github.ljtfreitas.restify.http.client.call;
 
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
+import com.github.ljtfreitas.restify.http.client.request.EndpointRequestExecutor;
+import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
+import com.github.ljtfreitas.restify.reflection.JavaType;
 
-public interface AsyncEndpointCallFactory {
+public class DefaultEndpointCallFactory implements EndpointCallFactory {
 
-	public <T> AsyncEndpointCall<T> create(EndpointRequest endpointRequest);
+	private final EndpointRequestExecutor endpointRequestExecutor;
 
+	public DefaultEndpointCallFactory(EndpointRequestExecutor endpointRequestExecutor) {
+		this.endpointRequestExecutor = endpointRequestExecutor;
+	}
+
+	@Override
+	public <T> EndpointCall<T> createWith(EndpointRequest endpointRequest, JavaType returnType) {
+		if (returnType.is(EndpointResponse.class)) {
+			return endpointResponseCall(endpointRequest);
+
+		} else {
+			return new DefaultEndpointCall<>(endpointRequest, endpointRequestExecutor);
+		}
+	}
+
+	@SuppressWarnings("unchecked")
+	private <T> EndpointCall<T> endpointResponseCall(EndpointRequest endpointRequest) {
+		return (EndpointCall<T>) new EndpointResponseCall<>(endpointRequest, endpointRequestExecutor);
+	}
 }

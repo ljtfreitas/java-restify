@@ -27,16 +27,26 @@ package com.github.ljtfreitas.restify.http.spring.client.call.exec;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.concurrent.Executor;
 
 import org.springframework.scheduling.annotation.AsyncResult;
 
 import com.github.ljtfreitas.restify.http.client.call.EndpointCall;
+import com.github.ljtfreitas.restify.http.client.call.async.AsyncEndpointCall;
 import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutable;
-import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutableDecoratorFactory;
+import com.github.ljtfreitas.restify.http.client.call.exec.async.AsyncEndpointCallExecutable;
+import com.github.ljtfreitas.restify.http.client.call.exec.async.AsyncEndpointCallExecutableDecoratorFactory;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethod;
 import com.github.ljtfreitas.restify.reflection.JavaType;
+import com.github.ljtfreitas.restify.util.Tryable;
 
-public class AsyncResultEndpointCallExecutableFactory<T, O> implements EndpointCallExecutableDecoratorFactory<AsyncResult<T>, T, O> {
+public class AsyncResultEndpointCallExecutableFactory<T, O> implements AsyncEndpointCallExecutableDecoratorFactory<AsyncResult<T>, T, O> {
+
+	private final Executor executor;
+
+	public AsyncResultEndpointCallExecutableFactory(Executor executor) {
+		this.executor = executor;
+	}
 
 	@Override
 	public boolean supports(EndpointMethod endpointMethod) {
@@ -55,11 +65,11 @@ public class AsyncResultEndpointCallExecutableFactory<T, O> implements EndpointC
 	}
 
 	@Override
-	public EndpointCallExecutable<AsyncResult<T>, O> create(EndpointMethod endpointMethod, EndpointCallExecutable<T, O> executable) {
+	public AsyncEndpointCallExecutable<AsyncResult<T>, O> createAsync(EndpointMethod endpointMethod, EndpointCallExecutable<T, O> executable) {
 		return new AsyncResultEndpointCallExecutable(executable);
 	}
 
-	private class AsyncResultEndpointCallExecutable implements EndpointCallExecutable<AsyncResult<T>, O> {
+	private class AsyncResultEndpointCallExecutable implements AsyncEndpointCallExecutable<AsyncResult<T>, O> {
 
 		private final EndpointCallExecutable<T, O> delegate;
 
@@ -75,6 +85,21 @@ public class AsyncResultEndpointCallExecutableFactory<T, O> implements EndpointC
 		@Override
 		public AsyncResult<T> execute(EndpointCall<O> call, Object[] args) {
 			return new AsyncResult<>(delegate.execute(call, args));
+		}
+
+		@Override
+		public AsyncResult<T> executeAsync(AsyncEndpointCall<O> call, Object[] args) {
+			return Tryable.of(() -> call.executeAsync()
+				.thenApply(o -> delegate.execute(() -> o, args))
+					.handleAsync(this::handle, executor)
+						.get());
+		}
+
+		@SuppressWarnings("unchecked")
+		private AsyncResult<T> handle(T value, Throwable throwable) {
+			return value != null ?
+					(AsyncResult<T>) AsyncResult.forValue(value) :
+						(AsyncResult<T>) AsyncResult.forExecutionException(throwable);
 		}
 	}
 }

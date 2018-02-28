@@ -23,12 +23,12 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.http.client.call.async;
+package com.github.ljtfreitas.restify.http.client.call;
 
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
+import com.github.ljtfreitas.restify.reflection.JavaType;
 
-public interface AsyncEndpointCallFactory {
+public interface EndpointCallFactory {
 
-	public <T> AsyncEndpointCall<T> create(EndpointRequest endpointRequest);
-
+	public <T> EndpointCall<T> createWith(EndpointRequest endpointRequest, JavaType returnType);
 }

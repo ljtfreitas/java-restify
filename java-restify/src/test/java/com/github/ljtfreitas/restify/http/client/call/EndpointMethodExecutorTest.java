@@ -7,6 +7,8 @@ import static org.mockito.Matchers.notNull;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.net.URI;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -16,6 +18,8 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutable;
 import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutables;
+import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
+import com.github.ljtfreitas.restify.http.client.request.EndpointRequestFactory;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethod;
 import com.github.ljtfreitas.restify.reflection.JavaType;
 
@@ -23,32 +27,47 @@ import com.github.ljtfreitas.restify.reflection.JavaType;
 public class EndpointMethodExecutorTest {
 
 	@Mock
-	private EndpointCallExecutables endpointCallExecutablesMock;
+	private EndpointRequestFactory endpointRequestFactory;
 
 	@Mock
-	private EndpointCallExecutable<Object, Object> endpointCallExecutableMock;
+	private EndpointCallExecutables endpointCallExecutables;
 
 	@Mock
-	private EndpointCallFactory endpointCallFactoryMock;
+	private EndpointCallExecutable<Object, Object> executable;
+
+	@Mock
+	private EndpointCallFactory endpointCallFactory;
 
 	@InjectMocks
 	private EndpointMethodExecutor endpointMethodExecutor;
 
 	private EndpointMethod endpointMethod;
 
+	private EndpointRequest request;
+
 	@Before
 	public void setup() throws NoSuchMethodException, SecurityException {
 		endpointMethod = new EndpointMethod(SomeType.class.getMethod("method"), "http://my.api.com/", "GET");
 
-		when(endpointCallExecutablesMock.of(endpointMethod))
-			.thenReturn(endpointCallExecutableMock);
+		when(endpointCallExecutables.of(endpointMethod))
+			.thenReturn(executable);
+
+		JavaType returnType = JavaType.of(String.class);
+
+		when(executable.returnType())
+			.thenReturn(returnType);
+
+		request = new EndpointRequest(URI.create("http://my.api.com"), "GET");
+
+		when(endpointRequestFactory.createWith(eq(endpointMethod), any(), eq(returnType)))
+			.thenReturn(request);
 
 		SimpleEndpointMethodCall call = new SimpleEndpointMethodCall("endpoint result");
 
-		when(endpointCallFactoryMock.createWith(notNull(EndpointMethod.class), any(), notNull(JavaType.class)))
+		when(endpointCallFactory.createWith(request, returnType))
 			.thenReturn(call);
 
-		when(endpointCallExecutableMock.execute(any(), any(Object[].class)))
+		when(executable.execute(any(), any(Object[].class)))
 			.then(i -> i.getArgumentAt(0, EndpointCall.class).execute());
 	}
 
@@ -57,18 +76,13 @@ public class EndpointMethodExecutorTest {
 	public void shouldExecuteEndpointMethod() throws Exception {
 		Object[] args = new Object[]{"arg"};
 
-		JavaType returnType = JavaType.of(String.class);
-
-		when(endpointCallExecutableMock.returnType())
-			.thenReturn(returnType);
-
 		Object result = endpointMethodExecutor.execute(endpointMethod, args);
 
 		assertEquals("endpoint result", result);
 
-		verify(endpointCallExecutablesMock).of(endpointMethod);
-		verify(endpointCallFactoryMock).createWith(notNull(EndpointMethod.class), any(), notNull(JavaType.class));
-		verify(endpointCallExecutableMock).execute(notNull(EndpointCall.class), eq(args));
+		verify(endpointCallExecutables).of(endpointMethod);
+		verify(endpointCallFactory).createWith(request, endpointMethod.returnType());
+		verify(executable).execute(notNull(EndpointCall.class), eq(args));
 	}
 
 	interface SomeType {

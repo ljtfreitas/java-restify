@@ -23,29 +23,15 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.http.client.call;
+package com.github.ljtfreitas.restify.http.client.request.async;
+
+import java.util.concurrent.CompletableFuture;
 
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequestExecutor;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
-import com.github.ljtfreitas.restify.http.client.response.EndpointResponseException;
 
-class EndpointResponseCall<T> implements EndpointCall<EndpointResponse<T>> {
+public interface AsyncEndpointRequestExecutor extends EndpointRequestExecutor {
 
-	private final EndpointRequest endpointRequest;
-	private final EndpointRequestExecutor endpointRequestExecutor;
-
-	public EndpointResponseCall(EndpointRequest endpointRequest, EndpointRequestExecutor endpointRequestExecutor) {
-		this.endpointRequest = endpointRequest;
-		this.endpointRequestExecutor = endpointRequestExecutor;
-	}
-
-	@Override
-	public EndpointResponse<T> execute() {
-		try {
-			return endpointRequestExecutor.execute(endpointRequest);
-		} catch (EndpointResponseException e) {
-			return EndpointResponse.error(e.status(), e.headers(), e.bodyAsString());
-		}
-	}
+	public <T> CompletableFuture<EndpointResponse<T>> executeAsync(EndpointRequest endpointRequest);
 }

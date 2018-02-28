@@ -27,33 +27,21 @@ package com.github.ljtfreitas.restify.http.client.call.exec.async;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 
-import com.github.ljtfreitas.restify.http.client.call.EndpointCall;
 import com.github.ljtfreitas.restify.http.client.call.async.AsyncEndpointCall;
-import com.github.ljtfreitas.restify.http.client.call.async.AsyncEndpointCallFactory;
+import com.github.ljtfreitas.restify.http.client.call.async.CompletableFutureAsyncEndpointCall;
 import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutable;
-import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutableDecoratorFactory;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethod;
 import com.github.ljtfreitas.restify.reflection.JavaType;
 
-public class AsyncEndpointCallExecutableFactory<T, O> implements EndpointCallExecutableDecoratorFactory<AsyncEndpointCall<T>, T, O> {
+public class AsyncEndpointCallObjectExecutableFactory<T, O> implements AsyncEndpointCallExecutableDecoratorFactory<AsyncEndpointCall<T>, T, O> {
 
 	private final Executor executor;
-	private final AsyncEndpointCallFactory asyncEndpointCallFactory;
 
-	public AsyncEndpointCallExecutableFactory() {
-		this(Executors.newCachedThreadPool());
-	}
-
-	public AsyncEndpointCallExecutableFactory(Executor executor) {
-		this(executor, new AsyncEndpointCallFactory());
-	}
-
-	public AsyncEndpointCallExecutableFactory(Executor executor, AsyncEndpointCallFactory asyncEndpointCallFactory) {
+	public AsyncEndpointCallObjectExecutableFactory(Executor executor) {
 		this.executor = executor;
-		this.asyncEndpointCallFactory = asyncEndpointCallFactory;
 	}
 
 	@Override
@@ -73,15 +61,15 @@ public class AsyncEndpointCallExecutableFactory<T, O> implements EndpointCallExe
 	}
 
 	@Override
-	public EndpointCallExecutable<AsyncEndpointCall<T>, O> create(EndpointMethod endpointMethod, EndpointCallExecutable<T, O> executable) {
-		return new AsyncEndpointCallExecutable(executable);
+	public AsyncEndpointCallExecutable<AsyncEndpointCall<T>, O> createAsync(EndpointMethod endpointMethod, EndpointCallExecutable<T, O> executable) {
+		return new AsyncEndpointCallExecutableAdapter(executable);
 	}
 
-	private class AsyncEndpointCallExecutable implements EndpointCallExecutable<AsyncEndpointCall<T>, O> {
+	private class AsyncEndpointCallExecutableAdapter implements AsyncEndpointCallExecutable<AsyncEndpointCall<T>, O> {
 
 		private final EndpointCallExecutable<T, O> delegate;
 
-		private AsyncEndpointCallExecutable(EndpointCallExecutable<T, O> executable) {
+		private AsyncEndpointCallExecutableAdapter(EndpointCallExecutable<T, O> executable) {
 			this.delegate = executable;;
 		}
 
@@ -91,8 +79,11 @@ public class AsyncEndpointCallExecutableFactory<T, O> implements EndpointCallExe
 		}
 
 		@Override
-		public AsyncEndpointCall<T> execute(EndpointCall<O> call, Object[] args) {
-			return asyncEndpointCallFactory.create(() -> delegate.execute(call, args), executor);
+		public AsyncEndpointCall<T> executeAsync(AsyncEndpointCall<O> call, Object[] args) {
+			CompletableFuture<T> future = call.executeAsync()
+					.thenApply(o -> delegate.execute(() -> o, args));
+
+			return new CompletableFutureAsyncEndpointCall<>(future, executor);
 		}
 	}
 }

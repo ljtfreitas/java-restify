@@ -4,8 +4,11 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Matchers.anyVararg;
+import static org.mockito.Matchers.notNull;
 import static org.mockito.Mockito.when;
+
+import java.util.concurrent.CompletableFuture;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -14,7 +17,9 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import com.github.ljtfreitas.restify.http.client.call.EndpointCall;
+import com.github.ljtfreitas.restify.http.client.call.async.AsyncEndpointCall;
 import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutable;
+import com.github.ljtfreitas.restify.http.client.call.exec.async.AsyncEndpointCallExecutable;
 import com.github.ljtfreitas.restify.reflection.JavaType;
 
 import reactor.core.publisher.Mono;
@@ -29,17 +34,28 @@ public class MonoEndpointCallExecutableFactoryTest {
 	private EndpointCallExecutable<String, String> delegate;
 
 	@Mock
-	private EndpointCall<String> endpointCallMock;
+	private AsyncEndpointCall<String> asyncEndpointCall;
 
 	private MonoEndpointCallExecutableFactory<String, String> factory;
 
 	private Scheduler scheduler;
 
+	private String asyncResult;
+
+	@SuppressWarnings("unchecked")
 	@Before
 	public void setup() {
 		scheduler = Schedulers.single();
 
 		factory = new MonoEndpointCallExecutableFactory<>(scheduler);
+
+		when(delegate.execute(notNull(EndpointCall.class), anyVararg()))
+			.then(invocation -> invocation.getArgumentAt(0, EndpointCall.class).execute());
+
+		asyncResult = "mono result";
+
+		when(asyncEndpointCall.executeAsync())
+			.thenReturn(CompletableFuture.completedFuture(asyncResult));
 	}
 
 	@Test
@@ -53,7 +69,7 @@ public class MonoEndpointCallExecutableFactoryTest {
 	}
 
 	@Test
-	public void shouldReturnArgumentTypeOfMono() throws Exception {
+	public void shouldReturnArOgumentTypeOfMono() throws Exception {
 		assertEquals(JavaType.of(String.class), factory.returnType(new SimpleEndpointMethod(SomeType.class.getMethod("mono"))));
 	}
 
@@ -64,45 +80,39 @@ public class MonoEndpointCallExecutableFactoryTest {
 
 	@Test
 	public void shouldCreateExecutableFromEndpointMethodWithMonoReturnType() throws Exception {
-		EndpointCallExecutable<Mono<String>, String> executable = factory
-				.create(new SimpleEndpointMethod(SomeType.class.getMethod("mono")), delegate);
+		AsyncEndpointCallExecutable<Mono<String>, String> executable = factory
+				.createAsync(new SimpleEndpointMethod(SomeType.class.getMethod("mono")), delegate);
 
-		String result = "mono result";
-
-		when(delegate.execute(endpointCallMock, null))
-			.thenReturn(result);
-
-		Mono<String> mono = executable.execute(endpointCallMock, null);
+		Mono<String> mono = executable.executeAsync(asyncEndpointCall, null);
 
 		assertNotNull(mono);
 
 		StepVerifier.create(mono)
-			.expectNext(result)
+			.expectNext(asyncResult)
 			.expectComplete()
 			.verify();
-
-		verify(delegate).execute(endpointCallMock, null);
 	}
 
 	@Test
 	public void shouldSubscribeErrorOnSingleWhenCreatedExecutableWithRxJava2SingleReturnTypeThrowException() throws Exception {
-		EndpointCallExecutable<Mono<String>, String> executable = factory
-				.create(new SimpleEndpointMethod(SomeType.class.getMethod("mono")), delegate);
+		AsyncEndpointCallExecutable<Mono<String>, String> executable = factory
+				.createAsync(new SimpleEndpointMethod(SomeType.class.getMethod("mono")), delegate);
 
 		RuntimeException exception = new RuntimeException();
 
-		when(delegate.execute(endpointCallMock, null))
-			.thenThrow(exception);
+		CompletableFuture<String> future = new CompletableFuture<>();
+		future.completeExceptionally(exception);
 
-		Mono<String> mono = executable.execute(endpointCallMock, null);
+		when(asyncEndpointCall.executeAsync())
+			.thenReturn(future);
+
+		Mono<String> mono = executable.executeAsync(asyncEndpointCall, null);
 
 		assertNotNull(mono);
 
 		StepVerifier.create(mono)
 			.expectError()
 			.verify();
-
-		verify(delegate).execute(endpointCallMock, null);
 	}
 
 	interface SomeType {

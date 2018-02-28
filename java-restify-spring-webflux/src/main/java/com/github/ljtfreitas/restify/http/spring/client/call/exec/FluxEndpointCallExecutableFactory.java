@@ -28,9 +28,10 @@ package com.github.ljtfreitas.restify.http.spring.client.call.exec;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 
-import com.github.ljtfreitas.restify.http.client.call.EndpointCall;
+import com.github.ljtfreitas.restify.http.client.call.async.AsyncEndpointCall;
 import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutable;
-import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutableDecoratorFactory;
+import com.github.ljtfreitas.restify.http.client.call.exec.async.AsyncEndpointCallExecutable;
+import com.github.ljtfreitas.restify.http.client.call.exec.async.AsyncEndpointCallExecutableDecoratorFactory;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethod;
 import com.github.ljtfreitas.restify.reflection.JavaType;
 
@@ -39,7 +40,7 @@ import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
 
-public class FluxEndpointCallExecutableFactory<T, O> implements EndpointCallExecutableDecoratorFactory<Flux<T>, T, O> {
+public class FluxEndpointCallExecutableFactory<T, O> implements AsyncEndpointCallExecutableDecoratorFactory<Flux<T>, T, O> {
 
 	public final Scheduler scheduler;
 
@@ -68,11 +69,11 @@ public class FluxEndpointCallExecutableFactory<T, O> implements EndpointCallExec
 	}
 
 	@Override
-	public EndpointCallExecutable<Flux<T>, O> create(EndpointMethod endpointMethod, EndpointCallExecutable<T, O> delegate) {
-		return new FluxEndpointCallExecutable(delegate);
+	public AsyncEndpointCallExecutable<Flux<T>, O> createAsync(EndpointMethod endpointMethod, EndpointCallExecutable<T, O> executable) {
+		return new FluxEndpointCallExecutable(executable);
 	}
 
-	private class FluxEndpointCallExecutable implements EndpointCallExecutable<Flux<T>, O> {
+	private class FluxEndpointCallExecutable implements AsyncEndpointCallExecutable<Flux<T>, O> {
 
 		private final MonoEndpointCallExecutable<T, O> delegate;
 
@@ -86,12 +87,12 @@ public class FluxEndpointCallExecutableFactory<T, O> implements EndpointCallExec
 		}
 
 		@Override
-		public Flux<T> execute(EndpointCall<O> call, Object[] args) {
-			Mono<T> mono = delegate.execute(call, args);
+		public Flux<T> executeAsync(AsyncEndpointCall<O> call, Object[] args) {
+			Mono<T> mono = delegate.executeAsync(call, args);
 
 			return mono
 				.flux()
-				.subscribeOn(scheduler);
+					.subscribeOn(scheduler);
 		}
 	}
 }

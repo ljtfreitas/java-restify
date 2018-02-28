@@ -29,21 +29,24 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.concurrent.Executors;
+import java.util.concurrent.Future;
 
-import com.github.ljtfreitas.restify.http.client.call.EndpointCall;
+import com.github.ljtfreitas.restify.http.client.call.async.AsyncEndpointCall;
 import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutable;
-import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutableDecoratorFactory;
+import com.github.ljtfreitas.restify.http.client.call.exec.async.AsyncEndpointCallExecutable;
+import com.github.ljtfreitas.restify.http.client.call.exec.async.AsyncEndpointCallExecutableDecoratorFactory;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethod;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethodParameter;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethodParameters;
 import com.github.ljtfreitas.restify.reflection.JavaType;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
+import com.google.common.util.concurrent.JdkFutureAdapters;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
 
-public class ListenableFutureCallbackEndpointCallExecutableFactory<T, O> implements EndpointCallExecutableDecoratorFactory<Void, T, O> {
+public class ListenableFutureCallbackEndpointCallExecutableFactory<T, O> implements AsyncEndpointCallExecutableDecoratorFactory<Void, T, O> {
 
 	private final ListeningExecutorService executorService;
 
@@ -76,11 +79,11 @@ public class ListenableFutureCallbackEndpointCallExecutableFactory<T, O> impleme
 	}
 
 	@Override
-	public EndpointCallExecutable<Void, O> create(EndpointMethod endpointMethod, EndpointCallExecutable<T, O> executable) {
+	public AsyncEndpointCallExecutable<Void, O> createAsync(EndpointMethod endpointMethod, EndpointCallExecutable<T, O> executable) {
 		return new ListenableFutureCallbackEndpointMethodExecutable(endpointMethod.parameters().callbacks(), executable);
 	}
 
-	private class ListenableFutureCallbackEndpointMethodExecutable implements EndpointCallExecutable<Void, O> {
+	private class ListenableFutureCallbackEndpointMethodExecutable implements AsyncEndpointCallExecutable<Void, O> {
 
 		private final Collection<EndpointMethodParameter> callbackMethodParameters;
 		private final EndpointCallExecutable<T, O> delegate;
@@ -97,11 +100,14 @@ public class ListenableFutureCallbackEndpointCallExecutableFactory<T, O> impleme
 		}
 
 		@Override
-		public Void execute(EndpointCall<O> call, Object[] args) {
+		public Void executeAsync(AsyncEndpointCall<O> call, Object[] args) {
 			FutureCallback<T> callback = callbackParameter(args);
 
-			ListenableFuture<T> future = executorService.submit(() -> delegate.execute(call, args));
-			Futures.addCallback(future, callback, executorService);
+			Future<T> future = call.executeAsync()
+					.thenApplyAsync(o -> delegate.execute(() -> o, args), executorService);
+
+			ListenableFuture<T> listenableFuture = JdkFutureAdapters.listenInPoolThread(future, executorService);
+			Futures.addCallback(listenableFuture, callback, executorService);
 
 			return null;
 		}

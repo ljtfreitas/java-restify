@@ -26,14 +26,55 @@
 package com.github.ljtfreitas.restify.http.client.call.async;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 import com.github.ljtfreitas.restify.http.client.call.EndpointCall;
 
-public interface AsyncEndpointCall<T> extends EndpointCall<T> {
+public class ExecutorAsyncEndpointCall<T> implements AsyncEndpointCall<T> {
 
-	public void executeAsync(EndpointCallCallback<T> callback);
+	private static final Executor DEFAULT_EXECUTOR = Executors.newCachedThreadPool();
 
-	public void executeAsync(EndpointCallSuccessCallback<T> success, EndpointCallFailureCallback failure);
+	private final Executor executor;
+	private final EndpointCall<T> source;
 
-	public CompletableFuture<T> executeAsync();
+	public ExecutorAsyncEndpointCall(EndpointCall<T> source) {
+		this(source, DEFAULT_EXECUTOR);
+	}
+
+	public ExecutorAsyncEndpointCall(EndpointCall<T> source, Executor executor) {
+		this.source = source;
+		this.executor = executor;
+	}
+
+	@Override
+	public void executeAsync(EndpointCallCallback<T> callback) {
+		new CompletableFutureAsyncEndpointCall<>(doExecuteAsync(), executor)
+			.executeAsync(callback);
+	}
+
+	@Override
+	public void executeAsync(EndpointCallSuccessCallback<T> success, EndpointCallFailureCallback failure) {
+		new CompletableFutureAsyncEndpointCall<>(doExecuteAsync(), executor)
+			.executeAsync(success, failure);
+	}
+
+	@Override
+	public CompletableFuture<T> executeAsync() {
+		return doExecuteAsync();
+	}
+
+	@Override
+	public T execute() {
+		return source.execute();
+	}
+
+	private CompletableFuture<T> doExecuteAsync() {
+		return CompletableFuture
+				.supplyAsync(() -> source.execute(), executor);
+	}
+
+	public static Executor pool() {
+		return DEFAULT_EXECUTOR;
+	}
 }

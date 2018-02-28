@@ -11,7 +11,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
-public class DefaultAsyncEndpointCallTest {
+public class ExecutorAsyncEndpointCallTest {
 
 	@Mock
 	private EndpointCallCallback<String> callback;
@@ -25,13 +25,13 @@ public class DefaultAsyncEndpointCallTest {
 	@Captor
 	private ArgumentCaptor<Throwable> throwableCaptor;
 
-	private DefaultAsyncEndpointCall<String> asyncCall;
+	private ExecutorAsyncEndpointCall<String> asyncCall;
 
 	@Test
 	public void shouldCallSuccessCallbackOnEndpointCallReturnsSomeResult() throws Exception {
-		asyncCall = new DefaultAsyncEndpointCall<>(r -> r.run(), () -> "result");
+		asyncCall = new ExecutorAsyncEndpointCall<>(() -> "result", r -> r.run());
 
-		asyncCall.execute(callback);
+		asyncCall.executeAsync(callback);
 
 		verify(callback).onSuccess("result");
 	}
@@ -40,9 +40,9 @@ public class DefaultAsyncEndpointCallTest {
 	public void shouldCallFailureCallbackWhenEndpointCallThrowException() throws Exception {
 		RuntimeException exception = new RuntimeException("some exception");
 
-		asyncCall = new DefaultAsyncEndpointCall<>(r -> r.run(), () -> {throw exception;});
+		asyncCall = new ExecutorAsyncEndpointCall<>(() -> {throw exception;}, r -> r.run());
 
-		asyncCall.execute(callback);
+		asyncCall.executeAsync(callback);
 
 		verify(callback).onFailure(throwableCaptor.capture());
 
@@ -51,9 +51,9 @@ public class DefaultAsyncEndpointCallTest {
 
 	@Test
 	public void shouldCallSuccessCallbackOnEndpointCallReturnsSomeResultWhenExecutingWithTwoCallbacks() throws Exception {
-		asyncCall = new DefaultAsyncEndpointCall<>(r -> r.run(), () -> "result");
+		asyncCall = new ExecutorAsyncEndpointCall<>(() -> "result", r -> r.run());
 
-		asyncCall.execute(successCallback, null);
+		asyncCall.executeAsync(successCallback, null);
 
 		verify(successCallback).onSuccess("result");
 	}
@@ -62,9 +62,9 @@ public class DefaultAsyncEndpointCallTest {
 	public void shouldCallFailureCallbackOnEndpointCallThrowExceptionWhenExecutingWithTwoCallbacks() throws Exception {
 		RuntimeException exception = new RuntimeException("some exception");
 
-		asyncCall = new DefaultAsyncEndpointCall<>(r -> r.run(), () -> {throw exception;});
+		asyncCall = new ExecutorAsyncEndpointCall<>(() -> {throw exception;}, r -> r.run());
 
-		asyncCall.execute(null, failureCallback);
+		asyncCall.executeAsync(null, failureCallback);
 
 		verify(failureCallback).onFailure(throwableCaptor.capture());
 

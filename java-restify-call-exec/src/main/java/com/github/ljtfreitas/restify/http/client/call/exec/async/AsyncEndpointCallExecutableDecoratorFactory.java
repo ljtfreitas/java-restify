@@ -23,12 +23,18 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.http.client.call.async;
+package com.github.ljtfreitas.restify.http.client.call.exec.async;
 
-import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
+import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutable;
+import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutableDecoratorFactory;
+import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethod;
 
-public interface AsyncEndpointCallFactory {
+public interface AsyncEndpointCallExecutableDecoratorFactory<M, T, O> extends EndpointCallExecutableDecoratorFactory<M, T, O> {
 
-	public <T> AsyncEndpointCall<T> create(EndpointRequest endpointRequest);
+	public AsyncEndpointCallExecutable<M, O> createAsync(EndpointMethod endpointMethod, EndpointCallExecutable<T, O> executable);
 
+	@Override
+	public default EndpointCallExecutable<M, O> create(EndpointMethod endpointMethod, EndpointCallExecutable<T, O> executable) {
+		return createAsync(endpointMethod, executable);
+	}
 }

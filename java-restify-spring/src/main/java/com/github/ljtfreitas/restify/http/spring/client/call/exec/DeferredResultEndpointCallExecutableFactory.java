@@ -27,36 +27,27 @@ package com.github.ljtfreitas.restify.http.spring.client.call.exec;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 
 import org.springframework.web.context.request.async.DeferredResult;
 
-import com.github.ljtfreitas.restify.http.client.call.EndpointCall;
+import com.github.ljtfreitas.restify.http.client.call.async.AsyncEndpointCall;
 import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutable;
-import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutableDecoratorFactory;
+import com.github.ljtfreitas.restify.http.client.call.exec.async.AsyncEndpointCallExecutable;
+import com.github.ljtfreitas.restify.http.client.call.exec.async.AsyncEndpointCallExecutableDecoratorFactory;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethod;
 import com.github.ljtfreitas.restify.reflection.JavaType;
 
-public class DeferredResultEndpointCallExecutableFactory<T, O> implements EndpointCallExecutableDecoratorFactory<DeferredResult<T>, T, O> {
+public class DeferredResultEndpointCallExecutableFactory<T, O> implements AsyncEndpointCallExecutableDecoratorFactory<DeferredResult<T>, T, O> {
 
 	private final Long timeout;
 	private final Executor executor;
 
-	public DeferredResultEndpointCallExecutableFactory() {
-		this(Executors.newSingleThreadExecutor());
-	}
-
 	public DeferredResultEndpointCallExecutableFactory(Executor executor) {
-		this(null, executor);
+		this(executor, null);
 	}
 
-	public DeferredResultEndpointCallExecutableFactory(Long timeout) {
-		this(timeout, Executors.newSingleThreadExecutor());
-	}
-
-	public DeferredResultEndpointCallExecutableFactory(Long timeout, Executor executor) {
+	public DeferredResultEndpointCallExecutableFactory(Executor executor, Long timeout) {
 		this.timeout = timeout;
 		this.executor = executor;
 	}
@@ -77,13 +68,12 @@ public class DeferredResultEndpointCallExecutableFactory<T, O> implements Endpoi
 					Object.class;
 	}
 
-
 	@Override
-	public EndpointCallExecutable<DeferredResult<T>, O> create(EndpointMethod endpointMethod, EndpointCallExecutable<T, O> executable) {
+	public AsyncEndpointCallExecutable<DeferredResult<T>, O> createAsync(EndpointMethod endpointMethod, EndpointCallExecutable<T, O> executable) {
 		return new DeferredResultEndpointCallExecutable(executable);
 	}
 
-	private class DeferredResultEndpointCallExecutable implements EndpointCallExecutable<DeferredResult<T>, O> {
+	private class DeferredResultEndpointCallExecutable implements AsyncEndpointCallExecutable<DeferredResult<T>, O> {
 
 		private final EndpointCallExecutable<T, O> delegate;
 
@@ -97,17 +87,18 @@ public class DeferredResultEndpointCallExecutableFactory<T, O> implements Endpoi
 		}
 
 		@Override
-		public DeferredResult<T> execute(EndpointCall<O> call, Object[] args) {
+		public DeferredResult<T> executeAsync(AsyncEndpointCall<O> call, Object[] args) {
 			DeferredResult<T> deferredResult = new DeferredResult<>(timeout);
 
-			CompletableFuture.supplyAsync(() -> delegate.execute(call, args), executor)
-				.whenComplete((r, ex) -> {
-					if (r != null) {
-						deferredResult.setResult(r);
-					} else if (ex != null) {
-						deferredResult.setErrorResult(ex);
-					}
-				});
+			call.executeAsync()
+				.thenApplyAsync(o -> delegate.execute(() -> o, args), executor)
+					.whenCompleteAsync((result, exception) -> {
+						if (exception != null) {
+							deferredResult.setErrorResult(exception);
+						} else {
+							deferredResult.setResult(result);
+						}
+					}, executor);
 
 			return deferredResult;
 		}

@@ -30,7 +30,7 @@ public class AsyncResultEndpointCallExecutableFactoryTest {
 
 	@Before
 	public void setup() {
-		factory = new AsyncResultEndpointCallExecutableFactory<>();
+		factory = new AsyncResultEndpointCallExecutableFactory<>(r -> r.run());
 
 		when(delegate.execute(any(), anyVararg()))
 			.then((invocation) -> invocation.getArgumentAt(0, EndpointCall.class).execute());

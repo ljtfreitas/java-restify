@@ -28,26 +28,21 @@ package com.github.ljtfreitas.restify.http.client.call.exec.jdk;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Collection;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 import java.util.function.BiConsumer;
 
-import com.github.ljtfreitas.restify.http.client.call.EndpointCall;
+import com.github.ljtfreitas.restify.http.client.call.async.AsyncEndpointCall;
 import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutable;
-import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutableDecoratorFactory;
+import com.github.ljtfreitas.restify.http.client.call.exec.async.AsyncEndpointCallExecutable;
+import com.github.ljtfreitas.restify.http.client.call.exec.async.AsyncEndpointCallExecutableDecoratorFactory;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethod;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethodParameter;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethodParameters;
 import com.github.ljtfreitas.restify.reflection.JavaType;
 
-public class CompletableFutureCallbackEndpointCallExecutableFactory<T, O> implements EndpointCallExecutableDecoratorFactory<Void, T, O> {
+public class CompletableFutureCallbackEndpointCallExecutableFactory<T, O> implements AsyncEndpointCallExecutableDecoratorFactory<Void, T, O> {
 
 	private final Executor executor;
-
-	public CompletableFutureCallbackEndpointCallExecutableFactory() {
-		this(Executors.newCachedThreadPool());
-	}
 
 	public CompletableFutureCallbackEndpointCallExecutableFactory(Executor executor) {
 		this.executor = executor;
@@ -74,16 +69,17 @@ public class CompletableFutureCallbackEndpointCallExecutableFactory<T, O> implem
 	}
 
 	@Override
-	public EndpointCallExecutable<Void, O> create(EndpointMethod endpointMethod, EndpointCallExecutable<T, O> executable) {
+	public AsyncEndpointCallExecutable<Void, O> createAsync(EndpointMethod endpointMethod, EndpointCallExecutable<T, O> executable) {
 		return new CompletableFutureCallbackEndpointCallExecutable(endpointMethod.parameters().callbacks(), executable);
 	}
 
-	private class CompletableFutureCallbackEndpointCallExecutable implements EndpointCallExecutable<Void, O> {
+	private class CompletableFutureCallbackEndpointCallExecutable implements AsyncEndpointCallExecutable<Void, O> {
 
 		private final Collection<EndpointMethodParameter> callbackMethodParameters;
 		private final EndpointCallExecutable<T, O> delegate;
 
-		private CompletableFutureCallbackEndpointCallExecutable(Collection<EndpointMethodParameter> callbackMethodParameters, EndpointCallExecutable<T, O> executable) {
+		private CompletableFutureCallbackEndpointCallExecutable(Collection<EndpointMethodParameter> callbackMethodParameters,
+				EndpointCallExecutable<T, O> executable) {
 			this.callbackMethodParameters = callbackMethodParameters;
 			this.delegate = executable;
 		}
@@ -94,10 +90,12 @@ public class CompletableFutureCallbackEndpointCallExecutableFactory<T, O> implem
 		}
 
 		@Override
-		public Void execute(EndpointCall<O> call, Object[] args) {
+		public Void executeAsync(AsyncEndpointCall<O> call, Object[] args) {
 			BiConsumer<? super T, ? super Throwable> callback = callbackParameter(args);
 
-			CompletableFuture.supplyAsync(() -> delegate.execute(call, args), executor).whenComplete(callback);
+			call.executeAsync()
+				.thenApply(o -> delegate.execute(() -> o, args))
+					.whenCompleteAsync(callback, executor);
 
 			return null;
 		}
