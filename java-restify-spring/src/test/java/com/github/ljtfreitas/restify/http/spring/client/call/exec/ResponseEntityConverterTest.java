@@ -12,8 +12,8 @@ import org.springframework.http.ResponseEntity;
 
 import com.github.ljtfreitas.restify.http.client.Headers;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
+import com.github.ljtfreitas.restify.http.client.response.RestifyEndpointResponseInternalServerErrorException;
 import com.github.ljtfreitas.restify.http.client.response.StatusCode;
-import com.github.ljtfreitas.restify.http.spring.client.call.exec.ResponseEntityConverter;
 
 public class ResponseEntityConverterTest {
 
@@ -40,5 +40,15 @@ public class ResponseEntityConverterTest {
 		assertEquals("expected result", responseEntity.getBody());
 
 		assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
+	}
+
+	@Test(expected = RestifyEndpointResponseInternalServerErrorException.class)
+	public void shouldThrowExceptionWhenEndpointResponseIsError() {
+		RestifyEndpointResponseInternalServerErrorException exception = new RestifyEndpointResponseInternalServerErrorException("Internal Server Error",
+				new Headers(), "oops...");
+
+		endpointResponse = EndpointResponse.error(exception);
+
+		converter.convert(endpointResponse);
 	}
 }
