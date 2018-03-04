@@ -86,6 +86,8 @@ import com.github.ljtfreitas.restify.http.client.request.EndpointRequestWriter;
 import com.github.ljtfreitas.restify.http.client.request.EndpointVersion;
 import com.github.ljtfreitas.restify.http.client.request.HttpClientRequestFactory;
 import com.github.ljtfreitas.restify.http.client.request.async.AsyncEndpointRequestExecutor;
+import com.github.ljtfreitas.restify.http.client.request.async.AsyncHttpClientRequestFactory;
+import com.github.ljtfreitas.restify.http.client.request.async.DefaultAsyncEndpointRequestExecutor;
 import com.github.ljtfreitas.restify.http.client.request.authentication.Authentication;
 import com.github.ljtfreitas.restify.http.client.request.interceptor.AcceptVersionHeaderEndpointRequestInterceptor;
 import com.github.ljtfreitas.restify.http.client.request.interceptor.EndpointRequestInterceptor;
@@ -269,11 +271,30 @@ public class RestifyProxyBuilder {
 		}
 
 		private EndpointRequestExecutor endpointRequestExecutor() {
-			HttpMessageConverters messageConverters = httpMessageConvertersBuilder.build();
 			return Optional.ofNullable(endpointRequestExecutor)
-					.orElseGet(() -> new DefaultEndpointRequestExecutor(httpClientRequestFactory(), 
-							new EndpointRequestWriter(messageConverters),
-							new EndpointResponseReader(messageConverters, endpointResponseErrorFallbackBuilder())));
+				.orElseGet(() -> endpointRequestExecutor(httpClientRequestFactory()));
+		}
+
+		private EndpointRequestExecutor endpointRequestExecutor(HttpClientRequestFactory httpClientRequestFactory) {
+			HttpMessageConverters httpMessageConverters = httpMessageConvertersBuilder.build();
+
+			EndpointRequestWriter writer = new EndpointRequestWriter(httpMessageConverters);
+			EndpointResponseReader reader = new EndpointResponseReader(httpMessageConverters, endpointResponseErrorFallbackBuilder());
+
+			return httpClientRequestFactory instanceof AsyncHttpClientRequestFactory ?
+					asyncEndpointRequestExecutor((AsyncHttpClientRequestFactory) httpClientRequestFactory, writer, reader) :
+						endpointRequestExecutor(httpClientRequestFactory, writer, reader);
+		}
+
+		private EndpointRequestExecutor asyncEndpointRequestExecutor(AsyncHttpClientRequestFactory asyncHttpClientRequestFactory,
+				EndpointRequestWriter writer, EndpointResponseReader reader) {
+			return new DefaultAsyncEndpointRequestExecutor(endpointCallExecutablesBuilder.async.executor,
+					(AsyncHttpClientRequestFactory) httpClientRequestFactory, writer, reader);
+		}
+
+		private EndpointRequestExecutor endpointRequestExecutor(HttpClientRequestFactory httpClientRequestFactory,
+				EndpointRequestWriter writer, EndpointResponseReader reader) {
+			return new DefaultEndpointRequestExecutor(httpClientRequestFactory, writer, reader);
 		}
 
 		private EndpointRequestExecutor retryable(EndpointRequestExecutor delegate) {

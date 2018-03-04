@@ -94,7 +94,8 @@ public class AsyncCallbackEndpointCallExecutableFactory<T, O> implements AsyncEn
 		@SuppressWarnings("unchecked")
 		@Override
 		public Void executeAsync(AsyncEndpointCall<O> call, Object[] args) {
-			CompletableFuture<T> future = call.executeAsync().thenApply(o -> delegate.execute(() -> o, args));
+			CompletableFuture<T> future = call.executeAsync()
+					.thenApplyAsync(o -> delegate.execute(() -> o, args), executor);
 
 			AsyncEndpointCall<T> asyncEndpointCall = new CompletableFutureAsyncEndpointCall<>(future, executor);
 

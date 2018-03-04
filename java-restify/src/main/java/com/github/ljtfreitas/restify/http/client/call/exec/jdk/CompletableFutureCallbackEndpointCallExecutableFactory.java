@@ -94,7 +94,7 @@ public class CompletableFutureCallbackEndpointCallExecutableFactory<T, O> implem
 			BiConsumer<? super T, ? super Throwable> callback = callbackParameter(args);
 
 			call.executeAsync()
-				.thenApply(o -> delegate.execute(() -> o, args))
+				.thenApplyAsync(o -> delegate.execute(() -> o, args), executor)
 					.whenCompleteAsync(callback, executor);
 
 			return null;

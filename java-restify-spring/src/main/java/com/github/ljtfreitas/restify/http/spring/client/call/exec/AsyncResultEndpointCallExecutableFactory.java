@@ -90,7 +90,7 @@ public class AsyncResultEndpointCallExecutableFactory<T, O> implements AsyncEndp
 		@Override
 		public AsyncResult<T> executeAsync(AsyncEndpointCall<O> call, Object[] args) {
 			return Tryable.of(() -> call.executeAsync()
-				.thenApply(o -> delegate.execute(() -> o, args))
+				.thenApplyAsync(o -> delegate.execute(() -> o, args), executor)
 					.handleAsync(this::handle, executor)
 						.get());
 		}
