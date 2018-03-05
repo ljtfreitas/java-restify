@@ -25,78 +25,30 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.apache.httpclient;
 
-import java.io.Closeable;
-import java.io.IOException;
-import java.nio.charset.Charset;
 import java.util.Optional;
 
-import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.config.RequestConfig.Builder;
 import org.apache.http.client.methods.Configurable;
-import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.protocol.HttpClientContext;
-import org.apache.http.impl.client.HttpClients;
 import org.apache.http.protocol.HttpContext;
 
-import com.github.ljtfreitas.restify.http.client.message.Encoding;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
-import com.github.ljtfreitas.restify.http.client.request.HttpClientRequestFactory;
 import com.github.ljtfreitas.restify.http.client.request.Timeout;
 
-public class ApacheHttpClientRequestFactory implements HttpClientRequestFactory, Closeable {
+class HttpContextBuilder {
 
-	private final HttpClient httpClient;
-	private final RequestConfig requestConfig;
 	private final HttpContext httpContext;
-	private final Charset charset;
+	private final RequestConfig requestConfig;
+	private final Configurable configurable;
 
-	public ApacheHttpClientRequestFactory() {
-		this(HttpClients.createSystem(), null);
-	}
-
-	public ApacheHttpClientRequestFactory(HttpClient httpClient) {
-		this(httpClient, null);
-	}
-
-	public ApacheHttpClientRequestFactory(RequestConfig requestConfig) {
-		this(HttpClients.createSystem(), requestConfig);
-	}
-
-	public ApacheHttpClientRequestFactory(HttpContext httpContext) {
-		this(HttpClients.createSystem(), null, httpContext);
-	}
-
-	public ApacheHttpClientRequestFactory(Charset charset) {
-		this(HttpClients.createSystem(), null, null, charset);
-	}
-
-	public ApacheHttpClientRequestFactory(HttpClient httpClient, RequestConfig requestConfig) {
-		this(httpClient, requestConfig, null);
-	}
-
-	public ApacheHttpClientRequestFactory(HttpClient httpClient, RequestConfig requestConfig, HttpContext httpContext) {
-		this(httpClient, requestConfig, httpContext, Encoding.UTF_8.charset());
-	}
-
-	public ApacheHttpClientRequestFactory(HttpClient httpClient, RequestConfig requestConfig, HttpContext httpContext, Charset charset) {
-		this.httpClient = httpClient;
-		this.requestConfig = requestConfig;
+	HttpContextBuilder(HttpContext httpContext, RequestConfig requestConfig, Object configurable) {
 		this.httpContext = httpContext;
-		this.charset = charset;
+		this.requestConfig = requestConfig;
+		this.configurable = configurable instanceof Configurable ? (Configurable) configurable : null;
 	}
 
-	@Override
-	public ApacheHttpClientRequest createOf(EndpointRequest endpointRequest) {
-		HttpUriRequest httpRequest = HttpUriRequestStrategy.of(endpointRequest.method())
-				.create(endpointRequest.endpoint().toString());
-
-		HttpContext context = configure(endpointRequest);
-
-		return new ApacheHttpClientRequest(httpClient, httpRequest, context, charset, endpointRequest.headers());
-	}
-
-	private HttpContext configure(EndpointRequest source) {
+	HttpContext buildTo(EndpointRequest source) {
 		return Optional.ofNullable(httpContext).orElseGet(() -> buildNewContext(source));
 	}
 
@@ -111,10 +63,13 @@ public class ApacheHttpClientRequestFactory implements HttpClientRequestFactory,
 	}
 
 	private RequestConfig buildNewConfiguration(EndpointRequest source) {
-		RequestConfig httpClientConfiguration = (httpClient instanceof Configurable) ? ((Configurable) httpClient).getConfig() : null;
+		RequestConfig httpClientConfiguration = Optional.ofNullable(configurable)
+				.map(Configurable::getConfig)
+					.orElse(null);
 
-		Builder builder = Optional.ofNullable(requestConfig).map(r -> RequestConfig.copy(r))
-				.orElseGet(() -> Optional.ofNullable(httpClientConfiguration)
+		Builder builder = Optional.ofNullable(requestConfig)
+				.map(r -> RequestConfig.copy(r))
+					.orElseGet(() -> Optional.ofNullable(httpClientConfiguration)
 						.map(r -> RequestConfig.copy(r))
 							.orElseGet(RequestConfig::custom));
 
@@ -125,14 +80,7 @@ public class ApacheHttpClientRequestFactory implements HttpClientRequestFactory,
 			builder.setConnectionRequestTimeout((int) timeout.connection());
 			builder.setSocketTimeout((int) timeout.read());
 		});
-		
-		return builder.build();
-	}
 
-	@Override
-	public void close() throws IOException {
-		if (httpClient instanceof Closeable) {
-			((Closeable) this.httpClient).close();
-		}
+		return builder.build();
 	}
 }

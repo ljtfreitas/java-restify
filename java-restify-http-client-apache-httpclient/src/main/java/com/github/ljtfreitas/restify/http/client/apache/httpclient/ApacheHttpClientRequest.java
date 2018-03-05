@@ -25,20 +25,14 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.apache.httpclient;
 
-import java.io.BufferedOutputStream;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.URI;
 import java.nio.charset.Charset;
-import java.util.Arrays;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpEntityEnclosingRequest;
 import org.apache.http.HttpResponse;
-import org.apache.http.StatusLine;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.entity.ByteArrayEntity;
@@ -49,7 +43,6 @@ import com.github.ljtfreitas.restify.http.client.message.Header;
 import com.github.ljtfreitas.restify.http.client.message.Headers;
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
 import com.github.ljtfreitas.restify.http.client.message.response.HttpResponseMessage;
-import com.github.ljtfreitas.restify.http.client.message.response.StatusCode;
 import com.github.ljtfreitas.restify.http.client.request.HttpClientRequest;
 
 class ApacheHttpClientRequest implements HttpClientRequest {
@@ -60,29 +53,21 @@ class ApacheHttpClientRequest implements HttpClientRequest {
 	private final Charset charset;
 	private final Headers headers;
 
-	private final ByteArrayOutputStream byteArrayOutputStream;
-	private final BufferedOutputStream bufferedOutputStream;
+	private final BufferedEntity bufferedEntity;
 
 	public ApacheHttpClientRequest(HttpClient httpClient, HttpUriRequest httpRequest, HttpContext httpContext, Charset charset,
 			Headers headers) {
-		this(httpClient, httpRequest, httpContext, charset, headers, new ByteArrayOutputStream(1024 * 100));
+		this(httpClient, httpRequest, httpContext, charset, headers, new BufferedEntity());
 	}
 
 	private ApacheHttpClientRequest(HttpClient httpClient, HttpUriRequest httpRequest, HttpContext httpContext, Charset charset,
-			Headers headers, ByteArrayOutputStream byteArrayOutputStream) {
-		this(httpClient, httpRequest, httpContext, charset, headers,
-				byteArrayOutputStream, new BufferedOutputStream(byteArrayOutputStream));
-	}
-
-	private ApacheHttpClientRequest(HttpClient httpClient, HttpUriRequest httpRequest, HttpContext httpContext, Charset charset,
-			Headers headers, ByteArrayOutputStream byteArrayOutputStream, BufferedOutputStream bufferedOutputStream) {
+			Headers headers, BufferedEntity bufferedEntity) {
 		this.httpClient = httpClient;
 		this.httpRequest = httpRequest;
 		this.httpContext = httpContext;
 		this.charset = charset;
 		this.headers = headers;
-		this.byteArrayOutputStream = byteArrayOutputStream;
-		this.bufferedOutputStream = bufferedOutputStream;
+		this.bufferedEntity = bufferedEntity;
 	}
 
 	@Override
@@ -91,7 +76,7 @@ class ApacheHttpClientRequest implements HttpClientRequest {
 
 		if (httpRequest instanceof HttpEntityEnclosingRequest) {
 			HttpEntityEnclosingRequest entityEnclosingRequest = (HttpEntityEnclosingRequest) httpRequest;
-			HttpEntity requestEntity = new ByteArrayEntity(byteArrayOutputStream.toByteArray());
+			HttpEntity requestEntity = new ByteArrayEntity(bufferedEntity.asByteArray());
 			entityEnclosingRequest.setEntity(requestEntity);
 		}
 
@@ -104,22 +89,12 @@ class ApacheHttpClientRequest implements HttpClientRequest {
 			throw new HttpClientException("I/O error on HTTP request: [" + httpRequest.getMethod() + " " +
 					httpRequest.getURI() + "]", e);
 		}
-
 	}
 
 	private ApacheHttpClientResponse responseOf(HttpResponse httpResponse) throws IOException {
-		StatusLine statusLine = httpResponse.getStatusLine();
+		ApacheHttpResponseReader reader = new ApacheHttpResponseReader(httpResponse, this);
 
-		StatusCode statusCode = StatusCode.of(statusLine.getStatusCode(), statusLine.getReasonPhrase());
-
-		Headers headers = Arrays.stream(httpResponse.getAllHeaders())
-			.reduce(new Headers(), (a, b) -> a.add(b.getName(), b.getValue()), (a, b) -> b);
-
-		HttpEntity entity = httpResponse.getEntity();
-
-		InputStream stream = entity != null ? entity.getContent() : new ByteArrayInputStream(new byte[0]);
-
-		return new ApacheHttpClientResponse(statusCode, headers, stream, entity, httpResponse, this);
+		return reader.read();
 	}
 
 	@Override
@@ -134,7 +109,7 @@ class ApacheHttpClientRequest implements HttpClientRequest {
 
 	@Override
 	public OutputStream output() {
-		return bufferedOutputStream;
+		return bufferedEntity.output();
 	}
 
 	@Override
@@ -150,6 +125,6 @@ class ApacheHttpClientRequest implements HttpClientRequest {
 	@Override
 	public HttpRequestMessage replace(Header header) {
 		return new ApacheHttpClientRequest(httpClient, httpRequest, httpContext, charset, headers.replace(header),
-				byteArrayOutputStream, bufferedOutputStream);
+				bufferedEntity);
 	}
 }
