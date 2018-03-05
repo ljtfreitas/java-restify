@@ -29,13 +29,12 @@ import java.io.Closeable;
 import java.io.IOException;
 
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
-import com.github.ljtfreitas.restify.http.client.request.HttpClientRequest;
-import com.github.ljtfreitas.restify.http.client.request.HttpClientRequestFactory;
+import com.github.ljtfreitas.restify.http.client.request.async.AsyncHttpClientRequestFactory;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.channel.EventLoopGroup;
 
-public class NettyHttpClientRequestFactory implements HttpClientRequestFactory, Closeable {
+public class NettyHttpClientRequestFactory implements AsyncHttpClientRequestFactory, Closeable {
 
 	private final EventLoopGroup eventLoopGroup;
 	private final NettyHttpClientRequestConfiguration nettyHttpClientRequestConfiguration;
@@ -58,7 +57,16 @@ public class NettyHttpClientRequestFactory implements HttpClientRequestFactory, 
 	}
 
 	@Override
-	public HttpClientRequest createOf(EndpointRequest endpointRequest) {
+	public NettyHttpClientRequest createOf(EndpointRequest endpointRequest) {
+		Bootstrap bootstrap = new NettyBootstrapFactory(eventLoopGroup, nettyHttpClientRequestConfiguration)
+				.createTo(endpointRequest);
+
+		return new NettyHttpClientRequest(bootstrap, endpointRequest.endpoint(), endpointRequest.headers(), endpointRequest.method(),
+				nettyHttpClientRequestConfiguration.charset());
+	}
+
+	@Override
+	public NettyHttpClientRequest createAsyncOf(EndpointRequest endpointRequest) {
 		Bootstrap bootstrap = new NettyBootstrapFactory(eventLoopGroup, nettyHttpClientRequestConfiguration)
 				.createTo(endpointRequest);
 
