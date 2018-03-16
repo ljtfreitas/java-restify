@@ -79,20 +79,24 @@ public class EndpointResponse<T> {
 	public static <T> EndpointResponse<T> error(StatusCode statusCode, Headers headers, String body) {
 		isTrue(statusCode.isError(), "StatusCode [" + statusCode + "] is not a HTTP error!");
 
-		return new EndpointResponse<T>(statusCode, headers, null) {
+		String message = new StringBuilder("HTTP response is a error of type ")
+				.append("[")
+					.append(statusCode)
+				.append("].")
+					.append("\n")
+				.append("Raw response body is:")
+					.append("\n")
+				.append(body)
+					.toString();
+
+		return error(new RestifyEndpointResponseException(message, statusCode, headers, body));
+	}
+
+	public static <T> EndpointResponse<T> error(RestifyEndpointResponseException exception) {
+		return new EndpointResponse<T>(exception.statusCode(), exception.headers(), null) {
 			@Override
 			public T body() {
-				String message = new StringBuilder("HTTP response is a error of type ")
-						.append("[")
-							.append(statusCode)
-						.append("].")
-							.append("\n")
-						.append("Raw response body is:")
-							.append("\n")
-						.append(body)
-							.toString();
-
-				throw new RestifyEndpointResponseException(message, statusCode, headers, body);
+				throw exception;
 			}
 		};
 	}

@@ -39,7 +39,7 @@ class ResponseEntityConverter<T> implements Converter<EndpointResponse<T>, Respo
 	public ResponseEntity<T> convert(EndpointResponse<T> source) {
 		return ResponseEntity.status(HttpStatus.valueOf(source.code().value()))
 				.headers(headersOf(source.headers()))
-				.body(source.code().isError() ? null : source.body());
+				.body(source.body());
 	}
 
 	private HttpHeaders headersOf(Headers headers) {
