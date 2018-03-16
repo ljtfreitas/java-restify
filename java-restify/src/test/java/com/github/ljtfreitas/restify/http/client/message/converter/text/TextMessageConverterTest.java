@@ -10,7 +10,7 @@ import java.io.ByteArrayOutputStream;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.github.ljtfreitas.restify.http.client.message.converter.text.TextMessageConverter;
+import com.github.ljtfreitas.restify.http.client.charset.Encoding;
 import com.github.ljtfreitas.restify.http.client.request.SimpleHttpRequestMessage;
 import com.github.ljtfreitas.restify.http.client.response.SimpleHttpResponseMessage;
 
@@ -59,6 +59,18 @@ public class TextMessageConverterTest {
 		converter.write(message, new SimpleHttpRequestMessage(output));
 
 		assertEquals(message, output.toString());
+	}
+
+	@Test
+	public void shouldWriteStringMessageUsingCharset() throws Exception {
+		ByteArrayOutputStream output = new ByteArrayOutputStream();
+
+		message = new String("Hellóòú".getBytes("UTF-8"));
+
+		converter.write(message, new SimpleHttpRequestMessage(output, Encoding.ISO_8859_1));
+
+		assertEquals(new String(message.getBytes("ISO-8859-1")),
+				output.toString());
 	}
 
 	@Test

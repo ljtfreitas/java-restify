@@ -14,6 +14,7 @@ public class SimpleHttpRequestMessage implements HttpRequestMessage {
 	private final OutputStream output;
 	private final Headers headers;
 	private final EndpointRequest source;
+	private final Encoding encoding;
 
 	public SimpleHttpRequestMessage(EndpointRequest source) {
 		this(source, new ByteArrayOutputStream(), source.headers());
@@ -31,10 +32,19 @@ public class SimpleHttpRequestMessage implements HttpRequestMessage {
 		this(null, output, headers);
 	}
 
+	public SimpleHttpRequestMessage(OutputStream output, Encoding encoding) {
+		this(null, output, new Headers(), encoding);
+	}
+
 	private SimpleHttpRequestMessage(EndpointRequest source, OutputStream output, Headers headers) {
+		this(source, output, headers, Encoding.UTF_8);
+	}
+
+	private SimpleHttpRequestMessage(EndpointRequest source, OutputStream output, Headers headers, Encoding encoding) {
 		this.source = source;
 		this.output = output;
 		this.headers = headers;
+		this.encoding = encoding;
 	}
 
 	@Override
@@ -54,7 +64,7 @@ public class SimpleHttpRequestMessage implements HttpRequestMessage {
 
 	@Override
 	public Charset charset() {
-		return Encoding.UTF_8.charset();
+		return encoding.charset();
 	}
 
 	@Override

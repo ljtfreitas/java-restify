@@ -63,7 +63,7 @@ public abstract class TextMessageConverter implements HttpMessageReader<String>,
 	@Override
 	public void write(String body, HttpRequestMessage httpRequestMessage) throws RestifyHttpMessageWriteException {
 		try {
-			httpRequestMessage.output().write(body.toString().getBytes());
+			httpRequestMessage.output().write(body.toString().getBytes(httpRequestMessage.charset()));
 		} catch (IOException e) {
 			throw new RestifyHttpMessageWriteException(e);
 		}
