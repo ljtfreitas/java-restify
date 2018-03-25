@@ -28,7 +28,7 @@ package com.github.ljtfreitas.restify.http.client.retry;
 import java.time.Duration;
 import java.util.stream.LongStream;
 
-class BackOffPolicy {
+public class BackOffPolicy {
 
 	private static final BackOffPolicy DEFAULT_BACKOFF_POLICY = new BackOffPolicy();
 

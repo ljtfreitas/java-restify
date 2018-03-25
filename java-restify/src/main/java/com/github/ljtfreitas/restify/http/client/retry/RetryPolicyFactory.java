@@ -25,35 +25,19 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.retry;
 
-import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
-import com.github.ljtfreitas.restify.http.client.request.EndpointRequestExecutor;
-import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
+public class RetryPolicyFactory {
 
-public class RetryableEndpointRequestExecutor implements EndpointRequestExecutor {
+	private final RetryConfiguration retryConfiguration;
 
-	private final EndpointRequestExecutor delegate;
-	private final RetryConfigurationFactory retryConfigurationFactory;
-
-	public RetryableEndpointRequestExecutor(EndpointRequestExecutor delegate) {
-		this(delegate, null);
+	public RetryPolicyFactory(RetryConfiguration retryConfiguration) {
+		this.retryConfiguration = retryConfiguration;
 	}
 
-	public RetryableEndpointRequestExecutor(EndpointRequestExecutor delegate, RetryConfiguration configuration) {
-		this.delegate = delegate;
-		this.retryConfigurationFactory = new RetryConfigurationFactory(configuration);
+	public RetryPolicy create() {
+		if (!retryConfiguration.timeout().isZero()) {
+			return new TimeoutRetryPolicy(retryConfiguration.timeout());
+
+		} else return AlwaysRetryPolicy.instance();
 	}
 
-	@Override
-	public <T> EndpointResponse<T> execute(EndpointRequest endpointRequest) {
-		RetryConfiguration retryConfiguration = retryConfigurationFactory.createOf(endpointRequest);
-
-		RetryPolicy retryPolicy = new RetryPolicyFactory(retryConfiguration).create();
-
-		BackOffPolicy backOffPolicy = new BackOffPolicyFactory(retryConfiguration).create();
-
-		RetryableLoop retryLoop = new RetryableLoop(new RetryConditionMatcher(retryConfiguration.conditions()), backOffPolicy,
-				retryPolicy);
-
-		return retryLoop.repeat(retryConfiguration.attempts(), () -> delegate.execute(endpointRequest));
-	}
 }

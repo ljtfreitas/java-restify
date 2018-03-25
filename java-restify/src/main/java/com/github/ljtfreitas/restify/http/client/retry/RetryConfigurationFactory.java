@@ -25,35 +25,41 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.retry;
 
+import static com.github.ljtfreitas.restify.http.client.retry.RetryCondition.ThrowableRetryCondition.ioFailure;
+
+import java.util.Optional;
+
+import com.github.ljtfreitas.restify.http.client.message.response.StatusCode;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
-import com.github.ljtfreitas.restify.http.client.request.EndpointRequestExecutor;
-import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
 
-public class RetryableEndpointRequestExecutor implements EndpointRequestExecutor {
+public class RetryConfigurationFactory {
 
-	private final EndpointRequestExecutor delegate;
-	private final RetryConfigurationFactory retryConfigurationFactory;
+	private final RetryConfiguration retryConfiguration;
 
-	public RetryableEndpointRequestExecutor(EndpointRequestExecutor delegate) {
-		this(delegate, null);
+	public RetryConfigurationFactory(RetryConfiguration retryConfiguration) {
+		super();
+		this.retryConfiguration = retryConfiguration;
 	}
 
-	public RetryableEndpointRequestExecutor(EndpointRequestExecutor delegate, RetryConfiguration configuration) {
-		this.delegate = delegate;
-		this.retryConfigurationFactory = new RetryConfigurationFactory(configuration);
+	public RetryConfiguration createOf(EndpointRequest endpointRequest) {
+		return endpointRequest.metadata().get(Retry.class)
+				.map(retry -> configurationOf(retry))
+					.orElseGet(() -> Optional.ofNullable(retryConfiguration).orElseGet(RetryConfiguration::simple));
 	}
 
-	@Override
-	public <T> EndpointResponse<T> execute(EndpointRequest endpointRequest) {
-		RetryConfiguration retryConfiguration = retryConfigurationFactory.createOf(endpointRequest);
-
-		RetryPolicy retryPolicy = new RetryPolicyFactory(retryConfiguration).create();
-
-		BackOffPolicy backOffPolicy = new BackOffPolicyFactory(retryConfiguration).create();
-
-		RetryableLoop retryLoop = new RetryableLoop(new RetryConditionMatcher(retryConfiguration.conditions()), backOffPolicy,
-				retryPolicy);
-
-		return retryLoop.repeat(retryConfiguration.attempts(), () -> delegate.execute(endpointRequest));
+	private RetryConfiguration configurationOf(Retry retry) {
+		return new RetryConfiguration.Builder()
+				.attempts(retry.attempts())
+				.timeout(retry.timeout())
+				.when(retry.status())
+				.when(retry.exceptions())
+				.when((StatusCode s) -> retry.on4xxStatus() && s.isClientError())
+				.when((StatusCode s) -> retry.on5xxStatus() && s.isServerError())
+				.when((Throwable t) -> retry.onIOFailure() && ioFailure().test(t))
+				.backOff()
+					.delay(retry.backoff().delay())
+					.multiplier(retry.backoff().multiplier())
+					.and()
+				.build();
 	}
 }

@@ -23,26 +23,11 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.http.client.retry;
+package com.github.ljtfreitas.restify.http.client.retry.async;
 
-public class AlwaysRetryPolicy implements RetryPolicy {
+import java.util.concurrent.CompletableFuture;
 
-	private static final AlwaysRetryPolicy SINGLE_INSTANCE = new AlwaysRetryPolicy();
+interface AsyncRetryable<T> {
 
-	private AlwaysRetryPolicy() {
-	}
-
-	@Override
-	public boolean retryable() {
-		return true;
-	}
-
-	@Override
-	public RetryPolicy refresh() {
-		return this;
-	}
-
-	public static AlwaysRetryPolicy instance() {
-		return SINGLE_INSTANCE;
-	}
+	CompletableFuture<T> execute();
 }

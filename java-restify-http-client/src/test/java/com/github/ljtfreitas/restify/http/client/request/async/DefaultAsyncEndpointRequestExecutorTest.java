@@ -29,6 +29,7 @@ import com.github.ljtfreitas.restify.http.client.message.HttpMessageException;
 import com.github.ljtfreitas.restify.http.client.message.response.HttpResponseMessage;
 import com.github.ljtfreitas.restify.http.client.message.response.StatusCode;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
+import com.github.ljtfreitas.restify.http.client.request.EndpointRequestExecutor;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequestWriter;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponseReader;
@@ -47,6 +48,9 @@ public class DefaultAsyncEndpointRequestExecutorTest {
 	private EndpointResponseReader reader;
 
 	@Mock
+	private EndpointRequestExecutor endpointRequestExecutor;
+
+	@Mock
 	private AsyncHttpClientRequest asyncHttpClientRequest;
 
 	@Mock
@@ -61,7 +65,7 @@ public class DefaultAsyncEndpointRequestExecutorTest {
 	public void before() {
 		Executor executor = r -> r.run();
 
-		subject = new DefaultAsyncEndpointRequestExecutor(executor, asyncHttpClientRequestFactory, writer, reader);
+		subject = new DefaultAsyncEndpointRequestExecutor(executor, asyncHttpClientRequestFactory, writer, reader, endpointRequestExecutor);
 
 		when(asyncHttpClientRequestFactory.createAsyncOf(notNull(EndpointRequest.class)))
 			.thenReturn(asyncHttpClientRequest);

@@ -36,6 +36,8 @@ import java.util.Collection;
 import java.util.Optional;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLSocketFactory;
@@ -103,6 +105,7 @@ import com.github.ljtfreitas.restify.http.client.retry.RetryCondition.StatusCode
 import com.github.ljtfreitas.restify.http.client.retry.RetryCondition.ThrowableRetryCondition;
 import com.github.ljtfreitas.restify.http.client.retry.RetryConfiguration;
 import com.github.ljtfreitas.restify.http.client.retry.RetryableEndpointRequestExecutor;
+import com.github.ljtfreitas.restify.http.client.retry.async.AsyncRetryableEndpointRequestExecutor;
 import com.github.ljtfreitas.restify.http.contract.metadata.Contract;
 import com.github.ljtfreitas.restify.http.contract.metadata.ContractExpressionResolver;
 import com.github.ljtfreitas.restify.http.contract.metadata.ContractReader;
@@ -252,10 +255,10 @@ public class RestifyProxyBuilder {
 		}
 
 		private EndpointCallFactory endpointCallFactory() {
-			EndpointRequestExecutor executor = endpointRequestExecutor();
+			EndpointRequestExecutor executor = retryable(endpointRequestExecutor());
 			return executor instanceof AsyncEndpointRequestExecutor ?
-					asyncEndpointCallFactory(retryable(executor)) :
-						executorEndpointCallFactory(retryable(executor));
+					asyncEndpointCallFactory(executor) :
+						executorEndpointCallFactory(executor);
 		}
 
 		private EndpointCallFactory asyncEndpointCallFactory(EndpointRequestExecutor executor) {
@@ -289,7 +292,8 @@ public class RestifyProxyBuilder {
 		private EndpointRequestExecutor asyncEndpointRequestExecutor(AsyncHttpClientRequestFactory asyncHttpClientRequestFactory,
 				EndpointRequestWriter writer, EndpointResponseReader reader) {
 			return new DefaultAsyncEndpointRequestExecutor(endpointCallExecutablesBuilder.async.executor,
-					(AsyncHttpClientRequestFactory) httpClientRequestFactory, writer, reader);
+					(AsyncHttpClientRequestFactory) httpClientRequestFactory, writer, reader,
+						endpointRequestExecutor(asyncHttpClientRequestFactory, writer, reader));
 		}
 
 		private EndpointRequestExecutor endpointRequestExecutor(HttpClientRequestFactory httpClientRequestFactory,
@@ -299,7 +303,10 @@ public class RestifyProxyBuilder {
 
 		private EndpointRequestExecutor retryable(EndpointRequestExecutor delegate) {
 			RetryConfiguration configuration = retryBuilder.build();
-			return configuration == null ? delegate : new RetryableEndpointRequestExecutor(delegate, configuration);
+			return configuration == null ? delegate :
+				delegate instanceof AsyncEndpointRequestExecutor ?
+						new AsyncRetryableEndpointRequestExecutor((AsyncEndpointRequestExecutor) delegate, retryBuilder.async.scheduler, configuration) :
+							new RetryableEndpointRequestExecutor(delegate, configuration);
 		}
 
 		private EndpointResponseErrorFallback endpointResponseErrorFallbackBuilder() {
@@ -717,6 +724,7 @@ public class RestifyProxyBuilder {
 
 		private final RestifyProxyBuilder context;
 		private final RetryConfigurationBuilder builder = new RetryConfigurationBuilder();
+		private final AsyncRetryConfigurationBuilder async = new AsyncRetryConfigurationBuilder(this);
 
 		private boolean enabled = false;
 		private RetryConfiguration configuration;
@@ -741,6 +749,10 @@ public class RestifyProxyBuilder {
 			return context;
 		}
 
+		public AsyncRetryConfigurationBuilder async() {
+			return async;
+		}
+
 		public RestifyProxyBuilder and() {
 			return context;
 		}
@@ -752,7 +764,7 @@ public class RestifyProxyBuilder {
 		public class RetryConfigurationBuilder {
 
 			private final RetryConfiguration.Builder delegate = new RetryConfiguration.Builder();
-			private final RetryConfigurationBackOffBuilder backOff = new RetryConfigurationBackOffBuilder();
+			private final RetryConfigurationBackOffBuilder backOff = new RetryConfigurationBackOffBuilder(this);
 
 			public RetryConfigurationBuilder attempts(int attempts) {
 				delegate.attempts(attempts);
@@ -814,6 +826,12 @@ public class RestifyProxyBuilder {
 
 			public class RetryConfigurationBackOffBuilder {
 
+				private final RetryConfigurationBuilder context;
+
+				private RetryConfigurationBackOffBuilder(RetryConfigurationBuilder context) {
+					this.context = context;
+				}
+
 				public RetryConfigurationBackOffBuilder delay(long delay) {
 					builder.backOff().delay(delay);
 					return this;
@@ -829,9 +847,25 @@ public class RestifyProxyBuilder {
 					return this;
 				}
 
-				public RestifyProxyBuilder and() {
+				public RetryConfigurationBuilder and() {
 					return context;
 				}
+			}
+		}
+
+		public class AsyncRetryConfigurationBuilder {
+
+			private final RetryBuilder context;
+
+			private ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+
+			private AsyncRetryConfigurationBuilder(RetryBuilder context) {
+				this.context = context;
+			}
+
+			public RetryBuilder scheduler(ScheduledExecutorService scheduler) {
+				this.scheduler = scheduler;
+				return context;
 			}
 		}
 	}
