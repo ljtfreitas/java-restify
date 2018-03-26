@@ -1,4 +1,4 @@
-package com.github.ljtfreitas.restify.http.spring.client.call.exec;
+package com.github.ljtfreitas.restify.http.spring.client.call.exec.async;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -21,6 +21,7 @@ import org.springframework.web.context.request.async.DeferredResult;
 import com.github.ljtfreitas.restify.http.client.call.EndpointCall;
 import com.github.ljtfreitas.restify.http.client.call.async.AsyncEndpointCall;
 import com.github.ljtfreitas.restify.http.client.call.exec.async.AsyncEndpointCallExecutable;
+import com.github.ljtfreitas.restify.http.spring.client.call.exec.SimpleEndpointMethod;
 import com.github.ljtfreitas.restify.reflection.JavaType;
 
 @RunWith(MockitoJUnitRunner.class)

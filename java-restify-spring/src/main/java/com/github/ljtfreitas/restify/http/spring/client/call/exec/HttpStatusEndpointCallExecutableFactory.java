@@ -25,57 +25,40 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.spring.client.call.exec;
 
-import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
-
-import org.springframework.core.task.AsyncListenableTaskExecutor;
-import org.springframework.core.task.SimpleAsyncTaskExecutor;
-import org.springframework.util.concurrent.ListenableFutureTask;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 
 import com.github.ljtfreitas.restify.http.client.call.EndpointCall;
 import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutable;
 import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutableDecoratorFactory;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethod;
 import com.github.ljtfreitas.restify.reflection.JavaType;
+import com.github.ljtfreitas.restify.reflection.SimpleParameterizedType;
 
-public class ListenableFutureTaskEndpointCallExecutableFactory<T, O> implements EndpointCallExecutableDecoratorFactory<ListenableFutureTask<T>, T, O> {
+public class HttpStatusEndpointCallExecutableFactory implements EndpointCallExecutableDecoratorFactory<HttpStatus, ResponseEntity<Void>, Void> {
 
-	private final AsyncListenableTaskExecutor asyncListenableTaskExecutor;
-
-	public ListenableFutureTaskEndpointCallExecutableFactory() {
-		this(new SimpleAsyncTaskExecutor());
-	}
-
-	public ListenableFutureTaskEndpointCallExecutableFactory(AsyncListenableTaskExecutor asyncTaskExecutor) {
-		this.asyncListenableTaskExecutor = asyncTaskExecutor;
-	}
+	private static final JavaType DEFAULT_RETURN_TYPE = JavaType.of(new SimpleParameterizedType(ResponseEntity.class, null, Void.class));
 
 	@Override
 	public boolean supports(EndpointMethod endpointMethod) {
-		return endpointMethod.returnType().is(ListenableFutureTask.class);
+		return endpointMethod.returnType().is(HttpStatus.class);
 	}
 
 	@Override
 	public JavaType returnType(EndpointMethod endpointMethod) {
-		return JavaType.of(unwrap(endpointMethod.returnType()));
-	}
-
-	private Type unwrap(JavaType declaredReturnType) {
-		return declaredReturnType.parameterized() ?
-				declaredReturnType.as(ParameterizedType.class).getActualTypeArguments()[0] :
-					Object.class;
+		return DEFAULT_RETURN_TYPE;
 	}
 
 	@Override
-	public EndpointCallExecutable<ListenableFutureTask<T>, O> create(EndpointMethod endpointMethod, EndpointCallExecutable<T, O> executable) {
-		return new ListenableFutureTaskEndpointCallExecutable(executable);
+	public EndpointCallExecutable<HttpStatus, Void> create(EndpointMethod endpointMethod, EndpointCallExecutable<ResponseEntity<Void>, Void> executable) {
+		return new HttpStatusEndpointCallExecutable(executable);
 	}
 
-	private class ListenableFutureTaskEndpointCallExecutable implements EndpointCallExecutable<ListenableFutureTask<T>, O> {
+	private class HttpStatusEndpointCallExecutable implements EndpointCallExecutable<HttpStatus, Void> {
 
-		private final EndpointCallExecutable<T, O> delegate;
+		private final EndpointCallExecutable<ResponseEntity<Void>, Void> delegate;
 
-		public ListenableFutureTaskEndpointCallExecutable(EndpointCallExecutable<T, O> executable) {
+		public HttpStatusEndpointCallExecutable(EndpointCallExecutable<ResponseEntity<Void>, Void> executable) {
 			this.delegate = executable;
 		}
 
@@ -85,10 +68,8 @@ public class ListenableFutureTaskEndpointCallExecutableFactory<T, O> implements 
 		}
 
 		@Override
-		public ListenableFutureTask<T> execute(EndpointCall<O> call, Object[] args) {
-			ListenableFutureTask<T> task = new ListenableFutureTask<T>(() -> delegate.execute(call, args));
-			asyncListenableTaskExecutor.submit(task);
-			return task;
+		public HttpStatus execute(EndpointCall<Void> call, Object[] args) {
+			return delegate.execute(call, args).getStatusCode();
 		}
 	}
 }

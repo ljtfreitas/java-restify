@@ -41,11 +41,11 @@ import org.springframework.core.task.support.ExecutorServiceAdapter;
 import org.springframework.scheduling.SchedulingTaskExecutor;
 import org.springframework.scheduling.TaskScheduler;
 
-import com.github.ljtfreitas.restify.http.spring.client.call.exec.AsyncResultEndpointCallExecutableFactory;
-import com.github.ljtfreitas.restify.http.spring.client.call.exec.DeferredResultEndpointCallExecutableFactory;
-import com.github.ljtfreitas.restify.http.spring.client.call.exec.ListenableFutureEndpointCallExecutableFactory;
-import com.github.ljtfreitas.restify.http.spring.client.call.exec.ListenableFutureTaskEndpointCallExecutableFactory;
-import com.github.ljtfreitas.restify.http.spring.client.call.exec.WebAsyncTaskEndpointCallExecutableFactory;
+import com.github.ljtfreitas.restify.http.spring.client.call.exec.async.AsyncResultEndpointCallExecutableFactory;
+import com.github.ljtfreitas.restify.http.spring.client.call.exec.async.DeferredResultEndpointCallExecutableFactory;
+import com.github.ljtfreitas.restify.http.spring.client.call.exec.async.ListenableFutureEndpointCallExecutableFactory;
+import com.github.ljtfreitas.restify.http.spring.client.call.exec.async.ListenableFutureTaskEndpointCallExecutableFactory;
+import com.github.ljtfreitas.restify.http.spring.client.call.exec.async.WebAsyncTaskEndpointCallExecutableFactory;
 
 @Configuration
 public class RestifyAsyncConfiguration {

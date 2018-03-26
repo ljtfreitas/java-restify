@@ -30,6 +30,7 @@ import static com.github.ljtfreitas.restify.util.Preconditions.nonNull;
 import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.Semaphore;
 import java.util.concurrent.TimeUnit;
@@ -188,7 +189,9 @@ class AsyncRetryableLoop {
 		}
 
 		private Throwable deepCause(Throwable throwable) {
-			return throwable instanceof CompletionException ? throwable.getCause() : throwable;
+			return (throwable instanceof CompletionException || throwable instanceof ExecutionException) ?
+					throwable.getCause() :
+						throwable;
 		}
 	}
 }

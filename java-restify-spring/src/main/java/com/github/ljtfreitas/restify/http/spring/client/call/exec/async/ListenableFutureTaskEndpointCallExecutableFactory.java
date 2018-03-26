@@ -23,34 +23,36 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.http.spring.client.call.exec;
+package com.github.ljtfreitas.restify.http.spring.client.call.exec.async;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.concurrent.Executor;
 
-import org.springframework.scheduling.annotation.AsyncResult;
+import org.springframework.core.task.AsyncListenableTaskExecutor;
+import org.springframework.core.task.SimpleAsyncTaskExecutor;
+import org.springframework.util.concurrent.ListenableFutureTask;
 
 import com.github.ljtfreitas.restify.http.client.call.EndpointCall;
-import com.github.ljtfreitas.restify.http.client.call.async.AsyncEndpointCall;
 import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutable;
-import com.github.ljtfreitas.restify.http.client.call.exec.async.AsyncEndpointCallExecutable;
-import com.github.ljtfreitas.restify.http.client.call.exec.async.AsyncEndpointCallExecutableDecoratorFactory;
+import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutableDecoratorFactory;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethod;
 import com.github.ljtfreitas.restify.reflection.JavaType;
-import com.github.ljtfreitas.restify.util.Tryable;
 
-public class AsyncResultEndpointCallExecutableFactory<T, O> implements AsyncEndpointCallExecutableDecoratorFactory<AsyncResult<T>, T, O> {
+public class ListenableFutureTaskEndpointCallExecutableFactory<T, O> implements EndpointCallExecutableDecoratorFactory<ListenableFutureTask<T>, T, O> {
 
-	private final Executor executor;
+	private final AsyncListenableTaskExecutor asyncListenableTaskExecutor;
 
-	public AsyncResultEndpointCallExecutableFactory(Executor executor) {
-		this.executor = executor;
+	public ListenableFutureTaskEndpointCallExecutableFactory() {
+		this(new SimpleAsyncTaskExecutor());
+	}
+
+	public ListenableFutureTaskEndpointCallExecutableFactory(AsyncListenableTaskExecutor asyncTaskExecutor) {
+		this.asyncListenableTaskExecutor = asyncTaskExecutor;
 	}
 
 	@Override
 	public boolean supports(EndpointMethod endpointMethod) {
-		return endpointMethod.returnType().is(AsyncResult.class);
+		return endpointMethod.returnType().is(ListenableFutureTask.class);
 	}
 
 	@Override
@@ -65,16 +67,16 @@ public class AsyncResultEndpointCallExecutableFactory<T, O> implements AsyncEndp
 	}
 
 	@Override
-	public AsyncEndpointCallExecutable<AsyncResult<T>, O> createAsync(EndpointMethod endpointMethod, EndpointCallExecutable<T, O> executable) {
-		return new AsyncResultEndpointCallExecutable(executable);
+	public EndpointCallExecutable<ListenableFutureTask<T>, O> create(EndpointMethod endpointMethod, EndpointCallExecutable<T, O> executable) {
+		return new ListenableFutureTaskEndpointCallExecutable(executable);
 	}
 
-	private class AsyncResultEndpointCallExecutable implements AsyncEndpointCallExecutable<AsyncResult<T>, O> {
+	private class ListenableFutureTaskEndpointCallExecutable implements EndpointCallExecutable<ListenableFutureTask<T>, O> {
 
 		private final EndpointCallExecutable<T, O> delegate;
 
-		private AsyncResultEndpointCallExecutable(EndpointCallExecutable<T, O> delegate) {
-			this.delegate = delegate;
+		public ListenableFutureTaskEndpointCallExecutable(EndpointCallExecutable<T, O> executable) {
+			this.delegate = executable;
 		}
 
 		@Override
@@ -83,23 +85,10 @@ public class AsyncResultEndpointCallExecutableFactory<T, O> implements AsyncEndp
 		}
 
 		@Override
-		public AsyncResult<T> execute(EndpointCall<O> call, Object[] args) {
-			return new AsyncResult<>(delegate.execute(call, args));
-		}
-
-		@Override
-		public AsyncResult<T> executeAsync(AsyncEndpointCall<O> call, Object[] args) {
-			return Tryable.of(() -> call.executeAsync()
-				.thenApplyAsync(o -> delegate.execute(() -> o, args), executor)
-					.handleAsync(this::handle, executor)
-						.get());
-		}
-
-		@SuppressWarnings("unchecked")
-		private AsyncResult<T> handle(T value, Throwable throwable) {
-			return value != null ?
-					(AsyncResult<T>) AsyncResult.forValue(value) :
-						(AsyncResult<T>) AsyncResult.forExecutionException(throwable);
+		public ListenableFutureTask<T> execute(EndpointCall<O> call, Object[] args) {
+			ListenableFutureTask<T> task = new ListenableFutureTask<T>(() -> delegate.execute(call, args));
+			asyncListenableTaskExecutor.submit(task);
+			return task;
 		}
 	}
 }

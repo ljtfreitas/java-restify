@@ -1,4 +1,4 @@
-package com.github.ljtfreitas.restify.http.spring.client.call.exec;
+package com.github.ljtfreitas.restify.http.spring.client.call.exec.async;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -17,8 +17,8 @@ import org.springframework.util.concurrent.ListenableFutureTask;
 
 import com.github.ljtfreitas.restify.http.client.call.EndpointCall;
 import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutable;
+import com.github.ljtfreitas.restify.http.spring.client.call.exec.SimpleEndpointMethod;
 import com.github.ljtfreitas.restify.reflection.JavaType;
-import com.github.ljtfreitas.restify.http.spring.client.call.exec.ListenableFutureTaskEndpointCallExecutableFactory;
 
 @RunWith(MockitoJUnitRunner.class)
 public class ListenableFutureTaskEndpointCallExecutableFactoryTest {
