@@ -25,10 +25,14 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.response;
 
+import java.net.URI;
+import java.util.Optional;
+
 import com.github.ljtfreitas.restify.http.client.message.ContentType;
 import com.github.ljtfreitas.restify.http.client.message.Headers;
 import com.github.ljtfreitas.restify.http.client.message.converter.HttpMessageReader;
 import com.github.ljtfreitas.restify.http.client.message.converter.text.StringMessageConverter;
+import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
 import com.github.ljtfreitas.restify.http.client.message.response.HttpResponseMessage;
 import com.github.ljtfreitas.restify.http.client.message.response.StatusCode;
 
@@ -44,9 +48,9 @@ public class EndpointResponseExceptionFactory {
 		String message = new StringBuilder()
 				.append("HTTP request: ")
 					.append("[")
-						.append(response.request().method())
+						.append(Optional.ofNullable(response.request()).map(HttpRequestMessage::method).orElse(""))
 							.append(" ")
-							.append(response.request().uri())
+							.append(Optional.ofNullable(response.request()).map(HttpRequestMessage::uri).map(URI::toString).orElse(""))
 					.append("]")
 					.append("\n")
 				.append("HTTP response: ")

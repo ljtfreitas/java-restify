@@ -49,7 +49,7 @@
 		<module>java-restify-spring</module>
 		<module>java-restify-spring-autoconfigure</module>
 		<module>java-restify-spring-starter</module>
-		<module>java-restify-spring-webflux</module>
+		<module>java-restify-spring-reactive</module>
 
 		<module>java-restify-netflix</module>
 		<module>java-restify-netflix-service-discovery</module>
