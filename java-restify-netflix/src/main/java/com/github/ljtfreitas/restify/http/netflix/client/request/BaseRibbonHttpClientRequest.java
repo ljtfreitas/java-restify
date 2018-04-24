@@ -28,20 +28,33 @@ package com.github.ljtfreitas.restify.http.netflix.client.request;
 import java.net.URI;
 
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
-import com.github.ljtfreitas.restify.http.client.request.HttpClientRequest;
 
-public interface RibbonHttpClientRequest {
+public abstract class BaseRibbonHttpClientRequest implements RibbonHttpClientRequest {
 
-	public boolean isGet();
+	protected BaseRibbonHttpClientRequest(EndpointRequest endpointRequest) {
+		this.endpointRequest = endpointRequest;
+	}
 
-	public void writeTo(HttpClientRequest httpRequestMessage);
+	private final EndpointRequest endpointRequest;
 
-	public URI loadBalancedEndpoint();
+	@Override
+	public boolean isGet() {
+		return endpointRequest.method().equalsIgnoreCase("GET");
+	}
 
-	public String serviceName();
+	@Override
+	public URI loadBalancedEndpoint() {
+		String sourceEndpoint = endpointRequest.endpoint().toString();
+		return URI.create(sourceEndpoint.replaceFirst(endpointRequest.endpoint().getHost(), ""));
+	}
 
-	public EndpointRequest endpointRequest();
+	@Override
+	public String serviceName() {
+		return endpointRequest.endpoint().getHost();
+	}
 
-	public RibbonHttpClientRequest replace(URI ribbonEndpoint);
-
+	@Override
+	public EndpointRequest endpointRequest() {
+		return endpointRequest;
+	}
 }

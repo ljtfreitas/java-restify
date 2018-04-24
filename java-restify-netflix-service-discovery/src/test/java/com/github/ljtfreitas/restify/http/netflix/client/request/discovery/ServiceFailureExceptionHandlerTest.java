@@ -20,7 +20,7 @@ import org.mockito.Captor;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import com.github.ljtfreitas.restify.http.netflix.client.request.RibbonHttpClientRequest;
+import com.github.ljtfreitas.restify.http.netflix.client.request.DefaultRibbonHttpClientRequest;
 import com.github.ljtfreitas.restify.http.netflix.client.request.RibbonRequest;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -30,7 +30,7 @@ public class ServiceFailureExceptionHandlerTest {
 	private ServiceInstanceFailureHandler serviceInstanceFailureHandlerMock;
 
 	@Mock
-	private RibbonHttpClientRequest ribbonHttpClientRequestMock;
+	private DefaultRibbonHttpClientRequest ribbonHttpClientRequestMock;
 
 	private ServiceFailureExceptionHandler handler;
 
@@ -41,7 +41,7 @@ public class ServiceFailureExceptionHandlerTest {
 
 	@Before
 	public void setup() {
-		when(ribbonHttpClientRequestMock.ribbonEndpoint()).thenReturn(URI.create("http://address:8080/path"));
+		when(ribbonHttpClientRequestMock.loadBalancedEndpoint()).thenReturn(URI.create("http://address:8080/path"));
 
 		ribbonRequest = new RibbonRequest(ribbonHttpClientRequestMock);
 	}
