@@ -33,7 +33,7 @@ import org.springframework.http.RequestEntity;
 import com.github.ljtfreitas.restify.http.client.message.Headers;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
 
-class RequestEntityConverter implements Converter<EndpointRequest, RequestEntity<Object>> {
+public class RequestEntityConverter implements Converter<EndpointRequest, RequestEntity<Object>> {
 
 	@Override
 	public RequestEntity<Object> convert(EndpointRequest source) {

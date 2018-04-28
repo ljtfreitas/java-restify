@@ -38,7 +38,7 @@ import com.netflix.loadbalancer.ILoadBalancer;
 
 public class RibbonHttpClientRequestFactory implements HttpClientRequestFactory {
 
-	private final RibbonLoadBalancedClient ribbonLoadBalancedClient;
+	private final DefaultRibbonLoadBalancedClient ribbonLoadBalancedClient;
 	private final Charset charset;
 
 	public RibbonHttpClientRequestFactory(ILoadBalancer loadBalancer) {
@@ -67,7 +67,7 @@ public class RibbonHttpClientRequestFactory implements HttpClientRequestFactory 
 
 	public RibbonHttpClientRequestFactory(ILoadBalancer loadBalancer, IClientConfig clientConfig, HttpClientRequestFactory delegate,
 			RibbonExceptionHandler ribbonExceptionHandler) {
-		this(new RibbonLoadBalancedClient(loadBalancer, clientConfig, delegate, ribbonExceptionHandler), Encoding.UTF_8.charset());
+		this(new DefaultRibbonLoadBalancedClient(loadBalancer, clientConfig, delegate, ribbonExceptionHandler), Encoding.UTF_8.charset());
 	}
 
 	public RibbonHttpClientRequestFactory(ILoadBalancer loadBalancer, IClientConfig clientConfig, RibbonExceptionHandler ribbonExceptionHandler,
@@ -76,25 +76,25 @@ public class RibbonHttpClientRequestFactory implements HttpClientRequestFactory 
 	}
 
 	public RibbonHttpClientRequestFactory(ILoadBalancer loadBalancer, IClientConfig clientConfig, HttpClientRequestFactory delegate, Charset charset) {
-		this(new RibbonLoadBalancedClient(loadBalancer, clientConfig, delegate), charset);
+		this(new DefaultRibbonLoadBalancedClient(loadBalancer, clientConfig, delegate), charset);
 	}
 
 	public RibbonHttpClientRequestFactory(ILoadBalancer loadBalancer, IClientConfig clientConfig, HttpClientRequestFactory delegate,
 			RibbonExceptionHandler ribbonExceptionHandler, Charset charset) {
-		this(new RibbonLoadBalancedClient(loadBalancer, clientConfig, delegate, ribbonExceptionHandler), charset);
+		this(new DefaultRibbonLoadBalancedClient(loadBalancer, clientConfig, delegate, ribbonExceptionHandler), charset);
 	}
 
-	public RibbonHttpClientRequestFactory(RibbonLoadBalancedClient ribbonLoadBalancedClient) {
+	public RibbonHttpClientRequestFactory(DefaultRibbonLoadBalancedClient ribbonLoadBalancedClient) {
 		this(ribbonLoadBalancedClient, Encoding.UTF_8.charset());
 	}
 
-	public RibbonHttpClientRequestFactory(RibbonLoadBalancedClient ribbonLoadBalancedClient, Charset charset) {
+	public RibbonHttpClientRequestFactory(DefaultRibbonLoadBalancedClient ribbonLoadBalancedClient, Charset charset) {
 		this.ribbonLoadBalancedClient = ribbonLoadBalancedClient;
 		this.charset = charset;
 	}
 
 	@Override
 	public HttpClientRequest createOf(EndpointRequest endpointRequest) {
-		return new RibbonHttpClientRequest(endpointRequest, ribbonLoadBalancedClient, charset);
+		return new DefaultRibbonHttpClientRequest(endpointRequest, ribbonLoadBalancedClient, charset);
 	}
 }

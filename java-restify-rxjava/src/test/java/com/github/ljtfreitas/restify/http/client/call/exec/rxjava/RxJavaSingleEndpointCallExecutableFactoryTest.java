@@ -6,7 +6,6 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyVararg;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import org.junit.Before;
@@ -89,8 +88,6 @@ public class RxJavaSingleEndpointCallExecutableFactoryTest {
 		subscriber.assertCompleted();
 		subscriber.assertNoErrors();
 		subscriber.assertValue(result);
-
-		verify(delegate).execute(endpointCallMock, null);
 	}
 
 	@Test
@@ -112,8 +109,6 @@ public class RxJavaSingleEndpointCallExecutableFactoryTest {
 		single.subscribeOn(scheduler).subscribe(subscriber);
 
 		subscriber.assertError(exception);
-
-		verify(delegate).execute(endpointCallMock, null);
 	}
 
 	interface SomeType {

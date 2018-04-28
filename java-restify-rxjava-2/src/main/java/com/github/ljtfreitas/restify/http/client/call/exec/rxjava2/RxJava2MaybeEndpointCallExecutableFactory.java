@@ -28,9 +28,10 @@ package com.github.ljtfreitas.restify.http.client.call.exec.rxjava2;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 
-import com.github.ljtfreitas.restify.http.client.call.EndpointCall;
+import com.github.ljtfreitas.restify.http.client.call.async.AsyncEndpointCall;
 import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutable;
-import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutableDecoratorFactory;
+import com.github.ljtfreitas.restify.http.client.call.exec.async.AsyncEndpointCallExecutable;
+import com.github.ljtfreitas.restify.http.client.call.exec.async.AsyncEndpointCallExecutableDecoratorFactory;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethod;
 import com.github.ljtfreitas.restify.reflection.JavaType;
 
@@ -38,7 +39,7 @@ import io.reactivex.Maybe;
 import io.reactivex.Scheduler;
 import io.reactivex.schedulers.Schedulers;
 
-public class RxJava2MaybeEndpointCallExecutableFactory<T, O> implements EndpointCallExecutableDecoratorFactory<Maybe<T>, T, O> {
+public class RxJava2MaybeEndpointCallExecutableFactory<T, O> implements AsyncEndpointCallExecutableDecoratorFactory<Maybe<T>, T, O> {
 
 	public final Scheduler scheduler;
 
@@ -67,11 +68,11 @@ public class RxJava2MaybeEndpointCallExecutableFactory<T, O> implements Endpoint
 	}
 
 	@Override
-	public EndpointCallExecutable<Maybe<T>, O> create(EndpointMethod endpointMethod, EndpointCallExecutable<T, O> delegate) {
-		return new RxJava2MaybeEndpointCallExecutable(delegate);
+	public AsyncEndpointCallExecutable<Maybe<T>, O> createAsync(EndpointMethod endpointMethod, EndpointCallExecutable<T, O> executable) {
+		return new RxJava2MaybeEndpointCallExecutable(executable);
 	}
 
-	private class RxJava2MaybeEndpointCallExecutable implements EndpointCallExecutable<Maybe<T>, O> {
+	private class RxJava2MaybeEndpointCallExecutable implements AsyncEndpointCallExecutable<Maybe<T>, O> {
 
 		private EndpointCallExecutable<T, O> delegate;
 
@@ -85,9 +86,10 @@ public class RxJava2MaybeEndpointCallExecutableFactory<T, O> implements Endpoint
 		}
 
 		@Override
-		public Maybe<T> execute(EndpointCall<O> call, Object[] args) {
-			return Maybe.fromCallable(() -> delegate.execute(call, args))
-					.subscribeOn(scheduler);
+		public Maybe<T> executeAsync(AsyncEndpointCall<O> call, Object[] args) {
+			return Maybe.fromFuture(call.executeAsync())
+					.map(o -> delegate.execute(() -> o, args))
+						.subscribeOn(scheduler);
 		}
 	}
 }

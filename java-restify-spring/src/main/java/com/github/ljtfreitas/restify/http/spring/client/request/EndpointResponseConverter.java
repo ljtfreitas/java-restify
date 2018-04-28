@@ -33,7 +33,7 @@ import com.github.ljtfreitas.restify.http.client.message.Headers;
 import com.github.ljtfreitas.restify.http.client.message.response.StatusCode;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
 
-class EndpointResponseConverter implements Converter<ResponseEntity<Object>, EndpointResponse<Object>> {
+public class EndpointResponseConverter implements Converter<ResponseEntity<Object>, EndpointResponse<Object>> {
 
 	@Override
 	public EndpointResponse<Object> convert(ResponseEntity<Object> source) {

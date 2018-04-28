@@ -28,7 +28,7 @@ package com.github.ljtfreitas.restify.http.netflix.client.request;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-class SimpleRibbonExceptionHandler implements RibbonExceptionHandler {
+public class SimpleRibbonExceptionHandler implements RibbonExceptionHandler {
 
 	private static final Logger log = LoggerFactory.getLogger(SimpleRibbonExceptionHandler.class);
 

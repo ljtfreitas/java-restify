@@ -32,7 +32,7 @@ public class RetryExhaustedException extends RuntimeException {
 	public RetryExhaustedException() {
 	}
 
-	public RetryExhaustedException(Exception cause) {
+	public RetryExhaustedException(Throwable cause) {
 		super(cause);
 	}
 
@@ -40,4 +40,7 @@ public class RetryExhaustedException extends RuntimeException {
 		super(message);
 	}
 
+	public RetryExhaustedException(String message, Throwable cause) {
+		super(message, cause);
+	}
 }

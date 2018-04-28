@@ -32,6 +32,7 @@ import java.io.OutputStream;
 import java.net.URI;
 import java.net.URL;
 import java.nio.charset.Charset;
+import java.util.concurrent.CompletableFuture;
 
 import com.github.ljtfreitas.restify.http.client.HttpClientException;
 import com.github.ljtfreitas.restify.http.client.message.Header;
@@ -39,16 +40,18 @@ import com.github.ljtfreitas.restify.http.client.message.Headers;
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
 import com.github.ljtfreitas.restify.http.client.message.response.HttpResponseMessage;
 import com.github.ljtfreitas.restify.http.client.message.response.StatusCode;
-import com.github.ljtfreitas.restify.http.client.request.HttpClientRequest;
+import com.github.ljtfreitas.restify.http.client.request.async.AsyncHttpClientRequest;
 import com.github.ljtfreitas.restify.util.Tryable;
 
+import okhttp3.Call;
+import okhttp3.Callback;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
 import okhttp3.RequestBody;
 import okhttp3.Response;
 
-class OkHttpClientRequest implements HttpClientRequest {
+class OkHttpClientRequest implements AsyncHttpClientRequest {
 
 	private final OkHttpClient okHttpClient;
 	private final URI uri;
@@ -104,6 +107,41 @@ class OkHttpClientRequest implements HttpClientRequest {
 
 	@Override
 	public HttpResponseMessage execute() throws HttpClientException {
+		Request request = doBuildRequest();
+
+		try {
+			return responseOf(okHttpClient.newCall(request).execute());
+
+		} catch (IOException e) {
+			throw new HttpClientException("I/O error on HTTP request: [" + request.method() + " " +
+					request.url() + "]", e);
+		}
+	}
+
+	@Override
+	public CompletableFuture<HttpResponseMessage> executeAsync() throws HttpClientException {
+		CompletableFuture<HttpResponseMessage> future = new CompletableFuture<>();
+
+		Request request = doBuildRequest();
+
+		okHttpClient.newCall(request).enqueue(new Callback() {
+
+			@Override
+			public void onResponse(Call call, Response response) throws IOException {
+				future.complete(responseOf(response));
+			}
+
+			@Override
+			public void onFailure(Call call, IOException exception) {
+				future.completeExceptionally(new HttpClientException("I/O error on HTTP request: [" + request.method() + " " +
+						request.url() + "]", exception));
+			}
+		});
+
+		return future;
+	}
+
+	private Request doBuildRequest() {
 		MediaType contentType = headers.get("Content-Type").map(header -> MediaType.parse(header.value()))
 				.orElse(null);
 
@@ -120,15 +158,7 @@ class OkHttpClientRequest implements HttpClientRequest {
 
 		headers.forEach(h -> builder.addHeader(h.name(), h.value()));
 
-		Request request = builder.build();
-
-		try {
-			return responseOf(okHttpClient.newCall(request).execute());
-
-		} catch (IOException e) {
-			throw new HttpClientException("I/O error on HTTP request: [" + request.method() + " " +
-					request.url() + "]", e);
-		}
+		return builder.build();
 	}
 
 	private OkHttpClientResponse responseOf(Response response) {

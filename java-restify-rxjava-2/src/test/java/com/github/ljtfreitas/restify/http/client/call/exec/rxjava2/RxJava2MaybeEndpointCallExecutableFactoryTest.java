@@ -4,8 +4,11 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Matchers.anyVararg;
+import static org.mockito.Matchers.notNull;
 import static org.mockito.Mockito.when;
+
+import java.util.concurrent.CompletableFuture;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -14,7 +17,9 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import com.github.ljtfreitas.restify.http.client.call.EndpointCall;
+import com.github.ljtfreitas.restify.http.client.call.async.AsyncEndpointCall;
 import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutable;
+import com.github.ljtfreitas.restify.http.client.call.exec.async.AsyncEndpointCallExecutable;
 import com.github.ljtfreitas.restify.reflection.JavaType;
 
 import io.reactivex.Maybe;
@@ -29,7 +34,7 @@ public class RxJava2MaybeEndpointCallExecutableFactoryTest {
 	private EndpointCallExecutable<String, String> delegate;
 
 	@Mock
-	private EndpointCall<String> endpointCallMock;
+	private AsyncEndpointCall<String> asyncEndpointCall;
 
 	private RxJava2MaybeEndpointCallExecutableFactory<String, String> factory;
 
@@ -62,17 +67,21 @@ public class RxJava2MaybeEndpointCallExecutableFactoryTest {
 		assertEquals(JavaType.of(Object.class), factory.returnType(new SimpleEndpointMethod(SomeType.class.getMethod("dumbMaybe"))));
 	}
 
+	@SuppressWarnings("unchecked")
 	@Test
 	public void shouldCreateExecutableFromEndpointMethodWithRxJava2MaybeReturnType() throws Exception {
-		EndpointCallExecutable<Maybe<String>, String> executable = factory
-				.create(new SimpleEndpointMethod(SomeType.class.getMethod("maybe")), delegate);
+		AsyncEndpointCallExecutable<Maybe<String>, String> executable = factory
+				.createAsync(new SimpleEndpointMethod(SomeType.class.getMethod("maybe")), delegate);
 
 		String result = "maybe result";
 
-		when(delegate.execute(endpointCallMock, null))
-			.thenReturn(result);
+		when(asyncEndpointCall.executeAsync())
+			.thenReturn(CompletableFuture.completedFuture(result));
 
-		Maybe<String> maybe = executable.execute(endpointCallMock, null);
+		when(delegate.execute(notNull(EndpointCall.class), anyVararg()))
+			.then(i -> i.getArgumentAt(0, EndpointCall.class).execute());
+
+		Maybe<String> maybe = executable.executeAsync(asyncEndpointCall, null);
 
 		assertNotNull(maybe);
 
@@ -82,8 +91,6 @@ public class RxJava2MaybeEndpointCallExecutableFactoryTest {
 		subscriber.assertNoErrors()
 			.assertComplete()
 			.assertResult(result);
-
-		verify(delegate).execute(endpointCallMock, null);
 	}
 
 	@Test
@@ -93,10 +100,13 @@ public class RxJava2MaybeEndpointCallExecutableFactoryTest {
 
 		RuntimeException exception = new RuntimeException();
 
-		when(delegate.execute(endpointCallMock, null))
-			.thenThrow(exception);
+		CompletableFuture<String> future = new CompletableFuture<>();
+		future.completeExceptionally(exception);
 
-		Maybe<String> maybe = executable.execute(endpointCallMock, null);
+		when(asyncEndpointCall.executeAsync())
+			.thenReturn(future);
+
+		Maybe<String> maybe = executable.execute(asyncEndpointCall, null);
 
 		assertNotNull(maybe);
 
@@ -104,8 +114,6 @@ public class RxJava2MaybeEndpointCallExecutableFactoryTest {
 		subscriber.await();
 
 		subscriber.assertError(exception);
-
-		verify(delegate).execute(endpointCallMock, null);
 	}
 
 	interface SomeType {

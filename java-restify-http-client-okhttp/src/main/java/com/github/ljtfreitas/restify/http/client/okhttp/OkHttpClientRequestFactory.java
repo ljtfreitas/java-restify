@@ -31,11 +31,12 @@ import java.nio.charset.Charset;
 
 import com.github.ljtfreitas.restify.http.client.message.Encoding;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
-import com.github.ljtfreitas.restify.http.client.request.HttpClientRequestFactory;
+import com.github.ljtfreitas.restify.http.client.request.async.AsyncHttpClientRequest;
+import com.github.ljtfreitas.restify.http.client.request.async.AsyncHttpClientRequestFactory;
 
 import okhttp3.OkHttpClient;
 
-public class OkHttpClientRequestFactory implements HttpClientRequestFactory, Closeable {
+public class OkHttpClientRequestFactory implements AsyncHttpClientRequestFactory, Closeable {
 
 	private final OkHttpClient okHttpClient;
 	private final Charset charset;
@@ -59,6 +60,12 @@ public class OkHttpClientRequestFactory implements HttpClientRequestFactory, Clo
 
 	@Override
 	public OkHttpClientRequest createOf(EndpointRequest endpointRequest) {
+		return new OkHttpClientRequest(okHttpClient, endpointRequest.endpoint(), endpointRequest.method(), endpointRequest.headers(),
+				charset);
+	}
+
+	@Override
+	public AsyncHttpClientRequest createAsyncOf(EndpointRequest endpointRequest) {
 		return new OkHttpClientRequest(okHttpClient, endpointRequest.endpoint(), endpointRequest.method(), endpointRequest.headers(),
 				charset);
 	}

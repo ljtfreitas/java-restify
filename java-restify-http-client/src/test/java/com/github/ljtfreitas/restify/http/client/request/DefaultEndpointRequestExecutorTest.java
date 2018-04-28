@@ -1,7 +1,6 @@
 package com.github.ljtfreitas.restify.http.client.request;
 
 import static org.junit.Assert.assertEquals;
-import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -26,7 +25,6 @@ import com.github.ljtfreitas.restify.http.client.message.Header;
 import com.github.ljtfreitas.restify.http.client.message.Headers;
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
 import com.github.ljtfreitas.restify.http.client.message.response.HttpResponseMessage;
-import com.github.ljtfreitas.restify.http.client.request.interceptor.EndpointRequestInterceptorStack;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponseReader;
 import com.github.ljtfreitas.restify.reflection.JavaType;
@@ -36,9 +34,6 @@ public class DefaultEndpointRequestExecutorTest {
 
 	@Mock
 	private HttpClientRequestFactory httpClientRequestFactoryMock;
-
-	@Mock
-	private EndpointRequestInterceptorStack endpointRequestInterceptorStackMock;
 
 	@Mock
 	private EndpointRequestWriter endpointRequestWriterMock;
@@ -59,8 +54,6 @@ public class DefaultEndpointRequestExecutorTest {
 		endpointResult = new SimpleEndpointResponse<>("endpoint request result");
 
 		when(response.body()).thenReturn(new ByteArrayInputStream(endpointResult.body().getBytes()));
-
-		when(endpointRequestInterceptorStackMock.apply(any())).then(returnsFirstArg());
 
 		when(endpointResponseReaderMock.<String> read(response, JavaType.of(String.class)))
 			.thenReturn(endpointResult);

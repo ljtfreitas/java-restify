@@ -43,7 +43,7 @@ public class ListenableFutureTaskEndpointCallExecutableFactory<T, O> implements 
 	private final ListeningExecutorService executorService;
 
 	public ListenableFutureTaskEndpointCallExecutableFactory() {
-		this(MoreExecutors.listeningDecorator(Executors.newSingleThreadExecutor()));
+		this(MoreExecutors.listeningDecorator(Executors.newCachedThreadPool()));
 	}
 
 	public ListenableFutureTaskEndpointCallExecutableFactory(ListeningExecutorService executorService) {

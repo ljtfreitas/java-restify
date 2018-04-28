@@ -31,6 +31,7 @@ import java.util.concurrent.CompletableFuture;
 import com.github.ljtfreitas.restify.http.client.message.Header;
 import com.github.ljtfreitas.restify.http.client.message.Headers;
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
+import com.github.ljtfreitas.restify.http.client.message.response.HttpResponseMessage;
 import com.github.ljtfreitas.restify.http.client.message.response.StatusCode;
 
 import io.netty.buffer.ByteBufInputStream;
@@ -40,10 +41,10 @@ import io.netty.handler.codec.http.FullHttpResponse;
 
 class NettyRequestExecuteHandler extends SimpleChannelInboundHandler<FullHttpResponse> {
 
-	private final CompletableFuture<NettyHttpClientResponse> future;
+	private final CompletableFuture<HttpResponseMessage> future;
 	private final HttpRequestMessage source;
 
-	public NettyRequestExecuteHandler(CompletableFuture<NettyHttpClientResponse> future, NettyHttpClientRequest source) {
+	public NettyRequestExecuteHandler(CompletableFuture<HttpResponseMessage> future, NettyHttpClientRequest source) {
 		this.future = future;
 		this.source = source;
 	}

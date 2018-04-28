@@ -26,53 +26,53 @@
 package com.github.ljtfreitas.restify.http.client.call.async;
 
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.CompletionException;
 import java.util.concurrent.Executor;
 
 import com.github.ljtfreitas.restify.http.client.call.EndpointCall;
+import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
+import com.github.ljtfreitas.restify.http.client.request.async.AsyncEndpointRequestExecutor;
+import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
 
 class DefaultAsyncEndpointCall<T> implements AsyncEndpointCall<T> {
 
+	private final EndpointRequest endpointRequest;
+	private final AsyncEndpointRequestExecutor asyncEndpointRequestExecutor;
 	private final Executor executor;
-	private final EndpointCall<T> source;
+	private final EndpointCall<T> delegate;
 
-	public DefaultAsyncEndpointCall(Executor executor, EndpointCall<T> source) {
+	public DefaultAsyncEndpointCall(EndpointRequest endpointRequest, AsyncEndpointRequestExecutor endpointRequestExecutor,
+			Executor executor, EndpointCall<T> delegate) {
+		this.endpointRequest = endpointRequest;
+		this.asyncEndpointRequestExecutor = endpointRequestExecutor;
 		this.executor = executor;
-		this.source = source;
+		this.delegate = delegate;
 	}
 
 	@Override
-	public void execute(EndpointCallCallback<T> callback) {
-		CompletableFuture
-			.supplyAsync(() -> source.execute(), executor)
-				.whenComplete((r, e) -> handle(r, e, callback, callback));
+	public void executeAsync(EndpointCallCallback<T> callback) {
+		new CompletableFutureAsyncEndpointCall<>(doExecuteAsync(), executor)
+			.executeAsync(callback);
 	}
 
 	@Override
-	public void execute(EndpointCallSuccessCallback<T> successCallback, EndpointCallFailureCallback failureCallback) {
-		CompletableFuture
-			.supplyAsync(() -> source.execute(), executor)
-				.whenComplete((r, e) -> handle(r, e, successCallback, failureCallback));
+	public void executeAsync(EndpointCallSuccessCallback<T> success, EndpointCallFailureCallback failure) {
+		new CompletableFutureAsyncEndpointCall<>(doExecuteAsync(), executor)
+			.executeAsync(success, failure);
 	}
 
-	private void handle(T value, Throwable throwable, EndpointCallSuccessCallback<T> successCallback, EndpointCallFailureCallback failureCallback) {
-		if (throwable != null) {
-			if (failureCallback != null) {
-				Throwable cause = deepCause(throwable);
-
-				failureCallback.onFailure(cause);
-			}
-
-		} else if (successCallback != null) {
-			successCallback.onSuccess(value);
-		}
+	@Override
+	public CompletableFuture<T> executeAsync() {
+		return doExecuteAsync();
 	}
 
-	private Throwable deepCause(Throwable throwable) {
-		if (throwable instanceof CompletionException) {
-			return deepCause(throwable.getCause());
-		} else {
-			return throwable;
-		}
+	@Override
+	public T execute() {
+		return delegate.execute();
+	}
+
+	private CompletableFuture<T> doExecuteAsync() {
+		CompletableFuture<EndpointResponse<T>> future = asyncEndpointRequestExecutor.executeAsync(endpointRequest);
+
+		return future.thenApplyAsync(response -> response.body(), executor);
 	}
 }

@@ -28,21 +28,12 @@ package com.github.ljtfreitas.restify.http.client.apache.httpclient;
 import java.io.Closeable;
 import java.io.IOException;
 import java.nio.charset.Charset;
-import java.util.Arrays;
 import java.util.Optional;
 
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
 import org.apache.http.client.config.RequestConfig.Builder;
 import org.apache.http.client.methods.Configurable;
-import org.apache.http.client.methods.HttpDelete;
-import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpHead;
-import org.apache.http.client.methods.HttpOptions;
-import org.apache.http.client.methods.HttpPatch;
-import org.apache.http.client.methods.HttpPost;
-import org.apache.http.client.methods.HttpPut;
-import org.apache.http.client.methods.HttpTrace;
 import org.apache.http.client.methods.HttpUriRequest;
 import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.impl.client.HttpClients;
@@ -136,59 +127,6 @@ public class ApacheHttpClientRequestFactory implements HttpClientRequestFactory,
 		});
 
 		return builder.build();
-	}
-
-	private enum HttpUriRequestStrategy {
-
-		GET {
-			HttpUriRequest create(String endpoint) {
-				return new HttpGet(endpoint);
-			}
-		},
-		HEAD {
-			HttpUriRequest create(String endpoint) {
-				return new HttpHead(endpoint);
-			}
-		},
-		POST {
-			HttpUriRequest create(String endpoint) {
-				return new HttpPost(endpoint);
-			}
-		},
-		PUT {
-			HttpUriRequest create(String endpoint) {
-				return new HttpPut(endpoint);
-			}
-		},
-		PATCH {
-			HttpUriRequest create(String endpoint) {
-				return new HttpPatch(endpoint);
-			}
-		},
-		DELETE {
-			HttpUriRequest create(String endpoint) {
-				return new HttpDelete(endpoint);
-			}
-		},
-		OPTIONS {
-			HttpUriRequest create(String endpoint) {
-				return new HttpOptions(endpoint);
-			}
-		},
-		TRACE {
-			HttpUriRequest create(String endpoint) {
-				return new HttpTrace(endpoint);
-			}
-		};
-
-		abstract HttpUriRequest create(String endpoint);
-
-		static HttpUriRequestStrategy of(String method) {
-			return Arrays.stream(HttpUriRequestStrategy.values())
-					.filter(m -> m.name().equals(method))
-						.findFirst()
-							.orElseThrow(() -> new IllegalArgumentException("Unsupported http method: " + method));
-		}
 	}
 
 	@Override

@@ -29,21 +29,17 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 
-import com.github.ljtfreitas.restify.http.client.call.EndpointCall;
+import com.github.ljtfreitas.restify.http.client.call.async.AsyncEndpointCall;
 import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutable;
-import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutableDecoratorFactory;
+import com.github.ljtfreitas.restify.http.client.call.exec.async.AsyncEndpointCallExecutable;
+import com.github.ljtfreitas.restify.http.client.call.exec.async.AsyncEndpointCallExecutableDecoratorFactory;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethod;
 import com.github.ljtfreitas.restify.reflection.JavaType;
 
-public class CompletableFutureEndpointCallExecutableFactory<T, O> implements EndpointCallExecutableDecoratorFactory<CompletableFuture<T>, T, O> {
+public class CompletableFutureEndpointCallExecutableFactory<T, O> implements AsyncEndpointCallExecutableDecoratorFactory<CompletableFuture<T>, T, O> {
 
 	private final Executor executor;
-
-	public CompletableFutureEndpointCallExecutableFactory() {
-		this(Executors.newSingleThreadExecutor());
-	}
 
 	public CompletableFutureEndpointCallExecutableFactory(Executor executor) {
 		this.executor = executor;
@@ -66,11 +62,11 @@ public class CompletableFutureEndpointCallExecutableFactory<T, O> implements End
 	}
 
 	@Override
-	public EndpointCallExecutable<CompletableFuture<T>, O> create(EndpointMethod endpointMethod, EndpointCallExecutable<T, O> executable) {
+	public AsyncEndpointCallExecutable<CompletableFuture<T>, O> createAsync(EndpointMethod endpointMethod, EndpointCallExecutable<T, O> executable) {
 		return new CompletableFutureEndpointCallExecutable(executable);
 	}
 
-	private class CompletableFutureEndpointCallExecutable implements EndpointCallExecutable<CompletableFuture<T>, O> {
+	private class CompletableFutureEndpointCallExecutable implements AsyncEndpointCallExecutable<CompletableFuture<T>, O> {
 
 		private final EndpointCallExecutable<T, O> delegate;
 
@@ -84,8 +80,9 @@ public class CompletableFutureEndpointCallExecutableFactory<T, O> implements End
 		}
 
 		@Override
-		public CompletableFuture<T> execute(EndpointCall<O> call, Object[] args) {
-			return CompletableFuture.supplyAsync(() -> delegate.execute(call, args), executor);
+		public CompletableFuture<T> executeAsync(AsyncEndpointCall<O> call, Object[] args) {
+			return call.executeAsync()
+				.thenApplyAsync(o -> delegate.execute(() -> o, args), executor);
 		}
 	}
 }

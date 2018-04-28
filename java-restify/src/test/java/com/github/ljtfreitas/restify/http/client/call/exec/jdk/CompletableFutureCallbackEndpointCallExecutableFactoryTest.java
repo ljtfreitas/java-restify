@@ -5,9 +5,13 @@ import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyVararg;
+import static org.mockito.Matchers.eq;
+import static org.mockito.Matchers.isNull;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.function.BiConsumer;
 
 import org.junit.Before;
@@ -17,12 +21,12 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import com.github.ljtfreitas.restify.http.client.call.EndpointCall;
-import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutable;
+import com.github.ljtfreitas.restify.http.client.call.async.AsyncEndpointCall;
 import com.github.ljtfreitas.restify.http.client.call.exec.SimpleEndpointMethod;
-import com.github.ljtfreitas.restify.http.client.call.exec.jdk.CompletableFutureCallbackEndpointCallExecutableFactory;
+import com.github.ljtfreitas.restify.http.client.call.exec.async.AsyncEndpointCallExecutable;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethodParameter;
-import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethodParameters;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethodParameter.EndpointMethodParameterType;
+import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethodParameters;
 import com.github.ljtfreitas.restify.reflection.JavaType;
 import com.github.ljtfreitas.restify.reflection.SimpleParameterizedType;
 
@@ -30,7 +34,10 @@ import com.github.ljtfreitas.restify.reflection.SimpleParameterizedType;
 public class CompletableFutureCallbackEndpointCallExecutableFactoryTest {
 
 	@Mock
-	private EndpointCallExecutable<String, String> delegate;
+	private AsyncEndpointCallExecutable<String, String> delegate;
+
+	@Mock
+	private AsyncEndpointCall<String> asyncEndpointCall;
 
 	private CompletableFutureCallbackEndpointCallExecutableFactory<String, String> factory;
 
@@ -68,18 +75,24 @@ public class CompletableFutureCallbackEndpointCallExecutableFactoryTest {
 		assertEquals(JavaType.of(String.class), factory.returnType(futureWithCallbackEndpointMethod));
 	}
 
+	@SuppressWarnings("unchecked")
 	@Test
 	public void shouldCreateExecutableFromEndpointRunnableAsyncMethodWithBiConsumerCallbackParameter() throws Exception {
-		EndpointCallExecutable<Void, String> executable = factory.create(futureWithCallbackEndpointMethod, delegate);
+		AsyncEndpointCallExecutable<Void, String> executable = factory.createAsync(futureWithCallbackEndpointMethod, delegate);
 
 		String result = "future result";
-		BiConsumer<String, Throwable> callbackArgument = ((r, t) -> assertEquals("other", r));
 
-		executable.execute(() -> result, new Object[]{callbackArgument});
+		when(asyncEndpointCall.executeAsync()).thenReturn(CompletableFuture.completedFuture(result));
+
+		BiConsumer<String, Throwable> callback = mock(BiConsumer.class);
+
+		executable.executeAsync(asyncEndpointCall, new Object[]{callback});
 
 		assertEquals(delegate.returnType(), executable.returnType());
 
 		verify(delegate).execute(any(), anyVararg());
+
+		verify(callback).accept(eq(result), isNull(Throwable.class));
 	}
 
 	interface SomeType {

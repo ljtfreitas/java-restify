@@ -36,7 +36,7 @@ import com.github.ljtfreitas.restify.http.client.message.Header;
 import com.github.ljtfreitas.restify.http.client.message.Headers;
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
 import com.github.ljtfreitas.restify.http.client.message.response.HttpResponseMessage;
-import com.github.ljtfreitas.restify.http.client.request.HttpClientRequest;
+import com.github.ljtfreitas.restify.http.client.request.async.AsyncHttpClientRequest;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
@@ -49,7 +49,7 @@ import io.netty.handler.codec.http.HttpMethod;
 import io.netty.handler.codec.http.HttpRequest;
 import io.netty.handler.codec.http.HttpVersion;
 
-class NettyHttpClientRequest implements HttpClientRequest {
+class NettyHttpClientRequest implements AsyncHttpClientRequest {
 
 	private static final String HTTP_SCHEME = "http";
 	private static final String HTTPS_SCHEME = "https";
@@ -108,22 +108,31 @@ class NettyHttpClientRequest implements HttpClientRequest {
 	}
 
 	@Override
-	public HttpResponseMessage execute() throws HttpClientException {
-		final CompletableFuture<NettyHttpClientResponse> responseOnFuture = new CompletableFuture<>();
+	public CompletableFuture<HttpResponseMessage> executeAsync() throws HttpClientException {
+		return doExecuteAsync();
+	}
 
-		NettyRequestExecuteHandler nettyRequestExecuteHandler = new NettyRequestExecuteHandler(responseOnFuture, this);
+	@Override
+	public HttpResponseMessage execute() throws HttpClientException {
+		try {
+			return doExecuteAsync().get();
+
+		} catch (InterruptedException | ExecutionException e) {
+			throw new HttpClientException("I/O error on HTTP request: [" + method + " " + uri + "]", e);
+		}
+	}
+
+	private CompletableFuture<HttpResponseMessage> doExecuteAsync() {
+		final CompletableFuture<HttpResponseMessage> responseAsFuture = new CompletableFuture<>();
+
+		NettyRequestExecuteHandler nettyRequestExecuteHandler = new NettyRequestExecuteHandler(responseAsFuture, this);
 
 		ChannelFutureListener connectionListener = new NettyChannelFutureListener(nettyHttpRequest(), nettyRequestExecuteHandler);
 
 		bootstrap.connect(uri.getHost(), port())
 				.addListener(connectionListener);
 
-		try {
-			return responseOnFuture.get();
-
-		} catch (InterruptedException | ExecutionException e) {
-			throw new HttpClientException("I/O error on HTTP request: [" + method + " " + uri + "]", e);
-		}
+		return responseAsFuture;
 	}
 
 	private int port() {
