@@ -3,8 +3,10 @@ package com.github.ljtfreitas.restify.http.client.call.exec.rxjava;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
+
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -12,8 +14,8 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import com.github.ljtfreitas.restify.http.client.call.EndpointCall;
-import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutable;
+import com.github.ljtfreitas.restify.http.client.call.async.AsyncEndpointCall;
+import com.github.ljtfreitas.restify.http.client.call.exec.async.AsyncEndpointCallExecutable;
 
 import rx.Completable;
 import rx.Scheduler;
@@ -24,7 +26,7 @@ import rx.schedulers.Schedulers;
 public class RxJavaCompletableEndpointCallExecutableFactoryTest {
 
 	@Mock
-	private EndpointCall<Void> endpointCallMock;
+	private AsyncEndpointCall<Void> endpointCall;
 
 	private RxJavaCompletableEndpointCallExecutableFactory factory;
 
@@ -49,10 +51,13 @@ public class RxJavaCompletableEndpointCallExecutableFactoryTest {
 
 	@Test
 	public void shouldCreateExecutableFromEndpointMethodWithRxJavaCompletableReturnType() throws Exception {
-		EndpointCallExecutable<Completable, Void> executable = factory
-				.create(new SimpleEndpointMethod(SomeType.class.getMethod("completable")));
+		AsyncEndpointCallExecutable<Completable, Void> executable = factory
+				.createAsync(new SimpleEndpointMethod(SomeType.class.getMethod("completable")));
 
-		Completable completable = executable.execute(endpointCallMock, null);
+		when(endpointCall.executeAsync())
+			.thenReturn(CompletableFuture.completedFuture(null));
+
+		Completable completable = executable.executeAsync(endpointCall, null);
 
 		assertNotNull(completable);
 
@@ -61,29 +66,28 @@ public class RxJavaCompletableEndpointCallExecutableFactoryTest {
 		subscriber.assertCompleted()
 			.assertNoErrors()
 			.assertNoValues();
-
-		verify(endpointCallMock).execute();
 	}
 
 	@Test
 	public void shouldSubscribeErrorOnCompletableWhenCreatedExecutableWithRxJavaCompletableReturnTypeThrowException() throws Exception {
-		EndpointCallExecutable<Completable, Void> executable = factory
-				.create(new SimpleEndpointMethod(SomeType.class.getMethod("completable")));
+		AsyncEndpointCallExecutable<Completable, Void> executable = factory
+				.createAsync(new SimpleEndpointMethod(SomeType.class.getMethod("completable")));
 
 		RuntimeException exception = new RuntimeException();
 
-		when(endpointCallMock.execute())
-			.thenThrow(exception);
+		CompletableFuture<Void> future = new CompletableFuture<>();
+		future.completeExceptionally(exception);
 
-		Completable completable = executable.execute(endpointCallMock, null);
+		when(endpointCall.executeAsync())
+			.thenReturn(future);
+
+		Completable completable = executable.execute(endpointCall, null);
 
 		assertNotNull(completable);
 
 		AssertableSubscriber<Void> subscriber = completable.subscribeOn(scheduler).test();
 
-		subscriber.assertError(exception);
-
-		verify(endpointCallMock).execute();
+		subscriber.assertError(ExecutionException.class);
 	}
 
 	interface SomeType {

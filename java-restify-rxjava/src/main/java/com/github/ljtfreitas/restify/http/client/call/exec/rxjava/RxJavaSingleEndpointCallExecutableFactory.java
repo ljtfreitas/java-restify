@@ -28,9 +28,10 @@ package com.github.ljtfreitas.restify.http.client.call.exec.rxjava;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 
-import com.github.ljtfreitas.restify.http.client.call.EndpointCall;
+import com.github.ljtfreitas.restify.http.client.call.async.AsyncEndpointCall;
 import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutable;
-import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutableDecoratorFactory;
+import com.github.ljtfreitas.restify.http.client.call.exec.async.AsyncEndpointCallExecutable;
+import com.github.ljtfreitas.restify.http.client.call.exec.async.AsyncEndpointCallExecutableDecoratorFactory;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethod;
 import com.github.ljtfreitas.restify.reflection.JavaType;
 
@@ -38,7 +39,7 @@ import rx.Scheduler;
 import rx.Single;
 import rx.schedulers.Schedulers;
 
-public class RxJavaSingleEndpointCallExecutableFactory<T, O> implements EndpointCallExecutableDecoratorFactory<Single<T>, T, O> {
+public class RxJavaSingleEndpointCallExecutableFactory<T, O> implements AsyncEndpointCallExecutableDecoratorFactory<Single<T>, T, O> {
 
 	public final Scheduler scheduler;
 
@@ -67,11 +68,11 @@ public class RxJavaSingleEndpointCallExecutableFactory<T, O> implements Endpoint
 	}
 
 	@Override
-	public EndpointCallExecutable<Single<T>, O> create(EndpointMethod endpointMethod, EndpointCallExecutable<T, O> delegate) {
-		return new RxJavaSingleEndpointCallExecutable(delegate);
+	public AsyncEndpointCallExecutable<Single<T>, O> createAsync(EndpointMethod endpointMethod, EndpointCallExecutable<T, O> executable) {
+		return new RxJavaSingleEndpointCallExecutable(executable);
 	}
 
-	private class RxJavaSingleEndpointCallExecutable implements EndpointCallExecutable<Single<T>, O> {
+	private class RxJavaSingleEndpointCallExecutable implements AsyncEndpointCallExecutable<Single<T>, O> {
 
 		private EndpointCallExecutable<T, O> delegate;
 
@@ -85,8 +86,9 @@ public class RxJavaSingleEndpointCallExecutableFactory<T, O> implements Endpoint
 		}
 
 		@Override
-		public Single<T> execute(EndpointCall<O> call, Object[] args) {
-			return Single.fromCallable(() -> delegate.execute(call, args))
+		public Single<T> executeAsync(AsyncEndpointCall<O> call, Object[] args) {
+			return Single.from(call.executeAsync())
+				.map(o -> delegate.execute(() -> o, args))
 					.subscribeOn(scheduler);
 		}
 	}

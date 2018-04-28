@@ -28,7 +28,6 @@ package com.github.ljtfreitas.restify.http.client.call.exec.jdk;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.FutureTask;
 
 import com.github.ljtfreitas.restify.http.client.call.EndpointCall;
@@ -40,10 +39,6 @@ import com.github.ljtfreitas.restify.reflection.JavaType;
 public class FutureTaskEndpointCallExecutableFactory<T, O> implements EndpointCallExecutableDecoratorFactory<FutureTask<T>, T, O> {
 
 	private final ExecutorService executorService;
-
-	public FutureTaskEndpointCallExecutableFactory() {
-		this.executorService = Executors.newSingleThreadExecutor();
-	}
 
 	public FutureTaskEndpointCallExecutableFactory(ExecutorService executorService) {
 		this.executorService = executorService;

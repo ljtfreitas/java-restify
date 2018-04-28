@@ -10,7 +10,7 @@
 	<dependencies>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
-			<artifactId>java-restify-contract</artifactId>
+			<artifactId>java-restify-http-client</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 	</dependencies>

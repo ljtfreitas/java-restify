@@ -37,7 +37,7 @@ import com.github.ljtfreitas.restify.http.client.retry.RetryCondition.HeadersRet
 import com.github.ljtfreitas.restify.http.client.retry.RetryCondition.StatusCodeRetryCondition;
 import com.github.ljtfreitas.restify.http.client.retry.RetryCondition.ThrowableRetryCondition;
 
-class RetryConditionMatcher {
+public class RetryConditionMatcher {
 
 	private final Collection<StatusCodeRetryCondition> statusCodeConditions;
 	private final Collection<ThrowableRetryCondition> throwableConditions;

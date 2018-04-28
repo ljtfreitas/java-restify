@@ -1,0 +1,2 @@
+com.github.ljtfreitas.restify.http.spring.client.call.exec.MonoEndpointCallExecutableFactory
+com.github.ljtfreitas.restify.http.spring.client.call.exec.FluxEndpointCallExecutableFactory

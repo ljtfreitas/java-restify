@@ -29,8 +29,10 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 
 import com.github.ljtfreitas.restify.http.client.call.EndpointCall;
+import com.github.ljtfreitas.restify.http.client.call.async.AsyncEndpointCall;
 import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutable;
-import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutableDecoratorFactory;
+import com.github.ljtfreitas.restify.http.client.call.exec.async.AsyncEndpointCallExecutable;
+import com.github.ljtfreitas.restify.http.client.call.exec.async.AsyncEndpointCallExecutableDecoratorFactory;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethod;
 import com.github.ljtfreitas.restify.reflection.JavaType;
 
@@ -38,7 +40,7 @@ import io.reactivex.Flowable;
 import io.reactivex.Scheduler;
 import io.reactivex.schedulers.Schedulers;
 
-public class RxJava2FlowableEndpointCallExecutableFactory<T, O> implements EndpointCallExecutableDecoratorFactory<Flowable<T>, T, O> {
+public class RxJava2FlowableEndpointCallExecutableFactory<T, O> implements AsyncEndpointCallExecutableDecoratorFactory<Flowable<T>, T, O> {
 
 	public final Scheduler scheduler;
 
@@ -67,11 +69,11 @@ public class RxJava2FlowableEndpointCallExecutableFactory<T, O> implements Endpo
 	}
 
 	@Override
-	public EndpointCallExecutable<Flowable<T>, O> create(EndpointMethod endpointMethod, EndpointCallExecutable<T, O> delegate) {
-		return new RxJava2FlowableEndpointCallExecutable(delegate);
+	public AsyncEndpointCallExecutable<Flowable<T>, O> createAsync(EndpointMethod endpointMethod, EndpointCallExecutable<T, O> executable) {
+		return new RxJava2FlowableEndpointCallExecutable(executable);
 	}
 
-	private class RxJava2FlowableEndpointCallExecutable implements EndpointCallExecutable<Flowable<T>, O> {
+	private class RxJava2FlowableEndpointCallExecutable implements AsyncEndpointCallExecutable<Flowable<T>, O> {
 
 		private EndpointCallExecutable<T, O> delegate;
 
@@ -88,6 +90,13 @@ public class RxJava2FlowableEndpointCallExecutableFactory<T, O> implements Endpo
 		public Flowable<T> execute(EndpointCall<O> call, Object[] args) {
 			return Flowable.fromCallable(() -> delegate.execute(call, args))
 					.subscribeOn(scheduler);
+		}
+
+		@Override
+		public Flowable<T> executeAsync(AsyncEndpointCall<O> call, Object[] args) {
+			return Flowable.fromFuture(call.executeAsync())
+					.map(o -> delegate.execute(() -> o, args))
+						.subscribeOn(scheduler);
 		}
 	}
 }

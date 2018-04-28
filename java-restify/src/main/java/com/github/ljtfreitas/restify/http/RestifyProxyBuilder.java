@@ -37,19 +37,24 @@ import java.util.Optional;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLSocketFactory;
 
+import com.github.ljtfreitas.restify.http.client.call.DefaultEndpointCallFactory;
 import com.github.ljtfreitas.restify.http.client.call.EndpointCallFactory;
 import com.github.ljtfreitas.restify.http.client.call.EndpointMethodExecutor;
+import com.github.ljtfreitas.restify.http.client.call.async.DefaultAsyncEndpointCallFactory;
+import com.github.ljtfreitas.restify.http.client.call.async.ExecutorAsyncEndpointCall;
+import com.github.ljtfreitas.restify.http.client.call.async.ExecutorAsyncEndpointCallFactory;
 import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutableProvider;
 import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutables;
 import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallObjectExecutableFactory;
 import com.github.ljtfreitas.restify.http.client.call.exec.HeadersEndpointCallExecutableFactory;
 import com.github.ljtfreitas.restify.http.client.call.exec.StatusCodeEndpointCallExecutableFactory;
 import com.github.ljtfreitas.restify.http.client.call.exec.async.AsyncCallbackEndpointCallExecutableFactory;
-import com.github.ljtfreitas.restify.http.client.call.exec.async.AsyncEndpointCallExecutableFactory;
+import com.github.ljtfreitas.restify.http.client.call.exec.async.AsyncEndpointCallObjectExecutableFactory;
 import com.github.ljtfreitas.restify.http.client.call.exec.jdk.CallableEndpointCallExecutableFactory;
 import com.github.ljtfreitas.restify.http.client.call.exec.jdk.CollectionEndpointCallExecutableFactory;
 import com.github.ljtfreitas.restify.http.client.call.exec.jdk.CompletableFutureCallbackEndpointCallExecutableFactory;
@@ -82,6 +87,9 @@ import com.github.ljtfreitas.restify.http.client.request.EndpointRequestFactory;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequestWriter;
 import com.github.ljtfreitas.restify.http.client.request.EndpointVersion;
 import com.github.ljtfreitas.restify.http.client.request.HttpClientRequestFactory;
+import com.github.ljtfreitas.restify.http.client.request.async.AsyncEndpointRequestExecutor;
+import com.github.ljtfreitas.restify.http.client.request.async.AsyncHttpClientRequestFactory;
+import com.github.ljtfreitas.restify.http.client.request.async.DefaultAsyncEndpointRequestExecutor;
 import com.github.ljtfreitas.restify.http.client.request.authentication.Authentication;
 import com.github.ljtfreitas.restify.http.client.request.interceptor.AcceptVersionHeaderEndpointRequestInterceptor;
 import com.github.ljtfreitas.restify.http.client.request.interceptor.EndpointRequestInterceptor;
@@ -97,6 +105,7 @@ import com.github.ljtfreitas.restify.http.client.retry.RetryCondition.StatusCode
 import com.github.ljtfreitas.restify.http.client.retry.RetryCondition.ThrowableRetryCondition;
 import com.github.ljtfreitas.restify.http.client.retry.RetryConfiguration;
 import com.github.ljtfreitas.restify.http.client.retry.RetryableEndpointRequestExecutor;
+import com.github.ljtfreitas.restify.http.client.retry.async.AsyncRetryableEndpointRequestExecutor;
 import com.github.ljtfreitas.restify.http.contract.metadata.Contract;
 import com.github.ljtfreitas.restify.http.contract.metadata.ContractExpressionResolver;
 import com.github.ljtfreitas.restify.http.contract.metadata.ContractReader;
@@ -119,7 +128,7 @@ public class RestifyProxyBuilder {
 
 	private EndpointRequestInterceptorsBuilder endpointRequestInterceptorsBuilder = new EndpointRequestInterceptorsBuilder(this);
 
-	private EndpointCallExecutablesBuilder endpointMethodExecutablesBuilder = new EndpointCallExecutablesBuilder(this);
+	private EndpointCallExecutablesBuilder endpointCallExecutablesBuilder = new EndpointCallExecutablesBuilder(this);
 
 	private EndpointResponseErrorFallbackBuilder endpointResponseErrorFallbackBuilder = new EndpointResponseErrorFallbackBuilder(this);
 
@@ -172,11 +181,11 @@ public class RestifyProxyBuilder {
 	}
 
 	public EndpointCallExecutablesBuilder executables() {
-		return this.endpointMethodExecutablesBuilder;
+		return this.endpointCallExecutablesBuilder;
 	}
 
 	public RestifyProxyBuilder executables(EndpointCallExecutableProvider providers) {
-		this.endpointMethodExecutablesBuilder.add(providers);
+		this.endpointCallExecutablesBuilder.add(providers);
 		return this;
 	}
 
@@ -227,36 +236,77 @@ public class RestifyProxyBuilder {
 		private RestifyProxyHandler doBuild() {
 			EndpointTarget target = new EndpointTarget(type, Optional.ofNullable(endpoint).orElse(null));
 
-			EndpointMethodExecutor endpointMethodExecutor = new EndpointMethodExecutor(endpointCallExecutables(), endpointMethodCallFactory()); 
+			EndpointMethodExecutor endpointMethodExecutor = new EndpointMethodExecutor(
+					endpointRequestFactory(),
+					endpointCallExecutables(),
+					endpointCallFactory());
 
 			Contract contract = contract();
 
 			return new RestifyProxyHandler(contract.read(target), endpointMethodExecutor);
 		}
 
-		private EndpointCallExecutables endpointCallExecutables() {
-			return endpointMethodExecutablesBuilder.build();
-		}
-
-		private EndpointCallFactory endpointMethodCallFactory() {
-			return new EndpointCallFactory(endpointRequestFactory(), retryable(endpointRequestExecutor()));
-		}
-
 		private EndpointRequestFactory endpointRequestFactory() {
 			return new EndpointRequestFactory(endpointRequestInterceptorsBuilder.build());
 		}
 
+		private EndpointCallExecutables endpointCallExecutables() {
+			return endpointCallExecutablesBuilder.build();
+		}
+
+		private EndpointCallFactory endpointCallFactory() {
+			EndpointRequestExecutor executor = retryable(endpointRequestExecutor());
+			return executor instanceof AsyncEndpointRequestExecutor ?
+					asyncEndpointCallFactory(executor) :
+						executorEndpointCallFactory(executor);
+		}
+
+		private EndpointCallFactory asyncEndpointCallFactory(EndpointRequestExecutor executor) {
+			EndpointCallFactory delegate = new DefaultEndpointCallFactory(executor);
+			return new DefaultAsyncEndpointCallFactory((AsyncEndpointRequestExecutor) executor,
+					endpointCallExecutablesBuilder.async.executor,
+					delegate);
+		}
+
+		private EndpointCallFactory executorEndpointCallFactory(EndpointRequestExecutor executor) {
+			EndpointCallFactory delegate = new DefaultEndpointCallFactory(executor);
+			return new ExecutorAsyncEndpointCallFactory(delegate, endpointCallExecutablesBuilder.async.executor);
+		}
+
 		private EndpointRequestExecutor endpointRequestExecutor() {
-			HttpMessageConverters messageConverters = httpMessageConvertersBuilder.build();
 			return Optional.ofNullable(endpointRequestExecutor)
-					.orElseGet(() -> new DefaultEndpointRequestExecutor(httpClientRequestFactory(), 
-							new EndpointRequestWriter(messageConverters),
-							new EndpointResponseReader(messageConverters, endpointResponseErrorFallbackBuilder())));
+				.orElseGet(() -> endpointRequestExecutor(httpClientRequestFactory()));
+		}
+
+		private EndpointRequestExecutor endpointRequestExecutor(HttpClientRequestFactory httpClientRequestFactory) {
+			HttpMessageConverters httpMessageConverters = httpMessageConvertersBuilder.build();
+
+			EndpointRequestWriter writer = new EndpointRequestWriter(httpMessageConverters);
+			EndpointResponseReader reader = new EndpointResponseReader(httpMessageConverters, endpointResponseErrorFallbackBuilder());
+
+			return httpClientRequestFactory instanceof AsyncHttpClientRequestFactory ?
+					asyncEndpointRequestExecutor((AsyncHttpClientRequestFactory) httpClientRequestFactory, writer, reader) :
+						endpointRequestExecutor(httpClientRequestFactory, writer, reader);
+		}
+
+		private EndpointRequestExecutor asyncEndpointRequestExecutor(AsyncHttpClientRequestFactory asyncHttpClientRequestFactory,
+				EndpointRequestWriter writer, EndpointResponseReader reader) {
+			return new DefaultAsyncEndpointRequestExecutor(endpointCallExecutablesBuilder.async.executor,
+					(AsyncHttpClientRequestFactory) httpClientRequestFactory, writer, reader,
+						endpointRequestExecutor(asyncHttpClientRequestFactory, writer, reader));
+		}
+
+		private EndpointRequestExecutor endpointRequestExecutor(HttpClientRequestFactory httpClientRequestFactory,
+				EndpointRequestWriter writer, EndpointResponseReader reader) {
+			return new DefaultEndpointRequestExecutor(httpClientRequestFactory, writer, reader);
 		}
 
 		private EndpointRequestExecutor retryable(EndpointRequestExecutor delegate) {
 			RetryConfiguration configuration = retryBuilder.build();
-			return configuration == null ? delegate : new RetryableEndpointRequestExecutor(delegate, configuration);
+			return configuration == null ? delegate :
+				delegate instanceof AsyncEndpointRequestExecutor ?
+						new AsyncRetryableEndpointRequestExecutor((AsyncEndpointRequestExecutor) delegate, retryBuilder.async.scheduler, configuration) :
+							new RetryableEndpointRequestExecutor(delegate, configuration);
 		}
 
 		private EndpointResponseErrorFallback endpointResponseErrorFallbackBuilder() {
@@ -476,12 +526,15 @@ public class RestifyProxyBuilder {
 		}
 
 		private EndpointCallExecutables build() {
-			providers.addAll(built);
-			providers.addAll(async.build());
+			Collection<EndpointCallExecutableProvider> all = new ArrayList<>();
 
-			if (discoveryComponentConfiguration.enabled) providers.addAll(provider.all(EndpointCallExecutableProvider.class));
+			all.addAll(providers);
+			all.addAll(built);
+			all.addAll(async.build());
 
-			return new EndpointCallExecutables(providers);
+			if (discoveryComponentConfiguration.enabled) all.addAll(provider.all(EndpointCallExecutableProvider.class));
+
+			return new EndpointCallExecutables(all);
 		}
 	}
 
@@ -489,23 +542,24 @@ public class RestifyProxyBuilder {
 
 		private final Collection<EndpointCallExecutableProvider> providers = new ArrayList<>();
 
-		private AsyncEndpointCallExecutablesBuilder all() {
-			with(Executors.newCachedThreadPool());
-			return this;
-		}
+		private Executor executor = ExecutorAsyncEndpointCall.pool();
 
-		private AsyncEndpointCallExecutablesBuilder with(ExecutorService executor) {
-			with((Executor) executor);
+		private AsyncEndpointCallExecutablesBuilder all() {
 			providers.add(new FutureEndpointCallExecutableFactory<Object, Object>(executor));
-			providers.add(new FutureTaskEndpointCallExecutableFactory<Object, Object>(executor));
+			providers.add(new CompletableFutureEndpointCallExecutableFactory<Object, Object>(executor));
+			providers.add(new CompletableFutureCallbackEndpointCallExecutableFactory<Object, Object>(executor));
+			providers.add(new AsyncEndpointCallObjectExecutableFactory<Object, Object>(executor));
+			providers.add(new AsyncCallbackEndpointCallExecutableFactory<Object, Object>(executor));
+
+			if (executor instanceof ExecutorService) {
+				providers.add(new FutureTaskEndpointCallExecutableFactory<Object, Object>((ExecutorService) executor));
+			}
+
 			return this;
 		}
 
 		private AsyncEndpointCallExecutablesBuilder with(Executor executor) {
-			providers.add(new CompletableFutureEndpointCallExecutableFactory<Object, Object>(executor));
-			providers.add(new CompletableFutureCallbackEndpointCallExecutableFactory<Object, Object>(executor));
-			providers.add(new AsyncEndpointCallExecutableFactory<Object, Object>(executor));
-			providers.add(new AsyncCallbackEndpointCallExecutableFactory<Object, Object>(executor));
+			this.executor = executor;
 			return this;
 		}
 
@@ -670,6 +724,7 @@ public class RestifyProxyBuilder {
 
 		private final RestifyProxyBuilder context;
 		private final RetryConfigurationBuilder builder = new RetryConfigurationBuilder();
+		private final AsyncRetryConfigurationBuilder async = new AsyncRetryConfigurationBuilder(this);
 
 		private boolean enabled = false;
 		private RetryConfiguration configuration;
@@ -694,6 +749,10 @@ public class RestifyProxyBuilder {
 			return context;
 		}
 
+		public AsyncRetryConfigurationBuilder async() {
+			return async;
+		}
+
 		public RestifyProxyBuilder and() {
 			return context;
 		}
@@ -705,7 +764,7 @@ public class RestifyProxyBuilder {
 		public class RetryConfigurationBuilder {
 
 			private final RetryConfiguration.Builder delegate = new RetryConfiguration.Builder();
-			private final RetryConfigurationBackOffBuilder backOff = new RetryConfigurationBackOffBuilder();
+			private final RetryConfigurationBackOffBuilder backOff = new RetryConfigurationBackOffBuilder(this);
 
 			public RetryConfigurationBuilder attempts(int attempts) {
 				delegate.attempts(attempts);
@@ -767,6 +826,12 @@ public class RestifyProxyBuilder {
 
 			public class RetryConfigurationBackOffBuilder {
 
+				private final RetryConfigurationBuilder context;
+
+				private RetryConfigurationBackOffBuilder(RetryConfigurationBuilder context) {
+					this.context = context;
+				}
+
 				public RetryConfigurationBackOffBuilder delay(long delay) {
 					builder.backOff().delay(delay);
 					return this;
@@ -782,9 +847,25 @@ public class RestifyProxyBuilder {
 					return this;
 				}
 
-				public RestifyProxyBuilder and() {
+				public RetryConfigurationBuilder and() {
 					return context;
 				}
+			}
+		}
+
+		public class AsyncRetryConfigurationBuilder {
+
+			private final RetryBuilder context;
+
+			private ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+
+			private AsyncRetryConfigurationBuilder(RetryBuilder context) {
+				this.context = context;
+			}
+
+			public RetryBuilder scheduler(ScheduledExecutorService scheduler) {
+				this.scheduler = scheduler;
+				return context;
 			}
 		}
 	}

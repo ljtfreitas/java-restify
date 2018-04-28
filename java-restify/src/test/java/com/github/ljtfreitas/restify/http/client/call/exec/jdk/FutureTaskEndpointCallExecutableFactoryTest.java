@@ -8,6 +8,8 @@ import static org.mockito.Matchers.anyVararg;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.concurrent.FutureTask;
 
 import org.junit.Before;
@@ -19,7 +21,6 @@ import org.mockito.runners.MockitoJUnitRunner;
 import com.github.ljtfreitas.restify.http.client.call.EndpointCall;
 import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutable;
 import com.github.ljtfreitas.restify.http.client.call.exec.SimpleEndpointMethod;
-import com.github.ljtfreitas.restify.http.client.call.exec.jdk.FutureTaskEndpointCallExecutableFactory;
 import com.github.ljtfreitas.restify.reflection.JavaType;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -32,7 +33,9 @@ public class FutureTaskEndpointCallExecutableFactoryTest {
 
 	@Before
 	public void setup() {
-		factory = new FutureTaskEndpointCallExecutableFactory<>();
+		ExecutorService executor = Executors.newSingleThreadExecutor();
+
+		factory = new FutureTaskEndpointCallExecutableFactory<>(executor);
 
 		when(delegate.execute(any(), anyVararg()))
 			.then(invocation -> invocation.getArgumentAt(0, EndpointCall.class).execute());

@@ -9,6 +9,8 @@ import static org.mockito.Matchers.anyVararg;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.concurrent.CompletableFuture;
+
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -16,7 +18,9 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import com.github.ljtfreitas.restify.http.client.call.EndpointCall;
+import com.github.ljtfreitas.restify.http.client.call.async.AsyncEndpointCall;
 import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutable;
+import com.github.ljtfreitas.restify.http.client.call.exec.async.AsyncEndpointCallExecutable;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethodParameter;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethodParameter.EndpointMethodParameterType;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethodParameters;
@@ -30,6 +34,9 @@ public class ListenableFutureCallbackEndpointCallExecutableFactoryTest {
 
 	@Mock
 	private EndpointCallExecutable<String, String> delegate;
+
+	@Mock
+	private AsyncEndpointCall<String> asyncEndpointCall;
 
 	private ListenableFutureCallbackEndpointCallExecutableFactory<String, String> factory;
 
@@ -76,7 +83,7 @@ public class ListenableFutureCallbackEndpointCallExecutableFactoryTest {
 
 	@Test
 	public void shouldCreateExecutableFromEndpointRunnableAsyncMethodWithFutureCallbackParameter() throws Exception {
-		EndpointCallExecutable<Void, String> executable = factory.create(futureWithCallbackEndpointMethod, delegate);
+		AsyncEndpointCallExecutable<Void, String> executable = factory.createAsync(futureWithCallbackEndpointMethod, delegate);
 
 		String result = "future result";
 		FutureCallback<String> callbackArgument = new FutureCallback<String>() {
@@ -92,7 +99,10 @@ public class ListenableFutureCallbackEndpointCallExecutableFactoryTest {
 			}
 		};
 
-		executable.execute(() -> result, new Object[]{callbackArgument});
+		when(asyncEndpointCall.executeAsync())
+			.thenReturn(CompletableFuture.completedFuture(result));
+
+		executable.executeAsync(asyncEndpointCall, new Object[]{callbackArgument});
 
 		assertEquals(JavaType.of(String.class), executable.returnType());
 

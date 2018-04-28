@@ -28,9 +28,10 @@ package com.github.ljtfreitas.restify.http.client.call.exec.rxjava2;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 
-import com.github.ljtfreitas.restify.http.client.call.EndpointCall;
+import com.github.ljtfreitas.restify.http.client.call.async.AsyncEndpointCall;
 import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutable;
-import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutableDecoratorFactory;
+import com.github.ljtfreitas.restify.http.client.call.exec.async.AsyncEndpointCallExecutable;
+import com.github.ljtfreitas.restify.http.client.call.exec.async.AsyncEndpointCallExecutableDecoratorFactory;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethod;
 import com.github.ljtfreitas.restify.reflection.JavaType;
 
@@ -38,7 +39,7 @@ import io.reactivex.Observable;
 import io.reactivex.Scheduler;
 import io.reactivex.schedulers.Schedulers;
 
-public class RxJava2ObservableEndpointCallExecutableFactory<T, O> implements EndpointCallExecutableDecoratorFactory<Observable<T>, T, O> {
+public class RxJava2ObservableEndpointCallExecutableFactory<T, O> implements AsyncEndpointCallExecutableDecoratorFactory<Observable<T>, T, O> {
 
 	public final Scheduler scheduler;
 
@@ -67,11 +68,11 @@ public class RxJava2ObservableEndpointCallExecutableFactory<T, O> implements End
 	}
 
 	@Override
-	public EndpointCallExecutable<Observable<T>, O> create(EndpointMethod endpointMethod, EndpointCallExecutable<T, O> delegate) {
-		return new RxJava2ObservableEndpointCallExecutable(delegate);
+	public AsyncEndpointCallExecutable<Observable<T>, O> createAsync(EndpointMethod endpointMethod, EndpointCallExecutable<T, O> executable) {
+		return new RxJava2ObservableEndpointCallExecutable(executable);
 	}
 
-	private class RxJava2ObservableEndpointCallExecutable implements EndpointCallExecutable<Observable<T>, O> {
+	private class RxJava2ObservableEndpointCallExecutable implements AsyncEndpointCallExecutable<Observable<T>, O> {
 
 		private EndpointCallExecutable<T, O> delegate;
 
@@ -85,8 +86,9 @@ public class RxJava2ObservableEndpointCallExecutableFactory<T, O> implements End
 		}
 
 		@Override
-		public Observable<T> execute(EndpointCall<O> call, Object[] args) {
-			return Observable.fromCallable(() -> delegate.execute(call, args))
+		public Observable<T> executeAsync(AsyncEndpointCall<O> call, Object[] args) {
+			return Observable.fromFuture(call.executeAsync())
+				.map(o -> delegate.execute(() -> o, args))
 					.subscribeOn(scheduler);
 		}
 	}

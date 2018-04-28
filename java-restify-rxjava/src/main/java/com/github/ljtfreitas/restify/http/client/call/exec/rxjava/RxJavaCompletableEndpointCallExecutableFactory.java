@@ -25,9 +25,9 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.call.exec.rxjava;
 
-import com.github.ljtfreitas.restify.http.client.call.EndpointCall;
-import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutable;
-import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutableFactory;
+import com.github.ljtfreitas.restify.http.client.call.async.AsyncEndpointCall;
+import com.github.ljtfreitas.restify.http.client.call.exec.async.AsyncEndpointCallExecutable;
+import com.github.ljtfreitas.restify.http.client.call.exec.async.AsyncEndpointCallExecutableFactory;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethod;
 import com.github.ljtfreitas.restify.reflection.JavaType;
 
@@ -35,7 +35,7 @@ import rx.Completable;
 import rx.Scheduler;
 import rx.schedulers.Schedulers;
 
-public class RxJavaCompletableEndpointCallExecutableFactory implements EndpointCallExecutableFactory<Completable, Void> {
+public class RxJavaCompletableEndpointCallExecutableFactory implements AsyncEndpointCallExecutableFactory<Completable, Void> {
 
 	public final Scheduler scheduler;
 
@@ -53,11 +53,11 @@ public class RxJavaCompletableEndpointCallExecutableFactory implements EndpointC
 	}
 
 	@Override
-	public EndpointCallExecutable<Completable, Void> create(EndpointMethod endpointMethod) {
+	public AsyncEndpointCallExecutable<Completable, Void> createAsync(EndpointMethod endpointMethod) {
 		return new RxJavaCompletableEndpointCallExecutable(endpointMethod.returnType());
 	}
 
-	private class RxJavaCompletableEndpointCallExecutable implements EndpointCallExecutable<Completable, Void> {
+	private class RxJavaCompletableEndpointCallExecutable implements AsyncEndpointCallExecutable<Completable, Void> {
 
 		private final JavaType javaType;
 
@@ -71,9 +71,9 @@ public class RxJavaCompletableEndpointCallExecutableFactory implements EndpointC
 		}
 
 		@Override
-		public Completable execute(EndpointCall<Void> call, Object[] args) {
-			return Completable.fromAction(call::execute)
-					.subscribeOn(scheduler);
+		public Completable executeAsync(AsyncEndpointCall<Void> call, Object[] args) {
+			return Completable.fromFuture(call.executeAsync())
+				.subscribeOn(scheduler);
 		}
 	}
 }

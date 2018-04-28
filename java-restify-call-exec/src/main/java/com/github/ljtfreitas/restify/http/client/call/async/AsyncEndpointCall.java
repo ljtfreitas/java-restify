@@ -25,9 +25,15 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.call.async;
 
-public interface AsyncEndpointCall<T> {
+import java.util.concurrent.CompletableFuture;
 
-	public void execute(EndpointCallCallback<T> callback);
+import com.github.ljtfreitas.restify.http.client.call.EndpointCall;
 
-	public void execute(EndpointCallSuccessCallback<T> success, EndpointCallFailureCallback failure);
+public interface AsyncEndpointCall<T> extends EndpointCall<T> {
+
+	public void executeAsync(EndpointCallCallback<T> callback);
+
+	public void executeAsync(EndpointCallSuccessCallback<T> success, EndpointCallFailureCallback failure);
+
+	public CompletableFuture<T> executeAsync();
 }

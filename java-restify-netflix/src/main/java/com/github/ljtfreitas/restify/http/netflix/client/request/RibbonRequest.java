@@ -25,6 +25,8 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.netflix.client.request;
 
+import java.net.URI;
+
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
 import com.github.ljtfreitas.restify.http.client.request.HttpClientRequest;
 import com.netflix.client.ClientRequest;
@@ -34,12 +36,19 @@ public class RibbonRequest extends ClientRequest {
 	private final RibbonHttpClientRequest source;
 
 	public RibbonRequest(RibbonHttpClientRequest source) {
-		super(source.ribbonEndpoint());
+		super(source.loadBalancedEndpoint());
 		this.source = source;
 	}
 
-	public EndpointRequest replaceUri() {
-		return source.replace(super.getUri());
+	private RibbonRequest(RibbonRequest source, RibbonHttpClientRequest httpClientRequest) {
+		super(source);
+		this.source = httpClientRequest;
+	}
+
+	@Override
+	public RibbonRequest replaceUri(URI newURI) {
+		RibbonRequest newRequest = (RibbonRequest) super.replaceUri(newURI);
+		return new RibbonRequest(newRequest, source.replace(newURI));
 	}
 
 	public boolean isGet() {
@@ -52,5 +61,9 @@ public class RibbonRequest extends ClientRequest {
 
 	public String serviceName() {
 		return source.serviceName();
+	}
+
+	public EndpointRequest endpointRequest() {
+		return source.endpointRequest();
 	}
 }

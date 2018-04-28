@@ -4,8 +4,11 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Mockito.verify;
+import static org.mockito.Matchers.anyVararg;
+import static org.mockito.Matchers.notNull;
 import static org.mockito.Mockito.when;
+
+import java.util.concurrent.CompletableFuture;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -14,11 +17,13 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import com.github.ljtfreitas.restify.http.client.call.EndpointCall;
+import com.github.ljtfreitas.restify.http.client.call.async.AsyncEndpointCall;
 import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutable;
+import com.github.ljtfreitas.restify.http.client.call.exec.async.AsyncEndpointCallExecutable;
 import com.github.ljtfreitas.restify.reflection.JavaType;
 
-import io.reactivex.Single;
 import io.reactivex.Scheduler;
+import io.reactivex.Single;
 import io.reactivex.observers.TestObserver;
 import io.reactivex.schedulers.Schedulers;
 
@@ -29,7 +34,7 @@ public class RxJava2SingleEndpointCallExecutableFactoryTest {
 	private EndpointCallExecutable<String, String> delegate;
 
 	@Mock
-	private EndpointCall<String> endpointCallMock;
+	private AsyncEndpointCall<String> asyncEndpointCall;
 
 	private RxJava2SingleEndpointCallExecutableFactory<String, String> factory;
 
@@ -62,17 +67,21 @@ public class RxJava2SingleEndpointCallExecutableFactoryTest {
 		assertEquals(JavaType.of(Object.class), factory.returnType(new SimpleEndpointMethod(SomeType.class.getMethod("dumbSingle"))));
 	}
 
+	@SuppressWarnings("unchecked")
 	@Test
 	public void shouldCreateExecutableFromEndpointMethodWithRxJava2SingleReturnType() throws Exception {
-		EndpointCallExecutable<Single<String>, String> executable = factory
-				.create(new SimpleEndpointMethod(SomeType.class.getMethod("single")), delegate);
+		AsyncEndpointCallExecutable<Single<String>, String> executable = factory
+				.createAsync(new SimpleEndpointMethod(SomeType.class.getMethod("single")), delegate);
 
 		String result = "single result";
 
-		when(delegate.execute(endpointCallMock, null))
-			.thenReturn(result);
+		when(asyncEndpointCall.executeAsync())
+			.thenReturn(CompletableFuture.completedFuture(result));
 
-		Single<String> single = executable.execute(endpointCallMock, null);
+		when(delegate.execute(notNull(EndpointCall.class), anyVararg()))
+			.then(i -> i.getArgumentAt(0, EndpointCall.class).execute());
+
+		Single<String> single = executable.execute(asyncEndpointCall, null);
 
 		assertNotNull(single);
 
@@ -82,8 +91,6 @@ public class RxJava2SingleEndpointCallExecutableFactoryTest {
 		subscriber.assertNoErrors()
 			.assertComplete()
 			.assertResult(result);
-
-		verify(delegate).execute(endpointCallMock, null);
 	}
 
 	@Test
@@ -93,19 +100,20 @@ public class RxJava2SingleEndpointCallExecutableFactoryTest {
 
 		RuntimeException exception = new RuntimeException();
 
-		when(delegate.execute(endpointCallMock, null))
-			.thenThrow(exception);
+		CompletableFuture<String> future = new CompletableFuture<>();
+		future.completeExceptionally(exception);
 
-		Single<String> single = executable.execute(endpointCallMock, null);
+		when(asyncEndpointCall.executeAsync())
+			.thenReturn(future);
+
+		Single<String> single = executable.execute(asyncEndpointCall, null);
 
 		assertNotNull(single);
 
 		TestObserver<String> subscriber = single.subscribeOn(scheduler).test();
 		subscriber.await();
 
-		subscriber.assertError(exception);
-
-		verify(delegate).execute(endpointCallMock, null);
+		subscriber.assertError(t -> t.getCause().equals(exception));
 	}
 
 	interface SomeType {

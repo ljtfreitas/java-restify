@@ -25,7 +25,7 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.retry;
 
-class AlwaysRetryPolicy implements RetryPolicy {
+public class AlwaysRetryPolicy implements RetryPolicy {
 
 	private static final AlwaysRetryPolicy SINGLE_INSTANCE = new AlwaysRetryPolicy();
 

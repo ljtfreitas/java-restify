@@ -41,7 +41,7 @@ import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMess
 import com.github.ljtfreitas.restify.http.client.message.response.BaseHttpResponseMessage;
 import com.github.ljtfreitas.restify.http.client.message.response.StatusCode;
 
-class ErrorHttpResponseMessage extends BaseHttpResponseMessage {
+public class ErrorHttpResponseMessage extends BaseHttpResponseMessage {
 
 	private ErrorHttpResponseMessage(StatusCode statusCode, Headers headers, InputStream body, HttpRequestMessage httpRequest) {
 		super(statusCode, headers, body, httpRequest);

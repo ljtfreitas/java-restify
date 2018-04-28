@@ -8,6 +8,7 @@ import static org.mockito.Matchers.anyVararg;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 
 import org.junit.Before;
@@ -17,22 +18,25 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import com.github.ljtfreitas.restify.http.client.call.EndpointCall;
-import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutable;
+import com.github.ljtfreitas.restify.http.client.call.async.AsyncEndpointCall;
 import com.github.ljtfreitas.restify.http.client.call.exec.SimpleEndpointMethod;
-import com.github.ljtfreitas.restify.http.client.call.exec.jdk.FutureEndpointCallExecutableFactory;
+import com.github.ljtfreitas.restify.http.client.call.exec.async.AsyncEndpointCallExecutable;
 import com.github.ljtfreitas.restify.reflection.JavaType;
 
 @RunWith(MockitoJUnitRunner.class)
 public class FutureEndpointCallExecutableFactoryTest {
 
 	@Mock
-	private EndpointCallExecutable<String, String> delegate;
+	private AsyncEndpointCallExecutable<String, String> delegate;
+
+	@Mock
+	private AsyncEndpointCall<String> asyncEndpointCall;
 
 	private FutureEndpointCallExecutableFactory<String, String> factory;
 
 	@Before
 	public void setup() {
-		factory = new FutureEndpointCallExecutableFactory<>();
+		factory = new FutureEndpointCallExecutableFactory<>(r -> r.run());
 
 		when(delegate.execute(any(), anyVararg()))
 			.then(invocation -> invocation.getArgumentAt(0, EndpointCall.class).execute());
@@ -63,12 +67,14 @@ public class FutureEndpointCallExecutableFactoryTest {
 
 	@Test
 	public void shouldCreateExecutableFromEndpointMethodWithFutureReturnType() throws Exception {
-		EndpointCallExecutable<Future<String>, String> executable = factory
-				.create(new SimpleEndpointMethod(SomeType.class.getMethod("future")), delegate);
+		AsyncEndpointCallExecutable<Future<String>, String> executable = factory
+				.createAsync(new SimpleEndpointMethod(SomeType.class.getMethod("future")), delegate);
 
 		String result = "future result";
 
-		Future<String> future = executable.execute(() -> result, null);
+		when(asyncEndpointCall.executeAsync()).thenReturn(CompletableFuture.completedFuture(result));
+
+		Future<String> future = executable.executeAsync(asyncEndpointCall, null);
 
 		assertEquals(result, future.get());
 		assertEquals(delegate.returnType(), executable.returnType());

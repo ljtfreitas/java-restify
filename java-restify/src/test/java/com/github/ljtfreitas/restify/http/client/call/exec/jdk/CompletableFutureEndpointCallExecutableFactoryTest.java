@@ -17,16 +17,19 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import com.github.ljtfreitas.restify.http.client.call.EndpointCall;
-import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutable;
+import com.github.ljtfreitas.restify.http.client.call.async.AsyncEndpointCall;
 import com.github.ljtfreitas.restify.http.client.call.exec.SimpleEndpointMethod;
-import com.github.ljtfreitas.restify.http.client.call.exec.jdk.CompletableFutureEndpointCallExecutableFactory;
+import com.github.ljtfreitas.restify.http.client.call.exec.async.AsyncEndpointCallExecutable;
 import com.github.ljtfreitas.restify.reflection.JavaType;
 
 @RunWith(MockitoJUnitRunner.class)
 public class CompletableFutureEndpointCallExecutableFactoryTest {
 
 	@Mock
-	private EndpointCallExecutable<String, String> delegate;
+	private AsyncEndpointCallExecutable<String, String> delegate;
+
+	@Mock
+	private AsyncEndpointCall<String> asyncEndpointCall;
 
 	private CompletableFutureEndpointCallExecutableFactory<String, String> factory;
 
@@ -63,12 +66,14 @@ public class CompletableFutureEndpointCallExecutableFactoryTest {
 
 	@Test
 	public void shouldCreateExecutableFromEndpointMethodWithCompletableFutureReturnType() throws Exception {
-		EndpointCallExecutable<CompletableFuture<String>, String> executable = factory
-				.create(new SimpleEndpointMethod(SomeType.class.getMethod("future")), delegate);
+		AsyncEndpointCallExecutable<CompletableFuture<String>, String> executable = factory
+				.createAsync(new SimpleEndpointMethod(SomeType.class.getMethod("future")), delegate);
 
 		String result = "future result";
 
-		CompletableFuture<String> future = executable.execute(() -> result, null);
+		when(asyncEndpointCall.executeAsync()).thenReturn(CompletableFuture.completedFuture(result));
+
+		CompletableFuture<String> future = executable.executeAsync(asyncEndpointCall, null);
 
 		assertEquals(result, future.get());
 		assertEquals(delegate.returnType(), executable.returnType());
