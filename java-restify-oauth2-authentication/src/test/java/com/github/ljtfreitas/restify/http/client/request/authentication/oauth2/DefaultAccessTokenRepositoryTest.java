@@ -1,6 +1,7 @@
 package com.github.ljtfreitas.restify.http.client.request.authentication.oauth2;
 
 import static org.junit.Assert.assertSame;
+import static org.mockito.Matchers.notNull;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -59,7 +60,8 @@ public class DefaultAccessTokenRepositoryTest {
 	public void shouldGetAccessTokenFromStore() {
 		AccessToken accessToken = AccessToken.bearer("access-token");
 
-		when(accessTokenStorage.findBy(request)).thenReturn(Optional.of(accessToken));
+		when(accessTokenStorage.findBy(notNull(AccessTokenStorageKey.class)))
+			.thenReturn(Optional.of(accessToken));
 
 		AccessToken output = accessTokenRepository.findBy(request);
 
@@ -70,15 +72,18 @@ public class DefaultAccessTokenRepositoryTest {
 	public void shouldGetAccessTokenFromProviderWhenStoreHasNoToken() {
 		AccessToken accessToken = AccessToken.bearer("access-token");
 
-		when(accessTokenStorage.findBy(request)).thenReturn(Optional.empty());
-		when(accessTokenProvider.provides(request)).thenReturn(accessToken);
+		when(accessTokenStorage.findBy(notNull(AccessTokenStorageKey.class)))
+			.thenReturn(Optional.empty());
+
+		when(accessTokenProvider.provides(request))
+			.thenReturn(accessToken);
 
 		AccessToken output = accessTokenRepository.findBy(request);
 
 		assertSame(output, accessToken);
 
 		verify(accessTokenProvider).provides(request);
-		verify(accessTokenStorage).add(request, accessToken);
+		verify(accessTokenStorage).add(notNull(AccessTokenStorageKey.class), accessToken);
 	}
 
 	@Test
@@ -86,8 +91,11 @@ public class DefaultAccessTokenRepositoryTest {
 		AccessToken expiredAccessToken = AccessToken.bearer("access-token", Duration.ofMillis(500));
 		AccessToken newAccessToken = AccessToken.bearer("new-access-token");
 
-		when(accessTokenStorage.findBy(request)).thenReturn(Optional.of(expiredAccessToken));
-		when(accessTokenProvider.provides(request)).thenReturn(newAccessToken);
+		when(accessTokenStorage.findBy(notNull(AccessTokenStorageKey.class)))
+			.thenReturn(Optional.of(expiredAccessToken));
+
+		when(accessTokenProvider.provides(request))
+			.thenReturn(newAccessToken);
 
 		Thread.sleep(1000);
 
@@ -95,9 +103,9 @@ public class DefaultAccessTokenRepositoryTest {
 
 		assertSame(newAccessToken, output);
 
-		verify(accessTokenStorage).findBy(request);
+		verify(accessTokenStorage).findBy(notNull(AccessTokenStorageKey.class));
 		verify(accessTokenProvider).provides(request);
-		verify(accessTokenStorage).add(request, newAccessToken);
+		verify(accessTokenStorage).add(notNull(AccessTokenStorageKey.class), newAccessToken);
 	}
 
 	@Test
@@ -109,8 +117,11 @@ public class DefaultAccessTokenRepositoryTest {
 
 		AccessToken newAccessToken = AccessToken.bearer("new-access-token");
 
-		when(accessTokenStorage.findBy(request)).thenReturn(Optional.of(expiredAccessToken));
-		when(accessTokenProvider.refresh(expiredAccessToken, request)).thenReturn(newAccessToken);
+		when(accessTokenStorage.findBy(notNull(AccessTokenStorageKey.class)))
+			.thenReturn(Optional.of(expiredAccessToken));
+
+		when(accessTokenProvider.refresh(expiredAccessToken, request))
+			.thenReturn(newAccessToken);
 
 		Thread.sleep(1000);
 
@@ -118,9 +129,9 @@ public class DefaultAccessTokenRepositoryTest {
 
 		assertSame(output, newAccessToken);
 
-		verify(accessTokenStorage).findBy(request);
+		verify(accessTokenStorage).findBy(notNull(AccessTokenStorageKey.class));
 		verify(accessTokenProvider, never()).provides(request);
 		verify(accessTokenProvider).refresh(expiredAccessToken, request);
-		verify(accessTokenStorage).add(request, newAccessToken);
+		verify(accessTokenStorage).add(notNull(AccessTokenStorageKey.class), newAccessToken);
 	}
 }

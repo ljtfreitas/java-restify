@@ -6,6 +6,7 @@ import java.net.URI;
 import java.security.Principal;
 import java.util.Optional;
 
+import org.junit.Before;
 import org.junit.Test;
 
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
@@ -17,10 +18,12 @@ import com.github.ljtfreitas.restify.http.client.request.authentication.oauth2.O
 
 public class AccessTokenMemoryStorageTest {
 
-	private AccessTokenMemoryStorage acessTokenMemoryStore;
+	private AccessTokenStorageKey key;
 
-	@Test
-	public void shouldSaveAccessTokenOnStore() {
+	private AccessTokenMemoryStorage accessTokenMemoryStore;
+
+	@Before
+	public void setup() {
 		Principal user = () -> "user-identity-key";
 
 		GrantProperties properties = new GrantProperties.Builder()
@@ -32,15 +35,20 @@ public class AccessTokenMemoryStorageTest {
 
 		OAuth2AuthenticatedEndpointRequest request = new OAuth2AuthenticatedEndpointRequest(source, properties, user);
 
-		acessTokenMemoryStore = new AccessTokenMemoryStorage();
+		key = AccessTokenStorageKey.by(request);
 
-		assertFalse(acessTokenMemoryStore.findBy(request).isPresent());
+		accessTokenMemoryStore = new AccessTokenMemoryStorage();
+	}
+
+	@Test
+	public void shouldSaveAccessTokenOnStore() {
+		assertFalse(accessTokenMemoryStore.findBy(key).isPresent());
 
 		AccessToken accessToken = AccessToken.bearer("accessToken");
 
-		acessTokenMemoryStore.add(request, accessToken);
+		accessTokenMemoryStore.add(key, accessToken);
 
-		Optional<AccessToken> foundAccessToken = acessTokenMemoryStore.findBy(request);
+		Optional<AccessToken> foundAccessToken = accessTokenMemoryStore.findBy(key);
 
 		assertTrue(foundAccessToken.isPresent());
 		assertSame(accessToken, foundAccessToken.get());

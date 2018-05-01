@@ -25,21 +25,52 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.request.authentication.oauth2;
 
-import java.util.Map;
-import java.util.Optional;
-import java.util.concurrent.ConcurrentHashMap;
+import java.io.Serializable;
+import java.security.Principal;
+import java.util.Objects;
 
-class AccessTokenMemoryStorage implements AccessTokenStorage {
+public class AccessTokenStorageKey implements Serializable {
 
-	private final Map<AccessTokenStorageKey, AccessToken> tokens = new ConcurrentHashMap<>();
+	private static final long serialVersionUID = 1L;
 
-	@Override
-	public void add(AccessTokenStorageKey key, AccessToken accessToken) {
-		tokens.put(key, accessToken);
+	private final String resource;
+	private final String clientId;
+	private final String scope;
+	private final String username;
+
+	private AccessTokenStorageKey(String resourceServer, String clientId, String scope, String username) {
+		this.resource = resourceServer;
+		this.clientId = clientId;
+		this.scope = scope;
+		this.username = username;
 	}
 
 	@Override
-	public Optional<AccessToken> findBy(AccessTokenStorageKey key) {
-		return Optional.ofNullable(tokens.get(key));
+	public int hashCode() {
+		return Objects.hash(resource, clientId, scope, username);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (obj instanceof AccessTokenStorageKey) {
+			AccessTokenStorageKey that = (AccessTokenStorageKey) obj;
+
+			return Objects.equals(this.resource, that.resource)
+				&& Objects.equals(this.clientId, that.clientId)
+				&& Objects.equals(this.scope, that.scope)
+				&& Objects.equals(this.username, that.username);
+
+		} else {
+			return false;
+		}
+	}
+
+	public static AccessTokenStorageKey by(OAuth2AuthenticatedEndpointRequest request) {
+		String resource = request.endpoint().getHost();
+		String clientId = request.clientId();
+		String scope = request.scope();
+		String username = request.user().map(Principal::getName).orElse(null);
+
+		return new AccessTokenStorageKey(resource, clientId, scope, username);
 	}
 }

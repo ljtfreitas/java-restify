@@ -32,6 +32,7 @@ import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -118,6 +119,24 @@ public class AccessToken implements Serializable {
 
 	public Optional<String> refreshToken() {
 		return Optional.ofNullable(refreshToken);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(tokenType, token);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (obj instanceof AccessToken) {
+			AccessToken that = (AccessToken) obj;
+
+			return this.tokenType.equals(that.tokenType)
+				&& this.token.equals(that.token);
+
+		} else {
+			return false;
+		}
 	}
 
 	@Override
