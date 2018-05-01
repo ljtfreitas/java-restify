@@ -26,5 +26,11 @@
             <version>2.6.2</version>
             <scope>test</scope>
         </dependency>
+        <dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>java-restify-spi</artifactId>
+			<version>${project.version}</version>
+			<scope>test</scope>
+		</dependency>
 	</dependencies>
 </project>
