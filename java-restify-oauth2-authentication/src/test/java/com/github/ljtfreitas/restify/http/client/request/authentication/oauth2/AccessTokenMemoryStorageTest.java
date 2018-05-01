@@ -20,7 +20,7 @@ public class AccessTokenMemoryStorageTest {
 
 	private AccessTokenStorageKey key;
 
-	private AccessTokenMemoryStorage accessTokenMemoryStore;
+	private AccessTokenMemoryStorage accessTokenMemoryStorage;
 
 	@Before
 	public void setup() {
@@ -37,18 +37,18 @@ public class AccessTokenMemoryStorageTest {
 
 		key = AccessTokenStorageKey.by(request);
 
-		accessTokenMemoryStore = new AccessTokenMemoryStorage();
+		accessTokenMemoryStorage = new AccessTokenMemoryStorage();
 	}
 
 	@Test
 	public void shouldSaveAccessTokenOnStore() {
-		assertFalse(accessTokenMemoryStore.findBy(key).isPresent());
+		assertFalse(accessTokenMemoryStorage.findBy(key).isPresent());
 
 		AccessToken accessToken = AccessToken.bearer("accessToken");
 
-		accessTokenMemoryStore.add(key, accessToken);
+		accessTokenMemoryStorage.add(key, accessToken);
 
-		Optional<AccessToken> foundAccessToken = accessTokenMemoryStore.findBy(key);
+		Optional<AccessToken> foundAccessToken = accessTokenMemoryStorage.findBy(key);
 
 		assertTrue(foundAccessToken.isPresent());
 		assertSame(accessToken, foundAccessToken.get());

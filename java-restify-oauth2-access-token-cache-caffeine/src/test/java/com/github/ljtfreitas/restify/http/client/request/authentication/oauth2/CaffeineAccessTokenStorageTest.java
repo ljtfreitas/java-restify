@@ -9,22 +9,16 @@ import java.security.Principal;
 import java.time.Duration;
 import java.util.Optional;
 
-import javax.cache.CacheManager;
-import javax.cache.Caching;
-
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
 
-public class JCacheAccessTokenStorageTest {
+public class CaffeineAccessTokenStorageTest {
 
-	private JCacheAccessTokenStorage jCacheAccessTokenStorage;
+	private CaffeineAccessTokenStorage caffeineAccessTokenStorage;
 
 	private AccessTokenStorageKey key;
-
-	private CacheManager cacheManager;
 
 	@Before
 	public void setup() {
@@ -41,25 +35,18 @@ public class JCacheAccessTokenStorageTest {
 
 		key = AccessTokenStorageKey.by(request);
 
-		cacheManager = Caching.getCachingProvider().getCacheManager();
-
-		jCacheAccessTokenStorage = new JCacheAccessTokenStorage(cacheManager);
-	}
-
-	@After
-	public void after() {
-		cacheManager.getCacheNames().forEach(cache -> cacheManager.destroyCache(cache));
+		caffeineAccessTokenStorage = new CaffeineAccessTokenStorage();
 	}
 
 	@Test
 	public void shouldSaveAccessTokenOnStore() {
-		assertFalse(jCacheAccessTokenStorage.findBy(key).isPresent());
+		assertFalse(caffeineAccessTokenStorage.findBy(key).isPresent());
 
 		AccessToken accessToken = AccessToken.bearer("accessToken");
 
-		jCacheAccessTokenStorage.add(key, accessToken);
+		caffeineAccessTokenStorage.add(key, accessToken);
 
-		Optional<AccessToken> foundAccessToken = jCacheAccessTokenStorage.findBy(key);
+		Optional<AccessToken> foundAccessToken = caffeineAccessTokenStorage.findBy(key);
 
 		assertTrue(foundAccessToken.isPresent());
 		assertEquals(accessToken, foundAccessToken.get());
@@ -67,16 +54,16 @@ public class JCacheAccessTokenStorageTest {
 
 	@Test
 	public void shouldEvictAccessTokenAfterExpirarionPeriod() throws Exception {
-		assertFalse(jCacheAccessTokenStorage.findBy(key).isPresent());
+		assertFalse(caffeineAccessTokenStorage.findBy(key).isPresent());
 
 		AccessToken accessToken = AccessToken.bearer("accessToken", Duration.ofSeconds(5));
 
-		jCacheAccessTokenStorage.add(key, accessToken);
+		caffeineAccessTokenStorage.add(key, accessToken);
 
-		assertTrue(jCacheAccessTokenStorage.findBy(key).isPresent());
+		assertTrue(caffeineAccessTokenStorage.findBy(key).isPresent());
 
 		Thread.sleep(5500);
 
-		assertFalse(jCacheAccessTokenStorage.findBy(key).isPresent());
+		assertFalse(caffeineAccessTokenStorage.findBy(key).isPresent());
 	}
 }
