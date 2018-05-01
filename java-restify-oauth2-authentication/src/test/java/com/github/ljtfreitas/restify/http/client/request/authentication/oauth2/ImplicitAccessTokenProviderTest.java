@@ -80,7 +80,7 @@ public class ImplicitAccessTokenProviderTest {
 		assertEquals("read write", accessToken.scope());
 
 		LocalDateTime expectedExpiration = LocalDateTime.now().plusSeconds(3600);
-		assertEquals(expectedExpiration.truncatedTo(ChronoUnit.SECONDS), accessToken.expiration().truncatedTo(ChronoUnit.SECONDS));
+		assertEquals(expectedExpiration.truncatedTo(ChronoUnit.SECONDS), accessToken.expiration().get().truncatedTo(ChronoUnit.SECONDS));
 	}
 
 	@Test(expected = OAuth2UserApprovalRequiredException.class)

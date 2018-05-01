@@ -1,6 +1,7 @@
 package com.github.ljtfreitas.restify.http.client.request.authentication.oauth2;
 
 import static org.junit.Assert.assertSame;
+import static org.mockito.Matchers.eq;
 import static org.mockito.Matchers.notNull;
 import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.verify;
@@ -50,6 +51,7 @@ public class DefaultAccessTokenRepositoryTest {
 	@Before
 	public void setup() {
 		when(user.getName()).thenReturn("user-identity-key");
+		when(properties.credentials()).thenReturn(ClientCredentials.clientId("client-id"));
 
 		EndpointRequest source = new EndpointRequest(URI.create("http://my.resource.server/path"), "GET");
 
@@ -83,7 +85,7 @@ public class DefaultAccessTokenRepositoryTest {
 		assertSame(output, accessToken);
 
 		verify(accessTokenProvider).provides(request);
-		verify(accessTokenStorage).add(notNull(AccessTokenStorageKey.class), accessToken);
+		verify(accessTokenStorage).add(notNull(AccessTokenStorageKey.class), eq(accessToken));
 	}
 
 	@Test
@@ -105,7 +107,7 @@ public class DefaultAccessTokenRepositoryTest {
 
 		verify(accessTokenStorage).findBy(notNull(AccessTokenStorageKey.class));
 		verify(accessTokenProvider).provides(request);
-		verify(accessTokenStorage).add(notNull(AccessTokenStorageKey.class), newAccessToken);
+		verify(accessTokenStorage).add(notNull(AccessTokenStorageKey.class), eq(newAccessToken));
 	}
 
 	@Test
@@ -132,6 +134,6 @@ public class DefaultAccessTokenRepositoryTest {
 		verify(accessTokenStorage).findBy(notNull(AccessTokenStorageKey.class));
 		verify(accessTokenProvider, never()).provides(request);
 		verify(accessTokenProvider).refresh(expiredAccessToken, request);
-		verify(accessTokenStorage).add(notNull(AccessTokenStorageKey.class), newAccessToken);
+		verify(accessTokenStorage).add(notNull(AccessTokenStorageKey.class), eq(newAccessToken));
 	}
 }

@@ -65,6 +65,19 @@ public class AccessTokenStorageKey implements Serializable {
 		}
 	}
 
+	@Override
+	public String toString() {
+		return new StringBuilder()
+			.append(resource)
+				.append(".")
+			.append(clientId)
+				.append(".")
+			.append(scope == null ? "none" : scope)
+				.append(".")
+			.append(username == null ? "none" : username)
+			.toString();
+	}
+
 	public static AccessTokenStorageKey by(OAuth2AuthenticatedEndpointRequest request) {
 		String resource = request.endpoint().getHost();
 		String clientId = request.clientId();

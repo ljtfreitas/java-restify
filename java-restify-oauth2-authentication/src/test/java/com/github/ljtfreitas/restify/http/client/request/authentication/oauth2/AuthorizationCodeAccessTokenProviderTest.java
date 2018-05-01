@@ -95,7 +95,7 @@ public class AuthorizationCodeAccessTokenProviderTest {
 		assertEquals("read write", accessToken.scope());
 
 		LocalDateTime expectedExpiration = LocalDateTime.now().plusSeconds(3600);
-		assertEquals(expectedExpiration.truncatedTo(ChronoUnit.SECONDS), accessToken.expiration().truncatedTo(ChronoUnit.SECONDS));
+		assertEquals(expectedExpiration.truncatedTo(ChronoUnit.SECONDS), accessToken.expiration().get().truncatedTo(ChronoUnit.SECONDS));
 
 		verify(authorizationCodeProvider).provides(request);
 	}
@@ -127,6 +127,6 @@ public class AuthorizationCodeAccessTokenProviderTest {
 		assertEquals("read write", newAccessToken.scope());
 
 		LocalDateTime expectedExpiration = LocalDateTime.now().plusSeconds(3600);
-		assertEquals(expectedExpiration.truncatedTo(ChronoUnit.SECONDS), newAccessToken.expiration().truncatedTo(ChronoUnit.SECONDS));
+		assertEquals(expectedExpiration.truncatedTo(ChronoUnit.SECONDS), newAccessToken.expiration().get().truncatedTo(ChronoUnit.SECONDS));
 	}
 }

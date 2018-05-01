@@ -82,7 +82,7 @@ public class ClientCredentialsAccessTokenProviderTest {
 		assertEquals("read write", accessToken.scope());
 
 		LocalDateTime expectedExpiration = LocalDateTime.now().plusSeconds(3600);
-		assertEquals(expectedExpiration.truncatedTo(ChronoUnit.SECONDS), accessToken.expiration().truncatedTo(ChronoUnit.SECONDS));
+		assertEquals(expectedExpiration.truncatedTo(ChronoUnit.SECONDS), accessToken.expiration().get().truncatedTo(ChronoUnit.SECONDS));
 	}
 
 	@Test(expected = UnsupportedOperationException.class)

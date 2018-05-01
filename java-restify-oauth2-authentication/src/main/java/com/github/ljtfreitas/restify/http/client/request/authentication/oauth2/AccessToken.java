@@ -82,8 +82,8 @@ public class AccessToken implements Serializable {
 		return this;
 	}
 
-	public LocalDateTime expiration() {
-		return expiration;
+	public Optional<LocalDateTime> expiration() {
+		return Optional.ofNullable(expiration);
 	}
 
 	public boolean expired() {
