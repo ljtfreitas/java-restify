@@ -6,7 +6,8 @@ import static org.mockserver.model.HttpResponse.response;
 import static org.mockserver.model.JsonBody.json;
 
 import java.net.URI;
-import java.time.LocalDateTime;
+import java.time.Duration;
+import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 
 import org.junit.Before;
@@ -17,14 +18,6 @@ import org.mockserver.junit.MockServerRule;
 import org.mockserver.model.Parameter;
 
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
-import com.github.ljtfreitas.restify.http.client.request.authentication.oauth2.AccessToken;
-import com.github.ljtfreitas.restify.http.client.request.authentication.oauth2.AccessTokenType;
-import com.github.ljtfreitas.restify.http.client.request.authentication.oauth2.GrantProperties;
-import com.github.ljtfreitas.restify.http.client.request.authentication.oauth2.ImplicitAccessTokenProvider;
-import com.github.ljtfreitas.restify.http.client.request.authentication.oauth2.ImplicitGrantProperties;
-import com.github.ljtfreitas.restify.http.client.request.authentication.oauth2.OAuth2AuthenticatedEndpointRequest;
-import com.github.ljtfreitas.restify.http.client.request.authentication.oauth2.OAuth2Exception;
-import com.github.ljtfreitas.restify.http.client.request.authentication.oauth2.OAuth2UserApprovalRequiredException;
 
 public class ImplicitAccessTokenProviderTest {
 
@@ -79,7 +72,7 @@ public class ImplicitAccessTokenProviderTest {
 
 		assertEquals("read write", accessToken.scope());
 
-		LocalDateTime expectedExpiration = LocalDateTime.now().plusSeconds(3600);
+		Instant expectedExpiration = Instant.now().plus(Duration.ofSeconds(3600));
 		assertEquals(expectedExpiration.truncatedTo(ChronoUnit.SECONDS), accessToken.expiration().get().truncatedTo(ChronoUnit.SECONDS));
 	}
 

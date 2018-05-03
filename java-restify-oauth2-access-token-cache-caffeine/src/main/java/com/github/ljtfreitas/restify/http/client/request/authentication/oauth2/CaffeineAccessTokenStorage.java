@@ -26,7 +26,7 @@
 package com.github.ljtfreitas.restify.http.client.request.authentication.oauth2;
 
 import java.time.Duration;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.Optional;
 
 import com.github.benmanes.caffeine.cache.Cache;
@@ -67,7 +67,7 @@ public class CaffeineAccessTokenStorage implements AccessTokenStorage {
 		@Override
 		public long expireAfterCreate(AccessTokenStorageKey key, AccessToken accessToken, long currentTime) {
 			return accessToken.expiration()
-				.map(end -> Duration.between(LocalDateTime.now(), end))
+				.map(end -> Duration.between(Instant.now(), end))
 					.map(d -> d.toNanos())
 						.orElseGet(() -> Long.MAX_VALUE);
 		}

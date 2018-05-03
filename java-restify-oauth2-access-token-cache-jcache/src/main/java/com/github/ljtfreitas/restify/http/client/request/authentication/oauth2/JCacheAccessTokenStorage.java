@@ -25,7 +25,7 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.request.authentication.oauth2;
 
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
@@ -71,7 +71,7 @@ public class JCacheAccessTokenStorage implements AccessTokenStorage {
 		return Optional.ofNullable(cacheManager.getCache(CACHE_NAME_PREFIX + key));
 	}
 
-	private Cache<AccessTokenStorageKey, AccessToken> newCacheTo(AccessTokenStorageKey key, Optional<LocalDateTime> expiration) {
+	private Cache<AccessTokenStorageKey, AccessToken> newCacheTo(AccessTokenStorageKey key, Optional<Instant> expiration) {
 		MutableConfiguration<AccessTokenStorageKey, AccessToken> configuration = new MutableConfiguration<>();
 
 		Factory<ExpiryPolicy> policy = CreatedExpiryPolicy.factoryOf(durationUntil(expiration));
@@ -84,9 +84,9 @@ public class JCacheAccessTokenStorage implements AccessTokenStorage {
 		return cacheManager.createCache(CACHE_NAME_PREFIX + key, configuration);
 	}
 
-	private Duration durationUntil(Optional<LocalDateTime> expiration) {
+	private Duration durationUntil(Optional<Instant> expiration) {
 		return expiration
-			.map(end -> java.time.Duration.between(LocalDateTime.now(), end))
+			.map(end -> java.time.Duration.between(Instant.now(), end))
 				.map(d -> new Duration(TimeUnit.MILLISECONDS, d.toMillis()))
 					.orElseGet(() -> Duration.ETERNAL);
 	}

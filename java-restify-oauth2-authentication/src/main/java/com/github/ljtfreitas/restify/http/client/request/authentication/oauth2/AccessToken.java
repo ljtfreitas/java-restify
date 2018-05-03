@@ -29,7 +29,7 @@ import static com.github.ljtfreitas.restify.util.Preconditions.nonNull;
 
 import java.io.Serializable;
 import java.time.Duration;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collections;
 import java.util.Objects;
@@ -46,7 +46,7 @@ public class AccessToken implements Serializable {
 	private final AccessTokenType tokenType;
 	private final String token;
 
-	private LocalDateTime expiration = null;
+	private Instant expiration = null;
 	private Set<String> scopes = Collections.emptySet();
 	private String refreshToken = null;
 
@@ -60,8 +60,8 @@ public class AccessToken implements Serializable {
 		this.expiration = expirationTo(seconds);
 	}
 
-	private LocalDateTime expirationTo(Duration seconds) {
-		return LocalDateTime.now().plus(seconds);
+	private Instant expirationTo(Duration seconds) {
+		return Instant.now().plus(seconds);
 	}
 
 	public AccessTokenType type() {
@@ -82,12 +82,12 @@ public class AccessToken implements Serializable {
 		return this;
 	}
 
-	public Optional<LocalDateTime> expiration() {
+	public Optional<Instant> expiration() {
 		return Optional.ofNullable(expiration);
 	}
 
 	public boolean expired() {
-		return expiration != null && expiration.isBefore(LocalDateTime.now());
+		return expiration != null && expiration.isBefore(Instant.now());
 	}
 
 	private AccessToken scope(String scope) {
