@@ -101,7 +101,9 @@ public class OAuth2AuthenticationBuilder {
 	}
 
 	private AccessTokenStorage accessTokenStorage() {
-		return Optional.ofNullable(accessTokenStorage).orElseGet(AccessTokenMemoryStorage::new);
+		return Optional.ofNullable(accessTokenStorage)
+			.orElseGet(() -> new Provider().single(AccessTokenStorage.class)
+				.orElseGet(AccessTokenMemoryStorage::new));
 	}
 
 	public class OAuth2AuthorizationServerBuilder {

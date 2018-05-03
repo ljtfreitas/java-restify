@@ -62,7 +62,10 @@
 		<module>java-restify-jaxrs-contract</module>
 
 		<module>java-restify-hateoas</module>
+
 		<module>java-restify-oauth2-authentication</module>
+		<module>java-restify-oauth2-access-token-cache-jcache</module>
+		<module>java-restify-oauth2-access-token-cache-caffeine</module>
 
 		<module>java-restify-util</module>
 	</modules>
