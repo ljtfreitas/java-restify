@@ -40,35 +40,40 @@ class DefaultAccessTokenRepository implements AccessTokenRepository {
 
 	@Override
 	public AccessToken findBy(OAuth2AuthenticatedEndpointRequest request) {
-		Optional<AccessToken> accessToken = accessTokenStorage.findBy(request);
+		AccessTokenStorageKey key = AccessTokenStorageKey.by(request);
+
+		Optional<AccessToken> accessToken = accessTokenStorage.findBy(key);
 
 		if (accessToken.isPresent()) {
 			if (accessToken.get().expired()) {
 				if (accessToken.get().refreshToken().isPresent()) {
-					return refresh(accessToken.get(), request);
+					return refresh(accessToken.get(), request, key);
+
 				} else {
-					return newToken(request);
+					return newToken(request, key);
 				}
+
 			} else {
 				return accessToken.get();
 			}
+
 		} else {
-			return newToken(request);
+			return newToken(request, key);
 		}
 	}
 
-	private AccessToken refresh(AccessToken accessToken, OAuth2AuthenticatedEndpointRequest request) {
-		return store(request, () -> accessTokenProvider.refresh(accessToken, request));
+	private AccessToken refresh(AccessToken accessToken, OAuth2AuthenticatedEndpointRequest request, AccessTokenStorageKey key) {
+		return store(key, () -> accessTokenProvider.refresh(accessToken, request));
 	}
 
-	private AccessToken newToken(OAuth2AuthenticatedEndpointRequest request) {
-		return store(request, () -> accessTokenProvider.provides(request));
+	private AccessToken newToken(OAuth2AuthenticatedEndpointRequest request, AccessTokenStorageKey key) {
+		return store(key, () -> accessTokenProvider.provides(request));
 	}
 
-	private AccessToken store(OAuth2AuthenticatedEndpointRequest request, Supplier<AccessToken> supplier) {
+	private AccessToken store(AccessTokenStorageKey key, Supplier<AccessToken> supplier) {
 		AccessToken newAccessToken = supplier.get();
 
-		accessTokenStorage.add(request, newAccessToken);
+		accessTokenStorage.add(key, newAccessToken);
 
 		return newAccessToken;
 	}

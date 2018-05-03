@@ -9,7 +9,8 @@ import static org.mockserver.model.JsonBody.json;
 import static org.mockserver.model.ParameterBody.params;
 
 import java.net.URI;
-import java.time.LocalDateTime;
+import java.time.Duration;
+import java.time.Instant;
 import java.time.temporal.ChronoUnit;
 
 import org.junit.Before;
@@ -23,14 +24,6 @@ import org.mockserver.junit.MockServerRule;
 import org.mockserver.model.Parameter;
 
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
-import com.github.ljtfreitas.restify.http.client.request.authentication.oauth2.AccessToken;
-import com.github.ljtfreitas.restify.http.client.request.authentication.oauth2.AccessTokenType;
-import com.github.ljtfreitas.restify.http.client.request.authentication.oauth2.AuthorizationCodeAccessTokenProvider;
-import com.github.ljtfreitas.restify.http.client.request.authentication.oauth2.AuthorizationCodeGrantProperties;
-import com.github.ljtfreitas.restify.http.client.request.authentication.oauth2.ClientCredentials;
-import com.github.ljtfreitas.restify.http.client.request.authentication.oauth2.DefaultAuthorizationCodeProvider;
-import com.github.ljtfreitas.restify.http.client.request.authentication.oauth2.GrantProperties;
-import com.github.ljtfreitas.restify.http.client.request.authentication.oauth2.OAuth2AuthenticatedEndpointRequest;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AuthorizationCodeAccessTokenProviderTest {
@@ -94,8 +87,8 @@ public class AuthorizationCodeAccessTokenProviderTest {
 
 		assertEquals("read write", accessToken.scope());
 
-		LocalDateTime expectedExpiration = LocalDateTime.now().plusSeconds(3600);
-		assertEquals(expectedExpiration.truncatedTo(ChronoUnit.SECONDS), accessToken.expiration().truncatedTo(ChronoUnit.SECONDS));
+		Instant expectedExpiration = Instant.now().plus(Duration.ofSeconds(3600));
+		assertEquals(expectedExpiration.truncatedTo(ChronoUnit.SECONDS), accessToken.expiration().get().truncatedTo(ChronoUnit.SECONDS));
 
 		verify(authorizationCodeProvider).provides(request);
 	}
@@ -126,7 +119,7 @@ public class AuthorizationCodeAccessTokenProviderTest {
 
 		assertEquals("read write", newAccessToken.scope());
 
-		LocalDateTime expectedExpiration = LocalDateTime.now().plusSeconds(3600);
-		assertEquals(expectedExpiration.truncatedTo(ChronoUnit.SECONDS), newAccessToken.expiration().truncatedTo(ChronoUnit.SECONDS));
+		Instant expectedExpiration = Instant.now().plus(Duration.ofSeconds(3600));
+		assertEquals(expectedExpiration.truncatedTo(ChronoUnit.SECONDS), newAccessToken.expiration().get().truncatedTo(ChronoUnit.SECONDS));
 	}
 }

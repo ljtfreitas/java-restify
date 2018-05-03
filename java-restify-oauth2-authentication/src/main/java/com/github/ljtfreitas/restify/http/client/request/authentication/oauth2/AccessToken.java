@@ -29,9 +29,10 @@ import static com.github.ljtfreitas.restify.util.Preconditions.nonNull;
 
 import java.io.Serializable;
 import java.time.Duration;
-import java.time.LocalDateTime;
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.Collections;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
@@ -45,7 +46,7 @@ public class AccessToken implements Serializable {
 	private final AccessTokenType tokenType;
 	private final String token;
 
-	private LocalDateTime expiration = null;
+	private Instant expiration = null;
 	private Set<String> scopes = Collections.emptySet();
 	private String refreshToken = null;
 
@@ -59,8 +60,8 @@ public class AccessToken implements Serializable {
 		this.expiration = expirationTo(seconds);
 	}
 
-	private LocalDateTime expirationTo(Duration seconds) {
-		return LocalDateTime.now().plus(seconds);
+	private Instant expirationTo(Duration seconds) {
+		return Instant.now().plus(seconds);
 	}
 
 	public AccessTokenType type() {
@@ -81,12 +82,12 @@ public class AccessToken implements Serializable {
 		return this;
 	}
 
-	public LocalDateTime expiration() {
-		return expiration;
+	public Optional<Instant> expiration() {
+		return Optional.ofNullable(expiration);
 	}
 
 	public boolean expired() {
-		return expiration != null && expiration.isBefore(LocalDateTime.now());
+		return expiration != null && expiration.isBefore(Instant.now());
 	}
 
 	private AccessToken scope(String scope) {
@@ -118,6 +119,24 @@ public class AccessToken implements Serializable {
 
 	public Optional<String> refreshToken() {
 		return Optional.ofNullable(refreshToken);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(tokenType, token);
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (obj instanceof AccessToken) {
+			AccessToken that = (AccessToken) obj;
+
+			return this.tokenType.equals(that.tokenType)
+				&& this.token.equals(that.token);
+
+		} else {
+			return false;
+		}
 	}
 
 	@Override
