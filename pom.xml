@@ -43,6 +43,7 @@
 		<module>java-restify-json-jackson-converter</module>
 		<module>java-restify-json-gson-converter</module>
 		<module>java-restify-json-jsonp-converter</module>
+		<module>java-restify-json-jsonb-converter</module>
 		<module>java-restify-octet-converter</module>
 		<module>java-restify-xml-jaxb-converter</module>
 
