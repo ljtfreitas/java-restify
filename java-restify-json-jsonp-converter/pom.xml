@@ -22,7 +22,15 @@
 		<dependency>
 			<groupId>org.glassfish</groupId>
 			<artifactId>javax.json</artifactId>
-			<version>1.0.4</version>
+			<version>1.1.2</version>
 		</dependency>
 	</dependencies>
+
+	<repositories>
+	    <repository>
+	        <id>java.net-Public</id>
+	        <name>Maven Java Net Snapshots and Releases</name>
+	        <url>https://maven.java.net/content/groups/public/</url>
+	    </repository>
+	</repositories>
 </project>
