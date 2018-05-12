@@ -10,6 +10,10 @@
 	<name>java-restify-spring</name>
 	<description>Java Restify Spring Extension</description>
 
+	<properties>
+		<spring.framework.version>5.0.6.RELEASE</spring.framework.version>
+	</properties>
+
 	<dependencies>
 		 <dependency>
 			<groupId>${project.groupId}</groupId>
@@ -29,13 +33,25 @@
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-web</artifactId>
-			<version>4.3.2.RELEASE</version>
+			<version>${spring.framework.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework</groupId>
+			<artifactId>spring-context</artifactId>
+			<version>${spring.framework.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework</groupId>
 			<artifactId>spring-test</artifactId>
-			<version>4.3.2.RELEASE</version>
+			<version>${spring.framework.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+			<version>2.9.0</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
