@@ -21,7 +21,8 @@ import com.github.ljtfreitas.restify.spring.autoconfigure.RestifyAutoConfigurati
 import com.github.ljtfreitas.restify.spring.autoconfigure.RestifyAutoConfigurationTest.TestRestifyConfiguration.TestRestifyConfigurationRegistrar;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = {TestRestifyConfiguration.class, RestifyAutoConfiguration.class})
+@SpringBootTest(classes = {TestRestifyConfiguration.class, RestifyAutoConfiguration.class},
+		properties = "restify.github.endpoint=https://api.github.com")
 public class RestifyAutoConfigurationTest {
 
 	@Autowired
