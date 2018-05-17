@@ -76,8 +76,14 @@ public class RestifyProxyFactoryBean implements FactoryBean<Object> {
 				.executables()
 					.add(executables())
 					.async(asyncExecutorService)
+					.discovery()
+						.disabled()
 					.and()
-				.converters(converters())
+				.converters()
+					.add(converters())
+					.discovery()
+						.disabled()
+					.and()
 				.error(endpointResponseErrorFallback)
 				.interceptors(interceptors());
 
