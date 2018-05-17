@@ -25,6 +25,7 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.spring.configure;
 
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
@@ -34,12 +35,17 @@ import com.github.ljtfreitas.restify.http.contract.metadata.ContractReader;
 import com.github.ljtfreitas.restify.http.jaxrs.contract.metadata.JaxRsContractReader;
 
 @Configuration
-@ConditionalOnProperty(name = "restify.contract", havingValue = "jax-rs")
-public class RestifyJaxRsConfiguration {
+public class RestifyContractConfiguration {
 
-	@ConditionalOnMissingBean
-	@Bean
-	public ContractReader restifyContractReader() {
-		return new JaxRsContractReader();
+	@Configuration
+	@ConditionalOnProperty(name = "restify.contract", havingValue = "jax-rs")
+	@ConditionalOnClass(JaxRsContractReader.class)
+	static class RestifyJaxRSContractConfiguration {
+
+		@ConditionalOnMissingBean
+		@Bean
+		public ContractReader jaxRsContractReader() {
+			return new JaxRsContractReader();
+		}
 	}
 }

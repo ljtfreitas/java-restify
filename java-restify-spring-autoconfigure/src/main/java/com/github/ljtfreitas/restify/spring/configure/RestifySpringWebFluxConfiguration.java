@@ -25,41 +25,42 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.spring.configure;
 
+import org.springframework.beans.factory.ObjectProvider;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.web.reactive.function.client.WebClient;
 
-import com.github.ljtfreitas.restify.http.client.response.DefaultEndpointResponseErrorFallback;
+import com.github.ljtfreitas.restify.http.client.request.EndpointRequestExecutor;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponseErrorFallback;
-import com.github.ljtfreitas.restify.http.spring.client.call.exec.HttpHeadersEndpointCallExecutableFactory;
-import com.github.ljtfreitas.restify.http.spring.client.call.exec.HttpStatusEndpointCallExecutableFactory;
-import com.github.ljtfreitas.restify.http.spring.client.call.exec.ResponseEntityEndpointCallExecutableFactory;
+import com.github.ljtfreitas.restify.http.spring.client.call.exec.FluxEndpointCallExecutableFactory;
+import com.github.ljtfreitas.restify.http.spring.client.call.exec.MonoEndpointCallExecutableFactory;
+import com.github.ljtfreitas.restify.http.spring.client.request.async.WebClientEndpointRequestExecutor;
 
 @Configuration
-public class RestifyDefaultConfiguration {
+@ConditionalOnClass(WebClient.class)
+public class RestifySpringWebFluxConfiguration {
 
 	@ConditionalOnMissingBean
 	@Bean
-	public HttpHeadersEndpointCallExecutableFactory httpHeadersEndpointCallExecutableFactory() {
-		return new HttpHeadersEndpointCallExecutableFactory();
+	public EndpointRequestExecutor webClientEndpointRequestExecutor(EndpointResponseErrorFallback endpointResponseErrorFallback,
+			ObjectProvider<WebClient> webClientProvider) {
+
+		WebClient webClient = webClientProvider.getIfAvailable();
+
+		return webClient == null ? new WebClientEndpointRequestExecutor() : new WebClientEndpointRequestExecutor(webClient);
 	}
 
 	@ConditionalOnMissingBean
 	@Bean
-	public HttpStatusEndpointCallExecutableFactory httpStatusEndpointCallExecutableFactory() {
-		return new HttpStatusEndpointCallExecutableFactory();
+	public FluxEndpointCallExecutableFactory<Object, Object> fluxEndpointCallExecutableFactory() {
+		return new FluxEndpointCallExecutableFactory<>();
 	}
 
 	@ConditionalOnMissingBean
 	@Bean
-	public ResponseEntityEndpointCallExecutableFactory<Object> responseEntityEndpointCallExecutableFactory() {
-		return new ResponseEntityEndpointCallExecutableFactory<>();
-	}
-
-	@ConditionalOnMissingBean
-	@Bean
-	public EndpointResponseErrorFallback endpointResponseErrorFallback(RestifyConfigurationProperties properties) {
-		return properties.getError().isEmptyOnNotFound() ?
-				DefaultEndpointResponseErrorFallback.emptyOnNotFound() : new DefaultEndpointResponseErrorFallback();
+	public MonoEndpointCallExecutableFactory<Object, Object> monoEndpointCallExecutableFactory() {
+		return new MonoEndpointCallExecutableFactory<>();
 	}
 }

@@ -3,29 +3,25 @@ package com.github.ljtfreitas.restify.spring.configure;
 import static org.junit.Assert.assertNotNull;
 
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.autoconfigure.SpringBootApplication;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.ApplicationContext;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.springframework.boot.test.context.runner.ApplicationContextRunner;
+import org.springframework.context.annotation.Configuration;
 
-import com.github.ljtfreitas.restify.spring.configure.EnableRestifyConfigurationTest.TestRestifyConfiguration;
 import com.github.ljtfreitas.restify.spring.whatever.TwitterApi;
 
-@RunWith(SpringRunner.class)
-@SpringBootTest(classes = TestRestifyConfiguration.class)
 public class EnableRestifyConfigurationTest {
-
-	@Autowired
-	private ApplicationContext context;
 
 	@Test
 	public void shouldCreateBeanOfTwitterApiType() {
-		assertNotNull(context.getBean(TwitterApi.class));
+		ApplicationContextRunner contextRunner = new ApplicationContextRunner()
+				.withUserConfiguration(TestRestifyConfiguration.class);
+
+		contextRunner.run(context -> {
+			assertNotNull(context.getBean(TwitterApi.class));
+		});
+
 	}
 
-	@SpringBootApplication
+	@Configuration
 	@EnableRestify(packages = "com.github.ljtfreitas.restify.spring.whatever")
 	static class TestRestifyConfiguration {
 	}
