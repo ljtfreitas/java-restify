@@ -1,23 +1,21 @@
 package com.github.ljtfreitas.restify.spring.netflix.autoconfigure.hystrix;
 
 import static org.junit.Assert.assertEquals;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
-import static org.springframework.test.web.client.response.MockRestResponseCreators.withServerError;
-import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
+import static org.mockserver.model.HttpRequest.request;
+import static org.mockserver.model.HttpResponse.response;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockserver.client.server.MockServerClient;
+import org.mockserver.junit.MockServerRule;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.context.annotation.Bean;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.web.client.MockRestServiceServer;
 import org.springframework.web.client.RestTemplate;
 
 import com.github.ljtfreitas.restify.spring.netflix.autoconfigure.hystrix.RestifyHystrixAutoConfigurationTest.SampleSpringApplication;
@@ -33,21 +31,24 @@ public class RestifyHystrixAutoConfigurationTest {
 	@Autowired
 	private GoodApi goodApi;
 
-	@Autowired
-	private RestTemplate restTemplate;
+	@Rule
+	public MockServerRule mockServerRule = new MockServerRule(this, 8080);
 
-	private MockRestServiceServer mockApiServer;
+	private MockServerClient mockServerClient;
 
 	@Before
 	public void setup() {
-		mockApiServer = MockRestServiceServer.createServer(restTemplate);
+		mockServerClient = new MockServerClient("localhost", 8080);
 	}
 
 	@Test
 	public void shouldGetFallbackToBadApiWhenOnCircuitBreakerMethodIsCalled() {
-		mockApiServer.expect(requestTo("http://localhost:8080/bad/get"))
-			.andExpect(method(HttpMethod.GET))
-				.andRespond(withServerError());
+		mockServerClient
+			.when(request()
+					.withMethod("GET")
+					.withPath("/bad/get"))
+			.respond(response()
+					.withStatusCode(500));
 
 		String result = badApi.get(); // break (response is 500) -> go to fallback...
 
@@ -57,9 +58,12 @@ public class RestifyHystrixAutoConfigurationTest {
 
 	@Test
 	public void shouldGetFallbackToBadApiWhenHystrixCommandIsCalled() {
-		mockApiServer.expect(requestTo("http://localhost:8080/bad/get"))
-    		.andExpect(method(HttpMethod.GET))
-    			.andRespond(withServerError());
+		mockServerClient
+			.when(request()
+					.withMethod("GET")
+					.withPath("/bad/get"))
+			.respond(response()
+					.withStatusCode(500));
 
 		HystrixCommand<String> command = badApi.getAsHystrixCommand();
 
@@ -71,9 +75,14 @@ public class RestifyHystrixAutoConfigurationTest {
 
 	@Test
 	public void shouldGetNormalResultOfGoodApiWhenOnCircuitBreakerMethodIsCalled() {
-		mockApiServer.expect(requestTo("http://localhost:8080/good/get"))
-			.andExpect(method(HttpMethod.GET))
-				.andRespond(withSuccess("It's works!", MediaType.TEXT_PLAIN));
+		mockServerClient
+			.when(request()
+					.withMethod("GET")
+					.withPath("/good/get"))
+			.respond(response()
+					.withStatusCode(200)
+					.withHeader("Content-Type", "text/plain")
+					.withBody("It's works!"));
 
 		String result = goodApi.get(); // response is 200
 
@@ -82,9 +91,14 @@ public class RestifyHystrixAutoConfigurationTest {
 
 	@Test
 	public void shouldGetNormalResultOfGoodApiWhenHystrixCommandIsCalled() {
-		mockApiServer.expect(requestTo("http://localhost:8080/good/get"))
-			.andExpect(method(HttpMethod.GET))
-				.andRespond(withSuccess("It's works!", MediaType.TEXT_PLAIN));
+		mockServerClient
+			.when(request()
+					.withMethod("GET")
+					.withPath("/good/get"))
+			.respond(response()
+					.withStatusCode(200)
+					.withHeader("Content-Type", "text/plain")
+					.withBody("It's works!"));
 
 		HystrixCommand<String> command = goodApi.getAsHystrixCommand();
 

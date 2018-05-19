@@ -2,24 +2,22 @@ package com.github.ljtfreitas.restify.spring.netflix.autoconfigure.ribbon;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.method;
-import static org.springframework.test.web.client.match.MockRestRequestMatchers.requestTo;
-import static org.springframework.test.web.client.response.MockRestResponseCreators.withSuccess;
+import static org.mockserver.model.HttpRequest.request;
+import static org.mockserver.model.HttpResponse.response;
+import static org.mockserver.model.JsonBody.json;
 
 import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockserver.client.server.MockServerClient;
+import org.mockserver.junit.MockServerRule;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.cloud.client.loadbalancer.LoadBalanced;
-import org.springframework.http.HttpMethod;
-import org.springframework.http.MediaType;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.test.web.client.MockRestServiceServer;
-import org.springframework.web.client.RestTemplate;
 
 import com.github.ljtfreitas.restify.spring.netflix.autoconfigure.ribbon.RestifyRibbonAutoConfigurationTest.SampleSpringApplication;
 
@@ -27,22 +25,26 @@ import com.github.ljtfreitas.restify.spring.netflix.autoconfigure.ribbon.Restify
 @SpringBootTest(classes = SampleSpringApplication.class)
 public class RestifyRibbonAutoConfigurationTest {
 
+	@Rule
+	public MockServerRule mockServerRule = new MockServerRule(this, 8080);
+
+	private MockServerClient mockServerClient;
+
 	@Autowired
 	private ObjectProvider<LoadBalancedApi> provider;
 
-	@Autowired @LoadBalanced
-	private RestTemplate restTemplate;
-	
-	private MockRestServiceServer mockLoadBalancedApiServer;
-
 	@Before
 	public void setup() {
-		mockLoadBalancedApiServer = MockRestServiceServer.createServer(restTemplate);
+		mockServerClient = new MockServerClient("localhost", 8080);
 
-		// ribbon must resolve endpoint to http://localhost:8080/get!
-		mockLoadBalancedApiServer.expect(requestTo("http://localhost:8080/get"))
-			.andExpect(method(HttpMethod.GET))
-				.andRespond(withSuccess("Ribbon it's works!", MediaType.TEXT_PLAIN));
+		mockServerClient
+			.when(request()
+					.withMethod("GET")
+					.withPath("/get"))
+			.respond(response()
+					.withStatusCode(200)
+					.withHeader("Content-Type", "text/plain")
+					.withBody(json("Ribbon it's works!")));
 	}
 	
 	@Test

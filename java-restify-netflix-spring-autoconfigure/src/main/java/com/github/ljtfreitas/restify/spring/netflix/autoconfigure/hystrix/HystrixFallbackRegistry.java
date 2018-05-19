@@ -27,12 +27,14 @@ package com.github.ljtfreitas.restify.spring.netflix.autoconfigure.hystrix;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.beans.factory.BeanFactory;
-import org.springframework.beans.factory.NoSuchBeanDefinitionException;
 import org.springframework.beans.factory.annotation.BeanFactoryAnnotationUtils;
 
-class HystrixFallbackBeanFactory {
+import com.github.ljtfreitas.restify.util.Tryable;
+
+class HystrixFallbackRegistry {
 
 	static final String QUALIFIER_NAME = "fallback";
 
@@ -40,14 +42,14 @@ class HystrixFallbackBeanFactory {
 
 	private final BeanFactory beanFactory;
 
-	public HystrixFallbackBeanFactory(BeanFactory beanFactory) {
+	public HystrixFallbackRegistry(BeanFactory beanFactory) {
 		this.beanFactory = beanFactory;
 	}
 
 	@SuppressWarnings("unchecked")
-	public <T> T get(Class<? extends T> classType) {
+	public <T> Optional<T> get(Class<? extends T> classType) {
 		T fallback = (T) (cache.containsKey(classType) ? cache.get(classType) : search(classType));
-		return fallback;
+		return Optional.ofNullable(fallback);
 	}
 
 	private Object search(Class<?> classType) {
@@ -59,10 +61,6 @@ class HystrixFallbackBeanFactory {
 	}
 
 	private Object doSearch(Class<?> classType) {
-		try {
-			return BeanFactoryAnnotationUtils.qualifiedBeanOfType(beanFactory, classType, QUALIFIER_NAME);
-		} catch (NoSuchBeanDefinitionException e) {
-			return null;
-		}
+		return Tryable.or(() -> BeanFactoryAnnotationUtils.qualifiedBeanOfType(beanFactory, classType, QUALIFIER_NAME), null);
 	}
 }

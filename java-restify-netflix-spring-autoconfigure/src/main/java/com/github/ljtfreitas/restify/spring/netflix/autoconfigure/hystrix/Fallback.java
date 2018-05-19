@@ -34,6 +34,6 @@ import org.springframework.beans.factory.annotation.Qualifier;
 
 @Target({ElementType.TYPE, ElementType.FIELD, ElementType.PARAMETER, ElementType.METHOD})
 @Retention(RetentionPolicy.RUNTIME)
-@Qualifier(HystrixFallbackBeanFactory.QUALIFIER_NAME)
-public @interface RestifyFallback {
+@Qualifier(HystrixFallbackRegistry.QUALIFIER_NAME)
+public @interface Fallback {
 }

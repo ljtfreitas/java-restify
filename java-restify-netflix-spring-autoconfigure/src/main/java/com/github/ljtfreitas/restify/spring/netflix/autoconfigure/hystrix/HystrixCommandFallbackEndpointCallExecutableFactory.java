@@ -28,16 +28,17 @@ package com.github.ljtfreitas.restify.spring.netflix.autoconfigure.hystrix;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethod;
 import com.github.ljtfreitas.restify.http.netflix.client.call.exec.BaseHystrixCommandEndpointCallExecutableFactory;
 
-class HystrixCommandSpringFallbackEndpointCallExecutableFactory extends BaseHystrixCommandEndpointCallExecutableFactory<Object, Object> {
+class HystrixCommandFallbackEndpointCallExecutableFactory extends BaseHystrixCommandEndpointCallExecutableFactory<Object, Object> {
 
-	private final HystrixFallbackBeanFactory hystrixFallbackBeanFactory;
+	private final HystrixFallbackRegistry hystrixFallbackRegistry;
 
-	public HystrixCommandSpringFallbackEndpointCallExecutableFactory(HystrixFallbackBeanFactory hystrixFallbackBeanFactory) {
-		this.hystrixFallbackBeanFactory = hystrixFallbackBeanFactory;
+	public HystrixCommandFallbackEndpointCallExecutableFactory(HystrixFallbackRegistry hystrixFallbackRegistry) {
+		this.hystrixFallbackRegistry = hystrixFallbackRegistry;
 	}
 
 	@Override
 	protected Object fallbackTo(EndpointMethod endpointMethod) {
-		return hystrixFallbackBeanFactory.get(endpointMethod.javaMethod().getDeclaringClass());
+		return hystrixFallbackRegistry.get(endpointMethod.javaMethod().getDeclaringClass())
+				.orElse(null);
 	}
 }
