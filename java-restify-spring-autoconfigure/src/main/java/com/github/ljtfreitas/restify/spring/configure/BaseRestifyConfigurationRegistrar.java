@@ -70,7 +70,7 @@ public abstract class BaseRestifyConfigurationRegistrar implements ImportBeanDef
 		RestifyProxyBeanBuilder builder = new RestifyProxyBeanBuilder()
 				.objectType(type.objectType())
 					.endpoint(endpoint)
-						.asyncExecutorServiceName("restifyAsyncExecutorService")
+						.asyncExecutorServiceName(Async.EXECUTOR_SERVICE_BEAN_NAME)
 							.authentication(apiAuthentication(restifyApiClient.getAuthentication()));
 
 		BeanDefinition bean = builder.build();
@@ -86,9 +86,9 @@ public abstract class BaseRestifyConfigurationRegistrar implements ImportBeanDef
 				.orElseGet(() -> ((ConfigurableBeanFactory) beanFactory).resolveEmbeddedValue(expression));
 	}
 
-	private Authentication apiAuthentication(RestifyApiAuthentication restifyApiAuthentication) {
-		if (restifyApiAuthentication != null) {
-			Basic basic = restifyApiAuthentication.getBasic();
+	private Authentication apiAuthentication(RestifyApiAuthentication authentication) {
+		if (authentication != null) {
+			Basic basic = authentication.getBasic();
 			if (basic != null) {
 				return new BasicAuthentication(basic.getUsername(), basic.getPassword());
 			}

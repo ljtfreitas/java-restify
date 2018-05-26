@@ -52,9 +52,9 @@ public class RestifySpringWebConfiguration {
 	@Bean
 	public EndpointRequestExecutor endpointRequestExecutor(EndpointResponseErrorFallback endpointResponseErrorFallback,
 			ObjectProvider<RestTemplateBuilder> restTemplateBuilderProvider,
-			ObjectProvider<RestTemplate> restTemplateProvider) {
+			ObjectProvider<RestOperations> restOperationsProvider) {
 
-		RestOperations restOperations = Optional.ofNullable(restTemplateProvider.getIfAvailable())
+		RestOperations restOperations = Optional.ofNullable(restOperationsProvider.getIfAvailable())
 				.orElseGet(() -> Optional.ofNullable(restTemplateBuilderProvider.getIfAvailable())
 					.map(builder -> builder.build())
 						.orElseGet(() -> new RestTemplate()));

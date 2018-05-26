@@ -25,6 +25,8 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.spring.configure;
 
+import java.util.Optional;
+
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -45,11 +47,13 @@ public class RestifySpringWebFluxConfiguration {
 	@ConditionalOnMissingBean
 	@Bean
 	public EndpointRequestExecutor webClientEndpointRequestExecutor(EndpointResponseErrorFallback endpointResponseErrorFallback,
-			ObjectProvider<WebClient> webClientProvider) {
+			ObjectProvider<WebClient.Builder> webClientBuilderProvider, ObjectProvider<WebClient> webClientProvider) {
 
-		WebClient webClient = webClientProvider.getIfAvailable();
-
-		return webClient == null ? new WebClientEndpointRequestExecutor() : new WebClientEndpointRequestExecutor(webClient);
+		return Optional.ofNullable(webClientProvider.getIfAvailable())
+			.map(webClient -> new WebClientEndpointRequestExecutor(webClient))
+				.orElseGet(() -> Optional.ofNullable(webClientBuilderProvider.getIfAvailable())
+						.map(builder -> new WebClientEndpointRequestExecutor(builder))
+							.orElseGet(WebClientEndpointRequestExecutor::new));
 	}
 
 	@ConditionalOnMissingBean

@@ -73,6 +73,8 @@ public class RestifyProxyFactoryBean implements FactoryBean<Object> {
 		builder.client(httpClientRequestFactory)
 				.contract(restifyContractReader)
 				.executor(endpointRequestExecutor)
+				.retry()
+					.disabled()
 				.executables()
 					.add(executables())
 					.async(asyncExecutorService)
