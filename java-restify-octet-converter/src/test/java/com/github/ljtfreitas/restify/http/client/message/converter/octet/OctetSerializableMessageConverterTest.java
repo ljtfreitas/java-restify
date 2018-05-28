@@ -18,6 +18,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
+import com.github.ljtfreitas.restify.http.client.message.request.RequestBody;
 import com.github.ljtfreitas.restify.http.client.message.response.HttpResponseMessage;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -76,12 +77,12 @@ public class OctetSerializableMessageConverterTest {
 	public void shouldSerializeStringBodyToOutputStream() throws Exception {
 		String body = "request body";
 
-		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-		when(request.output()).thenReturn(outputStream);
+		RequestBody buffer = new RequestBody();
+		when(request.body()).thenReturn(buffer);
 
 		converter.write(body, request);
 
-		ObjectInputStream objectInputStream = new ObjectInputStream(new ByteArrayInputStream(outputStream.toByteArray()));
+		ObjectInputStream objectInputStream = new ObjectInputStream(new ByteArrayInputStream(buffer.toByteArray()));
 		Object output = objectInputStream.readObject();
 
 		assertEquals(body, output);

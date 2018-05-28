@@ -63,7 +63,7 @@ public class OctetSerializableMessageConverter<T extends Serializable> implement
 	@Override
 	public void write(T body, HttpRequestMessage httpRequestMessage) throws HttpMessageWriteException {
 		try {
-			ObjectOutputStream objectOutputStream = new ObjectOutputStream(httpRequestMessage.output());
+			ObjectOutputStream objectOutputStream = new ObjectOutputStream(httpRequestMessage.body());
 			objectOutputStream.writeObject(body);
 
 			objectOutputStream.flush();

@@ -4,7 +4,6 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.Collection;
@@ -19,6 +18,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import com.github.ljtfreitas.restify.http.client.message.Encoding;
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
+import com.github.ljtfreitas.restify.http.client.message.request.RequestBody;
 import com.github.ljtfreitas.restify.http.client.message.response.HttpResponseMessage;
 import com.github.ljtfreitas.restify.reflection.SimpleParameterizedType;
 
@@ -67,9 +67,9 @@ public class JacksonMessageConverterTest {
 
 	@Test
 	public void shouldWriteJsonMessage() {
-		ByteArrayOutputStream output = new ByteArrayOutputStream();
+		RequestBody output = new RequestBody();
 
-		when(request.output()).thenReturn(output);
+		when(request.body()).thenReturn(output);
 		
 		converter.write(new MyJsonModel("Tiago de Freitas Lima", 31), request);
 
@@ -78,9 +78,9 @@ public class JacksonMessageConverterTest {
 
 	@Test
 	public void shouldWriteCollectionOfJsonMessage() {
-		ByteArrayOutputStream output = new ByteArrayOutputStream();
+		RequestBody output = new RequestBody();
 
-		when(request.output()).thenReturn(output);
+		when(request.body()).thenReturn(output);
 		
 		Collection<MyJsonModel> collection = Arrays.asList(new MyJsonModel("Tiago de Freitas Lima 1", 31), new MyJsonModel("Tiago de Freitas Lima 2", 32));
 

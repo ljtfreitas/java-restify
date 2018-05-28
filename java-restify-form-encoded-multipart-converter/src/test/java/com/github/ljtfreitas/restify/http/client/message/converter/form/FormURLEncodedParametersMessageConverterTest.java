@@ -4,7 +4,6 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.nio.charset.Charset;
 
 import org.junit.Before;
@@ -14,6 +13,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
+import com.github.ljtfreitas.restify.http.client.message.request.RequestBody;
 import com.github.ljtfreitas.restify.http.client.message.response.HttpResponseMessage;
 import com.github.ljtfreitas.restify.http.contract.Parameters;
 
@@ -43,9 +43,9 @@ public class FormURLEncodedParametersMessageConverterTest {
 			.put("param1", "value1")
 			.put("param2", "value2");
 
-		ByteArrayOutputStream output = new ByteArrayOutputStream();
+		RequestBody output = new RequestBody();
 
-		when(request.output()).thenReturn(output);
+		when(request.body()).thenReturn(output);
 		
 		converter.write(body, request);
 

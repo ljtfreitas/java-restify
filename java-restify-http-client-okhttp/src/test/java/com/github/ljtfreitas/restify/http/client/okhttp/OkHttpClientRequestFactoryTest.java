@@ -120,8 +120,8 @@ public class OkHttpClientRequestFactoryTest {
 				new Headers(Header.contentType("application/json")), requestBody);
 		
 		OkHttpClientRequest request = okHttpClientRequestFactory.createOf(endpointRequest);
-		request.output().write(requestBody.getBytes());
-		request.output().flush();
+		request.body().write(requestBody.getBytes());
+		request.body().flush();
 
 		HttpResponseMessage response = request.execute();
 
@@ -154,8 +154,8 @@ public class OkHttpClientRequestFactoryTest {
 				new Headers(Header.contentType("application/json")), requestBody);
 		
 		OkHttpClientRequest request = okHttpClientRequestFactory.createOf(endpointRequest);
-		request.output().write(requestBody.getBytes());
-		request.output().flush();
+		request.body().write(requestBody.getBytes());
+		request.body().flush();
 
 		HttpResponseMessage response = request.executeAsync().get();
 

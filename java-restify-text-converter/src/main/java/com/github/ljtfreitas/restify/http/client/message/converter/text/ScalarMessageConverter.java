@@ -94,9 +94,9 @@ public class ScalarMessageConverter implements TextMessageConverter<Object> {
 		String bodyAsString = body.toString();
 
 		try {
-			httpRequestMessage.output().write(bodyAsString.getBytes(httpRequestMessage.charset()));
-			httpRequestMessage.output().flush();
-			httpRequestMessage.output().close();
+			httpRequestMessage.body().write(bodyAsString.getBytes(httpRequestMessage.charset()));
+			httpRequestMessage.body().flush();
+			httpRequestMessage.body().close();
 
 		} catch (IOException e) {
 			throw new HttpMessageWriteException(e);

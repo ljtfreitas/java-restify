@@ -7,7 +7,6 @@ import static org.mockserver.model.JsonBody.json;
 import static org.mockserver.model.StringBody.exact;
 import static org.mockserver.verify.VerificationTimes.once;
 
-import java.io.OutputStream;
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.util.Arrays;
@@ -35,6 +34,7 @@ import com.github.ljtfreitas.restify.http.client.message.converter.HttpMessageCo
 import com.github.ljtfreitas.restify.http.client.message.converter.json.JacksonMessageConverter;
 import com.github.ljtfreitas.restify.http.client.message.converter.xml.JaxbXmlMessageConverter;
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
+import com.github.ljtfreitas.restify.http.client.message.request.RequestBody;
 import com.github.ljtfreitas.restify.http.client.message.response.HttpResponseMessage;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequestWriter;
@@ -240,8 +240,8 @@ public class AsyncRibbonHttpClientRequestFactoryTest {
 		}
 
 		@Override
-		public OutputStream output() {
-			return source.output();
+		public RequestBody body() {
+			return source.body();
 		}
 
 		@Override

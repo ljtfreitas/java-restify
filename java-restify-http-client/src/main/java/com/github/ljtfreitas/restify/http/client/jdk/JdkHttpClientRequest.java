@@ -28,7 +28,6 @@ package com.github.ljtfreitas.restify.http.client.jdk;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.nio.charset.Charset;
@@ -38,6 +37,7 @@ import com.github.ljtfreitas.restify.http.client.HttpClientException;
 import com.github.ljtfreitas.restify.http.client.message.Header;
 import com.github.ljtfreitas.restify.http.client.message.Headers;
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
+import com.github.ljtfreitas.restify.http.client.message.request.RequestBody;
 import com.github.ljtfreitas.restify.http.client.message.response.HttpResponseMessage;
 import com.github.ljtfreitas.restify.http.client.message.response.StatusCode;
 import com.github.ljtfreitas.restify.http.client.request.HttpClientRequest;
@@ -48,16 +48,26 @@ class JdkHttpClientRequest implements HttpClientRequest {
 	private final HttpURLConnection connection;
 	private final Charset charset;
 	private final Headers headers;
+	private final RequestBody body;
 
 	public JdkHttpClientRequest(HttpURLConnection connection, Charset charset, Headers headers) {
+		this(connection, charset, headers, new RequestBody());
+	}
+
+	private JdkHttpClientRequest(HttpURLConnection connection, Charset charset, Headers headers, RequestBody body) {
 		this.connection = connection;
 		this.charset = charset;
 		this.headers = new JdkHttpClientHeadersDecorator(connection, headers);
+		this.body = body;
 	}
 
 	@Override
 	public HttpResponseMessage execute() throws HttpClientException {
 		try {
+			if (body.hasAny()) {
+				body.writeTo(connection.getOutputStream());
+			}
+
 			connection.connect();
 
 			return responseOf(connection);
@@ -94,8 +104,8 @@ class JdkHttpClientRequest implements HttpClientRequest {
 	}
 
 	@Override
-	public OutputStream output() {
-		return Tryable.of(() -> connection.getOutputStream());
+	public RequestBody body() {
+		return body;
 	}
 
 	@Override

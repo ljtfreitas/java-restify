@@ -25,9 +25,6 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.netflix.client.request.async;
 
-import java.io.BufferedOutputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.OutputStream;
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.util.concurrent.CompletableFuture;
@@ -37,6 +34,7 @@ import com.github.ljtfreitas.restify.http.client.HttpException;
 import com.github.ljtfreitas.restify.http.client.message.Header;
 import com.github.ljtfreitas.restify.http.client.message.Headers;
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
+import com.github.ljtfreitas.restify.http.client.message.request.RequestBody;
 import com.github.ljtfreitas.restify.http.client.message.response.HttpResponseMessage;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
 import com.github.ljtfreitas.restify.http.client.request.HttpClientRequest;
@@ -53,27 +51,19 @@ public class AsyncRibbonHttpClientRequest extends BaseRibbonHttpClientRequest im
 	private final EndpointRequest endpointRequest;
 	private final AsyncRibbonLoadBalancedClient ribbonLoadBalancedClient;
 	private final Charset charset;
-
-	private final ByteArrayOutputStream byteArrayOutputStream;
-	private final BufferedOutputStream bufferedOutputStream;
+	private final RequestBody body;
 
 	public AsyncRibbonHttpClientRequest(EndpointRequest endpointRequest, AsyncRibbonLoadBalancedClient ribbonLoadBalancedClient, Charset charset) {
-		this(endpointRequest, ribbonLoadBalancedClient, charset, new ByteArrayOutputStream(1024 * 100));
+		this(endpointRequest, ribbonLoadBalancedClient, charset, new RequestBody());
 	}
 
 	private AsyncRibbonHttpClientRequest(EndpointRequest endpointRequest, AsyncRibbonLoadBalancedClient ribbonLoadBalancedClient, Charset charset,
-			ByteArrayOutputStream byteArrayOutputStream) {
-		this(endpointRequest, ribbonLoadBalancedClient, charset, byteArrayOutputStream, new BufferedOutputStream(byteArrayOutputStream));
-	}
-
-	private AsyncRibbonHttpClientRequest(EndpointRequest endpointRequest, AsyncRibbonLoadBalancedClient ribbonLoadBalancedClient, Charset charset,
-			ByteArrayOutputStream byteArrayOutputStream, BufferedOutputStream bufferedOutputStream) {
+			RequestBody body) {
 		super(endpointRequest);
 		this.endpointRequest = endpointRequest;
 		this.ribbonLoadBalancedClient = ribbonLoadBalancedClient;
 		this.charset = charset;
-		this.byteArrayOutputStream = byteArrayOutputStream;
-		this.bufferedOutputStream = bufferedOutputStream;
+		this.body = body;
 	}
 
 	@Override
@@ -87,8 +77,8 @@ public class AsyncRibbonHttpClientRequest extends BaseRibbonHttpClientRequest im
 	}
 
 	@Override
-	public OutputStream output() {
-		return bufferedOutputStream;
+	public RequestBody body() {
+		return body;
 	}
 
 	@Override
@@ -99,7 +89,7 @@ public class AsyncRibbonHttpClientRequest extends BaseRibbonHttpClientRequest im
 	@Override
 	public HttpRequestMessage replace(Header header) {
 		return new AsyncRibbonHttpClientRequest(endpointRequest.replace(header), ribbonLoadBalancedClient, charset,
-				byteArrayOutputStream, bufferedOutputStream);
+				body);
 	}
 
 	@Override
@@ -110,13 +100,17 @@ public class AsyncRibbonHttpClientRequest extends BaseRibbonHttpClientRequest im
 	@Override
 	public void writeTo(HttpClientRequest httpRequestMessage) {
 		endpointRequest.body()
-			.ifPresent(b -> Tryable.run(() -> byteArrayOutputStream.writeTo(httpRequestMessage.output())));
+			.ifPresent(b -> Tryable.run(() -> {
+				body.writeTo(httpRequestMessage.body());
+				httpRequestMessage.body().flush();
+				httpRequestMessage.body().close();
+			}));
 	}
 
 	@Override
 	public RibbonHttpClientRequest replace(URI ribbonEndpoint) {
 		return new AsyncRibbonHttpClientRequest(endpointRequest.replace(ribbonEndpoint), ribbonLoadBalancedClient, charset,
-				byteArrayOutputStream, bufferedOutputStream);
+				body);
 	}
 
 	@Override

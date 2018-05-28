@@ -5,7 +5,6 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.nio.charset.Charset;
 
 import org.junit.Before;
@@ -15,6 +14,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
+import com.github.ljtfreitas.restify.http.client.message.request.RequestBody;
 import com.github.ljtfreitas.restify.http.client.message.response.HttpResponseMessage;
 import com.github.ljtfreitas.restify.http.contract.Form;
 import com.github.ljtfreitas.restify.http.contract.Form.Field;
@@ -59,9 +59,9 @@ public class FormURLEncodedFormObjectMessageConverterTest {
 
 	@Test
 	public void shouldWriteFormUrlEncodedMessageWithFormObjectSource() {
-		ByteArrayOutputStream output = new ByteArrayOutputStream();
+		RequestBody output = new RequestBody();
 		
-		when(request.output()).thenReturn(output);
+		when(request.body()).thenReturn(output);
 
 		MyFormObject myFormObject = new MyFormObject();
 		myFormObject.name = "Tiago de Freitas";

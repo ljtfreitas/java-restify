@@ -23,31 +23,73 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.http.client.apache.httpclient;
+package com.github.ljtfreitas.restify.http.client.message.request;
 
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
 
-class BufferedEntity {
+public class RequestBody extends OutputStream {
 
-	private final ByteArrayOutputStream byteArrayOutputStream;
-	private final BufferedOutputStream bufferedOutputStream;
+	private static final int DEFAULT_BUFFER_SIZE = 1024 * 100;
 
-	BufferedEntity() {
-		this(new ByteArrayOutputStream(1024 * 100));
+	private final ByteArrayOutputStream source;
+	private final BufferedOutputStream buffer;
+
+	public RequestBody() {
+		this(DEFAULT_BUFFER_SIZE);
 	}
 
-	BufferedEntity(ByteArrayOutputStream byteArrayOutputStream) {
-		this.byteArrayOutputStream = byteArrayOutputStream;
-		this.bufferedOutputStream = new BufferedOutputStream(byteArrayOutputStream);
+	public RequestBody(int size) {
+		this.source = new ByteArrayOutputStream(size);
+		this.buffer = new BufferedOutputStream(source);
 	}
 
-	OutputStream output() {
-		return bufferedOutputStream;
+	@Override
+	public void write(byte[] b) throws IOException {
+		buffer.write(b);
 	}
 
-	byte[] asByteArray() {
-		return byteArrayOutputStream.toByteArray();
+	@Override
+	public void write(int b) throws IOException {
+		buffer.write(b);
+	}
+
+	@Override
+	public void write(byte[] b, int off, int len) throws IOException {
+		buffer.write(b, off, len);
+	}
+
+	@Override
+	public void flush() throws IOException {
+		buffer.flush();
+	}
+
+	public boolean hasAny() {
+		return source.size() != 0;
+	}
+
+	public void writeTo(OutputStream out) throws IOException {
+		source.writeTo(out);
+	}
+
+	public byte[] toByteArray() {
+		return source.toByteArray();
+	}
+
+	@Override
+	public String toString() {
+		return source.toString();
+	}
+
+	public String toString(String charsetName) throws UnsupportedEncodingException {
+		return source.toString(charsetName);
+	}
+
+	@Override
+	public void close() throws IOException {
+		buffer.close();
 	}
 }

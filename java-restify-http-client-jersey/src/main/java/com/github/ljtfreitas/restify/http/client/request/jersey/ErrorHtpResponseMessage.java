@@ -28,7 +28,6 @@ package com.github.ljtfreitas.restify.http.client.request.jersey;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.URI;
 import java.nio.charset.Charset;
 
@@ -37,6 +36,7 @@ import javax.ws.rs.core.Response;
 import com.github.ljtfreitas.restify.http.client.message.Header;
 import com.github.ljtfreitas.restify.http.client.message.Headers;
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
+import com.github.ljtfreitas.restify.http.client.message.request.RequestBody;
 import com.github.ljtfreitas.restify.http.client.message.response.BaseHttpResponseMessage;
 import com.github.ljtfreitas.restify.http.client.message.response.StatusCode;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
@@ -83,7 +83,7 @@ class ErrorHttpResponseMessage extends BaseHttpResponseMessage {
 		}
 
 		@Override
-		public OutputStream output() {
+		public RequestBody body() {
 			throw new UnsupportedOperationException();
 		}
 

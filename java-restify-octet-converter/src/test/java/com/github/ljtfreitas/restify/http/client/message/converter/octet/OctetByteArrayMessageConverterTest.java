@@ -6,7 +6,6 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 
 import org.junit.Before;
@@ -16,6 +15,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
+import com.github.ljtfreitas.restify.http.client.message.request.RequestBody;
 import com.github.ljtfreitas.restify.http.client.message.response.HttpResponseMessage;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -71,12 +71,12 @@ public class OctetByteArrayMessageConverterTest {
 	public void shouldWriteByteArrayBodyToOutputStream() {
 		String body = "request body";
 
-		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
-		when(request.output()).thenReturn(outputStream);
+		RequestBody buffer = new RequestBody();
+		when(request.body()).thenReturn(buffer);
 
 		converter.write(body.getBytes(), request);
 
-		String output = new String(outputStream.toByteArray());
+		String output = new String(buffer.toByteArray());
 
 		assertEquals(body, output);
 	}

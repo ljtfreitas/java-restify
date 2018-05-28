@@ -7,7 +7,6 @@ import static org.mockito.Mockito.when;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.stream.Collectors;
@@ -19,6 +18,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
+import com.github.ljtfreitas.restify.http.client.message.request.RequestBody;
 import com.github.ljtfreitas.restify.http.client.message.response.HttpResponseMessage;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -76,13 +76,13 @@ public class OctetInputStreamMessageConverterTest {
 	public void shouldWriteInputStreamBodyToOutputStream() {
 		String body = "request body";
 
-		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+		RequestBody buffer = new RequestBody();
 
-		when(request.output()).thenReturn(outputStream);
+		when(request.body()).thenReturn(buffer);
 
 		converter.write(new ByteArrayInputStream(body.getBytes()), request);
 
-		String output = new String(outputStream.toByteArray());
+		String output = new String(buffer.toByteArray());
 
 		assertEquals(body, output);
 	}

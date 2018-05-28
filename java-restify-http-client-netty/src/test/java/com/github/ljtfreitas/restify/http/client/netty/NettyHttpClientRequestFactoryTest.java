@@ -133,8 +133,8 @@ public class NettyHttpClientRequestFactoryTest {
 				new Headers(Header.contentType("application/json")), requestBody);
 
 		HttpClientRequest request = nettyHttpClientRequestFactory.createOf(endpointRequest);
-		request.output().write(requestBody.getBytes());
-		request.output().flush();
+		request.body().write(requestBody.getBytes());
+		request.body().flush();
 
 		HttpResponseMessage response = request.execute();
 
@@ -167,8 +167,8 @@ public class NettyHttpClientRequestFactoryTest {
 				new Headers(Header.contentType("application/json")), requestBody);
 
 		NettyHttpClientRequest request = nettyHttpClientRequestFactory.createAsyncOf(endpointRequest);
-		request.output().write(requestBody.getBytes());
-		request.output().flush();
+		request.body().write(requestBody.getBytes());
+		request.body().flush();
 
 		CompletableFuture<HttpResponseMessage> responseAsFuture = request.executeAsync();
 

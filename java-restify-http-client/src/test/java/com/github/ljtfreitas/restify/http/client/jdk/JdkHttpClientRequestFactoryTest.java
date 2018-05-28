@@ -101,8 +101,8 @@ public class JdkHttpClientRequestFactoryTest {
 				new Headers(Header.contentType("application/json")), requestBody);
 
 		JdkHttpClientRequest request = jdkHttpClientRequestFactory.createOf(endpointRequest);
-		request.output().write(requestBody.getBytes());
-		request.output().flush();
+		request.body().write(requestBody.getBytes());
+		request.body().flush();
 
 		HttpResponseMessage response = request.execute();
 

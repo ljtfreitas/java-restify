@@ -69,10 +69,10 @@ public class OctetInputStreamMessageConverter implements OctetStreamMessageConve
 	public void write(InputStream body, HttpRequestMessage httpRequestMessage) throws HttpMessageWriteException {
 		try {
 			InputStreamContent bodyContent = new InputStreamContent(body, bufferSize);
-			bodyContent.transferTo(httpRequestMessage.output());
+			bodyContent.transferTo(httpRequestMessage.body());
 
-			httpRequestMessage.output().flush();
-			httpRequestMessage.output().close();
+			httpRequestMessage.body().flush();
+			httpRequestMessage.body().close();
 
 		} catch (IOException e) {
 			throw new HttpMessageWriteException(e);

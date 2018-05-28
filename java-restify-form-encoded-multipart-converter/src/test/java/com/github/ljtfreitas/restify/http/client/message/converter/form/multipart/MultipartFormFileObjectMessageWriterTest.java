@@ -4,7 +4,6 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.when;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -20,6 +19,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import com.github.ljtfreitas.restify.http.client.message.Header;
 import com.github.ljtfreitas.restify.http.client.message.Headers;
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
+import com.github.ljtfreitas.restify.http.client.message.request.RequestBody;
 import com.github.ljtfreitas.restify.http.contract.MultipartFile;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -32,7 +32,7 @@ public class MultipartFormFileObjectMessageWriterTest {
 
 	private MultipartFile multipartFile;
 
-	private ByteArrayOutputStream output;
+	private RequestBody output;
 
 	private File file;
 
@@ -49,9 +49,9 @@ public class MultipartFormFileObjectMessageWriterTest {
 		fileWriter.flush();
 		fileWriter.close();
 
-		output = new ByteArrayOutputStream();
+		output = new RequestBody();
 
-		when(request.output()).thenReturn(output);
+		when(request.body()).thenReturn(output);
 		when(request.headers()).thenReturn(new Headers(Header.contentType("multipart/form-data")));
 		when(request.replace(any())).thenReturn(request);
 	}

@@ -6,7 +6,6 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 
 import javax.json.Json;
 import javax.json.JsonArray;
@@ -19,6 +18,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
+import com.github.ljtfreitas.restify.http.client.message.request.RequestBody;
 import com.github.ljtfreitas.restify.http.client.message.response.HttpResponseMessage;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -62,10 +62,10 @@ public class JsonpMessageConverterTest {
 
 	@Test
 	public void shouldWriteJsonObject() {
-		ByteArrayOutputStream output = new ByteArrayOutputStream();
+		RequestBody output = new RequestBody();
 
-		when(request.output()).thenReturn(output);
-		
+		when(request.body()).thenReturn(output);
+
 		converter.write(jsonObject, request);
 
 		assertEquals(jsonObject.toString(), output.toString());
@@ -95,9 +95,9 @@ public class JsonpMessageConverterTest {
 
 	@Test
 	public void shouldWriteJsonArray() {
-		ByteArrayOutputStream output = new ByteArrayOutputStream();
+		RequestBody output = new RequestBody();
 
-		when(request.output()).thenReturn(output);
+		when(request.body()).thenReturn(output);
 
 		converter.write(jsonArray, request);
 
