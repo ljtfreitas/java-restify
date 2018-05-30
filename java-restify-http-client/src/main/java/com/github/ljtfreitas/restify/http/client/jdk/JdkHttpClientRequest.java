@@ -64,7 +64,7 @@ class JdkHttpClientRequest implements HttpClientRequest {
 	@Override
 	public HttpResponseMessage execute() throws HttpClientException {
 		try {
-			if (body.hasAny()) {
+			if (!body.empty()) {
 				body.writeTo(connection.getOutputStream());
 			}
 

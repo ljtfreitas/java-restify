@@ -29,7 +29,8 @@ import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
+
+import com.github.ljtfreitas.restify.util.Tryable;
 
 public class RequestBody extends OutputStream {
 
@@ -67,7 +68,7 @@ public class RequestBody extends OutputStream {
 		buffer.flush();
 	}
 
-	public boolean hasAny() {
+	public boolean empty() {
 		return source.size() != 0;
 	}
 
@@ -84,8 +85,8 @@ public class RequestBody extends OutputStream {
 		return source.toString();
 	}
 
-	public String toString(String charsetName) throws UnsupportedEncodingException {
-		return source.toString(charsetName);
+	public String toString(String charsetName) {
+		return Tryable.of(() -> source.toString(charsetName));
 	}
 
 	@Override
