@@ -56,7 +56,7 @@ import com.github.ljtfreitas.restify.http.client.request.EndpointRequestWriter;
 import com.github.ljtfreitas.restify.http.client.request.HttpClientRequestFactory;
 import com.github.ljtfreitas.restify.http.client.request.authentication.Authentication;
 import com.github.ljtfreitas.restify.http.client.request.interceptor.EndpointRequestInterceptor;
-import com.github.ljtfreitas.restify.http.client.request.interceptor.EndpointRequestInterceptorStack;
+import com.github.ljtfreitas.restify.http.client.request.interceptor.EndpointRequestInterceptorChain;
 import com.github.ljtfreitas.restify.http.client.request.interceptor.authentication.AuthenticationEndpoinRequestInterceptor;
 import com.github.ljtfreitas.restify.http.client.response.DefaultEndpointResponseErrorFallback;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponseErrorFallback;
@@ -193,8 +193,8 @@ public class HypermediaBrowserBuilder {
 			return context;
 		}
 
-		private EndpointRequestInterceptorStack build() {
-			return new EndpointRequestInterceptorStack(interceptors);
+		private EndpointRequestInterceptorChain build() {
+			return new EndpointRequestInterceptorChain(interceptors);
 		}
 	}
 

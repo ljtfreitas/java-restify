@@ -19,7 +19,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import com.github.ljtfreitas.restify.http.client.request.interceptor.EndpointRequestInterceptorStack;
+import com.github.ljtfreitas.restify.http.client.request.interceptor.EndpointRequestInterceptorChain;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
 import com.github.ljtfreitas.restify.http.contract.Parameters;
 import com.github.ljtfreitas.restify.http.contract.QueryParameterSerializer;
@@ -36,7 +36,7 @@ import com.github.ljtfreitas.restify.reflection.JavaType;
 public class EndpointRequestFactoryTest {
 
 	@Mock
-	private EndpointRequestInterceptorStack endpointRequestInterceptorStackMock;
+	private EndpointRequestInterceptorChain endpointRequestInterceptorStackMock;
 
 	@InjectMocks
 	private EndpointRequestFactory endpointRequestFactory;

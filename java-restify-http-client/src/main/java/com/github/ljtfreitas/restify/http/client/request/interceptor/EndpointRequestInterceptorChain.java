@@ -23,26 +23,22 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.http.client.hateoas.browser;
+package com.github.ljtfreitas.restify.http.client.request.interceptor;
+
+import java.util.ArrayList;
+import java.util.Collection;
 
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
-import com.github.ljtfreitas.restify.http.client.request.EndpointRequestExecutor;
-import com.github.ljtfreitas.restify.http.client.request.interceptor.EndpointRequestInterceptorChain;
-import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
 
-public class LinkRequestExecutor {
+public class EndpointRequestInterceptorChain {
 
-	private final EndpointRequestExecutor endpointRequestExecutor;
-	private final EndpointRequestInterceptorChain endpointRequestInterceptorStack;
+	private final Collection<EndpointRequestInterceptor> interceptors;
 
-	public LinkRequestExecutor(EndpointRequestExecutor endpointRequestExecutor, EndpointRequestInterceptorChain endpointRequestInterceptorStack) {
-		this.endpointRequestExecutor = endpointRequestExecutor;
-		this.endpointRequestInterceptorStack = endpointRequestInterceptorStack;
+	public EndpointRequestInterceptorChain(Collection<EndpointRequestInterceptor> interceptors) {
+		this.interceptors = new ArrayList<>(interceptors);
 	}
 
-	public <T> EndpointResponse<T> execute(LinkEndpointRequest linkRequest) {
-		EndpointRequest endpointRequest = endpointRequestInterceptorStack.apply(linkRequest.asEndpointRequest());
-
-		return endpointRequestExecutor.execute(endpointRequest);
+	public EndpointRequest apply(EndpointRequest endpointRequest) {
+		return interceptors.stream().reduce(endpointRequest, (r, i) -> i.intercepts(r), (a, b) -> b);
 	}
 }

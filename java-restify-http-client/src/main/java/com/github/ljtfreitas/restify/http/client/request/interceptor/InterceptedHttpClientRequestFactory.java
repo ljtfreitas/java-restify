@@ -25,20 +25,24 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.request.interceptor;
 
-import java.util.ArrayList;
-import java.util.Collection;
-
+import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
 import com.github.ljtfreitas.restify.http.client.request.HttpClientRequest;
+import com.github.ljtfreitas.restify.http.client.request.HttpClientRequestFactory;
 
-public class HttpClientRequestInterceptorStack {
+public class InterceptedHttpClientRequestFactory implements HttpClientRequestFactory {
 
-	private final Collection<HttpClientRequestInterceptor> interceptors;
+	private final HttpClientRequestFactory delegate;
+	private final HttpClientRequestInterceptorChain interceptors;
 
-	public HttpClientRequestInterceptorStack(Collection<HttpClientRequestInterceptor> interceptors) {
-		this.interceptors = new ArrayList<>(interceptors);
+	public InterceptedHttpClientRequestFactory(HttpClientRequestFactory delegate, HttpClientRequestInterceptorChain interceptors) {
+		this.delegate = delegate;
+		this.interceptors = interceptors;
 	}
 
-	public HttpClientRequest apply(HttpClientRequest httpClientRequest) {
-		return interceptors.stream().reduce(httpClientRequest, (r, i) -> i.intercepts(r), (a, b) -> b);
+	@Override
+	public HttpClientRequest createOf(EndpointRequest endpointRequest) {
+		HttpClientRequest httpClientRequest = delegate.createOf(endpointRequest);
+
+		return interceptors.apply(httpClientRequest);
 	}
 }

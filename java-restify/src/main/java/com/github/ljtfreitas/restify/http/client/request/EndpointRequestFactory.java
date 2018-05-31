@@ -31,16 +31,16 @@ import java.net.URISyntaxException;
 import com.github.ljtfreitas.restify.http.client.HttpException;
 import com.github.ljtfreitas.restify.http.client.message.Header;
 import com.github.ljtfreitas.restify.http.client.message.Headers;
-import com.github.ljtfreitas.restify.http.client.request.interceptor.EndpointRequestInterceptorStack;
+import com.github.ljtfreitas.restify.http.client.request.interceptor.EndpointRequestInterceptorChain;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethod;
 import com.github.ljtfreitas.restify.http.contract.metadata.HeaderParameterResolver;
 import com.github.ljtfreitas.restify.reflection.JavaType;
 
 public class EndpointRequestFactory {
 
-	private final EndpointRequestInterceptorStack interceptors;
+	private final EndpointRequestInterceptorChain interceptors;
 
-	public EndpointRequestFactory(EndpointRequestInterceptorStack interceptors) {
+	public EndpointRequestFactory(EndpointRequestInterceptorChain interceptors) {
 		this.interceptors = interceptors;
 	}
 

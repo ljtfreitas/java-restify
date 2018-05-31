@@ -20,7 +20,7 @@ import com.github.ljtfreitas.restify.http.client.message.Headers;
 import com.github.ljtfreitas.restify.http.client.message.response.StatusCode;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequestExecutor;
-import com.github.ljtfreitas.restify.http.client.request.interceptor.EndpointRequestInterceptorStack;
+import com.github.ljtfreitas.restify.http.client.request.interceptor.EndpointRequestInterceptorChain;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -30,7 +30,7 @@ public class LinkRequestExecutorTest {
 	private EndpointRequestExecutor endpointRequestExecutor;
 
 	@Mock
-	private EndpointRequestInterceptorStack interceptorStack;
+	private EndpointRequestInterceptorChain interceptorStack;
 
 	@InjectMocks
 	private LinkRequestExecutor linkRequestExecutor;

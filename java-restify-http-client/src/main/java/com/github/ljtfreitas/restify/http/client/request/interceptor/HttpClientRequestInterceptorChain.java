@@ -28,17 +28,17 @@ package com.github.ljtfreitas.restify.http.client.request.interceptor;
 import java.util.ArrayList;
 import java.util.Collection;
 
-import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
+import com.github.ljtfreitas.restify.http.client.request.HttpClientRequest;
 
-public class EndpointRequestInterceptorStack {
+public class HttpClientRequestInterceptorChain {
 
-	private final Collection<EndpointRequestInterceptor> interceptors;
+	private final Collection<HttpClientRequestInterceptor> interceptors;
 
-	public EndpointRequestInterceptorStack(Collection<EndpointRequestInterceptor> interceptors) {
+	public HttpClientRequestInterceptorChain(Collection<HttpClientRequestInterceptor> interceptors) {
 		this.interceptors = new ArrayList<>(interceptors);
 	}
 
-	public EndpointRequest apply(EndpointRequest endpointRequest) {
-		return interceptors.stream().reduce(endpointRequest, (r, i) -> i.intercepts(r), (a, b) -> b);
+	public HttpClientRequest apply(HttpClientRequest httpClientRequest) {
+		return interceptors.stream().reduce(httpClientRequest, (r, i) -> i.intercepts(r), (a, b) -> b);
 	}
 }
