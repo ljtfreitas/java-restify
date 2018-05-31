@@ -80,7 +80,7 @@ public class OctetByteArrayMessageConverter implements OctetStreamMessageConvert
 	@Override
 	public void write(byte[] body, HttpRequestMessage httpRequestMessage) throws HttpMessageWriteException {
 		try {
-			OutputStream output = httpRequestMessage.body();
+			OutputStream output = httpRequestMessage.body().output();
 
 			output.write(body);
 			output.flush();

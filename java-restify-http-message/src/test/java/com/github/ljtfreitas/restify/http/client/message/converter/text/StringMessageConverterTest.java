@@ -17,6 +17,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import com.github.ljtfreitas.restify.http.client.message.ContentType;
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
 import com.github.ljtfreitas.restify.http.client.message.request.RequestBody;
+import com.github.ljtfreitas.restify.http.client.message.request.BufferedRequestBody;
 import com.github.ljtfreitas.restify.http.client.message.response.HttpResponseMessage;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -69,13 +70,13 @@ public class StringMessageConverterTest {
 
 	@Test
 	public void shouldWriteStringMessage() {
-		RequestBody output = new RequestBody();
+		RequestBody output = new BufferedRequestBody();
 
 		when(request.body()).thenReturn(output);
 
 		converter.write(message, request);
 
-		assertEquals(message, output.toString());
+		assertEquals(message, output.asString());
 	}
 
 	@Test

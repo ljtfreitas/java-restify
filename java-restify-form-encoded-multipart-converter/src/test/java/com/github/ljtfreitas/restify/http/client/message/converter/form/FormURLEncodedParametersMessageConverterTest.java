@@ -14,6 +14,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
 import com.github.ljtfreitas.restify.http.client.message.request.RequestBody;
+import com.github.ljtfreitas.restify.http.client.message.request.BufferedRequestBody;
 import com.github.ljtfreitas.restify.http.client.message.response.HttpResponseMessage;
 import com.github.ljtfreitas.restify.http.contract.Parameters;
 
@@ -43,13 +44,13 @@ public class FormURLEncodedParametersMessageConverterTest {
 			.put("param1", "value1")
 			.put("param2", "value2");
 
-		RequestBody output = new RequestBody();
+		RequestBody output = new BufferedRequestBody();
 
 		when(request.body()).thenReturn(output);
 		
 		converter.write(body, request);
 
-		assertEquals(messageBody, output.toString());
+		assertEquals(messageBody, output.asString());
 	}
 
 	@Test

@@ -20,7 +20,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import com.github.ljtfreitas.restify.http.client.message.Header;
 import com.github.ljtfreitas.restify.http.client.message.Headers;
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
-import com.github.ljtfreitas.restify.http.client.message.request.RequestBody;
+import com.github.ljtfreitas.restify.http.client.message.request.BufferedRequestBody;
 import com.github.ljtfreitas.restify.http.contract.MultipartFile;
 import com.github.ljtfreitas.restify.http.contract.MultipartParameters;
 
@@ -34,7 +34,7 @@ public class MultipartFormParametersMessageWriterTest {
 
 	private MultipartParameters parameters;
 
-	private RequestBody output;
+	private BufferedRequestBody output;
 
 	private File file;
 
@@ -53,7 +53,7 @@ public class MultipartFormParametersMessageWriterTest {
 		fileWriter.flush();
 		fileWriter.close();
 
-		output = new RequestBody();
+		output = new BufferedRequestBody();
 		
 		when(request.body()).thenReturn(output);
 		when(request.headers()).thenReturn(new Headers(Header.contentType("multipart/form-data")));
@@ -99,7 +99,7 @@ public class MultipartFormParametersMessageWriterTest {
 
 		converter.write(parameters, request);
 
-		assertEquals(body, output.toString());
+		assertEquals(body, output.asString());
 	}
 
 	@Test
@@ -122,7 +122,7 @@ public class MultipartFormParametersMessageWriterTest {
 
 		converter.write(parameters, request);
 
-		assertEquals(body, output.toString());
+		assertEquals(body, output.asString());
 	}
 
 	@Test
@@ -143,7 +143,7 @@ public class MultipartFormParametersMessageWriterTest {
 
 		converter.write(parameters, request);
 
-		assertEquals(body, output.toString());
+		assertEquals(body, output.asString());
 	}
 
 	@Test
@@ -166,7 +166,7 @@ public class MultipartFormParametersMessageWriterTest {
 
 		converter.write(parameters, request);
 
-		assertEquals(body, output.toString());
+		assertEquals(body, output.asString());
 	}
 
 	@Test
@@ -189,7 +189,7 @@ public class MultipartFormParametersMessageWriterTest {
 
 		converter.write(parameters, request);
 
-		assertEquals(body, output.toString());
+		assertEquals(body, output.asString());
 	}
 
 	@Test
@@ -212,7 +212,7 @@ public class MultipartFormParametersMessageWriterTest {
 
 		converter.write(parameters, request);
 
-		assertEquals(body, output.toString());
+		assertEquals(body, output.asString());
 	}
 
 	@Test
@@ -235,6 +235,6 @@ public class MultipartFormParametersMessageWriterTest {
 
 		converter.write(parameters, request);
 
-		assertEquals(body, output.toString());
+		assertEquals(body, output.asString());
 	}
 }

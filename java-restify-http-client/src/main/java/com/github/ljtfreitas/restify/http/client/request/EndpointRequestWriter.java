@@ -59,8 +59,8 @@ public class EndpointRequestWriter {
 		try {
 			writer.write(body, httpRequestMessage);
 
-			httpRequestMessage.body().flush();
-			httpRequestMessage.body().close();
+			httpRequestMessage.body().output().flush();
+			httpRequestMessage.body().output().close();
 
 		} catch (IOException e) {
 			throw new HttpMessageWriteException("Error on write HTTP body of type [" + contentType + "].", e);

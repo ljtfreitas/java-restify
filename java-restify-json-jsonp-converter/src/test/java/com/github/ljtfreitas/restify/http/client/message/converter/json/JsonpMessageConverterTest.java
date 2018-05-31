@@ -17,6 +17,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import com.github.ljtfreitas.restify.http.client.message.request.BufferedRequestBody;
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
 import com.github.ljtfreitas.restify.http.client.message.request.RequestBody;
 import com.github.ljtfreitas.restify.http.client.message.response.HttpResponseMessage;
@@ -62,13 +63,13 @@ public class JsonpMessageConverterTest {
 
 	@Test
 	public void shouldWriteJsonObject() {
-		RequestBody output = new RequestBody();
+		RequestBody output = new BufferedRequestBody();
 
 		when(request.body()).thenReturn(output);
 
 		converter.write(jsonObject, request);
 
-		assertEquals(jsonObject.toString(), output.toString());
+		assertEquals(jsonObject.toString(), output.asString());
 	}
 
 	@Test
@@ -95,13 +96,13 @@ public class JsonpMessageConverterTest {
 
 	@Test
 	public void shouldWriteJsonArray() {
-		RequestBody output = new RequestBody();
+		RequestBody output = new BufferedRequestBody();
 
 		when(request.body()).thenReturn(output);
 
 		converter.write(jsonArray, request);
 
-		assertEquals(jsonArray.toString(), output.toString());
+		assertEquals(jsonArray.toString(), output.asString());
 	}
 
 	@Test

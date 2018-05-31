@@ -22,6 +22,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import com.github.ljtfreitas.restify.http.client.message.Header;
 import com.github.ljtfreitas.restify.http.client.message.Headers;
+import com.github.ljtfreitas.restify.http.client.message.request.BufferedRequestBody;
 import com.github.ljtfreitas.restify.http.client.message.request.RequestBody;
 import com.github.ljtfreitas.restify.http.client.request.HttpClientRequest;
 
@@ -44,7 +45,7 @@ public class LogHttpClientRequestInterceptorTest {
 		when(request.headers())
 			.thenReturn(new Headers(Header.host("http://my.api.com"), Header.userAgent("http-java-restify-2.0"), Header.date(Instant.now())));
 		when(request.body())
-			.thenReturn(new RequestBody());
+			.thenReturn(new BufferedRequestBody());
 		when(request.charset())
 			.thenReturn(Charset.forName("UTF-8"));
 
@@ -72,9 +73,9 @@ public class LogHttpClientRequestInterceptorTest {
 
 	@Test
 	public void shouldLogHttpRequestWithBody() throws IOException {
-		RequestBody body = new RequestBody();
-		body.write("This is a message body".getBytes());
-		body.flush();
+		RequestBody body = new BufferedRequestBody();
+		body.output().write("This is a message body".getBytes());
+		body.output().flush();
 
 		when(request.body())
 			.thenReturn(body);

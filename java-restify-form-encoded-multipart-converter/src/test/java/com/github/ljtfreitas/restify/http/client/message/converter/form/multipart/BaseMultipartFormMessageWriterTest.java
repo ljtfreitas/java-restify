@@ -22,6 +22,7 @@ import com.github.ljtfreitas.restify.http.client.message.Header;
 import com.github.ljtfreitas.restify.http.client.message.Headers;
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
 import com.github.ljtfreitas.restify.http.client.message.request.RequestBody;
+import com.github.ljtfreitas.restify.http.client.message.request.BufferedRequestBody;
 
 @RunWith(MockitoJUnitRunner.class)
 public class BaseMultipartFormMessageWriterTest {
@@ -42,7 +43,7 @@ public class BaseMultipartFormMessageWriterTest {
 			@Override
 			protected void doWrite(String boundary, Object body, HttpRequestMessage httpRequestMessage)
 					throws IOException {
-				OutputStream output = httpRequestMessage.body();
+				OutputStream output = httpRequestMessage.body().output();
 
 				output.write(body.toString().getBytes());
 				output.flush();
@@ -64,7 +65,7 @@ public class BaseMultipartFormMessageWriterTest {
 		when(request.headers()).thenReturn(headers);
 		
 		HttpRequestMessage newRequest = mock(HttpRequestMessage.class);
-		when(newRequest.body()).thenReturn(new RequestBody());
+		when(newRequest.body()).thenReturn(new BufferedRequestBody());
 
 		Answer<HttpRequestMessage> answer = new Answer<HttpRequestMessage>() {
 			@Override
@@ -89,7 +90,7 @@ public class BaseMultipartFormMessageWriterTest {
 
 	@Test
 	public void shouldWriteHttpRequestBody() {
-		RequestBody output = new RequestBody();
+		RequestBody output = new BufferedRequestBody();
 
 		when(request.body()).thenReturn(output);
 
@@ -97,6 +98,6 @@ public class BaseMultipartFormMessageWriterTest {
 
 		String expectedBody = "MultipartFormMessageWriterTest\r\n------abc1234--";
 
-		assertEquals(expectedBody, output.toString());
+		assertEquals(expectedBody, output.asString());
 	}
 }

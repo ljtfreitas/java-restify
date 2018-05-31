@@ -36,6 +36,7 @@ import java.util.Collection;
 import com.github.ljtfreitas.restify.http.client.HttpClientException;
 import com.github.ljtfreitas.restify.http.client.message.Header;
 import com.github.ljtfreitas.restify.http.client.message.Headers;
+import com.github.ljtfreitas.restify.http.client.message.request.BufferedRequestBody;
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
 import com.github.ljtfreitas.restify.http.client.message.request.RequestBody;
 import com.github.ljtfreitas.restify.http.client.message.response.HttpResponseMessage;
@@ -51,10 +52,10 @@ class JdkHttpClientRequest implements HttpClientRequest {
 	private final RequestBody body;
 
 	public JdkHttpClientRequest(HttpURLConnection connection, Charset charset, Headers headers) {
-		this(connection, charset, headers, new RequestBody());
+		this(connection, charset, headers, new BufferedRequestBody(charset));
 	}
 
-	private JdkHttpClientRequest(HttpURLConnection connection, Charset charset, Headers headers, RequestBody body) {
+	private JdkHttpClientRequest(HttpURLConnection connection, Charset charset, Headers headers, BufferedRequestBody body) {
 		this.connection = connection;
 		this.charset = charset;
 		this.headers = new JdkHttpClientHeadersDecorator(connection, headers);

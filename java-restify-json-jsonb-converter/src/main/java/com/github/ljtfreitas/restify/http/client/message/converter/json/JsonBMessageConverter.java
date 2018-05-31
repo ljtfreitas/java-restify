@@ -76,7 +76,7 @@ public class JsonBMessageConverter<T> implements JsonMessageConverter<T> {
 
 	@Override
 	public void write(Object body, HttpRequestMessage httpRequestMessage) throws HttpMessageWriteException {
-		OutputStreamWriter writer = new OutputStreamWriter(httpRequestMessage.body(), httpRequestMessage.charset());
+		OutputStreamWriter writer = new OutputStreamWriter(httpRequestMessage.body().output(), httpRequestMessage.charset());
 
 		try {
 			jsonb.toJson(body, writer);

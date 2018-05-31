@@ -25,7 +25,9 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.netty;
 
+import java.io.OutputStream;
 import java.net.URI;
+import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
@@ -63,13 +65,13 @@ class NettyHttpClientRequest implements AsyncHttpClientRequest {
 	private final Headers headers;
 	private final String method;
 	private final Charset charset;
-	private final RequestBody body;
+	private final ByteBufRequestBody body;
 
 	public NettyHttpClientRequest(Bootstrap bootstrap, URI uri, Headers headers, String method, Charset charset) {
-		this(bootstrap, uri, headers, method, charset, new RequestBody());
+		this(bootstrap, uri, headers, method, charset, new ByteBufRequestBody(charset));
 	}
 
-	private NettyHttpClientRequest(Bootstrap bootstrap, URI uri, Headers headers, String method, Charset charset, RequestBody body) {
+	private NettyHttpClientRequest(Bootstrap bootstrap, URI uri, Headers headers, String method, Charset charset, ByteBufRequestBody body) {
 		this.bootstrap = bootstrap;
 		this.uri = uri;
 		this.headers = headers;
@@ -183,4 +185,33 @@ class NettyHttpClientRequest implements AsyncHttpClientRequest {
 		return bodyAsBuffer;
 	}
 
+	private static class ByteBufRequestBody implements RequestBody {
+
+		private final ByteBufOutputStream output = new ByteBufOutputStream(Unpooled.buffer());
+		private final Charset charset;
+
+		private ByteBufRequestBody(Charset charset) {
+			this.charset = charset;
+		}
+
+		@Override
+		public ByteBuffer buffer() {
+			return output.buffer().nioBuffer();
+		}
+
+		@Override
+		public String asString() {
+			return output.buffer().toString(charset);
+		}
+
+		@Override
+		public OutputStream output() {
+			return output;
+		}
+
+		@Override
+		public boolean empty() {
+			return output.buffer().hasArray() && output.buffer().array().length == 0;
+		}
+	}
 }

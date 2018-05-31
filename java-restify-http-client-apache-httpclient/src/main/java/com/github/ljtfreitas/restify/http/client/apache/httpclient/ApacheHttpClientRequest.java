@@ -40,6 +40,7 @@ import org.apache.http.protocol.HttpContext;
 import com.github.ljtfreitas.restify.http.client.HttpClientException;
 import com.github.ljtfreitas.restify.http.client.message.Header;
 import com.github.ljtfreitas.restify.http.client.message.Headers;
+import com.github.ljtfreitas.restify.http.client.message.request.BufferedRequestBody;
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
 import com.github.ljtfreitas.restify.http.client.message.request.RequestBody;
 import com.github.ljtfreitas.restify.http.client.message.response.HttpResponseMessage;
@@ -53,15 +54,15 @@ class ApacheHttpClientRequest implements HttpClientRequest {
 	private final Charset charset;
 	private final Headers headers;
 
-	private final RequestBody body;
+	private final BufferedRequestBody body;
 
 	public ApacheHttpClientRequest(HttpClient httpClient, HttpUriRequest httpRequest, HttpContext httpContext, Charset charset,
 			Headers headers) {
-		this(httpClient, httpRequest, httpContext, charset, headers, new RequestBody());
+		this(httpClient, httpRequest, httpContext, charset, headers, new BufferedRequestBody(charset));
 	}
 
 	private ApacheHttpClientRequest(HttpClient httpClient, HttpUriRequest httpRequest, HttpContext httpContext, Charset charset,
-			Headers headers, RequestBody body) {
+			Headers headers, BufferedRequestBody body) {
 		this.httpClient = httpClient;
 		this.httpRequest = httpRequest;
 		this.httpContext = httpContext;
@@ -76,7 +77,7 @@ class ApacheHttpClientRequest implements HttpClientRequest {
 
 		if (httpRequest instanceof HttpEntityEnclosingRequest) {
 			HttpEntityEnclosingRequest entityEnclosingRequest = (HttpEntityEnclosingRequest) httpRequest;
-			HttpEntity requestEntity = new ByteArrayEntity(body.toByteArray());
+			HttpEntity requestEntity = new ByteArrayEntity(body.buffer().array());
 			entityEnclosingRequest.setEntity(requestEntity);
 		}
 

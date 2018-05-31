@@ -113,8 +113,8 @@ public class ApacheAsyncHttpClientRequestFactoryTest {
 				new Headers(Header.contentType("application/json")), requestBody);
 
 		ApacheAsyncHttpClientRequest request = apacheAsyncHttpClientRequestFactory.createAsyncOf(endpointRequest);
-		request.body().write(requestBody.getBytes());
-		request.body().flush();
+		request.body().output().write(requestBody.getBytes());
+		request.body().output().flush();
 
 		HttpResponseMessage response = request.executeAsync().get();
 

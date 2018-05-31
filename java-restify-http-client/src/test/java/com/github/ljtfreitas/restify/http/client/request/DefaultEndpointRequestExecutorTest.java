@@ -23,6 +23,7 @@ import com.github.ljtfreitas.restify.http.client.message.Header;
 import com.github.ljtfreitas.restify.http.client.message.Headers;
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
 import com.github.ljtfreitas.restify.http.client.message.request.RequestBody;
+import com.github.ljtfreitas.restify.http.client.message.request.BufferedRequestBody;
 import com.github.ljtfreitas.restify.http.client.message.response.HttpResponseMessage;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponseReader;
@@ -98,7 +99,7 @@ public class DefaultEndpointRequestExecutorTest {
 		private final EndpointRequest source;
 		private final HttpResponseMessage response;
 
-		private final RequestBody body = new RequestBody();
+		private final RequestBody body = new BufferedRequestBody(Charset.defaultCharset());
 
 		public SimpleHttpClientRequest(EndpointRequest source, HttpResponseMessage response) {
 			this.source = source;

@@ -19,6 +19,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import com.github.ljtfreitas.restify.http.client.message.Encoding;
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
 import com.github.ljtfreitas.restify.http.client.message.request.RequestBody;
+import com.github.ljtfreitas.restify.http.client.message.request.BufferedRequestBody;
 import com.github.ljtfreitas.restify.http.client.message.response.HttpResponseMessage;
 import com.github.ljtfreitas.restify.reflection.SimpleParameterizedType;
 
@@ -67,18 +68,18 @@ public class JacksonMessageConverterTest {
 
 	@Test
 	public void shouldWriteJsonMessage() {
-		RequestBody output = new RequestBody();
+		RequestBody output = new BufferedRequestBody();
 
 		when(request.body()).thenReturn(output);
 		
 		converter.write(new MyJsonModel("Tiago de Freitas Lima", 31), request);
 
-		assertEquals(json, output.toString());
+		assertEquals(json, output.asString());
 	}
 
 	@Test
 	public void shouldWriteCollectionOfJsonMessage() {
-		RequestBody output = new RequestBody();
+		RequestBody output = new BufferedRequestBody();
 
 		when(request.body()).thenReturn(output);
 		
@@ -86,7 +87,7 @@ public class JacksonMessageConverterTest {
 
 		converter.write(collection, request);
 
-		assertEquals(collectionOfJson, output.toString());
+		assertEquals(collectionOfJson, output.asString());
 	}
 
 	@Test

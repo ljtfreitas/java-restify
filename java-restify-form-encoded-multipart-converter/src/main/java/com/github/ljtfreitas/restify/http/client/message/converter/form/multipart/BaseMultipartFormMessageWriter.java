@@ -60,7 +60,7 @@ abstract class BaseMultipartFormMessageWriter<T> implements MultipartFormMessage
 
 			doWrite("------" + boundary, body, httpRequestMessage);
 
-			OutputStream output = httpRequestMessage.body();
+			OutputStream output = httpRequestMessage.body().output();
 			output.write('\r');
 			output.write('\n');
 			output.write(("------" + boundary + "--").getBytes());

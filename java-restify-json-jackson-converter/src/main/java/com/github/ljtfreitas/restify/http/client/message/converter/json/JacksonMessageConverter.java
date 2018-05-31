@@ -81,7 +81,7 @@ public class JacksonMessageConverter<T> implements JsonMessageConverter<T> {
 					.findFirst()
 					.orElse(JsonEncoding.UTF8);
 
-			JsonGenerator generator = objectMapper.getFactory().createGenerator(httpRequestMessage.body(), encoding);
+			JsonGenerator generator = objectMapper.getFactory().createGenerator(httpRequestMessage.body().output(), encoding);
 
 			objectMapper.writeValue(generator, body);
 			generator.flush();

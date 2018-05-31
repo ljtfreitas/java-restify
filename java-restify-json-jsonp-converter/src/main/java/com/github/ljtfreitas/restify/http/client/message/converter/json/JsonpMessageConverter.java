@@ -95,13 +95,13 @@ public class JsonpMessageConverter implements JsonMessageConverter<JsonStructure
 	}
 
 	private void jsonWriterTo(HttpRequestMessage httpRequestMessage, Consumer<JsonWriter> consumer) {
-		JsonWriter writer = jsonWriterFactory.createWriter(httpRequestMessage.body());
+		JsonWriter writer = jsonWriterFactory.createWriter(httpRequestMessage.body().output());
 
 		consumer.accept(writer);
 
 		Tryable.run(() -> {;
-			httpRequestMessage.body().flush();
-			httpRequestMessage.body().close();
+			httpRequestMessage.body().output().flush();
+			httpRequestMessage.body().output().close();
 
 		}, e -> new HttpMessageWriteException(e));
 	}

@@ -105,8 +105,8 @@ public class ApacheHttpClientRequestFactoryTest {
 				new Headers(Header.contentType("application/json")), requestBody);
 
 		ApacheHttpClientRequest request = apacheHttpClientRequestFactory.createOf(endpointRequest);
-		request.body().write(requestBody.getBytes());
-		request.body().flush();
+		request.body().output().write(requestBody.getBytes());
+		request.body().output().flush();
 
 		HttpResponseMessage response = request.execute();
 

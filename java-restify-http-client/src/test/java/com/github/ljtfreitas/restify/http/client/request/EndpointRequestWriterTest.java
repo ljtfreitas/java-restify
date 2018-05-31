@@ -23,7 +23,7 @@ import com.github.ljtfreitas.restify.http.client.message.Headers;
 import com.github.ljtfreitas.restify.http.client.message.converter.HttpMessageConverters;
 import com.github.ljtfreitas.restify.http.client.message.converter.HttpMessageWriter;
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
-import com.github.ljtfreitas.restify.http.client.message.request.RequestBody;
+import com.github.ljtfreitas.restify.http.client.message.request.BufferedRequestBody;
 
 @RunWith(MockitoJUnitRunner.class)
 public class EndpointRequestWriterTest {
@@ -59,7 +59,7 @@ public class EndpointRequestWriterTest {
 				String.class);
 
 		when(httpRequestMessage.headers()).thenReturn(headers);
-		when(httpRequestMessage.body()).thenReturn(new RequestBody());
+		when(httpRequestMessage.body()).thenReturn(new BufferedRequestBody());
 
 		endpointRequestWriter.write(endpointRequest, httpRequestMessage);
 

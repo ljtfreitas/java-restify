@@ -74,7 +74,7 @@ abstract class BaseFormURLEncodedMessageConverter<T> implements FormURLEncodedMe
 	@Override
 	public void write(T body, HttpRequestMessage httpRequestMessage) throws HttpMessageWriteException {
 		try {
-			OutputStreamWriter writer = new OutputStreamWriter(httpRequestMessage.body(), httpRequestMessage.charset());
+			OutputStreamWriter writer = new OutputStreamWriter(httpRequestMessage.body().output(), httpRequestMessage.charset());
 			writer.write(serializer.serialize("", String.class, body));
 		
 			writer.flush();

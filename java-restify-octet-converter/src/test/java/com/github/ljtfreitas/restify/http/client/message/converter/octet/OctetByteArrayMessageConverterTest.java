@@ -16,6 +16,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
 import com.github.ljtfreitas.restify.http.client.message.request.RequestBody;
+import com.github.ljtfreitas.restify.http.client.message.request.BufferedRequestBody;
 import com.github.ljtfreitas.restify.http.client.message.response.HttpResponseMessage;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -71,12 +72,12 @@ public class OctetByteArrayMessageConverterTest {
 	public void shouldWriteByteArrayBodyToOutputStream() {
 		String body = "request body";
 
-		RequestBody buffer = new RequestBody();
+		RequestBody buffer = new BufferedRequestBody();
 		when(request.body()).thenReturn(buffer);
 
 		converter.write(body.getBytes(), request);
 
-		String output = new String(buffer.toByteArray());
+		String output = buffer.asString();
 
 		assertEquals(body, output);
 	}

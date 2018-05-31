@@ -105,10 +105,10 @@ public class JaxbXmlMessageConverter<T> implements XmlMessageConverter<T> {
 			Marshaller marshaller = context.createMarshaller();
 			marshaller.setProperty(Marshaller.JAXB_ENCODING, httpRequestMessage.charset().name());
 
-			marshaller.marshal(body, new StreamResult(httpRequestMessage.body()));
+			marshaller.marshal(body, new StreamResult(httpRequestMessage.body().output()));
 
-			httpRequestMessage.body().flush();
-			httpRequestMessage.body().close();
+			httpRequestMessage.body().output().flush();
+			httpRequestMessage.body().output().close();
 
 		} catch (JAXBException | IOException e) {
 			throw new HttpMessageWriteException("Error on try write xml message", e);

@@ -25,72 +25,27 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.message.request;
 
-import java.io.BufferedOutputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.ByteBuffer;
+import java.nio.channels.Channels;
+import java.nio.channels.WritableByteChannel;
 
 import com.github.ljtfreitas.restify.util.Tryable;
 
-public class RequestBody extends OutputStream {
+public interface RequestBody {
 
-	private static final int DEFAULT_BUFFER_SIZE = 1024 * 100;
+	public ByteBuffer buffer();
 
-	private final ByteArrayOutputStream source;
-	private final BufferedOutputStream buffer;
+	public String asString();
 
-	public RequestBody() {
-		this(DEFAULT_BUFFER_SIZE);
-	}
+	public OutputStream output();
 
-	public RequestBody(int size) {
-		this.source = new ByteArrayOutputStream(size);
-		this.buffer = new BufferedOutputStream(source);
-	}
+	public boolean empty();
 
-	@Override
-	public void write(byte[] b) throws IOException {
-		buffer.write(b);
-	}
-
-	@Override
-	public void write(int b) throws IOException {
-		buffer.write(b);
-	}
-
-	@Override
-	public void write(byte[] b, int off, int len) throws IOException {
-		buffer.write(b, off, len);
-	}
-
-	@Override
-	public void flush() throws IOException {
-		buffer.flush();
-	}
-
-	public boolean empty() {
-		return source.size() != 0;
-	}
-
-	public void writeTo(OutputStream out) throws IOException {
-		source.writeTo(out);
-	}
-
-	public byte[] toByteArray() {
-		return source.toByteArray();
-	}
-
-	@Override
-	public String toString() {
-		return source.toString();
-	}
-
-	public String toString(String charsetName) {
-		return Tryable.of(() -> source.toString(charsetName));
-	}
-
-	@Override
-	public void close() throws IOException {
-		buffer.close();
+	public default void writeTo(OutputStream other) {
+		WritableByteChannel channel = Channels.newChannel(other);
+		Tryable.run(() -> {
+			channel.write(buffer());
+		});
 	}
 }

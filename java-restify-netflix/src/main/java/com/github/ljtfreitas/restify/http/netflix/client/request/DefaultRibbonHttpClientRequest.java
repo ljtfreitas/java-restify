@@ -34,6 +34,7 @@ import com.github.ljtfreitas.restify.http.client.message.Header;
 import com.github.ljtfreitas.restify.http.client.message.Headers;
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
 import com.github.ljtfreitas.restify.http.client.message.request.RequestBody;
+import com.github.ljtfreitas.restify.http.client.message.request.BufferedRequestBody;
 import com.github.ljtfreitas.restify.http.client.message.response.HttpResponseMessage;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
 import com.github.ljtfreitas.restify.http.client.request.HttpClientRequest;
@@ -48,7 +49,7 @@ public class DefaultRibbonHttpClientRequest extends BaseRibbonHttpClientRequest 
 	private final RequestBody body;
 
 	public DefaultRibbonHttpClientRequest(EndpointRequest endpointRequest, RibbonLoadBalancedClient ribbonLoadBalancedClient, Charset charset) {
-		this(endpointRequest, ribbonLoadBalancedClient, charset, new RequestBody());
+		this(endpointRequest, ribbonLoadBalancedClient, charset, new BufferedRequestBody(charset));
 	}
 
 	private DefaultRibbonHttpClientRequest(EndpointRequest endpointRequest, RibbonLoadBalancedClient ribbonLoadBalancedClient, Charset charset,
@@ -108,9 +109,9 @@ public class DefaultRibbonHttpClientRequest extends BaseRibbonHttpClientRequest 
 		endpointRequest.body()
 			.ifPresent(b ->
 				Tryable.run(() -> {
-					body.writeTo(httpRequestMessage.body());
-					httpRequestMessage.body().flush();
-					httpRequestMessage.body().close();
+					body.writeTo(httpRequestMessage.body().output());
+					httpRequestMessage.body().output().flush();
+					httpRequestMessage.body().output().close();
 				})
 			);
 	}

@@ -108,7 +108,7 @@ public class LogHttpClientRequestInterceptor implements HttpClientRequestInterce
 
 			if (!source.body().empty()) {
 				message.append("\n")
-					   .append("> " + Tryable.of(() -> source.body().toString(source.charset().name())))
+					   .append("> " + Tryable.of(source.body()::asString))
 					   .append("\n");
 			}
 

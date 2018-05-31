@@ -35,6 +35,7 @@ import java.util.concurrent.CompletableFuture;
 import com.github.ljtfreitas.restify.http.client.HttpClientException;
 import com.github.ljtfreitas.restify.http.client.message.Header;
 import com.github.ljtfreitas.restify.http.client.message.Headers;
+import com.github.ljtfreitas.restify.http.client.message.request.BufferedRequestBody;
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
 import com.github.ljtfreitas.restify.http.client.message.request.RequestBody;
 import com.github.ljtfreitas.restify.http.client.message.response.HttpResponseMessage;
@@ -59,17 +60,17 @@ class OkHttpClientRequest implements AsyncHttpClientRequest {
 	private final RequestBody body;
 
 	public OkHttpClientRequest(OkHttpClient okHttpClient, URI uri, String method, Headers headers, Charset charset) {
-		this(okHttpClient, uri, method, headers, charset, new RequestBody());
+		this(okHttpClient, uri, method, headers, charset, new BufferedRequestBody(charset));
 	}
 
 	private OkHttpClientRequest(OkHttpClient okHttpClient, URI uri, String method, Headers headers, Charset charset,
-			RequestBody body) {
+			BufferedRequestBody body) {
 		this.okHttpClient = okHttpClient;
 		this.uri = uri;
 		this.method = method;
 		this.headers = headers;
 		this.charset = charset;
-		this.body = new RequestBody();
+		this.body = body;
 	}
 
 	@Override
@@ -142,7 +143,7 @@ class OkHttpClientRequest implements AsyncHttpClientRequest {
 		MediaType contentType = headers.get("Content-Type").map(header -> MediaType.parse(header.value()))
 				.orElse(null);
 
-		byte[] content = body.toByteArray();
+		byte[] content = body.buffer().array();
 
 		okhttp3.RequestBody body = (content.length > 0 ? okhttp3.RequestBody.create(contentType, content) : null);
 

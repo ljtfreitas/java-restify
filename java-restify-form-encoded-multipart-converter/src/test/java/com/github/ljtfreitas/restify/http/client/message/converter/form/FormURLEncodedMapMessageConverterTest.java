@@ -16,6 +16,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
 import com.github.ljtfreitas.restify.http.client.message.request.RequestBody;
+import com.github.ljtfreitas.restify.http.client.message.request.BufferedRequestBody;
 import com.github.ljtfreitas.restify.http.client.message.response.HttpResponseMessage;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -44,13 +45,13 @@ public class FormURLEncodedMapMessageConverterTest {
 		body.put("param1", "value1");
 		body.put("param2", "value2");
 
-		RequestBody output = new RequestBody();
+		RequestBody output = new BufferedRequestBody();
 
 		when(request.body()).thenReturn(output);
 
 		converter.write(body, request);
 
-		assertEquals(messageBody, output.toString());
+		assertEquals(messageBody, output.asString());
 	}
 
 	@Test(expected = UnsupportedOperationException.class)

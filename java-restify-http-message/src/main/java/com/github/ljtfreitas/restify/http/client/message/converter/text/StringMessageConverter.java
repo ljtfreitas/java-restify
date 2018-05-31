@@ -51,9 +51,9 @@ public abstract class StringMessageConverter implements TextMessageConverter<Str
 	@Override
 	public void write(String body, HttpRequestMessage httpRequestMessage) throws HttpMessageWriteException {
 		try {
-			httpRequestMessage.body().write(body.toString().getBytes(httpRequestMessage.charset()));
-			httpRequestMessage.body().flush();
-			httpRequestMessage.body().close();
+			httpRequestMessage.body().output().write(body.toString().getBytes(httpRequestMessage.charset()));
+			httpRequestMessage.body().output().flush();
+			httpRequestMessage.body().output().close();
 		} catch (IOException e) {
 			throw new HttpMessageWriteException(e);
 		}

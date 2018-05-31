@@ -20,6 +20,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import com.github.ljtfreitas.restify.http.client.message.Encoding;
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
 import com.github.ljtfreitas.restify.http.client.message.request.RequestBody;
+import com.github.ljtfreitas.restify.http.client.message.request.BufferedRequestBody;
 import com.github.ljtfreitas.restify.http.client.message.response.HttpResponseMessage;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -61,13 +62,13 @@ public class JaxbXmlMessageConverterTest {
 
 	@Test
 	public void shouldWriteXmlMessage() {
-		RequestBody output = new RequestBody();
+		RequestBody output = new BufferedRequestBody();
 
 		when(request.body()).thenReturn(output);
 
 		converter.write(new MyXmlModel("Tiago de Freitas Lima", 31), request);
 
-		assertEquals(xml, output.toString());
+		assertEquals(xml, output.asString());
 	}
 
 	@Test
