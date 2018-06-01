@@ -40,11 +40,11 @@ import org.apache.http.protocol.HttpContext;
 import com.github.ljtfreitas.restify.http.client.HttpClientException;
 import com.github.ljtfreitas.restify.http.client.message.Header;
 import com.github.ljtfreitas.restify.http.client.message.Headers;
-import com.github.ljtfreitas.restify.http.client.message.request.BufferedRequestBody;
+import com.github.ljtfreitas.restify.http.client.message.request.BufferedHttpRequestBody;
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
-import com.github.ljtfreitas.restify.http.client.message.request.RequestBody;
-import com.github.ljtfreitas.restify.http.client.message.response.HttpResponseMessage;
+import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestBody;
 import com.github.ljtfreitas.restify.http.client.request.HttpClientRequest;
+import com.github.ljtfreitas.restify.http.client.response.HttpClientResponse;
 
 class ApacheHttpClientRequest implements HttpClientRequest {
 
@@ -54,15 +54,15 @@ class ApacheHttpClientRequest implements HttpClientRequest {
 	private final Charset charset;
 	private final Headers headers;
 
-	private final BufferedRequestBody body;
+	private final BufferedHttpRequestBody body;
 
 	public ApacheHttpClientRequest(HttpClient httpClient, HttpUriRequest httpRequest, HttpContext httpContext, Charset charset,
 			Headers headers) {
-		this(httpClient, httpRequest, httpContext, charset, headers, new BufferedRequestBody(charset));
+		this(httpClient, httpRequest, httpContext, charset, headers, new BufferedHttpRequestBody(charset));
 	}
 
 	private ApacheHttpClientRequest(HttpClient httpClient, HttpUriRequest httpRequest, HttpContext httpContext, Charset charset,
-			Headers headers, BufferedRequestBody body) {
+			Headers headers, BufferedHttpRequestBody body) {
 		this.httpClient = httpClient;
 		this.httpRequest = httpRequest;
 		this.httpContext = httpContext;
@@ -72,12 +72,12 @@ class ApacheHttpClientRequest implements HttpClientRequest {
 	}
 
 	@Override
-	public HttpResponseMessage execute() throws HttpClientException {
+	public HttpClientResponse execute() throws HttpClientException {
 		headers.all().forEach(h -> httpRequest.addHeader(h.name(), h.value()));
 
 		if (httpRequest instanceof HttpEntityEnclosingRequest) {
 			HttpEntityEnclosingRequest entityEnclosingRequest = (HttpEntityEnclosingRequest) httpRequest;
-			HttpEntity requestEntity = new ByteArrayEntity(body.buffer().array());
+			HttpEntity requestEntity = new ByteArrayEntity(body.asBuffer().array());
 			entityEnclosingRequest.setEntity(requestEntity);
 		}
 
@@ -109,7 +109,7 @@ class ApacheHttpClientRequest implements HttpClientRequest {
 	}
 
 	@Override
-	public RequestBody body() {
+	public HttpRequestBody body() {
 		return body;
 	}
 

@@ -35,31 +35,30 @@ import java.nio.charset.Charset;
 import com.github.ljtfreitas.restify.http.client.message.Encoding;
 import com.github.ljtfreitas.restify.util.Tryable;
 
-public class BufferedRequestBody implements RequestBody {
+public class BufferedHttpRequestBody implements HttpRequestBody {
 
 	private static final int DEFAULT_BUFFER_SIZE = 1024 * 100;
 
 	private final Charset charset;
 	private final BufferedOutput output;
 
-	public BufferedRequestBody() {
+	public BufferedHttpRequestBody() {
 		this(Encoding.UTF_8.charset());
 	}
 
-	public BufferedRequestBody(Charset charset) {
+	public BufferedHttpRequestBody(Charset charset) {
 		this(charset, DEFAULT_BUFFER_SIZE);
 	}
 
-	public BufferedRequestBody(Charset charset, int size) {
+	public BufferedHttpRequestBody(Charset charset, int size) {
 		this.charset = charset;
 		this.output = new BufferedOutput(size);
 	}
 
 	@Override
-	public ByteBuffer buffer() {
+	public ByteBuffer asBuffer() {
 		return ByteBuffer.wrap(output.source.toByteArray());
 	}
-
 
 	@Override
 	public OutputStream output() {

@@ -40,7 +40,7 @@ public abstract class StringMessageConverter implements TextMessageConverter<Str
 
 	@Override
 	public String read(HttpResponseMessage httpResponseMessage, Type expectedType) throws HttpMessageReadException {
-		try (BufferedReader buffer = new BufferedReader(new InputStreamReader(httpResponseMessage.body()))) {
+		try (BufferedReader buffer = new BufferedReader(new InputStreamReader(httpResponseMessage.body().input()))) {
             return buffer.lines().collect(Collectors.joining("\n"));
 
 		} catch (IOException e) {

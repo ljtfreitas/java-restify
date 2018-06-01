@@ -14,12 +14,13 @@ import javax.json.JsonObject;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Answers;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import com.github.ljtfreitas.restify.http.client.message.request.BufferedRequestBody;
+import com.github.ljtfreitas.restify.http.client.message.request.BufferedHttpRequestBody;
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
-import com.github.ljtfreitas.restify.http.client.message.request.RequestBody;
+import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestBody;
 import com.github.ljtfreitas.restify.http.client.message.response.HttpResponseMessage;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -28,7 +29,7 @@ public class JsonpMessageConverterTest {
 	@Mock
 	private HttpRequestMessage request;
 
-	@Mock
+	@Mock(answer = Answers.RETURNS_DEEP_STUBS)
 	private HttpResponseMessage response;
 
 	private JsonpMessageConverter converter = new JsonpMessageConverter();
@@ -63,7 +64,7 @@ public class JsonpMessageConverterTest {
 
 	@Test
 	public void shouldWriteJsonObject() {
-		RequestBody output = new BufferedRequestBody();
+		HttpRequestBody output = new BufferedHttpRequestBody();
 
 		when(request.body()).thenReturn(output);
 
@@ -81,7 +82,7 @@ public class JsonpMessageConverterTest {
 	public void shouldReadJsonObject() {
 		ByteArrayInputStream input = new ByteArrayInputStream(jsonObject.toString().getBytes());
 
-		when(response.body()).thenReturn(input);
+		when(response.body().input()).thenReturn(input);
 		
 		JsonObject object = (JsonObject) converter.read(response, JsonObject.class);
 
@@ -96,7 +97,7 @@ public class JsonpMessageConverterTest {
 
 	@Test
 	public void shouldWriteJsonArray() {
-		RequestBody output = new BufferedRequestBody();
+		HttpRequestBody output = new BufferedHttpRequestBody();
 
 		when(request.body()).thenReturn(output);
 
@@ -114,7 +115,7 @@ public class JsonpMessageConverterTest {
 	public void shouldReadJsonArray() throws Exception {
 		ByteArrayInputStream input = new ByteArrayInputStream(jsonArray.toString().getBytes());
 
-		when(response.body()).thenReturn(input);
+		when(response.body().input()).thenReturn(input);
 
 		JsonArray array = (JsonArray) converter.read(response, JsonArray.class);
 

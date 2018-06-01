@@ -19,7 +19,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import com.github.ljtfreitas.restify.http.client.message.Header;
 import com.github.ljtfreitas.restify.http.client.message.Headers;
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
-import com.github.ljtfreitas.restify.http.client.message.request.BufferedRequestBody;
+import com.github.ljtfreitas.restify.http.client.message.request.BufferedHttpRequestBody;
 import com.github.ljtfreitas.restify.http.contract.MultipartFile;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -32,7 +32,7 @@ public class MultipartFormFileObjectMessageWriterTest {
 
 	private MultipartFile multipartFile;
 
-	private BufferedRequestBody output;
+	private BufferedHttpRequestBody output;
 
 	private File file;
 
@@ -49,7 +49,7 @@ public class MultipartFormFileObjectMessageWriterTest {
 		fileWriter.flush();
 		fileWriter.close();
 
-		output = new BufferedRequestBody();
+		output = new BufferedHttpRequestBody();
 
 		when(request.body()).thenReturn(output);
 		when(request.headers()).thenReturn(new Headers(Header.contentType("multipart/form-data")));

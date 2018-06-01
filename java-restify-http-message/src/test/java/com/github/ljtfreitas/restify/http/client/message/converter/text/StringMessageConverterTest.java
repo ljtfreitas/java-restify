@@ -11,13 +11,14 @@ import java.nio.charset.Charset;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Answers;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import com.github.ljtfreitas.restify.http.client.message.ContentType;
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
-import com.github.ljtfreitas.restify.http.client.message.request.RequestBody;
-import com.github.ljtfreitas.restify.http.client.message.request.BufferedRequestBody;
+import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestBody;
+import com.github.ljtfreitas.restify.http.client.message.request.BufferedHttpRequestBody;
 import com.github.ljtfreitas.restify.http.client.message.response.HttpResponseMessage;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -26,7 +27,7 @@ public class StringMessageConverterTest {
 	@Mock
 	private HttpRequestMessage request;
 
-	@Mock
+	@Mock(answer = Answers.RETURNS_DEEP_STUBS)
 	private HttpResponseMessage response;
 
 	private StringMessageConverter converter;
@@ -70,7 +71,7 @@ public class StringMessageConverterTest {
 
 	@Test
 	public void shouldWriteStringMessage() {
-		RequestBody output = new BufferedRequestBody();
+		HttpRequestBody output = new BufferedHttpRequestBody();
 
 		when(request.body()).thenReturn(output);
 
@@ -83,7 +84,7 @@ public class StringMessageConverterTest {
 	public void shouldReadStringMessage() {
 		ByteArrayInputStream input = new ByteArrayInputStream(message.getBytes());
 
-		when(response.body()).thenReturn(input);
+		when(response.body().input()).thenReturn(input);
 
 		Object content = converter.read(response, String.class);
 

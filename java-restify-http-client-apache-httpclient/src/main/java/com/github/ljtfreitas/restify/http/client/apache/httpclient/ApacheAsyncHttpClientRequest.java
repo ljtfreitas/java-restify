@@ -42,11 +42,11 @@ import org.apache.http.protocol.HttpContext;
 import com.github.ljtfreitas.restify.http.client.HttpClientException;
 import com.github.ljtfreitas.restify.http.client.message.Header;
 import com.github.ljtfreitas.restify.http.client.message.Headers;
+import com.github.ljtfreitas.restify.http.client.message.request.BufferedHttpRequestBody;
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
-import com.github.ljtfreitas.restify.http.client.message.request.RequestBody;
-import com.github.ljtfreitas.restify.http.client.message.request.BufferedRequestBody;
-import com.github.ljtfreitas.restify.http.client.message.response.HttpResponseMessage;
+import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestBody;
 import com.github.ljtfreitas.restify.http.client.request.async.AsyncHttpClientRequest;
+import com.github.ljtfreitas.restify.http.client.response.HttpClientResponse;
 import com.github.ljtfreitas.restify.util.Tryable;
 
 class ApacheAsyncHttpClientRequest implements AsyncHttpClientRequest {
@@ -56,15 +56,15 @@ class ApacheAsyncHttpClientRequest implements AsyncHttpClientRequest {
 	private final HttpContext httpContext;
 	private final Charset charset;
 	private final Headers headers;
-	private final RequestBody body;
+	private final HttpRequestBody body;
 
 	ApacheAsyncHttpClientRequest(HttpAsyncClient httpAsyncClient, HttpUriRequest httpRequest, HttpContext context,
 			Charset charset, Headers headers) {
-		this(httpAsyncClient, httpRequest, context, charset, headers, new BufferedRequestBody(charset));
+		this(httpAsyncClient, httpRequest, context, charset, headers, new BufferedHttpRequestBody(charset));
 	}
 
 	private ApacheAsyncHttpClientRequest(HttpAsyncClient httpAsyncClient, HttpUriRequest httpRequest,
-			HttpContext context, Charset charset, Headers headers, RequestBody body) {
+			HttpContext context, Charset charset, Headers headers, HttpRequestBody body) {
 		this.httpAsyncClient = httpAsyncClient;
 		this.httpRequest = httpRequest;
 		this.httpContext = context;
@@ -84,7 +84,7 @@ class ApacheAsyncHttpClientRequest implements AsyncHttpClientRequest {
 	}
 
 	@Override
-	public RequestBody body() {
+	public HttpRequestBody body() {
 		return body;
 	}
 
@@ -105,22 +105,22 @@ class ApacheAsyncHttpClientRequest implements AsyncHttpClientRequest {
 	}
 
 	@Override
-	public CompletableFuture<HttpResponseMessage> executeAsync() throws HttpClientException {
+	public CompletableFuture<HttpClientResponse> executeAsync() throws HttpClientException {
 		return doExecuteAsync();
 	}
 
-	private CompletableFuture<HttpResponseMessage> doExecuteAsync() {
+	private CompletableFuture<HttpClientResponse> doExecuteAsync() {
 		headers.all().forEach(h -> httpRequest.addHeader(h.name(), h.value()));
 
 		start();
 
 		if (httpRequest instanceof HttpEntityEnclosingRequest) {
 			HttpEntityEnclosingRequest entityEnclosingRequest = (HttpEntityEnclosingRequest) httpRequest;
-			HttpEntity requestEntity = new ByteArrayEntity(body.buffer().array());
+			HttpEntity requestEntity = new ByteArrayEntity(body.asBuffer().array());
 			entityEnclosingRequest.setEntity(requestEntity);
 		}
 
-		CompletableFuture<HttpResponseMessage> future = new CompletableFuture<>();
+		CompletableFuture<HttpClientResponse> future = new CompletableFuture<>();
 
 		httpAsyncClient.execute(httpRequest, httpContext, new ApacheHttpAsyncRequestCallback(future));
 
@@ -138,15 +138,15 @@ class ApacheAsyncHttpClientRequest implements AsyncHttpClientRequest {
 	}
 
 	@Override
-	public HttpResponseMessage execute() throws HttpClientException {
+	public HttpClientResponse execute() throws HttpClientException {
 		return Tryable.of(() -> doExecuteAsync().get());
 	}
 
 	private class ApacheHttpAsyncRequestCallback implements FutureCallback<HttpResponse> {
 
-		private final CompletableFuture<HttpResponseMessage> future;
+		private final CompletableFuture<HttpClientResponse> future;
 
-		private ApacheHttpAsyncRequestCallback(CompletableFuture<HttpResponseMessage> future) {
+		private ApacheHttpAsyncRequestCallback(CompletableFuture<HttpClientResponse> future) {
 			this.future = future;
 		}
 

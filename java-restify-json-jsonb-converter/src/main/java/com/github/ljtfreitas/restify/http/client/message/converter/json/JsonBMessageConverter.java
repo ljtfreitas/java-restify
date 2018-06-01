@@ -63,7 +63,7 @@ public class JsonBMessageConverter<T> implements JsonMessageConverter<T> {
 	@Override
 	public T read(HttpResponseMessage httpResponseMessage, Type expectedType) throws HttpMessageReadException {
 		try {
-			return jsonb.fromJson(httpResponseMessage.body(), expectedType);
+			return jsonb.fromJson(httpResponseMessage.body().input(), expectedType);
 		} catch (JsonbException e) {
 			throw new HttpMessageReadException(e);
 		}

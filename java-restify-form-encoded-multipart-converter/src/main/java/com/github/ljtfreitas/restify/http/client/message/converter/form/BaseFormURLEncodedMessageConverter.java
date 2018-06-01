@@ -51,10 +51,10 @@ abstract class BaseFormURLEncodedMessageConverter<T> implements FormURLEncodedMe
 	protected BaseFormURLEncodedMessageConverter(ParameterSerializer serializer) {
 		this.serializer = serializer;
 	}
-	
+
 	@Override
 	public T read(HttpResponseMessage httpResponseMessage, Type expectedType) throws HttpMessageReadException {
-		try (BufferedReader buffer = new BufferedReader(new InputStreamReader(httpResponseMessage.body()))) {
+		try (BufferedReader buffer = new BufferedReader(new InputStreamReader(httpResponseMessage.body().input()))) {
 			String content = buffer.lines().collect(Collectors.joining("\n"));
 
 			ParameterPair[] pairs = Arrays.stream(content.split("&")).map(p -> {

@@ -9,12 +9,13 @@ import java.nio.charset.Charset;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Answers;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
-import com.github.ljtfreitas.restify.http.client.message.request.RequestBody;
-import com.github.ljtfreitas.restify.http.client.message.request.BufferedRequestBody;
+import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestBody;
+import com.github.ljtfreitas.restify.http.client.message.request.BufferedHttpRequestBody;
 import com.github.ljtfreitas.restify.http.client.message.response.HttpResponseMessage;
 import com.github.ljtfreitas.restify.http.contract.Parameters;
 
@@ -24,7 +25,7 @@ public class FormURLEncodedParametersMessageConverterTest {
 	@Mock
 	private HttpRequestMessage request;
 
-	@Mock
+	@Mock(answer = Answers.RETURNS_DEEP_STUBS)
 	private HttpResponseMessage response;
 	
 	private FormURLEncodedParametersMessageConverter converter = new FormURLEncodedParametersMessageConverter();
@@ -44,7 +45,7 @@ public class FormURLEncodedParametersMessageConverterTest {
 			.put("param1", "value1")
 			.put("param2", "value2");
 
-		RequestBody output = new BufferedRequestBody();
+		HttpRequestBody output = new BufferedHttpRequestBody();
 
 		when(request.body()).thenReturn(output);
 		
@@ -57,7 +58,7 @@ public class FormURLEncodedParametersMessageConverterTest {
 	public void shouldReadFormUrlEncodedMessageWhenParametersIsExpectedType() {
 		ByteArrayInputStream input = new ByteArrayInputStream(messageBody.getBytes());
 
-		when(response.body()).thenReturn(input);
+		when(response.body().input()).thenReturn(input);
 		
 		Parameters parameters = converter.read(response, Parameters.class);
 

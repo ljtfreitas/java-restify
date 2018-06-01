@@ -28,9 +28,9 @@ package com.github.ljtfreitas.restify.http.netflix.client.request.async;
 import java.net.URI;
 import java.util.concurrent.CompletableFuture;
 
-import com.github.ljtfreitas.restify.http.client.message.response.HttpResponseMessage;
 import com.github.ljtfreitas.restify.http.client.request.async.AsyncHttpClientRequest;
 import com.github.ljtfreitas.restify.http.client.request.async.AsyncHttpClientRequestFactory;
+import com.github.ljtfreitas.restify.http.client.response.HttpClientResponse;
 import com.github.ljtfreitas.restify.http.netflix.client.request.RibbonExceptionHandler;
 import com.github.ljtfreitas.restify.http.netflix.client.request.RibbonLoadBalancedClient;
 import com.github.ljtfreitas.restify.http.netflix.client.request.RibbonRequest;
@@ -116,9 +116,9 @@ public class AsyncRibbonLoadBalancedClient implements RibbonLoadBalancedClient {
 					.createAsyncOf(newRequest.endpointRequest());
 			request.writeTo(asyncRibbonHttpRequestMessage);
 
-			CompletableFuture<HttpResponseMessage> httpResponseAsFuture = asyncRibbonHttpRequestMessage.executeAsync();
+			CompletableFuture<HttpClientResponse> httpClientResponseAsFuture = asyncRibbonHttpRequestMessage.executeAsync();
 
-			return Observable.from(httpResponseAsFuture).map(RibbonResponse::new).onErrorResumeNext(this::onError);
+			return Observable.from(httpClientResponseAsFuture).map(RibbonResponse::new).onErrorResumeNext(this::onError);
 		}
 
 		private Observable<RibbonResponse> onError(Throwable e) {

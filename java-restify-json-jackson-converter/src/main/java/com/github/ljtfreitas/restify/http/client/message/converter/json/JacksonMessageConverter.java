@@ -61,7 +61,7 @@ public class JacksonMessageConverter<T> implements JsonMessageConverter<T> {
 		try {
 			TypeFactory typeFactory = objectMapper.getTypeFactory();
 
-			return objectMapper.readValue(httpResponseMessage.body(), typeFactory.constructType(expectedType));
+			return objectMapper.readValue(httpResponseMessage.body().input(), typeFactory.constructType(expectedType));
 
 		} catch (IOException e) {
 			throw new HttpMessageReadException(e);

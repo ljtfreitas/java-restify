@@ -37,7 +37,7 @@ public interface HttpRequestMessage extends HttpMessage {
 
 	public String method();
 
-	public RequestBody body();
+	public HttpRequestBody body();
 
 	public Charset charset();
 

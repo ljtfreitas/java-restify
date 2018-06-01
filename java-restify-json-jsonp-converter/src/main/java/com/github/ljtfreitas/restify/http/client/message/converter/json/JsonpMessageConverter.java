@@ -66,10 +66,10 @@ public class JsonpMessageConverter implements JsonMessageConverter<JsonStructure
 	@Override
 	public JsonStructure read(HttpResponseMessage httpResponseMessage, Type expectedType) throws HttpMessageReadException {
 		if (JsonArray.class.equals(expectedType)) {
-			return jsonReaderFactory.createReader(httpResponseMessage.body()).readArray();
+			return jsonReaderFactory.createReader(httpResponseMessage.body().input()).readArray();
 
 		} else if (JsonObject.class.equals(expectedType)) {
-			return jsonReaderFactory.createReader(httpResponseMessage.body()).readObject();
+			return jsonReaderFactory.createReader(httpResponseMessage.body().input()).readObject();
 
 		} else {
 			throw new HttpMessageReadException("Unsupported type: [" + expectedType + "]. Only JsonArray and JsonObject are supported.");

@@ -68,7 +68,7 @@ public class JaxbXmlMessageConverter<T> implements XmlMessageConverter<T> {
 		try {
 			Unmarshaller unmarshaller = context.createUnmarshaller();
 
-			StreamSource source = new StreamSource(httpResponseMessage.body());
+			StreamSource source = new StreamSource(httpResponseMessage.body().input());
 
 			XMLStreamReader reader = XMLInputFactory.newInstance().createXMLStreamReader(source);
 

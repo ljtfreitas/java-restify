@@ -14,12 +14,13 @@ import java.util.stream.Collectors;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Answers;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
-import com.github.ljtfreitas.restify.http.client.message.request.RequestBody;
-import com.github.ljtfreitas.restify.http.client.message.request.BufferedRequestBody;
+import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestBody;
+import com.github.ljtfreitas.restify.http.client.message.request.BufferedHttpRequestBody;
 import com.github.ljtfreitas.restify.http.client.message.response.HttpResponseMessage;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -28,7 +29,7 @@ public class OctetInputStreamMessageConverterTest {
 	@Mock
 	private HttpRequestMessage request;
 
-	@Mock
+	@Mock(answer = Answers.RETURNS_DEEP_STUBS)
 	private HttpResponseMessage response;
 
 	private OctetInputStreamMessageConverter converter;
@@ -52,7 +53,7 @@ public class OctetInputStreamMessageConverterTest {
 	public void shouldReadHttpResponseToInputStream() {
 		String body = "response";
 
-		when(response.body()).thenReturn(new ByteArrayInputStream(body.getBytes()));
+		when(response.body().input()).thenReturn(new ByteArrayInputStream(body.getBytes()));
 
 		InputStream stream = converter.read(response, InputStream.class);
 
@@ -77,7 +78,7 @@ public class OctetInputStreamMessageConverterTest {
 	public void shouldWriteInputStreamBodyToOutputStream() {
 		String body = "request body";
 
-		RequestBody buffer = new BufferedRequestBody();
+		HttpRequestBody buffer = new BufferedHttpRequestBody();
 
 		when(request.body()).thenReturn(buffer);
 

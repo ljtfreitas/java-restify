@@ -60,7 +60,7 @@ public class OctetByteArrayMessageConverter implements OctetStreamMessageConvert
 		try {
 			ByteArrayOutputStream buffer = new ByteArrayOutputStream();
 
-			InputStreamContent bodyContent = new InputStreamContent(httpResponseMessage.body(), bufferSize);
+			InputStreamContent bodyContent = new InputStreamContent(httpResponseMessage.body().input(), bufferSize);
 			bodyContent.transferTo(buffer);
 
 			buffer.flush();

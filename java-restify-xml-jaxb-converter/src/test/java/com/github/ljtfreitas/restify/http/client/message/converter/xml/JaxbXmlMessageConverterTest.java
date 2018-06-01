@@ -14,19 +14,20 @@ import javax.xml.bind.annotation.XmlRootElement;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Answers;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import com.github.ljtfreitas.restify.http.client.message.Encoding;
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
-import com.github.ljtfreitas.restify.http.client.message.request.RequestBody;
-import com.github.ljtfreitas.restify.http.client.message.request.BufferedRequestBody;
+import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestBody;
+import com.github.ljtfreitas.restify.http.client.message.request.BufferedHttpRequestBody;
 import com.github.ljtfreitas.restify.http.client.message.response.HttpResponseMessage;
 
 @RunWith(MockitoJUnitRunner.class)
 public class JaxbXmlMessageConverterTest {
 
-	@Mock
+	@Mock(answer = Answers.RETURNS_DEEP_STUBS)
 	private HttpResponseMessage response;
 
 	@Mock
@@ -62,7 +63,7 @@ public class JaxbXmlMessageConverterTest {
 
 	@Test
 	public void shouldWriteXmlMessage() {
-		RequestBody output = new BufferedRequestBody();
+		HttpRequestBody output = new BufferedHttpRequestBody();
 
 		when(request.body()).thenReturn(output);
 
@@ -85,7 +86,7 @@ public class JaxbXmlMessageConverterTest {
 	public void shouldReadXmlMessage() {
 		ByteArrayInputStream input = new ByteArrayInputStream(xml.getBytes());
 
-		when(response.body()).thenReturn(input);
+		when(response.body().input()).thenReturn(input);
 
 		MyXmlModel myXmlModel = converter.read(response, MyXmlModel.class);
 

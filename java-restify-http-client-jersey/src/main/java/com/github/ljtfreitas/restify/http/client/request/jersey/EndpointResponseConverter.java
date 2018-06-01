@@ -48,7 +48,7 @@ class EndpointResponseConverter {
 		Family statusFamily = response.getStatusInfo().getFamily();
 
 		if (statusFamily == Family.SERVER_ERROR || statusFamily == Family.CLIENT_ERROR) {
-			return endpointResponseErrorFallback.onError(ErrorHttpResponseMessage.from(response, request), request.responseType());
+			return endpointResponseErrorFallback.onError(HttpErrorResponse.from(response, request), request.responseType());
 
 		} else {
 			return doConvert(response, request.responseType());

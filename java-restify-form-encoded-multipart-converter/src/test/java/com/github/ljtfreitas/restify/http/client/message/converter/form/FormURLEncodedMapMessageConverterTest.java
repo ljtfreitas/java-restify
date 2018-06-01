@@ -11,12 +11,13 @@ import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Answers;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
-import com.github.ljtfreitas.restify.http.client.message.request.RequestBody;
-import com.github.ljtfreitas.restify.http.client.message.request.BufferedRequestBody;
+import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestBody;
+import com.github.ljtfreitas.restify.http.client.message.request.BufferedHttpRequestBody;
 import com.github.ljtfreitas.restify.http.client.message.response.HttpResponseMessage;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -25,7 +26,7 @@ public class FormURLEncodedMapMessageConverterTest {
 	@Mock
 	private HttpRequestMessage request;
 
-	@Mock
+	@Mock(answer = Answers.RETURNS_DEEP_STUBS)
 	private HttpResponseMessage response;
 	
 	private FormURLEncodedMapMessageConverter converter = new FormURLEncodedMapMessageConverter();
@@ -45,7 +46,7 @@ public class FormURLEncodedMapMessageConverterTest {
 		body.put("param1", "value1");
 		body.put("param2", "value2");
 
-		RequestBody output = new BufferedRequestBody();
+		HttpRequestBody output = new BufferedHttpRequestBody();
 
 		when(request.body()).thenReturn(output);
 
@@ -58,7 +59,7 @@ public class FormURLEncodedMapMessageConverterTest {
 	public void shouldThrowUnsupportedOperationExceptionOnTryReadMessage() {
 		ByteArrayInputStream input = new ByteArrayInputStream(messageBody.getBytes());
 
-		when(response.body()).thenReturn(input);
+		when(response.body().input()).thenReturn(input);
 		
 		converter.read(response, Map.class);
 	}

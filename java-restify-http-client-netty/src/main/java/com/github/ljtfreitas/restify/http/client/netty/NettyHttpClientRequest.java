@@ -36,9 +36,9 @@ import com.github.ljtfreitas.restify.http.client.HttpClientException;
 import com.github.ljtfreitas.restify.http.client.message.Header;
 import com.github.ljtfreitas.restify.http.client.message.Headers;
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
-import com.github.ljtfreitas.restify.http.client.message.request.RequestBody;
-import com.github.ljtfreitas.restify.http.client.message.response.HttpResponseMessage;
+import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestBody;
 import com.github.ljtfreitas.restify.http.client.request.async.AsyncHttpClientRequest;
+import com.github.ljtfreitas.restify.http.client.response.HttpClientResponse;
 import com.github.ljtfreitas.restify.util.Tryable;
 
 import io.netty.bootstrap.Bootstrap;
@@ -91,7 +91,7 @@ class NettyHttpClientRequest implements AsyncHttpClientRequest {
 	}
 
 	@Override
-	public RequestBody body() {
+	public HttpRequestBody body() {
 		return body;
 	}
 
@@ -111,12 +111,12 @@ class NettyHttpClientRequest implements AsyncHttpClientRequest {
 	}
 
 	@Override
-	public CompletableFuture<HttpResponseMessage> executeAsync() throws HttpClientException {
+	public CompletableFuture<HttpClientResponse> executeAsync() throws HttpClientException {
 		return doExecuteAsync();
 	}
 
 	@Override
-	public HttpResponseMessage execute() throws HttpClientException {
+	public HttpClientResponse execute() throws HttpClientException {
 		try {
 			return doExecuteAsync().get();
 
@@ -125,8 +125,8 @@ class NettyHttpClientRequest implements AsyncHttpClientRequest {
 		}
 	}
 
-	private CompletableFuture<HttpResponseMessage> doExecuteAsync() {
-		final CompletableFuture<HttpResponseMessage> responseAsFuture = new CompletableFuture<>();
+	private CompletableFuture<HttpClientResponse> doExecuteAsync() {
+		final CompletableFuture<HttpClientResponse> responseAsFuture = new CompletableFuture<>();
 
 		NettyRequestExecuteHandler nettyRequestExecuteHandler = new NettyRequestExecuteHandler(responseAsFuture, this);
 
@@ -185,7 +185,7 @@ class NettyHttpClientRequest implements AsyncHttpClientRequest {
 		return bodyAsBuffer;
 	}
 
-	private static class ByteBufRequestBody implements RequestBody {
+	private static class ByteBufRequestBody implements HttpRequestBody {
 
 		private final ByteBufOutputStream output = new ByteBufOutputStream(Unpooled.buffer());
 		private final Charset charset;
@@ -195,7 +195,7 @@ class NettyHttpClientRequest implements AsyncHttpClientRequest {
 		}
 
 		@Override
-		public ByteBuffer buffer() {
+		public ByteBuffer asBuffer() {
 			return output.buffer().nioBuffer();
 		}
 

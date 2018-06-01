@@ -35,10 +35,10 @@ import com.github.ljtfreitas.restify.http.client.HttpClientException;
 import com.github.ljtfreitas.restify.http.client.message.Header;
 import com.github.ljtfreitas.restify.http.client.message.Headers;
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
-import com.github.ljtfreitas.restify.http.client.message.request.RequestBody;
-import com.github.ljtfreitas.restify.http.client.message.response.HttpResponseMessage;
+import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestBody;
 import com.github.ljtfreitas.restify.http.client.request.HttpClientRequest;
 import com.github.ljtfreitas.restify.http.client.request.interceptor.HttpClientRequestInterceptor;
+import com.github.ljtfreitas.restify.http.client.response.HttpClientResponse;
 import com.github.ljtfreitas.restify.util.Tryable;
 
 public class LogHttpClientRequestInterceptor implements HttpClientRequestInterceptor {
@@ -69,7 +69,7 @@ public class LogHttpClientRequestInterceptor implements HttpClientRequestInterce
 		}
 
 		@Override
-		public RequestBody body() {
+		public HttpRequestBody body() {
 			return source.body();
 		}
 
@@ -89,7 +89,7 @@ public class LogHttpClientRequestInterceptor implements HttpClientRequestInterce
 		}
 
 		@Override
-		public HttpResponseMessage execute() throws HttpClientException {
+		public HttpClientResponse execute() throws HttpClientException {
 			if (log.isLoggable(Level.INFO)) {
 				log.log(record());
 			}

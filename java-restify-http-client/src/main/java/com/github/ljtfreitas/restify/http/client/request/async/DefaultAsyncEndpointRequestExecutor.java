@@ -39,6 +39,7 @@ import com.github.ljtfreitas.restify.http.client.request.EndpointRequestExecutor
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequestWriter;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponseReader;
+import com.github.ljtfreitas.restify.http.client.response.HttpClientResponse;
 import com.github.ljtfreitas.restify.reflection.JavaType;
 
 public class DefaultAsyncEndpointRequestExecutor implements AsyncEndpointRequestExecutor {
@@ -72,7 +73,7 @@ public class DefaultAsyncEndpointRequestExecutor implements AsyncEndpointRequest
 		return future.handleAsync((r, e) -> doHandle(r, deepCause(e), endpointRequest), executor);
 	}
 
-	private CompletableFuture<HttpResponseMessage> doExecute(EndpointRequest endpointRequest) {
+	private CompletableFuture<HttpClientResponse> doExecute(EndpointRequest endpointRequest) {
 		AsyncHttpClientRequest httpClientRequest = httpClientRequestFactory.createAsyncOf(endpointRequest);
 
 		endpointRequest.body().ifPresent(b -> endpointRequestWriter.write(endpointRequest, httpClientRequest));

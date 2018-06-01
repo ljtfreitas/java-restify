@@ -56,7 +56,7 @@ public class EndpointResponseReader {
 		if (response.status().isError()) {
 			return endpointResponseErrorFallback.onError(response, responseType);
 
-		} else if (readableType(responseType) && response.readable()) {
+		} else if (readableType(responseType) && response.available()) {
 			return doRead(response, responseType);
 
 		} else {
@@ -101,7 +101,7 @@ public class EndpointResponseReader {
 
 			try {
 				T responseObject = (T) converter.read(response, responseType);
-				response.body().close();
+				response.body().input().close();
 
 				return new EndpointResponse<>(response.status(), response.headers(), responseObject);
 

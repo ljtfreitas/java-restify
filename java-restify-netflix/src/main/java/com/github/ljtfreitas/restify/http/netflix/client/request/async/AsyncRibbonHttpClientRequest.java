@@ -33,13 +33,13 @@ import com.github.ljtfreitas.restify.http.client.HttpClientException;
 import com.github.ljtfreitas.restify.http.client.HttpException;
 import com.github.ljtfreitas.restify.http.client.message.Header;
 import com.github.ljtfreitas.restify.http.client.message.Headers;
+import com.github.ljtfreitas.restify.http.client.message.request.BufferedHttpRequestBody;
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
-import com.github.ljtfreitas.restify.http.client.message.request.RequestBody;
-import com.github.ljtfreitas.restify.http.client.message.request.BufferedRequestBody;
-import com.github.ljtfreitas.restify.http.client.message.response.HttpResponseMessage;
+import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestBody;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
 import com.github.ljtfreitas.restify.http.client.request.HttpClientRequest;
 import com.github.ljtfreitas.restify.http.client.request.async.AsyncHttpClientRequest;
+import com.github.ljtfreitas.restify.http.client.response.HttpClientResponse;
 import com.github.ljtfreitas.restify.http.netflix.client.request.BaseRibbonHttpClientRequest;
 import com.github.ljtfreitas.restify.http.netflix.client.request.RibbonHttpClientRequest;
 import com.github.ljtfreitas.restify.http.netflix.client.request.RibbonRequest;
@@ -52,14 +52,14 @@ public class AsyncRibbonHttpClientRequest extends BaseRibbonHttpClientRequest im
 	private final EndpointRequest endpointRequest;
 	private final AsyncRibbonLoadBalancedClient ribbonLoadBalancedClient;
 	private final Charset charset;
-	private final RequestBody body;
+	private final HttpRequestBody body;
 
 	public AsyncRibbonHttpClientRequest(EndpointRequest endpointRequest, AsyncRibbonLoadBalancedClient ribbonLoadBalancedClient, Charset charset) {
-		this(endpointRequest, ribbonLoadBalancedClient, charset, new BufferedRequestBody(charset));
+		this(endpointRequest, ribbonLoadBalancedClient, charset, new BufferedHttpRequestBody(charset));
 	}
 
 	private AsyncRibbonHttpClientRequest(EndpointRequest endpointRequest, AsyncRibbonLoadBalancedClient ribbonLoadBalancedClient, Charset charset,
-			RequestBody body) {
+			HttpRequestBody body) {
 		super(endpointRequest);
 		this.endpointRequest = endpointRequest;
 		this.ribbonLoadBalancedClient = ribbonLoadBalancedClient;
@@ -78,7 +78,7 @@ public class AsyncRibbonHttpClientRequest extends BaseRibbonHttpClientRequest im
 	}
 
 	@Override
-	public RequestBody body() {
+	public HttpRequestBody body() {
 		return body;
 	}
 
@@ -115,7 +115,7 @@ public class AsyncRibbonHttpClientRequest extends BaseRibbonHttpClientRequest im
 	}
 
 	@Override
-	public HttpResponseMessage execute() throws HttpException {
+	public HttpClientResponse execute() throws HttpException {
 		try {
 			RibbonResponse response = ribbonLoadBalancedClient.withLoadBalancer(new RibbonRequest(this));
 
@@ -129,7 +129,7 @@ public class AsyncRibbonHttpClientRequest extends BaseRibbonHttpClientRequest im
 
 
 	@Override
-	public CompletableFuture<HttpResponseMessage> executeAsync() throws HttpClientException {
+	public CompletableFuture<HttpClientResponse> executeAsync() throws HttpClientException {
 		return ribbonLoadBalancedClient.executeAsync(new RibbonRequest(this))
 			.thenApply(RibbonResponse::unwrap);
 	}

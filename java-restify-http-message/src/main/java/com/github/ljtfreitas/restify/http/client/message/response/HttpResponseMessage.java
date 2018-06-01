@@ -26,7 +26,6 @@
 package com.github.ljtfreitas.restify.http.client.message.response;
 
 import java.io.Closeable;
-import java.io.InputStream;
 
 import com.github.ljtfreitas.restify.http.client.message.HttpMessage;
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
@@ -35,9 +34,9 @@ public interface HttpResponseMessage extends HttpMessage, Closeable {
 
 	public StatusCode status();
 
-	public InputStream body();
+	public HttpResponseBody body();
 
-	public boolean readable();
+	public boolean available();
 
 	public HttpRequestMessage request();
 

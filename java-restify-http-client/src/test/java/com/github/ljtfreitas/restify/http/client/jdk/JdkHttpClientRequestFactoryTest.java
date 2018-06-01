@@ -74,7 +74,7 @@ public class JdkHttpClientRequestFactoryTest {
 		HttpResponseMessage response = jdkHttpClientRequestFactory.createOf(new EndpointRequest(URI.create("http://localhost:7080/json"), "GET"))
 				.execute();
 
-		assertEquals(responseBody, new InputStreamContent(response.body()).asString());
+		assertEquals(responseBody, new InputStreamContent(response.body().input()).asString());
 		assertEquals("application/json", response.headers().get("Content-Type").get().value());
 		assertEquals(StatusCode.ok(), response.status());
 	}
@@ -106,7 +106,7 @@ public class JdkHttpClientRequestFactoryTest {
 
 		HttpResponseMessage response = request.execute();
 
-		assertEquals(responseBody, new InputStreamContent(response.body()).asString());
+		assertEquals(responseBody, new InputStreamContent(response.body().input()).asString());
 		assertEquals("text/plain", response.headers().get("Content-Type").get().value());
 		assertEquals(StatusCode.created(), response.status());
 
@@ -208,7 +208,7 @@ public class JdkHttpClientRequestFactoryTest {
 		HttpResponseMessage response = jdkHttpClientRequestFactory.createOf(new EndpointRequest(URI.create("https://localhost:7084/secure"), "GET"))
 				.execute();
 
-		assertEquals(responseBody, new InputStreamContent(response.body()).asString());
+		assertEquals(responseBody, new InputStreamContent(response.body().input()).asString());
 		assertEquals("application/json", response.headers().get("Content-Type").get().value());
 		assertEquals(StatusCode.ok(), response.status());
 
@@ -237,7 +237,7 @@ public class JdkHttpClientRequestFactoryTest {
 		HttpResponseMessage response = jdkHttpClientRequestFactory.createOf(new EndpointRequest(URI.create("http://www.google.com.br"), "GET"))
 				.execute();
 
-		assertEquals(responseBody, new InputStreamContent(response.body()).asString());
+		assertEquals(responseBody, new InputStreamContent(response.body().input()).asString());
 		assertEquals("application/json", response.headers().get("Content-Type").get().value());
 		assertEquals(StatusCode.ok(), response.status());
 	}

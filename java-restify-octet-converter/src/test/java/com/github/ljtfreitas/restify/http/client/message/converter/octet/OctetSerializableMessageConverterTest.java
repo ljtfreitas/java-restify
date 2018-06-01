@@ -14,12 +14,13 @@ import java.io.ObjectOutputStream;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Answers;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
-import com.github.ljtfreitas.restify.http.client.message.request.RequestBody;
-import com.github.ljtfreitas.restify.http.client.message.request.BufferedRequestBody;
+import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestBody;
+import com.github.ljtfreitas.restify.http.client.message.request.BufferedHttpRequestBody;
 import com.github.ljtfreitas.restify.http.client.message.response.HttpResponseMessage;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -28,7 +29,7 @@ public class OctetSerializableMessageConverterTest {
 	@Mock
 	private HttpRequestMessage request;
 
-	@Mock
+	@Mock(answer = Answers.RETURNS_DEEP_STUBS)
 	private HttpResponseMessage response;
 
 	private OctetSerializableMessageConverter<String> converter;
@@ -57,7 +58,7 @@ public class OctetSerializableMessageConverterTest {
 		objectOutputStream.writeObject(body);
 		objectOutputStream.flush();
 
-		when(response.body()).thenReturn(new ByteArrayInputStream(outputStream.toByteArray()));
+		when(response.body().input()).thenReturn(new ByteArrayInputStream(outputStream.toByteArray()));
 
 		String output = converter.read(response, String.class);
 
@@ -78,12 +79,12 @@ public class OctetSerializableMessageConverterTest {
 	public void shouldSerializeStringBodyToOutputStream() throws Exception {
 		String body = "request body";
 
-		RequestBody buffer = new BufferedRequestBody();
+		HttpRequestBody buffer = new BufferedHttpRequestBody();
 		when(request.body()).thenReturn(buffer);
 
 		converter.write(body, request);
 
-		ObjectInputStream objectInputStream = new ObjectInputStream(new ByteArrayInputStream(buffer.buffer().array()));
+		ObjectInputStream objectInputStream = new ObjectInputStream(new ByteArrayInputStream(buffer.asBuffer().array()));
 		Object output = objectInputStream.readObject();
 
 		assertEquals(body, output);

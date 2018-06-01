@@ -10,12 +10,13 @@ import java.nio.charset.Charset;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Answers;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
-import com.github.ljtfreitas.restify.http.client.message.request.RequestBody;
-import com.github.ljtfreitas.restify.http.client.message.request.BufferedRequestBody;
+import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestBody;
+import com.github.ljtfreitas.restify.http.client.message.request.BufferedHttpRequestBody;
 import com.github.ljtfreitas.restify.http.client.message.response.HttpResponseMessage;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -24,7 +25,7 @@ public class ScalarMessageConverterTest {
 	@Mock
 	private HttpRequestMessage request;
 	
-	@Mock
+	@Mock(answer = Answers.RETURNS_DEEP_STUBS)
 	private HttpResponseMessage response;
 	
 	private ScalarMessageConverter converter = new ScalarMessageConverter();
@@ -42,7 +43,7 @@ public class ScalarMessageConverterTest {
 
 	@Test
 	public void shouldReadByteValue() {
-		when(response.body()).thenReturn(new ByteArrayInputStream("1".getBytes()));
+		when(response.body().input()).thenReturn(new ByteArrayInputStream("1".getBytes()));
 		
 		Object value = converter.read(response, Byte.class);
 
@@ -57,7 +58,7 @@ public class ScalarMessageConverterTest {
 
 	@Test
 	public void shouldWriteByteValue() {
-		RequestBody output = new BufferedRequestBody();
+		HttpRequestBody output = new BufferedHttpRequestBody();
 
 		when(request.body()).thenReturn(output);
 
@@ -74,7 +75,7 @@ public class ScalarMessageConverterTest {
 
 	@Test
 	public void shouldReadShortValue() {
-		when(response.body()).thenReturn(new ByteArrayInputStream("1".getBytes()));
+		when(response.body().input()).thenReturn(new ByteArrayInputStream("1".getBytes()));
 
 		Object value = converter.read(response, Short.class);
 
@@ -89,7 +90,7 @@ public class ScalarMessageConverterTest {
 
 	@Test
 	public void shouldWriteShortValue() {
-		RequestBody output = new BufferedRequestBody();
+		HttpRequestBody output = new BufferedHttpRequestBody();
 
 		when(request.body()).thenReturn(output);
 		converter.write((short) 1, request);
@@ -105,7 +106,7 @@ public class ScalarMessageConverterTest {
 
 	@Test
 	public void shouldReadIntegerValue() {
-		when(response.body()).thenReturn(new ByteArrayInputStream("1".getBytes()));
+		when(response.body().input()).thenReturn(new ByteArrayInputStream("1".getBytes()));
 		Object value = converter.read(response, Integer.class);
 
 		assertEquals((int) 1, value);
@@ -119,7 +120,7 @@ public class ScalarMessageConverterTest {
 
 	@Test
 	public void shouldWriteIntegerValue() {
-		RequestBody output = new BufferedRequestBody();
+		HttpRequestBody output = new BufferedHttpRequestBody();
 
 		when(request.body()).thenReturn(output);
 		converter.write((int) 1, request);
@@ -135,7 +136,7 @@ public class ScalarMessageConverterTest {
 
 	@Test
 	public void shouldReadLongValue() {
-		when(response.body()).thenReturn(new ByteArrayInputStream("1".getBytes()));
+		when(response.body().input()).thenReturn(new ByteArrayInputStream("1".getBytes()));
 		Object value = converter.read(response, Long.class);
 
 		assertEquals((long) 1, value);
@@ -149,7 +150,7 @@ public class ScalarMessageConverterTest {
 
 	@Test
 	public void shouldWriteLongValue() {
-		RequestBody output = new BufferedRequestBody();
+		HttpRequestBody output = new BufferedHttpRequestBody();
 
 		when(request.body()).thenReturn(output);
 		converter.write((long) 1, request);
@@ -165,7 +166,7 @@ public class ScalarMessageConverterTest {
 
 	@Test
 	public void shouldReadFloatValue() {
-		when(response.body()).thenReturn(new ByteArrayInputStream("1.1".getBytes()));
+		when(response.body().input()).thenReturn(new ByteArrayInputStream("1.1".getBytes()));
 		Object value = converter.read(response, Float.class);
 
 		assertEquals((float) 1.1, value);
@@ -179,7 +180,7 @@ public class ScalarMessageConverterTest {
 
 	@Test
 	public void shouldWriteFloatValue() {
-		RequestBody output = new BufferedRequestBody();
+		HttpRequestBody output = new BufferedHttpRequestBody();
 
 		when(request.body()).thenReturn(output);
 		converter.write((float) 1.1, request);
@@ -195,7 +196,7 @@ public class ScalarMessageConverterTest {
 
 	@Test
 	public void shouldReadDoubleValue() {
-		when(response.body()).thenReturn(new ByteArrayInputStream("2.2".getBytes()));
+		when(response.body().input()).thenReturn(new ByteArrayInputStream("2.2".getBytes()));
 		Object value = converter.read(response, Double.class);
 
 		assertEquals((double) 2.2, value);
@@ -209,7 +210,7 @@ public class ScalarMessageConverterTest {
 
 	@Test
 	public void shouldWriteDoubleValue() {
-		RequestBody output = new BufferedRequestBody();
+		HttpRequestBody output = new BufferedHttpRequestBody();
 
 		when(request.body()).thenReturn(output);
 		converter.write((double) 2.2, request);
@@ -225,7 +226,7 @@ public class ScalarMessageConverterTest {
 
 	@Test
 	public void shouldReadBooleanValue() {
-		when(response.body()).thenReturn(new ByteArrayInputStream("true".getBytes()));
+		when(response.body().input()).thenReturn(new ByteArrayInputStream("true".getBytes()));
 		Object value = converter.read(response, Boolean.class);
 
 		assertEquals((boolean) true, value);
@@ -239,7 +240,7 @@ public class ScalarMessageConverterTest {
 
 	@Test
 	public void shouldWriteBooleanValue() {
-		RequestBody output = new BufferedRequestBody();
+		HttpRequestBody output = new BufferedHttpRequestBody();
 
 		when(request.body()).thenReturn(output);
 		converter.write((boolean) false, request);
@@ -255,7 +256,7 @@ public class ScalarMessageConverterTest {
 
 	@Test
 	public void shouldReadCharacterValue() {
-		when(response.body()).thenReturn(new ByteArrayInputStream("a".getBytes()));
+		when(response.body().input()).thenReturn(new ByteArrayInputStream("a".getBytes()));
 		Object value = converter.read(response, Character.class);
 
 		assertEquals((char) 'a', value);
@@ -269,7 +270,7 @@ public class ScalarMessageConverterTest {
 
 	@Test
 	public void shouldWriteCharacterValue() {
-		RequestBody output = new BufferedRequestBody();
+		HttpRequestBody output = new BufferedHttpRequestBody();
 
 		when(request.body()).thenReturn(output);
 		converter.write((char) 'a', request);

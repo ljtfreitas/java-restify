@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Answers;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
@@ -22,7 +23,7 @@ import com.github.ljtfreitas.restify.http.client.message.response.HttpResponseMe
 @RunWith(MockitoJUnitRunner.class)
 public class InputStreamMessageConverterTest {
 
-	@Mock
+	@Mock(answer= Answers.RETURNS_DEEP_STUBS)
 	private HttpResponseMessage response;
 
 	private InputStreamMessageConverter converter;
@@ -46,7 +47,7 @@ public class InputStreamMessageConverterTest {
 	public void shouldConvertHttpResponseMessageBodyToInputStream() {
 		String body = "hello world";
 
-		when(response.body()).thenReturn(new ByteArrayInputStream(body.getBytes()));
+		when(response.body().input()).thenReturn(new ByteArrayInputStream(body.getBytes()));
 
 		InputStream stream = converter.read(response, InputStream.class);
 

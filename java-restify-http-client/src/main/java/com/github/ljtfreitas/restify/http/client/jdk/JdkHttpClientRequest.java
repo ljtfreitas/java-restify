@@ -36,12 +36,12 @@ import java.util.Collection;
 import com.github.ljtfreitas.restify.http.client.HttpClientException;
 import com.github.ljtfreitas.restify.http.client.message.Header;
 import com.github.ljtfreitas.restify.http.client.message.Headers;
-import com.github.ljtfreitas.restify.http.client.message.request.BufferedRequestBody;
+import com.github.ljtfreitas.restify.http.client.message.request.BufferedHttpRequestBody;
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
-import com.github.ljtfreitas.restify.http.client.message.request.RequestBody;
-import com.github.ljtfreitas.restify.http.client.message.response.HttpResponseMessage;
+import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestBody;
 import com.github.ljtfreitas.restify.http.client.message.response.StatusCode;
 import com.github.ljtfreitas.restify.http.client.request.HttpClientRequest;
+import com.github.ljtfreitas.restify.http.client.response.HttpClientResponse;
 import com.github.ljtfreitas.restify.util.Tryable;
 
 class JdkHttpClientRequest implements HttpClientRequest {
@@ -49,13 +49,13 @@ class JdkHttpClientRequest implements HttpClientRequest {
 	private final HttpURLConnection connection;
 	private final Charset charset;
 	private final Headers headers;
-	private final RequestBody body;
+	private final HttpRequestBody body;
 
 	public JdkHttpClientRequest(HttpURLConnection connection, Charset charset, Headers headers) {
-		this(connection, charset, headers, new BufferedRequestBody(charset));
+		this(connection, charset, headers, new BufferedHttpRequestBody(charset));
 	}
 
-	private JdkHttpClientRequest(HttpURLConnection connection, Charset charset, Headers headers, BufferedRequestBody body) {
+	private JdkHttpClientRequest(HttpURLConnection connection, Charset charset, Headers headers, BufferedHttpRequestBody body) {
 		this.connection = connection;
 		this.charset = charset;
 		this.headers = new JdkHttpClientHeadersDecorator(connection, headers);
@@ -63,7 +63,7 @@ class JdkHttpClientRequest implements HttpClientRequest {
 	}
 
 	@Override
-	public HttpResponseMessage execute() throws HttpClientException {
+	public HttpClientResponse execute() throws HttpClientException {
 		try {
 			if (!body.empty()) {
 				body.writeTo(connection.getOutputStream());
@@ -105,7 +105,7 @@ class JdkHttpClientRequest implements HttpClientRequest {
 	}
 
 	@Override
-	public RequestBody body() {
+	public HttpRequestBody body() {
 		return body;
 	}
 

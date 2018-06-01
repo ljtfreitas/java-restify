@@ -23,35 +23,46 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.http.client.netty;
+package com.github.ljtfreitas.restify.http.client.response.interceptor.log;
 
-import java.io.IOException;
-import java.io.InputStream;
+import java.util.logging.Level;
+import java.util.logging.LogRecord;
+import java.util.logging.Logger;
 
-import com.github.ljtfreitas.restify.http.client.message.Headers;
-import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
-import com.github.ljtfreitas.restify.http.client.message.response.StatusCode;
-import com.github.ljtfreitas.restify.http.client.response.BaseHttpClientResponse;
+import com.github.ljtfreitas.restify.http.client.response.HttpClientResponse;
+import com.github.ljtfreitas.restify.http.client.response.interceptor.HttpClientResponseInterceptor;
+import com.github.ljtfreitas.restify.util.Tryable;
 
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.codec.http.FullHttpResponse;
+public class LogHttpClientResponseInterceptor implements HttpClientResponseInterceptor {
 
-class NettyHttpClientResponse extends BaseHttpClientResponse {
-
-	private final ChannelHandlerContext context;
-	private final FullHttpResponse nettyResponse;
-
-	public NettyHttpClientResponse(StatusCode statusCode, Headers headers, InputStream body, HttpRequestMessage httpRequest, 
-			ChannelHandlerContext context, FullHttpResponse nettyResponse) {
-		super(statusCode, headers, body, httpRequest);
-		this.context = context;
-		this.nettyResponse = nettyResponse;
-	}
+	private static final Logger log = Logger.getLogger(LogHttpClientResponseInterceptor.class.getCanonicalName());
 
 	@Override
-	public void close() throws IOException {
-		context.close();
-		nettyResponse.release();
+	public HttpClientResponse intercepts(HttpClientResponse response) {
+		if (log.isLoggable(Level.INFO)) {
+			log.log(record(response));
+		}
+
+		return response;
 	}
 
+	private LogRecord record(HttpClientResponse response) {
+		StringBuilder message = new StringBuilder();
+
+		message.append("**********")
+			   .append("\n")
+			   .append("< " + response.status());
+
+		response.headers().forEach(h -> message.append("\n").append("< " + h.toString()));
+
+		if (response.available() && !response.body().empty()) {
+			message.append("\n")
+				   .append("< " + Tryable.of(response.body()::asString))
+				   .append("\n");
+		}
+
+		message.append("<");
+
+		return new LogRecord(Level.INFO, message.toString());
+	}
 }

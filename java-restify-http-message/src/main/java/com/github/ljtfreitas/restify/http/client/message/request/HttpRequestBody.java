@@ -23,35 +23,29 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.http.client.netty;
+package com.github.ljtfreitas.restify.http.client.message.request;
 
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.OutputStream;
+import java.nio.ByteBuffer;
+import java.nio.channels.Channels;
+import java.nio.channels.WritableByteChannel;
 
-import com.github.ljtfreitas.restify.http.client.message.Headers;
-import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
-import com.github.ljtfreitas.restify.http.client.message.response.StatusCode;
-import com.github.ljtfreitas.restify.http.client.response.BaseHttpClientResponse;
+import com.github.ljtfreitas.restify.util.Tryable;
 
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.codec.http.FullHttpResponse;
+public interface HttpRequestBody {
 
-class NettyHttpClientResponse extends BaseHttpClientResponse {
+	public ByteBuffer asBuffer();
 
-	private final ChannelHandlerContext context;
-	private final FullHttpResponse nettyResponse;
+	public String asString();
 
-	public NettyHttpClientResponse(StatusCode statusCode, Headers headers, InputStream body, HttpRequestMessage httpRequest, 
-			ChannelHandlerContext context, FullHttpResponse nettyResponse) {
-		super(statusCode, headers, body, httpRequest);
-		this.context = context;
-		this.nettyResponse = nettyResponse;
+	public OutputStream output();
+
+	public boolean empty();
+
+	public default void writeTo(OutputStream other) {
+		WritableByteChannel channel = Channels.newChannel(other);
+		Tryable.run(() -> {
+			channel.write(asBuffer());
+		});
 	}
-
-	@Override
-	public void close() throws IOException {
-		context.close();
-		nettyResponse.release();
-	}
-
 }

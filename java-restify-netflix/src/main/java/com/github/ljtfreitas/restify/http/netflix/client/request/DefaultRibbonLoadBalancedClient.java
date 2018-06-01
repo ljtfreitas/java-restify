@@ -28,9 +28,9 @@ package com.github.ljtfreitas.restify.http.netflix.client.request;
 import java.util.Optional;
 
 import com.github.ljtfreitas.restify.http.client.jdk.JdkHttpClientRequestFactory;
-import com.github.ljtfreitas.restify.http.client.message.response.HttpResponseMessage;
 import com.github.ljtfreitas.restify.http.client.request.HttpClientRequest;
 import com.github.ljtfreitas.restify.http.client.request.HttpClientRequestFactory;
+import com.github.ljtfreitas.restify.http.client.response.HttpClientResponse;
 import com.netflix.client.AbstractLoadBalancerAwareClient;
 import com.netflix.client.ClientException;
 import com.netflix.client.RequestSpecificRetryHandler;
@@ -87,13 +87,13 @@ public class DefaultRibbonLoadBalancedClient extends AbstractLoadBalancerAwareCl
 	@Override
 	public RibbonResponse execute(RibbonRequest request, IClientConfig requestConfig) throws Exception {
 		try {
-			HttpClientRequest ribbonHttpRequestMessage = httpClientRequestFactory.createOf(request.endpointRequest());
+			HttpClientRequest ribbonHttpClientRequest = httpClientRequestFactory.createOf(request.endpointRequest());
 
-			request.writeTo(ribbonHttpRequestMessage);
+			request.writeTo(ribbonHttpClientRequest);
 
-			HttpResponseMessage httpResponse = ribbonHttpRequestMessage.execute();
+			HttpClientResponse httpClientResponse = ribbonHttpClientRequest.execute();
 
-			return new RibbonResponse(httpResponse);
+			return new RibbonResponse(httpClientResponse);
 
 		} catch (Exception e) {
 			ribbonExceptionHandler.onException(request, e);

@@ -23,35 +23,11 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.http.client.netty;
+package com.github.ljtfreitas.restify.http.client.response.interceptor;
 
-import java.io.IOException;
-import java.io.InputStream;
+import com.github.ljtfreitas.restify.http.client.response.HttpClientResponse;
 
-import com.github.ljtfreitas.restify.http.client.message.Headers;
-import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
-import com.github.ljtfreitas.restify.http.client.message.response.StatusCode;
-import com.github.ljtfreitas.restify.http.client.response.BaseHttpClientResponse;
+public interface HttpClientResponseInterceptor {
 
-import io.netty.channel.ChannelHandlerContext;
-import io.netty.handler.codec.http.FullHttpResponse;
-
-class NettyHttpClientResponse extends BaseHttpClientResponse {
-
-	private final ChannelHandlerContext context;
-	private final FullHttpResponse nettyResponse;
-
-	public NettyHttpClientResponse(StatusCode statusCode, Headers headers, InputStream body, HttpRequestMessage httpRequest, 
-			ChannelHandlerContext context, FullHttpResponse nettyResponse) {
-		super(statusCode, headers, body, httpRequest);
-		this.context = context;
-		this.nettyResponse = nettyResponse;
-	}
-
-	@Override
-	public void close() throws IOException {
-		context.close();
-		nettyResponse.release();
-	}
-
+	public HttpClientResponse intercepts(HttpClientResponse response);
 }

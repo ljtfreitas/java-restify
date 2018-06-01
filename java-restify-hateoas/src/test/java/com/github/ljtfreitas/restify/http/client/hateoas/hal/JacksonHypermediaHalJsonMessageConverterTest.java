@@ -13,6 +13,7 @@ import java.util.Optional;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Answers;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
@@ -25,7 +26,7 @@ import com.github.ljtfreitas.restify.reflection.JavaType;
 @RunWith(MockitoJUnitRunner.class)
 public class JacksonHypermediaHalJsonMessageConverterTest {
 
-	@Mock
+	@Mock(answer = Answers.RETURNS_DEEP_STUBS)
 	private HttpResponseMessage response;
 
 	private JacksonHypermediaHalJsonMessageConverter<Resource<? extends Object>> jsonConverter;
@@ -42,7 +43,7 @@ public class JacksonHypermediaHalJsonMessageConverterTest {
 			+ "\"self\":{\"href\":\"http://localhost:7080/\"},"
 			+ "\"friends\":{\"href\":\"http://localhost:7080/{user}/friends\",\"templated\":true}}}";
 
-		when(response.body()).thenReturn(new ByteArrayInputStream(json.getBytes()));
+		when(response.body().input()).thenReturn(new ByteArrayInputStream(json.getBytes()));
 
 		Resource<MyModel> resource = (Resource<MyModel>) jsonConverter.read(response, JavaType.parameterizedType(Resource.class, MyModel.class));
 
@@ -72,7 +73,7 @@ public class JacksonHypermediaHalJsonMessageConverterTest {
 				+ ",\"book\":{\"title\":\"1984\",\"_links\":{\"self\":{\"href\":\"http://my.api/books/1984\"}}}"
 			+ "}}";
 
-		when(response.body()).thenReturn(new ByteArrayInputStream(json.getBytes()));
+		when(response.body().input()).thenReturn(new ByteArrayInputStream(json.getBytes()));
 		
 		Resource<User> resource = (Resource<User>) jsonConverter.read(response, JavaType.parameterizedType(Resource.class, User.class));
 

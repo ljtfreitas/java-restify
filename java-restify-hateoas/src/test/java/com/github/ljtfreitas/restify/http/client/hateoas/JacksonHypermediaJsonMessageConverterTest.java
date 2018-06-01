@@ -10,6 +10,7 @@ import java.util.Optional;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Answers;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
@@ -20,7 +21,7 @@ import com.github.ljtfreitas.restify.reflection.JavaType;
 @RunWith(MockitoJUnitRunner.class)
 public class JacksonHypermediaJsonMessageConverterTest {
 
-	@Mock
+	@Mock(answer = Answers.RETURNS_DEEP_STUBS)
 	private HttpResponseMessage response;
 	
 	private JacksonHypermediaJsonMessageConverter<Resource<MyModel>> jsonConverter;
@@ -38,7 +39,7 @@ public class JacksonHypermediaJsonMessageConverterTest {
 				+ "{\"rel\":\"friends\",\"href\":\"http://localhost:8080/{user}/friends\",\"templated\":true}"
 			+ "]}";
 
-		when(response.body()).thenReturn(new ByteArrayInputStream(json.getBytes()));
+		when(response.body().input()).thenReturn(new ByteArrayInputStream(json.getBytes()));
 
 		Resource<MyModel> resource = jsonConverter.read(response, JavaType.parameterizedType(Resource.class, MyModel.class));
 

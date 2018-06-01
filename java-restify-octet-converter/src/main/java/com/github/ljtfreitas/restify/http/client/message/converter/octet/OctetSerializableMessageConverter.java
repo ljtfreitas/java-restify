@@ -47,7 +47,7 @@ public class OctetSerializableMessageConverter<T extends Serializable> implement
 	@Override
 	public T read(HttpResponseMessage httpResponseMessage, Type expectedType) throws HttpMessageReadException {
 		try {
-			ObjectInputStream objectInputStream = new ObjectInputStream(httpResponseMessage.body());
+			ObjectInputStream objectInputStream = new ObjectInputStream(httpResponseMessage.body().input());
 			return (T) objectInputStream.readObject();
 
 		} catch (IOException | ClassNotFoundException e) {

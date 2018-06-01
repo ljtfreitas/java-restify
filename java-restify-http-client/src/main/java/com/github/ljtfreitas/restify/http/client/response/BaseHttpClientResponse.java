@@ -23,28 +23,32 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.http.client.message.response;
+package com.github.ljtfreitas.restify.http.client.response;
 
 import java.io.InputStream;
+import java.util.Optional;
 
 import com.github.ljtfreitas.restify.http.client.message.Header;
 import com.github.ljtfreitas.restify.http.client.message.Headers;
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
+import com.github.ljtfreitas.restify.http.client.message.response.BufferedHttpResponseBody;
+import com.github.ljtfreitas.restify.http.client.message.response.HttpResponseBody;
+import com.github.ljtfreitas.restify.http.client.message.response.StatusCode;
 
-public abstract class BaseHttpResponseMessage implements HttpResponseMessage {
+public abstract class BaseHttpClientResponse implements HttpClientResponse {
 
 	public static final String CONTENT_LENGTH = "Content-Length";
 
 	private final StatusCode status;
 	private final Headers headers;
-	private final InputStream body;
+	private final HttpResponseBody body;
 	private final HttpRequestMessage httpRequest;
 
-	protected BaseHttpResponseMessage(StatusCode status, Headers headers, InputStream body,
+	protected BaseHttpClientResponse(StatusCode status, Headers headers, InputStream body,
 			HttpRequestMessage httpRequest) {
 		this.status = status;
 		this.headers = headers;
-		this.body = body;
+		this.body = Optional.ofNullable(body).map(BufferedHttpResponseBody::of).orElseGet(BufferedHttpResponseBody::none);
 		this.httpRequest = httpRequest;
 	}
 
@@ -64,12 +68,12 @@ public abstract class BaseHttpResponseMessage implements HttpResponseMessage {
 	}
 
 	@Override
-	public InputStream body() {
+	public HttpResponseBody body() {
 		return body;
 	}
 
 	@Override
-	public boolean readable() {
+	public boolean available() {
 		return readableStatus() && httpMethodShouldContainResponseBody() && hasContentLength();
 	}
 

@@ -21,8 +21,8 @@ import org.mockito.stubbing.Answer;
 import com.github.ljtfreitas.restify.http.client.message.Header;
 import com.github.ljtfreitas.restify.http.client.message.Headers;
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
-import com.github.ljtfreitas.restify.http.client.message.request.RequestBody;
-import com.github.ljtfreitas.restify.http.client.message.request.BufferedRequestBody;
+import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestBody;
+import com.github.ljtfreitas.restify.http.client.message.request.BufferedHttpRequestBody;
 
 @RunWith(MockitoJUnitRunner.class)
 public class BaseMultipartFormMessageWriterTest {
@@ -65,7 +65,7 @@ public class BaseMultipartFormMessageWriterTest {
 		when(request.headers()).thenReturn(headers);
 		
 		HttpRequestMessage newRequest = mock(HttpRequestMessage.class);
-		when(newRequest.body()).thenReturn(new BufferedRequestBody());
+		when(newRequest.body()).thenReturn(new BufferedHttpRequestBody());
 
 		Answer<HttpRequestMessage> answer = new Answer<HttpRequestMessage>() {
 			@Override
@@ -90,7 +90,7 @@ public class BaseMultipartFormMessageWriterTest {
 
 	@Test
 	public void shouldWriteHttpRequestBody() {
-		RequestBody output = new BufferedRequestBody();
+		HttpRequestBody output = new BufferedHttpRequestBody();
 
 		when(request.body()).thenReturn(output);
 
