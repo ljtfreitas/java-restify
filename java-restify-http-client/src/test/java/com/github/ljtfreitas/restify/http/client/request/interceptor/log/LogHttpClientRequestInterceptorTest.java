@@ -4,12 +4,13 @@ import static org.hamcrest.Matchers.containsString;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.when;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.time.Instant;
+import java.util.Deque;
 import java.util.LinkedList;
-import java.util.Queue;
 import java.util.logging.Handler;
 import java.util.logging.LogRecord;
 import java.util.logging.Logger;
@@ -24,13 +25,20 @@ import com.github.ljtfreitas.restify.http.client.message.Header;
 import com.github.ljtfreitas.restify.http.client.message.Headers;
 import com.github.ljtfreitas.restify.http.client.message.request.BufferedHttpRequestBody;
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestBody;
+import com.github.ljtfreitas.restify.http.client.message.response.BufferedHttpResponseBody;
+import com.github.ljtfreitas.restify.http.client.message.response.HttpResponseBody;
+import com.github.ljtfreitas.restify.http.client.message.response.StatusCode;
 import com.github.ljtfreitas.restify.http.client.request.HttpClientRequest;
+import com.github.ljtfreitas.restify.http.client.response.HttpClientResponse;
 
 @RunWith(MockitoJUnitRunner.class)
 public class LogHttpClientRequestInterceptorTest {
 
 	@Mock
 	private HttpClientRequest request;
+
+	@Mock
+	private HttpClientResponse response;
 
 	private MyHandler handler;
 
@@ -50,18 +58,24 @@ public class LogHttpClientRequestInterceptorTest {
 			.thenReturn(new BufferedHttpRequestBody());
 		when(request.charset())
 			.thenReturn(Charset.forName("UTF-8"));
+		when(request.execute())
+			.thenReturn(response);
+
+		when(response.status())
+			.thenReturn(StatusCode.ok());
+		when(response.headers())
+			.thenReturn(new Headers(Header.date(Instant.now()), Header.contentType("text/plain"), Header.of("Cache-Control", "private, max-age=0")));
 
 		handler = new MyHandler();
 
 		Logger.getLogger(LogHttpClientRequestInterceptor.class.getCanonicalName()).addHandler(handler);
-
 	}
 
 	@Test
 	public void shouldLogHttpRequestWithoutBody() {
-		HttpClientRequest log = interceptor.intercepts(request);
+		HttpClientRequest loggableHttpClientRequest = interceptor.intercepts(request);
 
-		log.execute();
+		loggableHttpClientRequest.execute();
 
 		LogRecord record = handler.entries.poll();
 
@@ -74,6 +88,22 @@ public class LogHttpClientRequestInterceptorTest {
 	}
 
 	@Test
+	public void shouldLogHttpResponseWithoutBody() {
+		HttpClientRequest loggableHttpClientRequest = interceptor.intercepts(request);
+
+		loggableHttpClientRequest.execute();
+
+		LogRecord record = handler.entries.pollLast();
+
+		String message = record.getMessage();
+
+		assertThat(message, containsString("< 200 Ok"));
+		assertThat(message, containsString("< Date: "));
+		assertThat(message, containsString("< Content-Type: text/plain"));
+		assertThat(message, containsString("< Cache-Control: private, max-age=0"));
+	}
+
+	@Test
 	public void shouldLogHttpRequestWithBody() throws IOException {
 		HttpRequestBody body = new BufferedHttpRequestBody();
 		body.output().write("This is a message body".getBytes());
@@ -82,9 +112,9 @@ public class LogHttpClientRequestInterceptorTest {
 		when(request.body())
 			.thenReturn(body);
 
-		HttpClientRequest log = interceptor.intercepts(request);
+		HttpClientRequest loggableHttpClientRequest = interceptor.intercepts(request);
 
-		log.execute();
+		loggableHttpClientRequest.execute();
 
 		LogRecord record = handler.entries.poll();
 
@@ -97,9 +127,35 @@ public class LogHttpClientRequestInterceptorTest {
 		assertThat(message, containsString("> This is a message body"));
 	}
 
+	@Test
+	public void shouldLogHttpResponseWithBody() throws IOException {
+		HttpResponseBody body = BufferedHttpResponseBody
+				.of(new ByteArrayInputStream("This is a message body".getBytes()));
+
+		when(response.body())
+			.thenReturn(body);
+
+		when(response.available())
+			.thenReturn(true);
+
+		HttpClientRequest loggableHttpClientRequest = interceptor.intercepts(request);
+
+		loggableHttpClientRequest.execute();
+
+		LogRecord record = handler.entries.pollLast();
+
+		String message = record.getMessage();
+
+		assertThat(message, containsString("< 200 Ok"));
+		assertThat(message, containsString("< Date: "));
+		assertThat(message, containsString("< Content-Type: text/plain"));
+		assertThat(message, containsString("< Cache-Control: private, max-age=0"));
+		assertThat(message, containsString("< This is a message body"));
+	}
+
 	private class MyHandler extends Handler {
 
-		private final Queue<LogRecord> entries = new LinkedList<>();
+		private final Deque<LogRecord> entries = new LinkedList<>();
 
 		@Override
 		public void publish(LogRecord record) {

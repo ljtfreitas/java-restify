@@ -95,7 +95,7 @@ import com.github.ljtfreitas.restify.http.client.request.interceptor.AcceptVersi
 import com.github.ljtfreitas.restify.http.client.request.interceptor.EndpointRequestInterceptor;
 import com.github.ljtfreitas.restify.http.client.request.interceptor.EndpointRequestInterceptorChain;
 import com.github.ljtfreitas.restify.http.client.request.interceptor.HeaderEndpointRequestInterceptor;
-import com.github.ljtfreitas.restify.http.client.request.interceptor.HttpClientRequestInterceptor;
+import com.github.ljtfreitas.restify.http.client.request.interceptor.HttpClientResponseInterceptor;
 import com.github.ljtfreitas.restify.http.client.request.interceptor.HttpClientRequestInterceptorChain;
 import com.github.ljtfreitas.restify.http.client.request.interceptor.InterceptedHttpClientRequestFactory;
 import com.github.ljtfreitas.restify.http.client.request.interceptor.authentication.AuthenticationEndpoinRequestInterceptor;
@@ -734,14 +734,14 @@ public class RestifyProxyBuilder {
 
 		public class HttpClientRequestInterceptorsBuilder {
 
-			private final Collection<HttpClientRequestInterceptor> all = new ArrayList<>();
+			private final Collection<HttpClientResponseInterceptor> all = new ArrayList<>();
 
 			public HttpClientRequestInterceptorsBuilder log() {
 				all.add(new LogHttpClientRequestInterceptor());
 				return this;
 			}
 
-			public HttpClientRequestInterceptorsBuilder add(HttpClientRequestInterceptor... interceptors) {
+			public HttpClientRequestInterceptorsBuilder add(HttpClientResponseInterceptor... interceptors) {
 				this.all.addAll(Arrays.asList(interceptors));
 				return this;
 			}

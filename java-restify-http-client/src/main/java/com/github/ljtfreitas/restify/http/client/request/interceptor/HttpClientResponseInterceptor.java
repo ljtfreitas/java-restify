@@ -27,7 +27,7 @@ package com.github.ljtfreitas.restify.http.client.request.interceptor;
 
 import com.github.ljtfreitas.restify.http.client.request.HttpClientRequest;
 
-public interface HttpClientRequestInterceptor {
+public interface HttpClientResponseInterceptor {
 
 	public HttpClientRequest intercepts(HttpClientRequest request);
 }

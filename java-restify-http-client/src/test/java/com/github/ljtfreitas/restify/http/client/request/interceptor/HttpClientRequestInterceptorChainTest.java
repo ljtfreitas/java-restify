@@ -20,7 +20,7 @@ import com.github.ljtfreitas.restify.http.client.request.HttpClientRequest;
 public class HttpClientRequestInterceptorChainTest {
 
 	@Mock
-	private HttpClientRequestInterceptor interceptor;
+	private HttpClientResponseInterceptor interceptor;
 
 	@Mock
 	private HttpClientRequest request;

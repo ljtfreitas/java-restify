@@ -32,9 +32,9 @@ import com.github.ljtfreitas.restify.http.client.request.HttpClientRequest;
 
 public class HttpClientRequestInterceptorChain {
 
-	private final Collection<HttpClientRequestInterceptor> interceptors;
+	private final Collection<HttpClientResponseInterceptor> interceptors;
 
-	public HttpClientRequestInterceptorChain(Collection<HttpClientRequestInterceptor> interceptors) {
+	public HttpClientRequestInterceptorChain(Collection<HttpClientResponseInterceptor> interceptors) {
 		this.interceptors = new ArrayList<>(interceptors);
 	}
 

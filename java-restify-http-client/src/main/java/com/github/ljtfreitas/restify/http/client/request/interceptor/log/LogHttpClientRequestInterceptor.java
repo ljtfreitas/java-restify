@@ -27,21 +27,19 @@ package com.github.ljtfreitas.restify.http.client.request.interceptor.log;
 
 import java.net.URI;
 import java.nio.charset.Charset;
-import java.util.logging.Level;
-import java.util.logging.LogRecord;
 import java.util.logging.Logger;
 
 import com.github.ljtfreitas.restify.http.client.HttpClientException;
 import com.github.ljtfreitas.restify.http.client.message.Header;
 import com.github.ljtfreitas.restify.http.client.message.Headers;
-import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestBody;
+import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
 import com.github.ljtfreitas.restify.http.client.request.HttpClientRequest;
-import com.github.ljtfreitas.restify.http.client.request.interceptor.HttpClientRequestInterceptor;
+import com.github.ljtfreitas.restify.http.client.request.interceptor.HttpClientResponseInterceptor;
 import com.github.ljtfreitas.restify.http.client.response.HttpClientResponse;
 import com.github.ljtfreitas.restify.util.Tryable;
 
-public class LogHttpClientRequestInterceptor implements HttpClientRequestInterceptor {
+public class LogHttpClientRequestInterceptor implements HttpClientResponseInterceptor {
 
 	private static final Logger log = Logger.getLogger(LogHttpClientRequestInterceptor.class.getCanonicalName());
 
@@ -90,31 +88,50 @@ public class LogHttpClientRequestInterceptor implements HttpClientRequestInterce
 
 		@Override
 		public HttpClientResponse execute() throws HttpClientException {
-			if (log.isLoggable(Level.INFO)) {
-				log.log(record());
-			}
+			CurlPrinter printer = new CurlPrinter();
 
-			return source.execute();
+			log.info(printer.print(source));
+
+			HttpClientResponse response = source.execute();
+
+			log.info(printer.print(response));
+
+			return response;
 		}
+	}
 
-		private LogRecord record() {
+	private class CurlPrinter {
+
+		private String print(HttpClientRequest request) {
 			StringBuilder message = new StringBuilder();
 
-			message.append("**********")
-				   .append("\n")
-				   .append("> " + source.method() + " " + source.uri());
+			message.append(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>").append("\n").append("> " + request.method() + " " + request.uri());
 
-			source.headers().forEach(h -> message.append("\n").append("> " + h.toString()));
+			request.headers().forEach(h -> message.append("\n").append("> " + h.toString()));
 
-			if (!source.body().empty()) {
-				message.append("\n")
-					   .append("> " + Tryable.of(source.body()::asString))
-					   .append("\n");
+			if (!request.body().empty()) {
+				message.append("\n").append("> " + Tryable.of(request.body()::asString));
 			}
 
-			message.append(">");
+			message.append("\n").append(">");
 
-			return new LogRecord(Level.INFO, message.toString());
+			return message.toString();
+		}
+
+		private String print(HttpClientResponse response) {
+			StringBuilder message = new StringBuilder();
+
+			message.append("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<").append("\n").append("< " + response.status());
+
+			response.headers().forEach(h -> message.append("\n").append("< " + h.toString()));
+
+			if (response.available() && !response.body().empty()) {
+				message.append("\n").append("< " + Tryable.of(response.body()::asString));
+			}
+
+			message.append("\n").append("<");
+
+			return message.toString();
 		}
 	}
 }
