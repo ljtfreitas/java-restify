@@ -31,25 +31,18 @@ import java.net.URISyntaxException;
 import com.github.ljtfreitas.restify.http.client.HttpException;
 import com.github.ljtfreitas.restify.http.client.message.Header;
 import com.github.ljtfreitas.restify.http.client.message.Headers;
-import com.github.ljtfreitas.restify.http.client.request.interceptor.EndpointRequestInterceptorChain;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethod;
 import com.github.ljtfreitas.restify.http.contract.metadata.HeaderParameterResolver;
 import com.github.ljtfreitas.restify.reflection.JavaType;
 
 public class EndpointRequestFactory {
 
-	private final EndpointRequestInterceptorChain interceptors;
-
-	public EndpointRequestFactory(EndpointRequestInterceptorChain interceptors) {
-		this.interceptors = interceptors;
-	}
-
 	public EndpointRequest createWith(EndpointMethod endpointMethod, Object[] args) {
-		return interceptors.apply(newRequest(endpointMethod, args, endpointMethod.returnType()));
+		return newRequest(endpointMethod, args, endpointMethod.returnType());
 	}
 
 	public EndpointRequest createWith(EndpointMethod endpointMethod, Object[] args, JavaType responseType) {
-		return interceptors.apply(newRequest(endpointMethod, args, responseType));
+		return newRequest(endpointMethod, args, responseType);
 	}
 
 	private EndpointRequest newRequest(EndpointMethod endpointMethod, Object[] args, JavaType responseType) {

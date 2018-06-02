@@ -3,23 +3,17 @@ package com.github.ljtfreitas.restify.http.client.request;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.AdditionalAnswers.returnsFirstArg;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import com.github.ljtfreitas.restify.http.client.request.interceptor.EndpointRequestInterceptorChain;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
 import com.github.ljtfreitas.restify.http.contract.Parameters;
 import com.github.ljtfreitas.restify.http.contract.QueryParameterSerializer;
@@ -35,17 +29,8 @@ import com.github.ljtfreitas.restify.reflection.JavaType;
 @RunWith(MockitoJUnitRunner.class)
 public class EndpointRequestFactoryTest {
 
-	@Mock
-	private EndpointRequestInterceptorChain endpointRequestInterceptorStackMock;
-
 	@InjectMocks
 	private EndpointRequestFactory endpointRequestFactory;
-
-	@Before
-	public void setup() {
-		when(endpointRequestInterceptorStackMock.apply(any()))
-			.then(returnsFirstArg());
-	}
 
 	@Test
 	public void shouldCreateEndpointRequestUsingEndpointMethodWithoutParameters() throws Exception {
