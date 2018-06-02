@@ -25,20 +25,9 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.request.interceptor;
 
-import java.util.ArrayList;
-import java.util.Collection;
-
 import com.github.ljtfreitas.restify.http.client.request.HttpClientRequest;
 
-public class HttpClientRequestInterceptorChain {
+public interface HttpClientRequestInterceptor {
 
-	private final Collection<HttpClientRequestInterceptor> interceptors;
-
-	public HttpClientRequestInterceptorChain(Collection<? extends HttpClientRequestInterceptor> interceptors) {
-		this.interceptors = new ArrayList<>(interceptors);
-	}
-
-	public HttpClientRequest apply(HttpClientRequest httpClientRequest) {
-		return interceptors.stream().reduce(httpClientRequest, (r, i) -> i.intercepts(r), (a, b) -> b);
-	}
+	public HttpClientRequest intercepts(HttpClientRequest request);
 }

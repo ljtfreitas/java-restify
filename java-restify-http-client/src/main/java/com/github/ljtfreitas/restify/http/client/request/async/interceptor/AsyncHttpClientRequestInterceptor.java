@@ -23,22 +23,12 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.http.client.request.interceptor;
+package com.github.ljtfreitas.restify.http.client.request.async.interceptor;
 
-import java.util.ArrayList;
-import java.util.Collection;
+import com.github.ljtfreitas.restify.http.client.request.async.AsyncHttpClientRequest;
+import com.github.ljtfreitas.restify.http.client.request.interceptor.HttpClientRequestInterceptor;
 
-import com.github.ljtfreitas.restify.http.client.request.HttpClientRequest;
+public interface AsyncHttpClientRequestInterceptor extends HttpClientRequestInterceptor {
 
-public class HttpClientRequestInterceptorChain {
-
-	private final Collection<HttpClientRequestInterceptor> interceptors;
-
-	public HttpClientRequestInterceptorChain(Collection<? extends HttpClientRequestInterceptor> interceptors) {
-		this.interceptors = new ArrayList<>(interceptors);
-	}
-
-	public HttpClientRequest apply(HttpClientRequest httpClientRequest) {
-		return interceptors.stream().reduce(httpClientRequest, (r, i) -> i.intercepts(r), (a, b) -> b);
-	}
+	public AsyncHttpClientRequest interceptsAsync(AsyncHttpClientRequest request);
 }

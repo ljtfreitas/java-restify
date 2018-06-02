@@ -23,11 +23,43 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.http.client.request.interceptor;
+package com.github.ljtfreitas.restify.http.client.request.interceptor.log;
 
 import com.github.ljtfreitas.restify.http.client.request.HttpClientRequest;
+import com.github.ljtfreitas.restify.http.client.response.HttpClientResponse;
+import com.github.ljtfreitas.restify.util.Tryable;
 
-public interface HttpClientResponseInterceptor {
+public class CurlPrinter {
 
-	public HttpClientRequest intercepts(HttpClientRequest request);
+	public String print(HttpClientRequest request) {
+		StringBuilder message = new StringBuilder();
+
+		message.append(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>").append("\n").append("> " + request.method() + " " + request.uri());
+
+		request.headers().forEach(h -> message.append("\n").append("> " + h.toString()));
+
+		if (!request.body().empty()) {
+			message.append("\n").append("> " + Tryable.of(request.body()::asString));
+		}
+
+		message.append("\n").append(">");
+
+		return message.toString();
+	}
+
+	public String print(HttpClientResponse response) {
+		StringBuilder message = new StringBuilder();
+
+		message.append("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<").append("\n").append("< " + response.status());
+
+		response.headers().forEach(h -> message.append("\n").append("< " + h.toString()));
+
+		if (response.available() && !response.body().empty()) {
+			message.append("\n").append("< " + Tryable.of(response.body()::asString));
+		}
+
+		message.append("\n").append("<");
+
+		return message.toString();
+	}
 }

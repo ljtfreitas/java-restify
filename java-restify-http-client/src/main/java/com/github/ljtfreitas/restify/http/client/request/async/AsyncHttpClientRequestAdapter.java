@@ -23,11 +23,13 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.http.client.request.interceptor.log;
+package com.github.ljtfreitas.restify.http.client.request.async;
 
 import java.net.URI;
 import java.nio.charset.Charset;
-import java.util.logging.Logger;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
 
 import com.github.ljtfreitas.restify.http.client.HttpClientException;
 import com.github.ljtfreitas.restify.http.client.message.Header;
@@ -35,67 +37,61 @@ import com.github.ljtfreitas.restify.http.client.message.Headers;
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestBody;
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
 import com.github.ljtfreitas.restify.http.client.request.HttpClientRequest;
-import com.github.ljtfreitas.restify.http.client.request.interceptor.HttpClientRequestInterceptor;
 import com.github.ljtfreitas.restify.http.client.response.HttpClientResponse;
 
-public class LogHttpClientRequestInterceptor implements HttpClientRequestInterceptor {
+public class AsyncHttpClientRequestAdapter implements AsyncHttpClientRequest  {
 
-	private static final Logger log = Logger.getLogger(LogHttpClientRequestInterceptor.class.getCanonicalName());
+	private static final Executor DEFAULT_EXECUTOR = Executors.newCachedThreadPool();
 
-	@Override
-	public HttpClientRequest intercepts(HttpClientRequest request) {
-		return new LogHttpClientRequest(request);
+	private final HttpClientRequest source;
+	private final Executor executor;
+
+	public AsyncHttpClientRequestAdapter(HttpClientRequest source) {
+		this(source, DEFAULT_EXECUTOR);
 	}
 
-	private class LogHttpClientRequest implements HttpClientRequest {
+	public AsyncHttpClientRequestAdapter(HttpClientRequest source, Executor executor) {
+		this.source = source;
+		this.executor = executor;
+	}
 
-		private final HttpClientRequest source;
+	@Override
+	public HttpClientResponse execute() throws HttpClientException {
+		return source.execute();
+	}
 
-		private LogHttpClientRequest(HttpClientRequest source) {
-			this.source = source;
-		}
+	@Override
+	public URI uri() {
+		return source.uri();
+	}
 
-		@Override
-		public URI uri() {
-			return source.uri();
-		}
+	@Override
+	public String method() {
+		return source.method();
+	}
 
-		@Override
-		public String method() {
-			return source.method();
-		}
+	@Override
+	public HttpRequestBody body() {
+		return source.body();
+	}
 
-		@Override
-		public HttpRequestBody body() {
-			return source.body();
-		}
+	@Override
+	public Charset charset() {
+		return source.charset();
+	}
 
-		@Override
-		public Charset charset() {
-			return source.charset();
-		}
+	@Override
+	public HttpRequestMessage replace(Header header) {
+		return source.replace(header);
+	}
 
-		@Override
-		public HttpRequestMessage replace(Header header) {
-			return source.replace(header);
-		}
+	@Override
+	public Headers headers() {
+		return source.headers();
+	}
 
-		@Override
-		public Headers headers() {
-			return source.headers();
-		}
-
-		@Override
-		public HttpClientResponse execute() throws HttpClientException {
-			CurlPrinter printer = new CurlPrinter();
-
-			log.info(printer.print(source));
-
-			HttpClientResponse response = source.execute();
-
-			log.info(printer.print(response));
-
-			return response;
-		}
+	@Override
+	public CompletableFuture<HttpClientResponse> executeAsync() throws HttpClientException {
+		return CompletableFuture.supplyAsync(source::execute, executor);
 	}
 }

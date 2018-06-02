@@ -90,16 +90,17 @@ import com.github.ljtfreitas.restify.http.client.request.HttpClientRequestFactor
 import com.github.ljtfreitas.restify.http.client.request.async.AsyncEndpointRequestExecutor;
 import com.github.ljtfreitas.restify.http.client.request.async.AsyncHttpClientRequestFactory;
 import com.github.ljtfreitas.restify.http.client.request.async.DefaultAsyncEndpointRequestExecutor;
+import com.github.ljtfreitas.restify.http.client.request.async.interceptor.AsyncHttpClientRequestInterceptorChain;
+import com.github.ljtfreitas.restify.http.client.request.async.interceptor.AsyncInterceptedHttpClientRequestFactory;
 import com.github.ljtfreitas.restify.http.client.request.authentication.Authentication;
 import com.github.ljtfreitas.restify.http.client.request.interceptor.AcceptVersionHeaderEndpointRequestInterceptor;
 import com.github.ljtfreitas.restify.http.client.request.interceptor.EndpointRequestInterceptor;
 import com.github.ljtfreitas.restify.http.client.request.interceptor.EndpointRequestInterceptorChain;
 import com.github.ljtfreitas.restify.http.client.request.interceptor.HeaderEndpointRequestInterceptor;
-import com.github.ljtfreitas.restify.http.client.request.interceptor.HttpClientResponseInterceptor;
+import com.github.ljtfreitas.restify.http.client.request.interceptor.HttpClientRequestInterceptor;
 import com.github.ljtfreitas.restify.http.client.request.interceptor.HttpClientRequestInterceptorChain;
 import com.github.ljtfreitas.restify.http.client.request.interceptor.InterceptedHttpClientRequestFactory;
 import com.github.ljtfreitas.restify.http.client.request.interceptor.authentication.AuthenticationEndpoinRequestInterceptor;
-import com.github.ljtfreitas.restify.http.client.request.interceptor.log.LogHttpClientRequestInterceptor;
 import com.github.ljtfreitas.restify.http.client.response.DefaultEndpointResponseErrorFallback;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponseErrorFallback;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponseReader;
@@ -279,7 +280,7 @@ public class RestifyProxyBuilder {
 
 		private EndpointRequestExecutor endpointRequestExecutor() {
 			return Optional.ofNullable(endpointRequestExecutor)
-				.orElseGet(() -> endpointRequestExecutor(httpClientRequestFactory()));
+				.orElseGet(() -> endpointRequestExecutor(intercepted(httpClientRequestFactory())));
 		}
 
 		private EndpointRequestExecutor endpointRequestExecutor(HttpClientRequestFactory httpClientRequestFactory) {
@@ -318,12 +319,16 @@ public class RestifyProxyBuilder {
 		}
 
 		private HttpClientRequestFactory httpClientRequestFactory() {
-			return interceptedHttpClientRequestFactory(Optional.ofNullable(httpClientRequestFactory)
-					.orElseGet(() -> new JdkHttpClientRequestFactory(httpClientRequestConfiguration())));
+			return Optional.ofNullable(httpClientRequestFactory)
+					.orElseGet(() -> new JdkHttpClientRequestFactory(httpClientRequestConfiguration()));
 		}
 
-		private HttpClientRequestFactory interceptedHttpClientRequestFactory(HttpClientRequestFactory delegate) {
-			return new InterceptedHttpClientRequestFactory(delegate, new HttpClientRequestInterceptorChain(httpClientRequestConfigurationBuilder.interceptors.all));
+		private HttpClientRequestFactory intercepted(HttpClientRequestFactory delegate) {
+			Collection<HttpClientRequestInterceptor> interceptors = httpClientRequestConfigurationBuilder.interceptors.all;
+			if (interceptors.isEmpty()) return delegate;
+			else return (delegate instanceof AsyncHttpClientRequestFactory) ?
+					new AsyncInterceptedHttpClientRequestFactory((AsyncHttpClientRequestFactory) delegate, AsyncHttpClientRequestInterceptorChain.of(interceptors)) :
+					new InterceptedHttpClientRequestFactory(delegate, new HttpClientRequestInterceptorChain(interceptors));
 		}
 
 		private HttpClientRequestConfiguration httpClientRequestConfiguration() {
@@ -734,14 +739,9 @@ public class RestifyProxyBuilder {
 
 		public class HttpClientRequestInterceptorsBuilder {
 
-			private final Collection<HttpClientResponseInterceptor> all = new ArrayList<>();
+			private final Collection<HttpClientRequestInterceptor> all = new ArrayList<>();
 
-			public HttpClientRequestInterceptorsBuilder log() {
-				all.add(new LogHttpClientRequestInterceptor());
-				return this;
-			}
-
-			public HttpClientRequestInterceptorsBuilder add(HttpClientResponseInterceptor... interceptors) {
+			public HttpClientRequestInterceptorsBuilder add(HttpClientRequestInterceptor... interceptors) {
 				this.all.addAll(Arrays.asList(interceptors));
 				return this;
 			}

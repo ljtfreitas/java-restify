@@ -23,22 +23,31 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.http.client.request.interceptor;
+package com.github.ljtfreitas.restify.http.client.request.async.interceptor;
 
-import java.util.ArrayList;
-import java.util.Collection;
-
+import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
 import com.github.ljtfreitas.restify.http.client.request.HttpClientRequest;
+import com.github.ljtfreitas.restify.http.client.request.async.AsyncHttpClientRequest;
+import com.github.ljtfreitas.restify.http.client.request.async.AsyncHttpClientRequestFactory;
 
-public class HttpClientRequestInterceptorChain {
+public class AsyncInterceptedHttpClientRequestFactory implements AsyncHttpClientRequestFactory {
 
-	private final Collection<HttpClientRequestInterceptor> interceptors;
+	private final AsyncHttpClientRequestFactory delegate;
+	private final AsyncHttpClientRequestInterceptorChain interceptors;
 
-	public HttpClientRequestInterceptorChain(Collection<? extends HttpClientRequestInterceptor> interceptors) {
-		this.interceptors = new ArrayList<>(interceptors);
+	public AsyncInterceptedHttpClientRequestFactory(AsyncHttpClientRequestFactory delegate, AsyncHttpClientRequestInterceptorChain interceptors) {
+		this.delegate = delegate;
+		this.interceptors = interceptors;
 	}
 
-	public HttpClientRequest apply(HttpClientRequest httpClientRequest) {
-		return interceptors.stream().reduce(httpClientRequest, (r, i) -> i.intercepts(r), (a, b) -> b);
+	@Override
+	public HttpClientRequest createOf(EndpointRequest endpointRequest) {
+		return delegate.createOf(endpointRequest);
+	}
+
+	@Override
+	public AsyncHttpClientRequest createAsyncOf(EndpointRequest endpointRequest) {
+		AsyncHttpClientRequest asyncHttpClientRequest = delegate.createAsyncOf(endpointRequest);
+		return interceptors.apply(asyncHttpClientRequest);
 	}
 }

@@ -23,10 +23,11 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.http.client.request.interceptor.log;
+package com.github.ljtfreitas.restify.http.client.request.async.interceptor.log;
 
 import java.net.URI;
 import java.nio.charset.Charset;
+import java.util.concurrent.CompletableFuture;
 import java.util.logging.Logger;
 
 import com.github.ljtfreitas.restify.http.client.HttpClientException;
@@ -35,23 +36,33 @@ import com.github.ljtfreitas.restify.http.client.message.Headers;
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestBody;
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
 import com.github.ljtfreitas.restify.http.client.request.HttpClientRequest;
-import com.github.ljtfreitas.restify.http.client.request.interceptor.HttpClientRequestInterceptor;
+import com.github.ljtfreitas.restify.http.client.request.async.AsyncHttpClientRequest;
+import com.github.ljtfreitas.restify.http.client.request.async.interceptor.AsyncHttpClientRequestInterceptor;
+import com.github.ljtfreitas.restify.http.client.request.interceptor.log.CurlPrinter;
+import com.github.ljtfreitas.restify.http.client.request.interceptor.log.LogHttpClientRequestInterceptor;
 import com.github.ljtfreitas.restify.http.client.response.HttpClientResponse;
 
-public class LogHttpClientRequestInterceptor implements HttpClientRequestInterceptor {
+public class AsyncLogHttpClientRequestInterceptor implements AsyncHttpClientRequestInterceptor {
 
-	private static final Logger log = Logger.getLogger(LogHttpClientRequestInterceptor.class.getCanonicalName());
+	private static final Logger log = Logger.getLogger(AsyncLogHttpClientRequestInterceptor.class.getCanonicalName());
+
+	private final LogHttpClientRequestInterceptor delegate = new LogHttpClientRequestInterceptor();
 
 	@Override
 	public HttpClientRequest intercepts(HttpClientRequest request) {
-		return new LogHttpClientRequest(request);
+		return delegate.intercepts(request);
 	}
 
-	private class LogHttpClientRequest implements HttpClientRequest {
+	@Override
+	public AsyncHttpClientRequest interceptsAsync(AsyncHttpClientRequest request) {
+		return new AsyncLogHttpClientRequest(request);
+	}
 
-		private final HttpClientRequest source;
+	private class AsyncLogHttpClientRequest implements AsyncHttpClientRequest {
 
-		private LogHttpClientRequest(HttpClientRequest source) {
+		private final AsyncHttpClientRequest source;
+
+		private AsyncLogHttpClientRequest(AsyncHttpClientRequest source) {
 			this.source = source;
 		}
 
@@ -87,15 +98,22 @@ public class LogHttpClientRequestInterceptor implements HttpClientRequestInterce
 
 		@Override
 		public HttpClientResponse execute() throws HttpClientException {
+			return source.execute();
+		}
+
+		@Override
+		public CompletableFuture<HttpClientResponse> executeAsync() throws HttpClientException {
 			CurlPrinter printer = new CurlPrinter();
 
 			log.info(printer.print(source));
 
-			HttpClientResponse response = source.execute();
+			CompletableFuture<HttpClientResponse> responseAsFuture = source.executeAsync();
 
-			log.info(printer.print(response));
+			return responseAsFuture.thenApplyAsync(response -> {
+				log.info(printer.print(response));
 
-			return response;
+				return response;
+			});
 		}
 	}
 }
