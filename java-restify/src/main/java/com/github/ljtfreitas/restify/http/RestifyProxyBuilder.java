@@ -90,6 +90,7 @@ import com.github.ljtfreitas.restify.http.client.request.HttpClientRequestFactor
 import com.github.ljtfreitas.restify.http.client.request.async.AsyncEndpointRequestExecutor;
 import com.github.ljtfreitas.restify.http.client.request.async.AsyncHttpClientRequestFactory;
 import com.github.ljtfreitas.restify.http.client.request.async.DefaultAsyncEndpointRequestExecutor;
+import com.github.ljtfreitas.restify.http.client.request.async.interceptor.AsyncEndpointRequestInterceptorChain;
 import com.github.ljtfreitas.restify.http.client.request.async.interceptor.AsyncHttpClientRequestInterceptorChain;
 import com.github.ljtfreitas.restify.http.client.request.async.interceptor.AsyncInterceptedEndpointRequestExecutor;
 import com.github.ljtfreitas.restify.http.client.request.async.interceptor.AsyncInterceptedHttpClientRequestFactory;
@@ -288,12 +289,9 @@ public class RestifyProxyBuilder {
 		private EndpointRequestExecutor intercepted(EndpointRequestExecutor delegate) {
 			Collection<EndpointRequestInterceptor> interceptors = endpointRequestInterceptorsBuilder.all;
 			if (interceptors.isEmpty()) return delegate;
-			else {
-				EndpointRequestInterceptorChain chain = new EndpointRequestInterceptorChain(interceptors);
-				return delegate instanceof AsyncEndpointRequestExecutor ?
-						new AsyncInterceptedEndpointRequestExecutor((AsyncEndpointRequestExecutor) delegate, chain) :
-							new InterceptedEndpointRequestExecutor(delegate, chain);
-			}
+			else return delegate instanceof AsyncEndpointRequestExecutor ?
+					new AsyncInterceptedEndpointRequestExecutor((AsyncEndpointRequestExecutor) delegate, AsyncEndpointRequestInterceptorChain.of(interceptors)) :
+						new InterceptedEndpointRequestExecutor(delegate, new EndpointRequestInterceptorChain(interceptors));
 		}
 
 		private EndpointRequestExecutor endpointRequestExecutor(HttpClientRequestFactory httpClientRequestFactory) {
@@ -688,6 +686,11 @@ public class RestifyProxyBuilder {
 
 		public HttpClientRequestInterceptorsBuilder interceptors() {
 			return interceptors;
+		}
+		
+		public RestifyProxyBuilder interceptors(HttpClientRequestInterceptor...interceptors) {
+			this.interceptors.add(interceptors);
+			return context;
 		}
 
 		public RestifyProxyBuilder using(HttpClientRequestConfiguration httpClientRequestConfiguration) {

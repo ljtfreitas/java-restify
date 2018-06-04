@@ -29,15 +29,14 @@ import java.util.concurrent.CompletableFuture;
 
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
 import com.github.ljtfreitas.restify.http.client.request.async.AsyncEndpointRequestExecutor;
-import com.github.ljtfreitas.restify.http.client.request.interceptor.EndpointRequestInterceptorChain;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
 
 public class AsyncInterceptedEndpointRequestExecutor implements AsyncEndpointRequestExecutor {
 
 	private final AsyncEndpointRequestExecutor delegate;
-	private final EndpointRequestInterceptorChain interceptors;
+	private final AsyncEndpointRequestInterceptorChain interceptors;
 
-	public AsyncInterceptedEndpointRequestExecutor(AsyncEndpointRequestExecutor delegate, EndpointRequestInterceptorChain interceptors) {
+	public AsyncInterceptedEndpointRequestExecutor(AsyncEndpointRequestExecutor delegate, AsyncEndpointRequestInterceptorChain interceptors) {
 		this.delegate = delegate;
 		this.interceptors = interceptors;
 	}
@@ -49,6 +48,6 @@ public class AsyncInterceptedEndpointRequestExecutor implements AsyncEndpointReq
 
 	@Override
 	public <T> CompletableFuture<EndpointResponse<T>> executeAsync(EndpointRequest endpointRequest) {
-		return delegate.executeAsync(interceptors.apply(endpointRequest));
+		return interceptors.applyAsync(endpointRequest).thenCompose(r -> delegate.executeAsync(r));
 	}
 }

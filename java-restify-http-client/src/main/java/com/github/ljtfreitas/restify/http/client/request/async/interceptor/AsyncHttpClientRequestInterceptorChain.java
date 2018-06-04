@@ -33,16 +33,23 @@ import com.github.ljtfreitas.restify.http.client.request.HttpClientRequest;
 import com.github.ljtfreitas.restify.http.client.request.async.AsyncHttpClientRequest;
 import com.github.ljtfreitas.restify.http.client.request.async.AsyncHttpClientRequestAdapter;
 import com.github.ljtfreitas.restify.http.client.request.interceptor.HttpClientRequestInterceptor;
+import com.github.ljtfreitas.restify.http.client.request.interceptor.HttpClientRequestInterceptorChain;
 
 public class AsyncHttpClientRequestInterceptorChain {
 
+	private final HttpClientRequestInterceptorChain delegate;
 	private final Collection<AsyncHttpClientRequestInterceptor> interceptors;
 
 	public AsyncHttpClientRequestInterceptorChain(Collection<AsyncHttpClientRequestInterceptor> interceptors) {
+		this.delegate = new HttpClientRequestInterceptorChain(interceptors);
 		this.interceptors = new ArrayList<>(interceptors);
 	}
 
-	public AsyncHttpClientRequest apply(AsyncHttpClientRequest asyncHttpClientRequest) {
+	public HttpClientRequest apply(HttpClientRequest httpClientRequest) {
+		return delegate.apply(httpClientRequest);
+	}
+
+	public AsyncHttpClientRequest applyAsync(AsyncHttpClientRequest asyncHttpClientRequest) {
 		return interceptors.stream().reduce(asyncHttpClientRequest, (r, i) -> i.interceptsAsync(r), (a, b) -> b);
 	}
 
@@ -50,7 +57,7 @@ public class AsyncHttpClientRequestInterceptorChain {
 		Collection<AsyncHttpClientRequestInterceptor> all = interceptors
 			.stream()
 			.map(i -> (i instanceof AsyncHttpClientRequestInterceptor) ? i : new AsyncHttpClientRequestInterceptorAdapter(i))
-			.map(AsyncHttpClientRequestInterceptorAdapter.class::cast)
+			.map(AsyncHttpClientRequestInterceptor.class::cast)
 			.collect(Collectors.toList());
 
 		return new AsyncHttpClientRequestInterceptorChain(all);

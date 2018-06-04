@@ -44,7 +44,7 @@ public class AsyncHttpClientRequestInterceptorChainTest {
 		when(interceptor.interceptsAsync(request))
 			.thenReturn(newRequest);
 
-		AsyncHttpClientRequest intercepted = chain.apply(request);
+		AsyncHttpClientRequest intercepted = chain.applyAsync(request);
 
 		assertSame(newRequest, intercepted);
 
@@ -71,7 +71,7 @@ public class AsyncHttpClientRequestInterceptorChainTest {
 
 		chain = AsyncHttpClientRequestInterceptorChain.of(Arrays.asList(syncInterceptor));
 
-		AsyncHttpClientRequest intercepted = chain.apply(request);
+		AsyncHttpClientRequest intercepted = chain.applyAsync(request);
 
 		assertThat(intercepted, instanceOf(AsyncHttpClientRequestAdapter.class));
 	}

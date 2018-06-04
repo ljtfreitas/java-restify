@@ -42,12 +42,11 @@ public class AsyncInterceptedHttpClientRequestFactory implements AsyncHttpClient
 
 	@Override
 	public HttpClientRequest createOf(EndpointRequest endpointRequest) {
-		return delegate.createOf(endpointRequest);
+		return interceptors.apply(delegate.createOf(endpointRequest));
 	}
 
 	@Override
 	public AsyncHttpClientRequest createAsyncOf(EndpointRequest endpointRequest) {
-		AsyncHttpClientRequest asyncHttpClientRequest = delegate.createAsyncOf(endpointRequest);
-		return interceptors.apply(asyncHttpClientRequest);
+		return interceptors.applyAsync(delegate.createAsyncOf(endpointRequest));
 	}
 }

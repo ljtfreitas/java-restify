@@ -23,22 +23,14 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.http.client.request.interceptor;
+package com.github.ljtfreitas.restify.http.client.request.async.interceptor;
 
-import java.util.ArrayList;
-import java.util.Collection;
+import java.util.concurrent.CompletableFuture;
 
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
+import com.github.ljtfreitas.restify.http.client.request.interceptor.EndpointRequestInterceptor;
 
-public class EndpointRequestInterceptorChain {
+public interface AsyncEndpointRequestInterceptor extends EndpointRequestInterceptor {
 
-	private final Collection<EndpointRequestInterceptor> interceptors;
-
-	public EndpointRequestInterceptorChain(Collection<? extends EndpointRequestInterceptor> interceptors) {
-		this.interceptors = new ArrayList<>(interceptors);
-	}
-
-	public EndpointRequest apply(EndpointRequest endpointRequest) {
-		return interceptors.stream().reduce(endpointRequest, (r, i) -> i.intercepts(r), (a, b) -> b);
-	}
+	public CompletableFuture<EndpointRequest> interceptsAsync(CompletableFuture<EndpointRequest> endpointRequest);
 }
