@@ -31,6 +31,7 @@ import com.github.ljtfreitas.restify.http.client.message.io.InputStreamContent;
 import com.github.ljtfreitas.restify.http.client.message.response.HttpResponseMessage;
 import com.github.ljtfreitas.restify.http.client.message.response.StatusCode;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
+import com.github.ljtfreitas.restify.http.client.response.HttpClientResponse;
 
 import okhttp3.OkHttpClient;
 
@@ -69,7 +70,7 @@ public class OkHttpClientRequestFactoryTest {
 		HttpResponseMessage response = okHttpClientRequestFactory.createOf(new EndpointRequest(URI.create("http://localhost:7080/json"), "GET"))
 				.execute();
 
-		assertEquals(responseBody, new InputStreamContent(response.body()).asString());
+		assertEquals(responseBody, new InputStreamContent(response.body().input()).asString());
 		assertEquals("application/json", response.headers().get("Content-Type").get().value());
 		assertEquals(StatusCode.ok(), response.status());
 	}
@@ -87,13 +88,13 @@ public class OkHttpClientRequestFactoryTest {
 					.withHeader("Content-Type", "application/json")
 					.withBody(json(responseBody)));
 
-		CompletableFuture<HttpResponseMessage> future = okHttpClientRequestFactory
+		CompletableFuture<HttpClientResponse> future = okHttpClientRequestFactory
 				.createAsyncOf(new EndpointRequest(URI.create("http://localhost:7080/json"), "GET"))
 					.executeAsync();
 
 		HttpResponseMessage response = future.get();
 
-		assertEquals(responseBody, new InputStreamContent(response.body()).asString());
+		assertEquals(responseBody, new InputStreamContent(response.body().input()).asString());
 		assertEquals("application/json", response.headers().get("Content-Type").get().value());
 		assertEquals(StatusCode.ok(), response.status());
 	}
@@ -120,12 +121,12 @@ public class OkHttpClientRequestFactoryTest {
 				new Headers(Header.contentType("application/json")), requestBody);
 
 		OkHttpClientRequest request = okHttpClientRequestFactory.createOf(endpointRequest);
-		request.output().write(requestBody.getBytes());
-		request.output().flush();
+		request.body().output().write(requestBody.getBytes());
+		request.body().output().flush();
 
 		HttpResponseMessage response = request.execute();
 
-		assertEquals(responseBody, new InputStreamContent(response.body()).asString());
+		assertEquals(responseBody, new InputStreamContent(response.body().input()).asString());
 		assertEquals("text/plain", response.headers().get("Content-Type").get().value());
 		assertEquals(StatusCode.created(), response.status());
 
@@ -154,12 +155,12 @@ public class OkHttpClientRequestFactoryTest {
 				new Headers(Header.contentType("application/json")), requestBody);
 
 		OkHttpClientRequest request = okHttpClientRequestFactory.createOf(endpointRequest);
-		request.output().write(requestBody.getBytes());
-		request.output().flush();
+		request.body().output().write(requestBody.getBytes());
+		request.body().output().flush();
 
 		HttpResponseMessage response = request.executeAsync().get();
 
-		assertEquals(responseBody, new InputStreamContent(response.body()).asString());
+		assertEquals(responseBody, new InputStreamContent(response.body().input()).asString());
 		assertEquals("text/plain", response.headers().get("Content-Type").get().value());
 		assertEquals(StatusCode.created(), response.status());
 
@@ -206,7 +207,7 @@ public class OkHttpClientRequestFactoryTest {
 
 		okHttpClientRequestFactory = new OkHttpClientRequestFactory(okHttpClient);
 
-		CompletableFuture<HttpResponseMessage> future = okHttpClientRequestFactory
+		CompletableFuture<HttpClientResponse> future = okHttpClientRequestFactory
 			.createAsyncOf(new EndpointRequest(URI.create("http://localhost:7080/slow"), "GET"))
 				.executeAsync();
 

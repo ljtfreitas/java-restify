@@ -5,16 +5,18 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.nio.charset.Charset;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Answers;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
+import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestBody;
+import com.github.ljtfreitas.restify.http.client.message.request.BufferedHttpRequestBody;
 import com.github.ljtfreitas.restify.http.client.message.response.HttpResponseMessage;
 import com.github.ljtfreitas.restify.http.contract.Form;
 import com.github.ljtfreitas.restify.http.contract.Form.Field;
@@ -25,7 +27,7 @@ public class FormURLEncodedFormObjectMessageConverterTest {
 	@Mock
 	private HttpRequestMessage request;
 
-	@Mock
+	@Mock(answer = Answers.RETURNS_DEEP_STUBS)
 	private HttpResponseMessage response;
 
 	private FormURLEncodedFormObjectMessageConverter converter = new FormURLEncodedFormObjectMessageConverter();
@@ -49,7 +51,7 @@ public class FormURLEncodedFormObjectMessageConverterTest {
 	public void shouldReadFormUrlEncodedMessageToFormObject() {
 		String source = "name=Tiago de Freitas&customFieldName=31";
 
-		when(response.body()).thenReturn(new ByteArrayInputStream(source.getBytes()));
+		when(response.body().input()).thenReturn(new ByteArrayInputStream(source.getBytes()));
 
 		MyFormObject myFormObject = (MyFormObject) converter.read(response, MyFormObject.class);
 
@@ -59,9 +61,9 @@ public class FormURLEncodedFormObjectMessageConverterTest {
 
 	@Test
 	public void shouldWriteFormUrlEncodedMessageWithFormObjectSource() {
-		ByteArrayOutputStream output = new ByteArrayOutputStream();
+		HttpRequestBody output = new BufferedHttpRequestBody();
 
-		when(request.output()).thenReturn(output);
+		when(request.body()).thenReturn(output);
 
 		MyFormObject myFormObject = new MyFormObject();
 		myFormObject.name = "Tiago de Freitas";
@@ -69,7 +71,7 @@ public class FormURLEncodedFormObjectMessageConverterTest {
 
 		converter.write(myFormObject, request);
 
-		assertEquals("name=Tiago+de+Freitas&customFieldName=31", output.toString());
+		assertEquals("name=Tiago+de+Freitas&customFieldName=31", output.asString());
 	}
 
 	@Form

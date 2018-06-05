@@ -25,6 +25,7 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.message.converter.xml;
 
+import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
@@ -67,7 +68,7 @@ public class JaxbXmlMessageConverter<T> implements XmlMessageConverter<T> {
 		try {
 			Unmarshaller unmarshaller = context.createUnmarshaller();
 
-			StreamSource source = new StreamSource(httpResponseMessage.body());
+			StreamSource source = new StreamSource(httpResponseMessage.body().input());
 
 			XMLStreamReader reader = XMLInputFactory.newInstance().createXMLStreamReader(source);
 
@@ -104,9 +105,12 @@ public class JaxbXmlMessageConverter<T> implements XmlMessageConverter<T> {
 			Marshaller marshaller = context.createMarshaller();
 			marshaller.setProperty(Marshaller.JAXB_ENCODING, httpRequestMessage.charset().name());
 
-			marshaller.marshal(body, new StreamResult(httpRequestMessage.output()));
+			marshaller.marshal(body, new StreamResult(httpRequestMessage.body().output()));
 
-		} catch (JAXBException e) {
+			httpRequestMessage.body().output().flush();
+			httpRequestMessage.body().output().close();
+
+		} catch (JAXBException | IOException e) {
 			throw new HttpMessageWriteException("Error on try write xml message", e);
 		}
 	}

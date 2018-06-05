@@ -7,7 +7,6 @@ import static org.mockito.Mockito.when;
 
 import java.io.BufferedReader;
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.util.stream.Collectors;
@@ -15,10 +14,13 @@ import java.util.stream.Collectors;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Answers;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
+import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestBody;
+import com.github.ljtfreitas.restify.http.client.message.request.BufferedHttpRequestBody;
 import com.github.ljtfreitas.restify.http.client.message.response.HttpResponseMessage;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -27,7 +29,7 @@ public class OctetInputStreamMessageConverterTest {
 	@Mock
 	private HttpRequestMessage request;
 
-	@Mock
+	@Mock(answer = Answers.RETURNS_DEEP_STUBS)
 	private HttpResponseMessage response;
 
 	private OctetInputStreamMessageConverter converter;
@@ -51,7 +53,7 @@ public class OctetInputStreamMessageConverterTest {
 	public void shouldReadHttpResponseToInputStream() {
 		String body = "response";
 
-		when(response.body()).thenReturn(new ByteArrayInputStream(body.getBytes()));
+		when(response.body().input()).thenReturn(new ByteArrayInputStream(body.getBytes()));
 
 		InputStream stream = converter.read(response, InputStream.class);
 
@@ -76,13 +78,13 @@ public class OctetInputStreamMessageConverterTest {
 	public void shouldWriteInputStreamBodyToOutputStream() {
 		String body = "request body";
 
-		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+		HttpRequestBody buffer = new BufferedHttpRequestBody();
 
-		when(request.output()).thenReturn(outputStream);
+		when(request.body()).thenReturn(buffer);
 
 		converter.write(new ByteArrayInputStream(body.getBytes()), request);
 
-		String output = new String(outputStream.toByteArray());
+		String output = buffer.asString();
 
 		assertEquals(body, output);
 	}

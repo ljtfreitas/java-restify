@@ -4,7 +4,6 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.Collection;
@@ -14,11 +13,14 @@ import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Answers;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import com.github.ljtfreitas.restify.http.client.message.Encoding;
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
+import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestBody;
+import com.github.ljtfreitas.restify.http.client.message.request.BufferedHttpRequestBody;
 import com.github.ljtfreitas.restify.http.client.message.response.HttpResponseMessage;
 import com.github.ljtfreitas.restify.reflection.SimpleParameterizedType;
 
@@ -28,7 +30,7 @@ public class JacksonMessageConverterTest {
 	@Mock
 	private HttpRequestMessage request;
 
-	@Mock
+	@Mock(answer = Answers.RETURNS_DEEP_STUBS)
 	private HttpResponseMessage response;
 
 	private JacksonMessageConverter<Object> converter = new JacksonMessageConverter<>();
@@ -67,33 +69,33 @@ public class JacksonMessageConverterTest {
 
 	@Test
 	public void shouldWriteJsonMessage() {
-		ByteArrayOutputStream output = new ByteArrayOutputStream();
+		HttpRequestBody output = new BufferedHttpRequestBody();
 
-		when(request.output()).thenReturn(output);
+		when(request.body()).thenReturn(output);
 
 		converter.write(new MyJsonModel("Tiago de Freitas Lima", 31), request);
 
-		assertEquals(json, output.toString());
+		assertEquals(json, output.asString());
 	}
 
 	@Test
 	public void shouldWriteCollectionOfJsonMessage() {
-		ByteArrayOutputStream output = new ByteArrayOutputStream();
+		HttpRequestBody output = new BufferedHttpRequestBody();
 
-		when(request.output()).thenReturn(output);
+		when(request.body()).thenReturn(output);
 
 		Collection<MyJsonModel> collection = Arrays.asList(new MyJsonModel("Tiago de Freitas Lima 1", 31), new MyJsonModel("Tiago de Freitas Lima 2", 32));
 
 		converter.write(collection, request);
 
-		assertEquals(collectionOfJson, output.toString());
+		assertEquals(collectionOfJson, output.asString());
 	}
 
 	@Test
 	public void shouldReadJsonMessage() {
 		ByteArrayInputStream input = new ByteArrayInputStream(json.getBytes());
 
-		when(response.body()).thenReturn(input);
+		when(response.body().input()).thenReturn(input);
 
 		MyJsonModel myJsonModel = (MyJsonModel) converter.read(response, MyJsonModel.class);
 
@@ -106,7 +108,7 @@ public class JacksonMessageConverterTest {
 	public void shouldReadJsonMessageToDefaultJacksonObject() {
 		ByteArrayInputStream input = new ByteArrayInputStream(json.getBytes());
 
-		when(response.body()).thenReturn(input);
+		when(response.body().input()).thenReturn(input);
 
 		Map<Object, Object> map = (Map<Object, Object>) converter.read(response, Object.class);
 
@@ -119,7 +121,7 @@ public class JacksonMessageConverterTest {
 	public void shouldReadCollectionOfJsonMessage() throws Exception {
 		ByteArrayInputStream input = new ByteArrayInputStream(collectionOfJson.getBytes());
 
-		when(response.body()).thenReturn(input);
+		when(response.body().input()).thenReturn(input);
 
 		Type genericCollectionType = new SimpleParameterizedType(Collection.class, null, MyJsonModel.class);
 

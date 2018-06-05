@@ -55,7 +55,7 @@ public class ByteArrayMessageConverter implements WildcardMessageConverter<byte[
 		try {
 			ByteArrayOutputStream buffer = new ByteArrayOutputStream();
 
-			InputStreamContent bodyContent = new InputStreamContent(httpResponseMessage.body(), bufferSize);
+			InputStreamContent bodyContent = new InputStreamContent(httpResponseMessage.body().input(), bufferSize);
 			bodyContent.transferTo(buffer);
 
 			buffer.flush();

@@ -6,16 +6,19 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
+import java.nio.charset.Charset;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Answers;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import com.github.ljtfreitas.restify.http.client.message.ContentType;
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
+import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestBody;
+import com.github.ljtfreitas.restify.http.client.message.request.BufferedHttpRequestBody;
 import com.github.ljtfreitas.restify.http.client.message.response.HttpResponseMessage;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -24,7 +27,7 @@ public class StringMessageConverterTest {
 	@Mock
 	private HttpRequestMessage request;
 
-	@Mock
+	@Mock(answer = Answers.RETURNS_DEEP_STUBS)
 	private HttpResponseMessage response;
 
 	private StringMessageConverter converter;
@@ -41,6 +44,9 @@ public class StringMessageConverterTest {
 		};
 
 		message = "Simple String message.\nSimple String message, second line.";
+
+		when(request.charset())
+			.thenReturn(Charset.forName("UTF-8"));
 	}
 
 	@Test
@@ -65,13 +71,13 @@ public class StringMessageConverterTest {
 
 	@Test
 	public void shouldWriteStringMessage() {
-		ByteArrayOutputStream output = new ByteArrayOutputStream();
+		HttpRequestBody output = new BufferedHttpRequestBody();
 
-		when(request.output()).thenReturn(output);
+		when(request.body()).thenReturn(output);
 
 		converter.write(message, request);
 
-		assertEquals(message, output.toString());
+		assertEquals(message, output.asString());
 	}
 
 	@Test
@@ -90,7 +96,7 @@ public class StringMessageConverterTest {
 	public void shouldReadStringMessage() {
 		ByteArrayInputStream input = new ByteArrayInputStream(message.getBytes());
 
-		when(response.body()).thenReturn(input);
+		when(response.body().input()).thenReturn(input);
 
 		Object content = converter.read(response, String.class);
 

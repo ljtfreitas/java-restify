@@ -61,7 +61,7 @@ public class JacksonMessageConverter<T> implements JsonMessageConverter<T> {
 		try {
 			TypeFactory typeFactory = objectMapper.getTypeFactory();
 
-			return objectMapper.readValue(httpResponseMessage.body(), typeFactory.constructType(expectedType));
+			return objectMapper.readValue(httpResponseMessage.body().input(), typeFactory.constructType(expectedType));
 
 		} catch (IOException e) {
 			throw new HttpMessageReadException(e);
@@ -81,7 +81,7 @@ public class JacksonMessageConverter<T> implements JsonMessageConverter<T> {
 					.findFirst()
 					.orElse(JsonEncoding.UTF8);
 
-			JsonGenerator generator = objectMapper.getFactory().createGenerator(httpRequestMessage.output(), encoding);
+			JsonGenerator generator = objectMapper.getFactory().createGenerator(httpRequestMessage.body().output(), encoding);
 
 			objectMapper.writeValue(generator, body);
 			generator.flush();

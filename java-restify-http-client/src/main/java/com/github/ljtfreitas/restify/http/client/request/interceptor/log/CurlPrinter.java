@@ -23,31 +23,43 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.http.client.apache.httpclient;
+package com.github.ljtfreitas.restify.http.client.request.interceptor.log;
 
-import java.io.BufferedOutputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.OutputStream;
+import com.github.ljtfreitas.restify.http.client.request.HttpClientRequest;
+import com.github.ljtfreitas.restify.http.client.response.HttpClientResponse;
+import com.github.ljtfreitas.restify.util.Tryable;
 
-class BufferedEntity {
+public class CurlPrinter {
 
-	private final ByteArrayOutputStream byteArrayOutputStream;
-	private final BufferedOutputStream bufferedOutputStream;
+	public String print(HttpClientRequest request) {
+		StringBuilder message = new StringBuilder();
 
-	BufferedEntity() {
-		this(new ByteArrayOutputStream(1024 * 100));
+		message.append(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>").append("\n").append("> " + request.method() + " " + request.uri());
+
+		request.headers().forEach(h -> message.append("\n").append("> " + h.toString()));
+
+		if (!request.body().empty()) {
+			message.append("\n").append("> " + Tryable.of(request.body()::asString));
+		}
+
+		message.append("\n").append(">");
+
+		return message.toString();
 	}
 
-	BufferedEntity(ByteArrayOutputStream byteArrayOutputStream) {
-		this.byteArrayOutputStream = byteArrayOutputStream;
-		this.bufferedOutputStream = new BufferedOutputStream(byteArrayOutputStream);
-	}
+	public String print(HttpClientResponse response) {
+		StringBuilder message = new StringBuilder();
 
-	OutputStream output() {
-		return bufferedOutputStream;
-	}
+		message.append("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<").append("\n").append("< " + response.status());
 
-	byte[] asByteArray() {
-		return byteArrayOutputStream.toByteArray();
+		response.headers().forEach(h -> message.append("\n").append("< " + h.toString()));
+
+		if (response.available() && !response.body().empty()) {
+			message.append("\n").append("< " + Tryable.of(response.body()::asString));
+		}
+
+		message.append("\n").append("<");
+
+		return message.toString();
 	}
 }

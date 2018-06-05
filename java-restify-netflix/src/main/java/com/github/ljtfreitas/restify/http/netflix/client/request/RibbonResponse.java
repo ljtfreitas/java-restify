@@ -31,15 +31,15 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import com.github.ljtfreitas.restify.http.client.message.Header;
-import com.github.ljtfreitas.restify.http.client.message.response.HttpResponseMessage;
+import com.github.ljtfreitas.restify.http.client.response.HttpClientResponse;
 import com.netflix.client.ClientException;
 import com.netflix.client.IResponse;
 
 public class RibbonResponse implements IResponse {
 
-	private final HttpResponseMessage response;
+	private final HttpClientResponse response;
 
-	public RibbonResponse(HttpResponseMessage response) {
+	public RibbonResponse(HttpClientResponse response) {
 		this.response = response;
 	}
 
@@ -55,7 +55,7 @@ public class RibbonResponse implements IResponse {
 
 	@Override
 	public boolean hasPayload() {
-		return response.readable();
+		return response.available();
 	}
 
 	@Override
@@ -74,7 +74,7 @@ public class RibbonResponse implements IResponse {
 				.collect(Collectors.groupingBy(Header::name));
 	}
 
-	public HttpResponseMessage unwrap() {
+	public HttpClientResponse unwrap() {
 		return response;
 	}
 }

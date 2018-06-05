@@ -23,22 +23,18 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.http.client.request.interceptor;
+package com.github.ljtfreitas.restify.http.client.message.response;
 
-import java.util.ArrayList;
-import java.util.Collection;
+import java.io.InputStream;
+import java.nio.ByteBuffer;
 
-import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
+public interface HttpResponseBody {
 
-public class EndpointRequestInterceptorStack {
+	public ByteBuffer asBuffer();
 
-	private final Collection<EndpointRequestInterceptor> interceptors;
+	public String asString();
 
-	public EndpointRequestInterceptorStack(Collection<EndpointRequestInterceptor> interceptors) {
-		this.interceptors = new ArrayList<>(interceptors);
-	}
+	public InputStream input();
 
-	public EndpointRequest apply(EndpointRequest endpointRequest) {
-		return interceptors.stream().reduce(endpointRequest, (r, i) -> i.intercepts(r), (a, b) -> b);
-	}
+	public boolean empty();
 }

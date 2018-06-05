@@ -30,13 +30,13 @@ import java.io.InputStream;
 
 import com.github.ljtfreitas.restify.http.client.message.Headers;
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
-import com.github.ljtfreitas.restify.http.client.message.response.BaseHttpResponseMessage;
 import com.github.ljtfreitas.restify.http.client.message.response.StatusCode;
+import com.github.ljtfreitas.restify.http.client.response.BaseHttpClientResponse;
 
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.handler.codec.http.FullHttpResponse;
 
-class NettyHttpClientResponse extends BaseHttpResponseMessage {
+class NettyHttpClientResponse extends BaseHttpClientResponse {
 
 	private final ChannelHandlerContext context;
 	private final FullHttpResponse nettyResponse;

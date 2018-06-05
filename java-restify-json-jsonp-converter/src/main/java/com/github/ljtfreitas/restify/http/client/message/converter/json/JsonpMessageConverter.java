@@ -28,18 +28,21 @@ package com.github.ljtfreitas.restify.http.client.message.converter.json;
 import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.Map;
+import java.util.function.Consumer;
 
 import javax.json.Json;
 import javax.json.JsonArray;
 import javax.json.JsonObject;
 import javax.json.JsonReaderFactory;
 import javax.json.JsonStructure;
+import javax.json.JsonWriter;
 import javax.json.JsonWriterFactory;
 
 import com.github.ljtfreitas.restify.http.client.message.converter.HttpMessageReadException;
 import com.github.ljtfreitas.restify.http.client.message.converter.HttpMessageWriteException;
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
 import com.github.ljtfreitas.restify.http.client.message.response.HttpResponseMessage;
+import com.github.ljtfreitas.restify.util.Tryable;
 
 public class JsonpMessageConverter implements JsonMessageConverter<JsonStructure> {
 
@@ -63,10 +66,10 @@ public class JsonpMessageConverter implements JsonMessageConverter<JsonStructure
 	@Override
 	public JsonStructure read(HttpResponseMessage httpResponseMessage, Type expectedType) throws HttpMessageReadException {
 		if (JsonArray.class.equals(expectedType)) {
-			return jsonReaderFactory.createReader(httpResponseMessage.body()).readArray();
+			return jsonReaderFactory.createReader(httpResponseMessage.body().input()).readArray();
 
 		} else if (JsonObject.class.equals(expectedType)) {
-			return jsonReaderFactory.createReader(httpResponseMessage.body()).readObject();
+			return jsonReaderFactory.createReader(httpResponseMessage.body().input()).readObject();
 
 		} else {
 			throw new HttpMessageReadException("Unsupported type: [" + expectedType + "]. Only JsonArray and JsonObject are supported.");
@@ -81,13 +84,25 @@ public class JsonpMessageConverter implements JsonMessageConverter<JsonStructure
 	@Override
 	public void write(JsonStructure json, HttpRequestMessage httpRequestMessage) throws HttpMessageWriteException {
 		if (json instanceof JsonArray) {
-			jsonWriterFactory.createWriter(httpRequestMessage.output()).writeArray((JsonArray) json);
+			jsonWriterTo(httpRequestMessage, writer -> writer.writeArray((JsonArray) json));
 
 		} else if (json instanceof JsonObject) {
-			jsonWriterFactory.createWriter(httpRequestMessage.output()).writeObject((JsonObject) json);
+			jsonWriterTo(httpRequestMessage, writer -> writer.writeObject((JsonObject) json));
 
 		} else {
 			throw new HttpMessageReadException("Unsupported type: [" + json.getClass() + "]. Only JsonArray and JsonObject are supported.");
 		}
+	}
+
+	private void jsonWriterTo(HttpRequestMessage httpRequestMessage, Consumer<JsonWriter> consumer) {
+		JsonWriter writer = jsonWriterFactory.createWriter(httpRequestMessage.body().output());
+
+		consumer.accept(writer);
+
+		Tryable.run(() -> {;
+			httpRequestMessage.body().output().flush();
+			httpRequestMessage.body().output().close();
+
+		}, e -> new HttpMessageWriteException(e));
 	}
 }

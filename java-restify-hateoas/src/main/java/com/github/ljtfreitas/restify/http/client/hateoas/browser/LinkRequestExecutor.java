@@ -27,15 +27,15 @@ package com.github.ljtfreitas.restify.http.client.hateoas.browser;
 
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequestExecutor;
-import com.github.ljtfreitas.restify.http.client.request.interceptor.EndpointRequestInterceptorStack;
+import com.github.ljtfreitas.restify.http.client.request.interceptor.EndpointRequestInterceptorChain;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
 
 public class LinkRequestExecutor {
 
 	private final EndpointRequestExecutor endpointRequestExecutor;
-	private final EndpointRequestInterceptorStack endpointRequestInterceptorStack;
+	private final EndpointRequestInterceptorChain endpointRequestInterceptorStack;
 
-	public LinkRequestExecutor(EndpointRequestExecutor endpointRequestExecutor, EndpointRequestInterceptorStack endpointRequestInterceptorStack) {
+	public LinkRequestExecutor(EndpointRequestExecutor endpointRequestExecutor, EndpointRequestInterceptorChain endpointRequestInterceptorStack) {
 		this.endpointRequestExecutor = endpointRequestExecutor;
 		this.endpointRequestInterceptorStack = endpointRequestInterceptorStack;
 	}

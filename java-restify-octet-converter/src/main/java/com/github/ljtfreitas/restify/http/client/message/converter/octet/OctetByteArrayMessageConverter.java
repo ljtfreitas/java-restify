@@ -60,7 +60,7 @@ public class OctetByteArrayMessageConverter implements OctetStreamMessageConvert
 		try {
 			ByteArrayOutputStream buffer = new ByteArrayOutputStream();
 
-			InputStreamContent bodyContent = new InputStreamContent(httpResponseMessage.body(), bufferSize);
+			InputStreamContent bodyContent = new InputStreamContent(httpResponseMessage.body().input(), bufferSize);
 			bodyContent.transferTo(buffer);
 
 			buffer.flush();
@@ -80,7 +80,7 @@ public class OctetByteArrayMessageConverter implements OctetStreamMessageConvert
 	@Override
 	public void write(byte[] body, HttpRequestMessage httpRequestMessage) throws HttpMessageWriteException {
 		try {
-			OutputStream output = httpRequestMessage.output();
+			OutputStream output = httpRequestMessage.body().output();
 
 			output.write(body);
 			output.flush();

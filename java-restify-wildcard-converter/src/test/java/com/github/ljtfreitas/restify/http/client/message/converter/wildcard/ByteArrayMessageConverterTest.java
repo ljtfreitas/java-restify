@@ -13,6 +13,7 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import com.github.ljtfreitas.restify.http.client.message.response.HttpResponseBody;
 import com.github.ljtfreitas.restify.http.client.message.response.HttpResponseMessage;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -21,10 +22,16 @@ public class ByteArrayMessageConverterTest {
 	@Mock
 	private HttpResponseMessage response;
 
+	@Mock
+	private HttpResponseBody responseBody;
+
 	private ByteArrayMessageConverter converter;
 
 	@Before
 	public void setup() {
+		when(response.body())
+			.thenReturn(responseBody);
+
 		converter = new ByteArrayMessageConverter();
 	}
 
@@ -42,7 +49,7 @@ public class ByteArrayMessageConverterTest {
 	public void shouldConvertHttpResponseMessageBodyToByteArray() {
 		String body = "hello world";
 
-		when(response.body()).thenReturn(new ByteArrayInputStream(body.getBytes()));
+		when(responseBody.input()).thenReturn(new ByteArrayInputStream(body.getBytes()));
 
 		byte[] byteArray = converter.read(response, byte[].class);
 

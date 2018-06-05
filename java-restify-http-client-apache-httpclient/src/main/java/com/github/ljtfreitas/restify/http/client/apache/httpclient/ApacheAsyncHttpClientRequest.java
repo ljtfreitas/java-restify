@@ -25,7 +25,6 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.apache.httpclient;
 
-import java.io.OutputStream;
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.util.concurrent.CompletableFuture;
@@ -43,9 +42,11 @@ import org.apache.http.protocol.HttpContext;
 import com.github.ljtfreitas.restify.http.client.HttpClientException;
 import com.github.ljtfreitas.restify.http.client.message.Header;
 import com.github.ljtfreitas.restify.http.client.message.Headers;
+import com.github.ljtfreitas.restify.http.client.message.request.BufferedHttpRequestBody;
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
-import com.github.ljtfreitas.restify.http.client.message.response.HttpResponseMessage;
+import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestBody;
 import com.github.ljtfreitas.restify.http.client.request.async.AsyncHttpClientRequest;
+import com.github.ljtfreitas.restify.http.client.response.HttpClientResponse;
 import com.github.ljtfreitas.restify.util.Tryable;
 
 class ApacheAsyncHttpClientRequest implements AsyncHttpClientRequest {
@@ -55,22 +56,21 @@ class ApacheAsyncHttpClientRequest implements AsyncHttpClientRequest {
 	private final HttpContext httpContext;
 	private final Charset charset;
 	private final Headers headers;
-
-	private final BufferedEntity bufferedEntity;
+	private final HttpRequestBody body;
 
 	ApacheAsyncHttpClientRequest(HttpAsyncClient httpAsyncClient, HttpUriRequest httpRequest, HttpContext context,
 			Charset charset, Headers headers) {
-		this(httpAsyncClient, httpRequest, context, charset, headers, new BufferedEntity());
+		this(httpAsyncClient, httpRequest, context, charset, headers, new BufferedHttpRequestBody(charset));
 	}
 
 	private ApacheAsyncHttpClientRequest(HttpAsyncClient httpAsyncClient, HttpUriRequest httpRequest,
-			HttpContext context, Charset charset, Headers headers, BufferedEntity bufferedEntity) {
+			HttpContext context, Charset charset, Headers headers, HttpRequestBody body) {
 		this.httpAsyncClient = httpAsyncClient;
 		this.httpRequest = httpRequest;
 		this.httpContext = context;
 		this.charset = charset;
 		this.headers = headers;
-		this.bufferedEntity = bufferedEntity;
+		this.body = body;
 	}
 
 	@Override
@@ -84,8 +84,8 @@ class ApacheAsyncHttpClientRequest implements AsyncHttpClientRequest {
 	}
 
 	@Override
-	public OutputStream output() {
-		return bufferedEntity.output();
+	public HttpRequestBody body() {
+		return body;
 	}
 
 	@Override
@@ -96,7 +96,7 @@ class ApacheAsyncHttpClientRequest implements AsyncHttpClientRequest {
 	@Override
 	public HttpRequestMessage replace(Header header) {
 		return new ApacheAsyncHttpClientRequest(httpAsyncClient, httpRequest, httpContext, charset,
-				headers.replace(header), bufferedEntity);
+				headers.replace(header), body);
 	}
 
 	@Override
@@ -105,22 +105,22 @@ class ApacheAsyncHttpClientRequest implements AsyncHttpClientRequest {
 	}
 
 	@Override
-	public CompletableFuture<HttpResponseMessage> executeAsync() throws HttpClientException {
+	public CompletableFuture<HttpClientResponse> executeAsync() throws HttpClientException {
 		return doExecuteAsync();
 	}
 
-	private CompletableFuture<HttpResponseMessage> doExecuteAsync() {
+	private CompletableFuture<HttpClientResponse> doExecuteAsync() {
 		headers.all().forEach(h -> httpRequest.addHeader(h.name(), h.value()));
 
 		start();
 
 		if (httpRequest instanceof HttpEntityEnclosingRequest) {
 			HttpEntityEnclosingRequest entityEnclosingRequest = (HttpEntityEnclosingRequest) httpRequest;
-			HttpEntity requestEntity = new ByteArrayEntity(bufferedEntity.asByteArray());
+			HttpEntity requestEntity = new ByteArrayEntity(body.asBuffer().array());
 			entityEnclosingRequest.setEntity(requestEntity);
 		}
 
-		CompletableFuture<HttpResponseMessage> future = new CompletableFuture<>();
+		CompletableFuture<HttpClientResponse> future = new CompletableFuture<>();
 
 		httpAsyncClient.execute(httpRequest, httpContext, new ApacheHttpAsyncRequestCallback(future));
 
@@ -138,15 +138,15 @@ class ApacheAsyncHttpClientRequest implements AsyncHttpClientRequest {
 	}
 
 	@Override
-	public HttpResponseMessage execute() throws HttpClientException {
+	public HttpClientResponse execute() throws HttpClientException {
 		return Tryable.of(() -> doExecuteAsync().get());
 	}
 
 	private class ApacheHttpAsyncRequestCallback implements FutureCallback<HttpResponse> {
 
-		private final CompletableFuture<HttpResponseMessage> future;
+		private final CompletableFuture<HttpClientResponse> future;
 
-		private ApacheHttpAsyncRequestCallback(CompletableFuture<HttpResponseMessage> future) {
+		private ApacheHttpAsyncRequestCallback(CompletableFuture<HttpClientResponse> future) {
 			this.future = future;
 		}
 

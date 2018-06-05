@@ -25,10 +25,8 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.okhttp;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.URI;
 import java.net.URL;
 import java.nio.charset.Charset;
@@ -37,10 +35,12 @@ import java.util.concurrent.CompletableFuture;
 import com.github.ljtfreitas.restify.http.client.HttpClientException;
 import com.github.ljtfreitas.restify.http.client.message.Header;
 import com.github.ljtfreitas.restify.http.client.message.Headers;
+import com.github.ljtfreitas.restify.http.client.message.request.BufferedHttpRequestBody;
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
-import com.github.ljtfreitas.restify.http.client.message.response.HttpResponseMessage;
+import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestBody;
 import com.github.ljtfreitas.restify.http.client.message.response.StatusCode;
 import com.github.ljtfreitas.restify.http.client.request.async.AsyncHttpClientRequest;
+import com.github.ljtfreitas.restify.http.client.response.HttpClientResponse;
 import com.github.ljtfreitas.restify.util.Tryable;
 
 import okhttp3.Call;
@@ -48,7 +48,6 @@ import okhttp3.Callback;
 import okhttp3.MediaType;
 import okhttp3.OkHttpClient;
 import okhttp3.Request;
-import okhttp3.RequestBody;
 import okhttp3.Response;
 
 class OkHttpClientRequest implements AsyncHttpClientRequest {
@@ -58,21 +57,20 @@ class OkHttpClientRequest implements AsyncHttpClientRequest {
 	private final String method;
 	private final Headers headers;
 	private final Charset charset;
-
-	private final ByteArrayOutputStream outputStream;
+	private final HttpRequestBody body;
 
 	public OkHttpClientRequest(OkHttpClient okHttpClient, URI uri, String method, Headers headers, Charset charset) {
-		this(okHttpClient, uri, method, headers, charset, new ByteArrayOutputStream(1024));
+		this(okHttpClient, uri, method, headers, charset, new BufferedHttpRequestBody(charset));
 	}
 
 	private OkHttpClientRequest(OkHttpClient okHttpClient, URI uri, String method, Headers headers, Charset charset,
-			ByteArrayOutputStream outputStream) {
+			BufferedHttpRequestBody body) {
 		this.okHttpClient = okHttpClient;
 		this.uri = uri;
 		this.method = method;
 		this.headers = headers;
 		this.charset = charset;
-		this.outputStream = outputStream;
+		this.body = body;
 	}
 
 	@Override
@@ -86,8 +84,8 @@ class OkHttpClientRequest implements AsyncHttpClientRequest {
 	}
 
 	@Override
-	public OutputStream output() {
-		return outputStream;
+	public HttpRequestBody body() {
+		return body;
 	}
 
 	@Override
@@ -106,7 +104,7 @@ class OkHttpClientRequest implements AsyncHttpClientRequest {
 	}
 
 	@Override
-	public HttpResponseMessage execute() throws HttpClientException {
+	public HttpClientResponse execute() throws HttpClientException {
 		Request request = doBuildRequest();
 
 		try {
@@ -119,8 +117,8 @@ class OkHttpClientRequest implements AsyncHttpClientRequest {
 	}
 
 	@Override
-	public CompletableFuture<HttpResponseMessage> executeAsync() throws HttpClientException {
-		CompletableFuture<HttpResponseMessage> future = new CompletableFuture<>();
+	public CompletableFuture<HttpClientResponse> executeAsync() throws HttpClientException {
+		CompletableFuture<HttpClientResponse> future = new CompletableFuture<>();
 
 		Request request = doBuildRequest();
 
@@ -145,9 +143,9 @@ class OkHttpClientRequest implements AsyncHttpClientRequest {
 		MediaType contentType = headers.get("Content-Type").map(header -> MediaType.parse(header.value()))
 				.orElse(null);
 
-		byte[] content = outputStream.toByteArray();
+		byte[] content = body.asBuffer().array();
 
-		RequestBody body = (content.length > 0 ? RequestBody.create(contentType, content) : null);
+		okhttp3.RequestBody body = (content.length > 0 ? okhttp3.RequestBody.create(contentType, content) : null);
 
 		URL url = Tryable.of(() -> uri.toURL());
 

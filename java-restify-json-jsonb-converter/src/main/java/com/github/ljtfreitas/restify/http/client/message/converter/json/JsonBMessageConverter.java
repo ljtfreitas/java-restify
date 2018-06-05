@@ -63,7 +63,7 @@ public class JsonBMessageConverter<T> implements JsonMessageConverter<T> {
 	@Override
 	public T read(HttpResponseMessage httpResponseMessage, Type expectedType) throws HttpMessageReadException {
 		try {
-			return jsonb.fromJson(httpResponseMessage.body(), expectedType);
+			return jsonb.fromJson(httpResponseMessage.body().input(), expectedType);
 		} catch (JsonbException e) {
 			throw new HttpMessageReadException(e);
 		}
@@ -76,7 +76,7 @@ public class JsonBMessageConverter<T> implements JsonMessageConverter<T> {
 
 	@Override
 	public void write(Object body, HttpRequestMessage httpRequestMessage) throws HttpMessageWriteException {
-		OutputStreamWriter writer = new OutputStreamWriter(httpRequestMessage.output(), httpRequestMessage.charset());
+		OutputStreamWriter writer = new OutputStreamWriter(httpRequestMessage.body().output(), httpRequestMessage.charset());
 
 		try {
 			jsonb.toJson(body, writer);

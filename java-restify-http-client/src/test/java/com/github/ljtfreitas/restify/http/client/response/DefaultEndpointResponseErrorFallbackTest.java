@@ -34,7 +34,7 @@ public class DefaultEndpointResponseErrorFallbackTest {
 	@Rule
 	public ExpectedException expectedException = ExpectedException.none();
 
-	@Mock(answer = Answers.RETURNS_MOCKS)
+	@Mock(answer = Answers.RETURNS_DEEP_STUBS)
 	private HttpResponseMessage response;
 
 	private DefaultEndpointResponseErrorFallback fallback;
@@ -47,7 +47,7 @@ public class DefaultEndpointResponseErrorFallbackTest {
 
 		body = "http response body";
 
-		when(response.body()).thenReturn(new ByteArrayInputStream(body.getBytes()));
+		when(response.body().input()).thenReturn(new ByteArrayInputStream(body.getBytes()));
 		when(response.headers()).thenReturn(new Headers());
 	}
 

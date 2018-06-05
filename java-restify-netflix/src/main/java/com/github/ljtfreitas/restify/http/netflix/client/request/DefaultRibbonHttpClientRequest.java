@@ -25,9 +25,6 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.netflix.client.request;
 
-import java.io.BufferedOutputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.OutputStream;
 import java.net.URI;
 import java.nio.charset.Charset;
 
@@ -36,9 +33,11 @@ import com.github.ljtfreitas.restify.http.client.HttpException;
 import com.github.ljtfreitas.restify.http.client.message.Header;
 import com.github.ljtfreitas.restify.http.client.message.Headers;
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
-import com.github.ljtfreitas.restify.http.client.message.response.HttpResponseMessage;
+import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestBody;
+import com.github.ljtfreitas.restify.http.client.message.request.BufferedHttpRequestBody;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
 import com.github.ljtfreitas.restify.http.client.request.HttpClientRequest;
+import com.github.ljtfreitas.restify.http.client.response.HttpClientResponse;
 import com.github.ljtfreitas.restify.util.Tryable;
 import com.netflix.client.ClientException;
 
@@ -47,27 +46,19 @@ public class DefaultRibbonHttpClientRequest extends BaseRibbonHttpClientRequest 
 	private final EndpointRequest endpointRequest;
 	private final RibbonLoadBalancedClient ribbonLoadBalancedClient;
 	private final Charset charset;
-
-	private final ByteArrayOutputStream byteArrayOutputStream;
-	private final BufferedOutputStream bufferedOutputStream;
+	private final HttpRequestBody body;
 
 	public DefaultRibbonHttpClientRequest(EndpointRequest endpointRequest, RibbonLoadBalancedClient ribbonLoadBalancedClient, Charset charset) {
-		this(endpointRequest, ribbonLoadBalancedClient, charset, new ByteArrayOutputStream(1024 * 100));
+		this(endpointRequest, ribbonLoadBalancedClient, charset, new BufferedHttpRequestBody(charset));
 	}
 
 	private DefaultRibbonHttpClientRequest(EndpointRequest endpointRequest, RibbonLoadBalancedClient ribbonLoadBalancedClient, Charset charset,
-			ByteArrayOutputStream byteArrayOutputStream) {
-		this(endpointRequest, ribbonLoadBalancedClient, charset, byteArrayOutputStream, new BufferedOutputStream(byteArrayOutputStream));
-	}
-
-	private DefaultRibbonHttpClientRequest(EndpointRequest endpointRequest, RibbonLoadBalancedClient ribbonLoadBalancedClient, Charset charset,
-			ByteArrayOutputStream byteArrayOutputStream, BufferedOutputStream bufferedOutputStream) {
+			HttpRequestBody body) {
 		super(endpointRequest);
 		this.endpointRequest = endpointRequest;
 		this.ribbonLoadBalancedClient = ribbonLoadBalancedClient;
 		this.charset = charset;
-		this.byteArrayOutputStream = byteArrayOutputStream;
-		this.bufferedOutputStream = bufferedOutputStream;
+		this.body = body;
 	}
 
 	@Override
@@ -81,8 +72,8 @@ public class DefaultRibbonHttpClientRequest extends BaseRibbonHttpClientRequest 
 	}
 
 	@Override
-	public OutputStream output() {
-		return bufferedOutputStream;
+	public HttpRequestBody body() {
+		return body;
 	}
 
 	@Override
@@ -92,8 +83,7 @@ public class DefaultRibbonHttpClientRequest extends BaseRibbonHttpClientRequest 
 
 	@Override
 	public HttpRequestMessage replace(Header header) {
-		return new DefaultRibbonHttpClientRequest(endpointRequest.replace(header), ribbonLoadBalancedClient, charset,
-				byteArrayOutputStream, bufferedOutputStream);
+		return new DefaultRibbonHttpClientRequest(endpointRequest.replace(header), ribbonLoadBalancedClient, charset, body);
 	}
 
 	@Override
@@ -102,7 +92,7 @@ public class DefaultRibbonHttpClientRequest extends BaseRibbonHttpClientRequest 
 	}
 
 	@Override
-	public HttpResponseMessage execute() throws HttpException {
+	public HttpClientResponse execute() throws HttpException {
 		try {
 			RibbonResponse response = ribbonLoadBalancedClient.withLoadBalancer(new RibbonRequest(this));
 
@@ -117,12 +107,18 @@ public class DefaultRibbonHttpClientRequest extends BaseRibbonHttpClientRequest 
 	@Override
 	public void writeTo(HttpClientRequest httpRequestMessage) {
 		endpointRequest.body()
-			.ifPresent(b -> Tryable.run(() -> byteArrayOutputStream.writeTo(httpRequestMessage.output())));
+			.ifPresent(b ->
+				Tryable.run(() -> {
+					body.writeTo(httpRequestMessage.body().output());
+					httpRequestMessage.body().output().flush();
+					httpRequestMessage.body().output().close();
+				})
+			);
 	}
 
 	@Override
 	public RibbonHttpClientRequest replace(URI ribbonEndpoint) {
 		return new DefaultRibbonHttpClientRequest(endpointRequest.replace(ribbonEndpoint), ribbonLoadBalancedClient, charset,
-				byteArrayOutputStream, bufferedOutputStream);
+				body);
 	}
 }

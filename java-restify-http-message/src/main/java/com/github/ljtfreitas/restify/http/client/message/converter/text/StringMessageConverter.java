@@ -40,7 +40,7 @@ public abstract class StringMessageConverter implements TextMessageConverter<Str
 
 	@Override
 	public String read(HttpResponseMessage httpResponseMessage, Type expectedType) throws HttpMessageReadException {
-		try (BufferedReader buffer = new BufferedReader(new InputStreamReader(httpResponseMessage.body()))) {
+		try (BufferedReader buffer = new BufferedReader(new InputStreamReader(httpResponseMessage.body().input()))) {
             return buffer.lines().collect(Collectors.joining("\n"));
 
 		} catch (IOException e) {
@@ -51,7 +51,9 @@ public abstract class StringMessageConverter implements TextMessageConverter<Str
 	@Override
 	public void write(String body, HttpRequestMessage httpRequestMessage) throws HttpMessageWriteException {
 		try {
-			httpRequestMessage.output().write(body.toString().getBytes(httpRequestMessage.charset()));
+			httpRequestMessage.body().output().write(body.toString().getBytes(httpRequestMessage.charset()));
+			httpRequestMessage.body().output().flush();
+			httpRequestMessage.body().output().close();
 		} catch (IOException e) {
 			throw new HttpMessageWriteException(e);
 		}

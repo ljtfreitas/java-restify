@@ -28,10 +28,10 @@ package com.github.ljtfreitas.restify.http.client.request.async;
 import java.util.concurrent.CompletableFuture;
 
 import com.github.ljtfreitas.restify.http.client.HttpClientException;
-import com.github.ljtfreitas.restify.http.client.message.response.HttpResponseMessage;
 import com.github.ljtfreitas.restify.http.client.request.HttpClientRequest;
+import com.github.ljtfreitas.restify.http.client.response.HttpClientResponse;
 
 public interface AsyncHttpClientRequest extends HttpClientRequest {
 
-	public CompletableFuture<HttpResponseMessage> executeAsync() throws HttpClientException;
+	public CompletableFuture<HttpClientResponse> executeAsync() throws HttpClientException;
 }

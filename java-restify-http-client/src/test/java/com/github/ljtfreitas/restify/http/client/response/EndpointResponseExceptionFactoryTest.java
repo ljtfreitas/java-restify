@@ -25,7 +25,7 @@ public class EndpointResponseExceptionFactoryTest {
 
 	private EndpointResponseExceptionFactory exceptionFactory;
 
-	@Mock(answer = Answers.RETURNS_MOCKS)
+	@Mock(answer = Answers.RETURNS_DEEP_STUBS)
 	private HttpResponseMessage response;
 
 	@Before
@@ -33,7 +33,7 @@ public class EndpointResponseExceptionFactoryTest {
 		exceptionFactory = new EndpointResponseExceptionFactory();
 
 		when(response.headers()).thenReturn(new Headers());
-		when(response.body()).thenReturn(new ByteArrayInputStream(new byte[0]));
+		when(response.body().input()).thenReturn(new ByteArrayInputStream(new byte[0]));
 	}
 
 	@Test

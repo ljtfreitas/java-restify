@@ -70,6 +70,14 @@ public interface Tryable {
 		}
 	}
 
+	public static <X extends Throwable> void run(TryableExpression expression, Function<? super Exception, ? extends X> exception) throws X {
+		try {
+			expression.run();
+		} catch (Exception e) {
+			throw exception.apply(e);
+		}
+	}
+
 	public static void silently(TryableExpression expression) {
 		try {
 			expression.run();

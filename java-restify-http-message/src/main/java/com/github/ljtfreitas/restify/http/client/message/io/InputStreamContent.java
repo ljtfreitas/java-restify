@@ -25,6 +25,7 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.message.io;
 
+import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -33,7 +34,7 @@ import java.io.UncheckedIOException;
 
 public class InputStreamContent {
 
-	public static final int DEFAULT_BUFFER_SIZE = 1024;
+	public static final int DEFAULT_BUFFER_SIZE = 1024 * 100;
 
 	private final InputStream source;
 	private final int bufferSize;
@@ -55,25 +56,42 @@ public class InputStreamContent {
 		}
 	}
 
+	public byte[] asBytes() {
+		try {
+			return read().toByteArray();
+
+		} catch (IOException e) {
+			throw new UncheckedIOException(e);
+		}
+	}
+
+	private ByteArrayOutputStream read() throws IOException {
+		ByteArrayOutputStream output = new ByteArrayOutputStream(bufferSize);
+		BufferedOutputStream buffer = new BufferedOutputStream(output);
+
+		doTransfer(buffer);
+
+		buffer.flush();
+		buffer.close();
+
+		return output;
+	}
+
 	public String asString() {
 		try {
-			ByteArrayOutputStream output = new ByteArrayOutputStream(bufferSize);
-			doTransfer(output);
-			output.flush();
-			output.close();
+			return new String(read().toByteArray());
 
-			return new String(output.toByteArray());
 		} catch (IOException e) {
 			throw new UncheckedIOException(e);
 		}
 	}
 
 	private void doTransfer(OutputStream output) throws IOException {
-		int len = 0;
+		int length = 0;
 		byte[] data = new byte[bufferSize];
 
-		while ((len = source.read(data, 0, data.length)) != -1) {
-			output.write(data, 0, len);
+		while ((length = source.read(data, 0, data.length)) != -1) {
+			output.write(data, 0, length);
 		}
 	}
 }

@@ -25,7 +25,6 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.message.request;
 
-import java.io.OutputStream;
 import java.net.URI;
 import java.nio.charset.Charset;
 
@@ -38,7 +37,7 @@ public interface HttpRequestMessage extends HttpMessage {
 
 	public String method();
 
-	public OutputStream output();
+	public HttpRequestBody body();
 
 	public Charset charset();
 
