@@ -738,6 +738,11 @@ public class RestifyProxyBuilder {
 			return this;
 		}
 
+		public RestifyProxyBuilder disabled() {
+			this.enabled = false;
+			return context;
+		}
+
 		public RetryConfigurationBuilder configure() {
 			this.enabled = true;
 			return builder;

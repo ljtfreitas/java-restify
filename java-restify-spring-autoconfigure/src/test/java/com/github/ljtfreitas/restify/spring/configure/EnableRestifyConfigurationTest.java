@@ -1,31 +1,53 @@
 package com.github.ljtfreitas.restify.spring.configure;
 
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertEquals;
+import static org.mockserver.model.HttpRequest.request;
+import static org.mockserver.model.HttpResponse.response;
 
+import org.junit.Before;
+import org.junit.Rule;
 import org.junit.Test;
-import org.junit.runner.RunWith;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.ApplicationContext;
-import org.springframework.test.annotation.DirtiesContext;
-import org.springframework.test.context.ContextConfiguration;
-import org.springframework.test.context.junit4.SpringRunner;
+import org.mockserver.client.server.MockServerClient;
+import org.mockserver.junit.MockServerRule;
+import org.springframework.boot.test.context.runner.ApplicationContextRunner;
+import org.springframework.context.annotation.Configuration;
 
-import com.github.ljtfreitas.restify.spring.configure.EnableRestifyConfigurationTest.TestRestifyConfiguration;
-import com.github.ljtfreitas.restify.spring.whatever.TwitterApi;
+import com.github.ljtfreitas.restify.spring.whatever.WhateverApi;
 
-@RunWith(SpringRunner.class)
-@ContextConfiguration(classes = TestRestifyConfiguration.class)
-@DirtiesContext
 public class EnableRestifyConfigurationTest {
 
-	@Autowired
-	private ApplicationContext context;
+	@Rule
+	public MockServerRule mockServerRule = new MockServerRule(this, 8080);
 
-	@Test
-	public void shouldCreateBeanOfTwitterApiType() {
-		assertNotNull(context.getBean(TwitterApi.class));
+	private MockServerClient mockServerClient;
+
+	@Before
+	public void setup() {
+		mockServerClient = new MockServerClient("localhost", 8080);
+
+		mockServerClient
+			.when(request()
+					.withMethod("GET")
+					.withPath("/whatever"))
+			.respond(response()
+					.withStatusCode(200)
+					.withHeader("Content-Type", "text/plain")
+					.withBody("It's works!"));
 	}
 
+	@Test
+	public void shouldCreateBeanOfWhateverApiType() {
+		ApplicationContextRunner contextRunner = new ApplicationContextRunner()
+				.withUserConfiguration(TestRestifyConfiguration.class);
+
+		contextRunner.run(context -> {
+			WhateverApi whateverApi = context.getBean(WhateverApi.class);
+
+			assertEquals("It's works!", whateverApi.sample());
+		});
+	}
+
+	@Configuration
 	@EnableRestify(packages = "com.github.ljtfreitas.restify.spring.whatever")
 	static class TestRestifyConfiguration {
 	}

@@ -65,11 +65,6 @@
 			<scope>provided</scope>
 			<optional>true</optional>
 		</dependency>
-		<dependency>
-			<groupId>io.projectreactor</groupId>
-			<artifactId>reactor-test</artifactId>
-			<version>3.1.2.RELEASE</version>
-			<scope>test</scope>
-		</dependency>
+
 	</dependencies>
 </project>

@@ -29,35 +29,63 @@ import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
+import org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoadBalancerAutoConfiguration;
 import org.springframework.cloud.netflix.ribbon.RibbonAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestTemplate;
+import org.springframework.web.reactive.function.client.WebClient;
 
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequestExecutor;
 import com.github.ljtfreitas.restify.http.spring.client.request.RestOperationsEndpointRequestExecutor;
+import com.github.ljtfreitas.restify.http.spring.client.request.async.WebClientEndpointRequestExecutor;
 import com.github.ljtfreitas.restify.spring.autoconfigure.RestifyAutoConfiguration;
 import com.netflix.loadbalancer.ILoadBalancer;
 
 @Configuration
-@ConditionalOnProperty(value = "restify.ribbon.enabled", matchIfMissing = true)
+@ConditionalOnProperty(value = "restify.ribbon.enabled")
 @ConditionalOnClass(ILoadBalancer.class)
 @AutoConfigureBefore(RestifyAutoConfiguration.class)
 @AutoConfigureAfter(RibbonAutoConfiguration.class)
 public class RestifyRibbonAutoConfiguration {
 
-	@ConditionalOnMissingBean
-	@Bean
-	public EndpointRequestExecutor endpointRequestExecutor(@LoadBalanced RestTemplate restTemplate) {
-		return new RestOperationsEndpointRequestExecutor(restTemplate);
+	@Configuration
+	@ConditionalOnMissingClass("org.springframework.web.reactive.function.client.WebClient")
+	static class LoadBalancedClientConfiguration {
+
+		@ConditionalOnMissingBean
+		@Bean
+		public EndpointRequestExecutor endpointRequestExecutor(@LoadBalanced RestTemplate restTemplate) {
+			return new RestOperationsEndpointRequestExecutor(restTemplate);
+		}
+
+		@ConditionalOnMissingBean
+		@Bean
+		@LoadBalanced
+		public RestTemplate restifyRestTemplate() {
+			return new RestTemplate();
+		}
 	}
 
-	@ConditionalOnMissingBean
-	@Bean
-	@LoadBalanced
-	public RestTemplate restifyRestTemplate() {
-		return new RestTemplate();
+	@Configuration
+	@ConditionalOnClass(WebClient.class)
+	@AutoConfigureBefore(ReactiveLoadBalancerAutoConfiguration.class)
+	static class ReactiveLoadBalancedClientConfiguration {
+
+		@ConditionalOnMissingBean
+		@Bean
+		public EndpointRequestExecutor endpointRequestExecutor(@LoadBalanced WebClient.Builder webClientBuilder) {
+			return new WebClientEndpointRequestExecutor(webClientBuilder);
+		}
+
+		@ConditionalOnMissingBean
+		@Bean
+		@LoadBalanced
+		public WebClient.Builder restifyWebClientBuilder() {
+			return WebClient.builder();
+		}
 	}
 }

@@ -7,13 +7,13 @@ import com.github.ljtfreitas.restify.http.netflix.client.request.circuitbreaker.
 import com.github.ljtfreitas.restify.spring.configure.Restifyable;
 import com.netflix.hystrix.HystrixCommand;
 
-@Restifyable(endpoint = "http://localhost:8080/good")
+@Restifyable(endpoint = "http://my-api")
 public interface GoodApi {
 
 	@OnCircuitBreaker
-	@RequestMapping(path = "/get", method = RequestMethod.GET)
+	@RequestMapping(path = "/good", method = RequestMethod.GET)
 	public String get();
 
-	@RequestMapping(path = "/get", method = RequestMethod.GET)
+	@RequestMapping(path = "/good", method = RequestMethod.GET)
 	public HystrixCommand<String> getAsHystrixCommand();
 }

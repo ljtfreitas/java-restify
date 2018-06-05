@@ -27,7 +27,7 @@ package com.github.ljtfreitas.restify.spring.configure;
 
 import java.util.Optional;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
@@ -48,17 +48,14 @@ import com.github.ljtfreitas.restify.http.spring.contract.metadata.SpringWebCont
 @Configuration
 public class RestifySpringWebConfiguration {
 
-	@Autowired(required = false)
-	private RestTemplateBuilder restTemplateBuilder;
-
-	@Autowired(required = false)
-	private RestOperations restTemplate;
-
 	@ConditionalOnMissingBean
 	@Bean
-	public EndpointRequestExecutor endpointRequestExecutor(EndpointResponseErrorFallback endpointResponseErrorFallback) {
-		RestOperations restOperations = Optional.ofNullable(restTemplate)
-				.orElseGet(() -> Optional.ofNullable(restTemplateBuilder)
+	public EndpointRequestExecutor endpointRequestExecutor(EndpointResponseErrorFallback endpointResponseErrorFallback,
+			ObjectProvider<RestTemplateBuilder> restTemplateBuilderProvider,
+			ObjectProvider<RestOperations> restOperationsProvider) {
+
+		RestOperations restOperations = Optional.ofNullable(restOperationsProvider.getIfAvailable())
+				.orElseGet(() -> Optional.ofNullable(restTemplateBuilderProvider.getIfAvailable())
 					.map(builder -> builder.build())
 						.orElseGet(() -> new RestTemplate()));
 
@@ -71,13 +68,13 @@ public class RestifySpringWebConfiguration {
 
 		@ConditionalOnMissingBean
 		@Bean
-		public ContractReader restifyContractReader(ContractExpressionResolver expressionResolver) {
+		public ContractReader springWebContractReader(ContractExpressionResolver expressionResolver) {
 			return new SpringWebContractReader(expressionResolver);
 		}
 
 		@ConditionalOnMissingBean
 		@Bean
-		public ContractExpressionResolver expressionResolver(ConfigurableBeanFactory beanFactory) {
+		public ContractExpressionResolver spelDynamicExpressionResolver(ConfigurableBeanFactory beanFactory) {
 			return new SpelDynamicParameterExpressionResolver(beanFactory);
 		}
 	}
