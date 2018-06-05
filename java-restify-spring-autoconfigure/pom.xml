@@ -46,6 +46,13 @@
 		</dependency>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
+			<artifactId>java-restify-reactor</artifactId>
+			<version>${project.version}</version>
+			<scope>provided</scope>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
 			<artifactId>java-restify-spring-reactive</artifactId>
 			<version>${project.version}</version>
 			<scope>provided</scope>

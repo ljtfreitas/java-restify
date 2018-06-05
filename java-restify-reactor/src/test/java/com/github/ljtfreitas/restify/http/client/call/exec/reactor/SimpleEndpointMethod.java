@@ -1,4 +1,4 @@
-package com.github.ljtfreitas.restify.http.spring.client.call.exec;
+package com.github.ljtfreitas.restify.http.client.call.exec.reactor;
 
 import java.lang.reflect.Method;
 

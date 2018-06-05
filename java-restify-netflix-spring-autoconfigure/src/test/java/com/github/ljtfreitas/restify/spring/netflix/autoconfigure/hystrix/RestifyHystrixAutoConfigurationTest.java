@@ -22,7 +22,7 @@ import com.github.ljtfreitas.restify.spring.netflix.autoconfigure.hystrix.Restif
 import com.netflix.hystrix.HystrixCommand;
 
 @RunWith(SpringRunner.class)
-@SpringBootTest(classes = SampleSpringApplication.class, properties = "restify.ribbon.enabled=false")
+@SpringBootTest(classes = SampleSpringApplication.class)
 public class RestifyHystrixAutoConfigurationTest {
 
 	@Autowired
@@ -46,7 +46,7 @@ public class RestifyHystrixAutoConfigurationTest {
 		mockServerClient
 			.when(request()
 					.withMethod("GET")
-					.withPath("/bad/get"))
+					.withPath("/bad"))
 			.respond(response()
 					.withStatusCode(500));
 
@@ -61,7 +61,7 @@ public class RestifyHystrixAutoConfigurationTest {
 		mockServerClient
 			.when(request()
 					.withMethod("GET")
-					.withPath("/bad/get"))
+					.withPath("/bad"))
 			.respond(response()
 					.withStatusCode(500));
 
@@ -78,7 +78,7 @@ public class RestifyHystrixAutoConfigurationTest {
 		mockServerClient
 			.when(request()
 					.withMethod("GET")
-					.withPath("/good/get"))
+					.withPath("/good"))
 			.respond(response()
 					.withStatusCode(200)
 					.withHeader("Content-Type", "text/plain")
@@ -94,7 +94,7 @@ public class RestifyHystrixAutoConfigurationTest {
 		mockServerClient
 			.when(request()
 					.withMethod("GET")
-					.withPath("/good/get"))
+					.withPath("/good"))
 			.respond(response()
 					.withStatusCode(200)
 					.withHeader("Content-Type", "text/plain")

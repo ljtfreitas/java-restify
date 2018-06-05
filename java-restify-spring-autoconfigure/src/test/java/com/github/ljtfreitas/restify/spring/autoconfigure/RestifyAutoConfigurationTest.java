@@ -24,12 +24,12 @@ import org.springframework.core.task.AsyncListenableTaskExecutor;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import com.github.ljtfreitas.restify.http.client.call.exec.reactor.FluxEndpointCallExecutableFactory;
+import com.github.ljtfreitas.restify.http.client.call.exec.reactor.MonoEndpointCallExecutableFactory;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponseErrorFallback;
 import com.github.ljtfreitas.restify.http.jaxrs.contract.metadata.JaxRsContractReader;
-import com.github.ljtfreitas.restify.http.spring.client.call.exec.FluxEndpointCallExecutableFactory;
 import com.github.ljtfreitas.restify.http.spring.client.call.exec.HttpHeadersEndpointCallExecutableFactory;
 import com.github.ljtfreitas.restify.http.spring.client.call.exec.HttpStatusEndpointCallExecutableFactory;
-import com.github.ljtfreitas.restify.http.spring.client.call.exec.MonoEndpointCallExecutableFactory;
 import com.github.ljtfreitas.restify.http.spring.client.call.exec.ResponseEntityEndpointCallExecutableFactory;
 import com.github.ljtfreitas.restify.http.spring.client.call.exec.async.AsyncResultEndpointCallExecutableFactory;
 import com.github.ljtfreitas.restify.http.spring.client.call.exec.async.DeferredResultEndpointCallExecutableFactory;

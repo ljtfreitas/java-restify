@@ -23,7 +23,7 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.http.spring.client.call.exec;
+package com.github.ljtfreitas.restify.http.client.call.exec.reactor;
 
 import com.github.ljtfreitas.restify.http.client.call.async.AsyncEndpointCall;
 import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutable;
