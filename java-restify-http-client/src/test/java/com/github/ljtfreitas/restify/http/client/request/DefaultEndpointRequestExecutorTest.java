@@ -7,8 +7,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.OutputStream;
 import java.net.URI;
 import java.nio.charset.Charset;
 
@@ -23,10 +21,13 @@ import com.github.ljtfreitas.restify.http.client.HttpClientException;
 import com.github.ljtfreitas.restify.http.client.message.Encoding;
 import com.github.ljtfreitas.restify.http.client.message.Header;
 import com.github.ljtfreitas.restify.http.client.message.Headers;
+import com.github.ljtfreitas.restify.http.client.message.request.BufferedHttpRequestBody;
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
-import com.github.ljtfreitas.restify.http.client.message.response.HttpResponseMessage;
+import com.github.ljtfreitas.restify.http.client.message.response.HttpResponseBody;
+import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestBody;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponseReader;
+import com.github.ljtfreitas.restify.http.client.response.HttpClientResponse;
 import com.github.ljtfreitas.restify.reflection.JavaType;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -47,13 +48,17 @@ public class DefaultEndpointRequestExecutorTest {
 	private SimpleEndpointResponse<String> endpointResult;
 
 	@Mock
-	private HttpResponseMessage response;
+	private HttpClientResponse response;
+
+	@Mock
+	private HttpResponseBody responseBody;
 
 	@Before
 	public void setup() {
 		endpointResult = new SimpleEndpointResponse<>("endpoint request result");
 
-		when(response.body()).thenReturn(new ByteArrayInputStream(endpointResult.body().getBytes()));
+		when(response.body()).thenReturn(responseBody);
+		when(responseBody.input()).thenReturn(new ByteArrayInputStream(endpointResult.body().getBytes()));
 
 		when(endpointResponseReaderMock.<String> read(response, JavaType.of(String.class)))
 			.thenReturn(endpointResult);
@@ -97,11 +102,11 @@ public class DefaultEndpointRequestExecutorTest {
 	private class SimpleHttpClientRequest implements HttpClientRequest {
 
 		private final EndpointRequest source;
-		private final HttpResponseMessage response;
+		private final HttpClientResponse response;
 
-		private final ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+		private final HttpRequestBody body = new BufferedHttpRequestBody(Charset.defaultCharset());
 
-		public SimpleHttpClientRequest(EndpointRequest source, HttpResponseMessage response) {
+		public SimpleHttpClientRequest(EndpointRequest source, HttpClientResponse response) {
 			this.source = source;
 			this.response = response;
 		}
@@ -117,8 +122,8 @@ public class DefaultEndpointRequestExecutorTest {
 		}
 
 		@Override
-		public OutputStream output() {
-			return outputStream;
+		public HttpRequestBody body() {
+			return body;
 		}
 
 		@Override
@@ -127,7 +132,7 @@ public class DefaultEndpointRequestExecutorTest {
 		}
 
 		@Override
-		public HttpResponseMessage execute() throws HttpClientException {
+		public HttpClientResponse execute() throws HttpClientException {
 			return response;
 		}
 

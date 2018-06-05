@@ -37,7 +37,7 @@ abstract class BaseMultipartFieldSerializer<T> implements MultipartFieldSerializ
 	@Override
 	public void write(String boundary, MultipartField<T> field, HttpRequestMessage httpRequestMessage) {
 		try {
-			OutputStream output = httpRequestMessage.output();
+			OutputStream output = httpRequestMessage.body().output();
 
 			output.write(boundary.getBytes());
 			output.write('\r');

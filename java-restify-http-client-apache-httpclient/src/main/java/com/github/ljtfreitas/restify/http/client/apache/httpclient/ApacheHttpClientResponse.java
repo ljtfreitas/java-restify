@@ -35,10 +35,10 @@ import org.apache.http.util.EntityUtils;
 
 import com.github.ljtfreitas.restify.http.client.message.Headers;
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
-import com.github.ljtfreitas.restify.http.client.message.response.BaseHttpResponseMessage;
 import com.github.ljtfreitas.restify.http.client.message.response.StatusCode;
+import com.github.ljtfreitas.restify.http.client.response.BaseHttpClientResponse;
 
-class ApacheHttpClientResponse extends BaseHttpResponseMessage {
+class ApacheHttpClientResponse extends BaseHttpClientResponse {
 
 	private final HttpEntity entity;
 	private final HttpResponse httpResponse;

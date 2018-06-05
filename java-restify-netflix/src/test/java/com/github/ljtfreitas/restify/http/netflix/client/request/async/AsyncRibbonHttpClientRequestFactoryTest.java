@@ -7,7 +7,6 @@ import static org.mockserver.model.JsonBody.json;
 import static org.mockserver.model.StringBody.exact;
 import static org.mockserver.verify.VerificationTimes.once;
 
-import java.io.OutputStream;
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.util.Arrays;
@@ -35,7 +34,7 @@ import com.github.ljtfreitas.restify.http.client.message.converter.HttpMessageCo
 import com.github.ljtfreitas.restify.http.client.message.converter.json.JacksonMessageConverter;
 import com.github.ljtfreitas.restify.http.client.message.converter.xml.JaxbXmlMessageConverter;
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
-import com.github.ljtfreitas.restify.http.client.message.response.HttpResponseMessage;
+import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestBody;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequestWriter;
 import com.github.ljtfreitas.restify.http.client.request.HttpClientRequest;
@@ -46,6 +45,7 @@ import com.github.ljtfreitas.restify.http.client.request.async.AsyncHttpClientRe
 import com.github.ljtfreitas.restify.http.client.request.async.DefaultAsyncEndpointRequestExecutor;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponseReader;
+import com.github.ljtfreitas.restify.http.client.response.HttpClientResponse;
 import com.netflix.client.config.DefaultClientConfigImpl;
 import com.netflix.client.config.IClientConfig;
 import com.netflix.loadbalancer.BaseLoadBalancer;
@@ -225,7 +225,7 @@ public class AsyncRibbonHttpClientRequestFactoryTest {
 		}
 
 		@Override
-		public HttpResponseMessage execute() throws HttpClientException {
+		public HttpClientResponse execute() throws HttpClientException {
 			return source.execute();
 		}
 
@@ -240,8 +240,8 @@ public class AsyncRibbonHttpClientRequestFactoryTest {
 		}
 
 		@Override
-		public OutputStream output() {
-			return source.output();
+		public HttpRequestBody body() {
+			return source.body();
 		}
 
 		@Override
@@ -260,7 +260,7 @@ public class AsyncRibbonHttpClientRequestFactoryTest {
 		}
 
 		@Override
-		public CompletableFuture<HttpResponseMessage> executeAsync() throws HttpClientException {
+		public CompletableFuture<HttpClientResponse> executeAsync() throws HttpClientException {
 			return CompletableFuture.supplyAsync(() -> source.execute());
 		}
 

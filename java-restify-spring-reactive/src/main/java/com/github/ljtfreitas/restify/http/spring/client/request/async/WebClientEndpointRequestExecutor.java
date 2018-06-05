@@ -50,10 +50,10 @@ import com.github.ljtfreitas.restify.http.client.HttpClientException;
 import com.github.ljtfreitas.restify.http.client.HttpException;
 import com.github.ljtfreitas.restify.http.client.message.Headers;
 import com.github.ljtfreitas.restify.http.client.message.HttpMessageException;
-import com.github.ljtfreitas.restify.http.client.message.response.BaseHttpResponseMessage;
 import com.github.ljtfreitas.restify.http.client.message.response.StatusCode;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
 import com.github.ljtfreitas.restify.http.client.request.async.AsyncEndpointRequestExecutor;
+import com.github.ljtfreitas.restify.http.client.response.BaseHttpClientResponse;
 import com.github.ljtfreitas.restify.http.client.response.DefaultEndpointResponseErrorFallback;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponseErrorFallback;
@@ -134,7 +134,7 @@ public class WebClientEndpointRequestExecutor implements AsyncEndpointRequestExe
 		return DataBufferUtils.join(response.body(BodyExtractors.toDataBuffers()))
 			.map(dataBuffer -> dataBuffer.asInputStream(true))
 			.defaultIfEmpty(new ByteArrayInputStream(new byte[0]))
-			.map(body -> fallback.onError(ErrorResponseMessage.create(response, body), responseType));
+			.map(body -> fallback.onError(HttpErrorResponse.create(response, body), responseType));
 	}
 
 	private <T> EndpointResponse<T> convert(ClientResponse response, T body) {
@@ -163,9 +163,9 @@ public class WebClientEndpointRequestExecutor implements AsyncEndpointRequestExe
 		}
 	}
 
-	private static class ErrorResponseMessage extends BaseHttpResponseMessage {
+	private static class HttpErrorResponse extends BaseHttpClientResponse {
 
-		private ErrorResponseMessage(StatusCode status, Headers headers, InputStream body) {
+		private HttpErrorResponse(StatusCode status, Headers headers, InputStream body) {
 			super(status, headers, body, null);
 		}
 
@@ -173,13 +173,13 @@ public class WebClientEndpointRequestExecutor implements AsyncEndpointRequestExe
 		public void close() throws IOException {
 		}
 
-		private static ErrorResponseMessage create(ClientResponse response, InputStream body) {
+		private static HttpErrorResponse create(ClientResponse response, InputStream body) {
 			StatusCode status = StatusCode.of(response.statusCode().value(), response.statusCode().getReasonPhrase());
 
 			Headers headers = response.headers().asHttpHeaders().entrySet().stream()
 					.reduce(new Headers(), (a, b) -> a.add(b.getKey(), b.getValue()), (a, b) -> b);
 
-			return new ErrorResponseMessage(status, headers, body);
+			return new HttpErrorResponse(status, headers, body);
 		}
 	}
 

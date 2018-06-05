@@ -90,11 +90,19 @@ import com.github.ljtfreitas.restify.http.client.request.HttpClientRequestFactor
 import com.github.ljtfreitas.restify.http.client.request.async.AsyncEndpointRequestExecutor;
 import com.github.ljtfreitas.restify.http.client.request.async.AsyncHttpClientRequestFactory;
 import com.github.ljtfreitas.restify.http.client.request.async.DefaultAsyncEndpointRequestExecutor;
+import com.github.ljtfreitas.restify.http.client.request.async.interceptor.AsyncEndpointRequestInterceptorChain;
+import com.github.ljtfreitas.restify.http.client.request.async.interceptor.AsyncHttpClientRequestInterceptorChain;
+import com.github.ljtfreitas.restify.http.client.request.async.interceptor.AsyncInterceptedEndpointRequestExecutor;
+import com.github.ljtfreitas.restify.http.client.request.async.interceptor.AsyncInterceptedHttpClientRequestFactory;
 import com.github.ljtfreitas.restify.http.client.request.authentication.Authentication;
 import com.github.ljtfreitas.restify.http.client.request.interceptor.AcceptVersionHeaderEndpointRequestInterceptor;
 import com.github.ljtfreitas.restify.http.client.request.interceptor.EndpointRequestInterceptor;
-import com.github.ljtfreitas.restify.http.client.request.interceptor.EndpointRequestInterceptorStack;
+import com.github.ljtfreitas.restify.http.client.request.interceptor.EndpointRequestInterceptorChain;
 import com.github.ljtfreitas.restify.http.client.request.interceptor.HeaderEndpointRequestInterceptor;
+import com.github.ljtfreitas.restify.http.client.request.interceptor.HttpClientRequestInterceptor;
+import com.github.ljtfreitas.restify.http.client.request.interceptor.HttpClientRequestInterceptorChain;
+import com.github.ljtfreitas.restify.http.client.request.interceptor.InterceptedEndpointRequestExecutor;
+import com.github.ljtfreitas.restify.http.client.request.interceptor.InterceptedHttpClientRequestFactory;
 import com.github.ljtfreitas.restify.http.client.request.interceptor.authentication.AuthenticationEndpoinRequestInterceptor;
 import com.github.ljtfreitas.restify.http.client.response.DefaultEndpointResponseErrorFallback;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponseErrorFallback;
@@ -247,7 +255,7 @@ public class RestifyProxyBuilder {
 		}
 
 		private EndpointRequestFactory endpointRequestFactory() {
-			return new EndpointRequestFactory(endpointRequestInterceptorsBuilder.build());
+			return new EndpointRequestFactory();
 		}
 
 		private EndpointCallExecutables endpointCallExecutables() {
@@ -275,7 +283,15 @@ public class RestifyProxyBuilder {
 
 		private EndpointRequestExecutor endpointRequestExecutor() {
 			return Optional.ofNullable(endpointRequestExecutor)
-				.orElseGet(() -> endpointRequestExecutor(httpClientRequestFactory()));
+				.orElseGet(() -> intercepted(endpointRequestExecutor(intercepted(httpClientRequestFactory()))));
+		}
+
+		private EndpointRequestExecutor intercepted(EndpointRequestExecutor delegate) {
+			Collection<EndpointRequestInterceptor> interceptors = endpointRequestInterceptorsBuilder.all;
+			if (interceptors.isEmpty()) return delegate;
+			else return delegate instanceof AsyncEndpointRequestExecutor ?
+					new AsyncInterceptedEndpointRequestExecutor((AsyncEndpointRequestExecutor) delegate, AsyncEndpointRequestInterceptorChain.of(interceptors)) :
+						new InterceptedEndpointRequestExecutor(delegate, new EndpointRequestInterceptorChain(interceptors));
 		}
 
 		private EndpointRequestExecutor endpointRequestExecutor(HttpClientRequestFactory httpClientRequestFactory) {
@@ -316,6 +332,14 @@ public class RestifyProxyBuilder {
 		private HttpClientRequestFactory httpClientRequestFactory() {
 			return Optional.ofNullable(httpClientRequestFactory)
 					.orElseGet(() -> new JdkHttpClientRequestFactory(httpClientRequestConfiguration()));
+		}
+
+		private HttpClientRequestFactory intercepted(HttpClientRequestFactory delegate) {
+			Collection<HttpClientRequestInterceptor> interceptors = httpClientRequestConfigurationBuilder.interceptors.all;
+			if (interceptors.isEmpty()) return delegate;
+			else return (delegate instanceof AsyncHttpClientRequestFactory) ?
+					new AsyncInterceptedHttpClientRequestFactory((AsyncHttpClientRequestFactory) delegate, AsyncHttpClientRequestInterceptorChain.of(interceptors)) :
+					new InterceptedHttpClientRequestFactory(delegate, new HttpClientRequestInterceptorChain(interceptors));
 		}
 
 		private HttpClientRequestConfiguration httpClientRequestConfiguration() {
@@ -411,58 +435,54 @@ public class RestifyProxyBuilder {
 	public class EndpointRequestInterceptorsBuilder {
 
 		private final RestifyProxyBuilder context;
-		private final Collection<EndpointRequestInterceptor> interceptors = new ArrayList<>();
+		private final Collection<EndpointRequestInterceptor> all = new ArrayList<>();
 
 		private EndpointRequestInterceptorsBuilder(RestifyProxyBuilder context) {
 			this.context = context;
 		}
 
 		public EndpointRequestInterceptorsBuilder authentication(Authentication authentication) {
-			interceptors.add(new AuthenticationEndpoinRequestInterceptor(authentication));
+			all.add(new AuthenticationEndpoinRequestInterceptor(authentication));
 			return this;
 		}
 
 		public EndpointRequestInterceptorsBuilder acceptVersion() {
-			interceptors.add(new AcceptVersionHeaderEndpointRequestInterceptor());
+			all.add(new AcceptVersionHeaderEndpointRequestInterceptor());
 			return this;
 		}
 
 		public EndpointRequestInterceptorsBuilder acceptVersion(String version) {
-			interceptors.add(new AcceptVersionHeaderEndpointRequestInterceptor(EndpointVersion.of(version)));
+			all.add(new AcceptVersionHeaderEndpointRequestInterceptor(EndpointVersion.of(version)));
 			return this;
 		}
 
 		public EndpointRequestInterceptorsBuilder acceptVersion(EndpointVersion version) {
-			interceptors.add(new AcceptVersionHeaderEndpointRequestInterceptor(version));
+			all.add(new AcceptVersionHeaderEndpointRequestInterceptor(version));
 			return this;
 		}
 
 		public EndpointRequestInterceptorsBuilder headers(Header... headers) {
-			this.interceptors.add(new HeaderEndpointRequestInterceptor(headers));
+			this.all.add(new HeaderEndpointRequestInterceptor(headers));
 			return this;
 		}
 
 		public EndpointRequestInterceptorsBuilder headers(Collection<Header> headers) {
-			this.interceptors.add(new HeaderEndpointRequestInterceptor(headers));
+			this.all.add(new HeaderEndpointRequestInterceptor(headers));
 			return this;
 		}
 
 		public EndpointRequestInterceptorsBuilder headers(Headers headers) {
-			this.interceptors.add(new HeaderEndpointRequestInterceptor(headers));
+			this.all.add(new HeaderEndpointRequestInterceptor(headers));
 			return this;
 		}
 
 		public EndpointRequestInterceptorsBuilder add(EndpointRequestInterceptor...interceptors) {
-			this.interceptors.addAll(Arrays.asList(interceptors));
+			this.all.addAll(Arrays.asList(interceptors));
 			return this;
 		}
 
 		public RestifyProxyBuilder and() {
 			return context;
-		}
-
-		private EndpointRequestInterceptorStack build() {
-			return new EndpointRequestInterceptorStack(interceptors);
 		}
 	}
 
@@ -603,7 +623,8 @@ public class RestifyProxyBuilder {
 	public class HttpClientRequestConfigurationBuilder {
 
 		private final RestifyProxyBuilder context;
-		private final HttpClientRequestConfiguration.Builder builder = new HttpClientRequestConfiguration.Builder();
+		private final HttpClientRequestConfiguration.Builder httpClientRequestConfigurationBuilder = new HttpClientRequestConfiguration.Builder();
+		private final HttpClientRequestInterceptorsBuilder interceptors = new HttpClientRequestInterceptorsBuilder();
 
 		private HttpClientRequestConfiguration httpClientRequestConfiguration = null;
 
@@ -612,32 +633,32 @@ public class RestifyProxyBuilder {
 		}
 
 		public HttpClientRequestConfigurationBuilder connectionTimeout(int connectionTimeout) {
-			builder.connectionTimeout(connectionTimeout);
+			httpClientRequestConfigurationBuilder.connectionTimeout(connectionTimeout);
 			return this;
 		}
 
 		public HttpClientRequestConfigurationBuilder connectionTimeout(Duration connectionTimeout) {
-			builder.connectionTimeout(connectionTimeout);
+			httpClientRequestConfigurationBuilder.connectionTimeout(connectionTimeout);
 			return this;
 		}
 
 		public HttpClientRequestConfigurationBuilder readTimeout(int readTimeout) {
-			builder.readTimeout(readTimeout);
+			httpClientRequestConfigurationBuilder.readTimeout(readTimeout);
 			return this;
 		}
 
 		public HttpClientRequestConfigurationBuilder readTimeout(Duration readTimeout) {
-			builder.readTimeout(readTimeout);
+			httpClientRequestConfigurationBuilder.readTimeout(readTimeout);
 			return this;
 		}
 
 		public HttpClientRequestConfigurationBuilder charset(Charset charset) {
-			builder.charset(charset);
+			httpClientRequestConfigurationBuilder.charset(charset);
 			return this;
 		}
 
 		public HttpClientRequestConfigurationBuilder proxy(Proxy proxy) {
-			builder.proxy(proxy);
+			httpClientRequestConfigurationBuilder.proxy(proxy);
 			return this;
 		}
 
@@ -646,7 +667,7 @@ public class RestifyProxyBuilder {
 		}
 
 		public HttpClientRequestConfigurationBuilder followRedirects(boolean enabled) {
-			builder.followRedirects(enabled);
+			httpClientRequestConfigurationBuilder.followRedirects(enabled);
 			return this;
 		}
 
@@ -655,12 +676,21 @@ public class RestifyProxyBuilder {
 		}
 
 		public HttpClientRequestConfigurationBuilder useCaches(boolean enabled) {
-			builder.useCaches(enabled);
+			httpClientRequestConfigurationBuilder.useCaches(enabled);
 			return this;
 		}
 
 		public HttpClientRequestSslConfigurationBuilder ssl() {
 			return new HttpClientRequestSslConfigurationBuilder();
+		}
+
+		public HttpClientRequestInterceptorsBuilder interceptors() {
+			return interceptors;
+		}
+		
+		public RestifyProxyBuilder interceptors(HttpClientRequestInterceptor...interceptors) {
+			this.interceptors.add(interceptors);
+			return context;
 		}
 
 		public RestifyProxyBuilder using(HttpClientRequestConfiguration httpClientRequestConfiguration) {
@@ -673,18 +703,18 @@ public class RestifyProxyBuilder {
 		}
 
 		private HttpClientRequestConfiguration build() {
-			return Optional.ofNullable(httpClientRequestConfiguration).orElseGet(() -> builder.build());
+			return Optional.ofNullable(httpClientRequestConfiguration).orElseGet(() -> httpClientRequestConfigurationBuilder.build());
 		}
 
 		public class HttpClientRequestFollowRedirectsConfigurationBuilder {
 
 			public HttpClientRequestConfigurationBuilder enabled() {
-				builder.followRedirects().enabled();
+				httpClientRequestConfigurationBuilder.followRedirects().enabled();
 				return HttpClientRequestConfigurationBuilder.this;
 			}
 
 			public HttpClientRequestConfigurationBuilder disabled() {
-				builder.followRedirects().disabled();
+				httpClientRequestConfigurationBuilder.followRedirects().disabled();
 				return HttpClientRequestConfigurationBuilder.this;
 			}
 		}
@@ -692,12 +722,12 @@ public class RestifyProxyBuilder {
 		public class HttpClientRequestUseCachesConfigurationBuilder {
 
 			public HttpClientRequestConfigurationBuilder enabled() {
-				builder.useCaches().enabled();
+				httpClientRequestConfigurationBuilder.useCaches().enabled();
 				return HttpClientRequestConfigurationBuilder.this;
 			}
 
 			public HttpClientRequestConfigurationBuilder disabled() {
-				builder.useCaches().disabled();
+				httpClientRequestConfigurationBuilder.useCaches().disabled();
 				return HttpClientRequestConfigurationBuilder.this;
 			}
 		}
@@ -705,13 +735,27 @@ public class RestifyProxyBuilder {
 		public class HttpClientRequestSslConfigurationBuilder {
 
 			public HttpClientRequestConfigurationBuilder sslSocketFactory(SSLSocketFactory sslSocketFactory) {
-				builder.ssl().sslSocketFactory(sslSocketFactory);
+				httpClientRequestConfigurationBuilder.ssl().sslSocketFactory(sslSocketFactory);
 				return HttpClientRequestConfigurationBuilder.this;
 			}
 
 			public HttpClientRequestConfigurationBuilder hostnameVerifier(HostnameVerifier hostnameVerifier) {
-				builder.ssl().hostnameVerifier(hostnameVerifier);
+				httpClientRequestConfigurationBuilder.ssl().hostnameVerifier(hostnameVerifier);
 				return HttpClientRequestConfigurationBuilder.this;
+			}
+
+			public RestifyProxyBuilder and() {
+				return context;
+			}
+		}
+
+		public class HttpClientRequestInterceptorsBuilder {
+
+			private final Collection<HttpClientRequestInterceptor> all = new ArrayList<>();
+
+			public HttpClientRequestInterceptorsBuilder add(HttpClientRequestInterceptor... interceptors) {
+				this.all.addAll(Arrays.asList(interceptors));
+				return this;
 			}
 
 			public RestifyProxyBuilder and() {

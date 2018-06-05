@@ -4,7 +4,6 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.lang.reflect.Type;
 import java.nio.charset.Charset;
 import java.util.ArrayList;
@@ -14,10 +13,13 @@ import java.util.Iterator;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Answers;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import com.github.ljtfreitas.restify.http.client.message.request.BufferedHttpRequestBody;
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
+import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestBody;
 import com.github.ljtfreitas.restify.http.client.message.response.HttpResponseMessage;
 import com.github.ljtfreitas.restify.reflection.SimpleParameterizedType;
 
@@ -27,7 +29,7 @@ public class JsonBMessageConverterTest {
 	@Mock
 	private HttpRequestMessage request;
 
-	@Mock
+	@Mock(answer = Answers.RETURNS_DEEP_STUBS)
 	private HttpResponseMessage response;
 
 	private JsonBMessageConverter<Object> converter = new JsonBMessageConverter<>();
@@ -66,20 +68,20 @@ public class JsonBMessageConverterTest {
 
 	@Test
 	public void shouldWriteJsonMessage() {
-		ByteArrayOutputStream output = new ByteArrayOutputStream();
+		HttpRequestBody output = new BufferedHttpRequestBody();
 
-		when(request.output()).thenReturn(output);
+		when(request.body()).thenReturn(output);
 
 		converter.write(new MyJsonModel("Tiago de Freitas Lima", 31), request);
 
-		assertEquals(json, output.toString());
+		assertEquals(json, output.asString());
 	}
 
 	@Test
 	public void shouldReadJsonMessage() throws Exception {
 		ByteArrayInputStream input = new ByteArrayInputStream(json.getBytes());
 
-		when(response.body()).thenReturn(input);
+		when(response.body().input()).thenReturn(input);
 
 		MyJsonModel myJsonModel = (MyJsonModel) converter.read(response, MyJsonModel.class);
 
@@ -92,7 +94,7 @@ public class JsonBMessageConverterTest {
 	public void shouldReadCollectionOfJsonMessage() throws Exception {
 		ByteArrayInputStream input = new ByteArrayInputStream(collectionOfJson.getBytes());
 
-		when(response.body()).thenReturn(input);
+		when(response.body().input()).thenReturn(input);
 
 		Type genericCollectionType = new SimpleParameterizedType(ArrayList.class, null, MyJsonModel.class);
 

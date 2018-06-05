@@ -28,7 +28,6 @@ package com.github.ljtfreitas.restify.http.spring.client.request;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.URI;
 import java.nio.charset.Charset;
 
@@ -37,13 +36,14 @@ import org.springframework.web.client.RestClientResponseException;
 
 import com.github.ljtfreitas.restify.http.client.message.Header;
 import com.github.ljtfreitas.restify.http.client.message.Headers;
+import com.github.ljtfreitas.restify.http.client.message.request.BufferedHttpRequestBody;
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
-import com.github.ljtfreitas.restify.http.client.message.response.BaseHttpResponseMessage;
 import com.github.ljtfreitas.restify.http.client.message.response.StatusCode;
+import com.github.ljtfreitas.restify.http.client.response.BaseHttpClientResponse;
 
-public class ErrorHttpResponseMessage extends BaseHttpResponseMessage {
+public class HttpErrorResponse extends BaseHttpClientResponse {
 
-	private ErrorHttpResponseMessage(StatusCode statusCode, Headers headers, InputStream body, HttpRequestMessage httpRequest) {
+	private HttpErrorResponse(StatusCode statusCode, Headers headers, InputStream body, HttpRequestMessage httpRequest) {
 		super(statusCode, headers, body, httpRequest);
 	}
 
@@ -51,7 +51,7 @@ public class ErrorHttpResponseMessage extends BaseHttpResponseMessage {
 	public void close() throws IOException {
 	}
 
-	public static ErrorHttpResponseMessage from(RequestEntity<Object> request, RestClientResponseException e) {
+	public static HttpErrorResponse from(RequestEntity<Object> request, RestClientResponseException e) {
 		StatusCode statusCode = StatusCode.of(e.getRawStatusCode(), e.getStatusText());
 
 		Headers headers = new Headers();
@@ -59,7 +59,7 @@ public class ErrorHttpResponseMessage extends BaseHttpResponseMessage {
 
 		InputStream body = new ByteArrayInputStream(e.getResponseBodyAsByteArray());
 
-		return new ErrorHttpResponseMessage(statusCode, headers, body, new ErrorHttpRequestMessage(request));
+		return new HttpErrorResponse(statusCode, headers, body, new ErrorHttpRequestMessage(request));
 	}
 
 	private static class ErrorHttpRequestMessage implements HttpRequestMessage {
@@ -86,7 +86,7 @@ public class ErrorHttpResponseMessage extends BaseHttpResponseMessage {
 		}
 
 		@Override
-		public OutputStream output() {
+		public BufferedHttpRequestBody body() {
 			throw new UnsupportedOperationException();
 		}
 

@@ -4,7 +4,6 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.lang.reflect.Type;
 import java.nio.charset.Charset;
 import java.util.Collection;
@@ -13,10 +12,13 @@ import java.util.Iterator;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Answers;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
+import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestBody;
+import com.github.ljtfreitas.restify.http.client.message.request.BufferedHttpRequestBody;
 import com.github.ljtfreitas.restify.http.client.message.response.HttpResponseMessage;
 import com.github.ljtfreitas.restify.reflection.SimpleParameterizedType;
 import com.google.gson.internal.LinkedTreeMap;
@@ -27,7 +29,7 @@ public class GsonMessageConverterTest {
 	@Mock
 	private HttpRequestMessage request;
 
-	@Mock
+	@Mock(answer = Answers.RETURNS_DEEP_STUBS)
 	private HttpResponseMessage response;
 	
 	private GsonMessageConverter<Object> converter = new GsonMessageConverter<>();
@@ -66,20 +68,20 @@ public class GsonMessageConverterTest {
 
 	@Test
 	public void shouldWriteJsonMessage() {
-		ByteArrayOutputStream output = new ByteArrayOutputStream();
+		HttpRequestBody output = new BufferedHttpRequestBody();
 
-		when(request.output()).thenReturn(output);
+		when(request.body()).thenReturn(output);
 		
 		converter.write(new MyJsonModel("Tiago de Freitas Lima", 31), request);
 
-		assertEquals(json, output.toString());
+		assertEquals(json, output.asString());
 	}
 
 	@Test
 	public void shouldReadJsonMessage() {
 		ByteArrayInputStream input = new ByteArrayInputStream(json.getBytes());
 
-		when(response.body()).thenReturn(input);
+		when(response.body().input()).thenReturn(input);
 		
 		MyJsonModel myJsonModel = (MyJsonModel) converter.read(response, MyJsonModel.class);
 
@@ -92,7 +94,7 @@ public class GsonMessageConverterTest {
 	public void shouldReadJsonMessageToDefaultGsonObject() {
 		ByteArrayInputStream input = new ByteArrayInputStream(json.getBytes());
 
-		when(response.body()).thenReturn(input);
+		when(response.body().input()).thenReturn(input);
 
 		LinkedTreeMap<Object, Object> map = (LinkedTreeMap<Object, Object>) converter.read(response, Object.class);
 
@@ -105,7 +107,7 @@ public class GsonMessageConverterTest {
 	public void shouldReadCollectionOfJsonMessage() throws Exception {
 		ByteArrayInputStream input = new ByteArrayInputStream(collectionOfJson.getBytes());
 
-		when(response.body()).thenReturn(input);
+		when(response.body().input()).thenReturn(input);
 		
 		Type genericCollectionType = new SimpleParameterizedType(Collection.class, null, MyJsonModel.class);
 

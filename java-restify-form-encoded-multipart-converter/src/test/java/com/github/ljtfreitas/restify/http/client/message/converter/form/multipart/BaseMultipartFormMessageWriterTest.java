@@ -10,7 +10,6 @@ import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.io.OutputStream;
 
-import org.apache.commons.io.output.ByteArrayOutputStream;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
@@ -22,6 +21,8 @@ import org.mockito.stubbing.Answer;
 import com.github.ljtfreitas.restify.http.client.message.Header;
 import com.github.ljtfreitas.restify.http.client.message.Headers;
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
+import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestBody;
+import com.github.ljtfreitas.restify.http.client.message.request.BufferedHttpRequestBody;
 
 @RunWith(MockitoJUnitRunner.class)
 public class BaseMultipartFormMessageWriterTest {
@@ -42,7 +43,7 @@ public class BaseMultipartFormMessageWriterTest {
 			@Override
 			protected void doWrite(String boundary, Object body, HttpRequestMessage httpRequestMessage)
 					throws IOException {
-				OutputStream output = httpRequestMessage.output();
+				OutputStream output = httpRequestMessage.body().output();
 
 				output.write(body.toString().getBytes());
 				output.flush();
@@ -64,7 +65,7 @@ public class BaseMultipartFormMessageWriterTest {
 		when(request.headers()).thenReturn(headers);
 		
 		HttpRequestMessage newRequest = mock(HttpRequestMessage.class);
-		when(newRequest.output()).thenReturn(new ByteArrayOutputStream());
+		when(newRequest.body()).thenReturn(new BufferedHttpRequestBody());
 
 		Answer<HttpRequestMessage> answer = new Answer<HttpRequestMessage>() {
 			@Override
@@ -89,14 +90,14 @@ public class BaseMultipartFormMessageWriterTest {
 
 	@Test
 	public void shouldWriteHttpRequestBody() {
-		ByteArrayOutputStream output = new ByteArrayOutputStream();
+		HttpRequestBody output = new BufferedHttpRequestBody();
 
-		when(request.output()).thenReturn(output);
+		when(request.body()).thenReturn(output);
 
 		writer.write("MultipartFormMessageWriterTest", request);
 
 		String expectedBody = "MultipartFormMessageWriterTest\r\n------abc1234--";
 
-		assertEquals(expectedBody, output.toString());
+		assertEquals(expectedBody, output.asString());
 	}
 }

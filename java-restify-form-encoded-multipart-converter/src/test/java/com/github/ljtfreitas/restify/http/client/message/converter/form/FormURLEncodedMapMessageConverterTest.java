@@ -4,7 +4,6 @@ import static org.junit.Assert.assertEquals;
 import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
 import java.nio.charset.Charset;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -12,11 +11,13 @@ import java.util.Map;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Answers;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import com.github.ljtfreitas.restify.http.client.message.converter.form.FormURLEncodedMapMessageConverter;
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
+import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestBody;
+import com.github.ljtfreitas.restify.http.client.message.request.BufferedHttpRequestBody;
 import com.github.ljtfreitas.restify.http.client.message.response.HttpResponseMessage;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -25,7 +26,7 @@ public class FormURLEncodedMapMessageConverterTest {
 	@Mock
 	private HttpRequestMessage request;
 
-	@Mock
+	@Mock(answer = Answers.RETURNS_DEEP_STUBS)
 	private HttpResponseMessage response;
 	
 	private FormURLEncodedMapMessageConverter converter = new FormURLEncodedMapMessageConverter();
@@ -45,20 +46,20 @@ public class FormURLEncodedMapMessageConverterTest {
 		body.put("param1", "value1");
 		body.put("param2", "value2");
 
-		ByteArrayOutputStream output = new ByteArrayOutputStream();
+		HttpRequestBody output = new BufferedHttpRequestBody();
 
-		when(request.output()).thenReturn(output);
+		when(request.body()).thenReturn(output);
 
 		converter.write(body, request);
 
-		assertEquals(messageBody, output.toString());
+		assertEquals(messageBody, output.asString());
 	}
 
 	@Test(expected = UnsupportedOperationException.class)
 	public void shouldThrowUnsupportedOperationExceptionOnTryReadMessage() {
 		ByteArrayInputStream input = new ByteArrayInputStream(messageBody.getBytes());
 
-		when(response.body()).thenReturn(input);
+		when(response.body().input()).thenReturn(input);
 		
 		converter.read(response, Map.class);
 	}

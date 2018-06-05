@@ -42,6 +42,7 @@ import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequestMetadata;
 import com.github.ljtfreitas.restify.http.client.request.HttpClientRequest;
 import com.github.ljtfreitas.restify.http.client.request.Timeout;
+import com.github.ljtfreitas.restify.http.client.response.HttpClientResponse;
 
 import io.netty.handler.ssl.SslContext;
 import io.netty.handler.ssl.SslContextBuilder;
@@ -82,7 +83,7 @@ public class NettyHttpClientRequestFactoryTest {
 		HttpResponseMessage response = nettyHttpClientRequestFactory.createOf(new EndpointRequest(URI.create("http://localhost:7080/json"), "GET"))
 				.execute();
 
-		assertEquals(responseBody, new InputStreamContent(response.body()).asString());
+		assertEquals(responseBody, new InputStreamContent(response.body().input()).asString());
 		assertEquals("application/json", response.headers().get("Content-Type").get().value());
 		assertEquals(StatusCode.ok(), response.status());
 	}
@@ -100,12 +101,12 @@ public class NettyHttpClientRequestFactoryTest {
 					.withHeader("Content-Type", "application/json")
 					.withBody(json(responseBody)));
 
-		CompletableFuture<HttpResponseMessage> responseAsFuture = nettyHttpClientRequestFactory
+		CompletableFuture<HttpClientResponse> responseAsFuture = nettyHttpClientRequestFactory
 				.createAsyncOf(new EndpointRequest(URI.create("http://localhost:7080/json"), "GET"))
 					.executeAsync();
 
 		responseAsFuture.thenAccept(response -> {
-			assertEquals(responseBody, new InputStreamContent(response.body()).asString());
+			assertEquals(responseBody, new InputStreamContent(response.body().input()).asString());
 			assertEquals("application/json", response.headers().get("Content-Type").get().value());
 			assertEquals(StatusCode.ok(), response.status());
 		});
@@ -133,12 +134,12 @@ public class NettyHttpClientRequestFactoryTest {
 				new Headers(Header.contentType("application/json")), requestBody);
 
 		HttpClientRequest request = nettyHttpClientRequestFactory.createOf(endpointRequest);
-		request.output().write(requestBody.getBytes());
-		request.output().flush();
+		request.body().output().write(requestBody.getBytes());
+		request.body().output().flush();
 
 		HttpResponseMessage response = request.execute();
 
-		assertEquals(responseBody, new InputStreamContent(response.body()).asString());
+		assertEquals(responseBody, new InputStreamContent(response.body().input()).asString());
 		assertEquals("text/plain", response.headers().get("Content-Type").get().value());
 		assertEquals(StatusCode.created(), response.status());
 
@@ -167,13 +168,13 @@ public class NettyHttpClientRequestFactoryTest {
 				new Headers(Header.contentType("application/json")), requestBody);
 
 		NettyHttpClientRequest request = nettyHttpClientRequestFactory.createAsyncOf(endpointRequest);
-		request.output().write(requestBody.getBytes());
-		request.output().flush();
+		request.body().output().write(requestBody.getBytes());
+		request.body().output().flush();
 
-		CompletableFuture<HttpResponseMessage> responseAsFuture = request.executeAsync();
+		CompletableFuture<HttpClientResponse> responseAsFuture = request.executeAsync();
 
 		responseAsFuture.thenAccept(response -> {
-			assertEquals(responseBody, new InputStreamContent(response.body()).asString());
+			assertEquals(responseBody, new InputStreamContent(response.body().input()).asString());
 			assertEquals("text/plain", response.headers().get("Content-Type").get().value());
 			assertEquals(StatusCode.created(), response.status());
 
@@ -221,7 +222,7 @@ public class NettyHttpClientRequestFactoryTest {
 		expectedException.expect(ExecutionException.class);
 		expectedException.expect(deeply(ReadTimeoutException.class));
 
-		CompletableFuture<HttpResponseMessage> responseAsFuture = nettyHttpClientRequestFactory
+		CompletableFuture<HttpClientResponse> responseAsFuture = nettyHttpClientRequestFactory
 				.createAsyncOf(new EndpointRequest(URI.create("http://localhost:7080/slow"), "GET"))
 					.executeAsync();
 
@@ -301,7 +302,7 @@ public class NettyHttpClientRequestFactoryTest {
 		EndpointRequest request = new EndpointRequest(URI.create("http://localhost:7080/slow"), "GET", new Headers(), null, void.class, null,
 				new EndpointRequestMetadata(Arrays.asList(timeout)));
 
-		CompletableFuture<HttpResponseMessage> responseAsFuture = nettyHttpClientRequestFactory
+		CompletableFuture<HttpClientResponse> responseAsFuture = nettyHttpClientRequestFactory
 				.createAsyncOf(request)
 					.executeAsync();
 
@@ -346,7 +347,7 @@ public class NettyHttpClientRequestFactoryTest {
 		HttpResponseMessage response = nettyHttpClientRequestFactory.createOf(new EndpointRequest(URI.create("https://localhost:7084/secure"), "GET"))
 				.execute();
 
-		assertEquals(responseBody, new InputStreamContent(response.body()).asString());
+		assertEquals(responseBody, new InputStreamContent(response.body().input()).asString());
 		assertEquals("application/json", response.headers().get("Content-Type").get().value());
 		assertEquals(StatusCode.ok(), response.status());
 
@@ -384,12 +385,12 @@ public class NettyHttpClientRequestFactoryTest {
 					.withHeader("Content-Type", "application/json")
 					.withBody(json(responseBody)));
 
-		CompletableFuture<HttpResponseMessage> responseAsFuture = nettyHttpClientRequestFactory
+		CompletableFuture<HttpClientResponse> responseAsFuture = nettyHttpClientRequestFactory
 				.createAsyncOf(new EndpointRequest(URI.create("https://localhost:7084/secure"), "GET"))
 					.executeAsync();
 
 		responseAsFuture.thenAccept(response -> {
-			assertEquals(responseBody, new InputStreamContent(response.body()).asString());
+			assertEquals(responseBody, new InputStreamContent(response.body().input()).asString());
 			assertEquals("application/json", response.headers().get("Content-Type").get().value());
 			assertEquals(StatusCode.ok(), response.status());
 

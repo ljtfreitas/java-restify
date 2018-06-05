@@ -77,7 +77,7 @@ public class RestOperationsEndpointRequestExecutor implements EndpointRequestExe
 			return (EndpointResponse<T>) responseEntityConverter.convert(response);
 
 		} catch (RestClientResponseException e) {
-			return endpointResponseErrorFallback.onError(ErrorHttpResponseMessage.from(request, e), endpointRequest.responseType());
+			return endpointResponseErrorFallback.onError(HttpErrorResponse.from(request, e), endpointRequest.responseType());
 
 		} catch (ResourceAccessException e) {
 			throw new HttpClientException("I/O error on HTTP request: [" + request.getMethod() + " " + request.getUrl() + "]", e);

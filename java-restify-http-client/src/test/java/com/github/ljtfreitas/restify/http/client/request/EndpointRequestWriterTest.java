@@ -5,7 +5,6 @@ import static org.mockito.Matchers.notNull;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
-import java.io.ByteArrayOutputStream;
 import java.net.URI;
 import java.util.Optional;
 
@@ -24,6 +23,7 @@ import com.github.ljtfreitas.restify.http.client.message.Headers;
 import com.github.ljtfreitas.restify.http.client.message.converter.HttpMessageConverters;
 import com.github.ljtfreitas.restify.http.client.message.converter.HttpMessageWriter;
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
+import com.github.ljtfreitas.restify.http.client.message.request.BufferedHttpRequestBody;
 
 @RunWith(MockitoJUnitRunner.class)
 public class EndpointRequestWriterTest {
@@ -59,7 +59,7 @@ public class EndpointRequestWriterTest {
 				String.class);
 
 		when(httpRequestMessage.headers()).thenReturn(headers);
-		when(httpRequestMessage.output()).thenReturn(new ByteArrayOutputStream());
+		when(httpRequestMessage.body()).thenReturn(new BufferedHttpRequestBody());
 
 		endpointRequestWriter.write(endpointRequest, httpRequestMessage);
 

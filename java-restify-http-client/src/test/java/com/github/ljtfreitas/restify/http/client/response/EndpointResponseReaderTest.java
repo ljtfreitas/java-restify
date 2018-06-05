@@ -13,6 +13,7 @@ import java.util.Optional;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.Answers;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
@@ -46,7 +47,7 @@ public class EndpointResponseReaderTest {
 	@Mock
 	private HttpRequestMessage httpRequestMessage;
 
-	@Mock
+	@Mock(answer = Answers.RETURNS_DEEP_STUBS)
 	private HttpResponseMessage httpResponseMessage;
 
 	private String endpointResult;
@@ -55,10 +56,10 @@ public class EndpointResponseReaderTest {
 	public void setup() {
 		endpointResult = "expected result";
 		
-		when(httpResponseMessage.body()).thenReturn(new ByteArrayInputStream(endpointResult.getBytes()));
+		when(httpResponseMessage.body().input()).thenReturn(new ByteArrayInputStream(endpointResult.getBytes()));
 		when(httpResponseMessage.headers()).thenReturn(new Headers(Header.contentType("text/plain")));
 		when(httpResponseMessage.status()).thenReturn(StatusCode.ok());
-		when(httpResponseMessage.readable()).thenReturn(true);
+		when(httpResponseMessage.available()).thenReturn(true);
 
 		when(httpMessageConvertersMock.readerOf(any(), any()))
 			.thenReturn(Optional.empty());
@@ -104,7 +105,7 @@ public class EndpointResponseReaderTest {
 
 	@Test
 	public void shouldReturnEmptyResponseWhenHttpResponseCodeIsNotReadable() {
-		when(httpResponseMessage.readable()).thenReturn(false);
+		when(httpResponseMessage.available()).thenReturn(false);
 
 		EndpointResponse<String> response = endpointResponseReader.read(httpResponseMessage, JavaType.of(String.class));
 

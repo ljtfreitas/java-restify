@@ -26,7 +26,6 @@
 package com.github.ljtfreitas.restify.http.client.apache.httpclient;
 
 import java.io.IOException;
-import java.io.OutputStream;
 import java.net.URI;
 import java.nio.charset.Charset;
 
@@ -41,9 +40,11 @@ import org.apache.http.protocol.HttpContext;
 import com.github.ljtfreitas.restify.http.client.HttpClientException;
 import com.github.ljtfreitas.restify.http.client.message.Header;
 import com.github.ljtfreitas.restify.http.client.message.Headers;
+import com.github.ljtfreitas.restify.http.client.message.request.BufferedHttpRequestBody;
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
-import com.github.ljtfreitas.restify.http.client.message.response.HttpResponseMessage;
+import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestBody;
 import com.github.ljtfreitas.restify.http.client.request.HttpClientRequest;
+import com.github.ljtfreitas.restify.http.client.response.HttpClientResponse;
 
 class ApacheHttpClientRequest implements HttpClientRequest {
 
@@ -53,30 +54,30 @@ class ApacheHttpClientRequest implements HttpClientRequest {
 	private final Charset charset;
 	private final Headers headers;
 
-	private final BufferedEntity bufferedEntity;
+	private final BufferedHttpRequestBody body;
 
 	public ApacheHttpClientRequest(HttpClient httpClient, HttpUriRequest httpRequest, HttpContext httpContext, Charset charset,
 			Headers headers) {
-		this(httpClient, httpRequest, httpContext, charset, headers, new BufferedEntity());
+		this(httpClient, httpRequest, httpContext, charset, headers, new BufferedHttpRequestBody(charset));
 	}
 
 	private ApacheHttpClientRequest(HttpClient httpClient, HttpUriRequest httpRequest, HttpContext httpContext, Charset charset,
-			Headers headers, BufferedEntity bufferedEntity) {
+			Headers headers, BufferedHttpRequestBody body) {
 		this.httpClient = httpClient;
 		this.httpRequest = httpRequest;
 		this.httpContext = httpContext;
 		this.charset = charset;
 		this.headers = headers;
-		this.bufferedEntity = bufferedEntity;
+		this.body = body;
 	}
 
 	@Override
-	public HttpResponseMessage execute() throws HttpClientException {
+	public HttpClientResponse execute() throws HttpClientException {
 		headers.all().forEach(h -> httpRequest.addHeader(h.name(), h.value()));
 
 		if (httpRequest instanceof HttpEntityEnclosingRequest) {
 			HttpEntityEnclosingRequest entityEnclosingRequest = (HttpEntityEnclosingRequest) httpRequest;
-			HttpEntity requestEntity = new ByteArrayEntity(bufferedEntity.asByteArray());
+			HttpEntity requestEntity = new ByteArrayEntity(body.asBuffer().array());
 			entityEnclosingRequest.setEntity(requestEntity);
 		}
 
@@ -108,8 +109,8 @@ class ApacheHttpClientRequest implements HttpClientRequest {
 	}
 
 	@Override
-	public OutputStream output() {
-		return bufferedEntity.output();
+	public HttpRequestBody body() {
+		return body;
 	}
 
 	@Override
@@ -125,6 +126,6 @@ class ApacheHttpClientRequest implements HttpClientRequest {
 	@Override
 	public HttpRequestMessage replace(Header header) {
 		return new ApacheHttpClientRequest(httpClient, httpRequest, httpContext, charset, headers.replace(header),
-				bufferedEntity);
+				body);
 	}
 }

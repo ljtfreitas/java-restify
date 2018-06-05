@@ -30,12 +30,12 @@ import java.io.InputStream;
 
 import com.github.ljtfreitas.restify.http.client.message.Headers;
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
-import com.github.ljtfreitas.restify.http.client.message.response.BaseHttpResponseMessage;
 import com.github.ljtfreitas.restify.http.client.message.response.StatusCode;
+import com.github.ljtfreitas.restify.http.client.response.BaseHttpClientResponse;
 
 import okhttp3.Response;
 
-class OkHttpClientResponse extends BaseHttpResponseMessage {
+class OkHttpClientResponse extends BaseHttpClientResponse {
 
 	private final Response response;
 

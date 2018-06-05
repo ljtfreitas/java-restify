@@ -47,6 +47,7 @@ import com.github.ljtfreitas.restify.http.client.message.response.StatusCode;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequestMetadata;
 import com.github.ljtfreitas.restify.http.client.request.Timeout;
+import com.github.ljtfreitas.restify.http.client.response.HttpClientResponse;
 
 public class ApacheAsyncHttpClientRequestFactoryTest {
 
@@ -80,13 +81,13 @@ public class ApacheAsyncHttpClientRequestFactoryTest {
 					.withHeader("Content-Type", "application/json")
 					.withBody(json(responseBody)));
 
-		CompletableFuture<HttpResponseMessage> responseAsFuture = apacheAsyncHttpClientRequestFactory
+		CompletableFuture<HttpClientResponse> responseAsFuture = apacheAsyncHttpClientRequestFactory
 				.createAsyncOf(new EndpointRequest(URI.create("http://localhost:7080/json"), "GET"))
 					.executeAsync();
 
 		HttpResponseMessage response = responseAsFuture.get();
 
-		assertEquals(responseBody, new InputStreamContent(response.body()).asString());
+		assertEquals(responseBody, new InputStreamContent(response.body().input()).asString());
 		assertEquals("application/json", response.headers().get("Content-Type").get().value());
 		assertEquals(StatusCode.ok(), response.status());
 	}
@@ -113,12 +114,12 @@ public class ApacheAsyncHttpClientRequestFactoryTest {
 				new Headers(Header.contentType("application/json")), requestBody);
 
 		ApacheAsyncHttpClientRequest request = apacheAsyncHttpClientRequestFactory.createAsyncOf(endpointRequest);
-		request.output().write(requestBody.getBytes());
-		request.output().flush();
+		request.body().output().write(requestBody.getBytes());
+		request.body().output().flush();
 
 		HttpResponseMessage response = request.executeAsync().get();
 
-		assertEquals(responseBody, new InputStreamContent(response.body()).asString());
+		assertEquals(responseBody, new InputStreamContent(response.body().input()).asString());
 		assertEquals("text/plain", response.headers().get("Content-Type").get().value());
 		assertEquals(StatusCode.created(), response.status());
 
@@ -144,7 +145,7 @@ public class ApacheAsyncHttpClientRequestFactoryTest {
 		expectedException.expectCause(isA(HttpClientException.class));
 		expectedException.expect(deepCauseIsA(SocketTimeoutException.class));
 
-		CompletableFuture<HttpResponseMessage> future = apacheAsyncHttpClientRequestFactory
+		CompletableFuture<HttpClientResponse> future = apacheAsyncHttpClientRequestFactory
 			.createAsyncOf(new EndpointRequest(URI.create("http://localhost:7080/slow"), "GET"))
 				.executeAsync();
 
@@ -189,7 +190,7 @@ public class ApacheAsyncHttpClientRequestFactoryTest {
 		EndpointRequest request = new EndpointRequest(URI.create("http://localhost:7080/slow"), "GET", new Headers(), null, void.class, null,
 				new EndpointRequestMetadata(Arrays.asList(timeout)));
 
-		CompletableFuture<HttpResponseMessage> future = apacheAsyncHttpClientRequestFactory
+		CompletableFuture<HttpClientResponse> future = apacheAsyncHttpClientRequestFactory
 			.createAsyncOf(request)
 				.executeAsync();
 
@@ -248,7 +249,7 @@ public class ApacheAsyncHttpClientRequestFactoryTest {
 					.executeAsync()
 						.get();
 
-		assertEquals("ok", new InputStreamContent(response.body()).asString());
+		assertEquals("ok", new InputStreamContent(response.body().input()).asString());
 
 		mockServerClient.verify(authenticatedRequest);
 	}

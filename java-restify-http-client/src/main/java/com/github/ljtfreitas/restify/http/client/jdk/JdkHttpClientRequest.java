@@ -28,7 +28,6 @@ package com.github.ljtfreitas.restify.http.client.jdk;
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.OutputStream;
 import java.net.HttpURLConnection;
 import java.net.URI;
 import java.nio.charset.Charset;
@@ -37,10 +36,12 @@ import java.util.Collection;
 import com.github.ljtfreitas.restify.http.client.HttpClientException;
 import com.github.ljtfreitas.restify.http.client.message.Header;
 import com.github.ljtfreitas.restify.http.client.message.Headers;
+import com.github.ljtfreitas.restify.http.client.message.request.BufferedHttpRequestBody;
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
-import com.github.ljtfreitas.restify.http.client.message.response.HttpResponseMessage;
+import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestBody;
 import com.github.ljtfreitas.restify.http.client.message.response.StatusCode;
 import com.github.ljtfreitas.restify.http.client.request.HttpClientRequest;
+import com.github.ljtfreitas.restify.http.client.response.HttpClientResponse;
 import com.github.ljtfreitas.restify.util.Tryable;
 
 class JdkHttpClientRequest implements HttpClientRequest {
@@ -48,16 +49,26 @@ class JdkHttpClientRequest implements HttpClientRequest {
 	private final HttpURLConnection connection;
 	private final Charset charset;
 	private final Headers headers;
+	private final HttpRequestBody body;
 
 	public JdkHttpClientRequest(HttpURLConnection connection, Charset charset, Headers headers) {
+		this(connection, charset, headers, new BufferedHttpRequestBody(charset));
+	}
+
+	private JdkHttpClientRequest(HttpURLConnection connection, Charset charset, Headers headers, BufferedHttpRequestBody body) {
 		this.connection = connection;
 		this.charset = charset;
 		this.headers = new JdkHttpClientHeadersDecorator(connection, headers);
+		this.body = body;
 	}
 
 	@Override
-	public HttpResponseMessage execute() throws HttpClientException {
+	public HttpClientResponse execute() throws HttpClientException {
 		try {
+			if (!body.empty()) {
+				body.writeTo(connection.getOutputStream());
+			}
+
 			connection.connect();
 
 			return responseOf(connection);
@@ -94,8 +105,8 @@ class JdkHttpClientRequest implements HttpClientRequest {
 	}
 
 	@Override
-	public OutputStream output() {
-		return Tryable.of(() -> connection.getOutputStream());
+	public HttpRequestBody body() {
+		return body;
 	}
 
 	@Override

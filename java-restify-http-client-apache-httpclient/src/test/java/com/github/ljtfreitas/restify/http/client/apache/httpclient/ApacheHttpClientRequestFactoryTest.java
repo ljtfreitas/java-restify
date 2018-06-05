@@ -78,7 +78,7 @@ public class ApacheHttpClientRequestFactoryTest {
 		HttpResponseMessage response = apacheHttpClientRequestFactory.createOf(new EndpointRequest(URI.create("http://localhost:7080/json"), "GET"))
 				.execute();
 
-		assertEquals(responseBody, new InputStreamContent(response.body()).asString());
+		assertEquals(responseBody, new InputStreamContent(response.body().input()).asString());
 		assertEquals("application/json", response.headers().get("Content-Type").get().value());
 		assertEquals(StatusCode.ok(), response.status());
 	}
@@ -105,12 +105,12 @@ public class ApacheHttpClientRequestFactoryTest {
 				new Headers(Header.contentType("application/json")), requestBody);
 
 		ApacheHttpClientRequest request = apacheHttpClientRequestFactory.createOf(endpointRequest);
-		request.output().write(requestBody.getBytes());
-		request.output().flush();
+		request.body().output().write(requestBody.getBytes());
+		request.body().output().flush();
 
 		HttpResponseMessage response = request.execute();
 
-		assertEquals(responseBody, new InputStreamContent(response.body()).asString());
+		assertEquals(responseBody, new InputStreamContent(response.body().input()).asString());
 		assertEquals("text/plain", response.headers().get("Content-Type").get().value());
 		assertEquals(StatusCode.created(), response.status());
 
@@ -206,7 +206,7 @@ public class ApacheHttpClientRequestFactoryTest {
 		HttpResponseMessage response = apacheHttpClientRequestFactory.createOf(new EndpointRequest(URI.create("http://localhost:7080/authenticated"), "GET"))
 			.execute();
 
-		assertEquals("ok", new InputStreamContent(response.body()).asString());
+		assertEquals("ok", new InputStreamContent(response.body().input()).asString());
 
 		mockServerClient.verify(authenticatedRequest);
 	}

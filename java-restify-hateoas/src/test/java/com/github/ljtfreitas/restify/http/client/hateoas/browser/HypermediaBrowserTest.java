@@ -34,13 +34,13 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.github.ljtfreitas.restify.http.client.hateoas.Link;
 import com.github.ljtfreitas.restify.http.client.hateoas.Resource;
 import com.github.ljtfreitas.restify.http.client.message.ContentType;
-import com.github.ljtfreitas.restify.http.client.request.interceptor.EndpointRequestInterceptorStack;
+import com.github.ljtfreitas.restify.http.client.request.interceptor.EndpointRequestInterceptorChain;
 
 @RunWith(MockitoJUnitRunner.class)
 public class HypermediaBrowserTest {
 
 	@Mock
-	private EndpointRequestInterceptorStack endpointRequestInterceptorStack;
+	private EndpointRequestInterceptorChain endpointRequestInterceptorStack;
 
 	@Rule
 	public MockServerRule mockServerRule = new MockServerRule(this, 7080);
