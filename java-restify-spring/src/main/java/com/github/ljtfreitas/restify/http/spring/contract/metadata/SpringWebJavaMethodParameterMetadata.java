@@ -57,17 +57,21 @@ class SpringWebJavaMethodParameterMetadata {
 	public SpringWebJavaMethodParameterMetadata(java.lang.reflect.Parameter javaMethodParameter, Class<?> targetClassType) {
 		this.type = JavaType.of(new JavaTypeResolver(targetClassType).parameterizedTypeOf(javaMethodParameter));
 
-		this.pathParameter = AnnotationUtils.synthesizeAnnotation(javaMethodParameter.getAnnotation(PathVariable.class),
-				javaMethodParameter);
+		this.pathParameter = Optional.ofNullable(javaMethodParameter.getAnnotation(PathVariable.class))
+				.map(a -> AnnotationUtils.synthesizeAnnotation(a, javaMethodParameter))
+					.orElse(null);
 
-		this.headerParameter = AnnotationUtils.synthesizeAnnotation(javaMethodParameter.getAnnotation(RequestHeader.class),
-				javaMethodParameter);
+		this.headerParameter = Optional.ofNullable(javaMethodParameter.getAnnotation(RequestHeader.class))
+				.map(a -> AnnotationUtils.synthesizeAnnotation(a, javaMethodParameter))
+					.orElse(null);
 
-		this.bodyParameter = AnnotationUtils.synthesizeAnnotation(javaMethodParameter.getAnnotation(RequestBody.class),
-				javaMethodParameter);
+		this.bodyParameter = Optional.ofNullable(javaMethodParameter.getAnnotation(RequestBody.class))
+				.map(a -> AnnotationUtils.synthesizeAnnotation(a, javaMethodParameter))
+					.orElse(null);
 
-		this.queryParameter = AnnotationUtils.synthesizeAnnotation(javaMethodParameter.getAnnotation(RequestParam.class),
-				javaMethodParameter);
+		this.queryParameter = Optional.ofNullable(javaMethodParameter.getAnnotation(RequestParam.class))
+				.map(a -> AnnotationUtils.synthesizeAnnotation(a, javaMethodParameter))
+					.orElse(null);
 
 		isFalse(Stream.of(pathParameter, headerParameter, bodyParameter, queryParameter).allMatch(a -> a == null),
 				"The parameter [" + javaMethodParameter.getName() + "] of method [" + javaMethodParameter.getDeclaringExecutable() + "] is not annotated with "

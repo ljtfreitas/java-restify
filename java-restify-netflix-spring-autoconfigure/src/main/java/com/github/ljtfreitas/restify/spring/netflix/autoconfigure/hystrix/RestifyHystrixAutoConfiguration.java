@@ -41,16 +41,16 @@ public class RestifyHystrixAutoConfiguration {
 
 	@ConditionalOnMissingBean
 	@Bean
-	public HystrixCommandSpringFallbackEndpointCallExecutableFactory hystrixCommandEndpointCallExecutableFactory(
-			HystrixFallbackBeanFactory fallbackObjectFactory) {
-		return new HystrixCommandSpringFallbackEndpointCallExecutableFactory(fallbackObjectFactory);
+	public HystrixCommandFallbackEndpointCallExecutableFactory hystrixCommandFallbackEndpointCallExecutableFactory(
+			HystrixFallbackRegistry fallbackObjectFactory) {
+		return new HystrixCommandFallbackEndpointCallExecutableFactory(fallbackObjectFactory);
 	}
 
 	@ConditionalOnMissingBean
 	@Bean
-	public HystrixCircuitBreakerSpringFallbackEndpointCallExecutableFactory hystrixCircuitBreakerSpringFallbackEndpointCallExecutableFactory(
-			HystrixFallbackBeanFactory fallbackObjectFactory) {
-		return new HystrixCircuitBreakerSpringFallbackEndpointCallExecutableFactory(fallbackObjectFactory);
+	public HystrixCircuitBreakerFallbackEndpointCallExecutableFactory hystrixCircuitBreakerFallbackEndpointCallExecutableFactory(
+			HystrixFallbackRegistry fallbackObjectFactory) {
+		return new HystrixCircuitBreakerFallbackEndpointCallExecutableFactory(fallbackObjectFactory);
 	}
 
 	@Configuration
@@ -59,8 +59,8 @@ public class RestifyHystrixAutoConfiguration {
 		private BeanFactory beanFactory;
 
 		@Bean
-		public HystrixFallbackBeanFactory restifyFallbackObjectFactory() {
-			return new HystrixFallbackBeanFactory(beanFactory);
+		public HystrixFallbackRegistry restifyFallbackObjectFactory() {
+			return new HystrixFallbackRegistry(beanFactory);
 		}
 
 		@Override

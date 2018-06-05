@@ -11,7 +11,7 @@
 	<description>Java Restify Spring Boot Extension</description>
 
 	<properties>
-		<spring.boot.version>1.4.1.RELEASE</spring.boot.version>
+		<spring.boot.version>2.0.2.RELEASE</spring.boot.version>
 	</properties>
 
 	<dependencies>
@@ -46,21 +46,21 @@
 		</dependency>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
+			<artifactId>java-restify-reactor</artifactId>
+			<version>${project.version}</version>
+			<scope>provided</scope>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>java-restify-spring-reactive</artifactId>
+			<version>${project.version}</version>
+			<scope>provided</scope>
+			<optional>true</optional>
+		</dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
 			<artifactId>java-restify-jaxrs-contract</artifactId>
-			<version>${project.version}</version>
-			<scope>provided</scope>
-			<optional>true</optional>
-		</dependency>
-		<dependency>
-			<groupId>${project.groupId}</groupId>
-			<artifactId>java-restify-http-client-apache-httpclient</artifactId>
-			<version>${project.version}</version>
-			<scope>provided</scope>
-			<optional>true</optional>
-		</dependency>
-		<dependency>
-			<groupId>${project.groupId}</groupId>
-			<artifactId>java-restify-http-client-okhttp</artifactId>
 			<version>${project.version}</version>
 			<scope>provided</scope>
 			<optional>true</optional>

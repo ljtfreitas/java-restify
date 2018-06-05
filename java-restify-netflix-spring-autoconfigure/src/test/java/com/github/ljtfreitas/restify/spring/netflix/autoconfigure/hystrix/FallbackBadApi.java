@@ -7,7 +7,7 @@ import com.netflix.hystrix.HystrixCommand.Setter;
 import com.netflix.hystrix.HystrixCommandGroupKey;
 
 @Service
-@RestifyFallback
+@Fallback
 public class FallbackBadApi implements BadApi {
 
 	@Override

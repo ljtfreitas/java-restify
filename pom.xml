@@ -35,6 +35,7 @@
 		<module>java-restify-rxjava</module>
 		<module>java-restify-rxjava-2</module>
 		<module>java-restify-jsoup</module>
+		<module>java-restify-reactor</module>
 
 		<module>java-restify-http-message</module>
 		<module>java-restify-wildcard-converter</module>

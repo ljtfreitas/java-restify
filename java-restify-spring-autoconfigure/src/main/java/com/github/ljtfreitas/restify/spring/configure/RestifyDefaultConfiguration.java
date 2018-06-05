@@ -26,47 +26,28 @@
 package com.github.ljtfreitas.restify.spring.configure;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.github.ljtfreitas.restify.http.client.apache.httpclient.ApacheHttpClientRequestFactory;
-import com.github.ljtfreitas.restify.http.client.jdk.JdkHttpClientRequestFactory;
-import com.github.ljtfreitas.restify.http.client.okhttp.OkHttpClientRequestFactory;
-import com.github.ljtfreitas.restify.http.client.request.HttpClientRequestFactory;
 import com.github.ljtfreitas.restify.http.client.response.DefaultEndpointResponseErrorFallback;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponseErrorFallback;
 import com.github.ljtfreitas.restify.http.spring.client.call.exec.HttpHeadersEndpointCallExecutableFactory;
+import com.github.ljtfreitas.restify.http.spring.client.call.exec.HttpStatusEndpointCallExecutableFactory;
 import com.github.ljtfreitas.restify.http.spring.client.call.exec.ResponseEntityEndpointCallExecutableFactory;
 
 @Configuration
 public class RestifyDefaultConfiguration {
 
 	@ConditionalOnMissingBean
-	@ConditionalOnProperty(name = "restify.http.client", havingValue = "jdk", matchIfMissing = true)
-	@Bean
-	public HttpClientRequestFactory jdkHttpClientRequestFactory() {
-		return new JdkHttpClientRequestFactory();
-	}
-
-	@ConditionalOnMissingBean
-	@ConditionalOnProperty(name = "restify.http.client", havingValue = "http-client")
-	@Bean
-	public HttpClientRequestFactory apacheHttpClientRequestFactory() {
-		return new ApacheHttpClientRequestFactory();
-	}
-
-	@ConditionalOnMissingBean
-	@ConditionalOnProperty(name = "restify.http.client", havingValue = "ok-http")
-	@Bean
-	public HttpClientRequestFactory okHttpClientRequestFactory() {
-		return new OkHttpClientRequestFactory();
-	}
-
-	@ConditionalOnMissingBean
 	@Bean
 	public HttpHeadersEndpointCallExecutableFactory httpHeadersEndpointCallExecutableFactory() {
 		return new HttpHeadersEndpointCallExecutableFactory();
+	}
+
+	@ConditionalOnMissingBean
+	@Bean
+	public HttpStatusEndpointCallExecutableFactory httpStatusEndpointCallExecutableFactory() {
+		return new HttpStatusEndpointCallExecutableFactory();
 	}
 
 	@ConditionalOnMissingBean
@@ -81,5 +62,4 @@ public class RestifyDefaultConfiguration {
 		return properties.getError().isEmptyOnNotFound() ?
 				DefaultEndpointResponseErrorFallback.emptyOnNotFound() : new DefaultEndpointResponseErrorFallback();
 	}
-
 }

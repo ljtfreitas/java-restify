@@ -26,9 +26,7 @@
 package com.github.ljtfreitas.restify.spring.configure;
 
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.stereotype.Component;
 
-@Component
 @ConfigurationProperties("restify")
 public class RestifyConfigurationProperties {
 

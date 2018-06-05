@@ -30,18 +30,23 @@ import static org.springframework.core.annotation.AnnotationUtils.findAnnotation
 import java.beans.Introspector;
 import java.util.Optional;
 
+import com.github.ljtfreitas.restify.util.Tryable;
+
 class RestifyableType {
 
 	private final Class<?> objectType;
 	private final Restifyable restifyable;
 
+
 	RestifyableType(String objectTypeName) {
-		try {
-			this.objectType = Class.forName(objectTypeName);
-		} catch (ClassNotFoundException e) {
-			throw new RuntimeException("@Restifyable type not found on classpath: [" + objectTypeName + "]", e);
-		}
-		this.restifyable = findAnnotation(this.objectType, Restifyable.class);
+		this(Tryable.of(() -> Class.forName(objectTypeName), e ->
+			new IllegalArgumentException("@Restifyable type not found on classpath: [" + objectTypeName + "]", e)));
+	}
+
+	RestifyableType(Class<?> objectType) {
+		this.objectType = objectType;
+		this.restifyable = Optional.ofNullable(findAnnotation(this.objectType, Restifyable.class))
+				.orElseThrow(() -> new IllegalArgumentException("[" + objectType.getCanonicalName() + "] must be annotated with @Restifyable."));
 	}
 
 	public Class<?> objectType() {
@@ -49,13 +54,11 @@ class RestifyableType {
 	}
 
 	public String name() {
-		return doName();
-	}
-
-	private String doName() {
 		return Optional.ofNullable(restifyable.name())
 				.filter(n -> !n.isEmpty())
-					.orElseGet(() -> Introspector.decapitalize(objectType.getSimpleName()));
+					.map(RestifyableTypeName::new)
+						.orElseGet(() -> new RestifyableTypeName(objectType.getSimpleName()))
+							.toString();
 	}
 
 	public String description() {
@@ -64,5 +67,20 @@ class RestifyableType {
 
 	public Optional<String> endpoint() {
 		return Optional.ofNullable(restifyable.endpoint()).filter(endpoint -> !endpoint.isEmpty());
+	}
+
+	private static class RestifyableTypeName {
+
+		private final String name;
+
+		private RestifyableTypeName(String name) {
+			this.name = Introspector.decapitalize(name);
+		}
+
+		@Override
+		public String toString() {
+			return name.replaceAll("([a-z])([A-Z])", "$1-$2")
+				.toLowerCase();
+		}
 	}
 }

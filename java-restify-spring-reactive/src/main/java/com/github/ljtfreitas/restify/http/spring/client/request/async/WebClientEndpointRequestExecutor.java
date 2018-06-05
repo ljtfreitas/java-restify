@@ -33,6 +33,7 @@ import java.io.InputStream;
 import java.lang.reflect.Type;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 import org.springframework.core.ParameterizedTypeReference;
@@ -63,11 +64,15 @@ import reactor.core.publisher.Mono;
 
 public class WebClientEndpointRequestExecutor implements AsyncEndpointRequestExecutor {
 
-	private final WebClient webClient;
+	private final Supplier<WebClient> webClientProvider;
 	private final EndpointResponseErrorFallback fallback;
 
 	public WebClientEndpointRequestExecutor() {
 		this(WebClient.create());
+	}
+
+	public WebClientEndpointRequestExecutor(WebClient.Builder webClientBuilder) {
+		this(() -> webClientBuilder.build(), new DefaultEndpointResponseErrorFallback());
 	}
 
 	public WebClientEndpointRequestExecutor(WebClient webClient) {
@@ -75,7 +80,11 @@ public class WebClientEndpointRequestExecutor implements AsyncEndpointRequestExe
 	}
 
 	public WebClientEndpointRequestExecutor(WebClient webClient, EndpointResponseErrorFallback fallback) {
-		this.webClient = webClient;
+		this(() -> webClient, fallback);
+	}
+
+	private WebClientEndpointRequestExecutor(Supplier<WebClient> webClientProvider, EndpointResponseErrorFallback fallback) {
+		this.webClientProvider = webClientProvider;
 		this.fallback = fallback;
 	}
 
@@ -94,7 +103,10 @@ public class WebClientEndpointRequestExecutor implements AsyncEndpointRequestExe
 	}
 
 	private <T> Mono<EndpointResponse<T>> doExecute(EndpointRequest endpointRequest) {
-		RequestBodySpec spec = webClient.method(HttpMethod.resolve(endpointRequest.method()))
+		WebClient webClient = webClientProvider.get();
+
+		RequestBodySpec spec = webClient
+			.method(HttpMethod.resolve(endpointRequest.method()))
 			.uri(endpointRequest.endpoint())
 			.headers(headers -> endpointRequest.headers().forEach(h -> headers.add(h.name(), h.value())));
 

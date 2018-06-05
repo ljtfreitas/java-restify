@@ -42,7 +42,7 @@ import org.springframework.core.annotation.AliasFor;
 @Inherited
 @EnableConfigurationProperties(RestifyConfigurationProperties.class)
 @Import({RestifyDefaultConfiguration.class, RestifySpringWebConfiguration.class, RestifyAsyncConfiguration.class,
-	RestifyJaxRsConfiguration.class, RestifyConfigurationRegistrar.class})
+	RestifyContractConfiguration.class, RestifyConfigurationRegistrar.class})
 public @interface EnableRestify {
 
 	@AliasFor("packages")

@@ -43,6 +43,16 @@ public class FormParameters implements MultiValueMap<String, Object> {
 	}
 
 	@Override
+	public void addAll(MultiValueMap<String, Object> source) {
+		map.addAll(source);
+	}
+
+	@Override
+	public void addAll(String key, List<? extends Object> values) {
+		map.addAll(key, values);
+	}
+
+	@Override
 	public int size() {
 		return map.size();
 	}
