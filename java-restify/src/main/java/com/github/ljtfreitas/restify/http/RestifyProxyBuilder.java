@@ -882,17 +882,17 @@ public class RestifyProxyBuilder {
 				}
 
 				public RetryConfigurationBackOffBuilder delay(long delay) {
-					builder.backOff().delay(delay);
+					delegate.backOff().delay(delay);
 					return this;
 				}
 
 				public RetryConfigurationBackOffBuilder delay(Duration delay) {
-					builder.backOff().delay(delay);
+					delegate.backOff().delay(delay);
 					return this;
 				}
 
 				public RetryConfigurationBackOffBuilder multiplier(double multiplier) {
-					builder.backOff().multiplier(multiplier);
+					delegate.backOff().multiplier(multiplier);
 					return this;
 				}
 
