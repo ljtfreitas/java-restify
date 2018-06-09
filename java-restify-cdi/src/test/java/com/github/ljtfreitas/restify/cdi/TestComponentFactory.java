@@ -29,14 +29,14 @@ import java.util.logging.Logger;
 
 import javax.enterprise.inject.Produces;
 
-import com.github.ljtfreitas.restify.http.client.message.converter.text.TextPlainMessageConverter;
+import com.github.ljtfreitas.restify.http.client.message.converter.wildcard.SimpleTextMessageConverter;
 import com.github.ljtfreitas.restify.http.client.request.interceptor.EndpointRequestInterceptor;
 
 public class TestComponentFactory {
 
 	@Produces
-	public TextPlainMessageConverter teste() {
-		return new TextPlainMessageConverter();
+	public SimpleTextMessageConverter simpleTextMessageConverter() {
+		return new SimpleTextMessageConverter();
 	}
 	
 	@Produces
