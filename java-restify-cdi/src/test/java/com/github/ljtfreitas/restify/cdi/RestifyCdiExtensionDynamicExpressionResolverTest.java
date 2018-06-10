@@ -24,7 +24,7 @@ import com.github.ljtfreitas.restify.http.contract.Path;
 
 @RunWith(CdiRunner.class)
 @SupportDeltaspikeCore
-@AdditionalClasses(value = {Extension.class, RestifyCdiExtension.class, DeltaSpikeExpressionResolver.class})
+@AdditionalClasses(value = {Extension.class, RestifyCdiExtension.class, TestComponentFactory.class, DeltaSpikeExpressionResolver.class})
 public class RestifyCdiExtensionDynamicExpressionResolverTest {
 
 	@Restifyable(endpoint = "@[api.endpoint]")

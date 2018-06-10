@@ -22,7 +22,7 @@ import com.github.ljtfreitas.restify.http.contract.Get;
 import com.github.ljtfreitas.restify.http.contract.Path;
 
 @RunWith(CdiRunner.class)
-@AdditionalClasses(value = {Extension.class, RestifyCdiExtension.class, SimpleEndpointRequestInterceptor.class})
+@AdditionalClasses(value = {Extension.class, RestifyCdiExtension.class, TestComponentFactory.class})
 public class RestifyCdiExtensionExtendedTest {
 
 	@Restifyable(endpoint = "http://localhost:8090/api")
@@ -33,7 +33,7 @@ public class RestifyCdiExtensionExtendedTest {
 		String test();
 	}
 
-	@Inject
+	@Inject	
 	private MyApiType myApiType;
 
 	private ClientAndServer mockServer;
@@ -50,7 +50,7 @@ public class RestifyCdiExtensionExtendedTest {
 				.withPath("/api/test"))
 			.respond(response()
 				.withStatusCode(200)
-				.withHeader("Content-Type", "text/plain; charset=UTF-8")
+				.withHeader("Content-Type", "text/plain")
 				.withBody("Hello, Restify CDI extension it's works!"));
 	}
 
