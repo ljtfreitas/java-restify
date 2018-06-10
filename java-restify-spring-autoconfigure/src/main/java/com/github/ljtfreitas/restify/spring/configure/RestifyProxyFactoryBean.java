@@ -40,6 +40,7 @@ import com.github.ljtfreitas.restify.http.client.request.HttpClientRequestFactor
 import com.github.ljtfreitas.restify.http.client.request.authentication.Authentication;
 import com.github.ljtfreitas.restify.http.client.request.interceptor.EndpointRequestInterceptor;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponseErrorFallback;
+import com.github.ljtfreitas.restify.http.contract.metadata.ContractExpressionResolver;
 import com.github.ljtfreitas.restify.http.contract.metadata.ContractReader;
 
 public class RestifyProxyFactoryBean implements FactoryBean<Object> {
@@ -50,7 +51,9 @@ public class RestifyProxyFactoryBean implements FactoryBean<Object> {
 
 	private HttpClientRequestFactory httpClientRequestFactory;
 
-	private ContractReader restifyContractReader;
+	private ContractReader contractReader;
+
+	private ContractExpressionResolver contractExpressionResolver;
 
 	private EndpointRequestExecutor endpointRequestExecutor;
 
@@ -71,23 +74,24 @@ public class RestifyProxyFactoryBean implements FactoryBean<Object> {
 		RestifyProxyBuilder builder = new RestifyProxyBuilder();
 
 		builder.client(httpClientRequestFactory)
-				.contract(restifyContractReader)
-				.executor(endpointRequestExecutor)
-				.retry()
-					.disabled()
-				.executables()
-					.add(executables())
+			.contract(contractReader)
+			.expression(contractExpressionResolver)
+			.executor(endpointRequestExecutor)
+			.retry()
+				.disabled()
+			.executables()
+				.add(executables())
 					.async(asyncExecutorService)
-					.discovery()
-						.disabled()
-					.and()
-				.converters()
-					.add(converters())
-					.discovery()
-						.disabled()
-					.and()
-				.error(endpointResponseErrorFallback)
-				.interceptors(interceptors());
+				.discovery()
+					.disabled()
+				.and()
+			.converters()
+				.add(converters())
+				.discovery()
+					.disabled()
+				.and()
+			.error(endpointResponseErrorFallback)
+			.interceptors(interceptors());
 
 		if (authentication != null) {
 			builder.interceptors().authentication(authentication);
@@ -130,8 +134,12 @@ public class RestifyProxyFactoryBean implements FactoryBean<Object> {
 		this.endpoint = endpoint;
 	}
 
-	public void setRestifyContractReader(ContractReader restifyContractReader) {
-		this.restifyContractReader = restifyContractReader;
+	public void setContractReader(ContractReader contractReader) {
+		this.contractReader = contractReader;
+	}
+
+	public void setContractExpressionResolver(ContractExpressionResolver contractExpressionResolver) {
+		this.contractExpressionResolver = contractExpressionResolver;
 	}
 
 	public void setConverters(Collection<HttpMessageConverter> converters) {

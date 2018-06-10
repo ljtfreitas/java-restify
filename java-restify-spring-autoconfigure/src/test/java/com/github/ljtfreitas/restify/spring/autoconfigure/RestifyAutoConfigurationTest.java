@@ -17,10 +17,14 @@ import org.springframework.boot.autoconfigure.AutoConfigurationPackages;
 import org.springframework.boot.autoconfigure.AutoConfigurations;
 import org.springframework.boot.test.context.FilteredClassLoader;
 import org.springframework.boot.test.context.runner.ApplicationContextRunner;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Import;
 import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
 import org.springframework.core.task.AsyncListenableTaskExecutor;
+import org.springframework.core.task.AsyncTaskExecutor;
+import org.springframework.core.task.SimpleAsyncTaskExecutor;
+import org.springframework.core.task.support.ExecutorServiceAdapter;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.web.reactive.function.client.WebClient;
 
@@ -41,6 +45,7 @@ import com.github.ljtfreitas.restify.http.spring.client.request.async.WebClientE
 import com.github.ljtfreitas.restify.http.spring.contract.metadata.SpelDynamicParameterExpressionResolver;
 import com.github.ljtfreitas.restify.http.spring.contract.metadata.SpringWebContractReader;
 import com.github.ljtfreitas.restify.spring.autoconfigure.RestifyAutoConfigurationTest.TestRestifyConfiguration.TestRestifyConfigurationRegistrar;
+import com.github.ljtfreitas.restify.spring.configure.Async;
 
 public class RestifyAutoConfigurationTest {
 
@@ -133,16 +138,25 @@ public class RestifyAutoConfigurationTest {
 
 		@Test
 		public void shouldCreateAsyncBeans() {
-			contextRunner.withClassLoader(new FilteredClassLoader(WebClient.class))
+			contextRunner.run(context -> {
+				assertNotNull(context.getBean(AsyncListenableTaskExecutor.class));
+				assertNotNull(context.getBean(ExecutorService.class));
+				assertNotNull(context.getBean(AsyncResultEndpointCallExecutableFactory.class));
+				assertNotNull(context.getBean(DeferredResultEndpointCallExecutableFactory.class));
+				assertNotNull(context.getBean(ListenableFutureEndpointCallExecutableFactory.class));
+				assertNotNull(context.getBean(ListenableFutureTaskEndpointCallExecutableFactory.class));
+				assertNotNull(context.getBean(WebAsyncTaskEndpointCallExecutableFactory.class));
+			});
+		}
+
+		@Test
+		public void shouldCreateAsyncBeansWithCustomExecutor() {
+			contextRunner.withUserConfiguration(TestRestifyAsyncConfiguration.class)
 				.run(context -> {
-					assertNotNull(context.getBean(AsyncListenableTaskExecutor.class));
-					assertNotNull(context.getBean(ExecutorService.class));
-					assertNotNull(context.getBean(AsyncResultEndpointCallExecutableFactory.class));
-					assertNotNull(context.getBean(DeferredResultEndpointCallExecutableFactory.class));
-					assertNotNull(context.getBean(ListenableFutureEndpointCallExecutableFactory.class));
-					assertNotNull(context.getBean(ListenableFutureTaskEndpointCallExecutableFactory.class));
-					assertNotNull(context.getBean(WebAsyncTaskEndpointCallExecutableFactory.class));
-				});
+					SimpleAsyncTaskExecutor taskExecutor = context.getBean(SimpleAsyncTaskExecutor.class);
+					assertNotNull(taskExecutor);
+					assertEquals("TestRestifyAsyncTaskExecutor", taskExecutor.getThreadNamePrefix());
+			});
 		}
 	}
 
@@ -182,6 +196,20 @@ public class RestifyAutoConfigurationTest {
 			public void registerBeanDefinitions(AnnotationMetadata arg0, BeanDefinitionRegistry registry) {
 				AutoConfigurationPackages.register(registry, RestifyAutoConfigurationTest.class.getPackage().getName());
 			}
+		}
+	}
+
+	@Configuration
+	static class TestRestifyAsyncConfiguration {
+
+		@Bean @Async
+		public AsyncListenableTaskExecutor testAsyncTaskExecutor() {
+			return new SimpleAsyncTaskExecutor("TestRestifyAsyncTaskExecutor");
+		}
+
+		@Bean @Async
+		public ExecutorService testAsyncExecutorService(@Async AsyncTaskExecutor executor) {
+			return new ExecutorServiceAdapter(executor);
 		}
 	}
 }

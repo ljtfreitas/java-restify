@@ -64,11 +64,20 @@ class RestifyProxyCdiBeanFactory {
 			.contract(contractReader())
 			.expression(expressionResolver())
 			.executor(endpointRequestExecutor())
+			.retry()
+				.enabled()
+				.and()
 			.executables()
 				.add(executables())
 					.async(executor())
+				.discovery()
+					.disabled()
 				.and()
-			.converters(httpMessageConverters())
+			.converters()
+				.add(httpMessageConverters())
+				.discovery()
+					.disabled()
+				.and()
 			.error(endpointResponseErrorFallback())
 			.interceptors(endpointRequestInterceptors());
 
@@ -88,7 +97,7 @@ class RestifyProxyCdiBeanFactory {
 	}
 
 	private Executor executor() {
-		return get(Executor.class, new RestifyExecutorLiteral(), () -> Executors.newCachedThreadPool());
+		return get(Executor.class, new AsyncAnnotationLiteral(), () -> Executors.newCachedThreadPool());
 	}
 
 	private EndpointCallExecutableProvider[] executables() {
@@ -134,6 +143,6 @@ class RestifyProxyCdiBeanFactory {
 	}
 
 	@SuppressWarnings("serial")
-	private static final class RestifyExecutorLiteral extends AnnotationLiteral<RestifyExecutor> implements RestifyExecutor {
+	private static final class AsyncAnnotationLiteral extends AnnotationLiteral<Async> implements Async {
 	}
 }

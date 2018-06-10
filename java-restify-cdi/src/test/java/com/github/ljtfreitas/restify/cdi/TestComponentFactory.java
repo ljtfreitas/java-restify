@@ -25,15 +25,27 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.cdi;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.util.logging.Logger;
 
-import javax.inject.Qualifier;
+import javax.enterprise.inject.Produces;
 
-@Target({ElementType.TYPE, ElementType.METHOD})
-@Retention(RetentionPolicy.RUNTIME)
-@Qualifier
-public @interface RestifyExecutor {
+import com.github.ljtfreitas.restify.http.client.message.converter.wildcard.SimpleTextMessageConverter;
+import com.github.ljtfreitas.restify.http.client.request.interceptor.EndpointRequestInterceptor;
+
+public class TestComponentFactory {
+
+	@Produces
+	public SimpleTextMessageConverter simpleTextMessageConverter() {
+		return new SimpleTextMessageConverter();
+	}
+
+	@Produces
+	public EndpointRequestInterceptor simpleEndpointRequestInterceptor() {
+		final Logger log = Logger.getLogger(SimpleEndpointRequestInterceptor.class.getCanonicalName());
+
+		return request -> {
+			log.info("Running request: " + request);
+			return request;
+		};
+	}
 }
