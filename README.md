@@ -104,7 +104,7 @@ public List<Contributor> contributors(@PathParameter String owner, @PathParamete
 
 ### Cabeçalhos
 Você pode enviar cabeçalhos HTTP utilizando a anotação ```@Header```:
-```
+```java
 @Header(name = "X-Custom-Header", value = "custom header")
 public interface MyApi {
 
@@ -117,7 +117,7 @@ As anotações ```@Header``` da interface e do método são mergeadas no momento
 
 A anotação ```@Header``` é *repetível*, de modo que você pode informar vários cabeçalhos (no topo da interface ou por método):
 
-```
+```java
 @Header(name = "X-Custom-Header", value = "custom header")
 @Header(name = "X-Other-Custom-Header", value = "custom header")
 public interface MyApi {
