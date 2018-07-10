@@ -79,7 +79,7 @@ public class RxJava2CompletableEndpointCallExecutableFactory implements AsyncEnd
 
 		@Override
 		public Completable executeAsync(AsyncEndpointCall<Void> call, Object[] args) {
-			return Completable.fromFuture(call.executeAsync())
+			return Completable.fromFuture(call.executeAsync().toCompletableFuture())
 				.subscribeOn(scheduler);
 		}
 	}

@@ -152,7 +152,7 @@ public class AccessToken implements Serializable {
 		return new AccessToken(AccessTokenType.BEARER, token, duration);
 	}
 
-	public static AccessToken of(AccessTokenResponse source) {
+	public static AccessToken of(AccessTokenResponseBody source) {
 		AccessTokenType tokenType = Optional.ofNullable(source.tokenType())
 				.map(t -> Tryable.or(() -> AccessTokenType.of(t), AccessTokenType.BEARER))
 					.orElse(AccessTokenType.BEARER);

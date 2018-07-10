@@ -25,15 +25,6 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.request.authentication.oauth2;
 
-import static com.github.ljtfreitas.restify.util.Preconditions.isTrue;
-
-import java.net.URI;
-
-import com.github.ljtfreitas.restify.http.client.message.Header;
-import com.github.ljtfreitas.restify.http.client.message.response.StatusCode;
-import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
-import com.github.ljtfreitas.restify.http.contract.Parameters;
-
 public class ImplicitAccessTokenProvider implements AccessTokenProvider {
 
 	private final AuthorizationServer authorizationServer;
@@ -50,27 +41,11 @@ public class ImplicitAccessTokenProvider implements AccessTokenProvider {
 	public AccessToken provides(OAuth2AuthenticatedEndpointRequest request) {
 		ImplicitGrantProperties properties = request.properties(ImplicitGrantProperties.class);
 
-		EndpointResponse<String> authorizationResponse = authorizationServer.authorize(new AuthorizationCodeRequest(properties, request.scope()));
+		AuthorizationCodeResponse authorizeResponse = authorizationServer.authorize(new AuthorizationCodeRequest(properties, request.scope()));
 
-		StatusCode status = authorizationResponse.status();
+		ImplicitAuthorizeResponse implicit = new ImplicitAuthorizeResponse(properties, authorizeResponse);
 
-		if (status.isOk()) {
-			String message = "You need approve the client [" + properties.credentials().clientId() + "] to access protected resources "
-				+ "with scopes [" + properties.scopes() + "]";
-
-			throw new OAuth2UserApprovalRequiredException(message);
-
-		} else {
-			Header location = authorizationResponse.headers().get("Location")
-					.orElseThrow(() -> new IllegalStateException("Location header must be present on Authorization redirect!"));
-
-			Parameters parameters = Parameters.parse(URI.create(location.value()).getFragment());
-
-			isTrue(properties.state().orElse("").equals(parameters.first("state").orElse("")),
-					"Possible CSRF attack? [state] parameter returned by the authorization server is not the same of the authorization request.");
-
-			return  AccessToken.of(AccessTokenResponse.of(parameters));
-		}
+		return implicit.accessToken();
 	}
 
 	@Override

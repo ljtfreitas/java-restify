@@ -25,9 +25,9 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.retry.async;
 
-import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 
 interface AsyncRetryable<T> {
 
-	CompletableFuture<T> execute();
+	CompletionStage<T> execute();
 }

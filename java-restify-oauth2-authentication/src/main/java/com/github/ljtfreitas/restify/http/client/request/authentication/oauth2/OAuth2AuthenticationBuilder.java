@@ -314,7 +314,7 @@ public class OAuth2AuthenticationBuilder {
 
 		@Override
 		protected AccessTokenProvider createProviderWith(AuthorizationServer authorizationServer) {
-			return new ClientCredentialsAccessTokenProvider(authorizationServer);
+			return new DefaultAccessTokenProvider(new ClientCredentialsAccessTokenStrategy(), authorizationServer);
 		}
 	}
 
@@ -393,7 +393,7 @@ public class OAuth2AuthenticationBuilder {
 
 		@Override
 		protected AccessTokenProvider createProviderWith(AuthorizationServer authorizationServer) {
-			return new ResourceOwnerPasswordAccessTokenProvider(authorizationServer);
+			return new DefaultAccessTokenProvider(new ResourceOwnerPasswordAccessTokenStrategy(), authorizationServer);
 		}
 	}
 
@@ -692,7 +692,7 @@ public class OAuth2AuthenticationBuilder {
 			AuthorizationCodeProvider authorizationCodeProvider = Optional.ofNullable(this.authorizationCodeProvider)
 					.orElseGet(() -> new DefaultAuthorizationCodeProvider(authorizationServer));
 
-			return new AuthorizationCodeAccessTokenProvider(authorizationCodeProvider, authorizationServer);
+			return new DefaultAccessTokenProvider(new AuthorizationCodeAccessTokenStrategy(authorizationCodeProvider), authorizationServer);
 		}
 	}
 }

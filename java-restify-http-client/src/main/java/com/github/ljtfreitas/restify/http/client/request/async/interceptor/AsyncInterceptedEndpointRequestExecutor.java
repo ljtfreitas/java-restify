@@ -25,7 +25,7 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.request.async.interceptor;
 
-import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
 import com.github.ljtfreitas.restify.http.client.request.async.AsyncEndpointRequestExecutor;
@@ -47,7 +47,7 @@ public class AsyncInterceptedEndpointRequestExecutor implements AsyncEndpointReq
 	}
 
 	@Override
-	public <T> CompletableFuture<EndpointResponse<T>> executeAsync(EndpointRequest endpointRequest) {
+	public <T> CompletionStage<EndpointResponse<T>> executeAsync(EndpointRequest endpointRequest) {
 		return interceptors.applyAsync(endpointRequest).thenCompose(r -> delegate.executeAsync(r));
 	}
 }

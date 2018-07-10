@@ -32,5 +32,4 @@ public interface AccessTokenStorage {
 	public Optional<AccessToken> findBy(AccessTokenStorageKey key);
 
 	public void add(AccessTokenStorageKey key, AccessToken accessToken);
-
 }

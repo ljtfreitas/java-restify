@@ -57,8 +57,8 @@ import com.github.ljtfreitas.restify.http.client.call.exec.async.AsyncCallbackEn
 import com.github.ljtfreitas.restify.http.client.call.exec.async.AsyncEndpointCallObjectExecutableFactory;
 import com.github.ljtfreitas.restify.http.client.call.exec.jdk.CallableEndpointCallExecutableFactory;
 import com.github.ljtfreitas.restify.http.client.call.exec.jdk.CollectionEndpointCallExecutableFactory;
-import com.github.ljtfreitas.restify.http.client.call.exec.jdk.CompletableFutureCallbackEndpointCallExecutableFactory;
-import com.github.ljtfreitas.restify.http.client.call.exec.jdk.CompletableFutureEndpointCallExecutableFactory;
+import com.github.ljtfreitas.restify.http.client.call.exec.jdk.CompletionStageCallbackEndpointCallExecutableFactory;
+import com.github.ljtfreitas.restify.http.client.call.exec.jdk.CompletionStageEndpointCallExecutableFactory;
 import com.github.ljtfreitas.restify.http.client.call.exec.jdk.EnumerationEndpointCallExecutableFactory;
 import com.github.ljtfreitas.restify.http.client.call.exec.jdk.FutureEndpointCallExecutableFactory;
 import com.github.ljtfreitas.restify.http.client.call.exec.jdk.FutureTaskEndpointCallExecutableFactory;
@@ -566,8 +566,8 @@ public class RestifyProxyBuilder {
 
 		private AsyncEndpointCallExecutablesBuilder all() {
 			providers.add(new FutureEndpointCallExecutableFactory<Object, Object>(executor));
-			providers.add(new CompletableFutureEndpointCallExecutableFactory<Object, Object>(executor));
-			providers.add(new CompletableFutureCallbackEndpointCallExecutableFactory<Object, Object>(executor));
+			providers.add(new CompletionStageEndpointCallExecutableFactory<Object, Object>(executor));
+			providers.add(new CompletionStageCallbackEndpointCallExecutableFactory<Object, Object>(executor));
 			providers.add(new AsyncEndpointCallObjectExecutableFactory<Object, Object>(executor));
 			providers.add(new AsyncCallbackEndpointCallExecutableFactory<Object, Object>(executor));
 

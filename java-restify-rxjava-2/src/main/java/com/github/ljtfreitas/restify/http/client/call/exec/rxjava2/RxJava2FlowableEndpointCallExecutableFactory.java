@@ -94,7 +94,7 @@ public class RxJava2FlowableEndpointCallExecutableFactory<T, O> implements Async
 
 		@Override
 		public Flowable<T> executeAsync(AsyncEndpointCall<O> call, Object[] args) {
-			return Flowable.fromFuture(call.executeAsync())
+			return Flowable.fromFuture(call.executeAsync().toCompletableFuture())
 					.map(o -> delegate.execute(() -> o, args))
 						.subscribeOn(scheduler);
 		}

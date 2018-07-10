@@ -27,7 +27,7 @@ package com.github.ljtfreitas.restify.http.client.request.async.interceptor.log;
 
 import java.net.URI;
 import java.nio.charset.Charset;
-import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 import java.util.logging.Logger;
 
 import com.github.ljtfreitas.restify.http.client.HttpClientException;
@@ -102,12 +102,12 @@ public class AsyncLogHttpClientRequestInterceptor implements AsyncHttpClientRequ
 		}
 
 		@Override
-		public CompletableFuture<HttpClientResponse> executeAsync() throws HttpClientException {
+		public CompletionStage<HttpClientResponse> executeAsync() throws HttpClientException {
 			CurlPrinter printer = new CurlPrinter();
 
 			log.info(printer.print(source));
 
-			CompletableFuture<HttpClientResponse> responseAsFuture = source.executeAsync();
+			CompletionStage<HttpClientResponse> responseAsFuture = source.executeAsync();
 
 			return responseAsFuture.thenApplyAsync(response -> {
 				log.info(printer.print(response));

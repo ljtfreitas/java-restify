@@ -43,6 +43,9 @@ public class GrantProperties {
 	private Collection<String> scopes = Collections.emptyList();
 	private Principal user;
 
+	protected GrantProperties() {
+	}
+
 	public ClientCredentials credentials() {
 		return credentials;
 	}

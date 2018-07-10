@@ -32,7 +32,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Type;
 import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -97,7 +97,7 @@ public class WebClientEndpointRequestExecutor implements AsyncEndpointRequestExe
 	}
 
 	@Override
-	public <T> CompletableFuture<EndpointResponse<T>> executeAsync(EndpointRequest endpointRequest) {
+	public <T> CompletionStage<EndpointResponse<T>> executeAsync(EndpointRequest endpointRequest) {
 		Mono<EndpointResponse<T>> mono = doExecute(endpointRequest);
 		return mono.toFuture();
 	}

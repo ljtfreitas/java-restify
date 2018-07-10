@@ -87,7 +87,7 @@ public class RxJava2MaybeEndpointCallExecutableFactory<T, O> implements AsyncEnd
 
 		@Override
 		public Maybe<T> executeAsync(AsyncEndpointCall<O> call, Object[] args) {
-			return Maybe.fromFuture(call.executeAsync())
+			return Maybe.fromFuture(call.executeAsync().toCompletableFuture())
 					.map(o -> delegate.execute(() -> o, args))
 						.subscribeOn(scheduler);
 		}

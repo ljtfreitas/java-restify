@@ -83,7 +83,8 @@ public class ApacheAsyncHttpClientRequestFactoryTest {
 
 		CompletableFuture<HttpClientResponse> responseAsFuture = apacheAsyncHttpClientRequestFactory
 				.createAsyncOf(new EndpointRequest(URI.create("http://localhost:7080/json"), "GET"))
-					.executeAsync();
+					.executeAsync()
+						.toCompletableFuture();
 
 		HttpResponseMessage response = responseAsFuture.get();
 
@@ -117,7 +118,7 @@ public class ApacheAsyncHttpClientRequestFactoryTest {
 		request.body().output().write(requestBody.getBytes());
 		request.body().output().flush();
 
-		HttpResponseMessage response = request.executeAsync().get();
+		HttpResponseMessage response = request.executeAsync().toCompletableFuture().get();
 
 		assertEquals(responseBody, new InputStreamContent(response.body().input()).asString());
 		assertEquals("text/plain", response.headers().get("Content-Type").get().value());
@@ -147,7 +148,8 @@ public class ApacheAsyncHttpClientRequestFactoryTest {
 
 		CompletableFuture<HttpClientResponse> future = apacheAsyncHttpClientRequestFactory
 			.createAsyncOf(new EndpointRequest(URI.create("http://localhost:7080/slow"), "GET"))
-				.executeAsync();
+				.executeAsync()
+					.toCompletableFuture();
 
 		Thread.sleep(3000);
 
@@ -192,7 +194,8 @@ public class ApacheAsyncHttpClientRequestFactoryTest {
 
 		CompletableFuture<HttpClientResponse> future = apacheAsyncHttpClientRequestFactory
 			.createAsyncOf(request)
-				.executeAsync();
+				.executeAsync()
+					.toCompletableFuture();
 
 		Thread.sleep(3000);
 
@@ -247,7 +250,8 @@ public class ApacheAsyncHttpClientRequestFactoryTest {
 		HttpResponseMessage response = apacheAsyncHttpClientRequestFactory
 				.createAsyncOf(new EndpointRequest(URI.create("http://localhost:7080/authenticated"), "GET"))
 					.executeAsync()
-						.get();
+						.toCompletableFuture()
+							.get();
 
 		assertEquals("ok", new InputStreamContent(response.body().input()).asString());
 

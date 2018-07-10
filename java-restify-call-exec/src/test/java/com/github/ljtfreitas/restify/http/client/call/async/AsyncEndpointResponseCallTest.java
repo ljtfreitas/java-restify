@@ -31,6 +31,7 @@ import static org.mockito.Mockito.when;
 
 import java.net.URI;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -121,9 +122,9 @@ public class AsyncEndpointResponseCallTest {
 
 	@Test
 	public void shouldExecuteAsyncWithCompletableFuture() throws Exception {
-		CompletableFuture<EndpointResponse<Object>> future = asyncCall.executeAsync();
+		CompletionStage<EndpointResponse<Object>> future = asyncCall.executeAsync();
 
-		assertSame(response, future.get());
+		assertSame(response, future.toCompletableFuture().get());
 
 		verify(asyncEndpointRequestExecutor).executeAsync(request);
 	}

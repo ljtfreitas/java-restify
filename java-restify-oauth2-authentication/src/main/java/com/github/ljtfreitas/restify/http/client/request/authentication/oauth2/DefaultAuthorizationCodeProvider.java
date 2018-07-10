@@ -31,7 +31,6 @@ import java.net.URI;
 
 import com.github.ljtfreitas.restify.http.client.message.Header;
 import com.github.ljtfreitas.restify.http.client.message.response.StatusCode;
-import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
 import com.github.ljtfreitas.restify.http.contract.Parameters;
 
 class DefaultAuthorizationCodeProvider implements AuthorizationCodeProvider {
@@ -50,7 +49,7 @@ class DefaultAuthorizationCodeProvider implements AuthorizationCodeProvider {
 	public String provides(OAuth2AuthenticatedEndpointRequest request) {
 		AuthorizationCodeGrantProperties properties = request.properties(AuthorizationCodeGrantProperties.class);
 
-		EndpointResponse<String> authorizationResponse = authorizationServer.authorize(new AuthorizationCodeRequest(properties, request.scope()));
+		AuthorizationCodeResponse authorizationResponse = authorizationServer.authorize(new AuthorizationCodeRequest(properties, request.scope()));
 
 		StatusCode status = authorizationResponse.status();
 

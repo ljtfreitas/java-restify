@@ -96,7 +96,8 @@ public class ListenableFutureEndpointCallExecutableFactory<T, O> implements Asyn
 		@Override
 		public ListenableFuture<T> executeAsync(AsyncEndpointCall<O> call, Object[] args) {
 			Future<T> future = call.executeAsync()
-					.thenApplyAsync(o -> delegate.execute(() -> o, args), executorService);
+					.toCompletableFuture()
+						.thenApplyAsync(o -> delegate.execute(() -> o, args), executorService);
 
 			return JdkFutureAdapters.listenInPoolThread(future, executorService);
 		}

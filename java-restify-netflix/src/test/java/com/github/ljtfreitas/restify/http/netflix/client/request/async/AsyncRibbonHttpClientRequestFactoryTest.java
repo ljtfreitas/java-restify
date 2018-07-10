@@ -11,6 +11,7 @@ import java.net.URI;
 import java.nio.charset.Charset;
 import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
@@ -97,9 +98,9 @@ public class AsyncRibbonHttpClientRequestFactoryTest {
 					.withHeader("Content-Type", "application/json")
 					.withBody(json("{\"name\": \"Tiago de Freitas Lima\",\"age\":31}")));
 
-		CompletableFuture<EndpointResponse<MyModel>> future = requestExecutor.executeAsync(new EndpointRequest(URI.create("http://myApi/json"), "GET", MyModel.class));
+		CompletionStage<EndpointResponse<MyModel>> future = requestExecutor.executeAsync(new EndpointRequest(URI.create("http://myApi/json"), "GET", MyModel.class));
 
-		EndpointResponse<MyModel> response = future.join();
+		EndpointResponse<MyModel> response = future.toCompletableFuture().join();
 
 		MyModel myModel = response.body();
 
@@ -145,10 +146,10 @@ public class AsyncRibbonHttpClientRequestFactoryTest {
 					.withHeader("Content-Type", "application/xml")
 					.withBody(exact("<model><name>Tiago de Freitas Lima</name><age>31</age></model>")));
 
-		CompletableFuture<EndpointResponse<MyModel>> future = requestExecutor
+		CompletionStage<EndpointResponse<MyModel>> future = requestExecutor
 				.executeAsync(new EndpointRequest(URI.create("http://myApi/xml"), "GET", MyModel.class));
 
-		EndpointResponse<MyModel> response = future.join();
+		EndpointResponse<MyModel> response = future.toCompletableFuture().join();
 
 		MyModel myModel = response.body();
 

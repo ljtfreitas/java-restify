@@ -26,6 +26,7 @@
 package com.github.ljtfreitas.restify.http.client.call.async;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
@@ -49,18 +50,18 @@ public class ExecutorAsyncEndpointCall<T> implements AsyncEndpointCall<T> {
 
 	@Override
 	public void executeAsync(EndpointCallCallback<T> callback) {
-		new CompletableFutureAsyncEndpointCall<>(doExecuteAsync(), executor)
+		new CompletionStageAsyncEndpointCall<>(doExecuteAsync(), executor)
 			.executeAsync(callback);
 	}
 
 	@Override
 	public void executeAsync(EndpointCallSuccessCallback<T> success, EndpointCallFailureCallback failure) {
-		new CompletableFutureAsyncEndpointCall<>(doExecuteAsync(), executor)
+		new CompletionStageAsyncEndpointCall<>(doExecuteAsync(), executor)
 			.executeAsync(success, failure);
 	}
 
 	@Override
-	public CompletableFuture<T> executeAsync() {
+	public CompletionStage<T> executeAsync() {
 		return doExecuteAsync();
 	}
 
@@ -69,7 +70,7 @@ public class ExecutorAsyncEndpointCall<T> implements AsyncEndpointCall<T> {
 		return source.execute();
 	}
 
-	private CompletableFuture<T> doExecuteAsync() {
+	private CompletionStage<T> doExecuteAsync() {
 		return CompletableFuture
 				.supplyAsync(() -> source.execute(), executor);
 	}

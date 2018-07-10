@@ -87,7 +87,7 @@ public class RxJava2SingleEndpointCallExecutableFactory<T, O> implements AsyncEn
 
 		@Override
 		public Single<T> executeAsync(AsyncEndpointCall<O> call, Object[] args) {
-			return Single.fromFuture(call.executeAsync())
+			return Single.fromFuture(call.executeAsync().toCompletableFuture())
 				.map(o -> delegate.execute(() -> o, args))
 					.subscribeOn(scheduler);
 		}

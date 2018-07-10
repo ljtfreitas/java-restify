@@ -30,6 +30,7 @@ import static com.github.ljtfreitas.restify.util.Preconditions.nonNull;
 import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
+import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.Semaphore;
@@ -66,7 +67,7 @@ class AsyncRetryableLoop {
 		this.retryPolicy = nonNull(retryPolicy, "Retry policy cannot be null");
 	}
 
-	public <T> CompletableFuture<T> repeat(int attempts, AsyncRetryable<T> retryable) throws RetryExhaustedException {
+	public <T> CompletionStage<T> repeat(int attempts, AsyncRetryable<T> retryable) throws RetryExhaustedException {
 		try {
 			return new AsyncRetryLoop(attempts, retryPolicy.refresh(), backOffPolicy).repeat(retryable);
 
@@ -90,7 +91,7 @@ class AsyncRetryableLoop {
 			this.backOffPolicy = backOffPolicy;
 		}
 
-		private <T> CompletableFuture<T> repeat(AsyncRetryable<T> retryable) throws Exception {
+		private <T> CompletionStage<T> repeat(AsyncRetryable<T> retryable) throws Exception {
 			CompletableFuture<T> retryableCompletableFuture = new CompletableFuture<>();
 
 			scheduler.schedule(new AsyncRetryableRunnable<>(retryable, new AsyncRetryableExecution<>(1, retryableCompletableFuture)), 0, TimeUnit.MILLISECONDS);

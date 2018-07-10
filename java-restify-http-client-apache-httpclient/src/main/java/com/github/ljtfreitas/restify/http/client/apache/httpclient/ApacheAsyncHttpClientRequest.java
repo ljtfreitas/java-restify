@@ -28,6 +28,7 @@ package com.github.ljtfreitas.restify.http.client.apache.httpclient;
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpEntityEnclosingRequest;
@@ -105,11 +106,11 @@ class ApacheAsyncHttpClientRequest implements AsyncHttpClientRequest {
 	}
 
 	@Override
-	public CompletableFuture<HttpClientResponse> executeAsync() throws HttpClientException {
+	public CompletionStage<HttpClientResponse> executeAsync() throws HttpClientException {
 		return doExecuteAsync();
 	}
 
-	private CompletableFuture<HttpClientResponse> doExecuteAsync() {
+	private CompletionStage<HttpClientResponse> doExecuteAsync() {
 		headers.all().forEach(h -> httpRequest.addHeader(h.name(), h.value()));
 
 		start();
@@ -139,7 +140,7 @@ class ApacheAsyncHttpClientRequest implements AsyncHttpClientRequest {
 
 	@Override
 	public HttpClientResponse execute() throws HttpClientException {
-		return Tryable.of(() -> doExecuteAsync().get());
+		return doExecuteAsync().toCompletableFuture().join();
 	}
 
 	private class ApacheHttpAsyncRequestCallback implements FutureCallback<HttpResponse> {
@@ -152,6 +153,7 @@ class ApacheAsyncHttpClientRequest implements AsyncHttpClientRequest {
 
 		@Override
 		public void cancelled() {
+			future.cancel(false);
 		}
 
 		@Override

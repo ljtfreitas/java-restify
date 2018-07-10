@@ -27,7 +27,7 @@ package com.github.ljtfreitas.restify.http.client.call.exec.jdk;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Executor;
 
 import com.github.ljtfreitas.restify.http.client.call.async.AsyncEndpointCall;
@@ -37,17 +37,17 @@ import com.github.ljtfreitas.restify.http.client.call.exec.async.AsyncEndpointCa
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethod;
 import com.github.ljtfreitas.restify.reflection.JavaType;
 
-public class CompletableFutureEndpointCallExecutableFactory<T, O> implements AsyncEndpointCallExecutableDecoratorFactory<CompletableFuture<T>, T, O> {
+public class CompletionStageEndpointCallExecutableFactory<T, O> implements AsyncEndpointCallExecutableDecoratorFactory<CompletionStage<T>, T, O> {
 
 	private final Executor executor;
 
-	public CompletableFutureEndpointCallExecutableFactory(Executor executor) {
+	public CompletionStageEndpointCallExecutableFactory(Executor executor) {
 		this.executor = executor;
 	}
 
 	@Override
 	public boolean supports(EndpointMethod endpointMethod) {
-		return endpointMethod.returnType().is(CompletableFuture.class);
+		return CompletionStage.class.isAssignableFrom(endpointMethod.returnType().classType());
 	}
 
 	@Override
@@ -62,15 +62,15 @@ public class CompletableFutureEndpointCallExecutableFactory<T, O> implements Asy
 	}
 
 	@Override
-	public AsyncEndpointCallExecutable<CompletableFuture<T>, O> createAsync(EndpointMethod endpointMethod, EndpointCallExecutable<T, O> executable) {
-		return new CompletableFutureEndpointCallExecutable(executable);
+	public AsyncEndpointCallExecutable<CompletionStage<T>, O> createAsync(EndpointMethod endpointMethod, EndpointCallExecutable<T, O> executable) {
+		return new CompletionStageEndpointCallExecutable(executable);
 	}
 
-	private class CompletableFutureEndpointCallExecutable implements AsyncEndpointCallExecutable<CompletableFuture<T>, O> {
+	private class CompletionStageEndpointCallExecutable implements AsyncEndpointCallExecutable<CompletionStage<T>, O> {
 
 		private final EndpointCallExecutable<T, O> delegate;
 
-		public CompletableFutureEndpointCallExecutable(EndpointCallExecutable<T, O> executable) {
+		public CompletionStageEndpointCallExecutable(EndpointCallExecutable<T, O> executable) {
 			this.delegate = executable;
 		}
 
@@ -80,7 +80,7 @@ public class CompletableFutureEndpointCallExecutableFactory<T, O> implements Asy
 		}
 
 		@Override
-		public CompletableFuture<T> executeAsync(AsyncEndpointCall<O> call, Object[] args) {
+		public CompletionStage<T> executeAsync(AsyncEndpointCall<O> call, Object[] args) {
 			return call.executeAsync()
 				.thenApplyAsync(o -> delegate.execute(() -> o, args), executor);
 		}

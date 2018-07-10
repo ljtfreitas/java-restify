@@ -23,31 +23,15 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.http.client.request.authentication.oauth2;
+package com.github.ljtfreitas.restify.http.client.request.authentication.oauth2.async;
 
-import static com.github.ljtfreitas.restify.util.Preconditions.nonNull;
+import java.util.concurrent.CompletionStage;
 
-public class ResourceOwnerPasswordAccessTokenProvider extends BaseAccessTokenProvider {
+import com.github.ljtfreitas.restify.http.client.request.authentication.oauth2.AccessToken;
+import com.github.ljtfreitas.restify.http.client.request.authentication.oauth2.OAuth2AuthenticatedEndpointRequest;
 
-	public ResourceOwnerPasswordAccessTokenProvider() {
-		super();
-	}
+public interface AsyncAccessTokenRepository {
 
-	public ResourceOwnerPasswordAccessTokenProvider(AuthorizationServer authorizationServer) {
-		super(authorizationServer);
-	}
+	public CompletionStage<AccessToken> findBy(OAuth2AuthenticatedEndpointRequest request);
 
-	@Override
-	protected AccessTokenRequest buildAccessTokenRequest(OAuth2AuthenticatedEndpointRequest request) {
-		ResourceOwnerGrantProperties properties = request.properties(ResourceOwnerGrantProperties.class);
-
-		nonNull(properties.resourceOwner(), "Your resource owner credentials are required.");
-
-		AccessTokenRequest.Builder builder = AccessTokenRequest.resourceOwner(properties.resourceOwner());
-
-		return builder.accessTokenUri(properties.accessTokenUri())
-					  .credentials(properties.credentials())
-					  .parameter("scope", request.scope())
-					  .build();
-	}
 }

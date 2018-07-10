@@ -17,15 +17,6 @@ import org.mockserver.model.Parameter;
 
 import com.github.ljtfreitas.restify.http.client.message.response.HttpStatusCode;
 import com.github.ljtfreitas.restify.http.client.message.response.StatusCode;
-import com.github.ljtfreitas.restify.http.client.request.authentication.oauth2.AccessToken;
-import com.github.ljtfreitas.restify.http.client.request.authentication.oauth2.AccessTokenRequest;
-import com.github.ljtfreitas.restify.http.client.request.authentication.oauth2.AuthorizationCodeGrantProperties;
-import com.github.ljtfreitas.restify.http.client.request.authentication.oauth2.AuthorizationCodeRequest;
-import com.github.ljtfreitas.restify.http.client.request.authentication.oauth2.ClientAuthenticationMethod;
-import com.github.ljtfreitas.restify.http.client.request.authentication.oauth2.ClientCredentials;
-import com.github.ljtfreitas.restify.http.client.request.authentication.oauth2.DefaultAuthorizationServer;
-import com.github.ljtfreitas.restify.http.client.request.authentication.oauth2.GrantProperties;
-import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
 
 public class DefaultAuthorizationServerTest {
 
@@ -68,7 +59,7 @@ public class DefaultAuthorizationServerTest {
 				.withHeader("Content-Type", "application/x-www-form-urlencoded")
 				.withHeader("Location", "http://my.web.app/oauth/callback?code=abc1234&state=current-state"));
 
-		EndpointResponse<String> authorizationResponse = authorizationServer.authorize(new AuthorizationCodeRequest(properties));
+		AuthorizationCodeResponse authorizationResponse = authorizationServer.authorize(new AuthorizationCodeRequest(properties));
 
 		assertNotNull(authorizationResponse);
 		assertEquals(StatusCode.of(HttpStatusCode.FOUND), authorizationResponse.status());
@@ -98,10 +89,10 @@ public class DefaultAuthorizationServerTest {
 					.parameter("scope", "read write")
 					.build();
 
-		EndpointResponse<AccessToken> tokenResponse = authorizationServer.requireToken(request);
+		AccessTokenResponse accessTokenResponse = authorizationServer.requireToken(request);
 
-		assertNotNull(tokenResponse);
-		assertEquals(StatusCode.of(HttpStatusCode.OK), tokenResponse.status());
+		assertNotNull(accessTokenResponse);
+		assertEquals(StatusCode.of(HttpStatusCode.OK), accessTokenResponse.status());
 	}
 
 	@Test
@@ -131,10 +122,10 @@ public class DefaultAuthorizationServerTest {
 					.parameter("scope", "read write")
 					.build();
 
-		EndpointResponse<AccessToken> tokenResponse = authorizationServer.requireToken(request);
+		AccessTokenResponse accessTokenResponse = authorizationServer.requireToken(request);
 
-		assertNotNull(tokenResponse);
-		assertEquals(StatusCode.of(HttpStatusCode.OK), tokenResponse.status());
+		assertNotNull(accessTokenResponse);
+		assertEquals(StatusCode.of(HttpStatusCode.OK), accessTokenResponse.status());
 	}
 
 	@Test
@@ -160,10 +151,10 @@ public class DefaultAuthorizationServerTest {
 
 		authorizationServer = new DefaultAuthorizationServer(ClientAuthenticationMethod.FORM_PARAMETER);
 
-		EndpointResponse<AccessToken> tokenResponse = authorizationServer.requireToken(request);
+		AccessTokenResponse accessTokenResponse = authorizationServer.requireToken(request);
 
-		assertNotNull(tokenResponse);
-		assertEquals(StatusCode.of(HttpStatusCode.OK), tokenResponse.status());
+		assertNotNull(accessTokenResponse);
+		assertEquals(StatusCode.of(HttpStatusCode.OK), accessTokenResponse.status());
 	}
 
 	@Test
@@ -189,9 +180,9 @@ public class DefaultAuthorizationServerTest {
 
 		authorizationServer = new DefaultAuthorizationServer(ClientAuthenticationMethod.QUERY_PARAMETER);
 
-		EndpointResponse<AccessToken> tokenResponse = authorizationServer.requireToken(request);
+		AccessTokenResponse accessTokenResponse = authorizationServer.requireToken(request);
 
-		assertNotNull(tokenResponse);
-		assertEquals(StatusCode.of(HttpStatusCode.OK), tokenResponse.status());
+		assertNotNull(accessTokenResponse);
+		assertEquals(StatusCode.of(HttpStatusCode.OK), accessTokenResponse.status());
 	}
 }

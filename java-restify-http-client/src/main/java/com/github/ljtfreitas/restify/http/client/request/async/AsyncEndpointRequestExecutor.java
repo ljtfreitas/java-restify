@@ -25,7 +25,7 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.request.async;
 
-import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequestExecutor;
@@ -33,5 +33,5 @@ import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
 
 public interface AsyncEndpointRequestExecutor extends EndpointRequestExecutor {
 
-	public <T> CompletableFuture<EndpointResponse<T>> executeAsync(EndpointRequest endpointRequest);
+	public <T> CompletionStage<EndpointResponse<T>> executeAsync(EndpointRequest endpointRequest);
 }

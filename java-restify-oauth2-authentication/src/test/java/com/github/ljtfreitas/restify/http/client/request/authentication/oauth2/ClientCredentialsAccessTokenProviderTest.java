@@ -30,7 +30,7 @@ public class ClientCredentialsAccessTokenProviderTest {
 
 	private MockServerClient mockServerClient;
 
-	private ClientCredentialsAccessTokenProvider provider;
+	private AccessTokenProvider provider;
 
 	private String authorizationCredentials;
 
@@ -50,7 +50,7 @@ public class ClientCredentialsAccessTokenProviderTest {
 
 		request = new OAuth2AuthenticatedEndpointRequest(source, properties);
 
-		provider = new ClientCredentialsAccessTokenProvider();
+		provider = new DefaultAccessTokenProvider(new ClientCredentialsAccessTokenStrategy());
 
 		authorizationCredentials = "Y2xpZW50LWlkOmNsaWVudC1zZWNyZXQ="; //(base64(client_id:client_secret))
 	}

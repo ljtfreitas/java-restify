@@ -11,6 +11,7 @@ import static org.mockito.Mockito.when;
 import java.io.IOException;
 import java.net.URI;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 
@@ -83,9 +84,9 @@ public class DefaultAsyncEndpointRequestExecutorTest {
 		when(reader.read(httpClientResponse, endpointRequest.responseType()))
 			.thenReturn(endpointResponse);
 
-		CompletableFuture<EndpointResponse<Object>> result = subject.executeAsync(endpointRequest);
+		CompletionStage<EndpointResponse<Object>> result = subject.executeAsync(endpointRequest);
 
-		assertEquals(endpointResponse, result.get());
+		assertEquals(endpointResponse, result.toCompletableFuture().get());
 
 		verify(writer, never()).write(any(), any());
 		verify(reader).read(httpClientResponse, JavaType.of(String.class));
@@ -101,9 +102,9 @@ public class DefaultAsyncEndpointRequestExecutorTest {
 		when(reader.read(httpClientResponse, endpointRequest.responseType()))
 			.thenReturn(endpointResponse);
 
-		CompletableFuture<EndpointResponse<Object>> result = subject.executeAsync(endpointRequest);
+		CompletionStage<EndpointResponse<Object>> result = subject.executeAsync(endpointRequest);
 
-		assertEquals(endpointResponse, result.get());
+		assertEquals(endpointResponse, result.toCompletableFuture().get());
 
 		verify(writer).write(endpointRequest, asyncHttpClientRequest);
 		verify(reader).read(httpClientResponse, JavaType.of(String.class));
@@ -119,12 +120,12 @@ public class DefaultAsyncEndpointRequestExecutorTest {
 		when(asyncHttpClientRequest.executeAsync())
 			.thenReturn(future);
 
-		CompletableFuture<EndpointResponse<Object>> result = subject.executeAsync(endpointRequest);
+		CompletionStage<EndpointResponse<Object>> result = subject.executeAsync(endpointRequest);
 
 		expectedException.expect(ExecutionException.class);
 		expectedException.expectCause(isA(HttpClientException.class));
 
-		result.get();
+		result.toCompletableFuture().get();
 	}
 
 	@Test
@@ -137,12 +138,12 @@ public class DefaultAsyncEndpointRequestExecutorTest {
 		when(asyncHttpClientRequest.executeAsync())
 			.thenReturn(future);
 
-		CompletableFuture<EndpointResponse<Object>> result = subject.executeAsync(endpointRequest);
+		CompletionStage<EndpointResponse<Object>> result = subject.executeAsync(endpointRequest);
 
 		expectedException.expect(ExecutionException.class);
 		expectedException.expectCause(isA(HttpMessageException.class));
 
-		result.get();
+		result.toCompletableFuture().get();
 	}
 
 	@Test
@@ -155,12 +156,12 @@ public class DefaultAsyncEndpointRequestExecutorTest {
 		when(asyncHttpClientRequest.executeAsync())
 			.thenReturn(future);
 
-		CompletableFuture<EndpointResponse<Object>> result = subject.executeAsync(endpointRequest);
+		CompletionStage<EndpointResponse<Object>> result = subject.executeAsync(endpointRequest);
 
 		expectedException.expect(ExecutionException.class);
 		expectedException.expectCause(isA(HttpClientException.class));
 
-		result.get();
+		result.toCompletableFuture().get();
 	}
 
 	@Test
@@ -173,11 +174,11 @@ public class DefaultAsyncEndpointRequestExecutorTest {
 		when(asyncHttpClientRequest.executeAsync())
 			.thenReturn(future);
 
-		CompletableFuture<EndpointResponse<Object>> result = subject.executeAsync(endpointRequest);
+		CompletionStage<EndpointResponse<Object>> result = subject.executeAsync(endpointRequest);
 
 		expectedException.expect(ExecutionException.class);
 		expectedException.expectCause(isA(HttpException.class));
 
-		result.get();
+		result.toCompletableFuture().get();
 	}
 }

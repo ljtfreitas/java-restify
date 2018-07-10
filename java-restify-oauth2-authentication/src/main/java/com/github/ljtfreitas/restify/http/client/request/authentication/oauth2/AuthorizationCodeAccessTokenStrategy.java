@@ -25,29 +25,16 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.request.authentication.oauth2;
 
-public class AuthorizationCodeAccessTokenProvider extends BaseAccessTokenProvider {
+class AuthorizationCodeAccessTokenStrategy implements AccessTokenStrategy {
 
 	private final AuthorizationCodeProvider authorizationCodeProvider;
 
-	public AuthorizationCodeAccessTokenProvider() {
-		this(new DefaultAuthorizationServer());
-	}
-
-	public AuthorizationCodeAccessTokenProvider(AuthorizationCodeProvider authorizationCodeProvider) {
-		this(authorizationCodeProvider, new DefaultAuthorizationServer());
-	}
-
-	public AuthorizationCodeAccessTokenProvider(AuthorizationServer authorizationServer) {
-		this(new DefaultAuthorizationCodeProvider(authorizationServer), authorizationServer);
-	}
-
-	public AuthorizationCodeAccessTokenProvider(AuthorizationCodeProvider authorizationCodeProvider, AuthorizationServer authorizationServer) {
-		super(authorizationServer);
+	public AuthorizationCodeAccessTokenStrategy(AuthorizationCodeProvider authorizationCodeProvider) {
 		this.authorizationCodeProvider = authorizationCodeProvider;
 	}
 
 	@Override
-	protected AccessTokenRequest buildAccessTokenRequest(OAuth2AuthenticatedEndpointRequest request) {
+	public AccessTokenRequest newAccessTokenRequest(OAuth2AuthenticatedEndpointRequest request) {
 		AuthorizationCodeGrantProperties properties = request.properties(AuthorizationCodeGrantProperties.class);
 
 		String authorizationCode = properties.authorizationCode()
@@ -63,4 +50,5 @@ public class AuthorizationCodeAccessTokenProvider extends BaseAccessTokenProvide
 					  .accessTokenUri(properties.accessTokenUri())
 					  .build();
 	}
+
 }
