@@ -37,7 +37,7 @@ class AuthorizationCodeAccessTokenStrategy implements AccessTokenStrategy {
 	public AccessTokenRequest newAccessTokenRequest(OAuth2AuthenticatedEndpointRequest request) {
 		AuthorizationCodeGrantProperties properties = request.properties(AuthorizationCodeGrantProperties.class);
 
-		String authorizationCode = properties.authorizationCode()
+		AuthorizationCode authorizationCode = properties.authorizationCode()
 					.orElseGet(() -> authorizationCodeProvider.provides(request));
 
 		AccessTokenRequest.Builder builder = AccessTokenRequest.authorizationCode(authorizationCode);

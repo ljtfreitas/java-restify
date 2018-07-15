@@ -38,7 +38,7 @@ import com.github.ljtfreitas.restify.http.client.message.Headers;
 
 public class AuthorizationCodeGrantProperties extends GrantProperties {
 
-	private String authorizationCode;
+	private AuthorizationCode authorizationCode;
 	private URI authorizationUri;
 	private URI redirectUri;
 	private String responseType = "code";
@@ -46,7 +46,7 @@ public class AuthorizationCodeGrantProperties extends GrantProperties {
 	private String state;
 	private Headers headers = new Headers();
 
-	public Optional<String> authorizationCode() {
+	public Optional<AuthorizationCode> authorizationCode() {
 		return Optional.ofNullable(authorizationCode);
 	}
 
@@ -135,6 +135,11 @@ public class AuthorizationCodeGrantProperties extends GrantProperties {
 		}
 
 		public Builder authorizationCode(String authorizationCode) {
+			properties.authorizationCode = new AuthorizationCode(authorizationCode);
+			return this;
+		}
+
+		public Builder authorizationCode(AuthorizationCode authorizationCode) {
 			properties.authorizationCode = authorizationCode;
 			return this;
 		}

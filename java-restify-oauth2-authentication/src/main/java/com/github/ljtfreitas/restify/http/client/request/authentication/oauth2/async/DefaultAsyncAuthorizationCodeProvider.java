@@ -28,6 +28,7 @@ package com.github.ljtfreitas.restify.http.client.request.authentication.oauth2.
 import java.util.concurrent.CompletionStage;
 
 import com.github.ljtfreitas.restify.http.client.request.authentication.oauth2.AuthorizationFlowResponse;
+import com.github.ljtfreitas.restify.http.client.request.authentication.oauth2.AuthorizationCode;
 import com.github.ljtfreitas.restify.http.client.request.authentication.oauth2.AuthorizationCodeGrantProperties;
 import com.github.ljtfreitas.restify.http.client.request.authentication.oauth2.AuthorizationCodeRequest;
 import com.github.ljtfreitas.restify.http.client.request.authentication.oauth2.OAuth2AuthenticatedEndpointRequest;
@@ -45,11 +46,12 @@ class DefaultAsyncAuthorizationCodeProvider implements AsyncAuthorizationCodePro
 	}
 
 	@Override
-	public CompletionStage<String> provides(OAuth2AuthenticatedEndpointRequest request) {
+	public CompletionStage<AuthorizationCode> provides(OAuth2AuthenticatedEndpointRequest request) {
 		AuthorizationCodeGrantProperties properties = request.properties(AuthorizationCodeGrantProperties.class);
 
 		return asyncAuthorizationServer.authorize(new AuthorizationCodeRequest(properties, request.scope()))
 				.thenApply(authorizationCodeResponse -> new AuthorizationFlowResponse(properties, authorizationCodeResponse))
-					.thenApply(AuthorizationFlowResponse::code);
+					.thenApply(AuthorizationFlowResponse::code)
+						.thenApply(AuthorizationCode::new);
 	}
 }

@@ -27,6 +27,7 @@ import org.mockserver.model.Parameter;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
 import com.github.ljtfreitas.restify.http.client.request.authentication.oauth2.AccessToken;
 import com.github.ljtfreitas.restify.http.client.request.authentication.oauth2.AccessTokenType;
+import com.github.ljtfreitas.restify.http.client.request.authentication.oauth2.AuthorizationCode;
 import com.github.ljtfreitas.restify.http.client.request.authentication.oauth2.AuthorizationCodeGrantProperties;
 import com.github.ljtfreitas.restify.http.client.request.authentication.oauth2.ClientCredentials;
 import com.github.ljtfreitas.restify.http.client.request.authentication.oauth2.GrantProperties;
@@ -65,7 +66,8 @@ public class AsyncAuthorizationCodeAccessTokenProviderTest {
 
 		request = new OAuth2AuthenticatedEndpointRequest(source, properties);
 
-		when(authorizationCodeProvider.provides(request)).thenReturn(CompletableFuture.completedFuture("abc1234"));
+		when(authorizationCodeProvider.provides(request))
+			.thenReturn(CompletableFuture.completedFuture(new AuthorizationCode("abc1234")));
 
 		provider = new DefaultAsyncAccessTokenProvider(new AsyncAuthorizationCodeAccessTokenStrategy(authorizationCodeProvider));
 

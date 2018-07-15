@@ -23,14 +23,31 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.http.client.request.authentication.oauth2.async;
+package com.github.ljtfreitas.restify.http.client.request.authentication.oauth2;
 
-import java.util.concurrent.CompletionStage;
+import java.util.Objects;
 
-import com.github.ljtfreitas.restify.http.client.request.authentication.oauth2.AuthorizationCode;
-import com.github.ljtfreitas.restify.http.client.request.authentication.oauth2.OAuth2AuthenticatedEndpointRequest;
+public class AuthorizationCode {
 
-public interface AsyncAuthorizationCodeProvider {
+	private final String code;
 
-	public CompletionStage<AuthorizationCode> provides(OAuth2AuthenticatedEndpointRequest request);
+	public AuthorizationCode(String code) {
+		this.code = code;
+	}
+
+	@Override
+	public String toString() {
+		return code;
+	}
+
+	@Override
+	public boolean equals(Object obj) {
+		if (!(obj instanceof AuthorizationCode)) return false;
+		return this.code.equals(((AuthorizationCode) obj).code);
+	}
+
+	@Override
+	public int hashCode() {
+		return Objects.hash(code);
+	}
 }

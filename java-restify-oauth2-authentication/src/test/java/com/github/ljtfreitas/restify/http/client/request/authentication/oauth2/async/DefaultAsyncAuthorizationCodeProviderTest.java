@@ -18,6 +18,7 @@ import org.mockserver.junit.MockServerRule;
 import org.mockserver.model.Parameter;
 
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
+import com.github.ljtfreitas.restify.http.client.request.authentication.oauth2.AuthorizationCode;
 import com.github.ljtfreitas.restify.http.client.request.authentication.oauth2.AuthorizationCodeGrantProperties;
 import com.github.ljtfreitas.restify.http.client.request.authentication.oauth2.OAuth2AuthenticatedEndpointRequest;
 import com.github.ljtfreitas.restify.http.client.request.authentication.oauth2.OAuth2Exception;
@@ -73,9 +74,9 @@ public class DefaultAsyncAuthorizationCodeProviderTest {
 				.withHeader("Content-Type", "application/x-www-form-urlencoded")
 				.withHeader("Location", "http://my.web.app/oauth/callback?code=abc1234&state=current-state"));
 
-		CompletableFuture<String> authorizationCodeAsFuture = provider.provides(request).toCompletableFuture();
+		CompletableFuture<AuthorizationCode> authorizationCodeAsFuture = provider.provides(request).toCompletableFuture();
 
-		assertEquals("abc1234", authorizationCodeAsFuture.join());
+		assertEquals(new AuthorizationCode("abc1234"), authorizationCodeAsFuture.join());
 	}
 
 	@Test
@@ -91,7 +92,7 @@ public class DefaultAsyncAuthorizationCodeProviderTest {
 			.respond(response()
 				.withStatusCode(200));
 
-		CompletableFuture<String> authorizationCodeAsFuture = provider.provides(request).toCompletableFuture();
+		CompletableFuture<AuthorizationCode> authorizationCodeAsFuture = provider.provides(request).toCompletableFuture();
 
 		expectedException.expectCause(isA(OAuth2UserApprovalRequiredException.class));
 
@@ -112,7 +113,7 @@ public class DefaultAsyncAuthorizationCodeProviderTest {
 				.withStatusCode(400)
 				.withBody(json("{\"error\":\"invalid_client\",\"error_description\":\"client_id unauthorized\"}")));
 
-		CompletableFuture<String> authorizationCodeAsFuture = provider.provides(request).toCompletableFuture();
+		CompletableFuture<AuthorizationCode> authorizationCodeAsFuture = provider.provides(request).toCompletableFuture();
 
 		expectedException.expectCause(isA(OAuth2Exception.class));
 

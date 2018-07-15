@@ -639,7 +639,7 @@ public class OAuth2AuthenticationBuilderTest {
 		AuthorizationCodeProvider authorizationCodeProvider = mock(AuthorizationCodeProvider.class);
 
 		when(authorizationCodeProvider.provides(notNull(OAuth2AuthenticatedEndpointRequest.class)))
-			.thenReturn("abc1234");
+			.thenReturn(new AuthorizationCode("abc1234"));
 
 		mockServerClient
 			.when(request()

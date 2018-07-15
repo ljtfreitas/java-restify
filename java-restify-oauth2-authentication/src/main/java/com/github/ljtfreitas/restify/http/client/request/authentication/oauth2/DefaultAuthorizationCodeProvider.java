@@ -38,13 +38,13 @@ class DefaultAuthorizationCodeProvider implements AuthorizationCodeProvider {
 	}
 
 	@Override
-	public String provides(OAuth2AuthenticatedEndpointRequest request) {
+	public AuthorizationCode provides(OAuth2AuthenticatedEndpointRequest request) {
 		AuthorizationCodeGrantProperties properties = request.properties(AuthorizationCodeGrantProperties.class);
 
 		AuthorizationCodeResponse authorizationCodeResponse = authorizationServer.authorize(new AuthorizationCodeRequest(properties, request.scope()));
 
 		AuthorizationFlowResponse flow = new AuthorizationFlowResponse(properties, authorizationCodeResponse);
 
-		return flow.code();
+		return new AuthorizationCode(flow.code());
 	}
 }

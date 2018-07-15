@@ -29,6 +29,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
 import com.github.ljtfreitas.restify.http.client.request.authentication.oauth2.AccessTokenRequest;
+import com.github.ljtfreitas.restify.http.client.request.authentication.oauth2.AuthorizationCode;
 import com.github.ljtfreitas.restify.http.client.request.authentication.oauth2.AuthorizationCodeGrantProperties;
 import com.github.ljtfreitas.restify.http.client.request.authentication.oauth2.OAuth2AuthenticatedEndpointRequest;
 
@@ -45,7 +46,7 @@ public class AsyncAuthorizationCodeAccessTokenStrategy implements AsyncAccessTok
 	public CompletionStage<AccessTokenRequest> newAccessTokenRequest(OAuth2AuthenticatedEndpointRequest request) {
 		AuthorizationCodeGrantProperties properties = request.properties(AuthorizationCodeGrantProperties.class);
 
-		CompletionStage<String> authorizationCodeAsFuture = properties.authorizationCode()
+		CompletionStage<AuthorizationCode> authorizationCodeAsFuture = properties.authorizationCode()
 				.map(CompletableFuture::completedFuture)
 					.map(CompletionStage.class::cast)
 						.orElseGet(() -> authorizationCodeProvider.provides(request));

@@ -31,6 +31,7 @@ import com.github.ljtfreitas.restify.http.client.request.authentication.oauth2.A
 import com.github.ljtfreitas.restify.http.client.request.authentication.oauth2.AccessTokenResponse;
 import com.github.ljtfreitas.restify.http.client.request.authentication.oauth2.AccessTokenResponseBody;
 import com.github.ljtfreitas.restify.http.client.request.authentication.oauth2.AccessTokenStorageKey;
+import com.github.ljtfreitas.restify.http.client.request.authentication.oauth2.AuthorizationCode;
 import com.github.ljtfreitas.restify.http.client.request.authentication.oauth2.AuthorizationCodeRequest;
 import com.github.ljtfreitas.restify.http.client.request.authentication.oauth2.AuthorizationCodeResponse;
 import com.github.ljtfreitas.restify.http.client.request.authentication.oauth2.ClientCredentials;
@@ -646,7 +647,7 @@ public class OAuth2AsyncAuthenticationBuilderTest {
 		AsyncAuthorizationCodeProvider authorizationCodeProvider = mock(AsyncAuthorizationCodeProvider.class);
 
 		when(authorizationCodeProvider.provides(notNull(OAuth2AuthenticatedEndpointRequest.class)))
-			.thenReturn(CompletableFuture.completedFuture("abc1234"));
+			.thenReturn(CompletableFuture.completedFuture(new AuthorizationCode("abc1234")));
 
 		mockServerClient
 			.when(request()

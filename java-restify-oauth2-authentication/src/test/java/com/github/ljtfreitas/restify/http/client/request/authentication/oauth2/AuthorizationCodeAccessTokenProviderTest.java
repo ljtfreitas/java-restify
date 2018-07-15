@@ -58,7 +58,8 @@ public class AuthorizationCodeAccessTokenProviderTest {
 
 		request = new OAuth2AuthenticatedEndpointRequest(source, properties);
 
-		when(authorizationCodeProvider.provides(request)).thenReturn("abc1234");
+		when(authorizationCodeProvider.provides(request))
+			.thenReturn(new AuthorizationCode("abc1234"));
 
 		provider = new DefaultAccessTokenProvider(new AuthorizationCodeAccessTokenStrategy(authorizationCodeProvider));
 
