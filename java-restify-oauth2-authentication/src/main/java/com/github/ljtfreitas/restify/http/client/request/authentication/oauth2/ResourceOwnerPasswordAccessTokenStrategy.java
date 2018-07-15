@@ -27,7 +27,7 @@ package com.github.ljtfreitas.restify.http.client.request.authentication.oauth2;
 
 import static com.github.ljtfreitas.restify.util.Preconditions.nonNull;
 
-class ResourceOwnerPasswordAccessTokenStrategy implements AccessTokenStrategy {
+public class ResourceOwnerPasswordAccessTokenStrategy implements AccessTokenStrategy {
 
 	@Override
 	public AccessTokenRequest newAccessTokenRequest(OAuth2AuthenticatedEndpointRequest request) {

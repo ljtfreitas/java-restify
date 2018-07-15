@@ -66,6 +66,10 @@ public class GrantProperties {
 		return Optional.ofNullable(user);
 	}
 
+	public static GrantProperties empty() {
+		return new GrantProperties();
+	}
+
 	public static class Builder {
 
 		private final GrantProperties properties;

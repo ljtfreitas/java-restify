@@ -23,25 +23,13 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.http.client.request.authentication.oauth2;
+package com.github.ljtfreitas.restify.http.client.request.authentication.oauth2.async;
 
-public class ClientCredentialsAccessTokenStrategy implements AccessTokenStrategy {
+import java.util.concurrent.CompletionStage;
 
-	@Override
-	public AccessTokenRequest newAccessTokenRequest(OAuth2AuthenticatedEndpointRequest request) {
-		GrantProperties properties = request.properties();
+import com.github.ljtfreitas.restify.http.client.request.authentication.oauth2.OAuth2AuthenticatedEndpointRequest;
 
-		AccessTokenRequest.Builder builder = AccessTokenRequest.clientCredentials(properties.credentials());
+public interface AsyncAuthorizationCodeProvider {
 
-		return builder.accessTokenUri(properties.accessTokenUri())
-					  .parameter("scope", request.scope())
-					  .build();
-	}
-
-	@Override
-	public AccessTokenRequest newRefreshTokenRequest(AccessToken accessToken,
-			OAuth2AuthenticatedEndpointRequest request) {
-		throw new UnsupportedOperationException("Client Credentials Grant does not support refresh token.");
-	}
-
+	public CompletionStage<String> provides(OAuth2AuthenticatedEndpointRequest request);
 }

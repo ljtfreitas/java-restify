@@ -33,35 +33,39 @@ import com.github.ljtfreitas.restify.http.client.message.Header;
 import com.github.ljtfreitas.restify.http.client.message.response.StatusCode;
 import com.github.ljtfreitas.restify.http.contract.Parameters;
 
-public class ImplicitAuthorizeResponse {
+public class AuthorizationFlowResponse {
 
-	private final ImplicitGrantProperties properties;
+	private final AuthorizationCodeGrantProperties properties;
 	private final AuthorizationCodeResponse response;
 
-	public ImplicitAuthorizeResponse(ImplicitGrantProperties properties, AuthorizationCodeResponse response) {
+	public AuthorizationFlowResponse(AuthorizationCodeGrantProperties properties, AuthorizationCodeResponse response) {
 		this.properties = properties;
 		this.response = response;
 	}
 
-	public AccessToken accessToken() {
+	public String code() {
 		StatusCode status = response.status();
 
 		if (status.isOk()) {
 			String message = "You need approve the client [" + properties.credentials().clientId() + "] to access protected resources "
-				+ "with scopes [" + properties.scopes() + "]";
+					+ "with scopes [" + properties.scopes() + "]";
 
 			throw new OAuth2UserApprovalRequiredException(message);
-
 		} else {
 			Header location = response.headers().get("Location")
 					.orElseThrow(() -> new IllegalStateException("Location header must be present on Authorization redirect!"));
 
-			Parameters parameters = Parameters.parse(URI.create(location.value()).getFragment());
+			URI redirectUri = URI.create(location.value());
+
+			Parameters parameters = Parameters.parse(redirectUri.getQuery());
 
 			isTrue(properties.state().orElse("").equals(parameters.first("state").orElse("")),
 					"Possible CSRF attack? [state] parameter returned by the authorization server is not the same of the authorization request.");
 
-			return  AccessToken.of(AccessTokenResponseBody.of(parameters));
+			String code = parameters.first("code")
+					.orElseThrow(() -> new OAuth2UserRedirectRequiredException("A redirect to [" + redirectUri + "] is required!"));
+
+			return code;
 		}
 	}
 }

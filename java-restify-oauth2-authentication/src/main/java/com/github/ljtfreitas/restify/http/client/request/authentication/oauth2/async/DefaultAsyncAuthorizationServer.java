@@ -81,8 +81,8 @@ class DefaultAsyncAuthorizationServer implements AsyncAuthorizationServer {
 	}
 
 	@Override
-	public CompletionStage<AuthorizationCodeResponse> authorize(CompletionStage<AuthorizationCodeRequest> request) {
-		return request.thenCompose(this::doAuthorize).thenApply(AuthorizationCodeResponse::new);
+	public CompletionStage<AuthorizationCodeResponse> authorize(AuthorizationCodeRequest request) {
+		return doAuthorize(request).thenApply(AuthorizationCodeResponse::new);
 	}
 
 	private CompletionStage<EndpointResponse<String>> doAuthorize(AuthorizationCodeRequest request) {
@@ -92,8 +92,8 @@ class DefaultAsyncAuthorizationServer implements AsyncAuthorizationServer {
 	}
 
 	@Override
-	public CompletionStage<AccessTokenResponse> requireToken(CompletionStage<AccessTokenRequest> request) {
-		return request.thenCompose(this::doRequireToken).thenApply(AccessTokenResponse::new);
+	public CompletionStage<AccessTokenResponse> requireToken(AccessTokenRequest request) {
+		return doRequireToken(request).thenApply(AccessTokenResponse::new);
 	}
 
 	private CompletionStage<EndpointResponse<AccessTokenResponseBody>> doRequireToken(AccessTokenRequest request) {

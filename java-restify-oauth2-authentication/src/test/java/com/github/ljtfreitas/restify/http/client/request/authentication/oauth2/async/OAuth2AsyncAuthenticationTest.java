@@ -1,4 +1,4 @@
-package com.github.ljtfreitas.restify.http.client.request.authentication.oauth2;
+package com.github.ljtfreitas.restify.http.client.request.authentication.oauth2.async;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
@@ -10,6 +10,7 @@ import static org.mockito.Mockito.when;
 import java.lang.annotation.Annotation;
 import java.net.URI;
 import java.util.Arrays;
+import java.util.concurrent.CompletableFuture;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -22,23 +23,22 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequestMetadata;
+import com.github.ljtfreitas.restify.http.client.request.authentication.async.AsyncAuthentication;
 import com.github.ljtfreitas.restify.http.client.request.authentication.oauth2.AccessToken;
-import com.github.ljtfreitas.restify.http.client.request.authentication.oauth2.AccessTokenRepository;
 import com.github.ljtfreitas.restify.http.client.request.authentication.oauth2.ClientCredentials;
 import com.github.ljtfreitas.restify.http.client.request.authentication.oauth2.GrantProperties;
 import com.github.ljtfreitas.restify.http.client.request.authentication.oauth2.OAuth2AuthenticatedEndpointRequest;
-import com.github.ljtfreitas.restify.http.client.request.authentication.oauth2.OAuth2Authentication;
 import com.github.ljtfreitas.restify.http.client.request.authentication.oauth2.Scope;
 
 @RunWith(MockitoJUnitRunner.class)
-public class OAuth2AuthenticationTest {
+public class OAuth2AsyncAuthenticationTest {
 
 	@Mock
-	private AccessTokenRepository accessTokenRepository;
+	private AsyncAccessTokenRepository accessTokenRepository;
 
 	private AccessToken accessToken;
 
-	private OAuth2Authentication authentication;
+	private AsyncAuthentication authentication;
 
 	@Captor
 	private ArgumentCaptor<OAuth2AuthenticatedEndpointRequest> requestCapture;
@@ -53,7 +53,7 @@ public class OAuth2AuthenticationTest {
 		accessToken = AccessToken.bearer("aaa111");
 
 		when(accessTokenRepository.findBy(notNull(OAuth2AuthenticatedEndpointRequest.class)))
-			.thenReturn(accessToken);
+			.thenReturn(CompletableFuture.completedFuture(accessToken));
 
 		properties = GrantProperties.Builder.clientCredentials()
 				.credentials(new ClientCredentials("client-id", "client-secret"))
@@ -61,12 +61,12 @@ public class OAuth2AuthenticationTest {
 				.scopes("read", "write")
 				.build();
 
-		authentication = new OAuth2Authentication(properties, accessTokenRepository);
+		authentication = new OAuth2AsyncAuthentication(properties, accessTokenRepository);
 	}
 
 	@Test
 	public void shouldGenerateAccessTokenFromOAuthAuthenticatedRequest() {
-		String result = authentication.content(source);
+		String result = authentication.contentAsync(source).toCompletableFuture().join();
 
 		assertEquals(accessToken.toString(), result);
 
@@ -89,7 +89,7 @@ public class OAuth2AuthenticationTest {
 		};
 		doReturn(new EndpointRequestMetadata(Arrays.asList(scope))).when(source).metadata();
 
-		assertNotNull(authentication.content(source));
+		assertNotNull(authentication.contentAsync(source).toCompletableFuture().join());
 
 		verify(accessTokenRepository).findBy(requestCapture.capture());
 

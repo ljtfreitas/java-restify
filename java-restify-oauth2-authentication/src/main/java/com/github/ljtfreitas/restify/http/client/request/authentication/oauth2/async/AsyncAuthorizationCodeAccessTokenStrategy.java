@@ -25,38 +25,42 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.request.authentication.oauth2.async;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
-import com.github.ljtfreitas.restify.http.client.request.authentication.oauth2.AccessToken;
-import com.github.ljtfreitas.restify.http.client.request.authentication.oauth2.AccessTokenResponse;
+import com.github.ljtfreitas.restify.http.client.request.authentication.oauth2.AccessTokenRequest;
+import com.github.ljtfreitas.restify.http.client.request.authentication.oauth2.AuthorizationCodeGrantProperties;
 import com.github.ljtfreitas.restify.http.client.request.authentication.oauth2.OAuth2AuthenticatedEndpointRequest;
 
-class DefaultAsyncAccessTokenProvider implements AsyncAccessTokenProvider {
+public class AsyncAuthorizationCodeAccessTokenStrategy implements AsyncAccessTokenStrategy {
 
-	private final AsyncAccessTokenStrategy accessTokenStrategy;
-	private final AsyncAuthorizationServer authorizationServer;
+	private final AsyncAuthorizationCodeProvider authorizationCodeProvider;
 
-	public DefaultAsyncAccessTokenProvider(AsyncAccessTokenStrategy accessTokenStrategy) {
-		this(accessTokenStrategy, new DefaultAsyncAuthorizationServer());
+	public AsyncAuthorizationCodeAccessTokenStrategy(AsyncAuthorizationCodeProvider authorizationCodeProvider) {
+		this.authorizationCodeProvider = authorizationCodeProvider;
 	}
 
-	public DefaultAsyncAccessTokenProvider(AsyncAccessTokenStrategy accessTokenStrategy, AsyncAuthorizationServer authorizationServer) {
-		this.accessTokenStrategy = accessTokenStrategy;
-		this.authorizationServer = authorizationServer;
-	}
-
+	@SuppressWarnings("unchecked")
 	@Override
-	public CompletionStage<AccessToken> provides(OAuth2AuthenticatedEndpointRequest request) {
-		return accessTokenStrategy.newAccessTokenRequest(request)
-				.thenCompose(accessTokenRequest -> authorizationServer.requireToken(accessTokenRequest))
-					.thenApply(AccessTokenResponse::accessToken);
-	}
+	public CompletionStage<AccessTokenRequest> newAccessTokenRequest(OAuth2AuthenticatedEndpointRequest request) {
+		AuthorizationCodeGrantProperties properties = request.properties(AuthorizationCodeGrantProperties.class);
 
-	@Override
-	public CompletionStage<AccessToken> refresh(AccessToken accessToken, OAuth2AuthenticatedEndpointRequest request) {
-		return accessTokenStrategy.newRefreshTokenRequest(accessToken, request)
-				.thenCompose(accessTokenRequest -> authorizationServer.requireToken(accessTokenRequest))
-					.thenApply(AccessTokenResponse::accessToken);
+		CompletionStage<String> authorizationCodeAsFuture = properties.authorizationCode()
+				.map(CompletableFuture::completedFuture)
+					.map(CompletionStage.class::cast)
+						.orElseGet(() -> authorizationCodeProvider.provides(request));
+
+		return authorizationCodeAsFuture.thenApply(authorizationCode -> {
+			AccessTokenRequest.Builder builder = AccessTokenRequest.authorizationCode(authorizationCode);
+
+			if (properties.redirectUri().isPresent()) {
+				builder.parameter("redirect_uri", properties.redirectUri().get().toString());
+			}
+
+			return builder.credentials(properties.credentials())
+					.accessTokenUri(properties.accessTokenUri())
+					.build();
+		});
 	}
 
 }

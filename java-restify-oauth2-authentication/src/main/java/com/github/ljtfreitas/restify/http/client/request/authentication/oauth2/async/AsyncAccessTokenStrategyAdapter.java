@@ -25,38 +25,32 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.request.authentication.oauth2.async;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
+import java.util.function.Supplier;
 
 import com.github.ljtfreitas.restify.http.client.request.authentication.oauth2.AccessToken;
-import com.github.ljtfreitas.restify.http.client.request.authentication.oauth2.AccessTokenResponse;
+import com.github.ljtfreitas.restify.http.client.request.authentication.oauth2.AccessTokenRequest;
+import com.github.ljtfreitas.restify.http.client.request.authentication.oauth2.AccessTokenStrategy;
 import com.github.ljtfreitas.restify.http.client.request.authentication.oauth2.OAuth2AuthenticatedEndpointRequest;
 
-class DefaultAsyncAccessTokenProvider implements AsyncAccessTokenProvider {
+public class AsyncAccessTokenStrategyAdapter implements AsyncAccessTokenStrategy {
 
-	private final AsyncAccessTokenStrategy accessTokenStrategy;
-	private final AsyncAuthorizationServer authorizationServer;
+	private final AccessTokenStrategy delegate;
 
-	public DefaultAsyncAccessTokenProvider(AsyncAccessTokenStrategy accessTokenStrategy) {
-		this(accessTokenStrategy, new DefaultAsyncAuthorizationServer());
-	}
-
-	public DefaultAsyncAccessTokenProvider(AsyncAccessTokenStrategy accessTokenStrategy, AsyncAuthorizationServer authorizationServer) {
-		this.accessTokenStrategy = accessTokenStrategy;
-		this.authorizationServer = authorizationServer;
+	public AsyncAccessTokenStrategyAdapter(AccessTokenStrategy delegate) {
+		this.delegate = delegate;
 	}
 
 	@Override
-	public CompletionStage<AccessToken> provides(OAuth2AuthenticatedEndpointRequest request) {
-		return accessTokenStrategy.newAccessTokenRequest(request)
-				.thenCompose(accessTokenRequest -> authorizationServer.requireToken(accessTokenRequest))
-					.thenApply(AccessTokenResponse::accessToken);
+	public CompletionStage<AccessTokenRequest> newAccessTokenRequest(OAuth2AuthenticatedEndpointRequest request) {
+		Supplier<AccessTokenRequest> lazy = () -> delegate.newAccessTokenRequest(request);
+		return CompletableFuture.completedFuture(lazy).thenApply(Supplier::get);
 	}
 
 	@Override
-	public CompletionStage<AccessToken> refresh(AccessToken accessToken, OAuth2AuthenticatedEndpointRequest request) {
-		return accessTokenStrategy.newRefreshTokenRequest(accessToken, request)
-				.thenCompose(accessTokenRequest -> authorizationServer.requireToken(accessTokenRequest))
-					.thenApply(AccessTokenResponse::accessToken);
+	public CompletionStage<AccessTokenRequest> newRefreshTokenRequest(AccessToken accessToken, OAuth2AuthenticatedEndpointRequest request) {
+		Supplier<AccessTokenRequest> lazy = () -> delegate.newRefreshTokenRequest(accessToken, request);
+		return CompletableFuture.completedFuture(lazy).thenApply(Supplier::get);
 	}
-
 }

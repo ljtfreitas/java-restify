@@ -41,9 +41,9 @@ public class ImplicitAccessTokenProvider implements AccessTokenProvider {
 	public AccessToken provides(OAuth2AuthenticatedEndpointRequest request) {
 		ImplicitGrantProperties properties = request.properties(ImplicitGrantProperties.class);
 
-		AuthorizationCodeResponse authorizeResponse = authorizationServer.authorize(new AuthorizationCodeRequest(properties, request.scope()));
+		AuthorizationCodeResponse authorizationCodeResponse = authorizationServer.authorize(new AuthorizationCodeRequest(properties, request.scope()));
 
-		ImplicitAuthorizeResponse implicit = new ImplicitAuthorizeResponse(properties, authorizeResponse);
+		ImplicitAuthorizationResponse implicit = new ImplicitAuthorizationResponse(properties, authorizationCodeResponse);
 
 		return implicit.accessToken();
 	}

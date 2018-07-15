@@ -34,8 +34,8 @@ import com.github.ljtfreitas.restify.http.client.request.authentication.oauth2.A
 
 public interface AsyncAuthorizationServer {
 
-	public CompletionStage<AuthorizationCodeResponse> authorize(CompletionStage<AuthorizationCodeRequest> request);
+	public CompletionStage<AuthorizationCodeResponse> authorize(AuthorizationCodeRequest request);
 
-	public CompletionStage<AccessTokenResponse> requireToken(CompletionStage<AccessTokenRequest> request);
+	public CompletionStage<AccessTokenResponse> requireToken(AccessTokenRequest request);
 
 }

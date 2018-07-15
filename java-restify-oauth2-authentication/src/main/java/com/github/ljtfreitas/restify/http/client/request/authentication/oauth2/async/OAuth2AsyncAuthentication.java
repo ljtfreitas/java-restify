@@ -35,36 +35,36 @@ import com.github.ljtfreitas.restify.http.client.request.authentication.oauth2.A
 import com.github.ljtfreitas.restify.http.client.request.authentication.oauth2.GrantProperties;
 import com.github.ljtfreitas.restify.http.client.request.authentication.oauth2.OAuth2AuthenticatedEndpointRequest;
 
-public class AsyncOAuth2Authentication implements AsyncAuthentication {
+public class OAuth2AsyncAuthentication implements AsyncAuthentication {
 
 	private final GrantProperties properties;
 	private final AsyncAccessTokenRepository accessTokenRepository;
 	private final Principal user;
 
-	public AsyncOAuth2Authentication(GrantProperties properties, AsyncAccessTokenRepository accessTokenRepository) {
+	public OAuth2AsyncAuthentication(GrantProperties properties, AsyncAccessTokenRepository accessTokenRepository) {
 		this(properties, accessTokenRepository, null);
 	}
 
-	public AsyncOAuth2Authentication(GrantProperties properties, AsyncAccessTokenProvider accessTokenProvider) {
+	public OAuth2AsyncAuthentication(GrantProperties properties, AsyncAccessTokenProvider accessTokenProvider) {
 		this(properties, accessTokenProvider, (Principal) null);
 	}
 
-	public AsyncOAuth2Authentication(GrantProperties properties, AsyncAccessTokenProvider accessTokenProvider,
+	public OAuth2AsyncAuthentication(GrantProperties properties, AsyncAccessTokenProvider accessTokenProvider,
 			Principal user) {
 		this(properties, accessTokenProvider, new AsyncAccessTokenStorageAdapter(new AccessTokenMemoryStorage()), user);
 	}
 
-	public AsyncOAuth2Authentication(GrantProperties properties, AsyncAccessTokenProvider accessTokenProvider,
+	public OAuth2AsyncAuthentication(GrantProperties properties, AsyncAccessTokenProvider accessTokenProvider,
 			AsyncAccessTokenStorage accessTokenStorage) {
 		this(properties, accessTokenProvider, accessTokenStorage, null);
 	}
 
-	public AsyncOAuth2Authentication(GrantProperties properties, AsyncAccessTokenProvider accessTokenProvider,
+	public OAuth2AsyncAuthentication(GrantProperties properties, AsyncAccessTokenProvider accessTokenProvider,
 			AsyncAccessTokenStorage accessTokenStorage, Principal user) {
 		this(properties, new DefaultAsyncAccessTokenRepository(accessTokenProvider, accessTokenStorage), null);
 	}
 
-	public AsyncOAuth2Authentication(GrantProperties properties, AsyncAccessTokenRepository accessTokenRepository, Principal user) {
+	public OAuth2AsyncAuthentication(GrantProperties properties, AsyncAccessTokenRepository accessTokenRepository, Principal user) {
 		this.properties = properties;
 		this.accessTokenRepository = accessTokenRepository;
 		this.user = user;

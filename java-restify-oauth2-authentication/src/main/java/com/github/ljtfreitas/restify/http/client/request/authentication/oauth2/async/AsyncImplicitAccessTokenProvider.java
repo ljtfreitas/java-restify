@@ -25,12 +25,11 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.request.authentication.oauth2.async;
 
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 
 import com.github.ljtfreitas.restify.http.client.request.authentication.oauth2.AccessToken;
 import com.github.ljtfreitas.restify.http.client.request.authentication.oauth2.AuthorizationCodeRequest;
-import com.github.ljtfreitas.restify.http.client.request.authentication.oauth2.ImplicitAuthorizeResponse;
+import com.github.ljtfreitas.restify.http.client.request.authentication.oauth2.ImplicitAuthorizationResponse;
 import com.github.ljtfreitas.restify.http.client.request.authentication.oauth2.ImplicitGrantProperties;
 import com.github.ljtfreitas.restify.http.client.request.authentication.oauth2.OAuth2AuthenticatedEndpointRequest;
 
@@ -50,9 +49,9 @@ public class AsyncImplicitAccessTokenProvider implements AsyncAccessTokenProvide
 	public CompletionStage<AccessToken> provides(OAuth2AuthenticatedEndpointRequest request) {
 		ImplicitGrantProperties properties = request.properties(ImplicitGrantProperties.class);
 
-		return authorizationServer.authorize(CompletableFuture.completedFuture(new AuthorizationCodeRequest(properties, request.scope())))
-			.thenApply(authorizeResponse -> new ImplicitAuthorizeResponse(properties, authorizeResponse))
-				.thenApply(ImplicitAuthorizeResponse::accessToken);
+		return authorizationServer.authorize(new AuthorizationCodeRequest(properties, request.scope()))
+			.thenApply(authorizeResponse -> new ImplicitAuthorizationResponse(properties, authorizeResponse))
+				.thenApply(ImplicitAuthorizationResponse::accessToken);
 	}
 
 	@Override

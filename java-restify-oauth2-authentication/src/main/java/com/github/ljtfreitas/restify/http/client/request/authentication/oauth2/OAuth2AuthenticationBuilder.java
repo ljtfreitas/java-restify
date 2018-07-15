@@ -246,12 +246,16 @@ public class OAuth2AuthenticationBuilder {
 		}
 	}
 
-	private abstract class OAuth2AccessTokenProviderFactory {
-		abstract AccessTokenProvider createProviderWith(AuthorizationServer authorizationServer);
+	private abstract class OAuth2AccessTokenStrategyFactory {
+		abstract AccessTokenStrategy createStrategyWith(AuthorizationServer authorizationServer);
 	}
 
-	private abstract class OAuth2AuthenticationGrantPropertiesBuilder extends OAuth2AccessTokenProviderFactory {
+	private abstract class OAuth2AuthenticationGrantPropertiesBuilder extends OAuth2AccessTokenStrategyFactory {
 		abstract GrantProperties build();
+
+		AccessTokenProvider createProviderWith(AuthorizationServer authorizationServer) {
+			return new DefaultAccessTokenProvider(createStrategyWith(authorizationServer), authorizationServer);
+		}
 	}
 
 	public class OAuth2ClientCredentialsGrantBuilder extends OAuth2AuthenticationGrantPropertiesBuilder {
@@ -313,8 +317,8 @@ public class OAuth2AuthenticationBuilder {
 		}
 
 		@Override
-		protected AccessTokenProvider createProviderWith(AuthorizationServer authorizationServer) {
-			return new DefaultAccessTokenProvider(new ClientCredentialsAccessTokenStrategy(), authorizationServer);
+		protected AccessTokenStrategy createStrategyWith(AuthorizationServer authorizationServer) {
+			return new ClientCredentialsAccessTokenStrategy();
 		}
 	}
 
@@ -392,8 +396,8 @@ public class OAuth2AuthenticationBuilder {
 		}
 
 		@Override
-		protected AccessTokenProvider createProviderWith(AuthorizationServer authorizationServer) {
-			return new DefaultAccessTokenProvider(new ResourceOwnerPasswordAccessTokenStrategy(), authorizationServer);
+		protected AccessTokenStrategy createStrategyWith(AuthorizationServer authorizationServer) {
+			return new ResourceOwnerPasswordAccessTokenStrategy();
 		}
 	}
 
@@ -536,7 +540,12 @@ public class OAuth2AuthenticationBuilder {
 		}
 
 		@Override
-		protected AccessTokenProvider createProviderWith(AuthorizationServer authorizationServer) {
+		protected AccessTokenStrategy createStrategyWith(AuthorizationServer authorizationServer) {
+			throw new UnsupportedOperationException();
+		}
+
+		@Override
+		AccessTokenProvider createProviderWith(AuthorizationServer authorizationServer) {
 			return new ImplicitAccessTokenProvider(authorizationServer);
 		}
 	}
@@ -688,11 +697,11 @@ public class OAuth2AuthenticationBuilder {
 		}
 
 		@Override
-		protected AccessTokenProvider createProviderWith(AuthorizationServer authorizationServer) {
+		protected AccessTokenStrategy createStrategyWith(AuthorizationServer authorizationServer) {
 			AuthorizationCodeProvider authorizationCodeProvider = Optional.ofNullable(this.authorizationCodeProvider)
 					.orElseGet(() -> new DefaultAuthorizationCodeProvider(authorizationServer));
 
-			return new DefaultAccessTokenProvider(new AuthorizationCodeAccessTokenStrategy(authorizationCodeProvider), authorizationServer);
+			return new AuthorizationCodeAccessTokenStrategy(authorizationCodeProvider);
 		}
 	}
 }
