@@ -87,7 +87,7 @@ public class RxJava2ObservableEndpointCallExecutableFactory<T, O> implements Asy
 
 		@Override
 		public Observable<T> executeAsync(AsyncEndpointCall<O> call, Object[] args) {
-			return Observable.fromFuture(call.executeAsync())
+			return Observable.fromFuture(call.executeAsync().toCompletableFuture())
 				.map(o -> delegate.execute(() -> o, args))
 					.subscribeOn(scheduler);
 		}

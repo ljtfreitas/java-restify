@@ -40,11 +40,11 @@ import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethodParame
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethodParameters;
 import com.github.ljtfreitas.restify.reflection.JavaType;
 
-public class CompletableFutureCallbackEndpointCallExecutableFactory<T, O> implements AsyncEndpointCallExecutableDecoratorFactory<Void, T, O> {
+public class CompletionStageCallbackEndpointCallExecutableFactory<T, O> implements AsyncEndpointCallExecutableDecoratorFactory<Void, T, O> {
 
 	private final Executor executor;
 
-	public CompletableFutureCallbackEndpointCallExecutableFactory(Executor executor) {
+	public CompletionStageCallbackEndpointCallExecutableFactory(Executor executor) {
 		this.executor = executor;
 	}
 
@@ -70,15 +70,15 @@ public class CompletableFutureCallbackEndpointCallExecutableFactory<T, O> implem
 
 	@Override
 	public AsyncEndpointCallExecutable<Void, O> createAsync(EndpointMethod endpointMethod, EndpointCallExecutable<T, O> executable) {
-		return new CompletableFutureCallbackEndpointCallExecutable(endpointMethod.parameters().callbacks(), executable);
+		return new CompletionStageFutureCallbackEndpointCallExecutable(endpointMethod.parameters().callbacks(), executable);
 	}
 
-	private class CompletableFutureCallbackEndpointCallExecutable implements AsyncEndpointCallExecutable<Void, O> {
+	private class CompletionStageFutureCallbackEndpointCallExecutable implements AsyncEndpointCallExecutable<Void, O> {
 
 		private final Collection<EndpointMethodParameter> callbackMethodParameters;
 		private final EndpointCallExecutable<T, O> delegate;
 
-		private CompletableFutureCallbackEndpointCallExecutable(Collection<EndpointMethodParameter> callbackMethodParameters,
+		private CompletionStageFutureCallbackEndpointCallExecutable(Collection<EndpointMethodParameter> callbackMethodParameters,
 				EndpointCallExecutable<T, O> executable) {
 			this.callbackMethodParameters = callbackMethodParameters;
 			this.delegate = executable;

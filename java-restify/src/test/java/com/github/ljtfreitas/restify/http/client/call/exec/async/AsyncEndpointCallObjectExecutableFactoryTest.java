@@ -74,7 +74,7 @@ public class AsyncEndpointCallObjectExecutableFactoryTest {
 
 		AsyncEndpointCall<String> output = executable.executeAsync(asyncEndpointCall, null);
 
-		assertEquals(result, output.executeAsync().get());
+		assertEquals(result, output.executeAsync().toCompletableFuture().join());
 		assertEquals(delegate.returnType(), executable.returnType());
 
 		verify(delegate).execute(any(), anyVararg());

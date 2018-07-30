@@ -31,6 +31,7 @@ import java.net.URI;
 import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 
 import com.github.ljtfreitas.restify.http.client.HttpClientException;
 import com.github.ljtfreitas.restify.http.client.message.Header;
@@ -117,7 +118,7 @@ class OkHttpClientRequest implements AsyncHttpClientRequest {
 	}
 
 	@Override
-	public CompletableFuture<HttpClientResponse> executeAsync() throws HttpClientException {
+	public CompletionStage<HttpClientResponse> executeAsync() throws HttpClientException {
 		CompletableFuture<HttpClientResponse> future = new CompletableFuture<>();
 
 		Request request = doBuildRequest();

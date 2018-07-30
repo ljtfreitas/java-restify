@@ -8,6 +8,7 @@ import static org.mockito.Mockito.when;
 
 import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Executors;
 
 import org.hamcrest.BaseMatcher;
@@ -63,9 +64,9 @@ public class AsyncRetryableLoopTest {
 			.thenReturn(exceptionally(new MyException("1st error...")))
 			.thenReturn(completed("success"));
 
-		CompletableFuture<String> future = asyncRetryableLoop.repeat(3, myObject::async);
+		CompletionStage<String> future = asyncRetryableLoop.repeat(3, myObject::async);
 
-		String output = future.get();
+		String output = future.toCompletableFuture().get();
 
 		assertEquals("success", output);
 
@@ -79,9 +80,9 @@ public class AsyncRetryableLoopTest {
 			.thenReturn(exceptionally(new EndpointResponseGatewayTimeoutException("Buuuuuu", Headers.empty(), "gateway timeout...")))
 			.thenReturn(completed("success"));
 
-		CompletableFuture<String> future = asyncRetryableLoop.repeat(3, myObject::async);
+		CompletionStage<String> future = asyncRetryableLoop.repeat(3, myObject::async);
 
-		String output = future.get();
+		String output = future.toCompletableFuture().get();
 
 		assertEquals("success", output);
 
@@ -99,13 +100,13 @@ public class AsyncRetryableLoopTest {
 
 		expectedException.expectCause(deepCause(expected));
 
-		CompletableFuture<String> future = asyncRetryableLoop.repeat(3, myObject::async);
+		CompletionStage<String> future = asyncRetryableLoop.repeat(3, myObject::async);
 
 		Thread.sleep(1000);
 
 		verify(myObject, times(3)).async();
 
-		future.get();
+		future.toCompletableFuture().get();
 	}
 
 	@Test
@@ -116,13 +117,13 @@ public class AsyncRetryableLoopTest {
 
 		expectedException.expectCause(deepCause(expected));
 
-		CompletableFuture<String> future = asyncRetryableLoop.repeat(1, myObject::async);
+		CompletionStage<String> future = asyncRetryableLoop.repeat(1, myObject::async);
 
 		Thread.sleep(1000);
 
 		verify(myObject).async();
 
-		future.get();
+		future.toCompletableFuture().get();
 	}
 
 	private <T> CompletableFuture<T> exceptionally(Exception e) {

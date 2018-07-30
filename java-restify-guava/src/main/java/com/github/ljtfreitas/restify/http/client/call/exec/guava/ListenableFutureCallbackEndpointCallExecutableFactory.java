@@ -104,7 +104,8 @@ public class ListenableFutureCallbackEndpointCallExecutableFactory<T, O> impleme
 			FutureCallback<T> callback = callbackParameter(args);
 
 			Future<T> future = call.executeAsync()
-					.thenApplyAsync(o -> delegate.execute(() -> o, args), executorService);
+					.toCompletableFuture()
+						.thenApplyAsync(o -> delegate.execute(() -> o, args), executorService);
 
 			ListenableFuture<T> listenableFuture = JdkFutureAdapters.listenInPoolThread(future, executorService);
 			Futures.addCallback(listenableFuture, callback, executorService);

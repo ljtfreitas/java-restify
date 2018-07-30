@@ -35,7 +35,7 @@ public class AsyncEndpointRequestInterceptorChainTest {
 
 		EndpointRequest request = new EndpointRequest(URI.create("http://whatever"), "GET");
 
-		CompletableFuture<EndpointRequest> intercepted = chain.applyAsync(request);
+		CompletableFuture<EndpointRequest> intercepted = chain.applyAsync(request).toCompletableFuture();
 
 		assertSame(request, intercepted.join());
 
@@ -53,7 +53,7 @@ public class AsyncEndpointRequestInterceptorChainTest {
 
 		EndpointRequest request = new EndpointRequest(URI.create("http://whatever"), "GET");
 
-		CompletableFuture<EndpointRequest> intercepted = chain.applyAsync(request);
+		CompletableFuture<EndpointRequest> intercepted = chain.applyAsync(request).toCompletableFuture();
 
 		assertSame(request, intercepted.join());
 

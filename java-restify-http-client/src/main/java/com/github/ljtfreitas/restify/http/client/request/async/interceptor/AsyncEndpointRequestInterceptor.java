@@ -26,11 +26,19 @@
 package com.github.ljtfreitas.restify.http.client.request.async.interceptor;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
 import com.github.ljtfreitas.restify.http.client.request.interceptor.EndpointRequestInterceptor;
 
 public interface AsyncEndpointRequestInterceptor extends EndpointRequestInterceptor {
 
-	public CompletableFuture<EndpointRequest> interceptsAsync(CompletableFuture<EndpointRequest> endpointRequest);
+	public CompletionStage<EndpointRequest> interceptsAsync(CompletionStage<EndpointRequest> endpointRequest);
+
+	@Override
+	public default EndpointRequest intercepts(EndpointRequest endpointRequest) {
+		return interceptsAsync(CompletableFuture.completedFuture(endpointRequest))
+				.toCompletableFuture()
+					.join();
+	}
 }

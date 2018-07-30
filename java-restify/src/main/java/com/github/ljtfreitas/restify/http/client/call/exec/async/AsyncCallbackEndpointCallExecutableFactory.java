@@ -27,11 +27,11 @@ package com.github.ljtfreitas.restify.http.client.call.exec.async;
 
 import java.lang.reflect.ParameterizedType;
 import java.util.Collection;
-import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Executor;
 
 import com.github.ljtfreitas.restify.http.client.call.async.AsyncEndpointCall;
-import com.github.ljtfreitas.restify.http.client.call.async.CompletableFutureAsyncEndpointCall;
+import com.github.ljtfreitas.restify.http.client.call.async.CompletionStageAsyncEndpointCall;
 import com.github.ljtfreitas.restify.http.client.call.async.EndpointCallFailureCallback;
 import com.github.ljtfreitas.restify.http.client.call.async.EndpointCallSuccessCallback;
 import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutable;
@@ -94,10 +94,10 @@ public class AsyncCallbackEndpointCallExecutableFactory<T, O> implements AsyncEn
 		@SuppressWarnings("unchecked")
 		@Override
 		public Void executeAsync(AsyncEndpointCall<O> call, Object[] args) {
-			CompletableFuture<T> future = call.executeAsync()
+			CompletionStage<T> stage = call.executeAsync()
 					.thenApplyAsync(o -> delegate.execute(() -> o, args), executor);
 
-			AsyncEndpointCall<T> asyncEndpointCall = new CompletableFutureAsyncEndpointCall<>(future, executor);
+			AsyncEndpointCall<T> asyncEndpointCall = new CompletionStageAsyncEndpointCall<>(stage, executor);
 
 			EndpointCallSuccessCallback<T> successCallback = callback(EndpointCallSuccessCallback.class, args);
 			EndpointCallFailureCallback failureCallback = callback(EndpointCallFailureCallback.class, args);

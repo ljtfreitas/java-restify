@@ -27,6 +27,7 @@ package com.github.ljtfreitas.restify.http.netflix.client.request.async;
 
 import java.net.URI;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 
 import com.github.ljtfreitas.restify.http.client.request.async.AsyncHttpClientRequest;
 import com.github.ljtfreitas.restify.http.client.request.async.AsyncHttpClientRequestFactory;
@@ -72,14 +73,14 @@ public class AsyncRibbonLoadBalancedClient implements RibbonLoadBalancedClient {
 
 	@Override
 	public RibbonResponse withLoadBalancer(RibbonRequest request) throws ClientException {
-		return doExecuteAsync(request).join();
+		return doExecuteAsync(request).toCompletableFuture().join();
 	}
 
-	public CompletableFuture<RibbonResponse> executeAsync(RibbonRequest request) {
+	public CompletionStage<RibbonResponse> executeAsync(RibbonRequest request) {
 		return doExecuteAsync(request);
 	}
 
-	private CompletableFuture<RibbonResponse> doExecuteAsync(RibbonRequest request) {
+	private CompletionStage<RibbonResponse> doExecuteAsync(RibbonRequest request) {
 		LoadBalancerCommand<RibbonResponse> command = LoadBalancerCommand.<RibbonResponse> builder()
 				.withLoadBalancerContext(loadBalancerContext)
 				.withRetryHandler(retryHandler())
@@ -116,9 +117,9 @@ public class AsyncRibbonLoadBalancedClient implements RibbonLoadBalancedClient {
 					.createAsyncOf(newRequest.endpointRequest());
 			request.writeTo(asyncRibbonHttpRequestMessage);
 
-			CompletableFuture<HttpClientResponse> httpClientResponseAsFuture = asyncRibbonHttpRequestMessage.executeAsync();
+			CompletionStage<HttpClientResponse> httpClientResponseAsFuture = asyncRibbonHttpRequestMessage.executeAsync();
 
-			return Observable.from(httpClientResponseAsFuture).map(RibbonResponse::new).onErrorResumeNext(this::onError);
+			return Observable.from(httpClientResponseAsFuture.toCompletableFuture()).map(RibbonResponse::new).onErrorResumeNext(this::onError);
 		}
 
 		private Observable<RibbonResponse> onError(Throwable e) {

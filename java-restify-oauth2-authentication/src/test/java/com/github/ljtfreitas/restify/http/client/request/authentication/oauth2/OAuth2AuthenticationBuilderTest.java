@@ -169,8 +169,10 @@ public class OAuth2AuthenticationBuilderTest {
 	public void shouldBuildOAuth2AuthenticationObjectToClientCredentialsGrantTypeUsingCustomizedAuthorizationServer() {
 		AuthorizationServer authorizationServer = mock(AuthorizationServer.class);
 
+		AccessTokenResponseBody accessTokenResponseBody = new AccessTokenResponseBody.Builder().type("Bearer").token("aaa111").build();
+
 		when(authorizationServer.requireToken(notNull(AccessTokenRequest.class)))
-			.thenReturn(new EndpointResponse<>(StatusCode.ok(), new Headers(), AccessToken.bearer("aaa111")));
+			.thenReturn(new AccessTokenResponse(new EndpointResponse<>(StatusCode.ok(), accessTokenResponseBody)));
 
 		OAuth2Authentication authentication = new OAuth2AuthenticationBuilder()
 				.grantType()
@@ -310,8 +312,10 @@ public class OAuth2AuthenticationBuilderTest {
 	public void shouldBuildOAuth2AuthenticationObjectToResourceOwnerGrantTypeUsingCustomizedAuthorizationServer() {
 		AuthorizationServer authorizationServer = mock(AuthorizationServer.class);
 
+		AccessTokenResponseBody accessTokenResponseBody = new AccessTokenResponseBody.Builder().type("Bearer").token("aaa111").build();
+
 		when(authorizationServer.requireToken(notNull(AccessTokenRequest.class)))
-			.thenReturn(new EndpointResponse<>(StatusCode.ok(), new Headers(), AccessToken.bearer("aaa111")));
+			.thenReturn(new AccessTokenResponse(new EndpointResponse<>(StatusCode.ok(), accessTokenResponseBody)));
 
 		OAuth2Authentication authentication = new OAuth2AuthenticationBuilder()
 				.grantType()
@@ -460,7 +464,7 @@ public class OAuth2AuthenticationBuilderTest {
 		AuthorizationServer authorizationServer = mock(AuthorizationServer.class);
 
 		Header location = new Header("Location", "http://my.web.app/oauth/callback#access_token=aaa111&token_type=bearer&state=current-state&expires_in=3600&scope=read%20write");
-		EndpointResponse<String> response = new EndpointResponse<>(StatusCode.found(), new Headers(location), "hello");
+		AuthorizationCodeResponse response = new AuthorizationCodeResponse(new EndpointResponse<>(StatusCode.found(), new Headers(location),  "hello"));
 
 		when(authorizationServer.authorize(notNull(AuthorizationCodeRequest.class))).thenReturn(response);
 
@@ -600,12 +604,13 @@ public class OAuth2AuthenticationBuilderTest {
 		AuthorizationServer authorizationServer = mock(AuthorizationServer.class);
 
 		Header location = new Header("Location", "http://my.web.app/oauth/callback?code=abc1234&state=current-state");
-		EndpointResponse<String> response = new EndpointResponse<>(StatusCode.found(), new Headers(location), "hello");
+		AuthorizationCodeResponse response = new AuthorizationCodeResponse(new EndpointResponse<>(StatusCode.found(), new Headers(location), "hello"));
 		when(authorizationServer.authorize(notNull(AuthorizationCodeRequest.class)))
 			.thenReturn(response);
 
+		AccessTokenResponseBody accessTokenResponseBody = new AccessTokenResponseBody.Builder().type("Bearer").token("aaa111").build();
 		when(authorizationServer.requireToken(notNull(AccessTokenRequest.class)))
-			.thenReturn(new EndpointResponse<>(StatusCode.ok(), new Headers(), AccessToken.bearer("aaa111")));
+			.thenReturn(new AccessTokenResponse(new EndpointResponse<>(StatusCode.ok(), new Headers(), accessTokenResponseBody)));
 
 		OAuth2Authentication authentication = new OAuth2AuthenticationBuilder()
 				.grantType()
@@ -634,7 +639,7 @@ public class OAuth2AuthenticationBuilderTest {
 		AuthorizationCodeProvider authorizationCodeProvider = mock(AuthorizationCodeProvider.class);
 
 		when(authorizationCodeProvider.provides(notNull(OAuth2AuthenticatedEndpointRequest.class)))
-			.thenReturn("abc1234");
+			.thenReturn(new AuthorizationCode("abc1234"));
 
 		mockServerClient
 			.when(request()

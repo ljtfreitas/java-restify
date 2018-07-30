@@ -43,6 +43,9 @@ public class GrantProperties {
 	private Collection<String> scopes = Collections.emptyList();
 	private Principal user;
 
+	protected GrantProperties() {
+	}
+
 	public ClientCredentials credentials() {
 		return credentials;
 	}
@@ -61,6 +64,10 @@ public class GrantProperties {
 
 	public Optional<Principal> user() {
 		return Optional.ofNullable(user);
+	}
+
+	public static GrantProperties empty() {
+		return new GrantProperties();
 	}
 
 	public static class Builder {

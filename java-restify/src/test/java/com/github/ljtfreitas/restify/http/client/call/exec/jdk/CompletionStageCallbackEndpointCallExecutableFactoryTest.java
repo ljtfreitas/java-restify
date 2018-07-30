@@ -31,7 +31,7 @@ import com.github.ljtfreitas.restify.reflection.JavaType;
 import com.github.ljtfreitas.restify.reflection.SimpleParameterizedType;
 
 @RunWith(MockitoJUnitRunner.class)
-public class CompletableFutureCallbackEndpointCallExecutableFactoryTest {
+public class CompletionStageCallbackEndpointCallExecutableFactoryTest {
 
 	@Mock
 	private AsyncEndpointCallExecutable<String, String> delegate;
@@ -39,13 +39,13 @@ public class CompletableFutureCallbackEndpointCallExecutableFactoryTest {
 	@Mock
 	private AsyncEndpointCall<String> asyncEndpointCall;
 
-	private CompletableFutureCallbackEndpointCallExecutableFactory<String, String> factory;
+	private CompletionStageCallbackEndpointCallExecutableFactory<String, String> factory;
 
 	private SimpleEndpointMethod futureWithCallbackEndpointMethod;
 
 	@Before
 	public void setup() throws Exception {
-		factory = new CompletableFutureCallbackEndpointCallExecutableFactory<>(r -> r.run());
+		factory = new CompletionStageCallbackEndpointCallExecutableFactory<>(r -> r.run());
 
 		when(delegate.execute(any(), anyVararg()))
 			.then(invocation -> invocation.getArgumentAt(0, EndpointCall.class).execute());

@@ -9,6 +9,7 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -23,7 +24,7 @@ import com.github.ljtfreitas.restify.http.client.call.exec.async.AsyncEndpointCa
 import com.github.ljtfreitas.restify.reflection.JavaType;
 
 @RunWith(MockitoJUnitRunner.class)
-public class CompletableFutureEndpointCallExecutableFactoryTest {
+public class CompletionStageEndpointCallExecutableFactoryTest {
 
 	@Mock
 	private AsyncEndpointCallExecutable<String, String> delegate;
@@ -31,11 +32,11 @@ public class CompletableFutureEndpointCallExecutableFactoryTest {
 	@Mock
 	private AsyncEndpointCall<String> asyncEndpointCall;
 
-	private CompletableFutureEndpointCallExecutableFactory<String, String> factory;
+	private CompletionStageEndpointCallExecutableFactory<String, String> factory;
 
 	@Before
 	public void setup() {
-		factory = new CompletableFutureEndpointCallExecutableFactory<>(r -> r.run());
+		factory = new CompletionStageEndpointCallExecutableFactory<>(r -> r.run());
 
 		when(delegate.execute(any(), anyVararg()))
 			.then(invocation -> invocation.getArgumentAt(0, EndpointCall.class).execute());
@@ -45,12 +46,17 @@ public class CompletableFutureEndpointCallExecutableFactoryTest {
 	}
 
 	@Test
+	public void shouldSupportsWhenEndpointMethodReturnTypeIsCompletionStage() throws Exception {
+		assertTrue(factory.supports(new SimpleEndpointMethod(SomeType.class.getMethod("stage"))));
+	}
+
+	@Test
 	public void shouldSupportsWhenEndpointMethodReturnTypeIsCompletableFuture() throws Exception {
 		assertTrue(factory.supports(new SimpleEndpointMethod(SomeType.class.getMethod("future"))));
 	}
 
 	@Test
-	public void shouldNotSupportsWhenEndpointMethodReturnTypeIsNotCompletableFuture() throws Exception {
+	public void shouldNotSupportsWhenEndpointMethodReturnTypeIsNotAssignableFromCompletionStage() throws Exception {
 		assertFalse(factory.supports(new SimpleEndpointMethod(SomeType.class.getMethod("string"))));
 	}
 
@@ -66,22 +72,24 @@ public class CompletableFutureEndpointCallExecutableFactoryTest {
 
 	@Test
 	public void shouldCreateExecutableFromEndpointMethodWithCompletableFutureReturnType() throws Exception {
-		AsyncEndpointCallExecutable<CompletableFuture<String>, String> executable = factory
+		AsyncEndpointCallExecutable<CompletionStage<String>, String> executable = factory
 				.createAsync(new SimpleEndpointMethod(SomeType.class.getMethod("future")), delegate);
 
 		String result = "future result";
 
 		when(asyncEndpointCall.executeAsync()).thenReturn(CompletableFuture.completedFuture(result));
 
-		CompletableFuture<String> future = executable.executeAsync(asyncEndpointCall, null);
+		CompletionStage<String> future = executable.executeAsync(asyncEndpointCall, null);
 
-		assertEquals(result, future.get());
+		assertEquals(result, future.toCompletableFuture().get());
 		assertEquals(delegate.returnType(), executable.returnType());
 
 		verify(delegate).execute(any(), anyVararg());
 	}
 
 	interface SomeType {
+
+		CompletionStage<String> stage();
 
 		CompletableFuture<String> future();
 

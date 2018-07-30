@@ -27,11 +27,11 @@ package com.github.ljtfreitas.restify.http.client.call.exec.async;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Executor;
 
 import com.github.ljtfreitas.restify.http.client.call.async.AsyncEndpointCall;
-import com.github.ljtfreitas.restify.http.client.call.async.CompletableFutureAsyncEndpointCall;
+import com.github.ljtfreitas.restify.http.client.call.async.CompletionStageAsyncEndpointCall;
 import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutable;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethod;
 import com.github.ljtfreitas.restify.reflection.JavaType;
@@ -80,10 +80,10 @@ public class AsyncEndpointCallObjectExecutableFactory<T, O> implements AsyncEndp
 
 		@Override
 		public AsyncEndpointCall<T> executeAsync(AsyncEndpointCall<O> call, Object[] args) {
-			CompletableFuture<T> future = call.executeAsync()
+			CompletionStage<T> stage = call.executeAsync()
 					.thenApplyAsync(o -> delegate.execute(() -> o, args), executor);
 
-			return new CompletableFutureAsyncEndpointCall<>(future, executor);
+			return new CompletionStageAsyncEndpointCall<>(stage, executor);
 		}
 	}
 }
