@@ -92,7 +92,8 @@ public class AsyncResultEndpointCallExecutableFactory<T, O> implements AsyncEndp
 			return Tryable.of(() -> call.executeAsync()
 				.thenApplyAsync(o -> delegate.execute(() -> o, args), executor)
 					.handleAsync(this::handle, executor)
-						.get());
+						.toCompletableFuture()
+							.join());
 		}
 
 		@SuppressWarnings("unchecked")

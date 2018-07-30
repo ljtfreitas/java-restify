@@ -15,6 +15,7 @@ import java.net.URI;
 import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
@@ -70,9 +71,9 @@ public class AsyncRetryableEndpointRequestExecutorTest {
 
 		RetryableEndpointRequest request = new RetryableEndpointRequest();
 
-		CompletableFuture<EndpointResponse<String>> future = executor.executeAsync(request);
+		CompletionStage<EndpointResponse<String>> future = executor.executeAsync(request);
 
-		EndpointResponse<String> output = future.get();
+		EndpointResponse<String> output = future.toCompletableFuture().get();
 
 		assertTrue(output.status().isOk());
 		assertEquals("success", output.body());
@@ -162,9 +163,9 @@ public class AsyncRetryableEndpointRequestExecutorTest {
 
 		RetryableEndpointRequest request = new RetryableEndpointRequest(retry);
 
-		CompletableFuture<EndpointResponse<Object>> future = executor.executeAsync(request);
+		CompletionStage<EndpointResponse<Object>> future = executor.executeAsync(request);
 
-		EndpointResponse<Object> output = future.get();
+		EndpointResponse<Object> output = future.toCompletableFuture().get();
 
 		verify(asyncEndpointRequestExecutor, times(3)).executeAsync(request);
 
@@ -254,7 +255,7 @@ public class AsyncRetryableEndpointRequestExecutorTest {
 			.thenReturn(unretryableFuture)
 			.thenReturn(third);
 
-		CompletableFuture<EndpointResponse<Object>> future = executor.executeAsync(request);
+		CompletableFuture<EndpointResponse<Object>> future = executor.executeAsync(request).toCompletableFuture();
 
 		Thread.sleep(1000);
 
@@ -345,9 +346,9 @@ public class AsyncRetryableEndpointRequestExecutorTest {
 			.thenReturn(second)
 			.thenReturn(third);
 
-		CompletableFuture<EndpointResponse<Object>> future = executor.executeAsync(request);
+		CompletionStage<EndpointResponse<Object>> future = executor.executeAsync(request);
 
-		EndpointResponse<Object> output = future.get();
+		EndpointResponse<Object> output = future.toCompletableFuture().get();
 
 		assertTrue(output.status().isOk());
 		assertEquals("success", output.body());
@@ -441,13 +442,13 @@ public class AsyncRetryableEndpointRequestExecutorTest {
 
 		expectedException.expectCause(deepCause(unretryableException));
 
-		CompletableFuture<EndpointResponse<Object>> future = executor.executeAsync(request);
+		CompletionStage<EndpointResponse<Object>> future = executor.executeAsync(request);
 
 		Thread.sleep(2000);
 
 		verify(asyncEndpointRequestExecutor, times(2)).executeAsync(request);
 
-		future.get();
+		future.toCompletableFuture().get();
 	}
 
 
@@ -533,9 +534,9 @@ public class AsyncRetryableEndpointRequestExecutorTest {
 			.thenReturn(second)
 			.thenReturn(third);
 
-		CompletableFuture<EndpointResponse<Object>> future = executor.executeAsync(request);
+		CompletionStage<EndpointResponse<Object>> future = executor.executeAsync(request);
 
-		EndpointResponse<Object> output = future.get();
+		EndpointResponse<Object> output = future.toCompletableFuture().get();
 
 		assertTrue(output.status().isOk());
 		assertEquals("success", output.body());
@@ -630,13 +631,13 @@ public class AsyncRetryableEndpointRequestExecutorTest {
 
 		expectedException.expect(deepCause(unretryableException));
 
-		CompletableFuture<EndpointResponse<Object>> future = executor.executeAsync(request);
+		CompletionStage<EndpointResponse<Object>> future = executor.executeAsync(request);
 
 		Thread.sleep(2000);
 
 		verify(asyncEndpointRequestExecutor, times(2)).executeAsync(request);
 
-		future.get();
+		future.toCompletableFuture().get();
 	}
 
 	@Test
@@ -721,9 +722,9 @@ public class AsyncRetryableEndpointRequestExecutorTest {
 			.thenReturn(second)
 			.thenReturn(third);
 
-		CompletableFuture<EndpointResponse<Object>> future = executor.executeAsync(request);
+		CompletionStage<EndpointResponse<Object>> future = executor.executeAsync(request);
 
-		EndpointResponse<Object> output = future.get();
+		EndpointResponse<Object> output = future.toCompletableFuture().get();
 
 		assertTrue(output.status().isOk());
 		assertEquals("success", output.body());
@@ -816,13 +817,13 @@ public class AsyncRetryableEndpointRequestExecutorTest {
 
 		expectedException.expectCause(deepCause(unretryableException));
 
-		CompletableFuture<EndpointResponse<Object>> future = executor.executeAsync(request);
+		CompletionStage<EndpointResponse<Object>> future = executor.executeAsync(request);
 
 		Thread.sleep(2000);
 
 		verify(asyncEndpointRequestExecutor, times(2)).executeAsync(request);
 
-		future.get();
+		future.toCompletableFuture().get();
 	}
 
 	@Test
@@ -907,9 +908,9 @@ public class AsyncRetryableEndpointRequestExecutorTest {
 			.thenReturn(second)
 			.thenReturn(third);
 
-		CompletableFuture<EndpointResponse<Object>> future = executor.executeAsync(request);
+		CompletionStage<EndpointResponse<Object>> future = executor.executeAsync(request);
 
-		EndpointResponse<Object> output = future.get();
+		EndpointResponse<Object> output = future.toCompletableFuture().get();
 
 		assertTrue(output.status().isOk());
 		assertEquals("success", output.body());
@@ -1002,13 +1003,13 @@ public class AsyncRetryableEndpointRequestExecutorTest {
 
 		expectedException.expectCause(deepCause(unretryableException));
 
-		CompletableFuture<EndpointResponse<Object>> future = executor.executeAsync(request);
+		CompletionStage<EndpointResponse<Object>> future = executor.executeAsync(request);
 
 		Thread.sleep(2000);
 
 		verify(asyncEndpointRequestExecutor, times(2)).executeAsync(request);
 
-		future.get();
+		future.toCompletableFuture().get();
 	}
 
 	@Test
@@ -1035,9 +1036,9 @@ public class AsyncRetryableEndpointRequestExecutorTest {
 
 		executor = new AsyncRetryableEndpointRequestExecutor(asyncEndpointRequestExecutor, scheduler, configuration);
 
-		CompletableFuture<EndpointResponse<Object>> future = executor.executeAsync(request);
+		CompletionStage<EndpointResponse<Object>> future = executor.executeAsync(request);
 
-		EndpointResponse<Object> output = future.get();
+		EndpointResponse<Object> output = future.toCompletableFuture().get();
 
 		assertTrue(output.status().isOk());
 		assertEquals("success", output.body());

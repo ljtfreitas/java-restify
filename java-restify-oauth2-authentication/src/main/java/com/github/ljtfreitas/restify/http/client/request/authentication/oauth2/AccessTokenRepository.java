@@ -27,6 +27,6 @@ package com.github.ljtfreitas.restify.http.client.request.authentication.oauth2;
 
 public interface AccessTokenRepository {
 
-	AccessToken findBy(OAuth2AuthenticatedEndpointRequest request);
+	public AccessToken findBy(OAuth2AuthenticatedEndpointRequest request);
 
 }

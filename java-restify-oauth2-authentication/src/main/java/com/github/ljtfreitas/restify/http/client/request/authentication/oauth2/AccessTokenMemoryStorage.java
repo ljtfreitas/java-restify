@@ -29,7 +29,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
 
-class AccessTokenMemoryStorage implements AccessTokenStorage {
+public class AccessTokenMemoryStorage implements AccessTokenStorage {
 
 	private final Map<AccessTokenStorageKey, AccessToken> tokens = new ConcurrentHashMap<>();
 

@@ -27,7 +27,7 @@ package com.github.ljtfreitas.restify.http.spring.client.call.exec.async;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Executor;
 
 import org.springframework.util.concurrent.CompletableToListenableFutureAdapter;
@@ -84,7 +84,7 @@ public class ListenableFutureEndpointCallExecutableFactory<T, O> implements Asyn
 
 		@Override
 		public ListenableFuture<T> executeAsync(AsyncEndpointCall<O> call, Object[] args) {
-			CompletableFuture<T> future = call.executeAsync()
+			CompletionStage<T> future = call.executeAsync()
 					.thenApplyAsync(o -> delegate.execute(() -> o, args), executor);
 
 			return new CompletableToListenableFutureAdapter<>(future);

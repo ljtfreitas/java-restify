@@ -28,6 +28,7 @@ package com.github.ljtfreitas.restify.http.client.request.async.interceptor;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 import java.util.stream.Collectors;
 
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
@@ -48,8 +49,9 @@ public class AsyncEndpointRequestInterceptorChain {
 		return delegate.apply(endpointRequest);
 	}
 
-	public CompletableFuture<EndpointRequest> applyAsync(EndpointRequest endpointRequest) {
-		return interceptors.stream().reduce(CompletableFuture.completedFuture(endpointRequest), (r, i) -> i.interceptsAsync(r), (a, b) -> b);
+	public CompletionStage<EndpointRequest> applyAsync(EndpointRequest endpointRequest) {
+		CompletionStage<EndpointRequest> completed = CompletableFuture.completedFuture(endpointRequest);
+		return interceptors.stream().reduce(completed, (r, i) -> i.interceptsAsync(r), (a, b) -> b);
 	}
 
 	public static AsyncEndpointRequestInterceptorChain of(Collection<EndpointRequestInterceptor> interceptors) {
@@ -76,7 +78,7 @@ public class AsyncEndpointRequestInterceptorChain {
 		}
 
 		@Override
-		public CompletableFuture<EndpointRequest> interceptsAsync(CompletableFuture<EndpointRequest> endpointRequest) {
+		public CompletionStage<EndpointRequest> interceptsAsync(CompletionStage<EndpointRequest> endpointRequest) {
 			return endpointRequest.thenApplyAsync(r -> delegate.intercepts(r));
 		}
 	}

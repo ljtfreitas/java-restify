@@ -82,7 +82,8 @@ public class FutureEndpointCallExecutableFactory<T, O> implements AsyncEndpointC
 		@Override
 		public Future<T> executeAsync(AsyncEndpointCall<O> call, Object[] args) {
 			return call.executeAsync()
-					.thenApplyAsync(o -> delegate.execute(() -> o, args), executor);
+					.toCompletableFuture()
+						.thenApplyAsync(o -> delegate.execute(() -> o, args), executor);
 		}
 	}
 }

@@ -27,15 +27,15 @@ package com.github.ljtfreitas.restify.http.netflix.client.request.async;
 
 import java.net.URI;
 import java.nio.charset.Charset;
-import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 
 import com.github.ljtfreitas.restify.http.client.HttpClientException;
 import com.github.ljtfreitas.restify.http.client.HttpException;
 import com.github.ljtfreitas.restify.http.client.message.Header;
 import com.github.ljtfreitas.restify.http.client.message.Headers;
 import com.github.ljtfreitas.restify.http.client.message.request.BufferedHttpRequestBody;
-import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestBody;
+import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
 import com.github.ljtfreitas.restify.http.client.request.HttpClientRequest;
 import com.github.ljtfreitas.restify.http.client.request.async.AsyncHttpClientRequest;
@@ -129,7 +129,7 @@ public class AsyncRibbonHttpClientRequest extends BaseRibbonHttpClientRequest im
 
 
 	@Override
-	public CompletableFuture<HttpClientResponse> executeAsync() throws HttpClientException {
+	public CompletionStage<HttpClientResponse> executeAsync() throws HttpClientException {
 		return ribbonLoadBalancedClient.executeAsync(new RibbonRequest(this))
 			.thenApply(RibbonResponse::unwrap);
 	}

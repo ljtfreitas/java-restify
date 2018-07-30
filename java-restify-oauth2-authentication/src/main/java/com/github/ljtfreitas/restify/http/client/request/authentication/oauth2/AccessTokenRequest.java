@@ -73,6 +73,13 @@ public class AccessTokenRequest {
 		return builder;
 	}
 
+	public static AccessTokenRequest.Builder authorizationCode(AuthorizationCode authorizationCode) {
+		Builder builder = new AccessTokenRequest.Builder("authorization_code");
+		builder.parameter("code", authorizationCode.toString());
+
+		return builder;
+	}
+
 	public static AccessTokenRequest.Builder clientCredentials(ClientCredentials credentials) {
 		Builder builder = new AccessTokenRequest.Builder("client_credentials");
 		builder.credentials(credentials);

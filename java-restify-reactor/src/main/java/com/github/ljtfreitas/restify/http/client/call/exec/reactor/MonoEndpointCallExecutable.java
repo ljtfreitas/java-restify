@@ -50,7 +50,7 @@ class MonoEndpointCallExecutable<T, O> implements AsyncEndpointCallExecutable<Mo
 
 	@Override
 	public Mono<T> executeAsync(AsyncEndpointCall<O> call, Object[] args) {
-		return Mono.fromFuture(call.executeAsync())
+		return Mono.fromFuture(call.executeAsync().toCompletableFuture())
 			.subscribeOn(scheduler)
 				.map(o -> delegate.execute(() -> o, args));
 	}

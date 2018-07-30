@@ -25,31 +25,31 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.call.async;
 
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
+import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 
 import com.github.ljtfreitas.restify.http.client.HttpException;
 
-public class CompletableFutureAsyncEndpointCall<T> implements AsyncEndpointCall<T> {
+public class CompletionStageAsyncEndpointCall<T> implements AsyncEndpointCall<T> {
 
-	private final CompletableFuture<T> future;
+	private final CompletionStage<T> stage;
 	private final Executor executor;
 
-	public CompletableFutureAsyncEndpointCall(CompletableFuture<T> future) {
-		this(future, ExecutorAsyncEndpointCall.pool());
+	public CompletionStageAsyncEndpointCall(CompletionStage<T> stage) {
+		this(stage, ExecutorAsyncEndpointCall.pool());
 	}
 
-	public CompletableFutureAsyncEndpointCall(CompletableFuture<T> future, Executor executor) {
-		this.future = future;
+	public CompletionStageAsyncEndpointCall(CompletionStage<T> stage, Executor executor) {
+		this.stage = stage;
 		this.executor = executor;
 	}
 
 	@Override
 	public T execute() {
 		try {
-			return future.get();
+			return stage.toCompletableFuture().get();
 		} catch (InterruptedException e) {
 			throw new HttpException("Interrupted exception on execute request.", e);
 
@@ -60,17 +60,17 @@ public class CompletableFutureAsyncEndpointCall<T> implements AsyncEndpointCall<
 
 	@Override
 	public void executeAsync(EndpointCallCallback<T> callback) {
-		future.whenCompleteAsync((r, e) -> handle(r, e, callback, callback), executor);
+		stage.whenCompleteAsync((r, e) -> handle(r, e, callback, callback), executor);
 	}
 
 	@Override
 	public void executeAsync(EndpointCallSuccessCallback<T> success, EndpointCallFailureCallback failure) {
-		future.whenCompleteAsync((r, e) -> handle(r, e, success, failure), executor);
+		stage.whenCompleteAsync((r, e) -> handle(r, e, success, failure), executor);
 	}
 
 	@Override
-	public CompletableFuture<T> executeAsync() {
-		return future;
+	public CompletionStage<T> executeAsync() {
+		return stage;
 	}
 
 	private void handle(T value, Throwable throwable, EndpointCallSuccessCallback<T> successCallback, EndpointCallFailureCallback failureCallback) {

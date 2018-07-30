@@ -103,7 +103,8 @@ public class NettyHttpClientRequestFactoryTest {
 
 		CompletableFuture<HttpClientResponse> responseAsFuture = nettyHttpClientRequestFactory
 				.createAsyncOf(new EndpointRequest(URI.create("http://localhost:7080/json"), "GET"))
-					.executeAsync();
+					.executeAsync()
+						.toCompletableFuture();
 
 		responseAsFuture.thenAccept(response -> {
 			assertEquals(responseBody, new InputStreamContent(response.body().input()).asString());
@@ -171,7 +172,7 @@ public class NettyHttpClientRequestFactoryTest {
 		request.body().output().write(requestBody.getBytes());
 		request.body().output().flush();
 
-		CompletableFuture<HttpClientResponse> responseAsFuture = request.executeAsync();
+		CompletableFuture<HttpClientResponse> responseAsFuture = request.executeAsync().toCompletableFuture();
 
 		responseAsFuture.thenAccept(response -> {
 			assertEquals(responseBody, new InputStreamContent(response.body().input()).asString());
@@ -224,7 +225,8 @@ public class NettyHttpClientRequestFactoryTest {
 
 		CompletableFuture<HttpClientResponse> responseAsFuture = nettyHttpClientRequestFactory
 				.createAsyncOf(new EndpointRequest(URI.create("http://localhost:7080/slow"), "GET"))
-					.executeAsync();
+					.executeAsync()
+						.toCompletableFuture();
 
 		Thread.sleep(3000);
 
@@ -304,7 +306,8 @@ public class NettyHttpClientRequestFactoryTest {
 
 		CompletableFuture<HttpClientResponse> responseAsFuture = nettyHttpClientRequestFactory
 				.createAsyncOf(request)
-					.executeAsync();
+					.executeAsync()
+						.toCompletableFuture();
 
 		Thread.sleep(3000);
 
@@ -387,7 +390,8 @@ public class NettyHttpClientRequestFactoryTest {
 
 		CompletableFuture<HttpClientResponse> responseAsFuture = nettyHttpClientRequestFactory
 				.createAsyncOf(new EndpointRequest(URI.create("https://localhost:7084/secure"), "GET"))
-					.executeAsync();
+					.executeAsync()
+						.toCompletableFuture();
 
 		responseAsFuture.thenAccept(response -> {
 			assertEquals(responseBody, new InputStreamContent(response.body().input()).asString());

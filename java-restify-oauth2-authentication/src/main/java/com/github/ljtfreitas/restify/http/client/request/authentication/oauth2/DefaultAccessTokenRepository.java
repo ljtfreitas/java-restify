@@ -26,7 +26,6 @@
 package com.github.ljtfreitas.restify.http.client.request.authentication.oauth2;
 
 import java.util.Optional;
-import java.util.function.Supplier;
 
 class DefaultAccessTokenRepository implements AccessTokenRepository {
 
@@ -63,16 +62,14 @@ class DefaultAccessTokenRepository implements AccessTokenRepository {
 	}
 
 	private AccessToken refresh(AccessToken accessToken, OAuth2AuthenticatedEndpointRequest request, AccessTokenStorageKey key) {
-		return store(key, () -> accessTokenProvider.refresh(accessToken, request));
+		return store(key, accessTokenProvider.refresh(accessToken, request));
 	}
 
 	private AccessToken newToken(OAuth2AuthenticatedEndpointRequest request, AccessTokenStorageKey key) {
-		return store(key, () -> accessTokenProvider.provides(request));
+		return store(key, accessTokenProvider.provides(request));
 	}
 
-	private AccessToken store(AccessTokenStorageKey key, Supplier<AccessToken> supplier) {
-		AccessToken newAccessToken = supplier.get();
-
+	private AccessToken store(AccessTokenStorageKey key, AccessToken newAccessToken) {
 		accessTokenStorage.add(key, newAccessToken);
 
 		return newAccessToken;

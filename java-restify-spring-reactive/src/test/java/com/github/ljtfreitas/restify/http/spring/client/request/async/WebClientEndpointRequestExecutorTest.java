@@ -9,7 +9,7 @@ import static org.mockserver.model.JsonBody.json;
 import static org.mockserver.model.StringBody.exact;
 
 import java.net.URI;
-import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutionException;
 
 import org.junit.Before;
@@ -63,10 +63,10 @@ public class WebClientEndpointRequestExecutorTest {
 					.withHeader("X-Custom-Header", "whatever")
 					.withBody(json(responseBody)));
 
-		CompletableFuture<EndpointResponse<Person>> future = executor
+		CompletionStage<EndpointResponse<Person>> future = executor
 				.executeAsync(new EndpointRequest(URI.create("http://localhost:7080/json"), "GET", JavaType.of(Person.class)));
 
-		EndpointResponse<Person> response = future.get();
+		EndpointResponse<Person> response = future.toCompletableFuture().get();
 
 		assertEquals(StatusCode.ok(), response.status());
 		assertEquals("whatever", response.headers().get("X-Custom-Header").map(Header::value).orElse(null));
@@ -98,10 +98,10 @@ public class WebClientEndpointRequestExecutorTest {
 		EndpointRequest endpointRequest = new EndpointRequest(URI.create("http://localhost:7080/json"), "POST",
 				new Headers(Header.contentType("application/json")), new Person("Tiago de Freitas Lima", 31), JavaType.of(String.class));
 
-		CompletableFuture<EndpointResponse<String>> future = executor
+		CompletionStage<EndpointResponse<String>> future = executor
 				.executeAsync(endpointRequest);
 
-		EndpointResponse<String> response = future.get();
+		EndpointResponse<String> response = future.toCompletableFuture().get();
 
 		assertEquals("OK", response.body());
 		assertEquals(StatusCode.created(), response.status());
@@ -128,10 +128,10 @@ public class WebClientEndpointRequestExecutorTest {
 		EndpointRequest endpointRequest = new EndpointRequest(URI.create("http://localhost:7080/json"), "PUT",
 				new Headers(Header.contentType("application/json")), new Person("Tiago de Freitas Lima", 31), JavaType.of(String.class));
 
-		CompletableFuture<EndpointResponse<String>> future = executor
+		CompletionStage<EndpointResponse<String>> future = executor
 				.executeAsync(endpointRequest);
 
-		EndpointResponse<String> response = future.get();
+		EndpointResponse<String> response = future.toCompletableFuture().get();
 
 		assertEquals("OK", response.body());
 		assertEquals(StatusCode.ok(), response.status());
@@ -151,10 +151,10 @@ public class WebClientEndpointRequestExecutorTest {
 
 		EndpointRequest endpointRequest = new EndpointRequest(URI.create("http://localhost:7080/person/abc123"), "DELETE");
 
-		CompletableFuture<EndpointResponse<Void>> future = executor
+		CompletionStage<EndpointResponse<Void>> future = executor
 				.executeAsync(endpointRequest);
 
-		EndpointResponse<Void> response = future.get();
+		EndpointResponse<Void> response = future.toCompletableFuture().get();
 
 		assertEquals(StatusCode.ok(), response.status());
 		assertEquals("deleted", response.headers().get("X-Custom-Header").map(Header::value).orElse(null));
@@ -163,13 +163,13 @@ public class WebClientEndpointRequestExecutorTest {
 
 	@Test
 	public void shouldWrapIOExceptionWhenOcurred() throws Exception {
-		CompletableFuture<EndpointResponse<Void>> future = executor
+		CompletionStage<EndpointResponse<Void>> future = executor
 				.executeAsync(new EndpointRequest(URI.create("http://localhost:7777/error"), "GET"));
 
 		expectedException.expect(ExecutionException.class);
 		expectedException.expectCause(isA(HttpClientException.class));
 
-		future.get();
+		future.toCompletableFuture().get();
 	}
 
 	@Test
@@ -181,13 +181,13 @@ public class WebClientEndpointRequestExecutorTest {
 			.respond(response()
 					.withStatusCode(500));
 
-		CompletableFuture<EndpointResponse<Void>> future = executor
+		CompletionStage<EndpointResponse<Void>> future = executor
 				.executeAsync(new EndpointRequest(URI.create("http://localhost:7080/error"), "GET"));
 
 		expectedException.expect(ExecutionException.class);
 		expectedException.expectCause(isA(EndpointResponseInternalServerErrorException.class));
 
-		future.get();
+		future.toCompletableFuture().get();
 	}
 
 	private static class Person {

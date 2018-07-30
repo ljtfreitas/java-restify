@@ -25,15 +25,6 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.request.authentication.oauth2;
 
-import static com.github.ljtfreitas.restify.util.Preconditions.isTrue;
-
-import java.net.URI;
-
-import com.github.ljtfreitas.restify.http.client.message.Header;
-import com.github.ljtfreitas.restify.http.client.message.response.StatusCode;
-import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
-import com.github.ljtfreitas.restify.http.contract.Parameters;
-
 class DefaultAuthorizationCodeProvider implements AuthorizationCodeProvider {
 
 	private final AuthorizationServer authorizationServer;
@@ -47,33 +38,13 @@ class DefaultAuthorizationCodeProvider implements AuthorizationCodeProvider {
 	}
 
 	@Override
-	public String provides(OAuth2AuthenticatedEndpointRequest request) {
+	public AuthorizationCode provides(OAuth2AuthenticatedEndpointRequest request) {
 		AuthorizationCodeGrantProperties properties = request.properties(AuthorizationCodeGrantProperties.class);
 
-		EndpointResponse<String> authorizationResponse = authorizationServer.authorize(new AuthorizationCodeRequest(properties, request.scope()));
+		AuthorizationCodeResponse authorizationCodeResponse = authorizationServer.authorize(new AuthorizationCodeRequest(properties, request.scope()));
 
-		StatusCode status = authorizationResponse.status();
+		AuthorizationFlowResponse flow = new AuthorizationFlowResponse(properties, authorizationCodeResponse);
 
-		if (status.isOk()) {
-			String message = "You need approve the client [" + properties.credentials().clientId() + "] to access protected resources "
-					+ "with scopes [" + properties.scopes() + "]";
-
-			throw new OAuth2UserApprovalRequiredException(message);
-		} else {
-			Header location = authorizationResponse.headers().get("Location")
-					.orElseThrow(() -> new IllegalStateException("Location header must be present on Authorization redirect!"));
-
-			URI redirectUri = URI.create(location.value());
-
-			Parameters parameters = Parameters.parse(redirectUri.getQuery());
-
-			isTrue(properties.state().orElse("").equals(parameters.first("state").orElse("")),
-					"Possible CSRF attack? [state] parameter returned by the authorization server is not the same of the authorization request.");
-
-			String code = parameters.first("code")
-					.orElseThrow(() -> new OAuth2UserRedirectRequiredException("A redirect to [" + redirectUri + "] is required!"));
-
-			return code;
-		}
+		return new AuthorizationCode(flow.code());
 	}
 }

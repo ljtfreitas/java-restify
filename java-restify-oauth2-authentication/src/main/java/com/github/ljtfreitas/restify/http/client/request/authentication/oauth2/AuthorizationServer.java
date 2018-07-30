@@ -25,12 +25,14 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.request.authentication.oauth2;
 
-import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
+import com.github.ljtfreitas.restify.http.client.message.ContentType;
 
 public interface AuthorizationServer {
 
-	public EndpointResponse<String> authorize(AuthorizationCodeRequest request);
+	public static final ContentType FORM_URLENCODED_CONTENT_TYPE = ContentType.of("application/x-www-form-urlencoded");
 
-	public EndpointResponse<AccessToken> requireToken(AccessTokenRequest request);
+	public AuthorizationCodeResponse authorize(AuthorizationCodeRequest request);
+
+	public AccessTokenResponse requireToken(AccessTokenRequest request);
 
 }

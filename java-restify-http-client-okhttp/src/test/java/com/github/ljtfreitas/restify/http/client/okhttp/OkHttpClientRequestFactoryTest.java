@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.net.SocketTimeoutException;
 import java.net.URI;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 
@@ -88,11 +89,11 @@ public class OkHttpClientRequestFactoryTest {
 					.withHeader("Content-Type", "application/json")
 					.withBody(json(responseBody)));
 
-		CompletableFuture<HttpClientResponse> future = okHttpClientRequestFactory
+		CompletionStage<HttpClientResponse> future = okHttpClientRequestFactory
 				.createAsyncOf(new EndpointRequest(URI.create("http://localhost:7080/json"), "GET"))
 					.executeAsync();
 
-		HttpResponseMessage response = future.get();
+		HttpResponseMessage response = future.toCompletableFuture().get();
 
 		assertEquals(responseBody, new InputStreamContent(response.body().input()).asString());
 		assertEquals("application/json", response.headers().get("Content-Type").get().value());
@@ -158,7 +159,7 @@ public class OkHttpClientRequestFactoryTest {
 		request.body().output().write(requestBody.getBytes());
 		request.body().output().flush();
 
-		HttpResponseMessage response = request.executeAsync().get();
+		HttpResponseMessage response = request.executeAsync().toCompletableFuture().get();
 
 		assertEquals(responseBody, new InputStreamContent(response.body().input()).asString());
 		assertEquals("text/plain", response.headers().get("Content-Type").get().value());
@@ -209,7 +210,8 @@ public class OkHttpClientRequestFactoryTest {
 
 		CompletableFuture<HttpClientResponse> future = okHttpClientRequestFactory
 			.createAsyncOf(new EndpointRequest(URI.create("http://localhost:7080/slow"), "GET"))
-				.executeAsync();
+				.executeAsync()
+					.toCompletableFuture();
 
 		Thread.sleep(3000);
 

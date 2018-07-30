@@ -76,7 +76,7 @@ public class AsyncLogHttpClientRequestInterceptorTest {
 	public void shouldLogHttpRequestWithoutBody() {
 		AsyncHttpClientRequest loggableHttpClientRequest = interceptor.interceptsAsync(request);
 
-		loggableHttpClientRequest.executeAsync().join();
+		loggableHttpClientRequest.executeAsync().toCompletableFuture().join();
 
 		LogRecord record = handler.entries.poll();
 
@@ -92,7 +92,7 @@ public class AsyncLogHttpClientRequestInterceptorTest {
 	public void shouldLogHttpResponseWithoutBody() {
 		AsyncHttpClientRequest loggableHttpClientRequest = interceptor.interceptsAsync(request);
 
-		loggableHttpClientRequest.executeAsync().join();
+		loggableHttpClientRequest.executeAsync().toCompletableFuture().join();
 
 		LogRecord record = handler.entries.pollLast();
 
@@ -115,7 +115,7 @@ public class AsyncLogHttpClientRequestInterceptorTest {
 
 		AsyncHttpClientRequest loggableHttpClientRequest = interceptor.interceptsAsync(request);
 
-		loggableHttpClientRequest.executeAsync().join();
+		loggableHttpClientRequest.executeAsync().toCompletableFuture().join();
 
 		LogRecord record = handler.entries.poll();
 
@@ -141,7 +141,7 @@ public class AsyncLogHttpClientRequestInterceptorTest {
 
 		AsyncHttpClientRequest loggableHttpClientRequest = interceptor.interceptsAsync(request);
 
-		loggableHttpClientRequest.executeAsync().join();
+		loggableHttpClientRequest.executeAsync().toCompletableFuture().join();
 
 		LogRecord record = handler.entries.pollLast();
 

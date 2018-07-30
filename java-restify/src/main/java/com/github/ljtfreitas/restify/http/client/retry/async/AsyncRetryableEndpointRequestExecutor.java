@@ -25,7 +25,7 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.retry.async;
 
-import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ScheduledExecutorService;
 
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
@@ -72,7 +72,7 @@ public class AsyncRetryableEndpointRequestExecutor implements AsyncEndpointReque
 	}
 
 	@Override
-	public <T> CompletableFuture<EndpointResponse<T>> executeAsync(EndpointRequest endpointRequest) {
+	public <T> CompletionStage<EndpointResponse<T>> executeAsync(EndpointRequest endpointRequest) {
 		RetryConfiguration retryConfiguration = retryConfigurationFactory.createOf(endpointRequest);
 
 		RetryPolicy retryPolicy = new RetryPolicyFactory(retryConfiguration).create();

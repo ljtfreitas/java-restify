@@ -29,6 +29,7 @@ import static org.junit.Assert.assertSame;
 import static org.mockito.Mockito.verify;
 
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -37,7 +38,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 @RunWith(MockitoJUnitRunner.class)
-public class CompletableFutureAsyncEndpointCallTest {
+public class CompletionStageAsyncEndpointCallTest {
 
 	@Mock
 	private EndpointCallCallback<String> callback;
@@ -48,7 +49,7 @@ public class CompletableFutureAsyncEndpointCallTest {
 	@Mock
 	private EndpointCallFailureCallback failureCallback;
 
-	private CompletableFutureAsyncEndpointCall<String> asyncCall;
+	private CompletionStageAsyncEndpointCall<String> asyncCall;
 
 	private String response;
 
@@ -58,7 +59,7 @@ public class CompletableFutureAsyncEndpointCallTest {
 
 		CompletableFuture<String> future = CompletableFuture.completedFuture(response);
 
-		asyncCall = new CompletableFutureAsyncEndpointCall<>(future, r -> r.run());
+		asyncCall = new CompletionStageAsyncEndpointCall<>(future, r -> r.run());
 	}
 
 	@Test
@@ -82,7 +83,7 @@ public class CompletableFutureAsyncEndpointCallTest {
 		CompletableFuture<String> future = new CompletableFuture<>();
 		future.completeExceptionally(exception);
 
-		asyncCall = new CompletableFutureAsyncEndpointCall<>(future, r -> r.run());
+		asyncCall = new CompletionStageAsyncEndpointCall<>(future, r -> r.run());
 
 		asyncCall.executeAsync(successCallback, failureCallback);
 
@@ -91,9 +92,9 @@ public class CompletableFutureAsyncEndpointCallTest {
 
 	@Test
 	public void shouldExecuteAsyncWithCompletableFuture() throws Exception {
-		CompletableFuture<String> future = asyncCall.executeAsync();
+		CompletionStage<String> future = asyncCall.executeAsync();
 
-		assertSame(response, future.get());
+		assertSame(response, future.toCompletableFuture().get());
 	}
 
 	@Test

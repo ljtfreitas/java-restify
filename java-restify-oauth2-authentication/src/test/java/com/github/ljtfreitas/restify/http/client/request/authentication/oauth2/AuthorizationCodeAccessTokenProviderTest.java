@@ -36,7 +36,7 @@ public class AuthorizationCodeAccessTokenProviderTest {
 	@Mock
 	private DefaultAuthorizationCodeProvider authorizationCodeProvider;
 
-	private AuthorizationCodeAccessTokenProvider provider;
+	private AccessTokenProvider provider;
 
 	private String authorizationCredentials;
 
@@ -58,9 +58,10 @@ public class AuthorizationCodeAccessTokenProviderTest {
 
 		request = new OAuth2AuthenticatedEndpointRequest(source, properties);
 
-		when(authorizationCodeProvider.provides(request)).thenReturn("abc1234");
+		when(authorizationCodeProvider.provides(request))
+			.thenReturn(new AuthorizationCode("abc1234"));
 
-		provider = new AuthorizationCodeAccessTokenProvider(authorizationCodeProvider);
+		provider = new DefaultAccessTokenProvider(new AuthorizationCodeAccessTokenStrategy(authorizationCodeProvider));
 
 		authorizationCredentials = "Y2xpZW50LWlkOmNsaWVudC1zZWNyZXQ="; //(base64(client_id:client_secret))
 	}

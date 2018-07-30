@@ -26,8 +26,8 @@
 package com.github.ljtfreitas.restify.http.client.request.async;
 
 import java.io.IOException;
-import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
+import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Executor;
 
 import com.github.ljtfreitas.restify.http.client.HttpClientException;
@@ -66,14 +66,14 @@ public class DefaultAsyncEndpointRequestExecutor implements AsyncEndpointRequest
 	}
 
 	@Override
-	public <T> CompletableFuture<EndpointResponse<T>> executeAsync(EndpointRequest endpointRequest) {
-		CompletableFuture<EndpointResponse<T>> future = doExecute(endpointRequest)
+	public <T> CompletionStage<EndpointResponse<T>> executeAsync(EndpointRequest endpointRequest) {
+		CompletionStage<EndpointResponse<T>> future = doExecute(endpointRequest)
 				.thenApplyAsync(response -> doRead(response, endpointRequest.responseType()), executor);
 
 		return future.handleAsync((r, e) -> doHandle(r, deepCause(e), endpointRequest), executor);
 	}
 
-	private CompletableFuture<HttpClientResponse> doExecute(EndpointRequest endpointRequest) {
+	private CompletionStage<HttpClientResponse> doExecute(EndpointRequest endpointRequest) {
 		AsyncHttpClientRequest httpClientRequest = httpClientRequestFactory.createAsyncOf(endpointRequest);
 
 		endpointRequest.body().ifPresent(b -> endpointRequestWriter.write(endpointRequest, httpClientRequest));

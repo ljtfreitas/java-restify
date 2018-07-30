@@ -27,5 +27,5 @@ package com.github.ljtfreitas.restify.http.client.request.authentication.oauth2;
 
 public interface AuthorizationCodeProvider {
 
-	public String provides(OAuth2AuthenticatedEndpointRequest request);
+	public AuthorizationCode provides(OAuth2AuthenticatedEndpointRequest request);
 }

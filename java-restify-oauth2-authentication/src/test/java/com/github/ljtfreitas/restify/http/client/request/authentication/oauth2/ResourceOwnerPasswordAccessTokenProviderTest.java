@@ -30,7 +30,7 @@ public class ResourceOwnerPasswordAccessTokenProviderTest {
 
 	private MockServerClient mockServerClient;
 
-	private ResourceOwnerPasswordAccessTokenProvider provider;
+	private AccessTokenProvider provider;
 
 	private String authorizationCredentials;
 
@@ -51,7 +51,7 @@ public class ResourceOwnerPasswordAccessTokenProviderTest {
 
 		request = new OAuth2AuthenticatedEndpointRequest(source, properties);
 
-		provider = new ResourceOwnerPasswordAccessTokenProvider();
+		provider = new DefaultAccessTokenProvider(new ResourceOwnerPasswordAccessTokenStrategy());
 
 		authorizationCredentials = "Y2xpZW50LWlkOmNsaWVudC1zZWNyZXQ="; //(base64(client_id:client_secret))
 	}

@@ -28,6 +28,7 @@ package com.github.ljtfreitas.restify.http.client.request.async;
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Executor;
 import java.util.concurrent.Executors;
 
@@ -91,7 +92,7 @@ public class AsyncHttpClientRequestAdapter implements AsyncHttpClientRequest  {
 	}
 
 	@Override
-	public CompletableFuture<HttpClientResponse> executeAsync() throws HttpClientException {
+	public CompletionStage<HttpClientResponse> executeAsync() throws HttpClientException {
 		return CompletableFuture.supplyAsync(source::execute, executor);
 	}
 }
