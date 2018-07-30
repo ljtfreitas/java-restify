@@ -7,7 +7,12 @@ import static org.junit.Assert.assertTrue;
 import java.net.URI;
 import java.security.Principal;
 import java.time.Duration;
+import java.util.concurrent.Executors;
 
+import javax.cache.CacheManager;
+import javax.cache.Caching;
+
+import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
@@ -19,11 +24,13 @@ import com.github.ljtfreitas.restify.http.client.request.authentication.oauth2.G
 import com.github.ljtfreitas.restify.http.client.request.authentication.oauth2.OAuth2AuthenticatedEndpointRequest;
 import com.github.ljtfreitas.restify.util.Tryable;
 
-public class CaffeineAsyncAccessTokenStorageTest {
+public class JCacheAsyncAccessTokenStorageTest {
 
-	private CaffeineAsyncAccessTokenStorage caffeineAsyncAccessTokenStorage;
+	private JCacheAsyncAccessTokenStorage jCacheAsyncAccessTokenStorage;
 
 	private AccessTokenStorageKey key;
+
+	private CacheManager cacheManager;
 
 	@Before
 	public void setup() {
@@ -40,27 +47,34 @@ public class CaffeineAsyncAccessTokenStorageTest {
 
 		key = AccessTokenStorageKey.by(request);
 
-		caffeineAsyncAccessTokenStorage = new CaffeineAsyncAccessTokenStorage();
+		cacheManager = Caching.getCachingProvider().getCacheManager();
+
+		jCacheAsyncAccessTokenStorage = new JCacheAsyncAccessTokenStorage(Executors.newSingleThreadExecutor(), cacheManager);
+	}
+
+	@After
+	public void after() {
+		cacheManager.getCacheNames().forEach(cache -> cacheManager.destroyCache(cache));
 	}
 
 	@Test
-	public void shouldSaveAccessTokenOnStoreAsync() {
-		caffeineAsyncAccessTokenStorage.findBy(key)
+	public void shouldSaveAccessTokenOnStore() {
+		jCacheAsyncAccessTokenStorage.findBy(key)
 
 			.thenAccept(accessToken -> assertFalse(accessToken.isPresent()))
 
 			.toCompletableFuture()
 			.join();
 
-		AccessToken newAccessToken = AccessToken.bearer("accessToken");
+		AccessToken accessToken = AccessToken.bearer("accessToken");
 
-		caffeineAsyncAccessTokenStorage.add(key, newAccessToken)
+		jCacheAsyncAccessTokenStorage.add(key, accessToken)
 
-			.thenCompose(a -> caffeineAsyncAccessTokenStorage.findBy(key))
+			.thenCompose(a -> jCacheAsyncAccessTokenStorage.findBy(key))
 
 			.thenAccept(foundAccessToken -> {
 				assertTrue(foundAccessToken.isPresent());
-				assertEquals(newAccessToken, foundAccessToken.get());
+				assertEquals(accessToken, foundAccessToken.get());
 			})
 
 			.toCompletableFuture()
@@ -69,15 +83,15 @@ public class CaffeineAsyncAccessTokenStorageTest {
 
 	@Test
 	public void shouldEvictAccessTokenAfterExpirarionPeriod() throws Exception {
-		caffeineAsyncAccessTokenStorage.findBy(key)
+		jCacheAsyncAccessTokenStorage.findBy(key)
 			.thenAccept(accessToken -> assertFalse(accessToken.isPresent()))
 			.toCompletableFuture()
 			.join();
 
 		AccessToken newAccessToken = AccessToken.bearer("accessToken", Duration.ofSeconds(5));
 
-		caffeineAsyncAccessTokenStorage.add(key, newAccessToken)
-			.thenCompose(a -> caffeineAsyncAccessTokenStorage.findBy(key))
+		jCacheAsyncAccessTokenStorage.add(key, newAccessToken)
+			.thenCompose(a -> jCacheAsyncAccessTokenStorage.findBy(key))
 
 			.thenAccept(foundAccessToken -> {
 				assertTrue(foundAccessToken.isPresent());
@@ -86,7 +100,7 @@ public class CaffeineAsyncAccessTokenStorageTest {
 
 			.thenRun(() -> Tryable.run(() -> Thread.sleep(5500)))
 
-			.thenCompose(a -> caffeineAsyncAccessTokenStorage.findBy(key))
+			.thenCompose(a -> jCacheAsyncAccessTokenStorage.findBy(key))
 
 			.thenAccept(expiredAccessToken -> assertFalse(expiredAccessToken.isPresent()))
 
