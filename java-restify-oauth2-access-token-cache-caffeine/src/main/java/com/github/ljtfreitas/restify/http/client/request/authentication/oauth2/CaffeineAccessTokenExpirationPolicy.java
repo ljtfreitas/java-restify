@@ -25,37 +25,30 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.request.authentication.oauth2;
 
-import java.util.Optional;
+import java.time.Duration;
+import java.time.Instant;
 
-import com.github.benmanes.caffeine.cache.Cache;
-import com.github.benmanes.caffeine.cache.Caffeine;
-import com.github.benmanes.caffeine.cache.CaffeineSpec;
+import com.github.benmanes.caffeine.cache.Expiry;
 
-public class CaffeineAccessTokenStorage implements AccessTokenStorage {
+public class CaffeineAccessTokenExpirationPolicy implements Expiry<AccessTokenStorageKey, AccessToken> {
 
-	private final Cache<AccessTokenStorageKey, AccessToken> cache;
-
-	public CaffeineAccessTokenStorage() {
-		this.cache = Caffeine.newBuilder()
-				.expireAfter(new CaffeineAccessTokenExpirationPolicy())
-				.build();
-	}
-
-	public CaffeineAccessTokenStorage(CaffeineSpec spec) {
-		this(Caffeine.from(spec).build());
-	}
-
-	public CaffeineAccessTokenStorage(Cache<AccessTokenStorageKey, AccessToken> cache) {
-		this.cache = cache;
+	@Override
+	public long expireAfterCreate(AccessTokenStorageKey key, AccessToken accessToken, long currentTime) {
+		return accessToken.expiration()
+			.map(end -> Duration.between(Instant.now(), end))
+				.map(d -> d.toNanos())
+					.orElseGet(() -> Long.MAX_VALUE);
 	}
 
 	@Override
-	public Optional<AccessToken> findBy(AccessTokenStorageKey key) {
-		return Optional.ofNullable(cache.getIfPresent(key));
+	public long expireAfterUpdate(AccessTokenStorageKey key, AccessToken value, long currentTime,
+			long currentDuration) {
+		return currentDuration;
 	}
 
 	@Override
-	public void add(AccessTokenStorageKey key, AccessToken accessToken) {
-		cache.put(key, accessToken);
+	public long expireAfterRead(AccessTokenStorageKey key, AccessToken value, long currentTime,
+			long currentDuration) {
+		return currentDuration;
 	}
 }

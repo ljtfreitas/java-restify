@@ -23,39 +23,45 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.http.client.request.authentication.oauth2;
+package com.github.ljtfreitas.restify.http.client.request.authentication.oauth2.async;
 
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 
-import com.github.benmanes.caffeine.cache.Cache;
+import com.github.benmanes.caffeine.cache.AsyncLoadingCache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.CaffeineSpec;
+import com.github.ljtfreitas.restify.http.client.request.authentication.oauth2.AccessToken;
+import com.github.ljtfreitas.restify.http.client.request.authentication.oauth2.AccessTokenStorageKey;
+import com.github.ljtfreitas.restify.http.client.request.authentication.oauth2.CaffeineAccessTokenExpirationPolicy;
 
-public class CaffeineAccessTokenStorage implements AccessTokenStorage {
+public class CaffeineAsyncAccessTokenStorage implements AsyncAccessTokenStorage {
 
-	private final Cache<AccessTokenStorageKey, AccessToken> cache;
+	private final AsyncLoadingCache<AccessTokenStorageKey, AccessToken> cache;
 
-	public CaffeineAccessTokenStorage() {
+	public CaffeineAsyncAccessTokenStorage() {
 		this.cache = Caffeine.newBuilder()
 				.expireAfter(new CaffeineAccessTokenExpirationPolicy())
-				.build();
+				.buildAsync(key -> null);
 	}
 
-	public CaffeineAccessTokenStorage(CaffeineSpec spec) {
-		this(Caffeine.from(spec).build());
+	public CaffeineAsyncAccessTokenStorage(CaffeineSpec spec) {
+		this(Caffeine.from(spec).buildAsync(key -> null));
 	}
 
-	public CaffeineAccessTokenStorage(Cache<AccessTokenStorageKey, AccessToken> cache) {
+	public CaffeineAsyncAccessTokenStorage(AsyncLoadingCache<AccessTokenStorageKey, AccessToken> cache) {
 		this.cache = cache;
 	}
 
 	@Override
-	public Optional<AccessToken> findBy(AccessTokenStorageKey key) {
-		return Optional.ofNullable(cache.getIfPresent(key));
+	public CompletionStage<Optional<AccessToken>> findBy(AccessTokenStorageKey key) {
+		return cache.get(key).thenApply(accessToken -> Optional.ofNullable(accessToken));
 	}
 
 	@Override
-	public void add(AccessTokenStorageKey key, AccessToken accessToken) {
-		cache.put(key, accessToken);
+	public CompletionStage<Void> add(AccessTokenStorageKey key, AccessToken accessToken) {
+		CompletableFuture<AccessToken> accessTokenAsFuture = CompletableFuture.completedFuture(accessToken);
+		return accessTokenAsFuture.thenAccept(a -> cache.put(key, accessTokenAsFuture));
 	}
 }
