@@ -37,6 +37,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.github.ljtfreitas.restify.http.client.hateoas.Link;
 import com.github.ljtfreitas.restify.http.client.hateoas.Resource;
 import com.github.ljtfreitas.restify.http.client.message.ContentType;
+import com.github.ljtfreitas.restify.http.client.message.Header;
 import com.github.ljtfreitas.restify.http.client.message.response.HttpStatusCode;
 import com.github.ljtfreitas.restify.http.client.request.interceptor.EndpointRequestInterceptorChain;
 
@@ -588,6 +589,42 @@ public class HypermediaBrowserTest {
 		assertEquals("1985-07-02", person.birthDate);
 
 		mockServerClient.verify(httpRequest, exactly(3));
+	}
+
+	@Test
+	public void shouldFollowLinkUsingRequestInterceptors() {
+		Header header = new Header("X-Custom-Header", "whatever");
+
+		HttpRequest httpRequest = request()
+			.withMethod("GET")
+			.withHeader(header.name(), header.value())
+			.withPath("/me");
+
+		mockServerClient.when(httpRequest)
+			.respond(
+				response()
+					.withStatusCode(200)
+					.withHeader("Content-Type", "application/hal+json")
+					.withBody(json("{\"name\":\"Tiago de Freitas Lima\",\"birth_date\":\"1985-07-02\"}")));
+
+		hypermediaBrowser = new HypermediaBrowserBuilder()
+				.interceptors()
+					.add(r -> r.add(header))
+					.and()
+				.build();
+
+		CompletionStage<Person> personAsFuture = hypermediaBrowser
+			.follow(Link.self("http://localhost:7080/me"))
+				.as(Person.class);
+
+		Person person = personAsFuture.toCompletableFuture().join();
+
+		assertNotNull(person);
+
+		assertEquals("Tiago de Freitas Lima", person.name);
+		assertEquals("1985-07-02", person.birthDate);
+
+		mockServerClient.verify(httpRequest);
 	}
 
 	private static class Person {
