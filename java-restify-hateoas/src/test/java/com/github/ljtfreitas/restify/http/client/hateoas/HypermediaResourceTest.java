@@ -27,9 +27,9 @@ public class HypermediaResourceTest {
 
 	@Test
 	public void resourceMustBeSerializedToJsonOnWebLinkFormat() throws IOException {
-		Resource<Model> resource = new Resource<>(new Model("Tiago de Freitas Lima"));
-		resource.addLink(Link.self("http://my.api/me"));
-		resource.addLink(new Link("http://my.api/me/friends", "friends"));
+		Resource<Model> resource = new Resource<>(new Model("Tiago de Freitas Lima"))
+				.addLink(Link.self("http://my.api/me"))
+				.addLink(new Link("http://my.api/me/friends", "friends"));
 
 		String expected = "{\"name\":\"Tiago de Freitas Lima\","
 				+ "\"links\":["
@@ -44,13 +44,13 @@ public class HypermediaResourceTest {
 
 	@Test
 	public void resourceMustBeSerializedToJsonOnWebLinkFormatWithAttributes() throws IOException {
-		Resource<Model> resource = new Resource<>(new Model("Tiago de Freitas Lima"));
-		resource.addLink(Link.self("http://my.api"));
-		resource.addLink(new LinkBuilder()
-				.href("http://my.api/{user}/friends")
-				.rel("friends")
-				.title("All friends for user")
-				.build());
+		Resource<Model> resource = new Resource<>(new Model("Tiago de Freitas Lima"))
+				.addLink(Link.self("http://my.api"))
+				.addLink(new LinkBuilder()
+						.href("http://my.api/{user}/friends")
+						.rel("friends")
+						.title("All friends for user")
+						.build());
 
 		String expected = "{\"name\":\"Tiago de Freitas Lima\","
 				+ "\"links\":["

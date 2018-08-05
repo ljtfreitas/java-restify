@@ -31,6 +31,7 @@
 		<module>java-restify-http-client-netty</module>
 		<module>java-restify-http-client-jersey</module>
 
+		<module>java-restify-retry</module>
 		<module>java-restify-guava</module>
 		<module>java-restify-rxjava</module>
 		<module>java-restify-rxjava-2</module>

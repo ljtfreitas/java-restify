@@ -263,7 +263,7 @@ public class RestifyProxyBuilder {
 		}
 
 		private EndpointCallFactory endpointCallFactory() {
-			EndpointRequestExecutor executor = retryable(endpointRequestExecutor());
+			EndpointRequestExecutor executor = retryable(intercepted(endpointRequestExecutor()));
 			return executor instanceof AsyncEndpointRequestExecutor ?
 					asyncEndpointCallFactory(executor) :
 						executorEndpointCallFactory(executor);
@@ -283,7 +283,7 @@ public class RestifyProxyBuilder {
 
 		private EndpointRequestExecutor endpointRequestExecutor() {
 			return Optional.ofNullable(endpointRequestExecutor)
-				.orElseGet(() -> intercepted(endpointRequestExecutor(intercepted(httpClientRequestFactory()))));
+				.orElseGet(() -> endpointRequestExecutor(intercepted(httpClientRequestFactory())));
 		}
 
 		private EndpointRequestExecutor intercepted(EndpointRequestExecutor delegate) {

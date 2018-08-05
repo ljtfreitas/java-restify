@@ -33,6 +33,6 @@ public interface EmbeddedResource {
 
 	public <T> Resource<T> as(Class<? extends T> type);
 
-	public <T> Collection<Resource<T>> collectionOf(Class<? extends T> type);
+	public <T> Collection<Resource<T>> asCollection(Class<? extends T> type);
 
 }

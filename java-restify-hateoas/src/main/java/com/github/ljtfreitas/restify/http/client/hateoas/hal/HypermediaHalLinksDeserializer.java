@@ -26,6 +26,8 @@
 package com.github.ljtfreitas.restify.http.client.hateoas.hal;
 
 import java.io.IOException;
+import java.util.Collection;
+import java.util.LinkedList;
 
 import com.fasterxml.jackson.core.JsonParseException;
 import com.fasterxml.jackson.core.JsonParser;
@@ -78,7 +80,7 @@ class HypermediaHalLinksDeserializer extends ContainerDeserializerBase<Links> im
 	public Links deserialize(JsonParser jsonParser, DeserializationContext context)
 			throws IOException, JsonProcessingException {
 
-		Links links = new Links();
+		Collection<Link> links = new LinkedList<>();
 
 		while (!JsonToken.END_OBJECT.equals(jsonParser.nextToken())) {
 			if (!JsonToken.FIELD_NAME.equals(jsonParser.getCurrentToken())) {
@@ -96,7 +98,7 @@ class HypermediaHalLinksDeserializer extends ContainerDeserializerBase<Links> im
 			}
 		}
 
-		return links;
+		return new Links(links);
 	}
 	
 	private Link createLink(String relation, JsonParser jsonParser) throws IOException {
