@@ -52,7 +52,7 @@ public class JsonEmbeddedResource implements EmbeddedResource {
 	}
 
 	@Override
-	public <T> Collection<Resource<T>> collectionOf(Class<? extends T> type) {
+	public <T> Collection<Resource<T>> asCollection(Class<? extends T> type) {
 		return reader.readAsCollectionOf(type, tree);
 	}
 

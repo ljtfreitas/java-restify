@@ -25,24 +25,20 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.hateoas.browser;
 
-import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
-import com.github.ljtfreitas.restify.http.client.request.EndpointRequestExecutor;
-import com.github.ljtfreitas.restify.http.client.request.interceptor.EndpointRequestInterceptorChain;
+import java.util.concurrent.CompletionStage;
+
+import com.github.ljtfreitas.restify.http.client.request.async.AsyncEndpointRequestExecutor;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
 
 public class LinkRequestExecutor {
 
-	private final EndpointRequestExecutor endpointRequestExecutor;
-	private final EndpointRequestInterceptorChain endpointRequestInterceptorStack;
+	private final AsyncEndpointRequestExecutor asyncEndpointRequestExecutor;
 
-	public LinkRequestExecutor(EndpointRequestExecutor endpointRequestExecutor, EndpointRequestInterceptorChain endpointRequestInterceptorStack) {
-		this.endpointRequestExecutor = endpointRequestExecutor;
-		this.endpointRequestInterceptorStack = endpointRequestInterceptorStack;
+	public LinkRequestExecutor(AsyncEndpointRequestExecutor endpointRequestExecutor) {
+		this.asyncEndpointRequestExecutor = endpointRequestExecutor;
 	}
 
-	public <T> EndpointResponse<T> execute(LinkEndpointRequest linkRequest) {
-		EndpointRequest endpointRequest = endpointRequestInterceptorStack.apply(linkRequest.asEndpointRequest());
-
-		return endpointRequestExecutor.execute(endpointRequest);
+	public <T> CompletionStage<EndpointResponse<T>> execute(LinkEndpointRequest linkRequest) {
+		return asyncEndpointRequestExecutor.executeAsync(linkRequest.asEndpointRequest());
 	}
 }

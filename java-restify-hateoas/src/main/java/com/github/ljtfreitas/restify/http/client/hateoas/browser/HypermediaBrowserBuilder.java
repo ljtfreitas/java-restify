@@ -34,6 +34,9 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Optional;
+import java.util.concurrent.Executor;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ScheduledExecutorService;
 
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLSocketFactory;
@@ -50,36 +53,53 @@ import com.github.ljtfreitas.restify.http.client.jdk.JdkHttpClientRequestFactory
 import com.github.ljtfreitas.restify.http.client.message.converter.HttpMessageConverter;
 import com.github.ljtfreitas.restify.http.client.message.converter.HttpMessageConverters;
 import com.github.ljtfreitas.restify.http.client.message.converter.wildcard.SimpleTextMessageConverter;
-import com.github.ljtfreitas.restify.http.client.request.DefaultEndpointRequestExecutor;
+import com.github.ljtfreitas.restify.http.client.message.response.HttpStatusCode;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequestExecutor;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequestWriter;
 import com.github.ljtfreitas.restify.http.client.request.HttpClientRequestFactory;
+import com.github.ljtfreitas.restify.http.client.request.async.AsyncEndpointRequestExecutor;
+import com.github.ljtfreitas.restify.http.client.request.async.AsyncEndpointRequestExecutorAdapter;
+import com.github.ljtfreitas.restify.http.client.request.async.AsyncHttpClientRequestFactory;
+import com.github.ljtfreitas.restify.http.client.request.async.AsyncHttpClientRequestFactoryAdapter;
+import com.github.ljtfreitas.restify.http.client.request.async.DefaultAsyncEndpointRequestExecutor;
+import com.github.ljtfreitas.restify.http.client.request.async.interceptor.AsyncEndpointRequestInterceptorChain;
+import com.github.ljtfreitas.restify.http.client.request.async.interceptor.AsyncInterceptedEndpointRequestExecutor;
 import com.github.ljtfreitas.restify.http.client.request.authentication.Authentication;
 import com.github.ljtfreitas.restify.http.client.request.interceptor.EndpointRequestInterceptor;
-import com.github.ljtfreitas.restify.http.client.request.interceptor.EndpointRequestInterceptorChain;
+import com.github.ljtfreitas.restify.http.client.request.interceptor.HttpClientRequestInterceptor;
 import com.github.ljtfreitas.restify.http.client.request.interceptor.authentication.AuthenticationEndpoinRequestInterceptor;
 import com.github.ljtfreitas.restify.http.client.response.DefaultEndpointResponseErrorFallback;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponseErrorFallback;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponseReader;
+import com.github.ljtfreitas.restify.http.client.retry.RetryCondition.EndpointResponseRetryCondition;
+import com.github.ljtfreitas.restify.http.client.retry.RetryCondition.HeadersRetryCondition;
+import com.github.ljtfreitas.restify.http.client.retry.RetryCondition.StatusCodeRetryCondition;
+import com.github.ljtfreitas.restify.http.client.retry.RetryCondition.ThrowableRetryCondition;
+import com.github.ljtfreitas.restify.http.client.retry.RetryConfiguration;
+import com.github.ljtfreitas.restify.http.client.retry.async.AsyncRetryableEndpointRequestExecutor;
 import com.github.ljtfreitas.restify.util.Tryable;
 
 public class HypermediaBrowserBuilder {
 
 	private URL baseURL;
 
-	private EndpointRequestExecutor endpointRequestExecutor;
-
 	private HttpClientRequestFactory httpClientRequestFactory;
 
-	private HttpClientRequestConfigurationBuilder httpClientRequestConfigurationBuilder = new HttpClientRequestConfigurationBuilder(this);
-
-	private EndpointRequestInterceptorsBuilder endpointRequestInterceptorsBuilder = new EndpointRequestInterceptorsBuilder(this);
+	private EndpointRequestExecutor endpointRequestExecutor;
 
 	private HttpMessageConvertersBuilder httpMessageConvertersBuilder = new HttpMessageConvertersBuilder(this);
 
+	private EndpointRequestInterceptorsBuilder endpointRequestInterceptorsBuilder = new EndpointRequestInterceptorsBuilder(this);
+
 	private EndpointResponseErrorFallbackBuilder endpointResponseErrorFallbackBuilder = new EndpointResponseErrorFallbackBuilder(this);
 
+	private HttpClientRequestConfigurationBuilder httpClientRequestConfigurationBuilder = new HttpClientRequestConfigurationBuilder(this);
+
+	private RetryBuilder retryBuilder = new RetryBuilder(this);
+
 	private ResourceLinkDiscoveryBuilder resourceLinkDiscoveryBuilder = new ResourceLinkDiscoveryBuilder(this);
+
+	private AsyncBuilder asyncBuilder = new AsyncBuilder(this);
 
 	public HypermediaBrowserBuilder baseURL(String baseUrl) {
 		this.baseURL = Tryable.of(() -> new URL(baseUrl));
@@ -141,6 +161,14 @@ public class HypermediaBrowserBuilder {
 		return resourceLinkDiscoveryBuilder;
 	}
 
+	public AsyncBuilder async() {
+		return asyncBuilder;
+	}
+
+	public RetryBuilder retry() {
+		return retryBuilder;
+	}
+
 	public HypermediaBrowser build() {
 		LinkRequestExecutor linkRequestExecutor = linkRequestExecutor();
 		HypermediaLinkDiscovery resourceLinkDiscovery = resourceLinkDiscoveryBuilder.build();
@@ -149,21 +177,51 @@ public class HypermediaBrowserBuilder {
 	}
 
 	private LinkRequestExecutor linkRequestExecutor() {
-		return new LinkRequestExecutor(endpointRequestExecutor(), endpointRequestInterceptorsBuilder.build());
+		return new LinkRequestExecutor(retryable(intercepted(asyncEndpointRequestExecutor())));
 	}
 
-	private EndpointRequestExecutor endpointRequestExecutor() {
+	private AsyncEndpointRequestExecutor retryable(AsyncEndpointRequestExecutor delegate) {
+		RetryConfiguration configuration = retryBuilder.build();
+		return configuration == null ?
+				delegate :
+					new AsyncRetryableEndpointRequestExecutor(delegate, retryBuilder.async.scheduler, configuration);
+	}
+
+	private AsyncEndpointRequestExecutor intercepted(AsyncEndpointRequestExecutor delegate) {
+		Collection<EndpointRequestInterceptor> interceptors = endpointRequestInterceptorsBuilder.all;
+		return interceptors.isEmpty() ?
+				delegate :
+					new AsyncInterceptedEndpointRequestExecutor(delegate, AsyncEndpointRequestInterceptorChain.of(interceptors));
+	}
+
+	private AsyncEndpointRequestExecutor asyncEndpointRequestExecutor() {
+		EndpointRequestExecutor endpointRequestExecutor = Optional.ofNullable(this.endpointRequestExecutor)
+				.orElseGet(this::defaultAsyncEndpointRequestExecutor);
+
+		return endpointRequestExecutor instanceof AsyncEndpointRequestExecutor ?
+				(AsyncEndpointRequestExecutor) endpointRequestExecutor :
+					new AsyncEndpointRequestExecutorAdapter(asyncBuilder.pool, endpointRequestExecutor);
+	}
+
+	private AsyncEndpointRequestExecutor defaultAsyncEndpointRequestExecutor() {
 		HttpMessageConverters messageConverters = httpMessageConvertersBuilder.build();
 		EndpointRequestWriter writer = new EndpointRequestWriter(messageConverters);
 		EndpointResponseReader reader = new EndpointResponseReader(messageConverters, endpointResponseErrorFallbackBuilder.build());
 
-		return Optional.ofNullable(endpointRequestExecutor)
-				.orElseGet(() -> new DefaultEndpointRequestExecutor(httpClientRequestFactory(), writer, reader));
+		return new DefaultAsyncEndpointRequestExecutor(asyncBuilder.pool, asyncHttpClientRequestFactory(), writer, reader);
 	}
 
-	private HttpClientRequestFactory httpClientRequestFactory() {
-		return Optional.ofNullable(httpClientRequestFactory)
-				.orElseGet(() -> new JdkHttpClientRequestFactory(httpClientRequestConfiguration()));
+	private AsyncHttpClientRequestFactory asyncHttpClientRequestFactory() {
+		HttpClientRequestFactory httpClientRequestFactory = Optional.ofNullable(this.httpClientRequestFactory)
+				.orElseGet(() -> defaultHttpClientRequestFactory());
+
+		return httpClientRequestFactory instanceof AsyncHttpClientRequestFactory ?
+				(AsyncHttpClientRequestFactory) httpClientRequestFactory :
+					new AsyncHttpClientRequestFactoryAdapter(asyncBuilder.pool, defaultHttpClientRequestFactory());
+	}
+
+	private JdkHttpClientRequestFactory defaultHttpClientRequestFactory() {
+		return new JdkHttpClientRequestFactory(httpClientRequestConfiguration());
 	}
 
 	private HttpClientRequestConfiguration httpClientRequestConfiguration() {
@@ -173,19 +231,19 @@ public class HypermediaBrowserBuilder {
 	public class EndpointRequestInterceptorsBuilder {
 
 		private final HypermediaBrowserBuilder context;
-		private final Collection<EndpointRequestInterceptor> interceptors = new ArrayList<>();
+		private final Collection<EndpointRequestInterceptor> all = new ArrayList<>();
 
 		private EndpointRequestInterceptorsBuilder(HypermediaBrowserBuilder context) {
 			this.context = context;
 		}
 
 		public EndpointRequestInterceptorsBuilder authentication(Authentication authentication) {
-			interceptors.add(new AuthenticationEndpoinRequestInterceptor(authentication));
+			all.add(new AuthenticationEndpoinRequestInterceptor(authentication));
 			return this;
 		}
 
-		public EndpointRequestInterceptorsBuilder add(EndpointRequestInterceptor... interceptors) {
-			this.interceptors.addAll(Arrays.asList(interceptors));
+		public EndpointRequestInterceptorsBuilder add(EndpointRequestInterceptor...interceptors) {
+			this.all.addAll(Arrays.asList(interceptors));
 			return this;
 		}
 
@@ -193,8 +251,8 @@ public class HypermediaBrowserBuilder {
 			return context;
 		}
 
-		private EndpointRequestInterceptorChain build() {
-			return new EndpointRequestInterceptorChain(interceptors);
+		public AsyncEndpointRequestInterceptorChain build() {
+			return AsyncEndpointRequestInterceptorChain.of(all);
 		}
 	}
 
@@ -324,7 +382,8 @@ public class HypermediaBrowserBuilder {
 	public class HttpClientRequestConfigurationBuilder {
 
 		private final HypermediaBrowserBuilder context;
-		private final HttpClientRequestConfiguration.Builder builder = new HttpClientRequestConfiguration.Builder();
+		private final HttpClientRequestConfiguration.Builder httpClientRequestConfigurationBuilder = new HttpClientRequestConfiguration.Builder();
+		private final HttpClientRequestInterceptorsBuilder interceptors = new HttpClientRequestInterceptorsBuilder();
 
 		private HttpClientRequestConfiguration httpClientRequestConfiguration = null;
 
@@ -333,32 +392,32 @@ public class HypermediaBrowserBuilder {
 		}
 
 		public HttpClientRequestConfigurationBuilder connectionTimeout(int connectionTimeout) {
-			builder.connectionTimeout(connectionTimeout);
+			httpClientRequestConfigurationBuilder.connectionTimeout(connectionTimeout);
 			return this;
 		}
 
 		public HttpClientRequestConfigurationBuilder connectionTimeout(Duration connectionTimeout) {
-			builder.connectionTimeout(connectionTimeout);
+			httpClientRequestConfigurationBuilder.connectionTimeout(connectionTimeout);
 			return this;
 		}
 
 		public HttpClientRequestConfigurationBuilder readTimeout(int readTimeout) {
-			builder.readTimeout(readTimeout);
+			httpClientRequestConfigurationBuilder.readTimeout(readTimeout);
 			return this;
 		}
 
 		public HttpClientRequestConfigurationBuilder readTimeout(Duration readTimeout) {
-			builder.readTimeout(readTimeout);
+			httpClientRequestConfigurationBuilder.readTimeout(readTimeout);
 			return this;
 		}
 
 		public HttpClientRequestConfigurationBuilder charset(Charset charset) {
-			builder.charset(charset);
+			httpClientRequestConfigurationBuilder.charset(charset);
 			return this;
 		}
 
 		public HttpClientRequestConfigurationBuilder proxy(Proxy proxy) {
-			builder.proxy(proxy);
+			httpClientRequestConfigurationBuilder.proxy(proxy);
 			return this;
 		}
 
@@ -367,7 +426,7 @@ public class HypermediaBrowserBuilder {
 		}
 
 		public HttpClientRequestConfigurationBuilder followRedirects(boolean enabled) {
-			builder.followRedirects(enabled);
+			httpClientRequestConfigurationBuilder.followRedirects(enabled);
 			return this;
 		}
 
@@ -376,12 +435,21 @@ public class HypermediaBrowserBuilder {
 		}
 
 		public HttpClientRequestConfigurationBuilder useCaches(boolean enabled) {
-			builder.useCaches(enabled);
+			httpClientRequestConfigurationBuilder.useCaches(enabled);
 			return this;
 		}
 
 		public HttpClientRequestSslConfigurationBuilder ssl() {
 			return new HttpClientRequestSslConfigurationBuilder();
+		}
+
+		public HttpClientRequestInterceptorsBuilder interceptors() {
+			return interceptors;
+		}
+
+		public HypermediaBrowserBuilder interceptors(HttpClientRequestInterceptor...interceptors) {
+			this.interceptors.add(interceptors);
+			return context;
 		}
 
 		public HypermediaBrowserBuilder using(HttpClientRequestConfiguration httpClientRequestConfiguration) {
@@ -394,18 +462,18 @@ public class HypermediaBrowserBuilder {
 		}
 
 		private HttpClientRequestConfiguration build() {
-			return Optional.ofNullable(httpClientRequestConfiguration).orElseGet(() -> builder.build());
+			return Optional.ofNullable(httpClientRequestConfiguration).orElseGet(() -> httpClientRequestConfigurationBuilder.build());
 		}
 
 		public class HttpClientRequestFollowRedirectsConfigurationBuilder {
 
 			public HttpClientRequestConfigurationBuilder enabled() {
-				builder.followRedirects().enabled();
+				httpClientRequestConfigurationBuilder.followRedirects().enabled();
 				return HttpClientRequestConfigurationBuilder.this;
 			}
 
 			public HttpClientRequestConfigurationBuilder disabled() {
-				builder.followRedirects().disabled();
+				httpClientRequestConfigurationBuilder.followRedirects().disabled();
 				return HttpClientRequestConfigurationBuilder.this;
 			}
 		}
@@ -413,12 +481,12 @@ public class HypermediaBrowserBuilder {
 		public class HttpClientRequestUseCachesConfigurationBuilder {
 
 			public HttpClientRequestConfigurationBuilder enabled() {
-				builder.useCaches().enabled();
+				httpClientRequestConfigurationBuilder.useCaches().enabled();
 				return HttpClientRequestConfigurationBuilder.this;
 			}
 
 			public HttpClientRequestConfigurationBuilder disabled() {
-				builder.useCaches().disabled();
+				httpClientRequestConfigurationBuilder.useCaches().disabled();
 				return HttpClientRequestConfigurationBuilder.this;
 			}
 		}
@@ -426,18 +494,207 @@ public class HypermediaBrowserBuilder {
 		public class HttpClientRequestSslConfigurationBuilder {
 
 			public HttpClientRequestConfigurationBuilder sslSocketFactory(SSLSocketFactory sslSocketFactory) {
-				builder.ssl().sslSocketFactory(sslSocketFactory);
+				httpClientRequestConfigurationBuilder.ssl().sslSocketFactory(sslSocketFactory);
 				return HttpClientRequestConfigurationBuilder.this;
 			}
 
 			public HttpClientRequestConfigurationBuilder hostnameVerifier(HostnameVerifier hostnameVerifier) {
-				builder.ssl().hostnameVerifier(hostnameVerifier);
+				httpClientRequestConfigurationBuilder.ssl().hostnameVerifier(hostnameVerifier);
 				return HttpClientRequestConfigurationBuilder.this;
 			}
 
 			public HypermediaBrowserBuilder and() {
 				return context;
 			}
+		}
+
+		public class HttpClientRequestInterceptorsBuilder {
+
+			private final Collection<HttpClientRequestInterceptor> all = new ArrayList<>();
+
+			public HttpClientRequestInterceptorsBuilder add(HttpClientRequestInterceptor... interceptors) {
+				this.all.addAll(Arrays.asList(interceptors));
+				return this;
+			}
+
+			public HypermediaBrowserBuilder and() {
+				return context;
+			}
+		}
+	}
+
+	public class RetryBuilder {
+
+		private final HypermediaBrowserBuilder context;
+		private final RetryConfigurationBuilder builder = new RetryConfigurationBuilder();
+		private final AsyncRetryConfigurationBuilder async = new AsyncRetryConfigurationBuilder(this);
+
+		private boolean enabled = false;
+		private RetryConfiguration configuration;
+
+		public RetryBuilder(HypermediaBrowserBuilder context) {
+			this.context = context;
+		}
+
+		public RetryBuilder enabled() {
+			this.enabled = true;
+			return this;
+		}
+
+		public HypermediaBrowserBuilder disabled() {
+			this.enabled = false;
+			return context;
+		}
+
+		public RetryConfigurationBuilder configure() {
+			this.enabled = true;
+			return builder;
+		}
+
+		public HypermediaBrowserBuilder using(RetryConfiguration configuration) {
+			this.enabled = true;
+			this.configuration = configuration;
+			return context;
+		}
+
+		public AsyncRetryConfigurationBuilder async() {
+			return async;
+		}
+
+		public HypermediaBrowserBuilder and() {
+			return context;
+		}
+
+		private RetryConfiguration build() {
+			return enabled ? Optional.ofNullable(configuration).orElseGet(() -> builder.build()) : null;
+		}
+
+		public class RetryConfigurationBuilder {
+
+			private final RetryConfiguration.Builder delegate = new RetryConfiguration.Builder();
+			private final RetryConfigurationBackOffBuilder backOff = new RetryConfigurationBackOffBuilder(this);
+
+			public RetryConfigurationBuilder attempts(int attempts) {
+				delegate.attempts(attempts);
+				return this;
+			}
+
+			public RetryConfigurationBuilder timeout(long timeout) {
+				delegate.timeout(timeout);
+				return this;
+			}
+
+			public RetryConfigurationBuilder timeout(Duration timeout) {
+				delegate.timeout(timeout);
+				return this;
+			}
+
+			public RetryConfigurationBuilder when(HttpStatusCode... statuses) {
+				delegate.when(statuses);
+				return this;
+			}
+
+			public RetryConfigurationBuilder when(StatusCodeRetryCondition condition) {
+				delegate.when(condition);
+				return this;
+			}
+
+			@SafeVarargs
+			public final RetryConfigurationBuilder when(Class<? extends Throwable>... throwableTypes) {
+				delegate.when(throwableTypes);
+				return this;
+			}
+
+			public final RetryConfigurationBuilder when(ThrowableRetryCondition condition) {
+				delegate.when(condition);
+				return this;
+			}
+
+			public final RetryConfigurationBuilder when(HeadersRetryCondition condition) {
+				delegate.when(condition);
+				return this;
+			}
+
+			public final RetryConfigurationBuilder when(EndpointResponseRetryCondition condition) {
+				delegate.when(condition);
+				return this;
+			}
+
+			public RetryConfigurationBackOffBuilder backOff() {
+				return backOff;
+			}
+
+			public HypermediaBrowserBuilder and() {
+				return context;
+			}
+
+			private RetryConfiguration build() {
+				return delegate.build();
+			}
+
+			public class RetryConfigurationBackOffBuilder {
+
+				private final RetryConfigurationBuilder context;
+
+				private RetryConfigurationBackOffBuilder(RetryConfigurationBuilder context) {
+					this.context = context;
+				}
+
+				public RetryConfigurationBackOffBuilder delay(long delay) {
+					delegate.backOff().delay(delay);
+					return this;
+				}
+
+				public RetryConfigurationBackOffBuilder delay(Duration delay) {
+					delegate.backOff().delay(delay);
+					return this;
+				}
+
+				public RetryConfigurationBackOffBuilder multiplier(double multiplier) {
+					delegate.backOff().multiplier(multiplier);
+					return this;
+				}
+
+				public RetryConfigurationBuilder and() {
+					return context;
+				}
+			}
+		}
+
+		public class AsyncRetryConfigurationBuilder {
+
+			private final RetryBuilder context;
+
+			private ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(10);
+
+			private AsyncRetryConfigurationBuilder(RetryBuilder context) {
+				this.context = context;
+			}
+
+			public RetryBuilder scheduler(ScheduledExecutorService scheduler) {
+				this.scheduler = scheduler;
+				return context;
+			}
+		}
+	}
+
+	public class AsyncBuilder {
+
+		private final HypermediaBrowserBuilder context;
+
+		private Executor pool = Executors.newCachedThreadPool();
+
+		private AsyncBuilder(HypermediaBrowserBuilder context) {
+			this.context = context;
+		}
+
+		public AsyncBuilder with(Executor executor) {
+			this.pool = executor;
+			return this;
+		}
+
+		public HypermediaBrowserBuilder and() {
+			return context;
 		}
 	}
 }
