@@ -13,10 +13,12 @@ import static org.mockito.Mockito.when;
 import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
 import static org.mockserver.model.JsonBody.json;
+import static org.mockserver.verify.VerificationTimes.exactly;
 
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CompletionStage;
 
 import org.hamcrest.Matchers;
 import org.junit.Before;
@@ -27,6 +29,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.mockserver.client.server.MockServerClient;
 import org.mockserver.junit.MockServerRule;
+import org.mockserver.matchers.Times;
 import org.mockserver.model.HttpRequest;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
@@ -34,6 +37,8 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.github.ljtfreitas.restify.http.client.hateoas.Link;
 import com.github.ljtfreitas.restify.http.client.hateoas.Resource;
 import com.github.ljtfreitas.restify.http.client.message.ContentType;
+import com.github.ljtfreitas.restify.http.client.message.Header;
+import com.github.ljtfreitas.restify.http.client.message.response.HttpStatusCode;
 import com.github.ljtfreitas.restify.http.client.request.interceptor.EndpointRequestInterceptorChain;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -71,11 +76,16 @@ public class HypermediaBrowserTest {
 					.withHeader("Content-Type", "application/hal+json")
 					.withBody(json("{\"name\":\"Tiago de Freitas Lima\",\"birth_date\":\"1985-07-02\"}")));
 
-		Person person = hypermediaBrowser
+		CompletionStage<Person> personAsFuture = hypermediaBrowser
 			.follow(Link.self("http://localhost:7080/me"))
 				.as(Person.class);
 
+		Person person = personAsFuture.toCompletableFuture().join();
+
 		assertNotNull(person);
+
+		assertEquals("Tiago de Freitas Lima", person.name);
+		assertEquals("1985-07-02", person.birthDate);
 
 		mockServerClient.verify(httpRequest);
 	}
@@ -111,10 +121,12 @@ public class HypermediaBrowserTest {
 								  + "{\"name\":\"Sicrano dos Santos\",\"birth_date\":\"1985-10-02\"}"
 								 + "]")));
 
-		Collection<Person> friends = hypermediaBrowser
+		CompletionStage<Collection<Person>> friendsAsFuture = hypermediaBrowser
 				.follow(Link.self("http://localhost:7080/me"))
 					.follow(rel("friends").usingParameter("user", "tiago"))
-						.asCollectionOf(Person.class);
+						.asCollection(Person.class);
+
+		Collection<Person> friends = friendsAsFuture.toCompletableFuture().join();
 
 		assertThat(friends, Matchers.hasSize(3));
 		assertThat(friends, Matchers.hasItem(new Person("Fulano de Tal", "1985-08-02")));
@@ -169,11 +181,13 @@ public class HypermediaBrowserTest {
 					.withBody(json("{\"name\":\"Rio de Janeiro\",\"state\":\"Rio de Janeiro\","
 							+ "\"_links\":{\"self\":{\"href\":\"http://localhost:7080/cities/rio-de-janeiro\"}}}")));
 
-		Resource<City> city = hypermediaBrowser
+		CompletionStage<Resource<City>> cityAsFuture = hypermediaBrowser
 				.follow(Link.self("http://localhost:7080/me"))
 					.follow(rel("friends").usingParameter("user", "tiago"))
 						.follow(rel("$.[1]._links.city.href"))
-							.asResourceOf(City.class);
+							.asResource(City.class);
+
+		Resource<City> city = cityAsFuture.toCompletableFuture().join();
 
 		assertEquals("Rio de Janeiro", city.content().name);
 		assertEquals("Rio de Janeiro", city.content().state);
@@ -214,10 +228,12 @@ public class HypermediaBrowserTest {
 								  + "{\"name\":\"Sicrano dos Santos\",\"birth_date\":\"1985-10-02\"}"
 								 + "]")));
 
-		Collection<Person> friends = hypermediaBrowser
+		CompletionStage<Collection<Person>> friendsAsFuture = hypermediaBrowser
 				.follow(Link.self("http://localhost:7080/me"))
 					.follow(rel("friends").usingParameter("user", "tiago"))
-						.asCollectionOf(Person.class);
+						.asCollection(Person.class);
+
+		Collection<Person> friends = friendsAsFuture.toCompletableFuture().join();
 
 		assertThat(friends, hasSize(3));
 		assertThat(friends, hasItem(new Person("Fulano de Tal", "1985-08-02")));
@@ -271,11 +287,13 @@ public class HypermediaBrowserTest {
 					.withHeader("Content-Type", "application/json")
 					.withBody(json("{\"name\":\"Rio de Janeiro\",\"state\":\"Rio de Janeiro\"}")));
 
-		City city = hypermediaBrowser
+		CompletionStage<City> cityAsFuture = hypermediaBrowser
 				.follow(Link.self("http://localhost:7080/me"))
 					.follow(rel("friends").usingParameter("user", "tiago"))
 						.follow(rel("$.[1]._links.city.href"))
 							.as(City.class);
+
+		City city = cityAsFuture.toCompletableFuture().join();
 
 		assertEquals("Rio de Janeiro", city.name);
 		assertEquals("Rio de Janeiro", city.state);
@@ -326,11 +344,13 @@ public class HypermediaBrowserTest {
 					.withHeader("Content-Type", "application/json")
 					.withBody(json("{\"name\":\"Sao Paulo\",\"state\":\"Sao Paulo\"}")));
 
-		City city = hypermediaBrowser
+		CompletionStage<City> cityAsFuture = hypermediaBrowser
 				.follow(Link.self("http://localhost:7080/me"))
 					.follow(rel("friends").usingParameter("user", "tiago"))
 						.follow(rel("$.[0].links[?(@.rel == 'city')].href"))
 							.as(City.class);
+
+		City city = cityAsFuture.toCompletableFuture().join();
 
 		assertEquals("Sao Paulo", city.name);
 		assertEquals("Sao Paulo", city.state);
@@ -375,10 +395,12 @@ public class HypermediaBrowserTest {
 					.withHeader("Content-Type", "application/json")
 					.withBody(json("{\"name\":\"Sao Paulo\",\"state\":\"Sao Paulo\"}")));
 
-		City city = hypermediaBrowser
+		CompletionStage<City> cityAsFuture = hypermediaBrowser
 				.follow(Link.self("http://localhost:7080/me"))
 					.follow("$.friends_url", "$.[0].city_url")
 						.as(City.class);
+
+		City city = cityAsFuture.toCompletableFuture().join();
 
 		assertEquals("Sao Paulo", city.name);
 		assertEquals("Sao Paulo", city.state);
@@ -429,10 +451,12 @@ public class HypermediaBrowserTest {
 					.and()
 				.build();
 
-		City city = hypermediaBrowser
+		CompletionStage<City> cityAsFuture = hypermediaBrowser
 				.follow(Link.self("http://localhost:7080/me"))
 					.follow("wife_url", "city_url")
 						.as(City.class);
+
+		City city = cityAsFuture.toCompletableFuture().join();
 
 		assertEquals("Sao Paulo", city.name);
 		assertEquals("Sao Paulo", city.state);
@@ -467,10 +491,12 @@ public class HypermediaBrowserTest {
 
 		hypermediaBrowser = new HypermediaBrowserBuilder().baseURL("http://localhost:7080").build();
 
-		Person wife = hypermediaBrowser
+		CompletionStage<Person> wifeAsFuture = hypermediaBrowser
 				.follow(Link.self("http://localhost:7080/me"))
 					.follow("wife")
 						.as(Person.class);
+
+		Person wife = wifeAsFuture.toCompletableFuture().join();
 
 		assertEquals("Tatiana Gomes da Silva", wife.name);
 
@@ -510,16 +536,95 @@ public class HypermediaBrowserTest {
 		Map<String, String> body = new HashMap<>();
 		body.put("image", "http://path.to.image/image.jpg");
 
-		String result = hypermediaBrowser
+		CompletionStage<String> resultAsFuture = hypermediaBrowser
 				.follow(Link.self("http://localhost:7080/me"))
 					.follow(rel("update_avatar")
 							.usingPost(body, ContentType.of("application/json"))
 							.usingHeader("X-Whatever", "whatever"))
 						.as(String.class);
 
+		String result = resultAsFuture.toCompletableFuture().join();
+
 		assertEquals("ok", result);
 
 		mockServerClient.verify(personRequest, avatarRequest);
+	}
+
+	@Test
+	public void shouldRetryRequestsWhenFollowLink() {
+		HttpRequest httpRequest = request()
+			.withMethod("GET")
+			.withPath("/me");
+
+		mockServerClient.when(httpRequest, Times.exactly(2))
+			.respond(
+				response()
+					.withStatusCode(500));
+
+		mockServerClient.when(httpRequest)
+			.respond(
+				response()
+					.withStatusCode(200)
+					.withHeader("Content-Type", "application/hal+json")
+					.withBody(json("{\"name\":\"Tiago de Freitas Lima\",\"birth_date\":\"1985-07-02\"}")));
+
+		hypermediaBrowser = new HypermediaBrowserBuilder()
+				.retry()
+					.enabled()
+					.configure()
+						.when(HttpStatusCode.INTERNAL_SERVER_ERROR)
+						.attempts(3)
+					.and()
+					.build();
+
+		CompletionStage<Person> personAsFuture = hypermediaBrowser
+			.follow(Link.self("http://localhost:7080/me"))
+				.as(Person.class);
+
+		Person person = personAsFuture.toCompletableFuture().join();
+
+		assertNotNull(person);
+
+		assertEquals("Tiago de Freitas Lima", person.name);
+		assertEquals("1985-07-02", person.birthDate);
+
+		mockServerClient.verify(httpRequest, exactly(3));
+	}
+
+	@Test
+	public void shouldFollowLinkUsingRequestInterceptors() {
+		Header header = new Header("X-Custom-Header", "whatever");
+
+		HttpRequest httpRequest = request()
+			.withMethod("GET")
+			.withHeader(header.name(), header.value())
+			.withPath("/me");
+
+		mockServerClient.when(httpRequest)
+			.respond(
+				response()
+					.withStatusCode(200)
+					.withHeader("Content-Type", "application/hal+json")
+					.withBody(json("{\"name\":\"Tiago de Freitas Lima\",\"birth_date\":\"1985-07-02\"}")));
+
+		hypermediaBrowser = new HypermediaBrowserBuilder()
+				.interceptors()
+					.add(r -> r.add(header))
+					.and()
+				.build();
+
+		CompletionStage<Person> personAsFuture = hypermediaBrowser
+			.follow(Link.self("http://localhost:7080/me"))
+				.as(Person.class);
+
+		Person person = personAsFuture.toCompletableFuture().join();
+
+		assertNotNull(person);
+
+		assertEquals("Tiago de Freitas Lima", person.name);
+		assertEquals("1985-07-02", person.birthDate);
+
+		mockServerClient.verify(httpRequest);
 	}
 
 	private static class Person {

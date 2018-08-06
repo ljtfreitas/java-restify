@@ -82,13 +82,14 @@ public class JacksonHypermediaHalJsonMessageConverterTest {
 		assertEquals("Tiago de Freitas Lima", user.name);
 		assertEquals("ljtfreitas", user.username);
 
-		Collection<Resource<User>> friends = resource.embedded().field("friends").get().collectionOf(User.class);
+		Collection<Resource<User>> friends = resource.embedded()
+				.flatMap(e -> e.field("friends")).get().asCollection(User.class);
 		assertThat(friends, hasSize(1));
 		Optional<Link> firstFriendSelfLink = friends.iterator().next().links().get("self");
 		assertTrue(firstFriendSelfLink.isPresent());
 		assertEquals("http://my.api/fulano", firstFriendSelfLink.get().href());
 
-		Resource<Book> book = resource.embedded().field("book").get().as(Book.class);
+		Resource<Book> book = resource.embedded().flatMap(e -> e.field("book")).get().as(Book.class);
 		assertEquals("1984", book.content().title);
 		Optional<Link> bookSelfLink = book.links().get("self");
 		assertTrue(bookSelfLink.isPresent());

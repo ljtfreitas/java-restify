@@ -6,6 +6,8 @@ import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
 import static org.mockserver.model.JsonBody.json;
 
+import java.util.concurrent.CompletionStage;
+
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -47,7 +49,9 @@ public class HypermediaLinkModuleTest {
 		assertNotNull(person.whatever);
 		assertEquals("address", person.whatever.rel());
 
-		Address address = person.whatever.follow().as(Address.class);
+		CompletionStage<Address> addressAsFuture = person.whatever.follow().as(Address.class);
+		Address address = addressAsFuture.toCompletableFuture().join();
+
 		assertEquals("Rua Ester Samara", address.street);
 		assertEquals("Sao Paulo", address.city);
 	}

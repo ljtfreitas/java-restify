@@ -34,6 +34,7 @@ import com.github.ljtfreitas.restify.http.client.HttpClientException;
 import com.github.ljtfreitas.restify.http.client.HttpException;
 import com.github.ljtfreitas.restify.http.client.message.HttpMessageException;
 import com.github.ljtfreitas.restify.http.client.message.response.HttpResponseMessage;
+import com.github.ljtfreitas.restify.http.client.request.DefaultEndpointRequestExecutor;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequestExecutor;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequestWriter;
@@ -49,6 +50,12 @@ public class DefaultAsyncEndpointRequestExecutor implements AsyncEndpointRequest
 	private final EndpointRequestWriter endpointRequestWriter;
 	private final EndpointResponseReader endpointResponseReader;
 	private final EndpointRequestExecutor delegate;
+
+	public DefaultAsyncEndpointRequestExecutor(Executor executor, AsyncHttpClientRequestFactory httpClientRequestFactory,
+			EndpointRequestWriter endpointRequestWriter, EndpointResponseReader endpointResponseReader) {
+		this(executor, httpClientRequestFactory, endpointRequestWriter, endpointResponseReader,
+				new DefaultEndpointRequestExecutor(httpClientRequestFactory, endpointRequestWriter, endpointResponseReader));
+	}
 
 	public DefaultAsyncEndpointRequestExecutor(Executor executor, AsyncHttpClientRequestFactory httpClientRequestFactory,
 			EndpointRequestWriter endpointRequestWriter, EndpointResponseReader endpointResponseReader,

@@ -26,6 +26,8 @@
 package com.github.ljtfreitas.restify.http.client.hateoas;
 
 import java.io.IOException;
+import java.util.Collection;
+import java.util.LinkedList;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -75,13 +77,13 @@ class HypermediaLinksDeserializer extends ContainerDeserializerBase<Links> imple
 	public Links deserialize(JsonParser jsonParser, DeserializationContext context)
 			throws IOException, JsonProcessingException {
 
-		Links links = new Links();
+		Collection<Link> links = new LinkedList<>();
 
 		while (!JsonToken.END_ARRAY.equals(jsonParser.nextToken())) {
 			links.add(new Link(jsonParser.readValueAs(Link.class), hypermediaBrowser));
 		}
 
-		return links;
+		return new Links(links);
 	}
 
 	@Override

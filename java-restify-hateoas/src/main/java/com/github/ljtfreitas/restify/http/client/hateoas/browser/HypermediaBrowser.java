@@ -33,6 +33,8 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import java.util.Queue;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 
 import com.github.ljtfreitas.restify.http.client.hateoas.Link;
 import com.github.ljtfreitas.restify.http.client.hateoas.Resource;
@@ -112,62 +114,64 @@ public class HypermediaBrowser {
 			return this;
 		}
 
-		public <T> T as(Type type) {
-			EndpointResponse<T> response = tryExecute(type);
-			return response.body();
+		public <T> CompletionStage<T> as(Type type) {
+			CompletionStage<EndpointResponse<T>> response = tryExecute(type);
+			return response.thenApply(EndpointResponse::body);
 		}
 
-		public <T> Collection<T> asCollectionOf(Type type) {
-			EndpointResponse<List<T>> response = tryExecute(JavaType.parameterizedType(List.class, type));
-			return response.body();
+		public <T> CompletionStage<Collection<T>> asCollection(Type type) {
+			CompletionStage<EndpointResponse<List<T>>> response = tryExecute(JavaType.parameterizedType(List.class, type));
+			return response.thenApply(EndpointResponse::body);
 		}
 
-		public <T> Resource<T> asResourceOf(Type type) {
-			EndpointResponse<Resource<T>> response = tryExecute(JavaType.parameterizedType(Resource.class, type));
-			return response.body();
+		public <T> CompletionStage<Resource<T>> asResource(Type type) {
+			CompletionStage<EndpointResponse<Resource<T>>> response = tryExecute(JavaType.parameterizedType(Resource.class, type));
+			return response.thenApply(EndpointResponse::body);
 		}
 
-		public <T> EndpointResponse<T> responseAs(Type type) {
+		public <T> CompletionStage<EndpointResponse<T>> asResponse(Type type) {
 			return tryExecute(type);
 		}
 
-		public EndpointResponse<Void> execute() {
+		public CompletionStage<EndpointResponse<Void>> execute() {
 			return tryExecute(void.class);
 		}
 
-		private <T> EndpointResponse<T> tryExecute(Type responseType) {
-			try {
-				return execute(traverse(), responseType);
-			} catch (Exception e) {
-				throw new HypermediaBrowserException("Could not follow link [" + link + "]", e);
-			}
+		private <T> CompletionStage<EndpointResponse<T>> tryExecute(Type responseType) {
+			CompletionStage<EndpointResponse<T>> responseAsFuture = traverse()
+					.thenCompose(linkURI -> execute(linkURI, responseType));
+
+			return responseAsFuture
+					.exceptionally(e -> {throw new HypermediaBrowserException("Could not follow link [" + link + "]", e);});
 		}
 
-		private LinkURI traverse() {
+		private CompletionStage<LinkURI> traverse() {
 			LinkURI linkURI = new LinkURI(link, parameters);
-			if (relations.isEmpty()) return linkURI;
+			if (relations.isEmpty()) return CompletableFuture.completedFuture(linkURI);
 			return traverse(linkURI, relations.poll());
 		}
 
-		private LinkURI traverse(LinkURI linkURI, Hop relation) {
-			if (relation == null) return linkURI;
+		private CompletionStage<LinkURI> traverse(LinkURI linkURI, Hop relation) {
+			if (relation == null) return CompletableFuture.completedFuture(linkURI);
 
-			EndpointResponse<String> resource = execute(linkURI, String.class);
+			return execute(linkURI, String.class)
+				.thenCompose(resource -> {
 
-			String resourceBody = resource.body();
+					String resourceBody = (String) resource.body();
 
-			ContentType contentType = resource.headers().get(Headers.CONTENT_TYPE)
-					.map(h -> ContentType.of(h.value()))
-						.orElseThrow(() -> new IllegalArgumentException("Your response body does not have a Content-Type header?"));
+					ContentType contentType = resource.headers().get(Headers.CONTENT_TYPE)
+							.map(h -> ContentType.of(h.value()))
+							.orElseThrow(() -> new IllegalArgumentException("Your response body does not have a Content-Type header?"));
 
-			Link relationLink = resourceLinkDiscovery.discovery(relation.rel(), RawResource.of(resourceBody, contentType))
-				.orElseThrow(() -> new IllegalStateException("Expected to find link [" + relation.rel() + "] "
-						+ "in resource [" + resourceBody + "]."));
+					Link relationLink = resourceLinkDiscovery.discovery(relation.rel(), RawResource.of(resourceBody, contentType))
+							.orElseThrow(() -> new IllegalStateException("Expected to find link [" + relation.rel() + "] "
+									+ "in resource [" + resourceBody + "]."));
 
-			return traverse(new LinkURI(relationLink, relation), relations.poll());
+					return traverse(new LinkURI(relationLink, relation), relations.poll());
+				});
 		}
 
-		private <T> EndpointResponse<T> execute(LinkURI linkURI, Type responseType) {
+		private <T> CompletionStage<EndpointResponse<T>> execute(LinkURI linkURI, Type responseType) {
 			LinkEndpointRequest request = new LinkEndpointRequest(baseURL, linkURI.link, linkURI.parameters, responseType, linkURI.method,
 					linkURI.headers, linkURI.body);
 

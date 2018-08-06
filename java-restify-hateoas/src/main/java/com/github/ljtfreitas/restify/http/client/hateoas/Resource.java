@@ -26,6 +26,7 @@
 package com.github.ljtfreitas.restify.http.client.hateoas;
 
 import java.util.Collection;
+import java.util.Optional;
 
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
@@ -44,7 +45,7 @@ public class Resource<T> {
 	private Links links = new Links();
 
 	@JsonProperty(value = "resource", access = Access.WRITE_ONLY)
-	private Embedded embedded = new Embedded();
+	private Embedded embedded;
 
 	@Deprecated
 	Resource() {
@@ -55,19 +56,25 @@ public class Resource<T> {
 	}
 
 	public Resource(T content, Links links) {
-		this.content = content;
+		this(content, links, null);
 	}
 
 	public Resource(T content, Collection<Link> links) {
+		this(content, new Links(links), null);
+	}
+
+	private Resource(T content, Links links, Embedded embedded) {
 		this.content = content;
+		this.links = links;
+		this.embedded = embedded;
 	}
 
 	public T content() {
 		return content;
 	}
 
-	public Embedded embedded() {
-		return embedded;
+	public Optional<Embedded> embedded() {
+		return Optional.ofNullable(embedded);
 	}
 
 	public Links links() {
@@ -75,8 +82,8 @@ public class Resource<T> {
 	}
 
 	public Resource<T> addLink(Link link) {
-		links.add(link);
-		return this;
+		Links links = this.links.add(link);
+		return new Resource<>(content, links, embedded);
 	}
 
 	@Override

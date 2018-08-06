@@ -66,8 +66,9 @@ public class Links implements Iterable<Link> {
 	}
 
 	public Links add(Link link) {
+		Collection<Link> links = new ArrayList<>(this.links);
 		links.add(link);
-		return this;
+		return new Links(links);
 	}
 
 	@Override
@@ -78,9 +79,5 @@ public class Links implements Iterable<Link> {
 	@Override
 	public String toString() {
 		return links.toString();
-	}
-
-	public Collection<Link> unwrap() {
-		return Collections.unmodifiableCollection(links);
 	}
 }

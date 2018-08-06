@@ -6,6 +6,8 @@ import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
 import static org.mockserver.model.JsonBody.json;
 
+import java.util.concurrent.CompletionStage;
+
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -48,7 +50,9 @@ public class LinkTest {
 
 	@Test
 	public void shouldFollowLink() {
-		Person person = link.follow().as(Person.class);
+		CompletionStage<Person> personAsFuture = link.follow().as(Person.class);
+
+		Person person = personAsFuture.toCompletableFuture().join();
 
 		assertNotNull(person);
 		assertEquals("Tiago de Freitas Lima", person.name);
