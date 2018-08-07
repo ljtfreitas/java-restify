@@ -19,7 +19,7 @@ public class RxJavaEndpointCallExecutableProviderSpiTest {
 
 		assertThat(services, contains(
 				instanceOf(RxJavaCompletableEndpointCallExecutableFactory.class),
-				instanceOf(RxJavaObservableEndpointCallExecutableFactory.class),
-				instanceOf(RxJavaSingleEndpointCallExecutableFactory.class)));
+				instanceOf(RxJavaObservableEndpointCallExecutableAdapter.class),
+				instanceOf(RxJavaSingleEndpointCallExecutableAdapter.class)));
 	}
 }

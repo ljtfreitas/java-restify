@@ -66,11 +66,11 @@ public class EndpointCallExecutables {
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private <M, T, O> EndpointCallExecutable<M, O> decorate(EndpointMethod endpointMethod, EndpointCallExecutableProvider provider) {
-		EndpointCallExecutableDecoratorFactory<M, T, O> decorator = (EndpointCallExecutableDecoratorFactory) provider;
-		return decorator.create(endpointMethod, search(endpointMethod.with(decorator.returnType(endpointMethod)), decorator));
+		EndpointCallExecutableAdapter<M, T, O> decorator = (EndpointCallExecutableAdapter) provider;
+		return decorator.adapt(endpointMethod, search(endpointMethod.with(decorator.returnType(endpointMethod)), decorator));
 	}
 
 	private boolean decorator(EndpointCallExecutableProvider provider) {
-		return provider instanceof EndpointCallExecutableDecoratorFactory;
+		return provider instanceof EndpointCallExecutableAdapter;
 	}
 }

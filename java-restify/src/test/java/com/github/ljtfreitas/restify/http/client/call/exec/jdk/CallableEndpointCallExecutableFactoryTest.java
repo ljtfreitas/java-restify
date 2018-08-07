@@ -64,7 +64,7 @@ public class CallableEndpointCallExecutableFactoryTest {
 	@Test
 	public void shouldCreateExecutableFromEndpointMethodWithCallableReturnType() throws Exception {
 		EndpointCallExecutable<Callable<String>, String> executable = factory
-				.create(new SimpleEndpointMethod(SomeType.class.getMethod("callable")), delegate);
+				.adapt(new SimpleEndpointMethod(SomeType.class.getMethod("callable")), delegate);
 
 		String result = "callable result";
 

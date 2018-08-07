@@ -19,9 +19,9 @@ public class RxJava2EndpointCallExecutableProviderSpiTest {
 
 		assertThat(services, contains(
 				instanceOf(RxJava2CompletableEndpointCallExecutableFactory.class),
-				instanceOf(RxJava2FlowableEndpointCallExecutableFactory.class),
-				instanceOf(RxJava2MaybeEndpointCallExecutableFactory.class),
-				instanceOf(RxJava2ObservableEndpointCallExecutableFactory.class),
-				instanceOf(RxJava2SingleEndpointCallExecutableFactory.class)));
+				instanceOf(RxJava2FlowableEndpointCallExecutableAdapter.class),
+				instanceOf(RxJava2MaybeEndpointCallExecutableAdapter.class),
+				instanceOf(RxJava2ObservableEndpointCallExecutableAdapter.class),
+				instanceOf(RxJava2SingleEndpointCallExecutableAdapter.class)));
 	}
 }

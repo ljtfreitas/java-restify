@@ -1,2 +1,2 @@
-com.github.ljtfreitas.restify.http.client.call.exec.reactor.MonoEndpointCallExecutableFactory
-com.github.ljtfreitas.restify.http.client.call.exec.reactor.FluxEndpointCallExecutableFactory
+com.github.ljtfreitas.restify.http.client.call.exec.reactor.MonoEndpointCallExecutableAdapter
+com.github.ljtfreitas.restify.http.client.call.exec.reactor.FluxEndpointCallExecutableAdapter

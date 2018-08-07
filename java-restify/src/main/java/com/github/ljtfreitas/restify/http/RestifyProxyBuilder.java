@@ -47,24 +47,23 @@ import com.github.ljtfreitas.restify.http.client.call.EndpointCallFactory;
 import com.github.ljtfreitas.restify.http.client.call.EndpointMethodExecutor;
 import com.github.ljtfreitas.restify.http.client.call.async.DefaultAsyncEndpointCallFactory;
 import com.github.ljtfreitas.restify.http.client.call.async.ExecutorAsyncEndpointCall;
-import com.github.ljtfreitas.restify.http.client.call.async.ExecutorAsyncEndpointCallFactory;
 import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutableProvider;
 import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutables;
-import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallObjectExecutableFactory;
-import com.github.ljtfreitas.restify.http.client.call.exec.HeadersEndpointCallExecutableFactory;
-import com.github.ljtfreitas.restify.http.client.call.exec.StatusCodeEndpointCallExecutableFactory;
-import com.github.ljtfreitas.restify.http.client.call.exec.async.AsyncCallbackEndpointCallExecutableFactory;
-import com.github.ljtfreitas.restify.http.client.call.exec.async.AsyncEndpointCallObjectExecutableFactory;
+import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallObjectExecutableAdapter;
+import com.github.ljtfreitas.restify.http.client.call.exec.HeadersEndpointCallExecutableAdapter;
+import com.github.ljtfreitas.restify.http.client.call.exec.StatusCodeEndpointCallExecutableAdapter;
+import com.github.ljtfreitas.restify.http.client.call.exec.async.AsyncCallbackEndpointCallExecutableAdapter;
+import com.github.ljtfreitas.restify.http.client.call.exec.async.AsyncEndpointCallObjectExecutableAdapter;
 import com.github.ljtfreitas.restify.http.client.call.exec.jdk.CallableEndpointCallExecutableFactory;
 import com.github.ljtfreitas.restify.http.client.call.exec.jdk.CollectionEndpointCallExecutableFactory;
-import com.github.ljtfreitas.restify.http.client.call.exec.jdk.CompletionStageCallbackEndpointCallExecutableFactory;
-import com.github.ljtfreitas.restify.http.client.call.exec.jdk.CompletionStageEndpointCallExecutableFactory;
-import com.github.ljtfreitas.restify.http.client.call.exec.jdk.EnumerationEndpointCallExecutableFactory;
-import com.github.ljtfreitas.restify.http.client.call.exec.jdk.FutureEndpointCallExecutableFactory;
-import com.github.ljtfreitas.restify.http.client.call.exec.jdk.FutureTaskEndpointCallExecutableFactory;
-import com.github.ljtfreitas.restify.http.client.call.exec.jdk.IterableEndpointCallExecutableFactory;
-import com.github.ljtfreitas.restify.http.client.call.exec.jdk.IteratorEndpointCallExecutableFactory;
-import com.github.ljtfreitas.restify.http.client.call.exec.jdk.ListIteratorEndpointCallExecutableFactory;
+import com.github.ljtfreitas.restify.http.client.call.exec.jdk.CompletionStageCallbackEndpointCallExecutableAdapter;
+import com.github.ljtfreitas.restify.http.client.call.exec.jdk.CompletionStageEndpointCallExecutableAdapter;
+import com.github.ljtfreitas.restify.http.client.call.exec.jdk.EnumerationEndpointCallExecutableAdapter;
+import com.github.ljtfreitas.restify.http.client.call.exec.jdk.FutureEndpointCallExecutableAdapter;
+import com.github.ljtfreitas.restify.http.client.call.exec.jdk.FutureTaskEndpointCallExecutableAdapter;
+import com.github.ljtfreitas.restify.http.client.call.exec.jdk.IterableEndpointCallExecutableAdapter;
+import com.github.ljtfreitas.restify.http.client.call.exec.jdk.IteratorEndpointCallExecutableAdapter;
+import com.github.ljtfreitas.restify.http.client.call.exec.jdk.ListIteratorEndpointCallExecutableAdapter;
 import com.github.ljtfreitas.restify.http.client.call.exec.jdk.OptionalEndpointCallExecutableFactory;
 import com.github.ljtfreitas.restify.http.client.call.exec.jdk.RunnableEndpointCallExecutableFactory;
 import com.github.ljtfreitas.restify.http.client.jdk.HttpClientRequestConfiguration;
@@ -266,19 +265,18 @@ public class RestifyProxyBuilder {
 			EndpointRequestExecutor executor = retryable(intercepted(endpointRequestExecutor()));
 			return executor instanceof AsyncEndpointRequestExecutor ?
 					asyncEndpointCallFactory(executor) :
-						executorEndpointCallFactory(executor);
+						defaultEndpointCallFactory(executor);
 		}
 
 		private EndpointCallFactory asyncEndpointCallFactory(EndpointRequestExecutor executor) {
-			EndpointCallFactory delegate = new DefaultEndpointCallFactory(executor);
+			EndpointCallFactory delegate = defaultEndpointCallFactory(executor);
 			return new DefaultAsyncEndpointCallFactory((AsyncEndpointRequestExecutor) executor,
 					endpointCallExecutablesBuilder.async.executor,
 					delegate);
 		}
 
-		private EndpointCallFactory executorEndpointCallFactory(EndpointRequestExecutor executor) {
-			EndpointCallFactory delegate = new DefaultEndpointCallFactory(executor);
-			return new ExecutorAsyncEndpointCallFactory(delegate, endpointCallExecutablesBuilder.async.executor);
+		private EndpointCallFactory defaultEndpointCallFactory(EndpointRequestExecutor executor) {
+			return new DefaultEndpointCallFactory(executor);
 		}
 
 		private EndpointRequestExecutor endpointRequestExecutor() {
@@ -503,13 +501,13 @@ public class RestifyProxyBuilder {
 			this.built.add(CallableEndpointCallExecutableFactory.instance());
 			this.built.add(RunnableEndpointCallExecutableFactory.instance());
 			this.built.add(CollectionEndpointCallExecutableFactory.instance());
-			this.built.add(EnumerationEndpointCallExecutableFactory.instance());
-			this.built.add(IteratorEndpointCallExecutableFactory.instance());
-			this.built.add(ListIteratorEndpointCallExecutableFactory.instance());
-			this.built.add(IterableEndpointCallExecutableFactory.instance());
-			this.built.add(EndpointCallObjectExecutableFactory.instance());
-			this.built.add(HeadersEndpointCallExecutableFactory.instance());
-			this.built.add(StatusCodeEndpointCallExecutableFactory.instance());
+			this.built.add(EnumerationEndpointCallExecutableAdapter.instance());
+			this.built.add(IteratorEndpointCallExecutableAdapter.instance());
+			this.built.add(ListIteratorEndpointCallExecutableAdapter.instance());
+			this.built.add(IterableEndpointCallExecutableAdapter.instance());
+			this.built.add(EndpointCallObjectExecutableAdapter.instance());
+			this.built.add(HeadersEndpointCallExecutableAdapter.instance());
+			this.built.add(StatusCodeEndpointCallExecutableAdapter.instance());
 		}
 
 		public EndpointCallExecutablesBuilder async() {
@@ -565,14 +563,14 @@ public class RestifyProxyBuilder {
 		private Executor executor = ExecutorAsyncEndpointCall.pool();
 
 		private AsyncEndpointCallExecutablesBuilder all() {
-			providers.add(new FutureEndpointCallExecutableFactory<Object, Object>(executor));
-			providers.add(new CompletionStageEndpointCallExecutableFactory<Object, Object>(executor));
-			providers.add(new CompletionStageCallbackEndpointCallExecutableFactory<Object, Object>(executor));
-			providers.add(new AsyncEndpointCallObjectExecutableFactory<Object, Object>(executor));
-			providers.add(new AsyncCallbackEndpointCallExecutableFactory<Object, Object>(executor));
+			providers.add(new FutureEndpointCallExecutableAdapter<Object, Object>(executor));
+			providers.add(new CompletionStageEndpointCallExecutableAdapter<Object, Object>(executor));
+			providers.add(new CompletionStageCallbackEndpointCallExecutableAdapter<Object, Object>(executor));
+			providers.add(new AsyncEndpointCallObjectExecutableAdapter<Object, Object>(executor));
+			providers.add(new AsyncCallbackEndpointCallExecutableAdapter<Object, Object>(executor));
 
 			if (executor instanceof ExecutorService) {
-				providers.add(new FutureTaskEndpointCallExecutableFactory<Object, Object>((ExecutorService) executor));
+				providers.add(new FutureTaskEndpointCallExecutableAdapter<Object, Object>((ExecutorService) executor));
 			}
 
 			return this;

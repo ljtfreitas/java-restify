@@ -34,8 +34,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.reactive.function.client.WebClient;
 
-import com.github.ljtfreitas.restify.http.client.call.exec.reactor.FluxEndpointCallExecutableFactory;
-import com.github.ljtfreitas.restify.http.client.call.exec.reactor.MonoEndpointCallExecutableFactory;
+import com.github.ljtfreitas.restify.http.client.call.exec.reactor.FluxEndpointCallExecutableAdapter;
+import com.github.ljtfreitas.restify.http.client.call.exec.reactor.MonoEndpointCallExecutableAdapter;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequestExecutor;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponseErrorFallback;
 import com.github.ljtfreitas.restify.http.spring.client.request.async.WebClientEndpointRequestExecutor;
@@ -57,19 +57,19 @@ public class RestifySpringWebFluxConfiguration {
 	}
 
 	@Configuration
-	@ConditionalOnClass(FluxEndpointCallExecutableFactory.class)
+	@ConditionalOnClass(FluxEndpointCallExecutableAdapter.class)
 	static class ReactiveExecutablesConfiguration {
 	
 		@ConditionalOnMissingBean
 		@Bean
-		public FluxEndpointCallExecutableFactory<Object, Object> fluxEndpointCallExecutableFactory() {
-			return new FluxEndpointCallExecutableFactory<>();
+		public FluxEndpointCallExecutableAdapter<Object, Object> fluxEndpointCallExecutableFactory() {
+			return new FluxEndpointCallExecutableAdapter<>();
 		}
 	
 		@ConditionalOnMissingBean
 		@Bean
-		public MonoEndpointCallExecutableFactory<Object, Object> monoEndpointCallExecutableFactory() {
-			return new MonoEndpointCallExecutableFactory<>();
+		public MonoEndpointCallExecutableAdapter<Object, Object> monoEndpointCallExecutableFactory() {
+			return new MonoEndpointCallExecutableAdapter<>();
 		}
 	}
 }

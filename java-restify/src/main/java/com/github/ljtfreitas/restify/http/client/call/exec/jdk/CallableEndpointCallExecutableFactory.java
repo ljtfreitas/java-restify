@@ -31,11 +31,11 @@ import java.util.concurrent.Callable;
 
 import com.github.ljtfreitas.restify.http.client.call.EndpointCall;
 import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutable;
-import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutableDecoratorFactory;
+import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutableAdapter;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethod;
 import com.github.ljtfreitas.restify.reflection.JavaType;
 
-public class CallableEndpointCallExecutableFactory<T, O> implements EndpointCallExecutableDecoratorFactory<Callable<T>, T, O> {
+public class CallableEndpointCallExecutableFactory<T, O> implements EndpointCallExecutableAdapter<Callable<T>, T, O> {
 
 	private static final CallableEndpointCallExecutableFactory<Object, Object> DEFAULT_INSTANCE = new CallableEndpointCallExecutableFactory<>();
 
@@ -56,7 +56,7 @@ public class CallableEndpointCallExecutableFactory<T, O> implements EndpointCall
 	}
 
 	@Override
-	public EndpointCallExecutable<Callable<T>, O> create(EndpointMethod endpointMethod, EndpointCallExecutable<T, O> executable) {
+	public EndpointCallExecutable<Callable<T>, O> adapt(EndpointMethod endpointMethod, EndpointCallExecutable<T, O> executable) {
 		return new CallableEndpointCallExecutable(executable);
 	}
 

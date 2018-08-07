@@ -40,11 +40,11 @@ import org.springframework.core.task.support.ExecutorServiceAdapter;
 import org.springframework.scheduling.SchedulingTaskExecutor;
 import org.springframework.scheduling.TaskScheduler;
 
-import com.github.ljtfreitas.restify.http.spring.client.call.exec.async.AsyncResultEndpointCallExecutableFactory;
-import com.github.ljtfreitas.restify.http.spring.client.call.exec.async.DeferredResultEndpointCallExecutableFactory;
-import com.github.ljtfreitas.restify.http.spring.client.call.exec.async.ListenableFutureEndpointCallExecutableFactory;
-import com.github.ljtfreitas.restify.http.spring.client.call.exec.async.ListenableFutureTaskEndpointCallExecutableFactory;
-import com.github.ljtfreitas.restify.http.spring.client.call.exec.async.WebAsyncTaskEndpointCallExecutableFactory;
+import com.github.ljtfreitas.restify.http.spring.client.call.exec.async.AsyncResultEndpointCallExecutableAdapter;
+import com.github.ljtfreitas.restify.http.spring.client.call.exec.async.DeferredResultEndpointCallExecutableAdapter;
+import com.github.ljtfreitas.restify.http.spring.client.call.exec.async.ListenableFutureEndpointCallExecutableAdapter;
+import com.github.ljtfreitas.restify.http.spring.client.call.exec.async.ListenableFutureTaskEndpointCallExecutableAdapter;
+import com.github.ljtfreitas.restify.http.spring.client.call.exec.async.WebAsyncTaskEndpointCallExecutableAdapter;
 
 @Configuration
 public class RestifyAsyncConfiguration {
@@ -63,37 +63,37 @@ public class RestifyAsyncConfiguration {
 
 	@ConditionalOnMissingBean
 	@Bean
-	public AsyncResultEndpointCallExecutableFactory<Object, Object> asyncResultEndpointCallExecutableFactory(
+	public AsyncResultEndpointCallExecutableAdapter<Object, Object> asyncResultEndpointCallExecutableFactory(
 			@Async AsyncTaskExecutor executor) {
-		return new AsyncResultEndpointCallExecutableFactory<>(executor);
+		return new AsyncResultEndpointCallExecutableAdapter<>(executor);
 	}
 
 	@ConditionalOnMissingBean
 	@Bean
-	public DeferredResultEndpointCallExecutableFactory<Object, Object> deferredResultEndpointCallExecutableFactory(
+	public DeferredResultEndpointCallExecutableAdapter<Object, Object> deferredResultEndpointCallExecutableFactory(
 			@Async AsyncTaskExecutor executor, RestifyConfigurationProperties properties) {
-		return new DeferredResultEndpointCallExecutableFactory<>(executor, properties.getAsync().getTimeout());
+		return new DeferredResultEndpointCallExecutableAdapter<>(executor, properties.getAsync().getTimeout());
 	}
 
 	@ConditionalOnMissingBean
 	@Bean
-	public ListenableFutureEndpointCallExecutableFactory<Object, Object> listenableFutureEndpointCallExecutableFactory(
+	public ListenableFutureEndpointCallExecutableAdapter<Object, Object> listenableFutureEndpointCallExecutableFactory(
 			@Async AsyncListenableTaskExecutor executor) {
-		return new ListenableFutureEndpointCallExecutableFactory<>(executor);
+		return new ListenableFutureEndpointCallExecutableAdapter<>(executor);
 	}
 
 	@ConditionalOnMissingBean
 	@Bean
-	public ListenableFutureTaskEndpointCallExecutableFactory<Object, Object> listenableFutureTaskEndpointCallExecutableFactory(
+	public ListenableFutureTaskEndpointCallExecutableAdapter<Object, Object> listenableFutureTaskEndpointCallExecutableFactory(
 			@Async AsyncListenableTaskExecutor executor) {
-		return new ListenableFutureTaskEndpointCallExecutableFactory<>(executor);
+		return new ListenableFutureTaskEndpointCallExecutableAdapter<>(executor);
 	}
 
 	@ConditionalOnMissingBean
 	@Bean
-	public WebAsyncTaskEndpointCallExecutableFactory<Object, Object> webAsyncTaskEndpointCallExecutableFactory(
+	public WebAsyncTaskEndpointCallExecutableAdapter<Object, Object> webAsyncTaskEndpointCallExecutableFactory(
 			@Async AsyncTaskExecutor executor, RestifyConfigurationProperties properties) {
-		return new WebAsyncTaskEndpointCallExecutableFactory<>(properties.getAsync().getTimeout(), executor);
+		return new WebAsyncTaskEndpointCallExecutableAdapter<>(properties.getAsync().getTimeout(), executor);
 	}
 
 	static class RestifyAsyncTaskExecutorCondition extends AllNestedConditions {

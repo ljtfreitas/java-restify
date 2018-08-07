@@ -31,8 +31,8 @@ import org.springframework.context.annotation.Configuration;
 
 import com.github.ljtfreitas.restify.http.client.response.DefaultEndpointResponseErrorFallback;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponseErrorFallback;
-import com.github.ljtfreitas.restify.http.spring.client.call.exec.HttpHeadersEndpointCallExecutableFactory;
-import com.github.ljtfreitas.restify.http.spring.client.call.exec.HttpStatusEndpointCallExecutableFactory;
+import com.github.ljtfreitas.restify.http.spring.client.call.exec.HttpHeadersEndpointCallExecutableAdapter;
+import com.github.ljtfreitas.restify.http.spring.client.call.exec.HttpStatusEndpointCallExecutableAdapter;
 import com.github.ljtfreitas.restify.http.spring.client.call.exec.ResponseEntityEndpointCallExecutableFactory;
 
 @Configuration
@@ -40,14 +40,14 @@ public class RestifyDefaultConfiguration {
 
 	@ConditionalOnMissingBean
 	@Bean
-	public HttpHeadersEndpointCallExecutableFactory httpHeadersEndpointCallExecutableFactory() {
-		return new HttpHeadersEndpointCallExecutableFactory();
+	public HttpHeadersEndpointCallExecutableAdapter httpHeadersEndpointCallExecutableFactory() {
+		return new HttpHeadersEndpointCallExecutableAdapter();
 	}
 
 	@ConditionalOnMissingBean
 	@Bean
-	public HttpStatusEndpointCallExecutableFactory httpStatusEndpointCallExecutableFactory() {
-		return new HttpStatusEndpointCallExecutableFactory();
+	public HttpStatusEndpointCallExecutableAdapter httpStatusEndpointCallExecutableFactory() {
+		return new HttpStatusEndpointCallExecutableAdapter();
 	}
 
 	@ConditionalOnMissingBean

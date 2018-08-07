@@ -18,9 +18,9 @@ public class GuavaEndpointCallExecutableProviderSpiTest {
 		Iterable<EndpointCallExecutableProvider> services = ServiceLoader.load(EndpointCallExecutableProvider.class);
 
 		assertThat(services, contains(
-				instanceOf(ListenableFutureCallbackEndpointCallExecutableFactory.class),
-				instanceOf(ListenableFutureEndpointCallExecutableFactory.class),
-				instanceOf(ListenableFutureTaskEndpointCallExecutableFactory.class),
+				instanceOf(ListenableFutureCallbackEndpointCallExecutableAdapter.class),
+				instanceOf(ListenableFutureEndpointCallExecutableAdapter.class),
+				instanceOf(ListenableFutureTaskEndpointCallExecutableAdapter.class),
 				instanceOf(OptionalEndpointCallExecutableFactory.class)));
 	}
 }
