@@ -23,22 +23,11 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.spring.netflix.autoconfigure.hystrix;
+package com.github.ljtfreitas.restify.http.netflix.client.request.ribbon;
 
-import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethod;
-import com.github.ljtfreitas.restify.http.netflix.client.call.hystrix.BaseHystrixCommandEndpointCallExecutableAdapter;
+import com.netflix.client.ClientException;
 
-class HystrixCommandFallbackEndpointCallExecutableAdapter extends BaseHystrixCommandEndpointCallExecutableAdapter<Object, Object> {
+public interface RibbonLoadBalancedClient {
 
-	private final HystrixFallbackRegistry hystrixFallbackRegistry;
-
-	public HystrixCommandFallbackEndpointCallExecutableAdapter(HystrixFallbackRegistry hystrixFallbackRegistry) {
-		this.hystrixFallbackRegistry = hystrixFallbackRegistry;
-	}
-
-	@Override
-	protected Object fallbackTo(EndpointMethod endpointMethod) {
-		return hystrixFallbackRegistry.get(endpointMethod.javaMethod().getDeclaringClass())
-				.orElse(null);
-	}
+	public RibbonResponse withLoadBalancer(RibbonRequest request) throws ClientException;
 }

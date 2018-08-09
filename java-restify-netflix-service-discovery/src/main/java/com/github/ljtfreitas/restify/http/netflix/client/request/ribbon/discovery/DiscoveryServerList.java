@@ -23,22 +23,49 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.spring.netflix.autoconfigure.hystrix;
+package com.github.ljtfreitas.restify.http.netflix.client.request.ribbon.discovery;
 
-import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethod;
-import com.github.ljtfreitas.restify.http.netflix.client.call.hystrix.BaseHystrixCommandEndpointCallExecutableAdapter;
+import java.util.List;
+import java.util.Optional;
+import java.util.stream.Collectors;
 
-class HystrixCommandFallbackEndpointCallExecutableAdapter extends BaseHystrixCommandEndpointCallExecutableAdapter<Object, Object> {
+import com.netflix.client.config.IClientConfig;
+import com.netflix.loadbalancer.AbstractServerList;
+import com.netflix.loadbalancer.Server;
 
-	private final HystrixFallbackRegistry hystrixFallbackRegistry;
+public class DiscoveryServerList<T extends ServiceInstance> extends AbstractServerList<Server> {
 
-	public HystrixCommandFallbackEndpointCallExecutableAdapter(HystrixFallbackRegistry hystrixFallbackRegistry) {
-		this.hystrixFallbackRegistry = hystrixFallbackRegistry;
+	private final ServiceDiscovery<T> serviceDiscovery;
+	private String serviceName;
+
+	public DiscoveryServerList(ServiceDiscovery<T> serviceDiscovery) {
+		this(serviceDiscovery, null);
+	}
+
+	public DiscoveryServerList(ServiceDiscovery<T> serviceDiscovery, String serviceName) {
+		this.serviceDiscovery = serviceDiscovery;
+		this.serviceName = serviceName;
 	}
 
 	@Override
-	protected Object fallbackTo(EndpointMethod endpointMethod) {
-		return hystrixFallbackRegistry.get(endpointMethod.javaMethod().getDeclaringClass())
-				.orElse(null);
+	public List<Server> getInitialListOfServers() {
+		return allServers();
+	}
+
+	@Override
+	public List<Server> getUpdatedListOfServers() {
+		return allServers();
+	}
+
+	private List<Server> allServers() {
+		return serviceDiscovery.queryForInstances(serviceName)
+			.stream()
+				.map(DiscoveryServer::new)
+					.collect(Collectors.toList());
+	}
+
+	@Override
+	public void initWithNiwsConfig(IClientConfig clientConfig) {
+		this.serviceName = Optional.ofNullable(this.serviceName).orElseGet(clientConfig::getClientName);
 	}
 }

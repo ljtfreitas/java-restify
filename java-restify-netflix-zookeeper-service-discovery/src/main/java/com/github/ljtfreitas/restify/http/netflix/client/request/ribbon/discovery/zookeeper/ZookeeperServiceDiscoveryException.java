@@ -23,22 +23,21 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.spring.netflix.autoconfigure.hystrix;
+package com.github.ljtfreitas.restify.http.netflix.client.request.ribbon.discovery.zookeeper;
 
-import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethod;
-import com.github.ljtfreitas.restify.http.netflix.client.call.hystrix.BaseHystrixCommandEndpointCallExecutableAdapter;
+public class ZookeeperServiceDiscoveryException extends RuntimeException {
 
-class HystrixCommandFallbackEndpointCallExecutableAdapter extends BaseHystrixCommandEndpointCallExecutableAdapter<Object, Object> {
+	private static final long serialVersionUID = 1L;
 
-	private final HystrixFallbackRegistry hystrixFallbackRegistry;
-
-	public HystrixCommandFallbackEndpointCallExecutableAdapter(HystrixFallbackRegistry hystrixFallbackRegistry) {
-		this.hystrixFallbackRegistry = hystrixFallbackRegistry;
+	public ZookeeperServiceDiscoveryException(String message, Throwable cause) {
+		super(message, cause);
 	}
 
-	@Override
-	protected Object fallbackTo(EndpointMethod endpointMethod) {
-		return hystrixFallbackRegistry.get(endpointMethod.javaMethod().getDeclaringClass())
-				.orElse(null);
+	public ZookeeperServiceDiscoveryException(String message) {
+		super(message);
+	}
+
+	public ZookeeperServiceDiscoveryException(Throwable cause) {
+		super(cause);
 	}
 }

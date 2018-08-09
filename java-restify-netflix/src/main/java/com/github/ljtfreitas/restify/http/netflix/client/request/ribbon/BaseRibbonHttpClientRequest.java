@@ -23,22 +23,38 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.spring.netflix.autoconfigure.hystrix;
+package com.github.ljtfreitas.restify.http.netflix.client.request.ribbon;
 
-import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethod;
-import com.github.ljtfreitas.restify.http.netflix.client.call.hystrix.BaseHystrixCommandEndpointCallExecutableAdapter;
+import java.net.URI;
 
-class HystrixCommandFallbackEndpointCallExecutableAdapter extends BaseHystrixCommandEndpointCallExecutableAdapter<Object, Object> {
+import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
 
-	private final HystrixFallbackRegistry hystrixFallbackRegistry;
+public abstract class BaseRibbonHttpClientRequest implements RibbonHttpClientRequest {
 
-	public HystrixCommandFallbackEndpointCallExecutableAdapter(HystrixFallbackRegistry hystrixFallbackRegistry) {
-		this.hystrixFallbackRegistry = hystrixFallbackRegistry;
+	protected BaseRibbonHttpClientRequest(EndpointRequest endpointRequest) {
+		this.endpointRequest = endpointRequest;
+	}
+
+	private final EndpointRequest endpointRequest;
+
+	@Override
+	public boolean isGet() {
+		return endpointRequest.method().equalsIgnoreCase("GET");
 	}
 
 	@Override
-	protected Object fallbackTo(EndpointMethod endpointMethod) {
-		return hystrixFallbackRegistry.get(endpointMethod.javaMethod().getDeclaringClass())
-				.orElse(null);
+	public URI loadBalancedEndpoint() {
+		String sourceEndpoint = endpointRequest.endpoint().toString();
+		return URI.create(sourceEndpoint.replaceFirst(endpointRequest.endpoint().getHost(), ""));
+	}
+
+	@Override
+	public String serviceName() {
+		return endpointRequest.endpoint().getHost();
+	}
+
+	@Override
+	public EndpointRequest endpointRequest() {
+		return endpointRequest;
 	}
 }

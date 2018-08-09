@@ -23,22 +23,37 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.spring.netflix.autoconfigure.hystrix;
+package com.github.ljtfreitas.restify.http.netflix.client.request.ribbon.discovery.kubernetes;
 
-import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethod;
-import com.github.ljtfreitas.restify.http.netflix.client.call.hystrix.BaseHystrixCommandEndpointCallExecutableAdapter;
+import com.github.ljtfreitas.restify.http.netflix.client.request.ribbon.discovery.ServiceInstance;
 
-class HystrixCommandFallbackEndpointCallExecutableAdapter extends BaseHystrixCommandEndpointCallExecutableAdapter<Object, Object> {
+import io.fabric8.kubernetes.api.model.EndpointAddress;
+import io.fabric8.kubernetes.api.model.EndpointPort;
 
-	private final HystrixFallbackRegistry hystrixFallbackRegistry;
+public class KubernetesServiceInstance implements ServiceInstance {
 
-	public HystrixCommandFallbackEndpointCallExecutableAdapter(HystrixFallbackRegistry hystrixFallbackRegistry) {
-		this.hystrixFallbackRegistry = hystrixFallbackRegistry;
+	private final String id;
+	private final String address;
+	private final int port;
+
+	public KubernetesServiceInstance(String id, EndpointAddress address, EndpointPort port) {
+		this.id = id;
+		this.address = address.getIp();
+		this.port = port.getPort();
 	}
 
 	@Override
-	protected Object fallbackTo(EndpointMethod endpointMethod) {
-		return hystrixFallbackRegistry.get(endpointMethod.javaMethod().getDeclaringClass())
-				.orElse(null);
+	public String name() {
+		return id;
+	}
+
+	@Override
+	public String host() {
+		return address;
+	}
+
+	@Override
+	public int port() {
+		return port;
 	}
 }

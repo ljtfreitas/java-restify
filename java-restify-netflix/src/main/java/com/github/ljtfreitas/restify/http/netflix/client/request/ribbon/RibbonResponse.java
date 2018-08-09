@@ -23,22 +23,58 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.spring.netflix.autoconfigure.hystrix;
+package com.github.ljtfreitas.restify.http.netflix.client.request.ribbon;
 
-import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethod;
-import com.github.ljtfreitas.restify.http.netflix.client.call.hystrix.BaseHystrixCommandEndpointCallExecutableAdapter;
+import java.io.IOException;
+import java.net.URI;
+import java.util.Map;
+import java.util.stream.Collectors;
 
-class HystrixCommandFallbackEndpointCallExecutableAdapter extends BaseHystrixCommandEndpointCallExecutableAdapter<Object, Object> {
+import com.github.ljtfreitas.restify.http.client.message.Header;
+import com.github.ljtfreitas.restify.http.client.response.HttpClientResponse;
+import com.netflix.client.ClientException;
+import com.netflix.client.IResponse;
 
-	private final HystrixFallbackRegistry hystrixFallbackRegistry;
+public class RibbonResponse implements IResponse {
 
-	public HystrixCommandFallbackEndpointCallExecutableAdapter(HystrixFallbackRegistry hystrixFallbackRegistry) {
-		this.hystrixFallbackRegistry = hystrixFallbackRegistry;
+	private final HttpClientResponse response;
+
+	public RibbonResponse(HttpClientResponse response) {
+		this.response = response;
 	}
 
 	@Override
-	protected Object fallbackTo(EndpointMethod endpointMethod) {
-		return hystrixFallbackRegistry.get(endpointMethod.javaMethod().getDeclaringClass())
-				.orElse(null);
+	public void close() throws IOException {
+		response.close();
+	}
+
+	@Override
+	public Object getPayload() throws ClientException {
+		return null;
+	}
+
+	@Override
+	public boolean hasPayload() {
+		return response.available();
+	}
+
+	@Override
+	public boolean isSuccess() {
+		return response.status().isSucessful();
+	}
+
+	@Override
+	public URI getRequestedURI() {
+		return response.request().uri();
+	}
+
+	@Override
+	public Map<String, ?> getHeaders() {
+		return response.headers().all().stream()
+				.collect(Collectors.groupingBy(Header::name));
+	}
+
+	public HttpClientResponse unwrap() {
+		return response;
 	}
 }

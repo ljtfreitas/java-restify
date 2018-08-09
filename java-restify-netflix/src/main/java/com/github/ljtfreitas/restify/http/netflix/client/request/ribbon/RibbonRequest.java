@@ -23,22 +23,47 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.spring.netflix.autoconfigure.hystrix;
+package com.github.ljtfreitas.restify.http.netflix.client.request.ribbon;
 
-import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethod;
-import com.github.ljtfreitas.restify.http.netflix.client.call.hystrix.BaseHystrixCommandEndpointCallExecutableAdapter;
+import java.net.URI;
 
-class HystrixCommandFallbackEndpointCallExecutableAdapter extends BaseHystrixCommandEndpointCallExecutableAdapter<Object, Object> {
+import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
+import com.github.ljtfreitas.restify.http.client.request.HttpClientRequest;
+import com.netflix.client.ClientRequest;
 
-	private final HystrixFallbackRegistry hystrixFallbackRegistry;
+public class RibbonRequest extends ClientRequest {
 
-	public HystrixCommandFallbackEndpointCallExecutableAdapter(HystrixFallbackRegistry hystrixFallbackRegistry) {
-		this.hystrixFallbackRegistry = hystrixFallbackRegistry;
+	private final RibbonHttpClientRequest source;
+
+	public RibbonRequest(RibbonHttpClientRequest source) {
+		super(source.loadBalancedEndpoint());
+		this.source = source;
+	}
+
+	private RibbonRequest(RibbonRequest source, RibbonHttpClientRequest httpClientRequest) {
+		super(source);
+		this.source = httpClientRequest;
 	}
 
 	@Override
-	protected Object fallbackTo(EndpointMethod endpointMethod) {
-		return hystrixFallbackRegistry.get(endpointMethod.javaMethod().getDeclaringClass())
-				.orElse(null);
+	public RibbonRequest replaceUri(URI newURI) {
+		RibbonRequest newRequest = (RibbonRequest) super.replaceUri(newURI);
+		return new RibbonRequest(newRequest, source.replace(newURI));
+	}
+
+	public boolean isGet() {
+		return source.isGet();
+	}
+
+	public void writeTo(HttpClientRequest httpRequestMessage) {
+		source.writeTo(httpRequestMessage);
+	}
+
+	public String serviceName() {
+		return source.serviceName();
+	}
+
+	public EndpointRequest endpointRequest() {
+		return source.endpointRequest();
 	}
 }

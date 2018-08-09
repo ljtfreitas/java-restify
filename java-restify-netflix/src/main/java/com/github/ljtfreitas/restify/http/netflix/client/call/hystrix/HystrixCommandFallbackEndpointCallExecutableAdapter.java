@@ -23,22 +23,19 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.spring.netflix.autoconfigure.hystrix;
+package com.github.ljtfreitas.restify.http.netflix.client.call.hystrix;
 
-import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethod;
-import com.github.ljtfreitas.restify.http.netflix.client.call.hystrix.BaseHystrixCommandEndpointCallExecutableAdapter;
+import static com.github.ljtfreitas.restify.util.Preconditions.nonNull;
 
-class HystrixCommandFallbackEndpointCallExecutableAdapter extends BaseHystrixCommandEndpointCallExecutableAdapter<Object, Object> {
+import com.netflix.hystrix.HystrixCommand;
 
-	private final HystrixFallbackRegistry hystrixFallbackRegistry;
+public class HystrixCommandFallbackEndpointCallExecutableAdapter<T, O, F> extends BaseHystrixCommandEndpointCallExecutableAdapter<T, O> {
 
-	public HystrixCommandFallbackEndpointCallExecutableAdapter(HystrixFallbackRegistry hystrixFallbackRegistry) {
-		this.hystrixFallbackRegistry = hystrixFallbackRegistry;
+	public HystrixCommandFallbackEndpointCallExecutableAdapter(F fallback) {
+		this(null, fallback);
 	}
 
-	@Override
-	protected Object fallbackTo(EndpointMethod endpointMethod) {
-		return hystrixFallbackRegistry.get(endpointMethod.javaMethod().getDeclaringClass())
-				.orElse(null);
+	public HystrixCommandFallbackEndpointCallExecutableAdapter(HystrixCommand.Setter hystrixMetadata, F fallback) {
+		super(hystrixMetadata, nonNull(fallback, "Your fallback cannot be null!"));
 	}
 }

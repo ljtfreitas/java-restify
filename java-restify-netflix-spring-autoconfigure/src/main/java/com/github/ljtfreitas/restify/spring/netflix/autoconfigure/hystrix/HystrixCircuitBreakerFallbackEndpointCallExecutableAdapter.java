@@ -26,9 +26,9 @@
 package com.github.ljtfreitas.restify.spring.netflix.autoconfigure.hystrix;
 
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethod;
-import com.github.ljtfreitas.restify.http.netflix.client.call.exec.BaseHystrixCircuitBreakerEndpointCallExecutableAdapter;
+import com.github.ljtfreitas.restify.http.netflix.client.call.hystrix.BaseHystrixEndpointCallExecutableAdapter;
 
-class HystrixCircuitBreakerFallbackEndpointCallExecutableAdapter extends BaseHystrixCircuitBreakerEndpointCallExecutableAdapter<Object, Object> {
+class HystrixCircuitBreakerFallbackEndpointCallExecutableAdapter extends BaseHystrixEndpointCallExecutableAdapter<Object, Object> {
 
 	private final HystrixFallbackRegistry hystrixFallbackRegistry;
 

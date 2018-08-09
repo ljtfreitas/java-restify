@@ -23,22 +23,32 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.spring.netflix.autoconfigure.hystrix;
+package com.github.ljtfreitas.restify.http.netflix.client.request.ribbon.discovery.zookeeper;
 
-import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethod;
-import com.github.ljtfreitas.restify.http.netflix.client.call.hystrix.BaseHystrixCommandEndpointCallExecutableAdapter;
+public class ZookeeperConfiguration {
 
-class HystrixCommandFallbackEndpointCallExecutableAdapter extends BaseHystrixCommandEndpointCallExecutableAdapter<Object, Object> {
+	private final ZookeeperQuorum quorum;
+	private final String chroot;
 
-	private final HystrixFallbackRegistry hystrixFallbackRegistry;
+	public ZookeeperConfiguration(ZookeeperQuorum quorum) {
+		this(quorum, quorum.chroot());
+	}
 
-	public HystrixCommandFallbackEndpointCallExecutableAdapter(HystrixFallbackRegistry hystrixFallbackRegistry) {
-		this.hystrixFallbackRegistry = hystrixFallbackRegistry;
+	public ZookeeperConfiguration(ZookeeperQuorum quorum, String chroot) {
+		this.quorum = quorum;
+		this.chroot = chroot;
+	}
+
+	public String chroot() {
+		return chroot;
+	}
+
+	public String connectionString() {
+		return quorum.connectionString();
 	}
 
 	@Override
-	protected Object fallbackTo(EndpointMethod endpointMethod) {
-		return hystrixFallbackRegistry.get(endpointMethod.javaMethod().getDeclaringClass())
-				.orElse(null);
+	public String toString() {
+		return quorum.connectionString();
 	}
 }

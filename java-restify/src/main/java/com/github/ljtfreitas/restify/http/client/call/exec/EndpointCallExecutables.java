@@ -47,7 +47,7 @@ public class EndpointCallExecutables {
 
 	private <M, T> EndpointCallExecutable<M, T> search(EndpointMethod endpointMethod, EndpointCallExecutableProvider exclude) {
 		EndpointCallExecutableProvider provider = doSearch(endpointMethod, exclude);
-		return decorator(provider) ? decorate(endpointMethod, provider) : create(endpointMethod, provider);
+		return adapter(provider) ? adapt(endpointMethod, provider) : create(endpointMethod, provider);
 	}
 
 	private EndpointCallExecutableProvider doSearch(EndpointMethod endpointMethod, EndpointCallExecutableProvider exclude) {
@@ -65,12 +65,12 @@ public class EndpointCallExecutables {
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	private <M, T, O> EndpointCallExecutable<M, O> decorate(EndpointMethod endpointMethod, EndpointCallExecutableProvider provider) {
+	private <M, T, O> EndpointCallExecutable<M, O> adapt(EndpointMethod endpointMethod, EndpointCallExecutableProvider provider) {
 		EndpointCallExecutableAdapter<M, T, O> decorator = (EndpointCallExecutableAdapter) provider;
-		return decorator.adapt(endpointMethod, search(endpointMethod.with(decorator.returnType(endpointMethod)), decorator));
+		return decorator.adapt(endpointMethod, search(endpointMethod.returns(decorator.returnType(endpointMethod)), decorator));
 	}
 
-	private boolean decorator(EndpointCallExecutableProvider provider) {
+	private boolean adapter(EndpointCallExecutableProvider provider) {
 		return provider instanceof EndpointCallExecutableAdapter;
 	}
 }

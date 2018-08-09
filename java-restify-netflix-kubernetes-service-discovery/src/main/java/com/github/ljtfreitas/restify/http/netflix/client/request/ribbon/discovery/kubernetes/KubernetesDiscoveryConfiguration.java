@@ -23,22 +23,33 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.spring.netflix.autoconfigure.hystrix;
+package com.github.ljtfreitas.restify.http.netflix.client.request.ribbon.discovery.kubernetes;
 
-import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethod;
-import com.github.ljtfreitas.restify.http.netflix.client.call.hystrix.BaseHystrixCommandEndpointCallExecutableAdapter;
+import java.util.Optional;
 
-class HystrixCommandFallbackEndpointCallExecutableAdapter extends BaseHystrixCommandEndpointCallExecutableAdapter<Object, Object> {
+public class KubernetesDiscoveryConfiguration {
 
-	private final HystrixFallbackRegistry hystrixFallbackRegistry;
+	private final String namespace;
+	private final String portName;
 
-	public HystrixCommandFallbackEndpointCallExecutableAdapter(HystrixFallbackRegistry hystrixFallbackRegistry) {
-		this.hystrixFallbackRegistry = hystrixFallbackRegistry;
+	public KubernetesDiscoveryConfiguration() {
+		this(null, null);
 	}
 
-	@Override
-	protected Object fallbackTo(EndpointMethod endpointMethod) {
-		return hystrixFallbackRegistry.get(endpointMethod.javaMethod().getDeclaringClass())
-				.orElse(null);
+	public KubernetesDiscoveryConfiguration(String namespace) {
+		this(namespace, null);
+	}
+
+	public KubernetesDiscoveryConfiguration(String namespace, String portName) {
+		this.namespace = namespace;
+		this.portName = portName;
+	}
+
+	public Optional<String> namespace() {
+		return Optional.ofNullable(namespace);
+	}
+
+	public Optional<String> portName() {
+		return Optional.ofNullable(portName);
 	}
 }
