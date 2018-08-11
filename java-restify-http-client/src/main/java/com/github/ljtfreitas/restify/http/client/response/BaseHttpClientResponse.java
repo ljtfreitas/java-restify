@@ -31,7 +31,7 @@ import java.util.Optional;
 import com.github.ljtfreitas.restify.http.client.message.Header;
 import com.github.ljtfreitas.restify.http.client.message.Headers;
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
-import com.github.ljtfreitas.restify.http.client.message.response.BufferedHttpResponseBody;
+import com.github.ljtfreitas.restify.http.client.message.response.InputStreamHttpResponseBody;
 import com.github.ljtfreitas.restify.http.client.message.response.HttpResponseBody;
 import com.github.ljtfreitas.restify.http.client.message.response.StatusCode;
 
@@ -48,7 +48,7 @@ public abstract class BaseHttpClientResponse implements HttpClientResponse {
 			HttpRequestMessage httpRequest) {
 		this.status = status;
 		this.headers = headers;
-		this.body = Optional.ofNullable(body).map(BufferedHttpResponseBody::of).orElseGet(BufferedHttpResponseBody::none);
+		this.body = Optional.ofNullable(body).map(InputStreamHttpResponseBody::new).orElseGet(InputStreamHttpResponseBody::empty);
 		this.httpRequest = httpRequest;
 	}
 

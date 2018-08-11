@@ -26,15 +26,9 @@
 package com.github.ljtfreitas.restify.http.client.message.response;
 
 import java.io.InputStream;
-import java.nio.ByteBuffer;
 
 public interface HttpResponseBody {
 
-	public ByteBuffer asBuffer();
-
-	public String asString();
-
 	public InputStream input();
 
-	public boolean empty();
 }

@@ -43,7 +43,7 @@ import org.apache.http.protocol.HttpContext;
 import com.github.ljtfreitas.restify.http.client.HttpClientException;
 import com.github.ljtfreitas.restify.http.client.message.Header;
 import com.github.ljtfreitas.restify.http.client.message.Headers;
-import com.github.ljtfreitas.restify.http.client.message.request.BufferedHttpRequestBody;
+import com.github.ljtfreitas.restify.http.client.message.request.BufferedByteArrayHttpRequestBody;
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestBody;
 import com.github.ljtfreitas.restify.http.client.request.async.AsyncHttpClientRequest;
@@ -61,7 +61,7 @@ class ApacheAsyncHttpClientRequest implements AsyncHttpClientRequest {
 
 	ApacheAsyncHttpClientRequest(HttpAsyncClient httpAsyncClient, HttpUriRequest httpRequest, HttpContext context,
 			Charset charset, Headers headers) {
-		this(httpAsyncClient, httpRequest, context, charset, headers, new BufferedHttpRequestBody(charset));
+		this(httpAsyncClient, httpRequest, context, charset, headers, new BufferedByteArrayHttpRequestBody(charset));
 	}
 
 	private ApacheAsyncHttpClientRequest(HttpAsyncClient httpAsyncClient, HttpUriRequest httpRequest,
@@ -117,7 +117,7 @@ class ApacheAsyncHttpClientRequest implements AsyncHttpClientRequest {
 
 		if (httpRequest instanceof HttpEntityEnclosingRequest) {
 			HttpEntityEnclosingRequest entityEnclosingRequest = (HttpEntityEnclosingRequest) httpRequest;
-			HttpEntity requestEntity = new ByteArrayEntity(body.asBuffer().array());
+			HttpEntity requestEntity = new ByteArrayEntity(body.asBytes());
 			entityEnclosingRequest.setEntity(requestEntity);
 		}
 

@@ -40,7 +40,7 @@ import org.apache.http.protocol.HttpContext;
 import com.github.ljtfreitas.restify.http.client.HttpClientException;
 import com.github.ljtfreitas.restify.http.client.message.Header;
 import com.github.ljtfreitas.restify.http.client.message.Headers;
-import com.github.ljtfreitas.restify.http.client.message.request.BufferedHttpRequestBody;
+import com.github.ljtfreitas.restify.http.client.message.request.BufferedByteArrayHttpRequestBody;
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestBody;
 import com.github.ljtfreitas.restify.http.client.request.HttpClientRequest;
@@ -54,15 +54,15 @@ class ApacheHttpClientRequest implements HttpClientRequest {
 	private final Charset charset;
 	private final Headers headers;
 
-	private final BufferedHttpRequestBody body;
+	private final BufferedByteArrayHttpRequestBody body;
 
 	public ApacheHttpClientRequest(HttpClient httpClient, HttpUriRequest httpRequest, HttpContext httpContext, Charset charset,
 			Headers headers) {
-		this(httpClient, httpRequest, httpContext, charset, headers, new BufferedHttpRequestBody(charset));
+		this(httpClient, httpRequest, httpContext, charset, headers, new BufferedByteArrayHttpRequestBody(charset));
 	}
 
 	private ApacheHttpClientRequest(HttpClient httpClient, HttpUriRequest httpRequest, HttpContext httpContext, Charset charset,
-			Headers headers, BufferedHttpRequestBody body) {
+			Headers headers, BufferedByteArrayHttpRequestBody body) {
 		this.httpClient = httpClient;
 		this.httpRequest = httpRequest;
 		this.httpContext = httpContext;
@@ -77,7 +77,7 @@ class ApacheHttpClientRequest implements HttpClientRequest {
 
 		if (httpRequest instanceof HttpEntityEnclosingRequest) {
 			HttpEntityEnclosingRequest entityEnclosingRequest = (HttpEntityEnclosingRequest) httpRequest;
-			HttpEntity requestEntity = new ByteArrayEntity(body.asBuffer().array());
+			HttpEntity requestEntity = new ByteArrayEntity(body.asBytes());
 			entityEnclosingRequest.setEntity(requestEntity);
 		}
 

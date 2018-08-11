@@ -19,7 +19,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import com.github.ljtfreitas.restify.http.client.message.Header;
 import com.github.ljtfreitas.restify.http.client.message.Headers;
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
-import com.github.ljtfreitas.restify.http.client.message.request.BufferedHttpRequestBody;
+import com.github.ljtfreitas.restify.http.client.message.request.BufferedByteArrayHttpRequestBody;
 import com.github.ljtfreitas.restify.http.contract.Form.Field;
 import com.github.ljtfreitas.restify.http.contract.MultipartForm;
 import com.github.ljtfreitas.restify.http.contract.MultipartForm.MultipartField;
@@ -34,7 +34,7 @@ public class MultipartFormObjectMessageWriterTest {
 
 	private MyMultipartFormObject myMultipartFormObject;
 
-	private BufferedHttpRequestBody output;
+	private BufferedByteArrayHttpRequestBody output;
 
 	private File file;
 
@@ -53,7 +53,7 @@ public class MultipartFormObjectMessageWriterTest {
 		fileWriter.flush();
 		fileWriter.close();
 
-		output = new BufferedHttpRequestBody();
+		output = new BufferedByteArrayHttpRequestBody();
 		
 		when(request.body()).thenReturn(output);
 		when(request.headers()).thenReturn(new Headers(Header.contentType("multipart/form-data")));
@@ -91,7 +91,7 @@ public class MultipartFormObjectMessageWriterTest {
 
 		converter.write(myMultipartFormObject, request);
 
-		assertEquals(body, output.asString());
+		assertEquals(body, new String(output.asBytes()));
 	}
 
 	@MultipartForm

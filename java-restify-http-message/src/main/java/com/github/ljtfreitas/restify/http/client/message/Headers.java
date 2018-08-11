@@ -165,6 +165,11 @@ public class Headers implements Iterable<Header> {
 	public Collection<Header> all() {
 		return Collections.unmodifiableCollection(headers);
 	}
+	
+	public Collection<Header> all(String name) {
+		return headers.stream().filter(h -> h.name().equalsIgnoreCase(name))
+				.collect(Collectors.toList());
+	}
 
 	public Optional<Header> get(String name) {
 		return headers.stream().filter(h -> h.name().equalsIgnoreCase(name))
