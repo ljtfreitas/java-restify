@@ -26,7 +26,6 @@
 package com.github.ljtfreitas.restify.http.netflix.client.call.hystrix;
 
 import java.lang.reflect.ParameterizedType;
-import java.lang.reflect.Type;
 
 import com.github.ljtfreitas.restify.http.client.call.EndpointCall;
 import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutable;
@@ -39,23 +38,25 @@ import rx.Observable;
 
 public class HystrixObservableEndpointCallExecutableAdapter<T, O> implements EndpointCallExecutableAdapter<Observable<T>, HystrixCommand<T>, O> {
 
+	private final HystrixEndpointCallExecutableAdapter<T, O> hystrixEndpointCallExecutableAdapter = new HystrixEndpointCallExecutableAdapter<>();
+	
 	@Override
 	public boolean supports(EndpointMethod endpointMethod) {
-		return new OnCircuitBreakerMethodPredicate(endpointMethod).test()
-				&& endpointMethod.returnType().is(Observable.class);
+		return hystrixEndpointCallExecutableAdapter.supports(endpointMethod)
+			&& endpointMethod.returnType().is(Observable.class);
 	}
 
 	@Override
 	public JavaType returnType(EndpointMethod endpointMethod) {
-		return JavaType.of(JavaType.parameterizedType(HystrixCommand.class, unwrap(endpointMethod.returnType())));
-	}
-
-	private Type unwrap(JavaType declaredReturnType) {
-		return declaredReturnType.parameterized() ?
-				declaredReturnType.as(ParameterizedType.class).getActualTypeArguments()[0] :
-					Object.class;
+		return hystrixEndpointCallExecutableAdapter.returnType(endpointMethod.returns(unwrap(endpointMethod.returnType())));
 	}
 	
+	private JavaType unwrap(JavaType declaredReturnType) {
+		return JavaType.of(declaredReturnType.parameterized() ?
+				declaredReturnType.as(ParameterizedType.class).getActualTypeArguments()[0] :
+					Object.class);
+	}
+
 	@Override
 	public EndpointCallExecutable<Observable<T>, O> adapt(EndpointMethod endpointMethod, EndpointCallExecutable<HystrixCommand<T>, O> executable) {
 		return new HystrixObservableEndpointCallExecutable(executable);

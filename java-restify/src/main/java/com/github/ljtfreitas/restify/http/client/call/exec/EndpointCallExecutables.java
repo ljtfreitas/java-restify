@@ -27,6 +27,7 @@ package com.github.ljtfreitas.restify.http.client.call.exec;
 
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethod;
 
@@ -42,17 +43,17 @@ public class EndpointCallExecutables {
 	}
 
 	public <M, T> EndpointCallExecutable<M, T> of(EndpointMethod endpointMethod) {
-		return search(endpointMethod, null);
+		return search(endpointMethod, new Exclusions());
 	}
 
-	private <M, T> EndpointCallExecutable<M, T> search(EndpointMethod endpointMethod, EndpointCallExecutableProvider exclude) {
-		EndpointCallExecutableProvider provider = doSearch(endpointMethod, exclude);
-		return adapter(provider) ? adapt(endpointMethod, provider) : create(endpointMethod, provider);
+	private <M, T> EndpointCallExecutable<M, T> search(EndpointMethod endpointMethod, Exclusions exclusions) {
+		EndpointCallExecutableProvider provider = doSearch(endpointMethod, exclusions);
+		return adapter(provider) ? adapt(endpointMethod, provider, exclusions) : create(endpointMethod, provider);
 	}
 
-	private EndpointCallExecutableProvider doSearch(EndpointMethod endpointMethod, EndpointCallExecutableProvider exclude) {
+	private EndpointCallExecutableProvider doSearch(EndpointMethod endpointMethod, Exclusions exclusions) {
 		return providers.stream()
-				.filter(f -> (exclude == null) || (f != exclude))
+				.filter(f -> (exclusions == null || exclusions.empty()) || (!exclusions.contains(f)))
 					.filter(f -> f.supports(endpointMethod))
 						.findFirst()
 							.orElseGet(() -> DEFAULT_EXECUTABLE_FACTORY);
@@ -65,12 +66,30 @@ public class EndpointCallExecutables {
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })
-	private <M, T, O> EndpointCallExecutable<M, O> adapt(EndpointMethod endpointMethod, EndpointCallExecutableProvider provider) {
-		EndpointCallExecutableAdapter<M, T, O> decorator = (EndpointCallExecutableAdapter) provider;
-		return decorator.adapt(endpointMethod, search(endpointMethod.returns(decorator.returnType(endpointMethod)), decorator));
+	private <M, T, O> EndpointCallExecutable<M, O> adapt(EndpointMethod endpointMethod, EndpointCallExecutableProvider provider, Exclusions exclusions) {
+		EndpointCallExecutableAdapter<M, T, O> adapter = (EndpointCallExecutableAdapter) provider;
+		return adapter.adapt(endpointMethod, search(endpointMethod.returns(adapter.returnType(endpointMethod)), exclusions.add(adapter)));
 	}
 
 	private boolean adapter(EndpointCallExecutableProvider provider) {
 		return provider instanceof EndpointCallExecutableAdapter;
+	}
+	
+	private class Exclusions {
+		
+		private final Collection<Class<? extends EndpointCallExecutableProvider>> values = new HashSet<>();
+		
+		private Exclusions add(EndpointCallExecutableProvider provider) {
+			this.values.add(provider.getClass());
+			return this;
+		}
+
+		private boolean contains(EndpointCallExecutableProvider provider) {
+			return values.contains(provider.getClass());
+		}
+
+		private boolean empty() {
+			return values.isEmpty();
+		}
 	}
 }

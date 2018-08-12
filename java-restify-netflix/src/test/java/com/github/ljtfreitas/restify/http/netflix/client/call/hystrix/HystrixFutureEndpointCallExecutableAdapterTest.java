@@ -18,7 +18,6 @@ import com.github.ljtfreitas.restify.http.client.call.EndpointCall;
 import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutable;
 import com.github.ljtfreitas.restify.reflection.JavaType;
 import com.netflix.hystrix.HystrixCommand;
-import com.netflix.hystrix.HystrixCommandGroupKey;
 
 @RunWith(MockitoJUnitRunner.class)
 public class HystrixFutureEndpointCallExecutableAdapterTest {
@@ -38,7 +37,7 @@ public class HystrixFutureEndpointCallExecutableAdapterTest {
 		arguments = new Object[0];
 
 		when(hystrixCommandExecutable.execute(call, arguments))
-			.thenReturn(new SuccessHystrixCommand());
+			.thenReturn(new SuccessHystrixCommand("call result"));
 
 		adapter = new HystrixFutureEndpointCallExecutableAdapter<>();
 	}
@@ -56,7 +55,7 @@ public class HystrixFutureEndpointCallExecutableAdapterTest {
 	@Test
 	public void shouldGetFutureWithFallbackWhenHystrixCommandFail() throws Exception {
 		when(hystrixCommandExecutable.execute(call, arguments))
-			.thenReturn(new FailHystrixCommand());
+			.thenReturn(new FailHystrixCommand("fallback result"));
 
 		EndpointCallExecutable<Future<String>, String> executable = adapter
 				.adapt(new SimpleEndpointMethod(SomeType.class.getMethod("futureOnCircuitBreaker")), hystrixCommandExecutable);
@@ -117,34 +116,5 @@ public class HystrixFutureEndpointCallExecutableAdapterTest {
 
 		@OnCircuitBreaker
 		String onCircuitBreakerOtherType();
-	}
-	
-	private class SuccessHystrixCommand extends HystrixCommand<String> {
-
-		private SuccessHystrixCommand() {
-			super(HystrixCommandGroupKey.Factory.asKey("success"));
-		}
-
-		@Override
-		protected String run() throws Exception {
-			return "call result";
-		}
-	}
-
-	private class FailHystrixCommand extends HystrixCommand<String> {
-
-		private FailHystrixCommand() {
-			super(HystrixCommandGroupKey.Factory.asKey("simple"));
-		}
-
-		@Override
-		protected String run() throws Exception {
-			throw new RuntimeException("ooops");
-		}
-
-		@Override
-		protected String getFallback() {
-			return "fallback result";
-		}
 	}
 }

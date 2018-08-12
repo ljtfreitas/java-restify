@@ -1,12 +1,9 @@
 package com.github.ljtfreitas.restify.http.netflix.client.call.hystrix;
 
-import static org.junit.Assert.*;
-import static org.mockito.Matchers.any;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
-
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.concurrent.Future;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -16,24 +13,18 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import com.github.ljtfreitas.restify.http.client.call.EndpointCall;
 import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutable;
-import com.github.ljtfreitas.restify.http.netflix.client.call.hystrix.HystrixEndpointCallExecutableAdapter;
-import com.github.ljtfreitas.restify.http.netflix.client.call.hystrix.OnCircuitBreaker;
+import com.netflix.hystrix.HystrixCommand;
 
 @RunWith(MockitoJUnitRunner.class)
 public class HystrixEndpointCallExecutableAdapterTest {
 
 	@Mock
-	private EndpointCallExecutable<String, String> endpointCallStringExecutable;
+	private EndpointCallExecutable<HystrixCommand<String>, String> hystrixCommandExecutable;
 
 	@Mock
-	private EndpointCallExecutable<Future<String>, String> endpointCallFutureExecutable;
+	private EndpointCall<String> call;
 
-	@Mock
-	private EndpointCall<String> endpointCallString;
-
-	private HystrixEndpointCallExecutableAdapter<String, String> hystrixCircuitBreakerStringExecutableAdapter;
-
-	private HystrixEndpointCallExecutableAdapter<Future<String>, String> hystrixCircuitBreakerFutureExecutableAdapter;
+	private HystrixEndpointCallExecutableAdapter<String, String> adapter;
 
 	private Object[] arguments;
 
@@ -41,53 +32,48 @@ public class HystrixEndpointCallExecutableAdapterTest {
 	public void setup() {
 		arguments = new Object[0];
 
-		when(endpointCallString.execute())
+		when(call.execute())
 			.thenReturn("call result");
 
-		when(endpointCallStringExecutable.execute(any(), any()))
-			.then(invocation -> invocation.getArgumentAt(0, EndpointCall.class).execute());
+		when(hystrixCommandExecutable.execute(call, arguments))
+			.thenReturn(new SuccessHystrixCommand("call result"));
 
-		hystrixCircuitBreakerStringExecutableAdapter = new HystrixEndpointCallExecutableAdapter<>();
-
-		hystrixCircuitBreakerFutureExecutableAdapter = new HystrixEndpointCallExecutableAdapter<>();
+		adapter = new HystrixEndpointCallExecutableAdapter<>();
 	}
 
 	@Test
-	public void shouldExecuteHystrixCommandUsingEndpointCall() throws Exception {
+	public void shouldGetResultFromHystrixCommand() throws Exception {
+		EndpointCallExecutable<String, String> executable = adapter
+				.adapt(new SimpleEndpointMethod(SomeType.class.getMethod("onCircuitBreaker")), hystrixCommandExecutable);
 
-		EndpointCallExecutable<String, String> executable = hystrixCircuitBreakerStringExecutableAdapter
-				.adapt(new SimpleEndpointMethod(SomeType.class.getMethod("onCircuitBreaker")), endpointCallStringExecutable);
-
-		String result = executable.execute(endpointCallString, arguments);
+		String result = executable.execute(call, arguments);
 
 		assertEquals("call result", result);
 	}
 
 	@Test
-	public void shouldExecuteHystrixCommandOnOtherThread() throws Exception {
-		EndpointCallExecutable<Future<String>, String> executable = hystrixCircuitBreakerFutureExecutableAdapter
-				.adapt(new SimpleEndpointMethod(SomeType.class.getMethod("onCircuitBreaker")), endpointCallFutureExecutable);
+	public void shouldGetFallbackWhenHystrixCommandFail() throws Exception {
+		when(hystrixCommandExecutable.execute(call, arguments))
+			.thenReturn(new FailHystrixCommand("fallback result"));
 
-		ExecutorService executor = Executors.newSingleThreadExecutor();
+		EndpointCallExecutable<String, String> executable = adapter
+				.adapt(new SimpleEndpointMethod(SomeType.class.getMethod("onCircuitBreaker")), hystrixCommandExecutable);
 
-		when(endpointCallFutureExecutable.execute(any(), any()))
-			.then(invocation -> executor.submit(() -> invocation.getArgumentAt(0, EndpointCall.class).execute()));
+		String result = executable.execute(call, arguments);
 
-		Future<String> result = executable.execute(endpointCallString, arguments);
-
-		assertEquals("call result", result.get());
+		assertEquals("fallback result", result);
 	}
 
 	@Test
 	public void shouldSupportsOnCircuitBreakerEndpointMethod() throws Exception {
 		SimpleEndpointMethod endpointMethod = new SimpleEndpointMethod(SomeType.class.getMethod("onCircuitBreaker"));
-		assertTrue(hystrixCircuitBreakerStringExecutableAdapter.supports(endpointMethod));
+		assertTrue(adapter.supports(endpointMethod));
 	}
 
 	@Test
 	public void shouldNotSupportsWhenEndpointMethodIsNotRunningOnOnCircuitBreaker() throws Exception {
 		SimpleEndpointMethod endpointMethod = new SimpleEndpointMethod(SomeType.class.getMethod("withoutCircuitBreaker"));
-		assertFalse(hystrixCircuitBreakerStringExecutableAdapter.supports(endpointMethod));
+		assertFalse(adapter.supports(endpointMethod));
 	}
 
 	interface SomeType {

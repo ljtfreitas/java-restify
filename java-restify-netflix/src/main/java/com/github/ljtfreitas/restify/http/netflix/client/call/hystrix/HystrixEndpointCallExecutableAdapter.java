@@ -25,15 +25,56 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.netflix.client.call.hystrix;
 
+import com.github.ljtfreitas.restify.http.client.call.EndpointCall;
+import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutable;
+import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutableAdapter;
+import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethod;
+import com.github.ljtfreitas.restify.reflection.JavaType;
 import com.netflix.hystrix.HystrixCommand;
 
-public class HystrixEndpointCallExecutableAdapter<T, O> extends BaseHystrixEndpointCallExecutableAdapter<T, O> {
+public class HystrixEndpointCallExecutableAdapter<T, O> implements EndpointCallExecutableAdapter<T, HystrixCommand<T>, O> {
 
-	public HystrixEndpointCallExecutableAdapter() {
-		super();
+	@Override
+	public JavaType returnType(EndpointMethod endpointMethod) {
+		return JavaType.of(JavaType.parameterizedType(HystrixCommand.class, endpointMethod.returnType().unwrap()));
 	}
 
-	public HystrixEndpointCallExecutableAdapter(HystrixCommand.Setter hystrixMetadata) {
-		super(hystrixMetadata);
+	@Override
+	public boolean supports(EndpointMethod endpointMethod) {
+		return onCircuitBreaker(endpointMethod)
+			&& !returnHystrixCommand(endpointMethod);
+	}
+
+	private boolean onCircuitBreaker(EndpointMethod endpointMethod) {
+		return endpointMethod.metadata().contains(OnCircuitBreaker.class);
+	}
+
+	private boolean returnHystrixCommand(EndpointMethod endpointMethod) {
+		return endpointMethod.returnType().is(HystrixCommand.class);
+	}
+
+	@Override
+	public EndpointCallExecutable<T, O> adapt(EndpointMethod endpointMethod, EndpointCallExecutable<HystrixCommand<T>, O> delegate) {
+		return new HystrixEndpointCallExecutable(delegate);
+	}
+
+	private class HystrixEndpointCallExecutable implements EndpointCallExecutable<T, O> {
+
+		private final EndpointCallExecutable<HystrixCommand<T>, O> delegate;
+
+		private HystrixEndpointCallExecutable(EndpointCallExecutable<HystrixCommand<T>, O> delegate) {
+			this.delegate = delegate;
+		}
+
+		@Override
+		public JavaType returnType() {
+			return delegate.returnType();
+		}
+
+		@Override
+		public T execute(EndpointCall<O> call, Object[] args) {
+			HystrixCommand<T> command = delegate.execute(call, args);
+			return command.execute();
+		}
 	}
 }

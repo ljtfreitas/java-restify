@@ -17,7 +17,6 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import com.github.ljtfreitas.restify.http.client.call.EndpointCall;
 import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutable;
-import com.github.ljtfreitas.restify.http.netflix.client.call.hystrix.HystrixCommandFallbackEndpointCallExecutableAdapter;
 import com.github.ljtfreitas.restify.reflection.JavaType;
 import com.netflix.hystrix.HystrixCommand;
 import com.netflix.hystrix.HystrixCommandGroupKey;
@@ -84,7 +83,9 @@ public class HystrixCommandFallbackEndpointCallExecutableAdapterTest {
 
 		HystrixCommand<String> hystrixCommand = executable.execute(() -> {throw new RuntimeException("oooh!");}, null);
 
-		assertEquals("fallback", hystrixCommand.execute());
+		String bla = hystrixCommand.execute();
+
+		assertEquals("fallback", bla);
 		assertEquals(delegate.returnType(), executable.returnType());
 
 		verify(delegate).execute(notNull(EndpointCall.class), anyVararg());

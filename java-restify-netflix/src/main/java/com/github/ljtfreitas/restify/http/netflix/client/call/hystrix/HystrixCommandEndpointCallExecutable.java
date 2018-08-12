@@ -78,8 +78,13 @@ class HystrixCommandEndpointCallExecutable<T, O> implements EndpointCallExecutab
 
 			@SuppressWarnings("unchecked")
 			private T doFallback() throws Exception {
-				HystrixCommand<T> fallbackCommand = (HystrixCommand<T>) endpointMethod.javaMethod().invoke(fallback, args);
-				return fallbackCommand.execute();
+				Object value = endpointMethod.javaMethod().invoke(fallback, args);
+				return value instanceof HystrixCommand ? asCommand(value).execute() : (T) value;
+			}
+
+			@SuppressWarnings("unchecked")
+			private HystrixCommand<T> asCommand(Object value) {
+				return (HystrixCommand<T>) value;
 			}
 		};
 	}
