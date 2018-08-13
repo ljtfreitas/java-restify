@@ -67,7 +67,7 @@ public class HttpHeadersEndpointCallHandlerAdapterTest {
 	}
 
 	@Test
-	public void shouldCreateExecutableWithResponseEntityReturnType() throws Exception {
+	public void shouldCreateHandlerWithResponseEntityReturnType() throws Exception {
 		EndpointCallHandler<HttpHeaders, Void> handler = adapter
 				.adapt(new SimpleEndpointMethod(SomeType.class.getMethod("httpHeaders")), delegate);
 

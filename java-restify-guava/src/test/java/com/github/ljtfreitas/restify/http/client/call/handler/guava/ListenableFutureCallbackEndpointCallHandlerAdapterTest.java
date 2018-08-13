@@ -82,7 +82,7 @@ public class ListenableFutureCallbackEndpointCallHandlerAdapterTest {
 	}
 
 	@Test
-	public void shouldCreateExecutableFromEndpointRunnableAsyncMethodWithFutureCallbackParameter() throws Exception {
+	public void shouldCreateHandlerFromEndpointRunnableAsyncMethodWithFutureCallbackParameter() throws Exception {
 		AsyncEndpointCallHandler<Void, String> handler = adapter.adaptAsync(futureWithCallbackEndpointMethod, delegate);
 
 		String result = "future result";

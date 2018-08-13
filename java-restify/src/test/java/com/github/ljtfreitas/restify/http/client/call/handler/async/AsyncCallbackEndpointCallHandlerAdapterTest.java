@@ -185,7 +185,7 @@ public class AsyncCallbackEndpointCallHandlerAdapterTest {
 	}
 
 	@Test
-	public void shouldCreateExecutableFromEndpointRunnableAsyncMethodWithSuccessCallbackParameter() {
+	public void shouldCreateHandlerFromEndpointRunnableAsyncMethodWithSuccessCallbackParameter() {
 		AsyncEndpointCallHandler<Void, String> handler = adapter.adaptAsync(asyncEndpointMethodWithSuccessCallback, delegate);
 
 		asyncResult = "async result";
@@ -198,7 +198,7 @@ public class AsyncCallbackEndpointCallHandlerAdapterTest {
 	}
 
 	@Test
-	public void shouldCreateExecutableFromEndpointRunnableAsyncMethodWithFailureCallbackParameter() {
+	public void shouldCreateHandlerFromEndpointRunnableAsyncMethodWithFailureCallbackParameter() {
 		AsyncEndpointCallHandler<Void, String> handler = adapter.adaptAsync(asyncEndpointMethodWithFailureCallback, delegate);
 
 		RuntimeException exception = new RuntimeException("ooops");
@@ -215,7 +215,7 @@ public class AsyncCallbackEndpointCallHandlerAdapterTest {
 	}
 
 	@Test
-	public void shouldCreateExecutableFromEndpointRunnableAsyncMethodWithSingleCallbackParameter() {
+	public void shouldCreateHandlerFromEndpointRunnableAsyncMethodWithSingleCallbackParameter() {
 		AsyncEndpointCallHandler<Void, String> handler = adapter.adaptAsync(asyncEndpointMethodWithSingleCallback, delegate);
 
 		handler.handleAsync(asyncEndpointCall, new Object[] { singleCallback });
@@ -226,7 +226,7 @@ public class AsyncCallbackEndpointCallHandlerAdapterTest {
 	}
 
 	@Test
-	public void shouldCreateExecutableFromEndpointRunnableAsyncMethodWithMultiplesCallbackParameters() {
+	public void shouldCreateHandlerFromEndpointRunnableAsyncMethodWithMultiplesCallbackParameters() {
 		AsyncEndpointCallHandler<Void, String> handler = adapter.adaptAsync(asyncEndpointMethodWithMultiplesCallbacks, delegate);
 
 		handler.handleAsync(asyncEndpointCall, new Object[] { successCallback, failureCallback });
@@ -235,7 +235,7 @@ public class AsyncCallbackEndpointCallHandlerAdapterTest {
 	}
 
 	@Test
-	public void shouldCreateExecutableFromEndpointRunnableAsyncMethodWithResponseCallbackParameter() {
+	public void shouldCreateHandlerFromEndpointRunnableAsyncMethodWithResponseCallbackParameter() {
 		AsyncEndpointCallHandler<Void, String> handler = adapter.adaptAsync(asyncEndpointMethodWithResponseCallback, delegate);
 
 		handler.handleAsync(asyncEndpointCall, new Object[] { responseSuccessCallback });
@@ -246,7 +246,7 @@ public class AsyncCallbackEndpointCallHandlerAdapterTest {
 	}
 
 	@Test
-	public void shouldCreateExecutableFromEndpointRunnableAsyncMethodWithResponseFailureCallbackParameter() {
+	public void shouldCreateHandlerFromEndpointRunnableAsyncMethodWithResponseFailureCallbackParameter() {
 		AsyncEndpointCallHandler<Void, String> handler = adapter.adaptAsync(asyncEndpointMethodWithResponseFailureCallback, delegate);
 
 		RuntimeException exception = new RuntimeException("ooops");

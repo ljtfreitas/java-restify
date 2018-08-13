@@ -63,7 +63,7 @@ public class EndpointCallObjectHandlerAdapterTest {
 	}
 
 	@Test
-	public void shouldCreateExecutableFromEndpointMethodWithEndpointallReturnType() throws Exception {
+	public void shouldCreateHandlerFromEndpointMethodWithEndpointCallReturnType() throws Exception {
 		EndpointCallHandler<EndpointCall<String>, String> handler = adapter
 				.adapt(new SimpleEndpointMethod(SomeType.class.getMethod("call")), delegate);
 

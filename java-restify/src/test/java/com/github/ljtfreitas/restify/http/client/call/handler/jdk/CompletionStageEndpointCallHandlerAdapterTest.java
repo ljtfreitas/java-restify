@@ -71,7 +71,7 @@ public class CompletionStageEndpointCallHandlerAdapterTest {
 	}
 
 	@Test
-	public void shouldCreateExecutableFromEndpointMethodWithCompletableFutureReturnType() throws Exception {
+	public void shouldCreateHandlerFromEndpointMethodWithCompletableFutureReturnType() throws Exception {
 		AsyncEndpointCallHandler<CompletionStage<String>, String> handler = adapter
 				.adaptAsync(new SimpleEndpointMethod(SomeType.class.getMethod("future")), delegate);
 

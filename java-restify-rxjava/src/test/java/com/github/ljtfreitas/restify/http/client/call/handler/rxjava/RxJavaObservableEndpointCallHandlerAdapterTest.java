@@ -66,7 +66,7 @@ public class RxJavaObservableEndpointCallHandlerAdapterTest {
 	}
 
 	@Test
-	public void shouldCreateExecutableFromEndpointMethodWithRxJavaObservableReturnType() throws Exception {
+	public void shouldCreateHandlerFromEndpointMethodWithRxJavaObservableReturnType() throws Exception {
 		EndpointCallHandler<Observable<String>, String> handler = adapter
 				.adapt(new SimpleEndpointMethod(SomeType.class.getMethod("observable")), delegate);
 
@@ -89,7 +89,7 @@ public class RxJavaObservableEndpointCallHandlerAdapterTest {
 	}
 
 	@Test
-	public void shouldSubscribeErrorOnObservableWhenCreatedExecutableWithRxJavaObservableReturnTypeThrowException() throws Exception {
+	public void shouldSubscribeErrorOnObservableWhenCreatedHandlerWithRxJavaObservableReturnTypeThrowException() throws Exception {
 		EndpointCallHandler<Observable<String>, String> handler = adapter
 				.adapt(new SimpleEndpointMethod(SomeType.class.getMethod("observable")), delegate);
 

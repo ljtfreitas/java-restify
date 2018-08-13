@@ -60,7 +60,7 @@ public class AsyncResultEndpointCallHandlerAdapterTest {
 	}
 
 	@Test
-	public void shouldCreateDecoratedExecutableFromEndpointMethod() throws Exception {
+	public void shouldCreateDecoratedHandlerFromEndpointMethod() throws Exception {
 		EndpointCallHandler<AsyncResult<String>, String> handler = adapter
 				.adapt(new SimpleEndpointMethod(SomeType.class.getMethod("asyncResult")), delegate);
 

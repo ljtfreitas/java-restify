@@ -69,7 +69,7 @@ public class RxJava2MaybeEndpointCallHandlerAdapterTest {
 
 	@SuppressWarnings("unchecked")
 	@Test
-	public void shouldCreateExecutableFromEndpointMethodWithRxJava2MaybeReturnType() throws Exception {
+	public void shouldCreateHandlerFromEndpointMethodWithRxJava2MaybeReturnType() throws Exception {
 		AsyncEndpointCallHandler<Maybe<String>, String> handler = adapter
 				.adaptAsync(new SimpleEndpointMethod(SomeType.class.getMethod("maybe")), delegate);
 
@@ -94,7 +94,7 @@ public class RxJava2MaybeEndpointCallHandlerAdapterTest {
 	}
 
 	@Test
-	public void shouldSubscribeErrorOnMaybeWhenCreatedExecutableWithRxJava2MaybeReturnTypeThrowException() throws Exception {
+	public void shouldSubscribeErrorOnMaybeWhenCreatedHandlerWithRxJava2MaybeReturnTypeThrowException() throws Exception {
 		EndpointCallHandler<Maybe<String>, String> handler = adapter
 				.adapt(new SimpleEndpointMethod(SomeType.class.getMethod("maybe")), delegate);
 

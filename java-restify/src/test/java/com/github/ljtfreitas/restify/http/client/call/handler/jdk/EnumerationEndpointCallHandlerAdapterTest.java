@@ -63,7 +63,7 @@ public class EnumerationEndpointCallHandlerAdapterTest {
 	}
 
 	@Test
-	public void shouldCreateExecutableFromEndpointMethodWithEnumerationReturnType() throws Exception {
+	public void shouldCreateHandlerFromEndpointMethodWithEnumerationReturnType() throws Exception {
 		EndpointCallHandler<Enumeration<String>, Collection<String>> handler = adapter.adapt(new SimpleEndpointMethod(SomeType.class.getMethod("enumeration")), delegate);
 
 		Collection<String> result = Arrays.asList("result");

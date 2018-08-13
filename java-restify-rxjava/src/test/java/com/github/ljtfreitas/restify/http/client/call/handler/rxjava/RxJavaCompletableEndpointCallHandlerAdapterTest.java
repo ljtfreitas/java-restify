@@ -50,7 +50,7 @@ public class RxJavaCompletableEndpointCallHandlerAdapterTest {
 	}
 
 	@Test
-	public void shouldCreateExecutableFromEndpointMethodWithRxJavaCompletableReturnType() throws Exception {
+	public void shouldCreateHandlerFromEndpointMethodWithRxJavaCompletableReturnType() throws Exception {
 		AsyncEndpointCallHandler<Completable, Void> handler = adapter
 				.createAsync(new SimpleEndpointMethod(SomeType.class.getMethod("completable")));
 
@@ -69,7 +69,7 @@ public class RxJavaCompletableEndpointCallHandlerAdapterTest {
 	}
 
 	@Test
-	public void shouldSubscribeErrorOnCompletableWhenCreatedExecutableWithRxJavaCompletableReturnTypeThrowException() throws Exception {
+	public void shouldSubscribeErrorOnCompletableWhenCreatedHandlerWithRxJavaCompletableReturnTypeThrowException() throws Exception {
 		AsyncEndpointCallHandler<Completable, Void> handler = adapter
 				.createAsync(new SimpleEndpointMethod(SomeType.class.getMethod("completable")));
 

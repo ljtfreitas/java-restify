@@ -16,13 +16,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-<<<<<<< HEAD
-import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutable;
-import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutables;
-=======
 import com.github.ljtfreitas.restify.http.client.call.handler.EndpointCallHandler;
 import com.github.ljtfreitas.restify.http.client.call.handler.EndpointCallHandlers;
->>>>>>> ea4d3f4... Mudança de nomes
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequestFactory;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethod;
@@ -35,17 +30,10 @@ public class EndpointMethodExecutorTest {
 	private EndpointRequestFactory endpointRequestFactory;
 
 	@Mock
-<<<<<<< HEAD
-	private EndpointCallExecutables endpointCallExecutables;
-
-	@Mock
-	private EndpointCallExecutable<Object, Object> executable;
-=======
-	private EndpointCallHandlers endpointCallExecutables;
+	private EndpointCallHandlers endpointCallHandlers;
 
 	@Mock
 	private EndpointCallHandler<Object, Object> handler;
->>>>>>> ea4d3f4... Mudança de nomes
 
 	@Mock
 	private EndpointCallFactory endpointCallFactory;
@@ -61,20 +49,12 @@ public class EndpointMethodExecutorTest {
 	public void setup() throws NoSuchMethodException, SecurityException {
 		endpointMethod = new EndpointMethod(SomeType.class.getMethod("method"), "http://my.api.com/", "GET");
 
-		when(endpointCallExecutables.of(endpointMethod))
-<<<<<<< HEAD
-			.thenReturn(executable);
-
-		JavaType returnType = JavaType.of(String.class);
-
-		when(executable.returnType())
-=======
+		when(endpointCallHandlers.of(endpointMethod))
 			.thenReturn(handler);
 
 		JavaType returnType = JavaType.of(String.class);
 
 		when(handler.returnType())
->>>>>>> ea4d3f4... Mudança de nomes
 			.thenReturn(returnType);
 
 		request = new EndpointRequest(URI.create("http://my.api.com"), "GET");
@@ -87,11 +67,7 @@ public class EndpointMethodExecutorTest {
 		when(endpointCallFactory.createWith(request, returnType))
 			.thenReturn(call);
 
-<<<<<<< HEAD
-		when(executable.execute(any(), any(Object[].class)))
-=======
 		when(handler.handle(any(), any(Object[].class)))
->>>>>>> ea4d3f4... Mudança de nomes
 			.then(i -> i.getArgumentAt(0, EndpointCall.class).execute());
 	}
 
@@ -104,13 +80,9 @@ public class EndpointMethodExecutorTest {
 
 		assertEquals("endpoint result", result);
 
-		verify(endpointCallExecutables).of(endpointMethod);
+		verify(endpointCallHandlers).of(endpointMethod);
 		verify(endpointCallFactory).createWith(request, endpointMethod.returnType());
-<<<<<<< HEAD
-		verify(executable).execute(notNull(EndpointCall.class), eq(args));
-=======
 		verify(handler).handle(notNull(EndpointCall.class), eq(args));
->>>>>>> ea4d3f4... Mudança de nomes
 	}
 
 	interface SomeType {

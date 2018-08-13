@@ -63,7 +63,7 @@ public class WebAsyncTaskEndpointCallHandlerAdapterTest {
 	}
 
 	@Test
-	public void shouldCreateExecutableFromEndpointMethodWithWebAsyncTaskReturnType() throws Exception {
+	public void shouldCreateHandlerFromEndpointMethodWithWebAsyncTaskReturnType() throws Exception {
 		EndpointCallHandler<WebAsyncTask<String>, String> handler = adapter
 				.adapt(new SimpleEndpointMethod(SomeType.class.getMethod("webAsyncTask")), delegate);
 

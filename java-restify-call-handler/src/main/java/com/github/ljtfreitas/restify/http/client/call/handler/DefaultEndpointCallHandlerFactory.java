@@ -13,14 +13,14 @@ class DefaultEndpointCallHandlerFactory<M> implements EndpointCallHandlerFactory
 
 	@Override
 	public EndpointCallHandler<M, M> create(EndpointMethod endpointMethod) {
-		return new DefaultEndpointMethodExecutable(endpointMethod.returnType());
+		return new DefaultEndpointMethodHandler(endpointMethod.returnType());
 	}
 
-	public class DefaultEndpointMethodExecutable implements EndpointCallHandler<M, M> {
+	public class DefaultEndpointMethodHandler implements EndpointCallHandler<M, M> {
 
 		private JavaType type;
 
-		public DefaultEndpointMethodExecutable(JavaType type) {
+		public DefaultEndpointMethodHandler(JavaType type) {
 			this.type = type;
 		}
 

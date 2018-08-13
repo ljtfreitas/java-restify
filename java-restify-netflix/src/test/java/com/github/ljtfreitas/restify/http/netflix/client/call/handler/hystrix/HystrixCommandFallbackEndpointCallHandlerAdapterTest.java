@@ -56,7 +56,7 @@ public class HystrixCommandFallbackEndpointCallHandlerAdapterTest {
 
 	@SuppressWarnings("unchecked")
 	@Test
-	public void shouldCreateExecutableFromEndpointMethodWithHystrixCommandReturnType() throws Exception {
+	public void shouldCreateHandlerFromEndpointMethodWithHystrixCommandReturnType() throws Exception {
 		EndpointCallHandler<HystrixCommand<String>, String> handler = adapter
 				.adapt(new SimpleEndpointMethod(SomeType.class.getMethod("command")), delegate);
 

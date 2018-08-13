@@ -53,14 +53,14 @@ public class EndpointCallObjectHandlerAdapter<T, O> implements EndpointCallHandl
 	}
 	@Override
 	public EndpointCallHandler<EndpointCall<T>, O> adapt(EndpointMethod endpointMethod, EndpointCallHandler<T, O> handler) {
-		return new EndpointCallObjectExecutable(handler);
+		return new EndpointCallObjectHandler(handler);
 	}
 
-	private class EndpointCallObjectExecutable implements EndpointCallHandler<EndpointCall<T>, O> {
+	private class EndpointCallObjectHandler implements EndpointCallHandler<EndpointCall<T>, O> {
 
 		private final EndpointCallHandler<T, O> delegate;
 
-		public EndpointCallObjectExecutable(EndpointCallHandler<T, O> handler) {
+		public EndpointCallObjectHandler(EndpointCallHandler<T, O> handler) {
 			this.delegate = handler;
 		}
 

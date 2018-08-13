@@ -79,7 +79,7 @@ public class MonoEndpointCallHandlerAdapterTest {
 	}
 
 	@Test
-	public void shouldCreateExecutableFromEndpointMethodWithMonoReturnType() throws Exception {
+	public void shouldCreateHandlerFromEndpointMethodWithMonoReturnType() throws Exception {
 		AsyncEndpointCallHandler<Mono<String>, String> handler = adapter
 				.adaptAsync(new SimpleEndpointMethod(SomeType.class.getMethod("mono")), delegate);
 
@@ -94,7 +94,7 @@ public class MonoEndpointCallHandlerAdapterTest {
 	}
 
 	@Test
-	public void shouldSubscribeErrorOnSingleWhenCreatedExecutableWithRxJava2SingleReturnTypeThrowException() throws Exception {
+	public void shouldSubscribeErrorOnSingleWhenCreatedHandlerWithRxJava2SingleReturnTypeThrowException() throws Exception {
 		AsyncEndpointCallHandler<Mono<String>, String> handler = adapter
 				.adaptAsync(new SimpleEndpointMethod(SomeType.class.getMethod("mono")), delegate);
 

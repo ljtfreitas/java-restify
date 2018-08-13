@@ -37,11 +37,7 @@ import javax.enterprise.inject.spi.CDI;
 import javax.enterprise.util.AnnotationLiteral;
 
 import com.github.ljtfreitas.restify.http.RestifyProxyBuilder;
-<<<<<<< HEAD
-import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutableProvider;
-=======
 import com.github.ljtfreitas.restify.http.client.call.handler.EndpointCallHandlerProvider;
->>>>>>> ea4d3f4... Mudança de nomes
 import com.github.ljtfreitas.restify.http.client.jdk.JdkHttpClientRequestFactory;
 import com.github.ljtfreitas.restify.http.client.message.converter.HttpMessageConverter;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequestExecutor;
@@ -71,13 +67,8 @@ class RestifyProxyCdiBeanFactory {
 			.retry()
 				.enabled()
 				.and()
-<<<<<<< HEAD
-			.executables()
-				.add(executables())
-=======
 			.handlers()
 				.add(handlers())
->>>>>>> ea4d3f4... Mudança de nomes
 					.async(executor())
 				.discovery()
 					.disabled()
@@ -109,13 +100,9 @@ class RestifyProxyCdiBeanFactory {
 		return get(Executor.class, new AsyncAnnotationLiteral(), () -> Executors.newCachedThreadPool());
 	}
 
-<<<<<<< HEAD
-	private EndpointCallExecutableProvider[] executables() {
-		return all(EndpointCallExecutableProvider.class).toArray(new EndpointCallExecutableProvider[0]);
-=======
+
 	private EndpointCallHandlerProvider[] handlers() {
 		return all(EndpointCallHandlerProvider.class).toArray(new EndpointCallHandlerProvider[0]);
->>>>>>> ea4d3f4... Mudança de nomes
 	}
 
 	private EndpointRequestExecutor endpointRequestExecutor() {

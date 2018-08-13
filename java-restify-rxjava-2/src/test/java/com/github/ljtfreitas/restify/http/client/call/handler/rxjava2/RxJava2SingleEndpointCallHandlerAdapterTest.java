@@ -69,7 +69,7 @@ public class RxJava2SingleEndpointCallHandlerAdapterTest {
 
 	@SuppressWarnings("unchecked")
 	@Test
-	public void shouldCreateExecutableFromEndpointMethodWithRxJava2SingleReturnType() throws Exception {
+	public void shouldCreateHandlerFromEndpointMethodWithRxJava2SingleReturnType() throws Exception {
 		AsyncEndpointCallHandler<Single<String>, String> handler = adapter
 				.adaptAsync(new SimpleEndpointMethod(SomeType.class.getMethod("single")), delegate);
 
@@ -94,7 +94,7 @@ public class RxJava2SingleEndpointCallHandlerAdapterTest {
 	}
 
 	@Test
-	public void shouldSubscribeErrorOnSingleWhenCreatedExecutableWithRxJava2SingleReturnTypeThrowException() throws Exception {
+	public void shouldSubscribeErrorOnSingleWhenCreatedHandlerWithRxJava2SingleReturnTypeThrowException() throws Exception {
 		EndpointCallHandler<Single<String>, String> handler = adapter
 				.adapt(new SimpleEndpointMethod(SomeType.class.getMethod("single")), delegate);
 

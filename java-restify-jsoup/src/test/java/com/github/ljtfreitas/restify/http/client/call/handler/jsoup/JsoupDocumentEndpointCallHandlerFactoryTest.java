@@ -37,7 +37,7 @@ public class JsoupDocumentEndpointCallHandlerFactoryTest {
 	}
 
 	@Test
-	public void shouldCreateExecutableFromEndpointMethodWithDocumentReturnTypeUsingHtmlResponse() throws Exception {
+	public void shouldCreateHandlerFromEndpointMethodWithDocumentReturnTypeUsingHtmlResponse() throws Exception {
 		String html = "<html><head></head><body>hello world</body></html>";
 
 		EndpointCallHandler<Document, String> handler = factory.create(new SimpleEndpointMethod(SomeType.class.getMethod("document")));

@@ -65,7 +65,7 @@ public class IteratorEndpointCallHandlerAdapterTest {
 	}
 
 	@Test
-	public void shouldCreateExecutableFromEndpointMethodWithIteratorReturnType() throws Exception {
+	public void shouldCreateHandlerFromEndpointMethodWithIteratorReturnType() throws Exception {
 		EndpointCallHandler<Iterator<String>, Collection<String>> handler = adapter.adapt(new SimpleEndpointMethod(SomeType.class.getMethod("iterator")), delegate);
 
 		Collection<String> result = Arrays.asList("result");

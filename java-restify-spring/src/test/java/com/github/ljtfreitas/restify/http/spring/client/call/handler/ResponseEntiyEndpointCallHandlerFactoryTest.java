@@ -57,7 +57,7 @@ public class ResponseEntiyEndpointCallHandlerFactoryTest {
 	}
 
 	@Test
-	public void shouldCreateExecutableWithParameterizedEndpointResponseReturnTypeWhenEndpointMethodReturnTypeIsResponseEntity() throws Exception {
+	public void shouldCreateHandlerWithParameterizedEndpointResponseReturnTypeWhenEndpointMethodReturnTypeIsResponseEntity() throws Exception {
 		EndpointCallHandler<ResponseEntity<String>, EndpointResponse<String>> handler = factory.create(new SimpleEndpointMethod(SomeType.class.getMethod("responseEntity")));
 
 		ResponseEntity<String> result = handler.handle(() -> endpointResponseMock, null);

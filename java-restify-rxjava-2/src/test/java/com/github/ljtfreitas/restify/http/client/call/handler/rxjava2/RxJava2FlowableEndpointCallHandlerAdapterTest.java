@@ -63,7 +63,7 @@ public class RxJava2FlowableEndpointCallHandlerAdapterTest {
 	}
 
 	@Test
-	public void shouldCreateExecutableFromEndpointMethodWithRxJava2FlowableReturnType() throws Exception {
+	public void shouldCreateHandlerFromEndpointMethodWithRxJava2FlowableReturnType() throws Exception {
 		EndpointCallHandler<Flowable<String>, String> handler = adapter
 				.adapt(new SimpleEndpointMethod(SomeType.class.getMethod("flowable")), delegate);
 
@@ -87,7 +87,7 @@ public class RxJava2FlowableEndpointCallHandlerAdapterTest {
 	}
 
 	@Test
-	public void shouldSubscribeErrorOnFlowableWhenCreatedExecutableWithRxJava2FlowableReturnTypeThrowException() throws Exception {
+	public void shouldSubscribeErrorOnFlowableWhenCreatedHandlerWithRxJava2FlowableReturnTypeThrowException() throws Exception {
 		EndpointCallHandler<Flowable<String>, String> handler = adapter
 				.adapt(new SimpleEndpointMethod(SomeType.class.getMethod("flowable")), delegate);
 

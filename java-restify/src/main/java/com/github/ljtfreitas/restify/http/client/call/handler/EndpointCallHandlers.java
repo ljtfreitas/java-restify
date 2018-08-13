@@ -33,7 +33,7 @@ import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethod;
 
 public class EndpointCallHandlers {
 
-	private static final EndpointCallHandlerFactory<? super Object, ? super Object> DEFAULT_EXECUTABLE_FACTORY
+	private static final EndpointCallHandlerFactory<? super Object, ? super Object> DEFAULT_HANDLER_FACTORY
 		= new DefaultEndpointCallHandlerFactory<>();
 
 	private final Collection<EndpointCallHandlerProvider> providers;
@@ -56,7 +56,7 @@ public class EndpointCallHandlers {
 				.filter(f -> (exclusions == null || exclusions.empty()) || (!exclusions.contains(f)))
 					.filter(f -> f.supports(endpointMethod))
 						.findFirst()
-							.orElseGet(() -> DEFAULT_EXECUTABLE_FACTORY);
+							.orElseGet(() -> DEFAULT_HANDLER_FACTORY);
 	}
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })

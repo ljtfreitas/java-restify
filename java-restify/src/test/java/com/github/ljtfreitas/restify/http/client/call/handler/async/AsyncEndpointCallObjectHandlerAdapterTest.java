@@ -65,7 +65,7 @@ public class AsyncEndpointCallObjectHandlerAdapterTest {
 	}
 
 	@Test
-	public void shouldCreateExecutableFromEndpointMethodWithAsyncEndpoinCallReturnType() throws Exception {
+	public void shouldCreateHandlerFromEndpointMethodWithAsyncEndpoinCallReturnType() throws Exception {
 		AsyncEndpointCallHandler<AsyncEndpointCall<String>, String> handler = adapter
 				.adaptAsync(new SimpleEndpointMethod(SomeType.class.getMethod("call")), delegate);
 

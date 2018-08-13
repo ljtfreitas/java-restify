@@ -65,7 +65,7 @@ public class ListenableFutureEndpointCallHandlerAdapterTest {
 	}
 
 	@Test
-	public void shouldCreateExecutableFromEndpointMethodWithListenableFutureReturnType() throws Exception {
+	public void shouldCreateHandlerFromEndpointMethodWithListenableFutureReturnType() throws Exception {
 		AsyncEndpointCallHandler<ListenableFuture<String>, String> handler = adapter
 				.adaptAsync(new SimpleEndpointMethod(SomeType.class.getMethod("future")), delegate);
 

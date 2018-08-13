@@ -27,13 +27,8 @@ package com.github.ljtfreitas.restify.http.client.call;
 
 import java.lang.reflect.ParameterizedType;
 
-<<<<<<< HEAD
-import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutable;
-import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutables;
-=======
 import com.github.ljtfreitas.restify.http.client.call.handler.EndpointCallHandler;
 import com.github.ljtfreitas.restify.http.client.call.handler.EndpointCallHandlers;
->>>>>>> ea4d3f4... Mudança de nomes
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequestFactory;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
@@ -43,15 +38,6 @@ import com.github.ljtfreitas.restify.reflection.JavaType;
 public class EndpointMethodExecutor {
 
 	private final EndpointRequestFactory endpointRequestFactory;
-<<<<<<< HEAD
-	private final EndpointCallExecutables endpointCallExecutables;
-	private final EndpointCallFactory endpointCallFactory;
-
-	public EndpointMethodExecutor(EndpointRequestFactory endpointRequestFactory, EndpointCallExecutables endpointCallExecutables,
-			EndpointCallFactory endpointCallFactory) {
-		this.endpointRequestFactory = endpointRequestFactory;
-		this.endpointCallExecutables = endpointCallExecutables;
-=======
 	private final EndpointCallHandlers endpointCallHandlers;
 	private final EndpointCallFactory endpointCallFactory;
 
@@ -59,20 +45,10 @@ public class EndpointMethodExecutor {
 			EndpointCallFactory endpointCallFactory) {
 		this.endpointRequestFactory = endpointRequestFactory;
 		this.endpointCallHandlers = endpointCallHandler;
->>>>>>> ea4d3f4... Mudança de nomes
 		this.endpointCallFactory = endpointCallFactory;
 	}
 
 	public Object execute(EndpointMethod endpointMethod, Object[] args) {
-<<<<<<< HEAD
-		EndpointCallExecutable<Object, Object> executable = endpointCallExecutables.of(endpointMethod);
-
-		EndpointRequest endpointRequest = endpointRequestFactory.createWith(endpointMethod, args, rawTypeOf(executable.returnType()));
-
-		EndpointCall<Object> call = endpointCallFactory.createWith(endpointRequest, executable.returnType());
-
-		return executable.execute(call, args);
-=======
 		EndpointCallHandler<Object, Object> handler = endpointCallHandlers.of(endpointMethod);
 
 		EndpointRequest endpointRequest = endpointRequestFactory.createWith(endpointMethod, args, rawTypeOf(handler.returnType()));
@@ -80,7 +56,6 @@ public class EndpointMethodExecutor {
 		EndpointCall<Object> call = endpointCallFactory.createWith(endpointRequest, handler.returnType());
 
 		return handler.handle(call, args);
->>>>>>> ea4d3f4... Mudança de nomes
 	}
 
 	private JavaType rawTypeOf(JavaType returnType) {

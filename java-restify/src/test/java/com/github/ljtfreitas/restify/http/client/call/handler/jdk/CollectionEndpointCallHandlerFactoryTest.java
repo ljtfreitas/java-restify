@@ -58,7 +58,7 @@ public class CollectionEndpointCallHandlerFactoryTest {
 	}
 
 	@Test
-	public void shouldCreateExecutableFromEndpointMethodWithCollectionReturnType() throws Exception {
+	public void shouldCreateHandlerFromEndpointMethodWithCollectionReturnType() throws Exception {
 		EndpointCallHandler<Collection<String>, Collection<String>> handler = factory.create(new SimpleEndpointMethod(SomeType.class.getMethod("collection")));
 
 		Collection<String> result = Arrays.asList("result");
@@ -73,7 +73,7 @@ public class CollectionEndpointCallHandlerFactoryTest {
 	}
 
 	@Test
-	public void shouldCreateExecutableFromEndpointMethodWithSetReturnType() throws Exception {
+	public void shouldCreateHandlerFromEndpointMethodWithSetReturnType() throws Exception {
 		EndpointCallHandler<Collection<String>, Collection<String>> handler = factory.create(new SimpleEndpointMethod(SomeType.class.getMethod("set")));
 
 		Set<String> result = Collections.singleton("result");
@@ -88,7 +88,7 @@ public class CollectionEndpointCallHandlerFactoryTest {
 	}
 
 	@Test
-	public void shouldCreateExecutableFromEndpointMethodWithListReturnType() throws Exception {
+	public void shouldCreateHandlerFromEndpointMethodWithListReturnType() throws Exception {
 		EndpointCallHandler<Collection<String>, Collection<String>> handler = factory.create(new SimpleEndpointMethod(SomeType.class.getMethod("list")));
 
 		Collection<String> result = Arrays.asList("result");

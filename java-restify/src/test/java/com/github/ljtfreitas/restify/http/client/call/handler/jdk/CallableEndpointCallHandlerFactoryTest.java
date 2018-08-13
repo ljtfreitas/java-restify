@@ -61,7 +61,7 @@ public class CallableEndpointCallHandlerFactoryTest {
 	}
 
 	@Test
-	public void shouldCreateExecutableFromEndpointMethodWithCallableReturnType() throws Exception {
+	public void shouldCreateHandlerFromEndpointMethodWithCallableReturnType() throws Exception {
 		EndpointCallHandler<Callable<String>, String> handler = factory
 				.adapt(new SimpleEndpointMethod(SomeType.class.getMethod("callable")), delegate);
 

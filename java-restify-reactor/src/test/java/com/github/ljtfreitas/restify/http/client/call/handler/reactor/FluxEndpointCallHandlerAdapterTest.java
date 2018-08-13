@@ -78,7 +78,7 @@ public class FluxEndpointCallHandlerAdapterTest {
 	}
 
 	@Test
-	public void shouldCreateExecutableFromEndpointMethodWithFluxReturnType() throws Exception {
+	public void shouldCreateHandlerFromEndpointMethodWithFluxReturnType() throws Exception {
 		AsyncEndpointCallHandler<Flux<String>, String> handler = adapter
 				.adaptAsync(new SimpleEndpointMethod(SomeType.class.getMethod("flux")), delegate);
 
@@ -93,7 +93,7 @@ public class FluxEndpointCallHandlerAdapterTest {
 	}
 
 	@Test
-	public void shouldSubscribeErrorOnObservableWhenCreatedExecutableWithRxJava2ObservableReturnTypeThrowException() throws Exception {
+	public void shouldSubscribeErrorOnObservableWhenCreatedHandlerWithRxJava2ObservableReturnTypeThrowException() throws Exception {
 		AsyncEndpointCallHandler<Flux<String>, String> handler = adapter
 				.adaptAsync(new SimpleEndpointMethod(SomeType.class.getMethod("flux")), delegate);
 

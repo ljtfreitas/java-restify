@@ -47,27 +47,6 @@ import com.github.ljtfreitas.restify.http.client.call.EndpointCallFactory;
 import com.github.ljtfreitas.restify.http.client.call.EndpointMethodExecutor;
 import com.github.ljtfreitas.restify.http.client.call.async.DefaultAsyncEndpointCallFactory;
 import com.github.ljtfreitas.restify.http.client.call.async.ExecutorAsyncEndpointCall;
-<<<<<<< HEAD
-import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutableProvider;
-import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutables;
-import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallObjectExecutableAdapter;
-import com.github.ljtfreitas.restify.http.client.call.exec.HeadersEndpointCallExecutableAdapter;
-import com.github.ljtfreitas.restify.http.client.call.exec.StatusCodeEndpointCallExecutableAdapter;
-import com.github.ljtfreitas.restify.http.client.call.exec.async.AsyncCallbackEndpointCallExecutableAdapter;
-import com.github.ljtfreitas.restify.http.client.call.exec.async.AsyncEndpointCallObjectExecutableAdapter;
-import com.github.ljtfreitas.restify.http.client.call.exec.jdk.CallableEndpointCallExecutableFactory;
-import com.github.ljtfreitas.restify.http.client.call.exec.jdk.CollectionEndpointCallExecutableFactory;
-import com.github.ljtfreitas.restify.http.client.call.exec.jdk.CompletionStageCallbackEndpointCallExecutableAdapter;
-import com.github.ljtfreitas.restify.http.client.call.exec.jdk.CompletionStageEndpointCallExecutableAdapter;
-import com.github.ljtfreitas.restify.http.client.call.exec.jdk.EnumerationEndpointCallExecutableAdapter;
-import com.github.ljtfreitas.restify.http.client.call.exec.jdk.FutureEndpointCallExecutableAdapter;
-import com.github.ljtfreitas.restify.http.client.call.exec.jdk.FutureTaskEndpointCallExecutableAdapter;
-import com.github.ljtfreitas.restify.http.client.call.exec.jdk.IterableEndpointCallExecutableAdapter;
-import com.github.ljtfreitas.restify.http.client.call.exec.jdk.IteratorEndpointCallExecutableAdapter;
-import com.github.ljtfreitas.restify.http.client.call.exec.jdk.ListIteratorEndpointCallExecutableAdapter;
-import com.github.ljtfreitas.restify.http.client.call.exec.jdk.OptionalEndpointCallExecutableFactory;
-import com.github.ljtfreitas.restify.http.client.call.exec.jdk.RunnableEndpointCallExecutableFactory;
-=======
 import com.github.ljtfreitas.restify.http.client.call.handler.EndpointCallHandlerProvider;
 import com.github.ljtfreitas.restify.http.client.call.handler.EndpointCallHandlers;
 import com.github.ljtfreitas.restify.http.client.call.handler.EndpointCallObjectHandlerAdapter;
@@ -87,7 +66,6 @@ import com.github.ljtfreitas.restify.http.client.call.handler.jdk.IteratorEndpoi
 import com.github.ljtfreitas.restify.http.client.call.handler.jdk.ListIteratorEndpointCallHandlerAdapter;
 import com.github.ljtfreitas.restify.http.client.call.handler.jdk.OptionalEndpointCallHandlerFactory;
 import com.github.ljtfreitas.restify.http.client.call.handler.jdk.RunnableEndpointCallHandlerFactory;
->>>>>>> ea4d3f4... Mudança de nomes
 import com.github.ljtfreitas.restify.http.client.jdk.HttpClientRequestConfiguration;
 import com.github.ljtfreitas.restify.http.client.jdk.JdkHttpClientRequestFactory;
 import com.github.ljtfreitas.restify.http.client.message.Header;
@@ -157,11 +135,7 @@ public class RestifyProxyBuilder {
 
 	private EndpointRequestInterceptorsBuilder endpointRequestInterceptorsBuilder = new EndpointRequestInterceptorsBuilder(this);
 
-<<<<<<< HEAD
-	private EndpointCallExecutablesBuilder endpointCallExecutablesBuilder = new EndpointCallExecutablesBuilder(this);
-=======
 	private EndpointCallHandlersBuilder endpointCallHandlersBuilder = new EndpointCallHandlersBuilder(this);
->>>>>>> ea4d3f4... Mudança de nomes
 
 	private EndpointResponseErrorFallbackBuilder endpointResponseErrorFallbackBuilder = new EndpointResponseErrorFallbackBuilder(this);
 
@@ -213,21 +187,12 @@ public class RestifyProxyBuilder {
 		return this;
 	}
 
-<<<<<<< HEAD
-	public EndpointCallExecutablesBuilder executables() {
-		return this.endpointCallExecutablesBuilder;
-	}
-
-	public RestifyProxyBuilder executables(EndpointCallExecutableProvider providers) {
-		this.endpointCallExecutablesBuilder.add(providers);
-=======
 	public EndpointCallHandlersBuilder handlers() {
 		return this.endpointCallHandlersBuilder;
 	}
 
 	public RestifyProxyBuilder handlers(EndpointCallHandlerProvider providers) {
 		this.endpointCallHandlersBuilder.add(providers);
->>>>>>> ea4d3f4... Mudança de nomes
 		return this;
 	}
 
@@ -280,7 +245,7 @@ public class RestifyProxyBuilder {
 
 			EndpointMethodExecutor endpointMethodExecutor = new EndpointMethodExecutor(
 					endpointRequestFactory(),
-					endpointCallExecutables(),
+					endpointCallHandlers(),
 					endpointCallFactory());
 
 			Contract contract = contract();
@@ -292,13 +257,8 @@ public class RestifyProxyBuilder {
 			return new EndpointRequestFactory();
 		}
 
-<<<<<<< HEAD
-		private EndpointCallExecutables endpointCallExecutables() {
-			return endpointCallExecutablesBuilder.build();
-=======
-		private EndpointCallHandlers endpointCallExecutables() {
+		private EndpointCallHandlers endpointCallHandlers() {
 			return endpointCallHandlersBuilder.build();
->>>>>>> ea4d3f4... Mudança de nomes
 		}
 
 		private EndpointCallFactory endpointCallFactory() {
@@ -311,11 +271,7 @@ public class RestifyProxyBuilder {
 		private EndpointCallFactory asyncEndpointCallFactory(EndpointRequestExecutor executor) {
 			EndpointCallFactory delegate = defaultEndpointCallFactory(executor);
 			return new DefaultAsyncEndpointCallFactory((AsyncEndpointRequestExecutor) executor,
-<<<<<<< HEAD
-					endpointCallExecutablesBuilder.async.executor,
-=======
 					endpointCallHandlersBuilder.async.executor,
->>>>>>> ea4d3f4... Mudança de nomes
 					delegate);
 		}
 
@@ -349,11 +305,7 @@ public class RestifyProxyBuilder {
 
 		private EndpointRequestExecutor asyncEndpointRequestExecutor(AsyncHttpClientRequestFactory asyncHttpClientRequestFactory,
 				EndpointRequestWriter writer, EndpointResponseReader reader) {
-<<<<<<< HEAD
-			return new DefaultAsyncEndpointRequestExecutor(endpointCallExecutablesBuilder.async.executor,
-=======
 			return new DefaultAsyncEndpointRequestExecutor(endpointCallHandlersBuilder.async.executor,
->>>>>>> ea4d3f4... Mudança de nomes
 					(AsyncHttpClientRequestFactory) httpClientRequestFactory, writer, reader,
 						endpointRequestExecutor(asyncHttpClientRequestFactory, writer, reader));
 		}
@@ -532,39 +484,10 @@ public class RestifyProxyBuilder {
 		}
 	}
 
-<<<<<<< HEAD
-	public class EndpointCallExecutablesBuilder {
-
-		private final RestifyProxyBuilder context;
-		private final AsyncEndpointCallExecutablesBuilder async = new AsyncEndpointCallExecutablesBuilder();
-
-		private final Collection<EndpointCallExecutableProvider> built = new ArrayList<>();
-		private final Collection<EndpointCallExecutableProvider> providers = new ArrayList<>();
-
-		private final DiscoveryComponentConfigurationBuilder<EndpointCallExecutablesBuilder> discoveryComponentConfiguration =
-				new DiscoveryComponentConfigurationBuilder<>(this);
-
-		private EndpointCallExecutablesBuilder(RestifyProxyBuilder context) {
-			this.context = context;
-			this.built.add(OptionalEndpointCallExecutableFactory.instance());
-			this.built.add(CallableEndpointCallExecutableFactory.instance());
-			this.built.add(RunnableEndpointCallExecutableFactory.instance());
-			this.built.add(CollectionEndpointCallExecutableFactory.instance());
-			this.built.add(EnumerationEndpointCallExecutableAdapter.instance());
-			this.built.add(IteratorEndpointCallExecutableAdapter.instance());
-			this.built.add(ListIteratorEndpointCallExecutableAdapter.instance());
-			this.built.add(IterableEndpointCallExecutableAdapter.instance());
-			this.built.add(EndpointCallObjectExecutableAdapter.instance());
-			this.built.add(HeadersEndpointCallExecutableAdapter.instance());
-			this.built.add(StatusCodeEndpointCallExecutableAdapter.instance());
-		}
-
-		public EndpointCallExecutablesBuilder async() {
-=======
 	public class EndpointCallHandlersBuilder {
 
 		private final RestifyProxyBuilder context;
-		private final AsyncEndpointCallHandlerBuilder async = new AsyncEndpointCallHandlerBuilder();
+		private final AsyncEndpointCallHandlersBuilder async = new AsyncEndpointCallHandlersBuilder();
 
 		private final Collection<EndpointCallHandlerProvider> built = new ArrayList<>();
 		private final Collection<EndpointCallHandlerProvider> providers = new ArrayList<>();
@@ -588,53 +511,31 @@ public class RestifyProxyBuilder {
 		}
 
 		public EndpointCallHandlersBuilder async() {
->>>>>>> ea4d3f4... Mudança de nomes
 			async.all();
 			return this;
 		}
 
-<<<<<<< HEAD
-		public EndpointCallExecutablesBuilder async(Executor executor) {
-=======
 		public EndpointCallHandlersBuilder async(Executor executor) {
->>>>>>> ea4d3f4... Mudança de nomes
 			async.with(executor);
 			return this;
 		}
 
-<<<<<<< HEAD
-		public EndpointCallExecutablesBuilder async(ExecutorService executorService) {
-=======
 		public EndpointCallHandlersBuilder async(ExecutorService executorService) {
->>>>>>> ea4d3f4... Mudança de nomes
 			async.with(executorService);
 			return this;
 		}
 
-<<<<<<< HEAD
-		public EndpointCallExecutablesBuilder add(EndpointCallExecutableProvider endpointCallExecutableProvider) {
-			providers.add(endpointCallExecutableProvider);
-			return this;
-		}
-
-		public EndpointCallExecutablesBuilder add(EndpointCallExecutableProvider...providers) {
-=======
 		public EndpointCallHandlersBuilder add(EndpointCallHandlerProvider provider) {
 			providers.add(provider);
 			return this;
 		}
 
 		public EndpointCallHandlersBuilder add(EndpointCallHandlerProvider...providers) {
->>>>>>> ea4d3f4... Mudança de nomes
 			this.providers.addAll(Arrays.asList(providers));
 			return this;
 		}
 
-<<<<<<< HEAD
-		public DiscoveryComponentConfigurationBuilder<EndpointCallExecutablesBuilder> discovery() {
-=======
 		public DiscoveryComponentConfigurationBuilder<EndpointCallHandlersBuilder> discovery() {
->>>>>>> ea4d3f4... Mudança de nomes
 			return discoveryComponentConfiguration;
 		}
 
@@ -642,54 +543,26 @@ public class RestifyProxyBuilder {
 			return context;
 		}
 
-<<<<<<< HEAD
-		private EndpointCallExecutables build() {
-			Collection<EndpointCallExecutableProvider> all = new ArrayList<>();
-=======
 		private EndpointCallHandlers build() {
 			Collection<EndpointCallHandlerProvider> all = new ArrayList<>();
->>>>>>> ea4d3f4... Mudança de nomes
 
 			all.addAll(providers);
 			all.addAll(built);
 			all.addAll(async.build());
 
-<<<<<<< HEAD
-			if (discoveryComponentConfiguration.enabled) all.addAll(provider.all(EndpointCallExecutableProvider.class));
-
-			return new EndpointCallExecutables(all);
-		}
-	}
-
-	private class AsyncEndpointCallExecutablesBuilder {
-
-		private final Collection<EndpointCallExecutableProvider> providers = new ArrayList<>();
-
-		private Executor executor = ExecutorAsyncEndpointCall.pool();
-
-		private AsyncEndpointCallExecutablesBuilder all() {
-			providers.add(new FutureEndpointCallExecutableAdapter<Object, Object>(executor));
-			providers.add(new CompletionStageEndpointCallExecutableAdapter<Object, Object>(executor));
-			providers.add(new CompletionStageCallbackEndpointCallExecutableAdapter<Object, Object>(executor));
-			providers.add(new AsyncEndpointCallObjectExecutableAdapter<Object, Object>(executor));
-			providers.add(new AsyncCallbackEndpointCallExecutableAdapter<Object, Object>(executor));
-
-			if (executor instanceof ExecutorService) {
-				providers.add(new FutureTaskEndpointCallExecutableAdapter<Object, Object>((ExecutorService) executor));
-=======
 			if (discoveryComponentConfiguration.enabled) all.addAll(provider.all(EndpointCallHandlerProvider.class));
 
 			return new EndpointCallHandlers(all);
 		}
 	}
 
-	private class AsyncEndpointCallHandlerBuilder {
+	private class AsyncEndpointCallHandlersBuilder {
 
 		private final Collection<EndpointCallHandlerProvider> providers = new ArrayList<>();
 
 		private Executor executor = ExecutorAsyncEndpointCall.pool();
 
-		private AsyncEndpointCallHandlerBuilder all() {
+		private AsyncEndpointCallHandlersBuilder all() {
 			providers.add(new FutureEndpointCallHandlerAdapter<Object, Object>(executor));
 			providers.add(new CompletionStageEndpointCallHandlerAdapter<Object, Object>(executor));
 			providers.add(new CompletionStageCallbackEndpointCallHandlerAdapter<Object, Object>(executor));
@@ -698,26 +571,17 @@ public class RestifyProxyBuilder {
 
 			if (executor instanceof ExecutorService) {
 				providers.add(new FutureTaskEndpointCallHandlerAdapter<Object, Object>((ExecutorService) executor));
->>>>>>> ea4d3f4... Mudança de nomes
 			}
 
 			return this;
 		}
 
-<<<<<<< HEAD
-		private AsyncEndpointCallExecutablesBuilder with(Executor executor) {
-=======
-		private AsyncEndpointCallHandlerBuilder with(Executor executor) {
->>>>>>> ea4d3f4... Mudança de nomes
+		private AsyncEndpointCallHandlersBuilder with(Executor executor) {
 			this.executor = executor;
 			return this;
 		}
 
-<<<<<<< HEAD
-		private Collection<EndpointCallExecutableProvider> build() {
-=======
 		private Collection<EndpointCallHandlerProvider> build() {
->>>>>>> ea4d3f4... Mudança de nomes
 			return providers.isEmpty() ? all().build() : providers;
 		}
 	}

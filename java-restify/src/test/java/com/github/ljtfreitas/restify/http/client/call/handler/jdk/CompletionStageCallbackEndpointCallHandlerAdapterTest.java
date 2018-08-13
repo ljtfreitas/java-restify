@@ -77,7 +77,7 @@ public class CompletionStageCallbackEndpointCallHandlerAdapterTest {
 
 	@SuppressWarnings("unchecked")
 	@Test
-	public void shouldCreateExecutableFromEndpointRunnableAsyncMethodWithBiConsumerCallbackParameter() throws Exception {
+	public void shouldCreateHandlerHandlerFromEndpointRunnableAsyncMethodWithBiConsumerCallbackParameter() throws Exception {
 		AsyncEndpointCallHandler<Void, String> handler = adapter.adaptAsync(futureWithCallbackEndpointMethod, delegate);
 
 		String result = "future result";

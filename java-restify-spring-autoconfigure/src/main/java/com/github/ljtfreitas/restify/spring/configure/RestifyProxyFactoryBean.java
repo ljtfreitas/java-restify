@@ -33,11 +33,7 @@ import java.util.concurrent.ExecutorService;
 import org.springframework.beans.factory.FactoryBean;
 
 import com.github.ljtfreitas.restify.http.RestifyProxyBuilder;
-<<<<<<< HEAD
-import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutableProvider;
-=======
 import com.github.ljtfreitas.restify.http.client.call.handler.EndpointCallHandlerProvider;
->>>>>>> ea4d3f4... Mudança de nomes
 import com.github.ljtfreitas.restify.http.client.message.converter.HttpMessageConverter;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequestExecutor;
 import com.github.ljtfreitas.restify.http.client.request.HttpClientRequestFactory;
@@ -65,11 +61,7 @@ public class RestifyProxyFactoryBean implements FactoryBean<Object> {
 
 	private Collection<HttpMessageConverter> converters = new ArrayList<>();
 
-<<<<<<< HEAD
-	private Collection<EndpointCallExecutableProvider> executables = new ArrayList<>();
-=======
 	private Collection<EndpointCallHandlerProvider> handlers = new ArrayList<>();
->>>>>>> ea4d3f4... Mudança de nomes
 
 	private Authentication authentication;
 
@@ -87,13 +79,8 @@ public class RestifyProxyFactoryBean implements FactoryBean<Object> {
 			.executor(endpointRequestExecutor)
 			.retry()
 				.disabled()
-<<<<<<< HEAD
-			.executables()
-				.add(executables())
-=======
 			.handlers()
 				.add(handlers())
->>>>>>> ea4d3f4... Mudança de nomes
 					.async(asyncExecutorService)
 				.discovery()
 					.disabled()
@@ -125,13 +112,8 @@ public class RestifyProxyFactoryBean implements FactoryBean<Object> {
 		return converters.toArray(new HttpMessageConverter[0]);
 	}
 
-<<<<<<< HEAD
-	private EndpointCallExecutableProvider[] executables() {
-		return executables.toArray(new EndpointCallExecutableProvider[0]);
-=======
 	private EndpointCallHandlerProvider[] handlers() {
 		return handlers.toArray(new EndpointCallHandlerProvider[0]);
->>>>>>> ea4d3f4... Mudança de nomes
 	}
 
 	@Override
@@ -180,13 +162,8 @@ public class RestifyProxyFactoryBean implements FactoryBean<Object> {
 		this.httpClientRequestFactory = httpClientRequestFactory;
 	}
 
-<<<<<<< HEAD
-	public void setExecutables(Collection<EndpointCallExecutableProvider> executables) {
-		this.executables = executables;
-=======
-	public void setExecutables(Collection<EndpointCallHandlerProvider> handlers) {
+	public void setHandlers(Collection<EndpointCallHandlerProvider> handlers) {
 		this.handlers = handlers;
->>>>>>> ea4d3f4... Mudança de nomes
 	}
 
 	public void setEndpointResponseErrorFallback(EndpointResponseErrorFallback endpointResponseErrorFallback) {

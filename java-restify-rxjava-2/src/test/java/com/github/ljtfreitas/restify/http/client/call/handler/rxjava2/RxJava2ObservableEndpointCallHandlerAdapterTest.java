@@ -70,7 +70,7 @@ public class RxJava2ObservableEndpointCallHandlerAdapterTest {
 
 	@SuppressWarnings("unchecked")
 	@Test
-	public void shouldCreateExecutableFromEndpointMethodWithRxJava2ObservableReturnType() throws Exception {
+	public void shouldCreateHandlerFromEndpointMethodWithRxJava2ObservableReturnType() throws Exception {
 		AsyncEndpointCallHandler<Observable<String>, String> handler = adapter
 				.adaptAsync(new SimpleEndpointMethod(SomeType.class.getMethod("observable")), delegate);
 
@@ -95,7 +95,7 @@ public class RxJava2ObservableEndpointCallHandlerAdapterTest {
 	}
 
 	@Test
-	public void shouldSubscribeErrorOnObservableWhenCreatedExecutableWithRxJava2ObservableReturnTypeThrowException() throws Exception {
+	public void shouldSubscribeErrorOnObservableWhenCreatedHandlerWithRxJava2ObservableReturnTypeThrowException() throws Exception {
 		AsyncEndpointCallHandler<Observable<String>, String> handler = adapter
 				.adaptAsync(new SimpleEndpointMethod(SomeType.class.getMethod("observable")), delegate);
 

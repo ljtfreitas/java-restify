@@ -68,7 +68,7 @@ public class RxJavaSingleEndpointCallHandlerAdapterTest {
 	}
 
 	@Test
-	public void shouldCreateExecutableFromEndpointMethodWithRxJavaSingleReturnType() throws Exception {
+	public void shouldCreateHandlerFromEndpointMethodWithRxJavaSingleReturnType() throws Exception {
 		EndpointCallHandler<Single<String>, String> handler = adapter
 				.adapt(new SimpleEndpointMethod(SomeType.class.getMethod("single")), delegate);
 
@@ -91,7 +91,7 @@ public class RxJavaSingleEndpointCallHandlerAdapterTest {
 	}
 
 	@Test
-	public void shouldSubscribeErrorOnSingleWhenCreatedExecutableWithRxJavaSingleReturnTypeThrowException() throws Exception {
+	public void shouldSubscribeErrorOnSingleWhenCreatedHandlerWithRxJavaSingleReturnTypeThrowException() throws Exception {
 		EndpointCallHandler<Single<String>, String> handler = adapter
 				.adapt(new SimpleEndpointMethod(SomeType.class.getMethod("single")), delegate);
 

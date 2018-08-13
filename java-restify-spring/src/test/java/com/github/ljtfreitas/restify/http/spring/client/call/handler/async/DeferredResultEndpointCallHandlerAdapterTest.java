@@ -69,7 +69,7 @@ public class DeferredResultEndpointCallHandlerAdapterTest {
 	}
 
 	@Test
-	public void shouldCreateExecutableFromEndpointMethodWithDeferredResultReturnType() throws Exception {
+	public void shouldCreateHandlerFromEndpointMethodWithDeferredResultReturnType() throws Exception {
 		AsyncEndpointCallHandler<DeferredResult<String>, String> handler = adapter
 				.adaptAsync(new SimpleEndpointMethod(SomeType.class.getMethod("deferredResult")), delegate);
 

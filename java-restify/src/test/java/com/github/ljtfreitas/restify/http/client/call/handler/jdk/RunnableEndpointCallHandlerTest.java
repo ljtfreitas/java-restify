@@ -38,7 +38,7 @@ public class RunnableEndpointCallHandlerTest {
 	}
 
 	@Test
-	public void shouldCreateExecutableFromEndpointMethodWithRunnableReturnType() throws Exception {
+	public void shouldCreateHandlerFromEndpointMethodWithRunnableReturnType() throws Exception {
 		EndpointCallHandler<Runnable, Void> handler = adapter.create(new SimpleEndpointMethod(SomeType.class.getMethod("runnable")));
 
 		Runnable runnable = handler.handle(call, null);

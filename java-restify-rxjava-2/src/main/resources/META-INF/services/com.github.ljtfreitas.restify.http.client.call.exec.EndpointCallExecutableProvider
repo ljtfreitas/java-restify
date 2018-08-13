@@ -1,5 +1,0 @@
-com.github.ljtfreitas.restify.http.client.call.exec.rxjava2.RxJava2CompletableEndpointCallExecutableFactory
-com.github.ljtfreitas.restify.http.client.call.exec.rxjava2.RxJava2FlowableEndpointCallExecutableAdapter
-com.github.ljtfreitas.restify.http.client.call.exec.rxjava2.RxJava2MaybeEndpointCallExecutableAdapter
-com.github.ljtfreitas.restify.http.client.call.exec.rxjava2.RxJava2ObservableEndpointCallExecutableAdapter
-com.github.ljtfreitas.restify.http.client.call.exec.rxjava2.RxJava2SingleEndpointCallExecutableAdapter

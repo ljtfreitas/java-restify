@@ -31,50 +31,29 @@ import org.springframework.context.annotation.Configuration;
 
 import com.github.ljtfreitas.restify.http.client.response.DefaultEndpointResponseErrorFallback;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponseErrorFallback;
-<<<<<<< HEAD
-import com.github.ljtfreitas.restify.http.spring.client.call.exec.HttpHeadersEndpointCallExecutableAdapter;
-import com.github.ljtfreitas.restify.http.spring.client.call.exec.HttpStatusEndpointCallExecutableAdapter;
-import com.github.ljtfreitas.restify.http.spring.client.call.exec.ResponseEntityEndpointCallExecutableFactory;
-=======
 import com.github.ljtfreitas.restify.http.spring.client.call.handler.HttpHeadersEndpointCallHandlerAdapter;
 import com.github.ljtfreitas.restify.http.spring.client.call.handler.HttpStatusEndpointCallHandlerAdapter;
 import com.github.ljtfreitas.restify.http.spring.client.call.handler.ResponseEntityEndpointCallHandlerFactory;
->>>>>>> ea4d3f4... Mudança de nomes
 
 @Configuration
 public class RestifyDefaultConfiguration {
 
 	@ConditionalOnMissingBean
 	@Bean
-<<<<<<< HEAD
-	public HttpHeadersEndpointCallExecutableAdapter httpHeadersEndpointCallExecutableFactory() {
-		return new HttpHeadersEndpointCallExecutableAdapter();
-=======
-	public HttpHeadersEndpointCallHandlerAdapter httpHeadersEndpointCallExecutableFactory() {
+	public HttpHeadersEndpointCallHandlerAdapter httpHeadersEndpointCallHandlerAdapter() {
 		return new HttpHeadersEndpointCallHandlerAdapter();
->>>>>>> ea4d3f4... Mudança de nomes
 	}
 
 	@ConditionalOnMissingBean
 	@Bean
-<<<<<<< HEAD
-	public HttpStatusEndpointCallExecutableAdapter httpStatusEndpointCallExecutableFactory() {
-		return new HttpStatusEndpointCallExecutableAdapter();
-=======
-	public HttpStatusEndpointCallHandlerAdapter httpStatusEndpointCallExecutableFactory() {
+	public HttpStatusEndpointCallHandlerAdapter httpStatusEndpointCallHandlerAdapter() {
 		return new HttpStatusEndpointCallHandlerAdapter();
->>>>>>> ea4d3f4... Mudança de nomes
 	}
 
 	@ConditionalOnMissingBean
 	@Bean
-<<<<<<< HEAD
-	public ResponseEntityEndpointCallExecutableFactory<Object> responseEntityEndpointCallExecutableFactory() {
-		return new ResponseEntityEndpointCallExecutableFactory<>();
-=======
-	public ResponseEntityEndpointCallHandlerFactory<Object> responseEntityEndpointCallExecutableFactory() {
+	public ResponseEntityEndpointCallHandlerFactory<Object> responseEntityEndpointCallHandlerFactory() {
 		return new ResponseEntityEndpointCallHandlerFactory<>();
->>>>>>> ea4d3f4... Mudança de nomes
 	}
 
 	@ConditionalOnMissingBean

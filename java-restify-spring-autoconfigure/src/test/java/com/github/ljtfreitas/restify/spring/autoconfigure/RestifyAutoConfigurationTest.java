@@ -28,20 +28,6 @@ import org.springframework.core.task.support.ExecutorServiceAdapter;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.web.reactive.function.client.WebClient;
 
-<<<<<<< HEAD
-import com.github.ljtfreitas.restify.http.client.call.exec.reactor.FluxEndpointCallExecutableAdapter;
-import com.github.ljtfreitas.restify.http.client.call.exec.reactor.MonoEndpointCallExecutableAdapter;
-import com.github.ljtfreitas.restify.http.client.response.EndpointResponseErrorFallback;
-import com.github.ljtfreitas.restify.http.jaxrs.contract.metadata.JaxRsContractReader;
-import com.github.ljtfreitas.restify.http.spring.client.call.exec.HttpHeadersEndpointCallExecutableAdapter;
-import com.github.ljtfreitas.restify.http.spring.client.call.exec.HttpStatusEndpointCallExecutableAdapter;
-import com.github.ljtfreitas.restify.http.spring.client.call.exec.ResponseEntityEndpointCallExecutableFactory;
-import com.github.ljtfreitas.restify.http.spring.client.call.exec.async.AsyncResultEndpointCallExecutableAdapter;
-import com.github.ljtfreitas.restify.http.spring.client.call.exec.async.DeferredResultEndpointCallExecutableAdapter;
-import com.github.ljtfreitas.restify.http.spring.client.call.exec.async.ListenableFutureEndpointCallExecutableAdapter;
-import com.github.ljtfreitas.restify.http.spring.client.call.exec.async.ListenableFutureTaskEndpointCallExecutableAdapter;
-import com.github.ljtfreitas.restify.http.spring.client.call.exec.async.WebAsyncTaskEndpointCallExecutableAdapter;
-=======
 import com.github.ljtfreitas.restify.http.client.call.handler.reactor.FluxEndpointCallHandlerAdapter;
 import com.github.ljtfreitas.restify.http.client.call.handler.reactor.MonoEndpointCallHandlerAdapter;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponseErrorFallback;
@@ -54,7 +40,6 @@ import com.github.ljtfreitas.restify.http.spring.client.call.handler.async.Defer
 import com.github.ljtfreitas.restify.http.spring.client.call.handler.async.ListenableFutureEndpointCallHandlerAdapter;
 import com.github.ljtfreitas.restify.http.spring.client.call.handler.async.ListenableFutureTaskEndpointCallHandlerAdapter;
 import com.github.ljtfreitas.restify.http.spring.client.call.handler.async.WebAsyncTaskEndpointCallHandlerAdapter;
->>>>>>> ea4d3f4... Mudança de nomes
 import com.github.ljtfreitas.restify.http.spring.client.request.RestOperationsEndpointRequestExecutor;
 import com.github.ljtfreitas.restify.http.spring.client.request.async.WebClientEndpointRequestExecutor;
 import com.github.ljtfreitas.restify.http.spring.contract.metadata.SpelDynamicParameterExpressionResolver;
@@ -113,15 +98,9 @@ public class RestifyAutoConfigurationTest {
 		@Test
 		public void shouldCreateDefaultBeans() {
 			contextRunner.run(context -> {
-<<<<<<< HEAD
-				assertNotNull(context.getBean(HttpHeadersEndpointCallExecutableAdapter.class));
-				assertNotNull(context.getBean(HttpStatusEndpointCallExecutableAdapter.class));
-				assertNotNull(context.getBean(ResponseEntityEndpointCallExecutableFactory.class));
-=======
 				assertNotNull(context.getBean(HttpHeadersEndpointCallHandlerAdapter.class));
 				assertNotNull(context.getBean(HttpStatusEndpointCallHandlerAdapter.class));
 				assertNotNull(context.getBean(ResponseEntityEndpointCallHandlerFactory.class));
->>>>>>> ea4d3f4... Mudança de nomes
 				assertNotNull(context.getBean(EndpointResponseErrorFallback.class));
 			});
 		}
@@ -130,13 +109,8 @@ public class RestifyAutoConfigurationTest {
 		public void shouldCreateWebFluxBeans() {
 			contextRunner.run(context -> {
 				assertNotNull(context.getBean(WebClientEndpointRequestExecutor.class));
-<<<<<<< HEAD
-				assertNotNull(context.getBean(FluxEndpointCallExecutableAdapter.class));
-				assertNotNull(context.getBean(MonoEndpointCallExecutableAdapter.class));
-=======
 				assertNotNull(context.getBean(FluxEndpointCallHandlerAdapter.class));
 				assertNotNull(context.getBean(MonoEndpointCallHandlerAdapter.class));
->>>>>>> ea4d3f4... Mudança de nomes
 			});
 		}
 
@@ -167,19 +141,11 @@ public class RestifyAutoConfigurationTest {
 			contextRunner.run(context -> {
 				assertNotNull(context.getBean(AsyncListenableTaskExecutor.class));
 				assertNotNull(context.getBean(ExecutorService.class));
-<<<<<<< HEAD
-				assertNotNull(context.getBean(AsyncResultEndpointCallExecutableAdapter.class));
-				assertNotNull(context.getBean(DeferredResultEndpointCallExecutableAdapter.class));
-				assertNotNull(context.getBean(ListenableFutureEndpointCallExecutableAdapter.class));
-				assertNotNull(context.getBean(ListenableFutureTaskEndpointCallExecutableAdapter.class));
-				assertNotNull(context.getBean(WebAsyncTaskEndpointCallExecutableAdapter.class));
-=======
 				assertNotNull(context.getBean(AsyncResultEndpointCallHandlerAdapter.class));
 				assertNotNull(context.getBean(DeferredResultEndpointCallHandlerAdapter.class));
 				assertNotNull(context.getBean(ListenableFutureEndpointCallHandlerAdapter.class));
 				assertNotNull(context.getBean(ListenableFutureTaskEndpointCallHandlerAdapter.class));
 				assertNotNull(context.getBean(WebAsyncTaskEndpointCallHandlerAdapter.class));
->>>>>>> ea4d3f4... Mudança de nomes
 			});
 		}
 		

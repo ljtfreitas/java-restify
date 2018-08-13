@@ -65,7 +65,7 @@ public class FutureTaskEndpointCallHandlerAdapterTest {
 	}
 
 	@Test
-	public void shouldCreateExecutableFromEndpointMethodWithFutureTaskReturnType() throws Exception {
+	public void shouldCreateHandlerFromEndpointMethodWithFutureTaskReturnType() throws Exception {
 		EndpointCallHandler<FutureTask<String>, String> handler = adapter
 				.adapt(new SimpleEndpointMethod(SomeType.class.getMethod("futureTask")), delegate);
 

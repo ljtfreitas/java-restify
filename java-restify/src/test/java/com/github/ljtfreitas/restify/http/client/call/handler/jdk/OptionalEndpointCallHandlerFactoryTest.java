@@ -42,7 +42,7 @@ public class OptionalEndpointCallHandlerFactoryTest {
 	}
 
 	@Test
-	public void shouldCreateExecutableFromEndpointMethodWithOptionalReturnType() throws Exception {
+	public void shouldCreateHandlerFromEndpointMethodWithOptionalReturnType() throws Exception {
 		EndpointCallHandler<Optional<String>, String> handler = factory.create(new SimpleEndpointMethod(SomeType.class.getMethod("optional")));
 
 		String result = "result";
@@ -57,7 +57,7 @@ public class OptionalEndpointCallHandlerFactoryTest {
 	}
 
 	@Test
-	public void shouldCreateExecutableWithObjectReturnTypeWhenEndpointMethodReturnTypeIsNotParameterizedOptional() throws Exception {
+	public void shouldCreateHandlerWithObjectReturnTypeWhenEndpointMethodReturnTypeIsNotParameterizedOptional() throws Exception {
 		EndpointCallHandler<Optional<String>, String> handler = factory.create(new SimpleEndpointMethod(SomeType.class.getMethod("dumbOptional")));
 		assertEquals(JavaType.of(Object.class), handler.returnType());
 	}
