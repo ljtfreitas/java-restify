@@ -23,7 +23,11 @@
 		<module>java-restify-spi</module>
 		<module>java-restify-reflection</module>
 		<module>java-restify-contract</module>
+<<<<<<< HEAD
 		<module>java-restify-call-exec</module>
+=======
+		<module>java-restify-call-handler</module>
+>>>>>>> ea4d3f4... Mudança de nomes
 		
 		<module>java-restify-http-client</module>
 		<module>java-restify-http-client-apache-httpclient</module>

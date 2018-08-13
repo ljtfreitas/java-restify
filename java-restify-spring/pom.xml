@@ -22,7 +22,11 @@
 		</dependency>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
+<<<<<<< HEAD
 			<artifactId>java-restify-call-exec</artifactId>
+=======
+			<artifactId>java-restify-call-handler</artifactId>
+>>>>>>> ea4d3f4... Mudança de nomes
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>

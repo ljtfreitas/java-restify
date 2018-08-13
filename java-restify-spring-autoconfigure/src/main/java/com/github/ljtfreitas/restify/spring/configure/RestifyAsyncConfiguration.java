@@ -40,11 +40,19 @@ import org.springframework.core.task.support.ExecutorServiceAdapter;
 import org.springframework.scheduling.SchedulingTaskExecutor;
 import org.springframework.scheduling.TaskScheduler;
 
+<<<<<<< HEAD
 import com.github.ljtfreitas.restify.http.spring.client.call.exec.async.AsyncResultEndpointCallExecutableAdapter;
 import com.github.ljtfreitas.restify.http.spring.client.call.exec.async.DeferredResultEndpointCallExecutableAdapter;
 import com.github.ljtfreitas.restify.http.spring.client.call.exec.async.ListenableFutureEndpointCallExecutableAdapter;
 import com.github.ljtfreitas.restify.http.spring.client.call.exec.async.ListenableFutureTaskEndpointCallExecutableAdapter;
 import com.github.ljtfreitas.restify.http.spring.client.call.exec.async.WebAsyncTaskEndpointCallExecutableAdapter;
+=======
+import com.github.ljtfreitas.restify.http.spring.client.call.handler.async.AsyncResultEndpointCallHandlerAdapter;
+import com.github.ljtfreitas.restify.http.spring.client.call.handler.async.DeferredResultEndpointCallHandlerAdapter;
+import com.github.ljtfreitas.restify.http.spring.client.call.handler.async.ListenableFutureEndpointCallHandlerAdapter;
+import com.github.ljtfreitas.restify.http.spring.client.call.handler.async.ListenableFutureTaskEndpointCallHandlerAdapter;
+import com.github.ljtfreitas.restify.http.spring.client.call.handler.async.WebAsyncTaskEndpointCallHandlerAdapter;
+>>>>>>> ea4d3f4... Mudança de nomes
 
 @Configuration
 public class RestifyAsyncConfiguration {
@@ -63,37 +71,67 @@ public class RestifyAsyncConfiguration {
 
 	@ConditionalOnMissingBean
 	@Bean
+<<<<<<< HEAD
 	public AsyncResultEndpointCallExecutableAdapter<Object, Object> asyncResultEndpointCallExecutableFactory(
 			@Async AsyncTaskExecutor executor) {
 		return new AsyncResultEndpointCallExecutableAdapter<>(executor);
+=======
+	public AsyncResultEndpointCallHandlerAdapter<Object, Object> asyncResultEndpointCallExecutableFactory(
+			@Async AsyncTaskExecutor executor) {
+		return new AsyncResultEndpointCallHandlerAdapter<>(executor);
+>>>>>>> ea4d3f4... Mudança de nomes
 	}
 
 	@ConditionalOnMissingBean
 	@Bean
+<<<<<<< HEAD
 	public DeferredResultEndpointCallExecutableAdapter<Object, Object> deferredResultEndpointCallExecutableFactory(
 			@Async AsyncTaskExecutor executor, RestifyConfigurationProperties properties) {
 		return new DeferredResultEndpointCallExecutableAdapter<>(executor, properties.getAsync().getTimeout());
+=======
+	public DeferredResultEndpointCallHandlerAdapter<Object, Object> deferredResultEndpointCallExecutableFactory(
+			@Async AsyncTaskExecutor executor, RestifyConfigurationProperties properties) {
+		return new DeferredResultEndpointCallHandlerAdapter<>(executor, properties.getAsync().getTimeout());
+>>>>>>> ea4d3f4... Mudança de nomes
 	}
 
 	@ConditionalOnMissingBean
 	@Bean
+<<<<<<< HEAD
 	public ListenableFutureEndpointCallExecutableAdapter<Object, Object> listenableFutureEndpointCallExecutableFactory(
 			@Async AsyncListenableTaskExecutor executor) {
 		return new ListenableFutureEndpointCallExecutableAdapter<>(executor);
+=======
+	public ListenableFutureEndpointCallHandlerAdapter<Object, Object> listenableFutureEndpointCallExecutableFactory(
+			@Async AsyncListenableTaskExecutor executor) {
+		return new ListenableFutureEndpointCallHandlerAdapter<>(executor);
+>>>>>>> ea4d3f4... Mudança de nomes
 	}
 
 	@ConditionalOnMissingBean
 	@Bean
+<<<<<<< HEAD
 	public ListenableFutureTaskEndpointCallExecutableAdapter<Object, Object> listenableFutureTaskEndpointCallExecutableFactory(
 			@Async AsyncListenableTaskExecutor executor) {
 		return new ListenableFutureTaskEndpointCallExecutableAdapter<>(executor);
+=======
+	public ListenableFutureTaskEndpointCallHandlerAdapter<Object, Object> listenableFutureTaskEndpointCallExecutableFactory(
+			@Async AsyncListenableTaskExecutor executor) {
+		return new ListenableFutureTaskEndpointCallHandlerAdapter<>(executor);
+>>>>>>> ea4d3f4... Mudança de nomes
 	}
 
 	@ConditionalOnMissingBean
 	@Bean
+<<<<<<< HEAD
 	public WebAsyncTaskEndpointCallExecutableAdapter<Object, Object> webAsyncTaskEndpointCallExecutableFactory(
 			@Async AsyncTaskExecutor executor, RestifyConfigurationProperties properties) {
 		return new WebAsyncTaskEndpointCallExecutableAdapter<>(properties.getAsync().getTimeout(), executor);
+=======
+	public WebAsyncTaskEndpointCallHandlerAdapter<Object, Object> webAsyncTaskEndpointCallExecutableFactory(
+			@Async AsyncTaskExecutor executor, RestifyConfigurationProperties properties) {
+		return new WebAsyncTaskEndpointCallHandlerAdapter<>(properties.getAsync().getTimeout(), executor);
+>>>>>>> ea4d3f4... Mudança de nomes
 	}
 
 	static class RestifyAsyncTaskExecutorCondition extends AllNestedConditions {

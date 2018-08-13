@@ -14,11 +14,14 @@
 	<dependencies>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
+<<<<<<< HEAD
 			<artifactId>java-restify-call-exec</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
+=======
+>>>>>>> ea4d3f4... Mudança de nomes
 			<artifactId>java-restify-http-client</artifactId>
 			<version>${project.version}</version>
 		</dependency>

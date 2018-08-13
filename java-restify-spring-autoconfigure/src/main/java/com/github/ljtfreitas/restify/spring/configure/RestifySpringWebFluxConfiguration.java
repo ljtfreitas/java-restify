@@ -34,8 +34,13 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.reactive.function.client.WebClient;
 
+<<<<<<< HEAD
 import com.github.ljtfreitas.restify.http.client.call.exec.reactor.FluxEndpointCallExecutableAdapter;
 import com.github.ljtfreitas.restify.http.client.call.exec.reactor.MonoEndpointCallExecutableAdapter;
+=======
+import com.github.ljtfreitas.restify.http.client.call.handler.reactor.FluxEndpointCallHandlerAdapter;
+import com.github.ljtfreitas.restify.http.client.call.handler.reactor.MonoEndpointCallHandlerAdapter;
+>>>>>>> ea4d3f4... Mudança de nomes
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequestExecutor;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponseErrorFallback;
 import com.github.ljtfreitas.restify.http.spring.client.request.async.WebClientEndpointRequestExecutor;
@@ -57,19 +62,33 @@ public class RestifySpringWebFluxConfiguration {
 	}
 
 	@Configuration
+<<<<<<< HEAD
 	@ConditionalOnClass(FluxEndpointCallExecutableAdapter.class)
+=======
+	@ConditionalOnClass(FluxEndpointCallHandlerAdapter.class)
+>>>>>>> ea4d3f4... Mudança de nomes
 	static class ReactiveExecutablesConfiguration {
 	
 		@ConditionalOnMissingBean
 		@Bean
+<<<<<<< HEAD
 		public FluxEndpointCallExecutableAdapter<Object, Object> fluxEndpointCallExecutableFactory() {
 			return new FluxEndpointCallExecutableAdapter<>();
+=======
+		public FluxEndpointCallHandlerAdapter<Object, Object> fluxEndpointCallExecutableFactory() {
+			return new FluxEndpointCallHandlerAdapter<>();
+>>>>>>> ea4d3f4... Mudança de nomes
 		}
 	
 		@ConditionalOnMissingBean
 		@Bean
+<<<<<<< HEAD
 		public MonoEndpointCallExecutableAdapter<Object, Object> monoEndpointCallExecutableFactory() {
 			return new MonoEndpointCallExecutableAdapter<>();
+=======
+		public MonoEndpointCallHandlerAdapter<Object, Object> monoEndpointCallExecutableFactory() {
+			return new MonoEndpointCallHandlerAdapter<>();
+>>>>>>> ea4d3f4... Mudança de nomes
 		}
 	}
 }

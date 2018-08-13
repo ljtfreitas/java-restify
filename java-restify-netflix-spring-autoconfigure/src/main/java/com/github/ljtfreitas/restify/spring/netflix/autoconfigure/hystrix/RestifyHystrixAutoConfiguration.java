@@ -33,7 +33,11 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+<<<<<<< HEAD
 import com.github.ljtfreitas.restify.http.netflix.client.call.hystrix.HystrixEndpointCallExecutableAdapter;
+=======
+import com.github.ljtfreitas.restify.http.netflix.client.call.handler.hystrix.HystrixEndpointCallHandlerAdapter;
+>>>>>>> ea4d3f4... Mudança de nomes
 import com.github.ljtfreitas.restify.spring.autoconfigure.RestifyAutoConfiguration;
 
 @Configuration
@@ -42,16 +46,28 @@ public class RestifyHystrixAutoConfiguration {
 
 	@ConditionalOnMissingBean
 	@Bean
+<<<<<<< HEAD
 	public HystrixCommandFallbackEndpointCallExecutableAdapter hystrixCommandFallbackEndpointCallExecutableFactory(
 			HystrixFallbackRegistry fallbackObjectFactory) {
 		return new HystrixCommandFallbackEndpointCallExecutableAdapter(fallbackObjectFactory);
+=======
+	public HystrixCommandFallbackEndpointCallHandlerAdapter hystrixCommandFallbackEndpointCallExecutableFactory(
+			HystrixFallbackRegistry fallbackObjectFactory) {
+		return new HystrixCommandFallbackEndpointCallHandlerAdapter(fallbackObjectFactory);
+>>>>>>> ea4d3f4... Mudança de nomes
 	}
 
 	@ConditionalOnMissingBean
 	@Bean
+<<<<<<< HEAD
 	public HystrixEndpointCallExecutableAdapter<Object, Object> hystrixCircuitBreakerFallbackEndpointCallExecutableFactory(
 			HystrixFallbackRegistry fallbackObjectFactory) {
 		return new HystrixEndpointCallExecutableAdapter<>();
+=======
+	public HystrixEndpointCallHandlerAdapter<Object, Object> hystrixCircuitBreakerFallbackEndpointCallExecutableFactory(
+			HystrixFallbackRegistry fallbackObjectFactory) {
+		return new HystrixEndpointCallHandlerAdapter<>();
+>>>>>>> ea4d3f4... Mudança de nomes
 	}
 
 	@Configuration
