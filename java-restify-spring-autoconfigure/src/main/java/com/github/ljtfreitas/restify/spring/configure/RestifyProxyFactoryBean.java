@@ -33,7 +33,7 @@ import java.util.concurrent.ExecutorService;
 import org.springframework.beans.factory.FactoryBean;
 
 import com.github.ljtfreitas.restify.http.RestifyProxyBuilder;
-import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutableProvider;
+import com.github.ljtfreitas.restify.http.client.call.handler.EndpointCallHandlerProvider;
 import com.github.ljtfreitas.restify.http.client.message.converter.HttpMessageConverter;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequestExecutor;
 import com.github.ljtfreitas.restify.http.client.request.HttpClientRequestFactory;
@@ -61,7 +61,7 @@ public class RestifyProxyFactoryBean implements FactoryBean<Object> {
 
 	private Collection<HttpMessageConverter> converters = new ArrayList<>();
 
-	private Collection<EndpointCallExecutableProvider> executables = new ArrayList<>();
+	private Collection<EndpointCallHandlerProvider> handlers = new ArrayList<>();
 
 	private Authentication authentication;
 
@@ -79,8 +79,8 @@ public class RestifyProxyFactoryBean implements FactoryBean<Object> {
 			.executor(endpointRequestExecutor)
 			.retry()
 				.disabled()
-			.executables()
-				.add(executables())
+			.handlers()
+				.add(handlers())
 					.async(asyncExecutorService)
 				.discovery()
 					.disabled()
@@ -112,8 +112,8 @@ public class RestifyProxyFactoryBean implements FactoryBean<Object> {
 		return converters.toArray(new HttpMessageConverter[0]);
 	}
 
-	private EndpointCallExecutableProvider[] executables() {
-		return executables.toArray(new EndpointCallExecutableProvider[0]);
+	private EndpointCallHandlerProvider[] handlers() {
+		return handlers.toArray(new EndpointCallHandlerProvider[0]);
 	}
 
 	@Override
@@ -162,8 +162,8 @@ public class RestifyProxyFactoryBean implements FactoryBean<Object> {
 		this.httpClientRequestFactory = httpClientRequestFactory;
 	}
 
-	public void setExecutables(Collection<EndpointCallExecutableProvider> executables) {
-		this.executables = executables;
+	public void setHandlers(Collection<EndpointCallHandlerProvider> handlers) {
+		this.handlers = handlers;
 	}
 
 	public void setEndpointResponseErrorFallback(EndpointResponseErrorFallback endpointResponseErrorFallback) {

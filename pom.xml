@@ -23,7 +23,7 @@
 		<module>java-restify-spi</module>
 		<module>java-restify-reflection</module>
 		<module>java-restify-contract</module>
-		<module>java-restify-call-exec</module>
+		<module>java-restify-call-handler</module>
 
 		<module>java-restify-http-client</module>
 		<module>java-restify-http-client-apache-httpclient</module>

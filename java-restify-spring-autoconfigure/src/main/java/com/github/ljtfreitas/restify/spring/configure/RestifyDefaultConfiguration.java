@@ -31,29 +31,29 @@ import org.springframework.context.annotation.Configuration;
 
 import com.github.ljtfreitas.restify.http.client.response.DefaultEndpointResponseErrorFallback;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponseErrorFallback;
-import com.github.ljtfreitas.restify.http.spring.client.call.exec.HttpHeadersEndpointCallExecutableFactory;
-import com.github.ljtfreitas.restify.http.spring.client.call.exec.HttpStatusEndpointCallExecutableFactory;
-import com.github.ljtfreitas.restify.http.spring.client.call.exec.ResponseEntityEndpointCallExecutableFactory;
+import com.github.ljtfreitas.restify.http.spring.client.call.handler.HttpHeadersEndpointCallHandlerAdapter;
+import com.github.ljtfreitas.restify.http.spring.client.call.handler.HttpStatusEndpointCallHandlerAdapter;
+import com.github.ljtfreitas.restify.http.spring.client.call.handler.ResponseEntityEndpointCallHandlerFactory;
 
 @Configuration
 public class RestifyDefaultConfiguration {
 
 	@ConditionalOnMissingBean
 	@Bean
-	public HttpHeadersEndpointCallExecutableFactory httpHeadersEndpointCallExecutableFactory() {
-		return new HttpHeadersEndpointCallExecutableFactory();
+	public HttpHeadersEndpointCallHandlerAdapter httpHeadersEndpointCallHandlerAdapter() {
+		return new HttpHeadersEndpointCallHandlerAdapter();
 	}
 
 	@ConditionalOnMissingBean
 	@Bean
-	public HttpStatusEndpointCallExecutableFactory httpStatusEndpointCallExecutableFactory() {
-		return new HttpStatusEndpointCallExecutableFactory();
+	public HttpStatusEndpointCallHandlerAdapter httpStatusEndpointCallHandlerAdapter() {
+		return new HttpStatusEndpointCallHandlerAdapter();
 	}
 
 	@ConditionalOnMissingBean
 	@Bean
-	public ResponseEntityEndpointCallExecutableFactory<Object> responseEntityEndpointCallExecutableFactory() {
-		return new ResponseEntityEndpointCallExecutableFactory<>();
+	public ResponseEntityEndpointCallHandlerFactory<Object> responseEntityEndpointCallHandlerFactory() {
+		return new ResponseEntityEndpointCallHandlerFactory<>();
 	}
 
 	@ConditionalOnMissingBean

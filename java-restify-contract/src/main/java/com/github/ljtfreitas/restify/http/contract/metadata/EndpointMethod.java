@@ -145,7 +145,7 @@ public class EndpointMethod {
 		return endpoint + query;
 	}
 
-	public EndpointMethod with(JavaType returnType) {
+	public EndpointMethod returns(JavaType returnType) {
 		return new EndpointMethod(javaMethod, path, httpMethod, parameters, headers, returnType);
 	}
 
