@@ -37,7 +37,7 @@ import javax.enterprise.inject.spi.CDI;
 import javax.enterprise.util.AnnotationLiteral;
 
 import com.github.ljtfreitas.restify.http.RestifyProxyBuilder;
-import com.github.ljtfreitas.restify.http.client.call.exec.EndpointCallExecutableProvider;
+import com.github.ljtfreitas.restify.http.client.call.handler.EndpointCallHandlerProvider;
 import com.github.ljtfreitas.restify.http.client.jdk.JdkHttpClientRequestFactory;
 import com.github.ljtfreitas.restify.http.client.message.converter.HttpMessageConverter;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequestExecutor;
@@ -67,8 +67,8 @@ class RestifyProxyCdiBeanFactory {
 			.retry()
 				.enabled()
 				.and()
-			.executables()
-				.add(executables())
+			.handlers()
+				.add(handlers())
 					.async(executor())
 				.discovery()
 					.disabled()
@@ -100,8 +100,9 @@ class RestifyProxyCdiBeanFactory {
 		return get(Executor.class, new AsyncAnnotationLiteral(), () -> Executors.newCachedThreadPool());
 	}
 
-	private EndpointCallExecutableProvider[] executables() {
-		return all(EndpointCallExecutableProvider.class).toArray(new EndpointCallExecutableProvider[0]);
+
+	private EndpointCallHandlerProvider[] handlers() {
+		return all(EndpointCallHandlerProvider.class).toArray(new EndpointCallHandlerProvider[0]);
 	}
 
 	private EndpointRequestExecutor endpointRequestExecutor() {

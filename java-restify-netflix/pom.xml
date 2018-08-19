@@ -9,7 +9,7 @@
 
 	<properties>
 		<netflix.ribbon.version>2.2.2</netflix.ribbon.version>
-		<netflix.hystrix.version>1.5.8</netflix.hystrix.version>
+		<netflix.hystrix.version>1.5.12</netflix.hystrix.version>
 	</properties>
 
 	<dependencies>
@@ -20,7 +20,7 @@
 		</dependency>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
-			<artifactId>java-restify-call-exec</artifactId>
+			<artifactId>java-restify-call-handler</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>

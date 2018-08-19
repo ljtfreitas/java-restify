@@ -33,6 +33,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import com.github.ljtfreitas.restify.http.netflix.client.call.handler.hystrix.HystrixEndpointCallHandlerAdapter;
 import com.github.ljtfreitas.restify.spring.autoconfigure.RestifyAutoConfiguration;
 
 @Configuration
@@ -41,16 +42,16 @@ public class RestifyHystrixAutoConfiguration {
 
 	@ConditionalOnMissingBean
 	@Bean
-	public HystrixCommandFallbackEndpointCallExecutableFactory hystrixCommandFallbackEndpointCallExecutableFactory(
+	public HystrixCommandFallbackEndpointCallHandlerAdapter hystrixCommandFallbackEndpointCallHandlerAdapter(
 			HystrixFallbackRegistry fallbackObjectFactory) {
-		return new HystrixCommandFallbackEndpointCallExecutableFactory(fallbackObjectFactory);
+		return new HystrixCommandFallbackEndpointCallHandlerAdapter(fallbackObjectFactory);
 	}
 
 	@ConditionalOnMissingBean
 	@Bean
-	public HystrixCircuitBreakerFallbackEndpointCallExecutableFactory hystrixCircuitBreakerFallbackEndpointCallExecutableFactory(
+	public HystrixEndpointCallHandlerAdapter<Object, Object> hystrixCircuitBreakerFallbackEndpointCallHandlerAdapter(
 			HystrixFallbackRegistry fallbackObjectFactory) {
-		return new HystrixCircuitBreakerFallbackEndpointCallExecutableFactory(fallbackObjectFactory);
+		return new HystrixEndpointCallHandlerAdapter<>();
 	}
 
 	@Configuration

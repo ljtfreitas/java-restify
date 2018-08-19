@@ -22,7 +22,7 @@
 		</dependency>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
-			<artifactId>java-restify-call-exec</artifactId>
+			<artifactId>java-restify-call-handler</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>

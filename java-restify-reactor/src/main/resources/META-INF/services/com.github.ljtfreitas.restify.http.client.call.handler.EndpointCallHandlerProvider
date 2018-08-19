@@ -1,0 +1,2 @@
+com.github.ljtfreitas.restify.http.client.call.handler.reactor.MonoEndpointCallHandlerAdapter
+com.github.ljtfreitas.restify.http.client.call.handler.reactor.FluxEndpointCallHandlerAdapter

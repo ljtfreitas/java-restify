@@ -40,11 +40,11 @@ import org.springframework.core.task.support.ExecutorServiceAdapter;
 import org.springframework.scheduling.SchedulingTaskExecutor;
 import org.springframework.scheduling.TaskScheduler;
 
-import com.github.ljtfreitas.restify.http.spring.client.call.exec.async.AsyncResultEndpointCallExecutableFactory;
-import com.github.ljtfreitas.restify.http.spring.client.call.exec.async.DeferredResultEndpointCallExecutableFactory;
-import com.github.ljtfreitas.restify.http.spring.client.call.exec.async.ListenableFutureEndpointCallExecutableFactory;
-import com.github.ljtfreitas.restify.http.spring.client.call.exec.async.ListenableFutureTaskEndpointCallExecutableFactory;
-import com.github.ljtfreitas.restify.http.spring.client.call.exec.async.WebAsyncTaskEndpointCallExecutableFactory;
+import com.github.ljtfreitas.restify.http.spring.client.call.handler.async.AsyncResultEndpointCallHandlerAdapter;
+import com.github.ljtfreitas.restify.http.spring.client.call.handler.async.DeferredResultEndpointCallHandlerAdapter;
+import com.github.ljtfreitas.restify.http.spring.client.call.handler.async.ListenableFutureEndpointCallHandlerAdapter;
+import com.github.ljtfreitas.restify.http.spring.client.call.handler.async.ListenableFutureTaskEndpointCallHandlerAdapter;
+import com.github.ljtfreitas.restify.http.spring.client.call.handler.async.WebAsyncTaskEndpointCallHandlerAdapter;
 
 @Configuration
 public class RestifyAsyncConfiguration {
@@ -63,37 +63,37 @@ public class RestifyAsyncConfiguration {
 
 	@ConditionalOnMissingBean
 	@Bean
-	public AsyncResultEndpointCallExecutableFactory<Object, Object> asyncResultEndpointCallExecutableFactory(
+	public AsyncResultEndpointCallHandlerAdapter<Object, Object> asyncResultEndpointCallHandlerAdapter(
 			@Async AsyncTaskExecutor executor) {
-		return new AsyncResultEndpointCallExecutableFactory<>(executor);
+		return new AsyncResultEndpointCallHandlerAdapter<>(executor);
 	}
 
 	@ConditionalOnMissingBean
 	@Bean
-	public DeferredResultEndpointCallExecutableFactory<Object, Object> deferredResultEndpointCallExecutableFactory(
+	public DeferredResultEndpointCallHandlerAdapter<Object, Object> deferredResultEndpointCallHandlerAdapter(
 			@Async AsyncTaskExecutor executor, RestifyConfigurationProperties properties) {
-		return new DeferredResultEndpointCallExecutableFactory<>(executor, properties.getAsync().getTimeout());
+		return new DeferredResultEndpointCallHandlerAdapter<>(executor, properties.getAsync().getTimeout());
 	}
 
 	@ConditionalOnMissingBean
 	@Bean
-	public ListenableFutureEndpointCallExecutableFactory<Object, Object> listenableFutureEndpointCallExecutableFactory(
+	public ListenableFutureEndpointCallHandlerAdapter<Object, Object> listenableFutureEndpointCallHandlerAdapter(
 			@Async AsyncListenableTaskExecutor executor) {
-		return new ListenableFutureEndpointCallExecutableFactory<>(executor);
+		return new ListenableFutureEndpointCallHandlerAdapter<>(executor);
 	}
 
 	@ConditionalOnMissingBean
 	@Bean
-	public ListenableFutureTaskEndpointCallExecutableFactory<Object, Object> listenableFutureTaskEndpointCallExecutableFactory(
+	public ListenableFutureTaskEndpointCallHandlerAdapter<Object, Object> listenableFutureTaskEndpointCallHandlerAdapter(
 			@Async AsyncListenableTaskExecutor executor) {
-		return new ListenableFutureTaskEndpointCallExecutableFactory<>(executor);
+		return new ListenableFutureTaskEndpointCallHandlerAdapter<>(executor);
 	}
 
 	@ConditionalOnMissingBean
 	@Bean
-	public WebAsyncTaskEndpointCallExecutableFactory<Object, Object> webAsyncTaskEndpointCallExecutableFactory(
+	public WebAsyncTaskEndpointCallHandlerAdapter<Object, Object> webAsyncTaskEndpointCallHandlerAdapter(
 			@Async AsyncTaskExecutor executor, RestifyConfigurationProperties properties) {
-		return new WebAsyncTaskEndpointCallExecutableFactory<>(properties.getAsync().getTimeout(), executor);
+		return new WebAsyncTaskEndpointCallHandlerAdapter<>(properties.getAsync().getTimeout(), executor);
 	}
 
 	static class RestifyAsyncTaskExecutorCondition extends AllNestedConditions {

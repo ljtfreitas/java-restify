@@ -1,0 +1,4 @@
+com.github.ljtfreitas.restify.http.client.call.handler.guava.ListenableFutureCallbackEndpointCallHandlerAdapter
+com.github.ljtfreitas.restify.http.client.call.handler.guava.ListenableFutureEndpointCallHandlerAdapter
+com.github.ljtfreitas.restify.http.client.call.handler.guava.ListenableFutureTaskEndpointCallHandlerAdapter
+com.github.ljtfreitas.restify.http.client.call.handler.guava.OptionalEndpointCallHandlerFactory
