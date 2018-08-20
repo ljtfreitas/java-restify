@@ -11,7 +11,7 @@
 	<description>Java Restify Spring Extension</description>
 
 	<properties>
-		<spring.framework.version>5.0.6.RELEASE</spring.framework.version>
+		<spring.framework.version>5.0.8.RELEASE</spring.framework.version>
 	</properties>
 
 	<dependencies>
