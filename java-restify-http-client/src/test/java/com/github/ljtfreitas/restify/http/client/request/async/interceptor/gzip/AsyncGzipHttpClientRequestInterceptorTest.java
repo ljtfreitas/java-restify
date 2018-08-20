@@ -1,4 +1,4 @@
-package com.github.ljtfreitas.restify.http.client.request.interceptor.gzip;
+package com.github.ljtfreitas.restify.http.client.request.async.interceptor.gzip;
 
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
@@ -11,6 +11,8 @@ import static org.mockito.Mockito.when;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStream;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
@@ -26,24 +28,24 @@ import com.github.ljtfreitas.restify.http.client.message.io.InputStreamContent;
 import com.github.ljtfreitas.restify.http.client.message.request.BufferedByteArrayHttpRequestBody;
 import com.github.ljtfreitas.restify.http.client.message.response.ByteArrayHttpResponseBody;
 import com.github.ljtfreitas.restify.http.client.message.response.InputStreamHttpResponseBody;
-import com.github.ljtfreitas.restify.http.client.request.HttpClientRequest;
+import com.github.ljtfreitas.restify.http.client.request.async.AsyncHttpClientRequest;
 import com.github.ljtfreitas.restify.http.client.response.HttpClientResponse;
 import com.github.ljtfreitas.restify.util.Tryable;
 
 @RunWith(MockitoJUnitRunner.class)
-public class GzipHttpClientRequestInterceptorTest {
+public class AsyncGzipHttpClientRequestInterceptorTest {
 
 	@Mock
-	private HttpClientRequest request;
+	private AsyncHttpClientRequest request;
 
 	@Mock
 	private HttpClientResponse response;
 
-	private GzipHttpClientRequestInterceptor interceptor;
+	private AsyncGzipHttpClientRequestInterceptor interceptor;
 
 	@Before
 	public void setup() throws Exception {
-		interceptor = new GzipHttpClientRequestInterceptor();
+		interceptor = new AsyncGzipHttpClientRequestInterceptor();
 
 		when(response.body())
 			.thenReturn(InputStreamHttpResponseBody.empty());
@@ -51,8 +53,8 @@ public class GzipHttpClientRequestInterceptorTest {
 		when(response.headers())
 			.thenReturn(new Headers(Header.contentEncoding("gzip")));
 
-		when(request.execute())
-			.thenReturn(response);
+		when(request.executeAsync())
+			.thenReturn(CompletableFuture.completedFuture(response));
 	}
 
 	@Test
@@ -67,9 +69,11 @@ public class GzipHttpClientRequestInterceptorTest {
 		when(response.body())
 			.thenReturn(new InputStreamHttpResponseBody(new ByteArrayInputStream(output.toByteArray())));
 
-		HttpClientRequest gzipHttpClientRequest = interceptor.intercepts(request);
+		AsyncHttpClientRequest gzipHttpClientRequest = interceptor.interceptsAsync(request);
 
-		HttpClientResponse gzipHttpClientResponse = gzipHttpClientRequest.execute();
+		CompletionStage<HttpClientResponse> responseAsFuture = gzipHttpClientRequest.executeAsync();
+
+		HttpClientResponse gzipHttpClientResponse = responseAsFuture.toCompletableFuture().join();
 
 		assertTrue(gzipHttpClientResponse.body().input() instanceof GZIPInputStream);
 
@@ -85,9 +89,11 @@ public class GzipHttpClientRequestInterceptorTest {
 		when(response.headers())
 			.thenReturn(Headers.empty());
 
-		HttpClientRequest httpClientRequest = interceptor.intercepts(request);
+		AsyncHttpClientRequest httpClientRequest = interceptor.interceptsAsync(request);
 
-		HttpClientResponse httpClientResponse = httpClientRequest.execute();
+		CompletionStage<HttpClientResponse> httpClientResponseAsFuture = httpClientRequest.executeAsync();
+
+		HttpClientResponse httpClientResponse = httpClientResponseAsFuture.toCompletableFuture().join();
 
 		assertSame(response, httpClientResponse);
 
@@ -105,9 +111,11 @@ public class GzipHttpClientRequestInterceptorTest {
 		when(response.headers())
 			.thenReturn(new Headers(Header.contentEncoding("br")));
 
-		HttpClientRequest httpClientRequest = interceptor.intercepts(request);
+		AsyncHttpClientRequest httpClientRequest = interceptor.interceptsAsync(request);
 
-		HttpClientResponse httpClientResponse = httpClientRequest.execute();
+		CompletionStage<HttpClientResponse> httpClientResponseAsFuture = httpClientRequest.executeAsync();
+
+		HttpClientResponse httpClientResponse = httpClientResponseAsFuture.toCompletableFuture().join();
 
 		assertSame(response, httpClientResponse);
 
@@ -120,7 +128,7 @@ public class GzipHttpClientRequestInterceptorTest {
 
 	@Test
 	public void shouldNotUseGzipResponseWhenDisabled() {
-		interceptor = new GzipHttpClientRequestInterceptor.Builder()
+		interceptor = new AsyncGzipHttpClientRequestInterceptor.Builder()
 				.encoding()
 					.response(false)
 					.build();
@@ -128,9 +136,11 @@ public class GzipHttpClientRequestInterceptorTest {
 		when(response.body())
 			.thenReturn(new InputStreamHttpResponseBody(new ByteArrayInputStream("simple http response".getBytes())));
 
-		HttpClientRequest httpClientRequest = interceptor.intercepts(request);
+		AsyncHttpClientRequest httpClientRequest = interceptor.interceptsAsync(request);
 
-		HttpClientResponse httpClientResponse = httpClientRequest.execute();
+		CompletionStage<HttpClientResponse> httpClientResponseAsFuture = httpClientRequest.executeAsync();
+
+		HttpClientResponse httpClientResponse = httpClientResponseAsFuture.toCompletableFuture().join();
 
 		assertSame(response, httpClientResponse);
 
@@ -143,7 +153,7 @@ public class GzipHttpClientRequestInterceptorTest {
 
 	@Test
 	public void shouldWriteGzippedRequestBody() throws Exception {
-		interceptor = new GzipHttpClientRequestInterceptor.Builder()
+		interceptor = new AsyncGzipHttpClientRequestInterceptor.Builder()
 				.encoding()
 					.request()
 					.response(false)
@@ -160,7 +170,7 @@ public class GzipHttpClientRequestInterceptorTest {
 		when(request.body())
 			.thenReturn(body);
 
-		HttpClientRequest gzipHttpClientRequest = interceptor.intercepts(request);
+		AsyncHttpClientRequest gzipHttpClientRequest = interceptor.interceptsAsync(request);
 
 		OutputStream outputBody = gzipHttpClientRequest.body().output();
 
@@ -170,7 +180,10 @@ public class GzipHttpClientRequestInterceptorTest {
 		outputBody.flush();
 		outputBody.close();
 
-		HttpClientResponse response = gzipHttpClientRequest.execute();
+		CompletionStage<HttpClientResponse> responseAsFuture = gzipHttpClientRequest.executeAsync();
+
+		HttpClientResponse response = responseAsFuture.toCompletableFuture().join();
+
 		assertNotNull(response);
 
 		verify(request).replace(Header.contentEncoding("gzip"));
@@ -182,7 +195,7 @@ public class GzipHttpClientRequestInterceptorTest {
 
 	@Test
 	public void shouldNotWriteGzipRequestBodyWhenDisabled() throws Exception {
-		interceptor = new GzipHttpClientRequestInterceptor.Builder()
+		interceptor = new AsyncGzipHttpClientRequestInterceptor.Builder()
 				.encoding()
 					.request(false)
 					.response(false)
@@ -196,7 +209,7 @@ public class GzipHttpClientRequestInterceptorTest {
 		when(request.body())
 			.thenReturn(body);
 
-		HttpClientRequest httpClientRequest = interceptor.intercepts(request);
+		AsyncHttpClientRequest httpClientRequest = interceptor.interceptsAsync(request);
 
 		OutputStream outputBody = httpClientRequest.body().output();
 
@@ -206,7 +219,9 @@ public class GzipHttpClientRequestInterceptorTest {
 		outputBody.flush();
 		outputBody.close();
 
-		HttpClientResponse httpClientResponse = httpClientRequest.execute();
+		CompletionStage<HttpClientResponse> httpClientResponseAsFuture = httpClientRequest.executeAsync();
+
+		HttpClientResponse httpClientResponse = httpClientResponseAsFuture.toCompletableFuture().join();
 
 		assertNotNull(httpClientResponse);
 

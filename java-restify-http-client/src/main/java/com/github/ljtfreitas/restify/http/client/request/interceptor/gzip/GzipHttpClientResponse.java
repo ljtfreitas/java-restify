@@ -25,36 +25,51 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.request.interceptor.gzip;
 
-import java.io.OutputStream;
-import java.util.zip.GZIPOutputStream;
+import java.io.IOException;
 
-import com.github.ljtfreitas.restify.http.client.message.converter.HttpMessageWriteException;
-import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestBody;
-import com.github.ljtfreitas.restify.util.Tryable;
+import com.github.ljtfreitas.restify.http.client.message.Headers;
+import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
+import com.github.ljtfreitas.restify.http.client.message.response.HttpResponseBody;
+import com.github.ljtfreitas.restify.http.client.message.response.StatusCode;
+import com.github.ljtfreitas.restify.http.client.response.HttpClientResponse;
 
-public class GzipHttpRequestBody implements HttpRequestBody {
+public class GzipHttpClientResponse implements HttpClientResponse {
 
-	private final HttpRequestBody source;
-	private final GZIPOutputStream output;
+	private final HttpClientResponse source;
+	private final HttpResponseBody body;
 
-	public GzipHttpRequestBody(HttpRequestBody source) {
+	public GzipHttpClientResponse(HttpClientResponse source) {
 		this.source = source;
-		this.output = Tryable.of(() -> new GZIPOutputStream(source.output()), HttpMessageWriteException::new);
+		this.body = GzipHttpResponseBody.of(source.body());
 	}
 
 	@Override
-	public OutputStream output() {
-		return output;
+	public StatusCode status() {
+		return source.status();
 	}
 
 	@Override
-	public byte[] asBytes() {
-		return source.asBytes();
+	public HttpResponseBody body() {
+		return body;
 	}
 
 	@Override
-	public boolean empty() {
-		return source.empty();
+	public boolean available() {
+		return source.available();
 	}
 
+	@Override
+	public HttpRequestMessage request() {
+		return source.request();
+	}
+
+	@Override
+	public Headers headers() {
+		return source.headers();
+	}
+
+	@Override
+	public void close() throws IOException {
+		source.close();
+	}
 }

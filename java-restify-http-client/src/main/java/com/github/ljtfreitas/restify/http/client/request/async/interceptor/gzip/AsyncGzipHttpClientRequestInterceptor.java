@@ -23,10 +23,11 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.http.client.request.interceptor.gzip;
+package com.github.ljtfreitas.restify.http.client.request.async.interceptor.gzip;
 
 import java.net.URI;
 import java.nio.charset.Charset;
+import java.util.concurrent.CompletionStage;
 import java.util.stream.Collectors;
 
 import com.github.ljtfreitas.restify.http.client.HttpClientException;
@@ -35,36 +36,51 @@ import com.github.ljtfreitas.restify.http.client.message.Headers;
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestBody;
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
 import com.github.ljtfreitas.restify.http.client.request.HttpClientRequest;
-import com.github.ljtfreitas.restify.http.client.request.interceptor.HttpClientRequestInterceptor;
+import com.github.ljtfreitas.restify.http.client.request.async.AsyncHttpClientRequest;
+import com.github.ljtfreitas.restify.http.client.request.async.interceptor.AsyncHttpClientRequestInterceptor;
+import com.github.ljtfreitas.restify.http.client.request.interceptor.gzip.GzipHttpClientRequestInterceptor;
+import com.github.ljtfreitas.restify.http.client.request.interceptor.gzip.GzipHttpClientResponse;
+import com.github.ljtfreitas.restify.http.client.request.interceptor.gzip.GzipHttpRequestBody;
 import com.github.ljtfreitas.restify.http.client.response.HttpClientResponse;
 
-public class GzipHttpClientRequestInterceptor implements HttpClientRequestInterceptor {
+public class AsyncGzipHttpClientRequestInterceptor implements AsyncHttpClientRequestInterceptor {
 
 	private static final String GZIP_ALGORITHM = "gzip";
 
 	private final boolean applyToRequest;
 	private final boolean applyToResponse;
+	private final GzipHttpClientRequestInterceptor delegate;
 
-	public GzipHttpClientRequestInterceptor() {
+	public AsyncGzipHttpClientRequestInterceptor() {
 		this(false, true);
 	}
 
-	private GzipHttpClientRequestInterceptor(boolean request, boolean response) {
-		this.applyToRequest = request;
-		this.applyToResponse = response;
+	private AsyncGzipHttpClientRequestInterceptor(boolean applyToRequest, boolean applyToResponse) {
+		this.applyToRequest = applyToRequest;
+		this.applyToResponse = applyToResponse;
+		this.delegate = new GzipHttpClientRequestInterceptor.Builder()
+				.encoding()
+					.request(applyToRequest)
+					.response(applyToResponse)
+					.build();
 	}
 
 	@Override
 	public HttpClientRequest intercepts(HttpClientRequest request) {
-		return applyToRequest || applyToResponse ? new GzipHttpClientRequest(request) : request;
+		return delegate.intercepts(request);
 	}
 
-	private class GzipHttpClientRequest implements HttpClientRequest {
+	@Override
+	public AsyncHttpClientRequest interceptsAsync(AsyncHttpClientRequest request) {
+		return new AsyncGzipHttpClientRequest(request);
+	}
 
-		private final HttpClientRequest source;
+	private class AsyncGzipHttpClientRequest implements AsyncHttpClientRequest {
+
+		private final AsyncHttpClientRequest source;
 		private final HttpRequestBody body;
 
-		private GzipHttpClientRequest(HttpClientRequest source) {
+		private AsyncGzipHttpClientRequest(AsyncHttpClientRequest source) {
 			this.source = source;
 			this.body = applyToRequest ? new GzipHttpRequestBody(source.body()) : source.body();
 		}
@@ -101,24 +117,33 @@ public class GzipHttpClientRequestInterceptor implements HttpClientRequestInterc
 
 		@Override
 		public HttpClientResponse execute() throws HttpClientException {
-			HttpClientResponse response = applyToRequest ? withGzip(source).execute() : source.execute();
-
-			if (applyToResponse) {
-				String encoding = response.headers().all(Headers.CONTENT_ENCODING)
-						.stream()
-							.map(Header::value)
-								.collect(Collectors.joining(","));
-
-				return encoding.contains(GZIP_ALGORITHM) ? new GzipHttpClientResponse(response) : response;
-
-			} else return response;
+			return source.execute();
 		}
 
-		private HttpClientRequest withGzip(HttpClientRequest request) {
+		@Override
+		public CompletionStage<HttpClientResponse> executeAsync() throws HttpClientException {
+			CompletionStage<HttpClientResponse> responseAsFuture = applyToRequest ?
+					withGzip(source).executeAsync() :
+						source.executeAsync();
+
+			if (applyToResponse) {
+				return responseAsFuture.thenApply(response -> {
+					String encoding = response.headers().all(Headers.CONTENT_ENCODING)
+							.stream()
+							.map(Header::value)
+							.collect(Collectors.joining(","));
+
+					return encoding.contains(GZIP_ALGORITHM) ? new GzipHttpClientResponse(response) : response;
+				});
+
+			} else return responseAsFuture;
+		}
+
+		private AsyncHttpClientRequest withGzip(AsyncHttpClientRequest request) {
 			if (!body.empty()) {
 				return request.headers().get(Headers.CONTENT_ENCODING)
 					.map(h -> request)
-						.orElseGet(() -> (HttpClientRequest) request.replace(Header.contentEncoding(GZIP_ALGORITHM)));
+						.orElseGet(() -> (AsyncHttpClientRequest) request.replace(Header.contentEncoding(GZIP_ALGORITHM)));
 
 			} else return request;
 		}
@@ -126,37 +151,37 @@ public class GzipHttpClientRequestInterceptor implements HttpClientRequestInterc
 
 	public static class Builder {
 
-		private final GzipHttpClientEncodingBuilder encoding = new GzipHttpClientEncodingBuilder();
+		private final AsyncGzipHttpClientEncodingBuilder encoding = new AsyncGzipHttpClientEncodingBuilder();
 
-		public GzipHttpClientEncodingBuilder encoding() {
+		public AsyncGzipHttpClientEncodingBuilder encoding() {
 			return encoding;
 		}
 
-		public GzipHttpClientRequestInterceptor build() {
-			return new GzipHttpClientRequestInterceptor(encoding.request, encoding.response);
+		public AsyncGzipHttpClientRequestInterceptor build() {
+			return new AsyncGzipHttpClientRequestInterceptor(encoding.request, encoding.response);
 		}
 
-		public class GzipHttpClientEncodingBuilder {
+		public class AsyncGzipHttpClientEncodingBuilder {
 
 			private boolean request = false;
 			private boolean response = true;
 
-			public GzipHttpClientEncodingBuilder request() {
+			public AsyncGzipHttpClientEncodingBuilder request() {
 				this.request = true;
 				return this;
 			}
 
-			public GzipHttpClientEncodingBuilder request(boolean enabled) {
+			public AsyncGzipHttpClientEncodingBuilder request(boolean enabled) {
 				this.request = enabled;
 				return this;
 			}
 
-			public GzipHttpClientEncodingBuilder response() {
+			public AsyncGzipHttpClientEncodingBuilder response() {
 				this.response = true;
 				return this;
 			}
 
-			public GzipHttpClientEncodingBuilder response(boolean enabled) {
+			public AsyncGzipHttpClientEncodingBuilder response(boolean enabled) {
 				this.response = enabled;
 				return this;
 			}
@@ -167,7 +192,7 @@ public class GzipHttpClientRequestInterceptor implements HttpClientRequestInterc
 				return Builder.this;
 			}
 
-			public GzipHttpClientRequestInterceptor build() {
+			public AsyncGzipHttpClientRequestInterceptor build() {
 				return Builder.this.build();
 			}
 		}
