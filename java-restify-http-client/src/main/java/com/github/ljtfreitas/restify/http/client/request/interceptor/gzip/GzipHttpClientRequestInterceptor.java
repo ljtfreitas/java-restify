@@ -27,7 +27,6 @@ package com.github.ljtfreitas.restify.http.client.request.interceptor.gzip;
 
 import java.net.URI;
 import java.nio.charset.Charset;
-import java.util.stream.Collectors;
 
 import com.github.ljtfreitas.restify.http.client.HttpClientException;
 import com.github.ljtfreitas.restify.http.client.message.Header;
@@ -39,8 +38,6 @@ import com.github.ljtfreitas.restify.http.client.request.interceptor.HttpClientR
 import com.github.ljtfreitas.restify.http.client.response.HttpClientResponse;
 
 public class GzipHttpClientRequestInterceptor implements HttpClientRequestInterceptor {
-
-	private static final String GZIP_ALGORITHM = "gzip";
 
 	private final boolean applyToRequest;
 	private final boolean applyToResponse;
@@ -101,26 +98,11 @@ public class GzipHttpClientRequestInterceptor implements HttpClientRequestInterc
 
 		@Override
 		public HttpClientResponse execute() throws HttpClientException {
-			HttpClientResponse response = applyToRequest ? withGzip(source).execute() : source.execute();
+			Gzip gzip = new Gzip();
+			
+			HttpClientResponse response = applyToRequest ? gzip.applyTo(source).execute() : source.execute();
 
-			if (applyToResponse) {
-				String encoding = response.headers().all(Headers.CONTENT_ENCODING)
-						.stream()
-							.map(Header::value)
-								.collect(Collectors.joining(","));
-
-				return encoding.contains(GZIP_ALGORITHM) ? new GzipHttpClientResponse(response) : response;
-
-			} else return response;
-		}
-
-		private HttpClientRequest withGzip(HttpClientRequest request) {
-			if (!body.empty()) {
-				return request.headers().get(Headers.CONTENT_ENCODING)
-					.map(h -> request)
-						.orElseGet(() -> (HttpClientRequest) request.replace(Header.contentEncoding(GZIP_ALGORITHM)));
-
-			} else return request;
+			return applyToResponse ? gzip.applyTo(response) : response;
 		}
 	}
 

@@ -28,7 +28,6 @@ package com.github.ljtfreitas.restify.http.client.request.async.interceptor.gzip
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.util.concurrent.CompletionStage;
-import java.util.stream.Collectors;
 
 import com.github.ljtfreitas.restify.http.client.HttpClientException;
 import com.github.ljtfreitas.restify.http.client.message.Header;
@@ -38,14 +37,12 @@ import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMess
 import com.github.ljtfreitas.restify.http.client.request.HttpClientRequest;
 import com.github.ljtfreitas.restify.http.client.request.async.AsyncHttpClientRequest;
 import com.github.ljtfreitas.restify.http.client.request.async.interceptor.AsyncHttpClientRequestInterceptor;
+import com.github.ljtfreitas.restify.http.client.request.interceptor.gzip.Gzip;
 import com.github.ljtfreitas.restify.http.client.request.interceptor.gzip.GzipHttpClientRequestInterceptor;
-import com.github.ljtfreitas.restify.http.client.request.interceptor.gzip.GzipHttpClientResponse;
 import com.github.ljtfreitas.restify.http.client.request.interceptor.gzip.GzipHttpRequestBody;
 import com.github.ljtfreitas.restify.http.client.response.HttpClientResponse;
 
 public class AsyncGzipHttpClientRequestInterceptor implements AsyncHttpClientRequestInterceptor {
-
-	private static final String GZIP_ALGORITHM = "gzip";
 
 	private final boolean applyToRequest;
 	private final boolean applyToResponse;
@@ -122,30 +119,13 @@ public class AsyncGzipHttpClientRequestInterceptor implements AsyncHttpClientReq
 
 		@Override
 		public CompletionStage<HttpClientResponse> executeAsync() throws HttpClientException {
+			Gzip gzip = new Gzip();
+			
 			CompletionStage<HttpClientResponse> responseAsFuture = applyToRequest ?
-					withGzip(source).executeAsync() :
+					gzip.applyTo(source).executeAsync() :
 						source.executeAsync();
 
-			if (applyToResponse) {
-				return responseAsFuture.thenApply(response -> {
-					String encoding = response.headers().all(Headers.CONTENT_ENCODING)
-							.stream()
-							.map(Header::value)
-							.collect(Collectors.joining(","));
-
-					return encoding.contains(GZIP_ALGORITHM) ? new GzipHttpClientResponse(response) : response;
-				});
-
-			} else return responseAsFuture;
-		}
-
-		private AsyncHttpClientRequest withGzip(AsyncHttpClientRequest request) {
-			if (!body.empty()) {
-				return request.headers().get(Headers.CONTENT_ENCODING)
-					.map(h -> request)
-						.orElseGet(() -> (AsyncHttpClientRequest) request.replace(Header.contentEncoding(GZIP_ALGORITHM)));
-
-			} else return request;
+			return applyToResponse ? responseAsFuture.thenApply(gzip::applyTo) : responseAsFuture;
 		}
 	}
 
