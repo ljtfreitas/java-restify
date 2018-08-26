@@ -25,53 +25,9 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.message.response;
 
-import java.io.ByteArrayInputStream;
-import java.io.InputStream;
-import java.nio.ByteBuffer;
+public interface BufferedHttpResponseBody extends HttpResponseBody {
 
-import com.github.ljtfreitas.restify.http.client.message.io.InputStreamContent;
+	boolean empty();
 
-public class BufferedHttpResponseBody implements HttpResponseBody {
-
-	private final byte[] responseAsBytes;
-	private final InputStream stream;
-
-	private BufferedHttpResponseBody(byte[] responseAsBytes) {
-		this.responseAsBytes = responseAsBytes;
-		this.stream = new ByteArrayInputStream(responseAsBytes);
-	}
-
-	@Override
-	public ByteBuffer asBuffer() {
-		return ByteBuffer.wrap(responseAsBytes);
-	}
-
-	@Override
-	public String asString() {
-		return new String(responseAsBytes);
-	}
-
-	@Override
-	public InputStream input() {
-		return stream;
-	}
-
-	@Override
-	public boolean empty() {
-		return responseAsBytes.length == 0;
-	}
-
-	@Override
-	public String toString() {
-		return new String(responseAsBytes);
-	}
-
-	public static HttpResponseBody of(InputStream source) {
-		InputStreamContent content = new InputStreamContent(source);
-		return new BufferedHttpResponseBody(content.asBytes());
-	}
-
-	public static HttpResponseBody none() {
-		return new BufferedHttpResponseBody(new byte[0]);
-	}
+	String asString();
 }

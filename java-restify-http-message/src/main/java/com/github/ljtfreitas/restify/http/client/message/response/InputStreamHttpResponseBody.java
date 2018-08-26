@@ -23,27 +23,25 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.http.client.message.request;
+package com.github.ljtfreitas.restify.http.client.message.response;
 
-import java.io.OutputStream;
-import java.nio.ByteBuffer;
-import java.nio.channels.Channels;
-import java.nio.channels.WritableByteChannel;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 
-import com.github.ljtfreitas.restify.util.Tryable;
+public class InputStreamHttpResponseBody implements HttpResponseBody {
 
-public interface HttpRequestBody {
+	private final InputStream input;
 
-	OutputStream output();
+	public InputStreamHttpResponseBody(InputStream input) {
+		this.input = input;
+	}
 
-	byte[] asBytes();
+	@Override
+	public InputStream input() {
+		return input;
+	}
 
-	boolean empty();
-
-	default void writeTo(OutputStream other) {
-		WritableByteChannel channel = Channels.newChannel(other);
-		Tryable.run(() -> {
-			channel.write(ByteBuffer.wrap(asBytes()));
-		});
+	public static InputStreamHttpResponseBody empty() {
+		return new InputStreamHttpResponseBody(new ByteArrayInputStream(new byte[0]));
 	}
 }

@@ -18,7 +18,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestBody;
-import com.github.ljtfreitas.restify.http.client.message.request.BufferedHttpRequestBody;
+import com.github.ljtfreitas.restify.http.client.message.request.BufferedByteArrayHttpRequestBody;
 import com.github.ljtfreitas.restify.http.client.message.response.HttpResponseMessage;
 import com.github.ljtfreitas.restify.reflection.SimpleParameterizedType;
 import com.google.gson.internal.LinkedTreeMap;
@@ -68,13 +68,13 @@ public class GsonMessageConverterTest {
 
 	@Test
 	public void shouldWriteJsonMessage() {
-		HttpRequestBody output = new BufferedHttpRequestBody();
+		HttpRequestBody output = new BufferedByteArrayHttpRequestBody();
 
 		when(request.body()).thenReturn(output);
 
 		converter.write(new MyJsonModel("Tiago de Freitas Lima", 31), request);
 
-		assertEquals(json, output.asString());
+		assertEquals(json, new String(output.asBytes()));
 	}
 
 	@Test

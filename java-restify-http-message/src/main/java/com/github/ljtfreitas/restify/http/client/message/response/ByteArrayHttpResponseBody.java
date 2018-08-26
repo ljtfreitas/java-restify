@@ -23,27 +23,40 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.http.client.message.request;
+package com.github.ljtfreitas.restify.http.client.message.response;
 
-import java.io.OutputStream;
-import java.nio.ByteBuffer;
-import java.nio.channels.Channels;
-import java.nio.channels.WritableByteChannel;
+import java.io.ByteArrayInputStream;
+import java.io.InputStream;
 
-import com.github.ljtfreitas.restify.util.Tryable;
+import com.github.ljtfreitas.restify.http.client.message.io.InputStreamContent;
 
-public interface HttpRequestBody {
+public class ByteArrayHttpResponseBody implements BufferedHttpResponseBody {
 
-	OutputStream output();
+	private final byte[] contentAsBytes;
+	private final ByteArrayInputStream input;
 
-	byte[] asBytes();
+	private ByteArrayHttpResponseBody(byte[] contentAsBytes) {
+		this.contentAsBytes = contentAsBytes;
+		this.input = new ByteArrayInputStream(contentAsBytes);
+	}
 
-	boolean empty();
+	@Override
+	public InputStream input() {
+		return input;
+	}
 
-	default void writeTo(OutputStream other) {
-		WritableByteChannel channel = Channels.newChannel(other);
-		Tryable.run(() -> {
-			channel.write(ByteBuffer.wrap(asBytes()));
-		});
+	@Override
+	public boolean empty() {
+		return contentAsBytes.length == 0;
+	}
+
+	@Override
+	public String asString() {
+		return new String(contentAsBytes);
+	}
+
+	public static BufferedHttpResponseBody of(HttpResponseBody source) {
+		InputStreamContent content = new InputStreamContent(source.input());
+		return new ByteArrayHttpResponseBody(content.asBytes());
 	}
 }

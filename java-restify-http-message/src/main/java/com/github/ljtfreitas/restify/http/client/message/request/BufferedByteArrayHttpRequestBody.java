@@ -29,40 +29,39 @@ import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
-import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 
 import com.github.ljtfreitas.restify.http.client.message.Encoding;
 import com.github.ljtfreitas.restify.util.Tryable;
 
-public class BufferedHttpRequestBody implements HttpRequestBody {
+public class BufferedByteArrayHttpRequestBody implements HttpRequestBody {
 
 	private static final int DEFAULT_BUFFER_SIZE = 1024 * 100;
 
 	private final Charset charset;
 	private final BufferedOutput output;
 
-	public BufferedHttpRequestBody() {
+	public BufferedByteArrayHttpRequestBody() {
 		this(Encoding.UTF_8.charset());
 	}
 
-	public BufferedHttpRequestBody(Charset charset) {
+	public BufferedByteArrayHttpRequestBody(Charset charset) {
 		this(charset, DEFAULT_BUFFER_SIZE);
 	}
 
-	public BufferedHttpRequestBody(Charset charset, int size) {
+	public BufferedByteArrayHttpRequestBody(Charset charset, int size) {
 		this.charset = charset;
 		this.output = new BufferedOutput(size);
 	}
 
 	@Override
-	public ByteBuffer asBuffer() {
-		return ByteBuffer.wrap(output.source.toByteArray());
+	public OutputStream output() {
+		return output;
 	}
 
 	@Override
-	public OutputStream output() {
-		return output;
+	public byte[] asBytes() {
+		return output.source.toByteArray();
 	}
 
 	@Override
@@ -72,15 +71,6 @@ public class BufferedHttpRequestBody implements HttpRequestBody {
 
 	@Override
 	public String toString() {
-		return bufferAsString();
-	}
-
-	@Override
-	public String asString() {
-		return bufferAsString();
-	}
-
-	private String bufferAsString() {
 		return Tryable.of(() -> output.source.toString(charset.name()));
 	}
 

@@ -25,9 +25,7 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.netty;
 
-import java.io.OutputStream;
 import java.net.URI;
-import java.nio.ByteBuffer;
 import java.nio.charset.Charset;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
@@ -36,16 +34,13 @@ import java.util.concurrent.ExecutionException;
 import com.github.ljtfreitas.restify.http.client.HttpClientException;
 import com.github.ljtfreitas.restify.http.client.message.Header;
 import com.github.ljtfreitas.restify.http.client.message.Headers;
-import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestBody;
+import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
 import com.github.ljtfreitas.restify.http.client.request.async.AsyncHttpClientRequest;
 import com.github.ljtfreitas.restify.http.client.response.HttpClientResponse;
-import com.github.ljtfreitas.restify.util.Tryable;
 
 import io.netty.bootstrap.Bootstrap;
 import io.netty.buffer.ByteBuf;
-import io.netty.buffer.ByteBufOutputStream;
-import io.netty.buffer.Unpooled;
 import io.netty.channel.ChannelFutureListener;
 import io.netty.handler.codec.http.DefaultFullHttpRequest;
 import io.netty.handler.codec.http.FullHttpRequest;
@@ -69,7 +64,7 @@ class NettyHttpClientRequest implements AsyncHttpClientRequest {
 	private final ByteBufRequestBody body;
 
 	public NettyHttpClientRequest(Bootstrap bootstrap, URI uri, Headers headers, String method, Charset charset) {
-		this(bootstrap, uri, headers, method, charset, new ByteBufRequestBody(charset));
+		this(bootstrap, uri, headers, method, charset, new ByteBufRequestBody());
 	}
 
 	private NettyHttpClientRequest(Bootstrap bootstrap, URI uri, Headers headers, String method, Charset charset, ByteBufRequestBody body) {
@@ -157,7 +152,7 @@ class NettyHttpClientRequest implements AsyncHttpClientRequest {
 	private HttpRequest nettyHttpRequest() {
 		HttpMethod nettyMethod = HttpMethod.valueOf(method);
 
-		ByteBuf bodyBuffer = bodyAsBuffer().buffer();
+		ByteBuf bodyBuffer = body.asByteBuf();
 
 		FullHttpRequest nettyRequest = new DefaultFullHttpRequest(HttpVersion.HTTP_1_1, nettyMethod,
 				uri.toString(), bodyBuffer);
@@ -172,47 +167,5 @@ class NettyHttpClientRequest implements AsyncHttpClientRequest {
 		headers.all().forEach(header -> nettyRequest.headers().add(header.name(), header.value()));
 
 		return nettyRequest;
-	}
-
-	private ByteBufOutputStream bodyAsBuffer() {
-		ByteBufOutputStream bodyAsBuffer = new ByteBufOutputStream(Unpooled.buffer());
-
-		Tryable.run(() -> {
-			body.writeTo(bodyAsBuffer);
-			bodyAsBuffer.flush();
-			bodyAsBuffer.close();
-		});
-
-		return bodyAsBuffer;
-	}
-
-	private static class ByteBufRequestBody implements HttpRequestBody {
-
-		private final ByteBufOutputStream output = new ByteBufOutputStream(Unpooled.buffer());
-		private final Charset charset;
-
-		private ByteBufRequestBody(Charset charset) {
-			this.charset = charset;
-		}
-
-		@Override
-		public ByteBuffer asBuffer() {
-			return output.buffer().nioBuffer();
-		}
-
-		@Override
-		public String asString() {
-			return output.buffer().toString(charset);
-		}
-
-		@Override
-		public OutputStream output() {
-			return output;
-		}
-
-		@Override
-		public boolean empty() {
-			return output.buffer().hasArray() && output.buffer().array().length == 0;
-		}
 	}
 }

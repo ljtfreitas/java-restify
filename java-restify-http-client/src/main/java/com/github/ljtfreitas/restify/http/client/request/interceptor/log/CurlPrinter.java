@@ -25,6 +25,8 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.request.interceptor.log;
 
+import com.github.ljtfreitas.restify.http.client.message.response.BufferedHttpResponseBody;
+import com.github.ljtfreitas.restify.http.client.message.response.ByteArrayHttpResponseBody;
 import com.github.ljtfreitas.restify.http.client.request.HttpClientRequest;
 import com.github.ljtfreitas.restify.http.client.response.HttpClientResponse;
 import com.github.ljtfreitas.restify.util.Tryable;
@@ -39,7 +41,7 @@ public class CurlPrinter {
 		request.headers().forEach(h -> message.append("\n").append("> " + h.toString()));
 
 		if (!request.body().empty()) {
-			message.append("\n").append("> " + Tryable.of(request.body()::asString));
+			message.append("\n").append("> " + new String(request.body().asBytes()));
 		}
 
 		message.append("\n").append(">");
@@ -54,8 +56,10 @@ public class CurlPrinter {
 
 		response.headers().forEach(h -> message.append("\n").append("< " + h.toString()));
 
-		if (response.available() && !response.body().empty()) {
-			message.append("\n").append("< " + Tryable.of(response.body()::asString));
+		BufferedHttpResponseBody bufferedHttpResponseBody = ByteArrayHttpResponseBody.of(response.body());
+
+		if (response.available() && !bufferedHttpResponseBody.empty()) {
+			message.append("\n").append("< " + Tryable.of(bufferedHttpResponseBody::asString));
 		}
 
 		message.append("\n").append("<");

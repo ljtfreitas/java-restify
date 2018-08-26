@@ -21,7 +21,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 import com.github.ljtfreitas.restify.http.client.message.Encoding;
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestBody;
-import com.github.ljtfreitas.restify.http.client.message.request.BufferedHttpRequestBody;
+import com.github.ljtfreitas.restify.http.client.message.request.BufferedByteArrayHttpRequestBody;
 import com.github.ljtfreitas.restify.http.client.message.response.HttpResponseMessage;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -63,13 +63,13 @@ public class JaxbXmlMessageConverterTest {
 
 	@Test
 	public void shouldWriteXmlMessage() {
-		HttpRequestBody output = new BufferedHttpRequestBody();
+		HttpRequestBody output = new BufferedByteArrayHttpRequestBody();
 
 		when(request.body()).thenReturn(output);
 
 		converter.write(new MyXmlModel("Tiago de Freitas Lima", 31), request);
 
-		assertEquals(xml, output.asString());
+		assertEquals(xml, new String(output.asBytes()));
 	}
 
 	@Test

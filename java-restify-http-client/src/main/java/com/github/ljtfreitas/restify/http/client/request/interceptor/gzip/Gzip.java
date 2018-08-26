@@ -23,27 +23,35 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.http.client.message.request;
+package com.github.ljtfreitas.restify.http.client.request.interceptor.gzip;
 
-import java.io.OutputStream;
-import java.nio.ByteBuffer;
-import java.nio.channels.Channels;
-import java.nio.channels.WritableByteChannel;
+import java.util.stream.Collectors;
 
-import com.github.ljtfreitas.restify.util.Tryable;
+import com.github.ljtfreitas.restify.http.client.message.Header;
+import com.github.ljtfreitas.restify.http.client.message.Headers;
+import com.github.ljtfreitas.restify.http.client.request.HttpClientRequest;
+import com.github.ljtfreitas.restify.http.client.response.HttpClientResponse;
 
-public interface HttpRequestBody {
+public class Gzip {
 
-	OutputStream output();
+	private static final String GZIP_ALGORITHM = "gzip";
 
-	byte[] asBytes();
+	@SuppressWarnings("unchecked")
+	public <T extends HttpClientRequest> T applyTo(T request) {
+		if (!request.body().empty()) {
+			return request.headers().get(Headers.CONTENT_ENCODING)
+				.map(h -> request)
+					.orElseGet(() -> (T) request.replace(Header.contentEncoding(GZIP_ALGORITHM)));
 
-	boolean empty();
+		} else return request;
+	}
 
-	default void writeTo(OutputStream other) {
-		WritableByteChannel channel = Channels.newChannel(other);
-		Tryable.run(() -> {
-			channel.write(ByteBuffer.wrap(asBytes()));
-		});
+	public HttpClientResponse applyTo(HttpClientResponse response) {
+		String encoding = response.headers().all(Headers.CONTENT_ENCODING)
+				.stream()
+					.map(Header::value)
+						.collect(Collectors.joining(","));
+
+		return encoding.contains(GZIP_ALGORITHM) ? new GzipHttpClientResponse(response) : response;
 	}
 }

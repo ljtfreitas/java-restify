@@ -23,48 +23,29 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.http.client.response;
+package com.github.ljtfreitas.restify.http.client.request.interceptor.gzip;
 
-import java.io.InputStream;
-import java.util.Optional;
+import java.io.IOException;
 
-import com.github.ljtfreitas.restify.http.client.message.Header;
 import com.github.ljtfreitas.restify.http.client.message.Headers;
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
-import com.github.ljtfreitas.restify.http.client.message.response.InputStreamHttpResponseBody;
 import com.github.ljtfreitas.restify.http.client.message.response.HttpResponseBody;
 import com.github.ljtfreitas.restify.http.client.message.response.StatusCode;
+import com.github.ljtfreitas.restify.http.client.response.HttpClientResponse;
 
-public abstract class BaseHttpClientResponse implements HttpClientResponse {
+public class GzipHttpClientResponse implements HttpClientResponse {
 
-	public static final String CONTENT_LENGTH = "Content-Length";
-
-	private final StatusCode status;
-	private final Headers headers;
+	private final HttpClientResponse source;
 	private final HttpResponseBody body;
-	private final HttpRequestMessage httpRequest;
 
-	protected BaseHttpClientResponse(StatusCode status, Headers headers, InputStream body,
-			HttpRequestMessage httpRequest) {
-		this.status = status;
-		this.headers = headers;
-		this.body = Optional.ofNullable(body).map(InputStreamHttpResponseBody::new).orElseGet(InputStreamHttpResponseBody::empty);
-		this.httpRequest = httpRequest;
-	}
-
-	@Override
-	public HttpRequestMessage request() {
-		return httpRequest;
+	public GzipHttpClientResponse(HttpClientResponse source) {
+		this.source = source;
+		this.body = GzipHttpResponseBody.of(source.body());
 	}
 
 	@Override
 	public StatusCode status() {
-		return status;
-	}
-
-	@Override
-	public Headers headers() {
-		return headers;
+		return source.status();
 	}
 
 	@Override
@@ -74,19 +55,21 @@ public abstract class BaseHttpClientResponse implements HttpClientResponse {
 
 	@Override
 	public boolean available() {
-		return readableStatus() && httpMethodShouldContainResponseBody() && hasContentLength();
+		return source.available();
 	}
 
-	private boolean httpMethodShouldContainResponseBody() {
-		return !(httpRequest.method().equals("HEAD") || httpRequest.method().equals("TRACE"));
+	@Override
+	public HttpRequestMessage request() {
+		return source.request();
 	}
 
-	private boolean readableStatus() {
-		return !(status.isInformational() || status.isNoContent() || status.isNotModified());
+	@Override
+	public Headers headers() {
+		return source.headers();
 	}
 
-	private boolean hasContentLength() {
-		int contentLength = headers.get(CONTENT_LENGTH).map(Header::value).map(Integer::valueOf).orElse(-1);
-		return contentLength != 0;
+	@Override
+	public void close() throws IOException {
+		source.close();
 	}
 }
