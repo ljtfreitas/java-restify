@@ -16,7 +16,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestBody;
-import com.github.ljtfreitas.restify.http.client.message.request.BufferedHttpRequestBody;
+import com.github.ljtfreitas.restify.http.client.message.request.BufferedByteArrayHttpRequestBody;
 import com.github.ljtfreitas.restify.http.client.message.response.HttpResponseMessage;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -58,13 +58,13 @@ public class ScalarMessageConverterTest {
 
 	@Test
 	public void shouldWriteByteValue() {
-		HttpRequestBody output = new BufferedHttpRequestBody();
+		HttpRequestBody output = new BufferedByteArrayHttpRequestBody();
 
 		when(request.body()).thenReturn(output);
 
 		converter.write((byte) 1, request);
 
-		assertEquals("1", output.asString());
+		assertEquals("1", new String(output.asBytes()));
 	}
 
 	@Test
@@ -90,12 +90,12 @@ public class ScalarMessageConverterTest {
 
 	@Test
 	public void shouldWriteShortValue() {
-		HttpRequestBody output = new BufferedHttpRequestBody();
+		HttpRequestBody output = new BufferedByteArrayHttpRequestBody();
 
 		when(request.body()).thenReturn(output);
 		converter.write((short) 1, request);
 
-		assertEquals("1", output.asString());
+		assertEquals("1", new String(output.asBytes()));
 	}
 
 	@Test
@@ -120,12 +120,12 @@ public class ScalarMessageConverterTest {
 
 	@Test
 	public void shouldWriteIntegerValue() {
-		HttpRequestBody output = new BufferedHttpRequestBody();
+		HttpRequestBody output = new BufferedByteArrayHttpRequestBody();
 
 		when(request.body()).thenReturn(output);
 		converter.write((int) 1, request);
 
-		assertEquals("1", output.asString());
+		assertEquals("1", new String(output.asBytes()));
 	}
 
 	@Test
@@ -150,12 +150,12 @@ public class ScalarMessageConverterTest {
 
 	@Test
 	public void shouldWriteLongValue() {
-		HttpRequestBody output = new BufferedHttpRequestBody();
+		HttpRequestBody output = new BufferedByteArrayHttpRequestBody();
 
 		when(request.body()).thenReturn(output);
 		converter.write((long) 1, request);
 
-		assertEquals("1", output.asString());
+		assertEquals("1", new String(output.asBytes()));
 	}
 
 	@Test
@@ -180,12 +180,12 @@ public class ScalarMessageConverterTest {
 
 	@Test
 	public void shouldWriteFloatValue() {
-		HttpRequestBody output = new BufferedHttpRequestBody();
+		HttpRequestBody output = new BufferedByteArrayHttpRequestBody();
 
 		when(request.body()).thenReturn(output);
 		converter.write((float) 1.1, request);
 
-		assertEquals("1.1", output.asString());
+		assertEquals("1.1", new String(output.asBytes()));
 	}
 
 	@Test
@@ -210,12 +210,12 @@ public class ScalarMessageConverterTest {
 
 	@Test
 	public void shouldWriteDoubleValue() {
-		HttpRequestBody output = new BufferedHttpRequestBody();
+		HttpRequestBody output = new BufferedByteArrayHttpRequestBody();
 
 		when(request.body()).thenReturn(output);
 		converter.write((double) 2.2, request);
 
-		assertEquals("2.2", output.asString());
+		assertEquals("2.2", new String(output.asBytes()));
 	}
 
 	@Test
@@ -240,12 +240,12 @@ public class ScalarMessageConverterTest {
 
 	@Test
 	public void shouldWriteBooleanValue() {
-		HttpRequestBody output = new BufferedHttpRequestBody();
+		HttpRequestBody output = new BufferedByteArrayHttpRequestBody();
 
 		when(request.body()).thenReturn(output);
 		converter.write((boolean) false, request);
 
-		assertEquals("false", output.asString());
+		assertEquals("false", new String(output.asBytes()));
 	}
 
 	@Test
@@ -270,11 +270,11 @@ public class ScalarMessageConverterTest {
 
 	@Test
 	public void shouldWriteCharacterValue() {
-		HttpRequestBody output = new BufferedHttpRequestBody();
+		HttpRequestBody output = new BufferedByteArrayHttpRequestBody();
 
 		when(request.body()).thenReturn(output);
 		converter.write((char) 'a', request);
 
-		assertEquals("a", output.asString());
+		assertEquals("a", new String(output.asBytes()));
 	}
 }

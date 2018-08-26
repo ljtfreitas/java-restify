@@ -23,27 +23,36 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.http.client.message.request;
+package com.github.ljtfreitas.restify.http.client.netty;
 
 import java.io.OutputStream;
-import java.nio.ByteBuffer;
-import java.nio.channels.Channels;
-import java.nio.channels.WritableByteChannel;
 
-import com.github.ljtfreitas.restify.util.Tryable;
+import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestBody;
 
-public interface HttpRequestBody {
+import io.netty.buffer.ByteBuf;
+import io.netty.buffer.ByteBufOutputStream;
+import io.netty.buffer.Unpooled;
 
-	OutputStream output();
+class ByteBufRequestBody implements HttpRequestBody {
 
-	byte[] asBytes();
-	
-	boolean empty();
+	private final ByteBufOutputStream output = new ByteBufOutputStream(Unpooled.buffer());
 
-	default void writeTo(OutputStream other) {
-		WritableByteChannel channel = Channels.newChannel(other);
-		Tryable.run(() -> {
-			channel.write(ByteBuffer.wrap(asBytes()));
-		});
+	@Override
+	public OutputStream output() {
+		return output;
+	}
+
+	@Override
+	public byte[] asBytes() {
+		return output.buffer().array();
+	}
+
+	@Override
+	public boolean empty() {
+		return output.buffer().hasArray() && output.buffer().array().length == 0;
+	}
+
+	ByteBuf asByteBuf() {
+		return output.buffer();
 	}
 }

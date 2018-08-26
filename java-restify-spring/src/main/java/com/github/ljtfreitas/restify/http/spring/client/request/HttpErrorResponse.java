@@ -36,7 +36,7 @@ import org.springframework.web.client.RestClientResponseException;
 
 import com.github.ljtfreitas.restify.http.client.message.Header;
 import com.github.ljtfreitas.restify.http.client.message.Headers;
-import com.github.ljtfreitas.restify.http.client.message.request.BufferedHttpRequestBody;
+import com.github.ljtfreitas.restify.http.client.message.request.BufferedByteArrayHttpRequestBody;
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
 import com.github.ljtfreitas.restify.http.client.message.response.StatusCode;
 import com.github.ljtfreitas.restify.http.client.response.BaseHttpClientResponse;
@@ -86,7 +86,7 @@ public class HttpErrorResponse extends BaseHttpClientResponse {
 		}
 
 		@Override
-		public BufferedHttpRequestBody body() {
+		public BufferedByteArrayHttpRequestBody body() {
 			throw new UnsupportedOperationException();
 		}
 

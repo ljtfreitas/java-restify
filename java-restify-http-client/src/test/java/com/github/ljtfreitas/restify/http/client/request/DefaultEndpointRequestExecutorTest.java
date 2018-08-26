@@ -21,7 +21,7 @@ import com.github.ljtfreitas.restify.http.client.HttpClientException;
 import com.github.ljtfreitas.restify.http.client.message.Encoding;
 import com.github.ljtfreitas.restify.http.client.message.Header;
 import com.github.ljtfreitas.restify.http.client.message.Headers;
-import com.github.ljtfreitas.restify.http.client.message.request.BufferedHttpRequestBody;
+import com.github.ljtfreitas.restify.http.client.message.request.BufferedByteArrayHttpRequestBody;
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
 import com.github.ljtfreitas.restify.http.client.message.response.HttpResponseBody;
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestBody;
@@ -104,7 +104,7 @@ public class DefaultEndpointRequestExecutorTest {
 		private final EndpointRequest source;
 		private final HttpClientResponse response;
 
-		private final HttpRequestBody body = new BufferedHttpRequestBody(Charset.defaultCharset());
+		private final HttpRequestBody body = new BufferedByteArrayHttpRequestBody(Charset.defaultCharset());
 
 		public SimpleHttpClientRequest(EndpointRequest source, HttpClientResponse response) {
 			this.source = source;

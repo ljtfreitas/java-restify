@@ -16,7 +16,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestBody;
-import com.github.ljtfreitas.restify.http.client.message.request.BufferedHttpRequestBody;
+import com.github.ljtfreitas.restify.http.client.message.request.BufferedByteArrayHttpRequestBody;
 import com.github.ljtfreitas.restify.http.client.message.response.HttpResponseMessage;
 import com.github.ljtfreitas.restify.http.contract.Form;
 import com.github.ljtfreitas.restify.http.contract.Form.Field;
@@ -61,7 +61,7 @@ public class FormURLEncodedFormObjectMessageConverterTest {
 
 	@Test
 	public void shouldWriteFormUrlEncodedMessageWithFormObjectSource() {
-		HttpRequestBody output = new BufferedHttpRequestBody();
+		HttpRequestBody output = new BufferedByteArrayHttpRequestBody();
 		
 		when(request.body()).thenReturn(output);
 
@@ -71,7 +71,7 @@ public class FormURLEncodedFormObjectMessageConverterTest {
 
 		converter.write(myFormObject, request);
 
-		assertEquals("name=Tiago+de+Freitas&customFieldName=31", output.asString());
+		assertEquals("name=Tiago+de+Freitas&customFieldName=31", new String(output.asBytes()));
 	}
 
 	@Form

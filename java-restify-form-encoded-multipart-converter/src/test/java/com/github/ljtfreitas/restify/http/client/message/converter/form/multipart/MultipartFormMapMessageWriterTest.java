@@ -24,7 +24,7 @@ import com.github.ljtfreitas.restify.http.client.message.Header;
 import com.github.ljtfreitas.restify.http.client.message.Headers;
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestBody;
-import com.github.ljtfreitas.restify.http.client.message.request.BufferedHttpRequestBody;
+import com.github.ljtfreitas.restify.http.client.message.request.BufferedByteArrayHttpRequestBody;
 import com.github.ljtfreitas.restify.http.contract.MultipartFile;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -56,7 +56,7 @@ public class MultipartFormMapMessageWriterTest {
 
 		parameters = new LinkedHashMap<>();
 
-		output = new BufferedHttpRequestBody();
+		output = new BufferedByteArrayHttpRequestBody();
 
 		when(request.body()).thenReturn(output);
 		when(request.headers()).thenReturn(new Headers(Header.contentType("multipart/form-data")));
@@ -101,7 +101,7 @@ public class MultipartFormMapMessageWriterTest {
 
 		converter.write(parameters, request);
 
-		assertEquals(body, output.asString());
+		assertEquals(body, new String(output.asBytes()));
 	}
 
 	@Test
@@ -124,7 +124,7 @@ public class MultipartFormMapMessageWriterTest {
 
 		converter.write(parameters, request);
 
-		assertEquals(body, output.asString());
+		assertEquals(body, new String(output.asBytes()));
 	}
 
 	@Test
@@ -145,7 +145,7 @@ public class MultipartFormMapMessageWriterTest {
 
 		converter.write(parameters, request);
 
-		assertEquals(body, output.asString());
+		assertEquals(body, new String(output.asBytes()));
 	}
 
 	@Test
@@ -168,7 +168,7 @@ public class MultipartFormMapMessageWriterTest {
 
 		converter.write(parameters, request);
 
-		assertEquals(body, output.asString());
+		assertEquals(body, new String(output.asBytes()));
 	}
 
 	@Test
@@ -191,7 +191,7 @@ public class MultipartFormMapMessageWriterTest {
 
 		converter.write(parameters, request);
 
-		assertEquals(body, output.asString());
+		assertEquals(body, new String(output.asBytes()));
 	}
 
 	@Test
@@ -214,7 +214,7 @@ public class MultipartFormMapMessageWriterTest {
 
 		converter.write(parameters, request);
 
-		assertEquals(body, output.asString());
+		assertEquals(body, new String(output.asBytes()));
 	}
 
 	@Test
@@ -238,6 +238,6 @@ public class MultipartFormMapMessageWriterTest {
 
 		converter.write(parameters, request);
 
-		assertEquals(body, output.asString());
+		assertEquals(body, new String(output.asBytes()));
 	}
 }

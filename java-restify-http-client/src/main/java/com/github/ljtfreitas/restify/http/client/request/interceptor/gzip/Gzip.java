@@ -23,47 +23,35 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.http.client.request.interceptor.log;
+package com.github.ljtfreitas.restify.http.client.request.interceptor.gzip;
 
-import com.github.ljtfreitas.restify.http.client.message.response.BufferedHttpResponseBody;
-import com.github.ljtfreitas.restify.http.client.message.response.ByteArrayHttpResponseBody;
+import java.util.stream.Collectors;
+
+import com.github.ljtfreitas.restify.http.client.message.Header;
+import com.github.ljtfreitas.restify.http.client.message.Headers;
 import com.github.ljtfreitas.restify.http.client.request.HttpClientRequest;
 import com.github.ljtfreitas.restify.http.client.response.HttpClientResponse;
-import com.github.ljtfreitas.restify.util.Tryable;
 
-public class CurlPrinter {
+public class Gzip {
 
-	public String print(HttpClientRequest request) {
-		StringBuilder message = new StringBuilder();
-
-		message.append(">>>>>>>>>>>>>>>>>>>>>>>>>>>>>>").append("\n").append("> " + request.method() + " " + request.uri());
-
-		request.headers().forEach(h -> message.append("\n").append("> " + h.toString()));
-
+	private static final String GZIP_ALGORITHM = "gzip";
+	
+	@SuppressWarnings("unchecked")
+	public <T extends HttpClientRequest> T applyTo(T request) {
 		if (!request.body().empty()) {
-			message.append("\n").append("> " + new String(request.body().asBytes()));
-		}
+			return request.headers().get(Headers.CONTENT_ENCODING)
+				.map(h -> request)
+					.orElseGet(() -> (T) request.replace(Header.contentEncoding(GZIP_ALGORITHM)));
 
-		message.append("\n").append(">");
-
-		return message.toString();
+		} else return request;
 	}
+	
+	public HttpClientResponse applyTo(HttpClientResponse response) {
+		String encoding = response.headers().all(Headers.CONTENT_ENCODING)
+				.stream()
+					.map(Header::value)
+						.collect(Collectors.joining(","));
 
-	public String print(HttpClientResponse response) {
-		StringBuilder message = new StringBuilder();
-
-		message.append("<<<<<<<<<<<<<<<<<<<<<<<<<<<<<<").append("\n").append("< " + response.status());
-
-		response.headers().forEach(h -> message.append("\n").append("< " + h.toString()));
-
-		BufferedHttpResponseBody bufferedHttpResponseBody = ByteArrayHttpResponseBody.of(response.body());
-
-		if (response.available() && !bufferedHttpResponseBody.empty()) {
-			message.append("\n").append("< " + Tryable.of(bufferedHttpResponseBody::asString));
-		}
-
-		message.append("\n").append("<");
-
-		return message.toString();
+		return encoding.contains(GZIP_ALGORITHM) ? new GzipHttpClientResponse(response) : response;
 	}
 }

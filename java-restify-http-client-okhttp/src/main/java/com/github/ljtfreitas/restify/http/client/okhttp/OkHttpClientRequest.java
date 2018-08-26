@@ -36,7 +36,7 @@ import java.util.concurrent.CompletionStage;
 import com.github.ljtfreitas.restify.http.client.HttpClientException;
 import com.github.ljtfreitas.restify.http.client.message.Header;
 import com.github.ljtfreitas.restify.http.client.message.Headers;
-import com.github.ljtfreitas.restify.http.client.message.request.BufferedHttpRequestBody;
+import com.github.ljtfreitas.restify.http.client.message.request.BufferedByteArrayHttpRequestBody;
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestBody;
 import com.github.ljtfreitas.restify.http.client.message.response.StatusCode;
@@ -61,11 +61,11 @@ class OkHttpClientRequest implements AsyncHttpClientRequest {
 	private final HttpRequestBody body;
 
 	public OkHttpClientRequest(OkHttpClient okHttpClient, URI uri, String method, Headers headers, Charset charset) {
-		this(okHttpClient, uri, method, headers, charset, new BufferedHttpRequestBody(charset));
+		this(okHttpClient, uri, method, headers, charset, new BufferedByteArrayHttpRequestBody(charset));
 	}
 
 	private OkHttpClientRequest(OkHttpClient okHttpClient, URI uri, String method, Headers headers, Charset charset,
-			BufferedHttpRequestBody body) {
+			BufferedByteArrayHttpRequestBody body) {
 		this.okHttpClient = okHttpClient;
 		this.uri = uri;
 		this.method = method;
@@ -144,7 +144,7 @@ class OkHttpClientRequest implements AsyncHttpClientRequest {
 		MediaType contentType = headers.get("Content-Type").map(header -> MediaType.parse(header.value()))
 				.orElse(null);
 
-		byte[] content = body.asBuffer().array();
+		byte[] content = body.asBytes();
 
 		okhttp3.RequestBody body = (content.length > 0 ? okhttp3.RequestBody.create(contentType, content) : null);
 

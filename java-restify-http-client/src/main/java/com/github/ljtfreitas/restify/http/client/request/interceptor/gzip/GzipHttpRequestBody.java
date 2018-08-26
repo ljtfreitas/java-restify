@@ -23,27 +23,38 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.http.client.message.request;
+package com.github.ljtfreitas.restify.http.client.request.interceptor.gzip;
 
 import java.io.OutputStream;
-import java.nio.ByteBuffer;
-import java.nio.channels.Channels;
-import java.nio.channels.WritableByteChannel;
+import java.util.zip.GZIPOutputStream;
 
+import com.github.ljtfreitas.restify.http.client.message.converter.HttpMessageWriteException;
+import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestBody;
 import com.github.ljtfreitas.restify.util.Tryable;
 
-public interface HttpRequestBody {
+public class GzipHttpRequestBody implements HttpRequestBody {
 
-	OutputStream output();
+	private final HttpRequestBody source;
+	private final GZIPOutputStream output;
 
-	byte[] asBytes();
-	
-	boolean empty();
-
-	default void writeTo(OutputStream other) {
-		WritableByteChannel channel = Channels.newChannel(other);
-		Tryable.run(() -> {
-			channel.write(ByteBuffer.wrap(asBytes()));
-		});
+	public GzipHttpRequestBody(HttpRequestBody source) {
+		this.source = source;
+		this.output = Tryable.of(() -> new GZIPOutputStream(source.output()), HttpMessageWriteException::new);
 	}
+
+	@Override
+	public OutputStream output() {
+		return output;
+	}
+
+	@Override
+	public byte[] asBytes() {
+		return source.asBytes();
+	}
+
+	@Override
+	public boolean empty() {
+		return source.empty();
+	}
+
 }

@@ -23,27 +23,31 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.http.client.message.request;
+package com.github.ljtfreitas.restify.http.client.request.interceptor.gzip;
 
-import java.io.OutputStream;
-import java.nio.ByteBuffer;
-import java.nio.channels.Channels;
-import java.nio.channels.WritableByteChannel;
+import java.io.InputStream;
+import java.util.zip.GZIPInputStream;
 
+import com.github.ljtfreitas.restify.http.client.message.converter.HttpMessageReadException;
+import com.github.ljtfreitas.restify.http.client.message.response.HttpResponseBody;
+import com.github.ljtfreitas.restify.http.client.message.response.InputStreamHttpResponseBody;
 import com.github.ljtfreitas.restify.util.Tryable;
 
-public interface HttpRequestBody {
+class GzipHttpResponseBody implements HttpResponseBody {
 
-	OutputStream output();
+	private final HttpResponseBody source;
 
-	byte[] asBytes();
-	
-	boolean empty();
+	private GzipHttpResponseBody(HttpResponseBody source) {
+		this.source = source;
+	}
 
-	default void writeTo(OutputStream other) {
-		WritableByteChannel channel = Channels.newChannel(other);
-		Tryable.run(() -> {
-			channel.write(ByteBuffer.wrap(asBytes()));
-		});
+	@Override
+	public InputStream input() {
+		return source.input();
+	}
+
+	static HttpResponseBody of(HttpResponseBody source) {
+		GZIPInputStream gzipContent = Tryable.of(() -> new GZIPInputStream(source.input()), HttpMessageReadException::new);
+		return new GzipHttpResponseBody(new InputStreamHttpResponseBody(gzipContent));
 	}
 }

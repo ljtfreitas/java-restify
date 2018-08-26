@@ -23,9 +23,9 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import com.github.ljtfreitas.restify.http.client.message.Header;
 import com.github.ljtfreitas.restify.http.client.message.Headers;
-import com.github.ljtfreitas.restify.http.client.message.request.BufferedHttpRequestBody;
+import com.github.ljtfreitas.restify.http.client.message.request.BufferedByteArrayHttpRequestBody;
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestBody;
-import com.github.ljtfreitas.restify.http.client.message.response.BufferedHttpResponseBody;
+import com.github.ljtfreitas.restify.http.client.message.response.InputStreamHttpResponseBody;
 import com.github.ljtfreitas.restify.http.client.message.response.HttpResponseBody;
 import com.github.ljtfreitas.restify.http.client.message.response.StatusCode;
 import com.github.ljtfreitas.restify.http.client.request.HttpClientRequest;
@@ -55,7 +55,7 @@ public class LogHttpClientRequestInterceptorTest {
 		when(request.headers())
 			.thenReturn(new Headers(Header.host("http://my.api.com"), Header.userAgent("http-java-restify-2.0"), Header.date(Instant.now())));
 		when(request.body())
-			.thenReturn(new BufferedHttpRequestBody());
+			.thenReturn(new BufferedByteArrayHttpRequestBody());
 		when(request.charset())
 			.thenReturn(Charset.forName("UTF-8"));
 		when(request.execute())
@@ -65,6 +65,8 @@ public class LogHttpClientRequestInterceptorTest {
 			.thenReturn(StatusCode.ok());
 		when(response.headers())
 			.thenReturn(new Headers(Header.date(Instant.now()), Header.contentType("text/plain"), Header.of("Cache-Control", "private, max-age=0")));
+		when(response.body())
+			.thenReturn(InputStreamHttpResponseBody.empty());
 
 		handler = new MyHandler();
 
@@ -105,7 +107,7 @@ public class LogHttpClientRequestInterceptorTest {
 
 	@Test
 	public void shouldLogHttpRequestWithBody() throws IOException {
-		HttpRequestBody body = new BufferedHttpRequestBody();
+		HttpRequestBody body = new BufferedByteArrayHttpRequestBody();
 		body.output().write("This is a message body".getBytes());
 		body.output().flush();
 
@@ -129,8 +131,7 @@ public class LogHttpClientRequestInterceptorTest {
 
 	@Test
 	public void shouldLogHttpResponseWithBody() throws IOException {
-		HttpResponseBody body = BufferedHttpResponseBody
-				.of(new ByteArrayInputStream("This is a message body".getBytes()));
+		HttpResponseBody body = new InputStreamHttpResponseBody(new ByteArrayInputStream("This is a message body".getBytes()));
 
 		when(response.body())
 			.thenReturn(body);
