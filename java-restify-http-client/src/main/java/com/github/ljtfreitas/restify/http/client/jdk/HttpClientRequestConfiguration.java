@@ -200,14 +200,14 @@ public class HttpClientRequestConfiguration {
 
 		public class SslBuilder {
 
-			public Builder sslSocketFactory(SSLSocketFactory sslSocketFactory) {
+			public SslBuilder sslSocketFactory(SSLSocketFactory sslSocketFactory) {
 				configuration.ssl().sslSocketFactory = sslSocketFactory;
-				return Builder.this;
+				return this;
 			}
 
-			public Builder hostnameVerifier(HostnameVerifier hostnameVerifier) {
+			public SslBuilder hostnameVerifier(HostnameVerifier hostnameVerifier) {
 				configuration.ssl().hostnameVerifier = hostnameVerifier;
-				return Builder.this;
+				return this;
 			}
 
 			public Builder and() {

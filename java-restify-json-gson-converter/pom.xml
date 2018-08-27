@@ -12,6 +12,7 @@
 			<groupId>${project.groupId}</groupId>
 			<artifactId>java-restify-http-message</artifactId>
 			<version>${project.version}</version>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>com.google.code.gson</groupId>

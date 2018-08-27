@@ -732,14 +732,14 @@ public class RestifyProxyBuilder {
 
 		public class HttpClientRequestSslConfigurationBuilder {
 
-			public HttpClientRequestConfigurationBuilder sslSocketFactory(SSLSocketFactory sslSocketFactory) {
+			public HttpClientRequestSslConfigurationBuilder sslSocketFactory(SSLSocketFactory sslSocketFactory) {
 				httpClientRequestConfigurationBuilder.ssl().sslSocketFactory(sslSocketFactory);
-				return HttpClientRequestConfigurationBuilder.this;
+				return this;
 			}
 
-			public HttpClientRequestConfigurationBuilder hostnameVerifier(HostnameVerifier hostnameVerifier) {
+			public HttpClientRequestSslConfigurationBuilder hostnameVerifier(HostnameVerifier hostnameVerifier) {
 				httpClientRequestConfigurationBuilder.ssl().hostnameVerifier(hostnameVerifier);
-				return HttpClientRequestConfigurationBuilder.this;
+				return this;
 			}
 
 			public RestifyProxyBuilder and() {

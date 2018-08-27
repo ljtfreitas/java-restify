@@ -13,6 +13,11 @@
 			<groupId>${project.groupId}</groupId>
 			<artifactId>java-restify-oauth2-authentication</artifactId>
 			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>java-restify-util</artifactId>
+			<version>${project.version}</version>
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
@@ -29,6 +34,24 @@
         <dependency>
 			<groupId>${project.groupId}</groupId>
 			<artifactId>java-restify-spi</artifactId>
+			<version>${project.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>java-restify-reflection</artifactId>
+			<version>${project.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>java-restify-http-client</artifactId>
+			<version>${project.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>java-restify-http-message</artifactId>
 			<version>${project.version}</version>
 			<scope>test</scope>
 		</dependency>

@@ -13,6 +13,7 @@
 			<groupId>${project.groupId}</groupId>
 			<artifactId>java-restify-http-message</artifactId>
 			<version>${project.version}</version>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
             <groupId>javax.json.bind</groupId>
@@ -28,6 +29,12 @@
 			<groupId>org.eclipse</groupId>
 			<artifactId>yasson</artifactId>
 			<version>1.0.1</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>java-restify-reflection</artifactId>
+			<version>${project.version}</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>
