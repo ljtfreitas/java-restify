@@ -13,7 +13,6 @@ import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import javax.xml.bind.annotation.XmlAccessType;
 import javax.xml.bind.annotation.XmlAccessorType;
@@ -47,7 +46,7 @@ import com.github.ljtfreitas.restify.http.client.request.async.DefaultAsyncEndpo
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponseReader;
 import com.github.ljtfreitas.restify.http.client.response.HttpClientResponse;
-import com.github.ljtfreitas.restify.http.netflix.client.request.ribbon.async.AsyncRibbonHttpClientRequestFactory;
+import com.github.ljtfreitas.restify.util.async.DisposableExecutors;
 import com.netflix.client.config.DefaultClientConfigImpl;
 import com.netflix.client.config.IClientConfig;
 import com.netflix.loadbalancer.BaseLoadBalancer;
@@ -80,7 +79,7 @@ public class AsyncRibbonHttpClientRequestFactoryTest {
 
 		HttpMessageConverters messageConverters = new HttpMessageConverters(Arrays.asList(new JacksonMessageConverter<>(), new JaxBXmlMessageConverter<>()));
 
-		executor = Executors.newCachedThreadPool();
+		executor = DisposableExecutors.newSingleThreadExecutor();
 
 		requestExecutor = new DefaultAsyncEndpointRequestExecutor(executor, asyncRibbonHttpClientRequestFactory, new EndpointRequestWriter(messageConverters),
 				new EndpointResponseReader(messageConverters), null);

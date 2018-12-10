@@ -9,7 +9,6 @@ import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.FutureTask;
 
 import org.junit.Before;
@@ -22,6 +21,7 @@ import com.github.ljtfreitas.restify.http.client.call.EndpointCall;
 import com.github.ljtfreitas.restify.http.client.call.handler.EndpointCallHandler;
 import com.github.ljtfreitas.restify.http.client.call.handler.SimpleEndpointMethod;
 import com.github.ljtfreitas.restify.reflection.JavaType;
+import com.github.ljtfreitas.restify.util.async.DisposableExecutors;
 
 @RunWith(MockitoJUnitRunner.class)
 public class FutureTaskEndpointCallHandlerAdapterTest {
@@ -33,7 +33,7 @@ public class FutureTaskEndpointCallHandlerAdapterTest {
 
 	@Before
 	public void setup() {
-		ExecutorService executor = Executors.newSingleThreadExecutor();
+		ExecutorService executor = DisposableExecutors.newSingleThreadExecutor();
 
 		adapter = new FutureTaskEndpointCallHandlerAdapter<>(executor);
 

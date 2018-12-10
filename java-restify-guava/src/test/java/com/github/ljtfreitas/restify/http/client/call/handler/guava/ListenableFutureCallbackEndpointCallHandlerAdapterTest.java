@@ -52,9 +52,9 @@ public class ListenableFutureCallbackEndpointCallHandlerAdapterTest {
 		when(delegate.returnType())
 			.thenReturn(JavaType.of(String.class));
 
-		EndpointMethodParameters parameters = new EndpointMethodParameters();
-		parameters.put(new EndpointMethodParameter(0, "callback",
-				new SimpleParameterizedType(FutureCallback.class, null, String.class), EndpointMethodParameterType.ENDPOINT_CALLBACK));
+		EndpointMethodParameters parameters = new EndpointMethodParameters()
+				.put(new EndpointMethodParameter(0, "callback",
+						new SimpleParameterizedType(FutureCallback.class, null, String.class), EndpointMethodParameterType.ENDPOINT_CALLBACK));
 
 		futureWithCallbackEndpointMethod = new SimpleEndpointMethod(SomeType.class.getMethod("futureWithCallback", FutureCallback.class), 
 				parameters);

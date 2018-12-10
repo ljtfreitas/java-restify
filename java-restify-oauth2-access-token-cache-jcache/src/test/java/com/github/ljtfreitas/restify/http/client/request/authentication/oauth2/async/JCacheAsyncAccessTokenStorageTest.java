@@ -7,7 +7,6 @@ import static org.junit.Assert.assertTrue;
 import java.net.URI;
 import java.security.Principal;
 import java.time.Duration;
-import java.util.concurrent.Executors;
 
 import javax.cache.CacheManager;
 import javax.cache.Caching;
@@ -23,6 +22,7 @@ import com.github.ljtfreitas.restify.http.client.request.authentication.oauth2.C
 import com.github.ljtfreitas.restify.http.client.request.authentication.oauth2.GrantProperties;
 import com.github.ljtfreitas.restify.http.client.request.authentication.oauth2.OAuth2AuthenticatedEndpointRequest;
 import com.github.ljtfreitas.restify.util.Tryable;
+import com.github.ljtfreitas.restify.util.async.DisposableExecutors;
 
 public class JCacheAsyncAccessTokenStorageTest {
 
@@ -49,7 +49,7 @@ public class JCacheAsyncAccessTokenStorageTest {
 
 		cacheManager = Caching.getCachingProvider().getCacheManager();
 
-		jCacheAsyncAccessTokenStorage = new JCacheAsyncAccessTokenStorage(Executors.newSingleThreadExecutor(), cacheManager);
+		jCacheAsyncAccessTokenStorage = new JCacheAsyncAccessTokenStorage(DisposableExecutors.newSingleThreadExecutor(), cacheManager);
 	}
 
 	@After
