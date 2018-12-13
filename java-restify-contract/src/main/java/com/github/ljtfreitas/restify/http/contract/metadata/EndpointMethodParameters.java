@@ -35,7 +35,15 @@ import java.util.stream.Collectors;
 
 public class EndpointMethodParameters {
 
-	private final Map<Integer, EndpointMethodParameter> parameters = new LinkedHashMap<>();
+	private final Map<Integer, EndpointMethodParameter> parameters;
+
+	public EndpointMethodParameters() {
+		this.parameters = new LinkedHashMap<>();
+	}
+
+	private EndpointMethodParameters(Map<Integer, EndpointMethodParameter> parameters) {
+		this.parameters = new LinkedHashMap<>(parameters);
+	}
 
 	public Optional<EndpointMethodParameter> get(int position) {
 		return Optional.ofNullable(parameters.get(position));
@@ -45,17 +53,27 @@ public class EndpointMethodParameters {
 		return parameters.values().stream().filter(p -> p.is(name)).findFirst();
 	}
 
-	public Optional<EndpointMethodParameter> ofBody() {
-		return parameters.values().stream().filter(p -> p.body()).findFirst();
+	public Optional<EndpointMethodParameter> body() {
+		return parameters.values().stream().filter(EndpointMethodParameter::body).findFirst();
 	}
 
-	public Collection<EndpointMethodParameter> ofQuery() {
-		return parameters.values().stream().filter(p -> p.query())
+	public Collection<EndpointMethodParameter> query() {
+		return parameters.values().stream().filter(EndpointMethodParameter::query)
+				.collect(Collectors.toList());
+	}
+
+	public Collection<EndpointMethodParameter> header() {
+		return parameters.values().stream().filter(EndpointMethodParameter::header)
+				.collect(Collectors.toList());
+	}
+
+	public Collection<EndpointMethodParameter> cookie() {
+		return parameters.values().stream().filter(EndpointMethodParameter::cookie)
 				.collect(Collectors.toList());
 	}
 
 	public Collection<EndpointMethodParameter> callbacks() {
-		return parameters.values().stream().filter(p -> p.callback())
+		return parameters.values().stream().filter(EndpointMethodParameter::callback)
 				.collect(Collectors.toList());
 	}
 
@@ -65,11 +83,17 @@ public class EndpointMethodParameters {
 					.collect(Collectors.toList());
 	}
 
-	public void put(EndpointMethodParameter parameter) {
+	public EndpointMethodParameters put(EndpointMethodParameter parameter) {
 		if (parameter.body()) {
 			isFalse(parameters.values().stream().anyMatch(EndpointMethodParameter::body), "Only one parameter annotated with @BodyParameter is allowed.");
 		}
 
+		EndpointMethodParameters parameters = new EndpointMethodParameters(this.parameters);
+		parameters.doPut(parameter);
+		return parameters;
+	}
+
+	private void doPut(EndpointMethodParameter parameter) {
 		parameters.put(parameter.position(), parameter);
 	}
 }

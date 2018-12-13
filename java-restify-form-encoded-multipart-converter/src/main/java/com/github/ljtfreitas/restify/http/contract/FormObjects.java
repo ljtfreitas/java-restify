@@ -25,12 +25,8 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.contract;
 
-import java.util.Arrays;
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
-
-import com.github.ljtfreitas.restify.http.contract.Form.Field;
 
 public class FormObjects {
 
@@ -42,30 +38,7 @@ public class FormObjects {
 	}
 
 	public FormObject of(Class<?> formObjectType) {
-		return get(formObjectType).orElseGet(() -> create(formObjectType));
-	}
-
-	private FormObject create(Class<?> formObjectType) {
-		FormObject formObjectMetadata = new FormObject(formObjectType);
-
-		Arrays.stream(formObjectType.getDeclaredFields())
-			.filter(field -> field.isAnnotationPresent(Field.class))
-			.forEach(field -> {
-				Field annotation = field.getAnnotation(Field.class);
-
-				String name = annotation.value().isEmpty() ? field.getName() : annotation.value();
-				boolean indexed = annotation.indexed();
-
-				formObjectMetadata.put(name, indexed, field);
-		});
-
-		cache.put(formObjectType, formObjectMetadata);
-
-		return formObjectMetadata;
-	}
-
-	private Optional<FormObject> get(Class<?> formObjectType) {
-		return Optional.ofNullable(cache.get(formObjectType));
+		return cache.computeIfAbsent(formObjectType, FormObject::of);
 	}
 
 	public static FormObjects cache() {

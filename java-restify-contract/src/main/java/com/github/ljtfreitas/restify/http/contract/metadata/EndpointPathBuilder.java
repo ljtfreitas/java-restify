@@ -23,38 +23,43 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.http.spring.contract.metadata;
+package com.github.ljtfreitas.restify.http.contract.metadata;
 
-import java.lang.reflect.Type;
+import java.util.Collection;
+import java.util.LinkedList;
+import java.util.stream.Collectors;
 
-import com.github.ljtfreitas.restify.http.contract.ParameterSerializer;
-import com.github.ljtfreitas.restify.http.contract.QueryParameterSerializer;
-import com.github.ljtfreitas.restify.http.contract.QueryParametersSerializer;
-import com.github.ljtfreitas.restify.http.contract.DefaultParameterSerializer;
+public class EndpointPathBuilder {
 
-class SpringWebEndpointMethodParameterSerializer {
+	private final Collection<String> parts;
 
-	static Class<? extends ParameterSerializer> of(SpringWebJavaMethodParameterMetadata parameter) {
-		if (parameter.query()) {
-			return SpringWebQueryParameterSerializer.class;
-		} else {
-			return DefaultParameterSerializer.class;
-		}
+	public EndpointPathBuilder() {
+		this.parts = new LinkedList<>();
 	}
 
-	public static class SpringWebQueryParameterSerializer implements ParameterSerializer {
+	private EndpointPathBuilder(Collection<String> parts) {
+		this.parts = parts;
+	}
 
-		private final QueryParameterSerializer queryParameterSerializer = new QueryParameterSerializer();
+	public EndpointPathBuilder append(String part) {
+		Collection<String> list = new LinkedList<>(this.parts);
 
-		private final QueryParametersSerializer queryParametersSerializer = new QueryParametersSerializer();
-
-		@Override
-		public String serialize(String name, Type type, Object source) {
-			if (queryParametersSerializer.supports(type, source)) {
-				return queryParametersSerializer.serialize(name, type, source);
-			} else {
-				return queryParameterSerializer.serialize(name, type, source);
-			}
+		if (part != null && !part.trim().isEmpty()) {
+			list.add(removeSlashOnTheStart(removeSlashOnTheEnd(part)));
 		}
+
+		return new EndpointPathBuilder(list);
+	}
+
+	public String build() {
+		return parts.stream().collect(Collectors.joining("/"));
+	}
+
+	private String removeSlashOnTheStart(String part) {
+		return part.startsWith("/") ? part.substring(1, part.length()) : part;
+	}
+
+	private String removeSlashOnTheEnd(String part) {
+		return part.endsWith("/") ? part.substring(0, part.length() - 1) : part;
 	}
 }

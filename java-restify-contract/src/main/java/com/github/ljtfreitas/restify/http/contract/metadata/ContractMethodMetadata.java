@@ -29,6 +29,7 @@ import java.lang.reflect.Type;
 import java.util.Collection;
 import java.util.Optional;
 
+import com.github.ljtfreitas.restify.http.contract.Cookie;
 import com.github.ljtfreitas.restify.http.contract.Header;
 import com.github.ljtfreitas.restify.http.contract.Method;
 import com.github.ljtfreitas.restify.http.contract.Path;
@@ -42,6 +43,7 @@ class ContractMethodMetadata {
 	private final Path path;
 	private final Method httpMethod;
 	private final Collection<Header> headers;
+	private final Collection<Cookie> cookies;
 	private final Version version;
 
 	public ContractMethodMetadata(java.lang.reflect.Method javaMethod) {
@@ -55,6 +57,7 @@ class ContractMethodMetadata {
 				.orElseThrow(() -> new IllegalArgumentException("Method " + javaMethod + " does not have a @Method annotation"));
 
 		this.headers = annotationScanner.scanAll(Header.class);
+		this.cookies = annotationScanner.scanAll(Cookie.class);
 		this.version = annotationScanner.scan(Version.class).orElse(null);
 	}
 
@@ -72,6 +75,10 @@ class ContractMethodMetadata {
 
 	public Collection<Header> headers() {
 		return headers;
+	}
+
+	public Collection<Cookie> cookies() {
+		return cookies;
 	}
 
 	public Type returnType(Class<?> rawType) {

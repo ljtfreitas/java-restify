@@ -47,6 +47,7 @@ class MultipartFieldSerializers {
 		serializers.add(new MultipartFileFieldSerializer());
 
 		serializers.add(new IterableMultipartFieldSerializer(serializers));
+		serializers.add(new MultipartFormObjectFieldSerializer(serializers));
 	}
 
 	public MultipartFieldSerializer<?> of(Class<?> type) {

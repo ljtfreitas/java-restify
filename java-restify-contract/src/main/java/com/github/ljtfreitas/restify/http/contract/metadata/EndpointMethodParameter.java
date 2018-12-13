@@ -29,13 +29,13 @@ import java.lang.reflect.Type;
 import java.util.Optional;
 
 import com.github.ljtfreitas.restify.http.contract.ParameterSerializer;
-import com.github.ljtfreitas.restify.http.contract.SimpleParameterSerializer;
+import com.github.ljtfreitas.restify.http.contract.DefaultParameterSerializer;
 import com.github.ljtfreitas.restify.reflection.JavaType;
 
 public class EndpointMethodParameter {
 
 	public enum EndpointMethodParameterType {
-		PATH, HEADER, BODY, QUERY_STRING, ENDPOINT_CALLBACK;
+		PATH, HEADER, COOKIE, BODY, QUERY_STRING, ENDPOINT_CALLBACK;
 	}
 
 	private final int position;
@@ -49,7 +49,7 @@ public class EndpointMethodParameter {
 	}
 
 	public EndpointMethodParameter(int position, String name, Type javaType, EndpointMethodParameterType type) {
-		this(position, name, javaType, type, new SimpleParameterSerializer());
+		this(position, name, javaType, type, new DefaultParameterSerializer());
 	}
 
 	public EndpointMethodParameter(int position, String name, Type javaType, EndpointMethodParameterType type,
@@ -77,7 +77,7 @@ public class EndpointMethodParameter {
 	public String resolve(Object arg) {
 		return Optional.ofNullable(serializer)
 				.map(s -> s.serialize(name, javaType.unwrap(), arg))
-					.orElseGet(() -> arg.toString());
+					.orElseGet(() -> Optional.ofNullable(arg).map(Object::toString).orElse(null));
 	}
 
 	public String name() {
@@ -98,6 +98,10 @@ public class EndpointMethodParameter {
 
 	public boolean header() {
 		return type == EndpointMethodParameterType.HEADER;
+	}
+
+	public boolean cookie() {
+		return type == EndpointMethodParameterType.COOKIE;
 	}
 
 	public boolean query() {

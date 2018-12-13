@@ -34,7 +34,7 @@ class MultipartFileFieldSerializer extends BaseMultipartFieldSerializer<Multipar
 
 	@Override
 	public boolean supports(Class<?> type) {
-		return type == MultipartFile.class;
+		return MultipartFile.class.isAssignableFrom(type);
 	}
 
 	@Override

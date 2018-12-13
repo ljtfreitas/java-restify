@@ -43,5 +43,7 @@ public @interface Form {
 		String value() default "";
 
 		boolean indexed() default false;
+
+		Class<? extends FormFieldSerializer> serializer() default SimpleFormFieldSerializer.class;
 	}
 }

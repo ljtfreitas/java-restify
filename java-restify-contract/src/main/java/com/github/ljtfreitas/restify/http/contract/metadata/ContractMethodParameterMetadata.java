@@ -34,13 +34,14 @@ import java.util.stream.Stream;
 
 import com.github.ljtfreitas.restify.http.contract.BodyParameter;
 import com.github.ljtfreitas.restify.http.contract.CallbackParameter;
+import com.github.ljtfreitas.restify.http.contract.CookieParameter;
 import com.github.ljtfreitas.restify.http.contract.HeaderParameter;
 import com.github.ljtfreitas.restify.http.contract.Parameter;
 import com.github.ljtfreitas.restify.http.contract.ParameterSerializer;
 import com.github.ljtfreitas.restify.http.contract.PathParameter;
 import com.github.ljtfreitas.restify.http.contract.QueryParameter;
 import com.github.ljtfreitas.restify.http.contract.QueryParameters;
-import com.github.ljtfreitas.restify.http.contract.SimpleParameterSerializer;
+import com.github.ljtfreitas.restify.http.contract.DefaultParameterSerializer;
 import com.github.ljtfreitas.restify.reflection.JavaAnnotationScanner;
 import com.github.ljtfreitas.restify.reflection.JavaType;
 import com.github.ljtfreitas.restify.reflection.JavaTypeResolver;
@@ -63,6 +64,7 @@ class ContractMethodParameterMetadata {
 
 		Optional<PathParameter> pathParameter = annotationScanner.scan(PathParameter.class);
 		Optional<HeaderParameter> headerParameter = annotationScanner.scan(HeaderParameter.class);
+		Optional<CookieParameter> cookieParameter = annotationScanner.scan(CookieParameter.class);
 		Optional<QueryParameter> queryParameter = annotationScanner.scan(QueryParameter.class);
 		Optional<QueryParameters> queryParameters = annotationScanner.scan(QueryParameters.class);
 		Optional<CallbackParameter> callbackParameter = annotationScanner.scan(CallbackParameter.class);
@@ -76,10 +78,11 @@ class ContractMethodParameterMetadata {
 
 		String name = pathParameter.map(PathParameter::value).filter(s -> !s.trim().isEmpty())
 				.orElseGet(() -> headerParameter.map(HeaderParameter::value).filter(s -> !s.trim().isEmpty())
-					.orElseGet(() -> queryParameter.map(QueryParameter::value).filter(s -> !s.trim().isEmpty())
-						.orElseGet(() -> Optional.ofNullable(javaMethodParameter.getName())
-							.filter(n -> javaMethodParameter.isNamePresent() && !n.isEmpty())
-								.orElse(null))));
+					.orElseGet(() -> cookieParameter.map(CookieParameter::value).filter(s -> !s.trim().isEmpty())
+						.orElseGet(() -> queryParameter.map(QueryParameter::value).filter(s -> !s.trim().isEmpty())
+							.orElseGet(() -> Optional.ofNullable(javaMethodParameter.getName())
+								.filter(n -> javaMethodParameter.isNamePresent() && !n.isEmpty())
+									.orElse(null)))));
 
 		isFalse(needName() && name == null, "Could not get the name of the parameter [" + javaMethodParameter + "], "
 				+ "of method [" + javaMethodParameter.getDeclaringExecutable() + "]");
@@ -88,13 +91,14 @@ class ContractMethodParameterMetadata {
 		this.serializerType = pathParameter.isPresent() ? pathParameter.map(PathParameter::serializer).get() :
 				queryParameter.isPresent() ? queryParameter.map(QueryParameter::serializer).get() :
 					queryParameters.isPresent() ? queryParameters.map(QueryParameters::serializer).get() :
-						callbackParameter.isPresent() ? null : SimpleParameterSerializer.class;
+						callbackParameter.isPresent() ? null : DefaultParameterSerializer.class;
 	}
 
 	private boolean needName() {
 		return (annotationParameter instanceof PathParameter || annotationParameter == null)
 			|| annotationParameter instanceof QueryParameter
-			|| annotationParameter instanceof HeaderParameter;
+			|| annotationParameter instanceof HeaderParameter
+			|| annotationParameter instanceof CookieParameter;
 	}
 
 	public String name() {
@@ -115,6 +119,10 @@ class ContractMethodParameterMetadata {
 
 	public boolean header() {
 		return annotationParameter instanceof HeaderParameter;
+	}
+
+	public boolean cookie() {
+		return annotationParameter instanceof CookieParameter;
 	}
 
 	public boolean query() {

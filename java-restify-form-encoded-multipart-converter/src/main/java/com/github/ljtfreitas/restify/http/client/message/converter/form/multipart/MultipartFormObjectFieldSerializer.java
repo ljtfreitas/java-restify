@@ -23,38 +23,35 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.http.spring.contract.metadata;
+package com.github.ljtfreitas.restify.http.client.message.converter.form.multipart;
 
-import java.lang.reflect.Type;
+import java.util.Collection;
 
-import com.github.ljtfreitas.restify.http.contract.ParameterSerializer;
-import com.github.ljtfreitas.restify.http.contract.QueryParameterSerializer;
-import com.github.ljtfreitas.restify.http.contract.QueryParametersSerializer;
-import com.github.ljtfreitas.restify.http.contract.DefaultParameterSerializer;
+import com.github.ljtfreitas.restify.http.client.message.converter.form.multipart.MultipartFormObjectHolder.MultipartFormObjectFieldHolder;
+import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
 
-class SpringWebEndpointMethodParameterSerializer {
+class MultipartFormObjectFieldSerializer implements MultipartFieldSerializer<MultipartFormObjectFieldHolder> {
 
-	static Class<? extends ParameterSerializer> of(SpringWebJavaMethodParameterMetadata parameter) {
-		if (parameter.query()) {
-			return SpringWebQueryParameterSerializer.class;
-		} else {
-			return DefaultParameterSerializer.class;
-		}
+	private final MultipartFieldSerializers serializers;
+
+	public MultipartFormObjectFieldSerializer(Collection<MultipartFieldSerializer<?>> serializers) {
+		this.serializers = new MultipartFieldSerializers(serializers);
 	}
 
-	public static class SpringWebQueryParameterSerializer implements ParameterSerializer {
+	@SuppressWarnings({ "unchecked", "rawtypes" })
+	@Override
+	public void write(String boundary, MultipartField<MultipartFormObjectFieldHolder> field,
+			HttpRequestMessage httpRequestMessage) {
 
-		private final QueryParameterSerializer queryParameterSerializer = new QueryParameterSerializer();
+		MultipartFormObjectFieldHolder holder = field.value();
 
-		private final QueryParametersSerializer queryParametersSerializer = new QueryParametersSerializer();
-
-		@Override
-		public String serialize(String name, Type type, Object source) {
-			if (queryParametersSerializer.supports(type, source)) {
-				return queryParametersSerializer.serialize(name, type, source);
-			} else {
-				return queryParameterSerializer.serialize(name, type, source);
-			}
-		}
+		serializers.of(holder.type()).write(boundary,
+				new MultipartField(holder.name(), holder.value(), holder.contentType()), httpRequestMessage);
 	}
+
+	@Override
+	public boolean supports(Class<?> type) {
+		return MultipartFormObjectFieldHolder.class.isAssignableFrom(type);
+	}
+
 }

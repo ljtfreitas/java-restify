@@ -34,10 +34,18 @@ import java.lang.annotation.Target;
 @Retention(RetentionPolicy.RUNTIME)
 public @interface MultipartForm {
 
+	String value() default "";
+
 	@Target({ElementType.FIELD})
 	@Retention(RetentionPolicy.RUNTIME)
 	public @interface MultipartField {
 
 		String value() default "";
+
+		boolean indexed() default false;
+
+		String contentType() default "text/plain";
+
+		Class<? extends FormFieldSerializer> serializer() default SimpleFormFieldSerializer.class;
 	}
 }

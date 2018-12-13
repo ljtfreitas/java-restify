@@ -37,5 +37,5 @@ public @interface PathParameter {
 
 	String value() default "";
 
-	Class<? extends ParameterSerializer> serializer() default SimpleParameterSerializer.class;
+	Class<? extends ParameterSerializer> serializer() default DefaultParameterSerializer.class;
 }

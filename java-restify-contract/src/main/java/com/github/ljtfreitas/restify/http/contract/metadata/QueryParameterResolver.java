@@ -38,14 +38,21 @@ class QueryParameterResolver {
 	}
 
 	public String resolve(Object[] args) {
-		String query = parameters.stream().filter(p -> p.query())
-			.map(p -> Optional.ofNullable(args[p.position()]).map(a -> p.resolve(a)).orElse(""))
+		String query = parameters.stream().filter(EndpointMethodParameter::query)
+			.map(p -> resolve(p, args))
 				.filter(p -> !"".equals(p))
 					.collect(Collectors.joining("&"));
 
 		return Optional.ofNullable(query)
-			.filter(q -> !"".equals(q))
-				.map(q -> "?".concat(q))
-					.orElse("");
+				.map(String::trim)
+					.filter(s -> !s.isEmpty())
+						.orElse("");
+	}
+
+	private String resolve(EndpointMethodParameter parameter, Object[] args) {
+		return args.length < parameter.position() ? "" :
+				Optional.ofNullable(args[parameter.position()])
+					.map(arg -> parameter.resolve(arg))
+						.orElse("");
 	}
 }

@@ -38,47 +38,64 @@ import java.util.stream.Collectors;
 
 public class MultipartParameters {
 
-	private Map<String, List<Object>> parameters = new LinkedHashMap<>();
+	private Map<String, List<Object>> parameters;
 
-	public void put(String name, String value) {
-		doPut(name, value);
+	public MultipartParameters() {
+		this.parameters = new LinkedHashMap<>();
 	}
 
-	public void put(String name, File value) {
-		doPut(name, MultipartFile.create(name, value));
+	private MultipartParameters(Map<String, List<Object>> parameters) {
+		this.parameters = new LinkedHashMap<>(parameters);
 	}
 
-	public void put(String name, File value, String contentType) {
-		doPut(name, MultipartFile.create(name, contentType, value));
+	public MultipartParameters put(String name, String value) {
+		return new MultipartParameters(this.parameters).doPut(name, value);
 	}
 
-	public void put(String name, Path value) {
-		doPut(name, MultipartFile.create(name, value));
+	public MultipartParameters put(String name, File value) {
+		return new MultipartParameters(this.parameters)
+			.doPut(name, MultipartFile.create(name, value));
 	}
 
-	public void put(String name, Path value, String contentType) {
-		doPut(name, MultipartFile.create(name, contentType, value));
+	public MultipartParameters put(String name, File value, String contentType) {
+		return new MultipartParameters(this.parameters)
+			.doPut(name, MultipartFile.create(name, contentType, value));
 	}
 
-	public void put(String name, String fileName, InputStream value) {
-		doPut(name, MultipartFile.create(name, fileName, value));
+	public MultipartParameters put(String name, Path value) {
+		return new MultipartParameters(this.parameters)
+			.doPut(name, MultipartFile.create(name, value));
 	}
 
-	public void put(String name, String fileName, String contentType, InputStream value) {
-		doPut(name, MultipartFile.create(name, fileName, contentType, value));
+	public MultipartParameters put(String name, Path value, String contentType) {
+		return new MultipartParameters(this.parameters)
+			.doPut(name, MultipartFile.create(name, contentType, value));
 	}
 
-	public void put(MultipartFile multipartFile) {
-		doPut(multipartFile.name(), multipartFile);
+	public MultipartParameters put(String name, String fileName, InputStream value) {
+		return new MultipartParameters(this.parameters)
+			.doPut(name, MultipartFile.create(name, fileName, value));
 	}
 
-	public void doPut(String name, Object value) {
-		parameters.compute(name, (k, v) -> Optional.ofNullable(v).orElseGet(() -> new ArrayList<>()))
+	public MultipartParameters put(String name, String fileName, String contentType, InputStream value) {
+		return new MultipartParameters(this.parameters)
+			.doPut(name, MultipartFile.create(name, fileName, contentType, value));
+	}
+
+	public MultipartParameters put(MultipartFile multipartFile) {
+		return new MultipartParameters(this.parameters)
+			.doPut(multipartFile.name(), multipartFile);
+	}
+
+	private MultipartParameters doPut(String name, Object value) {
+		parameters.compute(name, (k, v) -> Optional.ofNullable(v).orElseGet(ArrayList::new))
 			.add(value);
+		return this;
 	}
 
 	public Collection<Part<Object>> all() {
-		return parameters.entrySet().stream().map(e -> new Part<>(e.getKey(), e.getValue()))
+		return parameters.entrySet().stream()
+			.map(e -> new Part<>(e.getKey(), e.getValue()))
 				.collect(Collectors.toList());
 	}
 

@@ -201,9 +201,13 @@ public class Header {
 	public static Header contentType(ContentType contentType) {
 		return of(Headers.CONTENT_TYPE, contentType.toString());
 	}
-	
+
 	public static Header cookie(String... cookies) {
-		return cookie(new Cookies(cookies));
+		return cookie(Cookies.of(Arrays.stream(cookies).collect(Collectors.joining("; "))));
+	}
+
+	public static Header cookie(String cookies) {
+		return cookie(Cookies.of(cookies));
 	}
 
 	public static Header cookie(Cookie... cookies) {
