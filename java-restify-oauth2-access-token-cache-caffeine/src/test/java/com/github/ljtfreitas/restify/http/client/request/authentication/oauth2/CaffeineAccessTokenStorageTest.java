@@ -53,7 +53,7 @@ public class CaffeineAccessTokenStorageTest {
 	}
 
 	@Test
-	public void shouldEvictAccessTokenAfterExpirarionPeriod() throws Exception {
+	public void shouldEvictAccessTokenAfterExpirationPeriod() throws Exception {
 		assertFalse(caffeineAccessTokenStorage.findBy(key).isPresent());
 
 		AccessToken accessToken = AccessToken.bearer("accessToken", Duration.ofSeconds(5));

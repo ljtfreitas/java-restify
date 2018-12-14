@@ -187,6 +187,7 @@ public class JdkHttpClientRequestFactoryTest {
 		HttpClientRequestConfiguration configuration = new HttpClientRequestConfiguration.Builder()
 				.ssl()
 					.sslSocketFactory(sslContext.getSocketFactory())
+					.and()
 				.build();
 
 		jdkHttpClientRequestFactory = new JdkHttpClientRequestFactory(configuration);

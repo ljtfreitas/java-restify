@@ -9,7 +9,7 @@
 	<artifactId>java-restify-netflix-kubernetes-service-discovery</artifactId>
 
 	<properties>
-		<kubernetes.client.version>2.5.2</kubernetes.client.version>
+		<kubernetes.client.version>4.0.3</kubernetes.client.version>
 	</properties>
 
 	<dependencies>
@@ -24,6 +24,12 @@
            <version>${project.version}</version>
         </dependency>
         <dependency>
+           <groupId>com.github.ljtfreitas</groupId>
+           <artifactId>java-restify-util</artifactId>
+           <version>${project.version}</version>
+           <scope>provided</scope>
+        </dependency>
+        <dependency>
             <groupId>io.fabric8</groupId>
             <artifactId>kubernetes-server-mock</artifactId>
             <version>${kubernetes.client.version}</version>
@@ -32,6 +38,24 @@
         <dependency>
 			<groupId>${project.groupId}</groupId>
 			<artifactId>java-restify-json-jackson-converter</artifactId>
+			<version>${project.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>java-restify-http-message</artifactId>
+			<version>${project.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>java-restify-http-client</artifactId>
+			<version>${project.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>java-restify-reflection</artifactId>
 			<version>${project.version}</version>
 			<scope>test</scope>
 		</dependency>

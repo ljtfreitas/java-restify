@@ -82,7 +82,7 @@ public class JCacheAsyncAccessTokenStorageTest {
 	}
 
 	@Test
-	public void shouldEvictAccessTokenAfterExpirarionPeriod() throws Exception {
+	public void shouldEvictAccessTokenAfterExpirationPeriod() throws Exception {
 		jCacheAsyncAccessTokenStorage.findBy(key)
 			.thenAccept(accessToken -> assertFalse(accessToken.isPresent()))
 			.toCompletableFuture()
