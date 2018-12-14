@@ -14,7 +14,17 @@
 	<dependencies>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
-			<artifactId>java-restify-spi</artifactId>
+			<artifactId>java-restify-contract</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>java-restify-util</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>java-restify-reflection</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
@@ -24,22 +34,27 @@
 		</dependency>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
-			<artifactId>java-restify-retry</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>${project.groupId}</groupId>
 			<artifactId>java-restify-http-client</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
-			<artifactId>java-restify-wildcard-converter</artifactId>
+			<artifactId>java-restify-http-message</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
-			<artifactId>java-restify-util</artifactId>
+			<artifactId>java-restify-spi</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>java-restify-retry</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>java-restify-wildcard-converter</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 	</dependencies>
@@ -54,6 +69,7 @@
 						<artifactId>maven-shade-plugin</artifactId>
 						<version>3.1.0</version>
 						<configuration>
+							<createDependencyReducedPom>false</createDependencyReducedPom>
 						</configuration>
 						<executions>
 							<execution>

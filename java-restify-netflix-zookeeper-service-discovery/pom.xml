@@ -8,7 +8,7 @@
 	<artifactId>java-restify-netflix-zookeeper-service-discovery</artifactId>
 
 	<properties>
-		<curator.version>2.11.1</curator.version>
+		<curator.version>4.0.1</curator.version>
 	</properties>
 
 	<dependencies>
@@ -16,6 +16,12 @@
 			<groupId>${project.groupId}</groupId>
 			<artifactId>java-restify-netflix-service-discovery</artifactId>
 			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>java-restify-util</artifactId>
+			<version>${project.version}</version>
+			<scope>provided</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.apache.curator</groupId>
@@ -31,6 +37,24 @@
 		<dependency>
 			<groupId>${project.groupId}</groupId>
 			<artifactId>java-restify-json-jackson-converter</artifactId>
+			<version>${project.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>java-restify-http-client</artifactId>
+			<version>${project.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>java-restify-http-message</artifactId>
+			<version>${project.version}</version>
+			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>java-restify-reflection</artifactId>
 			<version>${project.version}</version>
 			<scope>test</scope>
 		</dependency>
