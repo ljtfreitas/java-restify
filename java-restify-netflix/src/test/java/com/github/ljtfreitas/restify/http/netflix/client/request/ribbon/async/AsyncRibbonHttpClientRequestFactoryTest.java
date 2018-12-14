@@ -33,9 +33,9 @@ import com.github.ljtfreitas.restify.http.client.message.Header;
 import com.github.ljtfreitas.restify.http.client.message.Headers;
 import com.github.ljtfreitas.restify.http.client.message.converter.HttpMessageConverters;
 import com.github.ljtfreitas.restify.http.client.message.converter.json.JacksonMessageConverter;
-import com.github.ljtfreitas.restify.http.client.message.converter.xml.JaxbXmlMessageConverter;
-import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
+import com.github.ljtfreitas.restify.http.client.message.converter.xml.JaxBXmlMessageConverter;
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestBody;
+import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequestWriter;
 import com.github.ljtfreitas.restify.http.client.request.HttpClientRequest;
@@ -78,7 +78,7 @@ public class AsyncRibbonHttpClientRequestFactoryTest {
 
 		AsyncRibbonHttpClientRequestFactory asyncRibbonHttpClientRequestFactory = new AsyncRibbonHttpClientRequestFactory(delegate, loadBalancer, clientConfig);
 
-		HttpMessageConverters messageConverters = new HttpMessageConverters(Arrays.asList(new JacksonMessageConverter<>(), new JaxbXmlMessageConverter<>()));
+		HttpMessageConverters messageConverters = new HttpMessageConverters(Arrays.asList(new JacksonMessageConverter<>(), new JaxBXmlMessageConverter<>()));
 
 		executor = Executors.newCachedThreadPool();
 
