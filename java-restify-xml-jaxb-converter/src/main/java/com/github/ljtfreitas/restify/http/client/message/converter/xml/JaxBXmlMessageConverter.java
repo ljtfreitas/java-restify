@@ -48,7 +48,7 @@ import com.github.ljtfreitas.restify.http.client.message.converter.HttpMessageWr
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
 import com.github.ljtfreitas.restify.http.client.message.response.HttpResponseMessage;
 
-public class JaxbXmlMessageConverter<T> implements XmlMessageConverter<T> {
+public class JaxBXmlMessageConverter<T> implements XmlMessageConverter<T> {
 
 	private final Map<Class<?>, JAXBContext> contexts = new ConcurrentHashMap<>();
 

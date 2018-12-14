@@ -8,7 +8,7 @@ import java.util.ServiceLoader;
 
 import org.junit.Test;
 
-public class JaxbXmlMessageConverterSpiTest {
+public class JaxBXmlMessageConverterSpiTest {
 
 	@SuppressWarnings({ "rawtypes" })
 	@Test
@@ -16,6 +16,6 @@ public class JaxbXmlMessageConverterSpiTest {
 		Iterable<XmlMessageConverter> services = ServiceLoader.load(XmlMessageConverter.class);
 
 		assertThat(services, contains(
-				instanceOf(JaxbXmlMessageConverter.class)));
+				instanceOf(JaxBXmlMessageConverter.class)));
 	}
 }

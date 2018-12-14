@@ -25,7 +25,7 @@ import com.github.ljtfreitas.restify.http.client.message.request.BufferedByteArr
 import com.github.ljtfreitas.restify.http.client.message.response.HttpResponseMessage;
 
 @RunWith(MockitoJUnitRunner.class)
-public class JaxbXmlMessageConverterTest {
+public class JaxBXmlMessageConverterTest {
 
 	@Mock(answer = Answers.RETURNS_DEEP_STUBS)
 	private HttpResponseMessage response;
@@ -33,7 +33,7 @@ public class JaxbXmlMessageConverterTest {
 	@Mock
 	private HttpRequestMessage request;
 
-	private JaxbXmlMessageConverter<MyXmlModel> converter = new JaxbXmlMessageConverter<>();
+	private JaxBXmlMessageConverter<MyXmlModel> converter = new JaxBXmlMessageConverter<>();
 
 	private String xml;
 
