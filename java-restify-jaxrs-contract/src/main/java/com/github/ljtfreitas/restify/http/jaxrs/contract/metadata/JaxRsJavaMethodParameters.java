@@ -30,8 +30,6 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import javax.ws.rs.HeaderParam;
-
 class JaxRsJavaMethodParameters {
 
 	private final List<JaxRsJavaMethodParameterMetadata> parameters;
@@ -48,13 +46,5 @@ class JaxRsJavaMethodParameters {
 
 	public JaxRsJavaMethodParameterMetadata get(int position) {
 		return parameters.get(position);
-	}
-
-	public JaxRsEndpointHeader[] headers() {
-		return parameters.stream().filter(p -> p.header())
-			.map(p -> p.annotation(HeaderParam.class))
-				.filter(a -> a.value() != null && !"".equals(a.value()))
-					.map(a -> new JaxRsEndpointHeader(a.value(), "{" + a.value() + "}"))
-						.toArray(s -> new JaxRsEndpointHeader[s]);
 	}
 }

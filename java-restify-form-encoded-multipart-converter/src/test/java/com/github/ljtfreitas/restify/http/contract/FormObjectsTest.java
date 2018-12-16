@@ -2,8 +2,10 @@ package com.github.ljtfreitas.restify.http.contract;
 
 import static org.junit.Assert.assertEquals;
 
+import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Date;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -27,7 +29,7 @@ public class FormObjectsTest {
 
 		FormObject formObject = formObjects.of(MySimpleFormObject.class);
 
-		String expected= "name=Tiago+de+Freitas+Lima&age=31";
+		String expected = "name=Tiago+de+Freitas+Lima&age=31";
 
 		assertEquals(expected, formObject.serialize(mySimpleFormObject));
 	}
@@ -39,7 +41,7 @@ public class FormObjectsTest {
 
 		FormObject formObject = formObjects.of(MySimpleFormObject.class);
 
-		String expected= "age=31";
+		String expected = "age=31";
 
 		assertEquals(expected, formObject.serialize(mySimpleFormObject));
 	}
@@ -51,7 +53,7 @@ public class FormObjectsTest {
 
 		FormObject formObject = formObjects.of(MyIterableFormObject.class);
 
-		String expected= "name=Tiago&name=Freitas&name=Lima";
+		String expected = "name=Tiago&name=Freitas&name=Lima";
 
 		assertEquals(expected, formObject.serialize(myIterableFormObject));
 	}
@@ -63,7 +65,7 @@ public class FormObjectsTest {
 
 		FormObject formObject = formObjects.of(MyIndexedIterableFormObject.class);
 
-		String expected= "name[0]=Tiago&name[1]=Freitas&name[2]=Lima";
+		String expected = "name[0]=Tiago&name[1]=Freitas&name[2]=Lima";
 
 		assertEquals(expected, formObject.serialize(myIndexedIterableFormObject));
 	}
@@ -84,7 +86,7 @@ public class FormObjectsTest {
 
 		FormObject formObject = formObjects.of(MyComplexIndexedIterableFormObject.class);
 
-		String expected= "object[0].name=Tiago+de+Freitas+Lima&object[0].age=31&"
+		String expected = "object[0].name=Tiago+de+Freitas+Lima&object[0].age=31&"
 				+ "object[1].name=William+Shakespeare&object[1].age=25";
 
 		assertEquals(expected, formObject.serialize(myIndexedIterableFormObject));
@@ -98,7 +100,7 @@ public class FormObjectsTest {
 
 		FormObject formObject = formObjects.of(MyCustomizedFormObject.class);
 
-		String expected= "whatever_name=Tiago+de+Freitas+Lima&whatever_age=31";
+		String expected = "whatever_name=Tiago+de+Freitas+Lima&whatever_age=31";
 
 		assertEquals(expected, formObject.serialize(myCustomizedFormObject));
 	}
@@ -111,7 +113,7 @@ public class FormObjectsTest {
 
 		FormObject formObject = formObjects.of(MyPrefixedFormObject.class);
 
-		String expected= "object.name=Tiago+de+Freitas+Lima&object.age=31";
+		String expected = "object.name=Tiago+de+Freitas+Lima&object.age=31";
 
 		assertEquals(expected, formObject.serialize(myPrefixedFormObject));
 	}
@@ -129,7 +131,7 @@ public class FormObjectsTest {
 
 		FormObject formObject = formObjects.of(MyNestedFormObject.class);
 
-		String expected= "name=Tiago+de+Freitas+Lima&nested.name=Tiago+de+Freitas+Lima&nested.age=31";
+		String expected = "name=Tiago+de+Freitas+Lima&nested.name=Tiago+de+Freitas+Lima&nested.age=31";
 
 		assertEquals(expected, formObject.serialize(myNestedFormObject));
 	}
@@ -146,7 +148,7 @@ public class FormObjectsTest {
 
 		FormObject formObject = formObjects.of(MyCustomizedNestedFormObject.class);
 
-		String expected= "whatever.name=Tiago+de+Freitas+Lima&whatever.age=31";
+		String expected = "whatever.name=Tiago+de+Freitas+Lima&whatever.age=31";
 
 		assertEquals(expected, formObject.serialize(myCustomizedNestedFormObject));
 	}
@@ -173,12 +175,26 @@ public class FormObjectsTest {
 
 		FormObject formObject = formObjects.of(MyComplexFormObject.class);
 
-		String expected= "form.whatever_name=Tiago+de+Freitas+Lima&form.whatever_age=31&"
+		String expected = "form.whatever_name=Tiago+de+Freitas+Lima&form.whatever_age=31&"
 				+ "form.iterable.name=Tiago&form.iterable.name=Freitas&form.iterable.name=Lima&"
 				+ "form.prefixed.object.name=Tiago+de+Freitas+Lima&form.prefixed.object.age=31&"
 				+ "form.simple.name=Tiago+de+Freitas+Lima&form.simple.age=31";
 
 		assertEquals(expected, formObject.serialize(myComplexFormObject));
+	}
+
+	@Test
+	public void shouldSerializeFormObjectFieldsUsingCustomSerializer() {
+		Date expectedDate = new Date();
+
+		MyCustomizedSerializableFormObject myCustomizedSerializableFormObject = new MyCustomizedSerializableFormObject();
+		myCustomizedSerializableFormObject.date = expectedDate;
+
+		FormObject formObject = formObjects.of(MyCustomizedSerializableFormObject.class);
+
+		String expected = "timestamp=" + expectedDate.getTime();
+
+		assertEquals(expected, formObject.serialize(myCustomizedSerializableFormObject));
 	}
 
 	@Form
@@ -269,5 +285,20 @@ public class FormObjectsTest {
 
 		@Field
 		private MySimpleFormObject simple;
+	}
+
+	@Form
+	private class MyCustomizedSerializableFormObject {
+
+		@Field(value = "timestamp", serializer = DateTimestampSerializer.class)
+		private Date date;
+	}
+
+	static class DateTimestampSerializer implements FormFieldSerializer {
+
+		@Override
+		public Object serialize(Type type, Object source) {
+			return ((Date) source).getTime();
+		}
 	}
 }

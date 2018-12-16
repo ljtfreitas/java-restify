@@ -25,9 +25,11 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.contract;
 
-import java.io.UnsupportedEncodingException;
 import java.lang.reflect.Type;
-import java.net.URLEncoder;
+import java.util.Collection;
+import java.util.LinkedList;
+
+import com.github.ljtfreitas.restify.http.contract.Parameters.Parameter;
 
 public class QueryParameterSerializer implements ParameterSerializer {
 
@@ -41,26 +43,16 @@ public class QueryParameterSerializer implements ParameterSerializer {
 			return serializeAsIterable(name, (Iterable) source);
 
 		} else {
-			return encode(name) + "=" + encode(source.toString());
+			return Parameter.of(name, source.toString()).queryString();
 		}
 	}
 
-	private String encode(String value) {
-		try {
-			return URLEncoder.encode(value, "UTF-8");
-		} catch (UnsupportedEncodingException e) {
-			return value;
-		}
-	}
-
-	@SuppressWarnings("rawtypes")
+	@SuppressWarnings({ "rawtypes", "unchecked" })
 	private String serializeAsIterable(String name, Iterable source) {
-		Parameters parameters = new Parameters();
+		Collection<String> values = new LinkedList<>();
 
-		for (Object e : source) {
-			parameters = parameters.put(name, e.toString());
-		}
+		source.forEach(e -> values.add(e.toString()));
 
-		return parameters.queryString();
+		return Parameter.of(name, values).queryString();
 	}
 }

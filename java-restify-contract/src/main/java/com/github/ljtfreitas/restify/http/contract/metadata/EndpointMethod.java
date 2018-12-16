@@ -29,8 +29,12 @@ import static com.github.ljtfreitas.restify.util.Preconditions.nonNull;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Type;
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import com.github.ljtfreitas.restify.reflection.JavaType;
 
@@ -135,14 +139,17 @@ public class EndpointMethod {
 		return Optional.ofNullable(version);
 	}
 
-	public String expand(final Object[] args) {
-		String endpoint = new PathParameterResolver(path, parameters)
-				.resolve(args);
+	public URI expand(final Object[] args) throws URISyntaxException  {
+		URI endpoint = new URI(new PathParameterResolver(path, parameters)
+				.resolve(args));
 
-		String query = new QueryParameterResolver(parameters.ofQuery())
-				.resolve(args);
+		String query = new QueryParametersBuilder()
+				.with(endpoint.getQuery())
+				.with(args)
+				.build();
 
-		return endpoint + query;
+		return new URI(endpoint.getScheme(), endpoint.getUserInfo(), endpoint.getHost(),
+				endpoint.getPort(), endpoint.getPath(), "".equals(query) ? null : query, endpoint.getFragment());
 	}
 
 	public EndpointMethod returns(JavaType returnType) {
@@ -183,5 +190,28 @@ public class EndpointMethod {
 			.append("]");
 
 		return report.toString();
+	}
+
+	private class QueryParametersBuilder {
+
+		private String prefix = "";
+		private String arguments = "";
+
+		private QueryParametersBuilder with(String prefix) {
+			this.prefix = prefix;
+			return this;
+		}
+
+		private QueryParametersBuilder with(Object[] args) {
+			this.arguments = new QueryParameterResolver(parameters.query())
+					.resolve(args);
+			return this;
+		}
+
+		private String build() {
+			return Stream.of(prefix, arguments)
+					.filter(s -> s != null && !s.trim().isEmpty())
+					.collect(Collectors.joining("&"));
+		}
 	}
 }

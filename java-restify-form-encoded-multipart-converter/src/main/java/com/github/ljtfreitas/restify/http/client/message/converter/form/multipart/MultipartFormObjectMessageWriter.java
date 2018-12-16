@@ -26,19 +26,14 @@
 package com.github.ljtfreitas.restify.http.client.message.converter.form.multipart;
 
 import java.io.IOException;
-import java.util.LinkedHashMap;
-import java.util.Map;
 
+import com.github.ljtfreitas.restify.http.client.message.converter.form.multipart.MultipartFormObjectHolder.MultipartFormObjectFieldHolder;
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
 import com.github.ljtfreitas.restify.http.contract.MultipartForm;
+import com.github.ljtfreitas.restify.http.contract.MultipartFormObject;
 import com.github.ljtfreitas.restify.http.contract.MultipartFormObjects;
-import com.github.ljtfreitas.restify.reflection.JavaAnnotationScanner;
 
 public class MultipartFormObjectMessageWriter extends BaseMultipartFormMessageWriter<Object> {
-
-	private final MultipartFormObjects multipartFormObjects = MultipartFormObjects.cache();
-
-	private final MultipartFormMapMessageWriter mapMessageConverter = new MultipartFormMapMessageWriter();
 
 	public MultipartFormObjectMessageWriter() {
 	}
@@ -49,16 +44,21 @@ public class MultipartFormObjectMessageWriter extends BaseMultipartFormMessageWr
 
 	@Override
 	public boolean canWrite(Class<?> type) {
-		return new JavaAnnotationScanner(type).contains(MultipartForm.class);
+		return type.isAnnotationPresent(MultipartForm.class);
 	}
 
 	@Override
 	protected void doWrite(String boundary, Object body, HttpRequestMessage httpRequestMessage) throws IOException {
-		Map<String, Object> bodyAsMap = new LinkedHashMap<>();
+		MultipartFormObject formObject = MultipartFormObjects.cache().of(body.getClass());
 
-		multipartFormObjects.of(body.getClass()).fields()
-				.forEach(field -> bodyAsMap.put(field.name(), field.valueOn(body)));
+		new MultipartFormObjectHolder(formObject, body)
+			.fields()
+				.forEach(holder -> this.doWrite(boundary, body, httpRequestMessage, holder));
+	}
 
-		mapMessageConverter.doWrite(boundary, bodyAsMap, httpRequestMessage);
+	@SuppressWarnings({ "rawtypes", "unchecked" })
+	private void doWrite(String boundary, Object body, HttpRequestMessage httpRequestMessage, MultipartFormObjectFieldHolder holder) {
+		MultipartField multipartField = new MultipartField<>(holder.name(), holder);
+		serializers.of(MultipartFormObjectFieldHolder.class).write(boundary, multipartField, httpRequestMessage);
 	}
 }

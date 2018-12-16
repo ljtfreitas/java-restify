@@ -36,7 +36,7 @@ class SimpleMultipartFieldSerializer extends BaseMultipartFieldSerializer<Object
 
 	@Override
 	protected ContentDisposition contentDispositionOf(MultipartField<Object> field) {
-		return new ContentDisposition(field.name(), null);
+		return new ContentDisposition(field.name());
 	}
 
 	@Override

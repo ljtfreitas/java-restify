@@ -1,6 +1,8 @@
 package com.github.ljtfreitas.restify.http.contract.metadata;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+
+import java.net.URL;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -16,7 +18,7 @@ public class PathParameterResolverTest {
 
 	@Test
 	public void shouldResolveArgumentOnPath() {
-		parameters.put(new EndpointMethodParameter(0, "first", String.class));
+		parameters = parameters.put(new EndpointMethodParameter(0, "first", String.class));
 
 		PathParameterResolver resolver = new PathParameterResolver("/method/{first}", parameters);
 
@@ -29,8 +31,8 @@ public class PathParameterResolverTest {
 
 	@Test
 	public void shouldResolveMultiplesArgumentsOnPath() {
-		parameters.put(new EndpointMethodParameter(0, "first", String.class));
-		parameters.put(new EndpointMethodParameter(1, "second", String.class));
+		parameters = parameters.put(new EndpointMethodParameter(0, "first", String.class))
+				.put(new EndpointMethodParameter(1, "second", String.class));
 
 		PathParameterResolver resolver = new PathParameterResolver("/method/{first}/{second}", parameters);
 
@@ -43,7 +45,7 @@ public class PathParameterResolverTest {
 
 	@Test(expected = IllegalArgumentException.class)
 	public void shouldThrowExceptionWhenPathArgumentIsNull() {
-		parameters.put(new EndpointMethodParameter(0, "first", String.class));
+		parameters = parameters.put(new EndpointMethodParameter(0, "first", String.class));
 
 		PathParameterResolver resolver = new PathParameterResolver("/method/{first}", parameters);
 
@@ -65,7 +67,7 @@ public class PathParameterResolverTest {
 
 	@Test
 	public void shouldResolveDynamicArgumentWithHyphen() {
-		parameters.put(new EndpointMethodParameter(0, "first-argument", String.class));
+		parameters = parameters.put(new EndpointMethodParameter(0, "first-argument", String.class));
 
 		PathParameterResolver resolver = new PathParameterResolver("/method/{first-argument}", parameters);
 
@@ -78,7 +80,7 @@ public class PathParameterResolverTest {
 
 	@Test
 	public void shouldResolveDynamicArgumentWithUnderline() {
-		parameters.put(new EndpointMethodParameter(0, "first_argument", String.class));
+		parameters = parameters.put(new EndpointMethodParameter(0, "first_argument", String.class));
 
 		PathParameterResolver resolver = new PathParameterResolver("/method/{first_argument}", parameters);
 
@@ -87,5 +89,18 @@ public class PathParameterResolverTest {
 		String endpoint = resolver.resolve(args);
 
 		assertEquals("/method/arg", endpoint);
+	}
+
+	@Test
+	public void shouldResolveSingleDynamicArgument() throws Exception {
+		parameters = parameters.put(new EndpointMethodParameter(0, "url", URL.class));
+
+		PathParameterResolver resolver = new PathParameterResolver("{url}", parameters);
+
+		Object[] args = { new URL("http://my.api.com/path") };
+
+		String endpoint = resolver.resolve(args);
+
+		assertEquals("http://my.api.com/path", endpoint);
 	}
 }

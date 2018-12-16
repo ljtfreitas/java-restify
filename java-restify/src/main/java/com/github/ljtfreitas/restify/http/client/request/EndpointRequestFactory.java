@@ -27,12 +27,13 @@ package com.github.ljtfreitas.restify.http.client.request;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Optional;
 
 import com.github.ljtfreitas.restify.http.client.HttpException;
+import com.github.ljtfreitas.restify.http.client.message.Cookies;
 import com.github.ljtfreitas.restify.http.client.message.Header;
 import com.github.ljtfreitas.restify.http.client.message.Headers;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethod;
-import com.github.ljtfreitas.restify.http.contract.metadata.HeaderParameterResolver;
 import com.github.ljtfreitas.restify.reflection.JavaType;
 
 public class EndpointRequestFactory {
@@ -47,7 +48,7 @@ public class EndpointRequestFactory {
 
 	private EndpointRequest newRequest(EndpointMethod endpointMethod, Object[] args, JavaType responseType) {
 		try {
-			URI endpoint = new URI(endpointMethod.expand(args));
+			URI endpoint = endpointMethod.expand(args);
 
 			Object body = bodyOf(endpointMethod, args);
 
@@ -66,14 +67,30 @@ public class EndpointRequestFactory {
 
 	private Object bodyOf(EndpointMethod endpointMethod, Object[] args) {
 		return endpointMethod.parameters()
-				.ofBody()
+				.body()
 					.map(p -> args[p.position()]).orElse(null);
 	}
 
 	private Headers headersOf(EndpointMethod endpointMethod, Object[] args) {
-		return endpointMethod.headers().all().stream()
-				.map(h -> new Header(h.name(),
-						new HeaderParameterResolver(h.value(), endpointMethod.parameters()).resolve(args)))
-				.reduce(new Headers(), (a, b) -> a.add(b), (a, b) -> b);
+		Headers headers = endpointMethod.headers().all()
+				.stream()
+					.reduce(new Headers(), (a, b) -> a.add(new Header(b.name(), b.value())), (a, b) -> b)
+				.addAll(endpointMethod.parameters().header()
+						.stream()
+							.reduce(new Headers(),
+									(a, b) -> a.add(new Header(b.name(), b.resolve(args[b.position()]))), (a, b) -> b));
+
+		return cookiesOf(endpointMethod, args)
+				.map(headers::add)
+					.orElse(headers);
+	}
+
+	private Optional<Header> cookiesOf(EndpointMethod endpointMethod, Object[] args) {
+		Cookies cookies = endpointMethod.parameters().cookie()
+			.stream()
+				.reduce(new Cookies(),
+						(a, b) -> a.add(b.name(), b.resolve(args[b.position()])), (a, b) -> b);
+
+		return cookies.empty() ? Optional.empty() : Optional.of(Header.cookie(cookies));
 	}
 }

@@ -59,6 +59,10 @@ abstract class BaseMultipartFieldSerializer<T> implements MultipartFieldSerializ
 		}
 	}
 
+	protected String contentTypeOf(T value) {
+		return null;
+	}
+
 	class MultipartFieldHeaders {
 
 		private final ContentDisposition contentDisposition;
@@ -66,7 +70,7 @@ abstract class BaseMultipartFieldSerializer<T> implements MultipartFieldSerializ
 
 		private MultipartFieldHeaders(MultipartField<T> field) {
 			this.contentDisposition = contentDispositionOf(field);
-			this.contentType = contentTypeOf(field.value());
+			this.contentType = field.contentType().orElseGet(() -> contentTypeOf(field.value()));
 		}
 
 		private void writeOn(OutputStream output) throws IOException {
@@ -83,10 +87,6 @@ abstract class BaseMultipartFieldSerializer<T> implements MultipartFieldSerializ
 		}
 	}
 
-	protected String contentTypeOf(T value) {
-		return null;
-	}
-
 	protected abstract ContentDisposition contentDispositionOf(MultipartField<T> field);
 
 	protected abstract byte[] valueOf(MultipartField<T> field, Charset charset);
@@ -95,6 +95,10 @@ abstract class BaseMultipartFieldSerializer<T> implements MultipartFieldSerializ
 
 		final String name;
 		final String fileName;
+
+		ContentDisposition(String name) {
+			this(name, null);
+		}
 
 		ContentDisposition(String name, String fileName) {
 			this.name = name;

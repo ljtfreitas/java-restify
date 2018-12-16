@@ -53,9 +53,9 @@ public class CompletionStageCallbackEndpointCallHandlerAdapterTest {
 		when(delegate.returnType())
 			.thenReturn(JavaType.of(String.class));
 
-		EndpointMethodParameters parameters = new EndpointMethodParameters();
-		parameters.put(new EndpointMethodParameter(0, "callback",
-				new SimpleParameterizedType(BiConsumer.class, null, String.class, Throwable.class), EndpointMethodParameterType.ENDPOINT_CALLBACK));
+		EndpointMethodParameters parameters = new EndpointMethodParameters()
+				.put(new EndpointMethodParameter(0, "callback",
+						new SimpleParameterizedType(BiConsumer.class, null, String.class, Throwable.class), EndpointMethodParameterType.ENDPOINT_CALLBACK));
 
 		futureWithCallbackEndpointMethod = new SimpleEndpointMethod(SomeType.class.getMethod("futureWithCallback", BiConsumer.class), parameters);
 	}

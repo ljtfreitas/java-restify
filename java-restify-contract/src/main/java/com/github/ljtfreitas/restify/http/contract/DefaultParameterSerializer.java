@@ -23,38 +23,15 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.http.spring.contract.metadata;
+package com.github.ljtfreitas.restify.http.contract;
 
 import java.lang.reflect.Type;
 
-import com.github.ljtfreitas.restify.http.contract.ParameterSerializer;
-import com.github.ljtfreitas.restify.http.contract.QueryParameterSerializer;
-import com.github.ljtfreitas.restify.http.contract.QueryParametersSerializer;
-import com.github.ljtfreitas.restify.http.contract.DefaultParameterSerializer;
+public class DefaultParameterSerializer implements ParameterSerializer {
 
-class SpringWebEndpointMethodParameterSerializer {
-
-	static Class<? extends ParameterSerializer> of(SpringWebJavaMethodParameterMetadata parameter) {
-		if (parameter.query()) {
-			return SpringWebQueryParameterSerializer.class;
-		} else {
-			return DefaultParameterSerializer.class;
-		}
+	@Override
+	public String serialize(String name, Type type, Object source) {
+		return source == null ? null : source.toString();
 	}
 
-	public static class SpringWebQueryParameterSerializer implements ParameterSerializer {
-
-		private final QueryParameterSerializer queryParameterSerializer = new QueryParameterSerializer();
-
-		private final QueryParametersSerializer queryParametersSerializer = new QueryParametersSerializer();
-
-		@Override
-		public String serialize(String name, Type type, Object source) {
-			if (queryParametersSerializer.supports(type, source)) {
-				return queryParametersSerializer.serialize(name, type, source);
-			} else {
-				return queryParameterSerializer.serialize(name, type, source);
-			}
-		}
-	}
 }
