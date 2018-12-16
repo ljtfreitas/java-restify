@@ -16,7 +16,6 @@ import java.net.UnknownHostException;
 import java.util.Arrays;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
 import org.hamcrest.BaseMatcher;
@@ -43,6 +42,7 @@ import com.github.ljtfreitas.restify.http.client.response.EndpointResponseUnauth
 import com.github.ljtfreitas.restify.http.client.retry.BackOff;
 import com.github.ljtfreitas.restify.http.client.retry.Retry;
 import com.github.ljtfreitas.restify.http.client.retry.RetryConfiguration;
+import com.github.ljtfreitas.restify.util.async.DisposableExecutors;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AsyncRetryableEndpointRequestExecutorTest {
@@ -59,7 +59,7 @@ public class AsyncRetryableEndpointRequestExecutorTest {
 
 	@Before
 	public void setup() {
-		scheduler = Executors.newSingleThreadScheduledExecutor();
+		scheduler = DisposableExecutors.newSingleThreadScheduledExecutor();
 
 		executor = new AsyncRetryableEndpointRequestExecutor(asyncEndpointRequestExecutor, scheduler);
 	}

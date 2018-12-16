@@ -35,7 +35,6 @@ import java.util.Arrays;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
 import javax.net.ssl.HostnameVerifier;
@@ -78,6 +77,7 @@ import com.github.ljtfreitas.restify.http.client.retry.RetryCondition.ThrowableR
 import com.github.ljtfreitas.restify.http.client.retry.RetryConfiguration;
 import com.github.ljtfreitas.restify.http.client.retry.async.AsyncRetryableEndpointRequestExecutor;
 import com.github.ljtfreitas.restify.util.Tryable;
+import com.github.ljtfreitas.restify.util.async.DisposableExecutors;
 
 public class HypermediaBrowserBuilder {
 
@@ -665,7 +665,7 @@ public class HypermediaBrowserBuilder {
 
 			private final RetryBuilder context;
 
-			private ScheduledExecutorService scheduler = Executors.newScheduledThreadPool(10);
+			private ScheduledExecutorService scheduler = DisposableExecutors.newScheduledThreadPool(10);
 
 			private AsyncRetryConfigurationBuilder(RetryBuilder context) {
 				this.context = context;
@@ -682,7 +682,7 @@ public class HypermediaBrowserBuilder {
 
 		private final HypermediaBrowserBuilder context;
 
-		private Executor pool = Executors.newCachedThreadPool();
+		private Executor pool = DisposableExecutors.newCachedThreadPool();
 
 		private AsyncBuilder(HypermediaBrowserBuilder context) {
 			this.context = context;

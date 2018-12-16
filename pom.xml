@@ -71,6 +71,7 @@
 		<module>java-restify-oauth2-access-token-cache-caffeine</module>
 
 		<module>java-restify-util</module>
+		<module>java-restify-util-async</module>
 	</modules>
 
 	<dependencies>

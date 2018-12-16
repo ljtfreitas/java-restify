@@ -30,7 +30,6 @@ import java.nio.charset.Charset;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 
 import com.github.ljtfreitas.restify.http.client.HttpClientException;
 import com.github.ljtfreitas.restify.http.client.message.Header;
@@ -39,10 +38,11 @@ import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestBody
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
 import com.github.ljtfreitas.restify.http.client.request.HttpClientRequest;
 import com.github.ljtfreitas.restify.http.client.response.HttpClientResponse;
+import com.github.ljtfreitas.restify.util.async.DisposableExecutors;
 
 public class AsyncHttpClientRequestAdapter implements AsyncHttpClientRequest  {
 
-	private static final Executor DEFAULT_EXECUTOR = Executors.newCachedThreadPool();
+	private static final Executor DEFAULT_EXECUTOR = DisposableExecutors.newCachedThreadPool();
 
 	private final HttpClientRequest source;
 	private final Executor executor;

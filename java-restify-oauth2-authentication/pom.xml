@@ -41,6 +41,12 @@
 		</dependency>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
+			<artifactId>java-restify-util-async</artifactId>
+			<version>${project.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
 			<artifactId>java-restify-form-encoded-multipart-converter</artifactId>
 			<version>${project.version}</version>
 		</dependency>
