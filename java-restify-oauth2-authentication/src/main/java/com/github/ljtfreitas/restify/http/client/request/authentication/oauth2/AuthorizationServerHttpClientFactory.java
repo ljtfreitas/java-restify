@@ -28,7 +28,6 @@ package com.github.ljtfreitas.restify.http.client.request.authentication.oauth2;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 
 import com.github.ljtfreitas.restify.http.client.jdk.HttpClientRequestConfiguration;
 import com.github.ljtfreitas.restify.http.client.jdk.JdkHttpClientRequestFactory;
@@ -48,6 +47,7 @@ import com.github.ljtfreitas.restify.http.client.request.async.AsyncHttpClientRe
 import com.github.ljtfreitas.restify.http.client.request.async.DefaultAsyncEndpointRequestExecutor;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponseReader;
 import com.github.ljtfreitas.restify.spi.Provider;
+import com.github.ljtfreitas.restify.util.async.DisposableExecutors;
 
 public class AuthorizationServerHttpClientFactory {
 
@@ -78,7 +78,7 @@ public class AuthorizationServerHttpClientFactory {
 	}
 
 	public AsyncEndpointRequestExecutor createAsync() {
-		ExecutorService threadPool = Executors.newCachedThreadPool();
+		ExecutorService threadPool = DisposableExecutors.newCachedThreadPool();
 		return httpClientRequestFactory instanceof AsyncHttpClientRequestFactory ?
 			new DefaultAsyncEndpointRequestExecutor(threadPool, (AsyncHttpClientRequestFactory) httpClientRequestFactory,
 					endpointRequestWriter(converters), endpointResponseReader(converters), doCreate()) :

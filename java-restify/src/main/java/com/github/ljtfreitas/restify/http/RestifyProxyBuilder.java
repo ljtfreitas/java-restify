@@ -36,7 +36,6 @@ import java.util.Collection;
 import java.util.Optional;
 import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
 import javax.net.ssl.HostnameVerifier;
@@ -120,6 +119,7 @@ import com.github.ljtfreitas.restify.http.contract.metadata.DefaultContractReade
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointTarget;
 import com.github.ljtfreitas.restify.http.contract.metadata.SimpleContractExpressionResolver;
 import com.github.ljtfreitas.restify.spi.Provider;
+import com.github.ljtfreitas.restify.util.async.DisposableExecutors;
 
 public class RestifyProxyBuilder {
 
@@ -904,7 +904,7 @@ public class RestifyProxyBuilder {
 
 			private final RetryBuilder context;
 
-			private ScheduledExecutorService scheduler = Executors.newSingleThreadScheduledExecutor();
+			private ScheduledExecutorService scheduler = DisposableExecutors.newSingleThreadScheduledExecutor();
 
 			private AsyncRetryConfigurationBuilder(RetryBuilder context) {
 				this.context = context;

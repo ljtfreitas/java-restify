@@ -27,7 +27,6 @@ package com.github.ljtfreitas.restify.http.client.call.handler.guava;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import com.github.ljtfreitas.restify.http.client.call.EndpointCall;
@@ -37,6 +36,7 @@ import com.github.ljtfreitas.restify.http.client.call.handler.async.AsyncEndpoin
 import com.github.ljtfreitas.restify.http.client.call.handler.async.AsyncEndpointCallHandlerAdapter;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethod;
 import com.github.ljtfreitas.restify.reflection.JavaType;
+import com.github.ljtfreitas.restify.util.async.DisposableExecutors;
 import com.google.common.util.concurrent.JdkFutureAdapters;
 import com.google.common.util.concurrent.ListenableFuture;
 import com.google.common.util.concurrent.ListeningExecutorService;
@@ -47,7 +47,7 @@ public class ListenableFutureEndpointCallHandlerAdapter<T, O> implements AsyncEn
 	private final ListeningExecutorService executorService;
 
 	public ListenableFutureEndpointCallHandlerAdapter() {
-		this(MoreExecutors.listeningDecorator(Executors.newCachedThreadPool()));
+		this(MoreExecutors.listeningDecorator(DisposableExecutors.newCachedThreadPool()));
 	}
 
 	public ListenableFutureEndpointCallHandlerAdapter(ListeningExecutorService executorService) {

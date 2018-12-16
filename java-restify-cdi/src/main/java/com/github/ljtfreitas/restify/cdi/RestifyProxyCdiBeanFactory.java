@@ -29,7 +29,6 @@ import java.lang.annotation.Annotation;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.concurrent.Executor;
-import java.util.concurrent.Executors;
 import java.util.function.Supplier;
 
 import javax.enterprise.inject.Instance;
@@ -46,6 +45,7 @@ import com.github.ljtfreitas.restify.http.client.request.interceptor.EndpointReq
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponseErrorFallback;
 import com.github.ljtfreitas.restify.http.contract.metadata.ContractExpressionResolver;
 import com.github.ljtfreitas.restify.http.contract.metadata.ContractReader;
+import com.github.ljtfreitas.restify.util.async.DisposableExecutors;
 
 class RestifyProxyCdiBeanFactory {
 
@@ -97,7 +97,7 @@ class RestifyProxyCdiBeanFactory {
 	}
 
 	private Executor executor() {
-		return get(Executor.class, new AsyncAnnotationLiteral(), () -> Executors.newCachedThreadPool());
+		return get(Executor.class, new AsyncAnnotationLiteral(), DisposableExecutors::newCachedThreadPool);
 	}
 
 

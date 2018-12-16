@@ -27,13 +27,13 @@ package com.github.ljtfreitas.restify.http.client.call.handler.guava;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.util.concurrent.Executors;
 
 import com.github.ljtfreitas.restify.http.client.call.EndpointCall;
 import com.github.ljtfreitas.restify.http.client.call.handler.EndpointCallHandler;
 import com.github.ljtfreitas.restify.http.client.call.handler.EndpointCallHandlerAdapter;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethod;
 import com.github.ljtfreitas.restify.reflection.JavaType;
+import com.github.ljtfreitas.restify.util.async.DisposableExecutors;
 import com.google.common.util.concurrent.ListenableFutureTask;
 import com.google.common.util.concurrent.ListeningExecutorService;
 import com.google.common.util.concurrent.MoreExecutors;
@@ -43,7 +43,7 @@ public class ListenableFutureTaskEndpointCallHandlerAdapter<T, O> implements End
 	private final ListeningExecutorService executorService;
 
 	public ListenableFutureTaskEndpointCallHandlerAdapter() {
-		this(MoreExecutors.listeningDecorator(Executors.newCachedThreadPool()));
+		this(MoreExecutors.listeningDecorator(DisposableExecutors.newCachedThreadPool()));
 	}
 
 	public ListenableFutureTaskEndpointCallHandlerAdapter(ListeningExecutorService executorService) {

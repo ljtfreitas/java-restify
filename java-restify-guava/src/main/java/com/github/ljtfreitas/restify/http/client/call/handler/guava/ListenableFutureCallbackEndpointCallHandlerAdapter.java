@@ -28,7 +28,6 @@ package com.github.ljtfreitas.restify.http.client.call.handler.guava;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Collection;
-import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 
 import com.github.ljtfreitas.restify.http.client.call.async.AsyncEndpointCall;
@@ -39,6 +38,7 @@ import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethod;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethodParameter;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethodParameters;
 import com.github.ljtfreitas.restify.reflection.JavaType;
+import com.github.ljtfreitas.restify.util.async.DisposableExecutors;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.Futures;
 import com.google.common.util.concurrent.JdkFutureAdapters;
@@ -51,7 +51,7 @@ public class ListenableFutureCallbackEndpointCallHandlerAdapter<T, O> implements
 	private final ListeningExecutorService executorService;
 
 	public ListenableFutureCallbackEndpointCallHandlerAdapter() {
-		this(MoreExecutors.listeningDecorator(Executors.newCachedThreadPool()));
+		this(MoreExecutors.listeningDecorator(DisposableExecutors.newCachedThreadPool()));
 	}
 
 	public ListenableFutureCallbackEndpointCallHandlerAdapter(ListeningExecutorService executorService) {
@@ -104,8 +104,8 @@ public class ListenableFutureCallbackEndpointCallHandlerAdapter<T, O> implements
 			FutureCallback<T> callback = callbackParameter(args);
 
 			Future<T> future = call.executeAsync()
-					.toCompletableFuture()
-						.thenApplyAsync(o -> delegate.handle(() -> o, args), executorService);
+					.thenApplyAsync(o -> delegate.handle(() -> o, args), executorService)
+						.toCompletableFuture();
 
 			ListenableFuture<T> listenableFuture = JdkFutureAdapters.listenInPoolThread(future, executorService);
 			Futures.addCallback(listenableFuture, callback, executorService);

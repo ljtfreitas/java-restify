@@ -9,7 +9,6 @@ import static org.mockito.Mockito.when;
 import java.time.Duration;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
-import java.util.concurrent.Executors;
 
 import org.hamcrest.BaseMatcher;
 import org.hamcrest.Description;
@@ -29,6 +28,7 @@ import com.github.ljtfreitas.restify.http.client.response.EndpointResponseIntern
 import com.github.ljtfreitas.restify.http.client.retry.BackOffPolicy;
 import com.github.ljtfreitas.restify.http.client.retry.RetryConditionMatcher;
 import com.github.ljtfreitas.restify.http.client.retry.RetryConfiguration;
+import com.github.ljtfreitas.restify.util.async.DisposableExecutors;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AsyncRetryableLoopTest {
@@ -53,7 +53,7 @@ public class AsyncRetryableLoopTest {
 
 		when(backOffPolicy.backOff(anyInt())).thenReturn(Duration.ZERO);
 
-		asyncRetryableLoop = new AsyncRetryableLoop(Executors.newSingleThreadScheduledExecutor(), new RetryConditionMatcher(configuration.conditions()),
+		asyncRetryableLoop = new AsyncRetryableLoop(DisposableExecutors.newSingleThreadScheduledExecutor(), new RetryConditionMatcher(configuration.conditions()),
 				backOffPolicy);
 	}
 
