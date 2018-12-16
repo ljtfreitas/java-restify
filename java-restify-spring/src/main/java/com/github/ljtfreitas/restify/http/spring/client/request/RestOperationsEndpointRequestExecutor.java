@@ -33,6 +33,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestOperations;
+import org.springframework.web.client.RestTemplate;
 
 import com.github.ljtfreitas.restify.http.client.HttpClientException;
 import com.github.ljtfreitas.restify.http.client.HttpException;
@@ -49,6 +50,10 @@ public class RestOperationsEndpointRequestExecutor implements EndpointRequestExe
 	private final EndpointResponseErrorFallback endpointResponseErrorFallback;
 	private final RequestEntityConverter requestEntityConverter;
 	private final EndpointResponseConverter responseEntityConverter;
+
+	public RestOperationsEndpointRequestExecutor() {
+		this(new RestTemplate(), new DefaultEndpointResponseErrorFallback());
+	}
 
 	public RestOperationsEndpointRequestExecutor(RestOperations rest) {
 		this(rest, new DefaultEndpointResponseErrorFallback());

@@ -303,9 +303,9 @@ public class HeaderTest {
 
 	@Test
 	public void shouldGenerateCookieHeaderFromCookiesObject() {
-		Cookies cookies = new Cookies();
-		cookies.add(new Cookie("sessionid", "abc1234"));
-		cookies.add(new Cookie("other-cookie", "other-value"));
+		Cookies cookies = new Cookies()
+			.add(new Cookie("sessionid", "abc1234"))
+			.add(new Cookie("other-cookie", "other-value"));
 
 		Header header = Header.cookie(cookies);
 

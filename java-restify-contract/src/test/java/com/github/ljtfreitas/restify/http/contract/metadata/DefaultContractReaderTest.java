@@ -1,10 +1,13 @@
 package com.github.ljtfreitas.restify.http.contract.metadata;
 
+import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
 import java.lang.reflect.Type;
+import java.net.URL;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -19,6 +22,8 @@ import org.junit.Test;
 import com.github.ljtfreitas.restify.http.contract.AcceptJson;
 import com.github.ljtfreitas.restify.http.contract.BodyParameter;
 import com.github.ljtfreitas.restify.http.contract.CallbackParameter;
+import com.github.ljtfreitas.restify.http.contract.Cookie;
+import com.github.ljtfreitas.restify.http.contract.CookieParameter;
 import com.github.ljtfreitas.restify.http.contract.Delete;
 import com.github.ljtfreitas.restify.http.contract.Get;
 import com.github.ljtfreitas.restify.http.contract.Header;
@@ -50,6 +55,8 @@ public class DefaultContractReaderTest {
 
 	private EndpointTarget myVersionedApiTarget;
 
+	private EndpointTarget myFullyDynamicApiTarget;
+
 	private DefaultContractReader restifyContractReader;
 
 	@Before
@@ -65,6 +72,8 @@ public class DefaultContractReaderTest {
 		mySimpleCrudApiTarget = new EndpointTarget(MySimpleCrudApi.class, "http://my.api.com");
 
 		myVersionedApiTarget = new EndpointTarget(MyVersionedApi.class);
+
+		myFullyDynamicApiTarget = new EndpointTarget(MyFullyDynamicApi.class);
 
 		restifyContractReader = new DefaultContractReader();
 	}
@@ -105,13 +114,35 @@ public class DefaultContractReaderTest {
 
 		Optional<EndpointMethodParameter> headerParameter = endpointMethod.parameters().get(1);
 		assertTrue(headerParameter.isPresent());
-		assertEquals("contentType", headerParameter.get().name());
+		assertEquals("X-Custom-Header", headerParameter.get().name());
 		assertTrue(headerParameter.get().header());
 
 		Optional<EndpointMethodParameter> bodyParameter = endpointMethod.parameters().get(2);
 		assertTrue(bodyParameter.isPresent());
 		assertEquals("body", bodyParameter.get().name());
 		assertTrue(bodyParameter.get().body());
+	}
+
+	@Test
+	public void shouldCreateEndpointMethodWithoutHeaderFromHeaderParameter() throws Exception {
+		EndpointMethods endpointMethods = restifyContractReader.read(myApiTypeTarget);
+
+		EndpointMethod endpointMethod = endpointMethods.find(MyApiType.class.getMethod("method", new Class[] { String.class, String.class, Object.class }))
+			.orElseThrow(() -> new IllegalStateException("Method not found..."));
+
+		assertEquals("GET", endpointMethod.httpMethod());
+		assertEquals("http://my.api.com/{path}", endpointMethod.path());
+		assertEquals(String.class, endpointMethod.returnType().classType());
+
+		Optional<EndpointMethodParameter> headerParameter = endpointMethod.parameters().get(1);
+		assertTrue(headerParameter.isPresent());
+		assertEquals("X-Custom-Header", headerParameter.get().name());
+		assertTrue(headerParameter.get().header());
+
+		Optional<EndpointHeader> header = endpointMethod.headers().first("X-Custom-Header");
+		assertFalse(header.isPresent());
+
+		assertThat(endpointMethod.headers().all(), hasSize(3));
 	}
 
 	@Test
@@ -192,7 +223,7 @@ public class DefaultContractReaderTest {
 
 		Optional<EndpointMethodParameter> headerParameter = endpointMethod.parameters().get(1);
 		assertTrue(headerParameter.isPresent());
-		assertEquals("customArgumentContentType", headerParameter.get().name());
+		assertEquals("Content-Type", headerParameter.get().name());
 		assertTrue(headerParameter.get().header());
 	}
 
@@ -493,8 +524,57 @@ public class DefaultContractReaderTest {
 		assertEquals("v2", endpointMethod.version().get());
 	}
 
+	@Test
+	public void shouldCreateEndpointMethodWithDynamicUrlDefinition() throws Exception {
+		EndpointMethod endpointMethod = restifyContractReader.read(myFullyDynamicApiTarget)
+			.find(MyFullyDynamicApi.class.getMethod("dynamic", URL.class))
+				.orElseThrow(() -> new IllegalStateException("Method not found..."));;
+
+		assertEquals("{endpoint}", endpointMethod.path());
+
+		Optional<EndpointMethodParameter> parameter = endpointMethod.parameters().get(0);
+
+		assertTrue(parameter.isPresent());
+		assertEquals("endpoint", parameter.get().name());
+		assertEquals(URL.class, parameter.get().javaType().unwrap());
+	}
+
+	@Test
+	public void shouldCreateEndpointMethodWithCookieParameter() throws Exception {
+		EndpointMethod endpointMethod = restifyContractReader.read(myApiTypeTarget)
+			.find(MyApiType.class.getMethod("cookie", String.class))
+				.orElseThrow(() -> new IllegalStateException("Method not found..."));;
+
+		assertEquals("http://my.api.com/cookie", endpointMethod.path());
+
+		Optional<EndpointMethodParameter> parameter = endpointMethod.parameters().get(0);
+
+		assertTrue(parameter.isPresent());
+		assertTrue(parameter.get().cookie());
+		assertEquals("my-cookie", parameter.get().name());
+		assertEquals(String.class, parameter.get().javaType().unwrap());
+	}
+
+	@Test
+	public void shouldCreateEndpointMethodWithCookieDefinedByAnnotations() throws Exception {
+		EndpointMethod endpointMethod = restifyContractReader.read(myApiTypeTarget)
+			.find(MyApiType.class.getMethod("cookiesByAnnotation"))
+				.orElseThrow(() -> new IllegalStateException("Method not found..."));;
+
+		assertEquals("http://my.api.com/cookie", endpointMethod.path());
+
+		Collection<EndpointHeader> cookieHeaders = endpointMethod.headers().find("Cookie");
+
+		assertThat(cookieHeaders, hasSize(3));
+
+		assertTrue(cookieHeaders.stream().anyMatch(c -> c.value().equals("whatever=cookie-whatever")));
+		assertTrue(cookieHeaders.stream().anyMatch(c -> c.value().equals("other-cookie=other-cookie-value")));
+		assertTrue(cookieHeaders.stream().anyMatch(c -> c.value().equals("more-one-cookie=more-one-cookie-value")));
+	}
+
 	@Path("http://my.api.com")
 	@Header(name = "X-My-Type", value = "MyApiType")
+	@Cookie(name = "whatever", value = "cookie-whatever")
 	interface MyApiType {
 
 		@Path("/{path}")
@@ -503,8 +583,8 @@ public class DefaultContractReaderTest {
 
 		@Path("/{path}")
 		@Method("GET")
-		@Header(name = "Content-Type", value = "{contentType}")
-		public String method(String path, @HeaderParameter String contentType, @BodyParameter Object body);
+		@Header(name = "Content-Type", value = "application/json")
+		public String method(String path, @HeaderParameter("X-Custom-Header") String customHeader, @BodyParameter Object body);
 
 		@Path("path")
 		@Method("GET")
@@ -518,9 +598,8 @@ public class DefaultContractReaderTest {
 
 		@Path("/{customArgumentPath}")
 		@Method("GET")
-		@Header(name = "Content-Type", value = "{customArgumentContentType}")
 		public void customizedNames(@PathParameter("customArgumentPath") String path,
-				@HeaderParameter("customArgumentContentType") String contentType);
+				@HeaderParameter("Content-Type") String contentType);
 
 		@Path("/some-method")
 		@Post
@@ -545,6 +624,16 @@ public class DefaultContractReaderTest {
 		@AcceptJson
 		@Header(name = "User-Agent", value = "Restify-Agent")
 		public String metaHeaders();
+
+		@Path("/cookie")
+		@Get
+		public String cookie(@CookieParameter("my-cookie") String cookie);
+
+		@Path("/cookie")
+		@Get
+		@Cookie(name = "other-cookie", value = "other-cookie-value")
+		@Cookie(name = "more-one-cookie", value = "more-one-cookie-value")
+		public String cookiesByAnnotation();
 	}
 
 	@Path("http://my.api.com")
@@ -681,6 +770,13 @@ public class DefaultContractReaderTest {
 		@Get
 		@Version("v2")
 		public MyModel versionTwo();
+	}
+
+	interface MyFullyDynamicApi {
+
+		@Path("{endpoint}")
+		@Get
+		public String dynamic(@PathParameter URL endpoint);
 	}
 
 	class MyModel {

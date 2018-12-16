@@ -23,42 +23,16 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.http.contract.metadata;
+package com.github.ljtfreitas.restify.http.contract;
 
-import java.util.Optional;
-import java.util.regex.MatchResult;
-import java.util.regex.Matcher;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-public class HeaderParameterResolver {
+@Target({ElementType.TYPE, ElementType.METHOD})
+@Retention(RetentionPolicy.RUNTIME)
+public @interface Cookies {
 
-	private final String value;
-	private final EndpointMethodParameters parameters;
-
-	public HeaderParameterResolver(String value, EndpointMethodParameters parameters) {
-		this.value = value;
-		this.parameters = parameters;
-	}
-
-	public String resolve(Object[] args) {
-		StringBuffer builder = new StringBuffer();
-
-		Matcher matcher = DynamicParameterMatcher.matches(value);
-
-		while (matcher.find()) {
-			MatchResult match = matcher.toMatchResult();
-
-			String name = match.group(1);
-
-			parameters.find(name)
-				.filter(p -> p.header())
-					.ifPresent(p -> matcher.appendReplacement(builder,
-							Optional.ofNullable(args[p.position()]).map(a -> p.resolve(a)).orElse("")));
-		}
-
-		matcher.appendTail(builder);
-
-		return builder.toString();
-
-	}
-
+	public Cookie[] value();
 }

@@ -25,13 +25,17 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.contract;
 
-import java.lang.reflect.Type;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
-public class SimpleParameterSerializer implements ParameterSerializer {
+@Target(ElementType.PARAMETER)
+@Retention(RetentionPolicy.RUNTIME)
+@Parameter
+public @interface CookieParameter {
 
-	@Override
-	public String serialize(String name, Type type, Object source) {
-		return source == null ? null : source.toString();
-	}
+	String value() default "";
 
+	Class<? extends ParameterSerializer> serializer() default DefaultParameterSerializer.class;
 }

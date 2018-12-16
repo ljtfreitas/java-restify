@@ -203,7 +203,11 @@ public class Header {
 	}
 
 	public static Header cookie(String... cookies) {
-		return cookie(new Cookies(cookies));
+		return cookie(Cookies.of(Arrays.stream(cookies).collect(Collectors.joining("; "))));
+	}
+
+	public static Header cookie(String cookies) {
+		return cookie(Cookies.of(cookies));
 	}
 
 	public static Header cookie(Cookie... cookies) {

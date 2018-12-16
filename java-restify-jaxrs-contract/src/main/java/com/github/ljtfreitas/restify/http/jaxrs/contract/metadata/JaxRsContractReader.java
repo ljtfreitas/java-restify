@@ -26,7 +26,6 @@
 package com.github.ljtfreitas.restify.http.jaxrs.contract.metadata;
 
 import java.lang.reflect.Type;
-import java.net.URL;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashSet;
@@ -43,8 +42,8 @@ import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethodParame
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethodParameter.EndpointMethodParameterType;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethodParameters;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethods;
+import com.github.ljtfreitas.restify.http.contract.metadata.EndpointPathBuilder;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointTarget;
-import com.github.ljtfreitas.restify.util.Tryable;
 
 public class JaxRsContractReader implements ContractReader {
 
@@ -80,9 +79,11 @@ public class JaxRsContractReader implements ContractReader {
 	}
 
 	private String endpointPath(EndpointTarget target, JaxRsJavaTypeMetadata javaTypeMetadata, JaxRsJavaMethodMetadata javaMethodMetadata) {
-		String endpoint = endpointTarget(target) + endpointTypePath(javaTypeMetadata) + endpointMethodPath(javaMethodMetadata);
-
-		return Tryable.of(() -> new URL(endpoint)).toString();
+		return new EndpointPathBuilder()
+				.append(endpointTarget(target))
+				.append(endpointTypePath(javaTypeMetadata))
+				.append(endpointMethodPath(javaMethodMetadata))
+				.build();
 	}
 
 	private String endpointTarget(EndpointTarget target) {
@@ -91,13 +92,11 @@ public class JaxRsContractReader implements ContractReader {
 
 	private String endpointTypePath(JaxRsJavaTypeMetadata javaTypeMetadata) {
 		return Arrays.stream(javaTypeMetadata.paths())
-				.map(p -> p.endsWith("/") ? p.substring(0, p.length() - 1) : p)
-					.collect(Collectors.joining());
+				.collect(Collectors.joining());
 	}
 
 	private String endpointMethodPath(JaxRsJavaMethodMetadata javaMethodMetadata) {
-		String endpointMethodPath = javaMethodMetadata.path().map(Path::value).orElse("");
-		return (endpointMethodPath.isEmpty() || endpointMethodPath.startsWith("/") ? endpointMethodPath : "/" + endpointMethodPath);
+		return javaMethodMetadata.path().map(Path::value).orElse("");
 	}
 
 	private EndpointMethodParameters endpointMethodParameters(JaxRsJavaMethodParameters javaMethodParameters) {
@@ -109,11 +108,12 @@ public class JaxRsContractReader implements ContractReader {
 			EndpointMethodParameterType type = javaMethodParameterMetadata.path() ? EndpointMethodParameterType.PATH :
 				javaMethodParameterMetadata.header() ? EndpointMethodParameterType.HEADER :
 					javaMethodParameterMetadata.query() ? EndpointMethodParameterType.QUERY_STRING :
-						EndpointMethodParameterType.BODY;
+						javaMethodParameterMetadata.cookie() ? EndpointMethodParameterType.COOKIE :
+							EndpointMethodParameterType.BODY;
 
 			ParameterSerializer serializer = javaMethodParameterMetadata.serializer();
 
-			parameters.put(new EndpointMethodParameter(position, javaMethodParameterMetadata.name(), javaMethodParameterMetadata.javaType(), type, serializer));
+			parameters = parameters.put(new EndpointMethodParameter(position, javaMethodParameterMetadata.name(), javaMethodParameterMetadata.javaType(), type, serializer));
 		}
 
 		return parameters;
@@ -125,7 +125,6 @@ public class JaxRsContractReader implements ContractReader {
 		Collection<JaxRsEndpointHeader> headers = new LinkedHashSet<>();
 		headers.addAll(Arrays.asList(javaTypeMetadata.headers()));
 		headers.addAll(Arrays.asList(javaMethodMetadata.headers()));
-		headers.addAll(Arrays.asList(javaMethodParameters.headers()));
 
 		return new EndpointHeaders(headers.stream().map(h -> new EndpointHeader(h.name(), h.value())).collect(Collectors.toSet()));
 	}

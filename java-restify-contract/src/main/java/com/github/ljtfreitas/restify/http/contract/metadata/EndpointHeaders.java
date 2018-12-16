@@ -43,7 +43,13 @@ public class EndpointHeaders {
 		this.headers = new LinkedHashSet<>(headers);
 	}
 
-	public void put(EndpointHeader endpointHeader) {
+	public EndpointHeaders put(EndpointHeader endpointHeader) {
+		EndpointHeaders headers = new EndpointHeaders(this.headers);
+		headers.doPut(endpointHeader);
+		return headers;
+	}
+
+	private void doPut(EndpointHeader endpointHeader) {
 		headers.add(endpointHeader);
 	}
 

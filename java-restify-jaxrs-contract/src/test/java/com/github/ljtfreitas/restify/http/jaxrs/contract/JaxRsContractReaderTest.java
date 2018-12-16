@@ -1,10 +1,12 @@
 package com.github.ljtfreitas.restify.http.jaxrs.contract;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.lang.reflect.Type;
+import java.net.URL;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -12,6 +14,7 @@ import java.util.Optional;
 
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.CookieParam;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
@@ -46,6 +49,8 @@ public class JaxRsContractReaderTest {
 
 	private EndpointTarget mySimpleCrudApiTarget;
 
+	private EndpointTarget myFullyDynamicApiTarget;
+
 	private JaxRsContractReader jaxRsContractReader;
 
 	@Before
@@ -59,6 +64,8 @@ public class JaxRsContractReaderTest {
 		myContextApiTarget = new EndpointTarget(MyContextApi.class, "http://my.api.com");
 
 		mySimpleCrudApiTarget = new EndpointTarget(MySimpleCrudApi.class, "http://my.api.com");
+
+		myFullyDynamicApiTarget = new EndpointTarget(MyFullyDynamicApi.class);
 
 		jaxRsContractReader = new JaxRsContractReader();
 	}
@@ -107,7 +114,7 @@ public class JaxRsContractReaderTest {
 	}
 
 	@Test
-	public void shouldCreateEndpointMethodWithHeadersWhenMethodHasHeaderParameters() throws Exception {
+	public void shouldCreateEndpointMethodWithoutIncludeHeaderParametersOnHeadersCollection() throws Exception {
 		EndpointMethod endpointMethod = jaxRsContractReader.read(myApiTypeTarget)
 				.find(MyApiType.class.getMethod("headers", new Class[] { String.class, String.class }))
 					.orElseThrow(() -> new IllegalStateException("Method not found..."));
@@ -126,13 +133,8 @@ public class JaxRsContractReaderTest {
 		assertEquals("X-Other-Custom-Header", otherCustomHeaderParameter.get().name());
 		assertTrue(otherCustomHeaderParameter.get().header());
 
-		EndpointHeader customHeader = endpointMethod.headers().first("X-Custom-Header").orElse(null);
-		assertNotNull(customHeader);
-		assertEquals("{X-Custom-Header}", customHeader.value());
-
-		EndpointHeader otherCustomHeader = endpointMethod.headers().first("X-Other-Custom-Header").orElse(null);
-		assertNotNull(otherCustomHeader);
-		assertEquals("{X-Other-Custom-Header}", otherCustomHeader.value());
+		assertFalse(endpointMethod.headers().first("X-Custom-Header").isPresent());
+		assertFalse(endpointMethod.headers().first("X-Other-Custom-Header").isPresent());
 	}
 
 	@Test
@@ -185,9 +187,9 @@ public class JaxRsContractReaderTest {
 	}
 
 	@Test
-	public void shouldCreateEndpointMethodMergingMethodHeaderAnnotationsWithHeaderParameters() throws Exception {
+	public void shouldCreateEndpointMethodMergingMethodHeaders() throws Exception {
 		EndpointMethod endpointMethod = jaxRsContractReader.read(myApiTypeTarget)
-				.find(MyApiType.class.getMethod("mergeHeaders", new Class[] { Object.class, String.class }))
+				.find(MyApiType.class.getMethod("mergeHeaders", new Class[] { Object.class }))
 					.orElseThrow(() -> new IllegalStateException("Method not found..."));
 
 		assertEquals("GET", endpointMethod.httpMethod());
@@ -201,10 +203,6 @@ public class JaxRsContractReaderTest {
 		EndpointHeader acceptHeader = endpointMethod.headers().first("Accept").orElse(null);
 		assertNotNull(acceptHeader);
 		assertEquals("application/json", acceptHeader.value());
-
-		EndpointHeader customHeader = endpointMethod.headers().first("X-Custom-Header").orElse(null);
-		assertNotNull(customHeader);
-		assertEquals("{X-Custom-Header}", customHeader.value());
 	}
 
 	@Test(expected = IllegalArgumentException.class)
@@ -307,9 +305,9 @@ public class JaxRsContractReaderTest {
 
 		assertEquals("http://my.api.com/getWithHeaders", endpointMethod.path());
 
-		EndpointHeader customHeader = endpointMethod.headers().first("X-Custom-Header").orElse(null);
-		assertNotNull(customHeader);
-		assertEquals("{X-Custom-Header}", customHeader.value());
+		Optional<EndpointMethodParameter> headerParameter = endpointMethod.parameters().get(0);
+		assertTrue(headerParameter.isPresent());
+		assertEquals("X-Custom-Header", headerParameter.get().name());
 
 		EndpointHeader acceptHeader = endpointMethod.headers().first("Accept").orElse(null);
 		assertNotNull(acceptHeader);
@@ -429,6 +427,37 @@ public class JaxRsContractReaderTest {
 		jaxRsContractReader.read(new EndpointTarget(MyWrongApi.class));
 	}
 
+	@Test
+	public void shouldCreateEndpointMethodWithDynamicUrlDefinition() throws Exception {
+		EndpointMethod endpointMethod = jaxRsContractReader.read(myFullyDynamicApiTarget)
+			.find(MyFullyDynamicApi.class.getMethod("dynamic", URL.class))
+				.orElseThrow(() -> new IllegalStateException("Method not found..."));;
+
+		assertEquals("{endpoint}", endpointMethod.path());
+
+		Optional<EndpointMethodParameter> parameter = endpointMethod.parameters().get(0);
+
+		assertTrue(parameter.isPresent());
+		assertEquals("endpoint", parameter.get().name());
+		assertEquals(URL.class, parameter.get().javaType().unwrap());
+	}
+
+	@Test
+	public void shouldCreateEndpointMethodWithDynamicCookieParameter() throws Exception {
+		EndpointMethod endpointMethod = jaxRsContractReader.read(myApiTypeTarget)
+			.find(MyApiType.class.getMethod("cookie", String.class))
+				.orElseThrow(() -> new IllegalStateException("Method not found..."));;
+
+		assertEquals("http://my.api.com/cookie", endpointMethod.path());
+
+		Optional<EndpointMethodParameter> parameter = endpointMethod.parameters().get(0);
+
+		assertTrue(parameter.isPresent());
+		assertTrue(parameter.get().cookie());
+		assertEquals("my-cookie", parameter.get().name());
+		assertEquals(String.class, parameter.get().javaType().unwrap());
+	}
+
 	@ApplicationPath("http://my.api.com")
 	interface MyApiType {
 
@@ -479,7 +508,11 @@ public class JaxRsContractReaderTest {
 		@GET
 		@Consumes("application/json")
 		@Produces("application/json")
-		public Object mergeHeaders(Object body, @HeaderParam("X-Custom-Header") String customHeader);
+		public Object mergeHeaders(Object body);
+
+		@Path("/cookie")
+		@GET
+		public String cookie(@CookieParam("my-cookie") String cookie);
 
 	}
 
@@ -598,6 +631,13 @@ public class JaxRsContractReaderTest {
 	interface MyWrongApi {
 
 		public void wrong();
+	}
+
+	interface MyFullyDynamicApi {
+
+		@Path("{endpoint}")
+		@GET
+		public String dynamic(@PathParam("endpoint") URL endpoint);
 	}
 
 	class MyModel {

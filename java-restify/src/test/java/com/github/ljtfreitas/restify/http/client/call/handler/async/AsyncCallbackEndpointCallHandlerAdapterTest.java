@@ -97,49 +97,49 @@ public class AsyncCallbackEndpointCallHandlerAdapterTest {
 	}
 
 	private EndpointMethod createEndpointMethodWithSuccessCallback() throws Exception {
-		EndpointMethodParameters parameters = new EndpointMethodParameters();
-		parameters.put(new EndpointMethodParameter(0, "callback",
-				new SimpleParameterizedType(EndpointCallSuccessCallback.class, null, String.class), EndpointMethodParameterType.ENDPOINT_CALLBACK));
+		EndpointMethodParameters parameters = new EndpointMethodParameters()
+				.put(new EndpointMethodParameter(0, "callback",
+						new SimpleParameterizedType(EndpointCallSuccessCallback.class, null, String.class), EndpointMethodParameterType.ENDPOINT_CALLBACK));
 
 		return new SimpleEndpointMethod(SomeType.class.getMethod("asyncWithSuccessCallback", EndpointCallSuccessCallback.class), parameters);
 	}
 
 	private EndpointMethod createEndpointMethodWithFailureCallback() throws Exception {
-		EndpointMethodParameters parameters = new EndpointMethodParameters();
-		parameters.put(new EndpointMethodParameter(0, "callback", EndpointCallFailureCallback.class, EndpointMethodParameterType.ENDPOINT_CALLBACK));
+		EndpointMethodParameters parameters = new EndpointMethodParameters()
+				.put(new EndpointMethodParameter(0, "callback", EndpointCallFailureCallback.class, EndpointMethodParameterType.ENDPOINT_CALLBACK));
 
 		return new SimpleEndpointMethod(SomeType.class.getMethod("asyncWithFailureCallback", EndpointCallFailureCallback.class), parameters);
 	}
 
 	private EndpointMethod createEndpointMethodWithSingleCallback() throws Exception {
-		EndpointMethodParameters parameters = new EndpointMethodParameters();
-		parameters.put(new EndpointMethodParameter(0, "callback",
-				new SimpleParameterizedType(EndpointCallCallback.class, null, String.class), EndpointMethodParameterType.ENDPOINT_CALLBACK));
+		EndpointMethodParameters parameters = new EndpointMethodParameters()
+				.put(new EndpointMethodParameter(0, "callback",
+						new SimpleParameterizedType(EndpointCallCallback.class, null, String.class), EndpointMethodParameterType.ENDPOINT_CALLBACK));
 
 		return new SimpleEndpointMethod(SomeType.class.getMethod("asyncWithSingleCallback", EndpointCallCallback.class), parameters);
 	}
 
 	private EndpointMethod createEndpointMethodWithMultiplesCallbacks() throws Exception {
-		EndpointMethodParameters parameters = new EndpointMethodParameters();
-		parameters.put(new EndpointMethodParameter(0, "successCallback",
-				new SimpleParameterizedType(EndpointCallSuccessCallback.class, null, String.class), EndpointMethodParameterType.ENDPOINT_CALLBACK));
-		parameters.put(new EndpointMethodParameter(1, "failureCallback", EndpointCallFailureCallback.class, EndpointMethodParameterType.ENDPOINT_CALLBACK));
+		EndpointMethodParameters parameters = new EndpointMethodParameters()
+				.put(new EndpointMethodParameter(0, "successCallback",
+						new SimpleParameterizedType(EndpointCallSuccessCallback.class, null, String.class), EndpointMethodParameterType.ENDPOINT_CALLBACK))
+				.put(new EndpointMethodParameter(1, "failureCallback", EndpointCallFailureCallback.class, EndpointMethodParameterType.ENDPOINT_CALLBACK));
 
 		return new SimpleEndpointMethod(SomeType.class.getMethod("asyncWithMultiplesCallbacks",
 				EndpointCallSuccessCallback.class, EndpointCallFailureCallback.class), parameters);
 	}
 
 	private EndpointMethod createEndpointMethodWithResponseCallback() throws Exception {
-		EndpointMethodParameters parameters = new EndpointMethodParameters();
-		parameters.put(new EndpointMethodParameter(0, "callback",
-				new SimpleParameterizedType(EndpointResponseCallback.class, null, String.class), EndpointMethodParameterType.ENDPOINT_CALLBACK));
+		EndpointMethodParameters parameters = new EndpointMethodParameters()
+				.put(new EndpointMethodParameter(0, "callback",
+						new SimpleParameterizedType(EndpointResponseCallback.class, null, String.class), EndpointMethodParameterType.ENDPOINT_CALLBACK));
 
 		return new SimpleEndpointMethod(SomeType.class.getMethod("asyncWithEndpointResponseCallback", EndpointResponseCallback.class), parameters);
 	}
 
 	private EndpointMethod createEndpointMethodWithResponseFailureCallback() throws Exception {
-		EndpointMethodParameters parameters = new EndpointMethodParameters();
-		parameters.put(new EndpointMethodParameter(0, "callback", EndpointResponseFailureCallback.class, EndpointMethodParameterType.ENDPOINT_CALLBACK));
+		EndpointMethodParameters parameters = new EndpointMethodParameters()
+				.put(new EndpointMethodParameter(0, "callback", EndpointResponseFailureCallback.class, EndpointMethodParameterType.ENDPOINT_CALLBACK));
 
 		return new SimpleEndpointMethod(SomeType.class.getMethod("asyncWithEndpointResponseFailureCallback", EndpointResponseFailureCallback.class), parameters);
 	}

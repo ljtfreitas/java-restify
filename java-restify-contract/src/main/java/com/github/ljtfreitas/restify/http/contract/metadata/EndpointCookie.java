@@ -23,38 +23,21 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.http.spring.contract.metadata;
+package com.github.ljtfreitas.restify.http.contract.metadata;
 
-import java.lang.reflect.Type;
+import static com.github.ljtfreitas.restify.util.Preconditions.nonNull;
 
-import com.github.ljtfreitas.restify.http.contract.ParameterSerializer;
-import com.github.ljtfreitas.restify.http.contract.QueryParameterSerializer;
-import com.github.ljtfreitas.restify.http.contract.QueryParametersSerializer;
-import com.github.ljtfreitas.restify.http.contract.DefaultParameterSerializer;
+public class EndpointCookie {
 
-class SpringWebEndpointMethodParameterSerializer {
+	private final String name;
+	private final String value;
 
-	static Class<? extends ParameterSerializer> of(SpringWebJavaMethodParameterMetadata parameter) {
-		if (parameter.query()) {
-			return SpringWebQueryParameterSerializer.class;
-		} else {
-			return DefaultParameterSerializer.class;
-		}
+	public EndpointCookie(String name, String value) {
+		this.name = nonNull(name, "EndpointCookie need a name.");
+		this.value = nonNull(value, "EndpointCookie need a value.");
 	}
 
-	public static class SpringWebQueryParameterSerializer implements ParameterSerializer {
-
-		private final QueryParameterSerializer queryParameterSerializer = new QueryParameterSerializer();
-
-		private final QueryParametersSerializer queryParametersSerializer = new QueryParametersSerializer();
-
-		@Override
-		public String serialize(String name, Type type, Object source) {
-			if (queryParametersSerializer.supports(type, source)) {
-				return queryParametersSerializer.serialize(name, type, source);
-			} else {
-				return queryParameterSerializer.serialize(name, type, source);
-			}
-		}
+	public EndpointHeader asHeader() {
+		return new EndpointHeader("Cookie", name + "=" + value);
 	}
 }

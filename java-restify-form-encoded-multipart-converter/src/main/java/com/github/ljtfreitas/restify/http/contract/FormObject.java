@@ -28,10 +28,13 @@ package com.github.ljtfreitas.restify.http.contract;
 import static com.github.ljtfreitas.restify.util.Preconditions.isFalse;
 import static com.github.ljtfreitas.restify.util.Preconditions.isTrue;
 
+import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
+import com.github.ljtfreitas.restify.http.contract.Form.Field;
 import com.github.ljtfreitas.restify.http.contract.Parameters.Parameter;
 import com.github.ljtfreitas.restify.util.Tryable;
 
@@ -39,15 +42,16 @@ public class FormObject {
 
 	private final Class<?> type;
 	private final String name;
-	private final Map<String, FormObjectField> fields = new LinkedHashMap<>();
+	private final Map<String, FormObjectField> fields;
 
-	FormObject(Class<?> type) {
-		isTrue(type.isAnnotationPresent(Form.class), "Your form class type must be annotated with @Form.");
+	private FormObject(Class<?> type, String name, Map<String, FormObjectField> fields) {
 		this.type = type;
-		this.name = Optional.ofNullable(type.getAnnotation(Form.class).value())
-				.filter(value -> !value.isEmpty())
-					.map(value -> value.endsWith(".") ? value : value + ".")
-						.orElse("");
+		this.name = name;
+		this.fields = fields;
+	}
+
+	public String name() {
+		return name;
 	}
 
 	public Optional<FormObjectField> fieldBy(String name) {
@@ -67,21 +71,55 @@ public class FormObject {
 					(a, b) -> b);
 	}
 
-	void put(String name, boolean indexed, java.lang.reflect.Field field) {
-		isFalse(fields.containsKey(name), "Duplicate field [" + name + " on @Form object: " + type);
-		fields.put(name, new FormObjectField(name, indexed, field));
+	public static FormObject of(Class<?> formObjectType) {
+		isTrue(formObjectType.isAnnotationPresent(Form.class), "Your form class type must be annotated with @Form.");
+
+		String name = Optional.ofNullable(formObjectType.getAnnotation(Form.class).value())
+				.filter(value -> !value.isEmpty())
+					.map(value -> value.endsWith(".") ? value : value + ".")
+						.orElse("");
+
+		Map<String, FormObjectField> fields = new LinkedHashMap<>();
+
+		Arrays.stream(formObjectType.getDeclaredFields())
+			.filter(field -> field.isAnnotationPresent(Field.class))
+				.forEach(field -> {
+					FormObjectField formObjectField = FormObjectField.of(field);
+
+					isFalse(fields.containsKey(formObjectField.name),
+							"Duplicate field [" + name + " on @Form object: " + formObjectType);
+
+					fields.put(formObjectField.name, formObjectField);
+		});
+
+		return new FormObject(formObjectType, name, fields);
 	}
 
-	public class FormObjectField {
+	public static class FormObjectField {
 
 		private final String name;
 		private final boolean indexed;
+		private final FormFieldSerializer serializer;
 		private final java.lang.reflect.Field field;
 
-		FormObjectField(String name, boolean indexed, java.lang.reflect.Field field) {
+		private FormObjectField(String name, boolean indexed, FormFieldSerializer serializer,
+				java.lang.reflect.Field field) {
 			this.name = name;
 			this.indexed = indexed;
+			this.serializer = serializer;
 			this.field = field;
+		}
+
+		public String name() {
+			return name;
+		}
+
+		public boolean indexed() {
+			return indexed;
+		}
+
+		public FormFieldSerializer serializer() {
+			return serializer;
 		}
 
 		private Parameters serialize(Object source) throws Exception {
@@ -101,7 +139,7 @@ public class FormObject {
 					return serializeIterable(name, value);
 
 				} else {
-					return Parameters.of(Parameter.of(name, value.toString()));
+					return Parameters.of(Parameter.of(name, serializer.serialize(value.getClass(), value).toString()));
 				}
 			} else {
 				return Parameters.empty();
@@ -180,6 +218,38 @@ public class FormObject {
 			} else {
 				return value;
 			}
+		}
+
+		@Override
+		public int hashCode() {
+			return Objects.hash(name, field);
+		}
+
+		@Override
+		public boolean equals(Object obj) {
+			if (obj instanceof FormObjectField) {
+				FormObjectField that = (FormObjectField) obj;
+
+				return Objects.equals(name, that.name)
+					&& Objects.equals(field, that.field);
+
+			} else {
+				return false;
+			}
+		}
+
+		public static FormObjectField of(java.lang.reflect.Field field) {
+			isTrue(field.isAnnotationPresent(Field.class), "Your form field must be annotated with @Field.");
+
+			Field annotation = field.getAnnotation(Field.class);
+
+			String name = annotation.value().isEmpty() ? field.getName() : annotation.value();
+			boolean indexed = annotation.indexed();
+
+			FormFieldSerializer serializer = Tryable.of(annotation.serializer()::newInstance,
+					(e) -> new UnsupportedOperationException("Cannot create a instance of serializer " + annotation.serializer(), e));
+
+			return new FormObjectField(name, indexed, serializer, field);
 		}
 	}
 }

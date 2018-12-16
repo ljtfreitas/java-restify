@@ -30,18 +30,19 @@ import static com.github.ljtfreitas.restify.util.Preconditions.isTrue;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.lang.reflect.Type;
-import java.net.URL;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import com.github.ljtfreitas.restify.http.contract.Cookie;
+import com.github.ljtfreitas.restify.http.contract.Header;
 import com.github.ljtfreitas.restify.http.contract.ParameterSerializer;
 import com.github.ljtfreitas.restify.http.contract.Path;
 import com.github.ljtfreitas.restify.http.contract.Version;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethodParameter.EndpointMethodParameterType;
-import com.github.ljtfreitas.restify.util.Tryable;
 
 public class DefaultContractReader implements ContractReader {
 
@@ -86,27 +87,23 @@ public class DefaultContractReader implements ContractReader {
 	}
 
 	private String endpointPath(EndpointTarget target, ContractTypeMetadata javaTypeMetadata, ContractMethodMetadata javaMethodMetadata) {
-		String endpoint = new StringBuilder()
+		return new EndpointPathBuilder()
 				.append(endpointTarget(target))
 				.append(endpointTypePath(javaTypeMetadata))
 				.append(endpointVersion(javaTypeMetadata, javaMethodMetadata))
 				.append(endpointMethodPath(javaMethodMetadata))
-				.toString();
-
-		return Tryable.of(() -> new URL(endpoint)).toString();
+				.build();
 	}
 
 	private String endpointTarget(EndpointTarget target) {
-		String endpoint = expressionResolver.resolve(target.endpoint().orElse(""));
-		return endpoint.endsWith("/") ? endpoint.substring(0, endpoint.length() - 1) : endpoint;
+		return expressionResolver.resolve(target.endpoint().orElse(""));
 	}
 
 	private String endpointTypePath(ContractTypeMetadata javaTypeMetadata) {
 		return Arrays.stream(javaTypeMetadata.paths())
 				.map(Path::value)
 					.map(p -> expressionResolver.resolve(p))
-						.map(p -> p.endsWith("/") ? p.substring(0, p.length() - 1) : p)
-							.collect(Collectors.joining());
+						.collect(Collectors.joining());
 	}
 
 	private String endpointVersion(ContractTypeMetadata javaTypeMetadata, ContractMethodMetadata javaMethodMetadata) {
@@ -122,21 +119,17 @@ public class DefaultContractReader implements ContractReader {
 
 		return Optional.ofNullable(version)
 			.map(Version::value)
-				.map(v -> v.endsWith("/") ? v.substring(0, v.length() - 1) : v)
-					.map(v -> v.startsWith("/") || v.isEmpty() ? v : "/" + v)
-						.orElse("");
+				.orElse("");
 	}
 
 	private String endpointMethodVersion(String version) {
 		 return Optional.ofNullable(version)
 			.filter(v -> !v.trim().isEmpty())
-				.map(v -> v.substring(1))
-					.orElse(null);
+				.orElse(null);
 	}
 
 	private String endpointMethodPath(ContractMethodMetadata javaMethodMetadata) {
-		String endpointMethodPath = javaMethodMetadata.path().map(Path::value).orElse("");
-		return (endpointMethodPath.startsWith("/") || endpointMethodPath.isEmpty() ? endpointMethodPath : "/" + endpointMethodPath);
+		return javaMethodMetadata.path().map(Path::value).orElse("");
 	}
 
 	private EndpointMethodParameters endpointMethodParameters(Method javaMethod, EndpointTarget target) {
@@ -153,7 +146,8 @@ public class DefaultContractReader implements ContractReader {
 				javaMethodParameterMetadata.header()? EndpointMethodParameterType.HEADER :
 					javaMethodParameterMetadata.body() ? EndpointMethodParameterType.BODY :
 						javaMethodParameterMetadata.query() ? EndpointMethodParameterType.QUERY_STRING :
-							EndpointMethodParameterType.ENDPOINT_CALLBACK;
+							javaMethodParameterMetadata.cookie() ? EndpointMethodParameterType.COOKIE :
+								EndpointMethodParameterType.ENDPOINT_CALLBACK;
 
 			if (type == EndpointMethodParameterType.ENDPOINT_CALLBACK) {
 				isTrue(parameters.callbacks(javaMethodParameterMetadata.javaType().classType()).isEmpty(),
@@ -163,7 +157,7 @@ public class DefaultContractReader implements ContractReader {
 			ParameterSerializer serializer = Optional.ofNullable(javaMethodParameterMetadata.serializer())
 					.map(s -> serializerOf(javaMethodParameterMetadata)).orElse(null);
 
-			parameters.put(new EndpointMethodParameter(position, javaMethodParameterMetadata.name(), javaMethodParameterMetadata.javaType(), type, serializer));
+			parameters = parameters.put(new EndpointMethodParameter(position, javaMethodParameterMetadata.name(), javaMethodParameterMetadata.javaType(), type, serializer));
 		}
 
 		return parameters;
@@ -178,9 +172,21 @@ public class DefaultContractReader implements ContractReader {
 	}
 
 	private EndpointHeaders endpointMethodHeaders(ContractTypeMetadata javaTypeMetadata, ContractMethodMetadata javaMethodMetadata) {
-		return new EndpointHeaders(
-				Stream.concat(javaTypeMetadata.headers().stream(), javaMethodMetadata.headers().stream())
-					.map(h -> new EndpointHeader(h.name(), h.value()))
-						.collect(Collectors.toSet()));
+		Collection<Header> headersOfType = javaTypeMetadata.headers();
+		Collection<Header> headersOfMethod = javaMethodMetadata.headers();
+
+		Collection<EndpointHeader> headers = Stream.concat(headersOfType.stream(), headersOfMethod.stream())
+				.map(h -> new EndpointHeader(h.name(), h.value()))
+					.collect(Collectors.toCollection(HashSet::new));
+
+		Collection<Cookie> cookiesOfType = javaTypeMetadata.cookies();
+		Collection<Cookie> cookiesOfMethod = javaMethodMetadata.cookies();
+
+		headers.addAll(Stream.concat(cookiesOfType.stream(), cookiesOfMethod.stream())
+				.map(c -> new EndpointCookie(c.name(), c.value()))
+					.map(EndpointCookie::asHeader)
+						.collect(Collectors.toCollection(HashSet::new)));
+
+		return new EndpointHeaders(headers);
 	}
 }

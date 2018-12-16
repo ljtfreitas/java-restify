@@ -25,14 +25,22 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.message.converter.form.multipart;
 
+import java.util.Optional;
+
 class MultipartField<T> {
 
 	private final String name;
 	private final T value;
+	private final String contentType;
 
 	public MultipartField(String name, T value) {
+		this(name, value, null);
+	}
+
+	public MultipartField(String name, T value, String contentType) {
 		this.name = name;
 		this.value = value;
+		this.contentType = contentType;
 	}
 
 	public String name() {
@@ -43,4 +51,7 @@ class MultipartField<T> {
 		return value;
 	}
 
+	public Optional<String> contentType() {
+		return Optional.ofNullable(contentType);
+	}
 }

@@ -33,6 +33,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.Optional;
 
+import com.github.ljtfreitas.restify.http.contract.Cookie;
+import com.github.ljtfreitas.restify.http.contract.Cookies;
 import com.github.ljtfreitas.restify.http.contract.Header;
 import com.github.ljtfreitas.restify.http.contract.Headers;
 import com.github.ljtfreitas.restify.http.contract.Path;
@@ -44,6 +46,7 @@ class ContractTypeMetadata {
 	private final Class<?> javaType;
 	private final Path path;
 	private final Collection<Header> headers;
+	private final Collection<Cookie> cookies;
 	private final Version version;
 	private final ContractTypeMetadata parent;
 
@@ -62,6 +65,11 @@ class ContractTypeMetadata {
 				.map(Headers::value)
 					.map(array -> Arrays.asList(array))
 						.orElseGet(() -> new ArrayList<>(annotationScanner.scanAll(Header.class)));
+
+		this.cookies = Optional.ofNullable(javaType.getAnnotation(Cookies.class))
+				.map(Cookies::value)
+					.map(array -> Arrays.asList(array))
+						.orElseGet(() -> new ArrayList<>(annotationScanner.scanAll(Cookie.class)));
 
 		this.version = javaType.getAnnotation(Version.class);
 	}
@@ -93,6 +101,18 @@ class ContractTypeMetadata {
 		headers.addAll(this.headers);
 
 		return headers;
+	}
+
+	public Collection<Cookie> cookies() {
+		Collection<Cookie> cookies = new ArrayList<>();
+
+		Optional.ofNullable(parent)
+			.map(p -> p.cookies())
+				.ifPresent(c -> cookies.addAll(c));
+
+		cookies.addAll(this.cookies);
+
+		return cookies;
 	}
 
 	public Class<?> javaType() {

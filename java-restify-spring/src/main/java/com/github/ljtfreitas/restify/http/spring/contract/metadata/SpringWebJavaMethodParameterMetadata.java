@@ -26,11 +26,14 @@
 package com.github.ljtfreitas.restify.http.spring.contract.metadata;
 
 import static com.github.ljtfreitas.restify.util.Preconditions.isFalse;
+import static com.github.ljtfreitas.restify.util.Preconditions.isTrue;
 
+import java.lang.annotation.Annotation;
+import java.util.Arrays;
 import java.util.Optional;
-import java.util.stream.Stream;
 
 import org.springframework.core.annotation.AnnotationUtils;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestHeader;
@@ -44,10 +47,7 @@ class SpringWebJavaMethodParameterMetadata {
 
 	private final JavaType type;
 	private final String name;
-	private final PathVariable pathParameter;
-	private final RequestHeader headerParameter;
-	private final RequestBody bodyParameter;
-	private final RequestParam queryParameter;
+	private final Annotation annotationParameter;
 	private final Class<? extends ParameterSerializer> serializerType;
 
 	public SpringWebJavaMethodParameterMetadata(java.lang.reflect.Parameter javaMethodParameter) {
@@ -55,27 +55,34 @@ class SpringWebJavaMethodParameterMetadata {
 	}
 
 	public SpringWebJavaMethodParameterMetadata(java.lang.reflect.Parameter javaMethodParameter, Class<?> targetClassType) {
+		isTrue(javaMethodParameter.getAnnotations().length <= 1, "Parameter " + javaMethodParameter + " has more than one annotation.");
+
 		this.type = JavaType.of(new JavaTypeResolver(targetClassType).parameterizedTypeOf(javaMethodParameter));
 
-		this.pathParameter = Optional.ofNullable(javaMethodParameter.getAnnotation(PathVariable.class))
+		PathVariable pathParameter = Optional.ofNullable(javaMethodParameter.getAnnotation(PathVariable.class))
 				.map(a -> AnnotationUtils.synthesizeAnnotation(a, javaMethodParameter))
 					.orElse(null);
 
-		this.headerParameter = Optional.ofNullable(javaMethodParameter.getAnnotation(RequestHeader.class))
+		RequestHeader headerParameter = Optional.ofNullable(javaMethodParameter.getAnnotation(RequestHeader.class))
 				.map(a -> AnnotationUtils.synthesizeAnnotation(a, javaMethodParameter))
 					.orElse(null);
 
-		this.bodyParameter = Optional.ofNullable(javaMethodParameter.getAnnotation(RequestBody.class))
+		RequestBody bodyParameter = Optional.ofNullable(javaMethodParameter.getAnnotation(RequestBody.class))
 				.map(a -> AnnotationUtils.synthesizeAnnotation(a, javaMethodParameter))
 					.orElse(null);
 
-		this.queryParameter = Optional.ofNullable(javaMethodParameter.getAnnotation(RequestParam.class))
+		RequestParam queryParameter = Optional.ofNullable(javaMethodParameter.getAnnotation(RequestParam.class))
 				.map(a -> AnnotationUtils.synthesizeAnnotation(a, javaMethodParameter))
 					.orElse(null);
 
-		isFalse(Stream.of(pathParameter, headerParameter, bodyParameter, queryParameter).allMatch(a -> a == null),
-				"The parameter [" + javaMethodParameter.getName() + "] of method [" + javaMethodParameter.getDeclaringExecutable() + "] is not annotated with "
-						+ "@PathVariable, @RequestHeader, @RequestBody or @RequestParam");
+		CookieValue cookieParameter = Optional.ofNullable(javaMethodParameter.getAnnotation(CookieValue.class))
+				.map(a -> AnnotationUtils.synthesizeAnnotation(a, javaMethodParameter))
+					.orElse(null);
+
+		this.annotationParameter = Arrays.asList(pathParameter, headerParameter, bodyParameter, queryParameter, cookieParameter)
+				.stream().filter(a -> a != null).findFirst()
+					.orElseThrow(()-> new IllegalArgumentException("The parameter [" + javaMethodParameter.getName() + "] of method [" + javaMethodParameter.getDeclaringExecutable() + "] isn't annotated with "
+						+ "@PathVariable, @RequestHeader, @CookieValue, @RequestBody or @RequestParam"));
 
 		String name = Optional.ofNullable(pathParameter)
 				.map(PathVariable::value).filter(s -> !s.trim().isEmpty())
@@ -83,9 +90,11 @@ class SpringWebJavaMethodParameterMetadata {
 						.map(RequestHeader::value).filter(s -> !s.trim().isEmpty())
 							.orElseGet(() -> Optional.ofNullable(queryParameter)
 								.map(RequestParam::value).filter(s -> !s.trim().isEmpty())
-									.orElseGet(() -> Optional.ofNullable(javaMethodParameter.getName())
-											.filter(n -> javaMethodParameter.isNamePresent() && !n.isEmpty())
-												.orElse(null))));
+									.orElseGet(() -> Optional.ofNullable(cookieParameter)
+										.map(CookieValue::value).filter(s -> !s.trim().isEmpty())
+											.orElseGet(() -> Optional.ofNullable(javaMethodParameter.getName())
+												.filter(n -> javaMethodParameter.isNamePresent() && !n.isEmpty())
+													.orElse(null)))));
 
 		isFalse(needName() && name == null, "Could not get the name of the parameter [" + javaMethodParameter + "], "
 				+ "from method [" + javaMethodParameter.getDeclaringExecutable() + "]");
@@ -95,7 +104,10 @@ class SpringWebJavaMethodParameterMetadata {
 	}
 
 	private boolean needName() {
-		return pathParameter != null || queryParameter != null || headerParameter != null;
+		return annotationParameter instanceof PathVariable
+			|| annotationParameter instanceof RequestParam
+			|| annotationParameter instanceof RequestHeader
+			|| annotationParameter instanceof CookieValue;
 	}
 
 	public String name() {
@@ -107,19 +119,23 @@ class SpringWebJavaMethodParameterMetadata {
 	}
 
 	public boolean path() {
-		return pathParameter != null;
+		return annotationParameter instanceof PathVariable;
 	}
 
 	public boolean body() {
-		return bodyParameter != null;
+		return annotationParameter instanceof RequestBody;
 	}
 
 	public boolean header() {
-		return headerParameter != null;
+		return annotationParameter instanceof RequestHeader;
+	}
+
+	public boolean cookie() {
+		return annotationParameter instanceof CookieValue;
 	}
 
 	public boolean query() {
-		return queryParameter != null;
+		return annotationParameter instanceof RequestParam;
 	}
 
 	public Class<? extends ParameterSerializer> serializer() {

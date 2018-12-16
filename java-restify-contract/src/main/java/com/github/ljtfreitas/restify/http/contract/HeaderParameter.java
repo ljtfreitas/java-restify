@@ -36,4 +36,6 @@ import java.lang.annotation.Target;
 public @interface HeaderParameter {
 
 	String value() default "";
+
+	Class<? extends ParameterSerializer> serializer() default DefaultParameterSerializer.class;
 }

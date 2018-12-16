@@ -28,6 +28,7 @@ package com.github.ljtfreitas.restify.http.client.message;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Collection;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 public class Cookies {
@@ -39,24 +40,35 @@ public class Cookies {
 	}
 
 	public Cookies(Cookie... cookies) {
-		this.cookies = new ArrayList<>(Arrays.asList(cookies));
+		this(Arrays.asList(cookies));
 	}
 
-	public Cookies(String... cookies) {
-		this.cookies = new ArrayList<>(Arrays.stream(cookies)
-				.map(c -> c.split("="))
-					.filter(c -> c.length == 2)
-						.map(c -> new Cookie(c[0], c[1]))
-							.collect(Collectors.toList()));
+	private Cookies(Collection<Cookie> cookies) {
+		this.cookies = new ArrayList<>(cookies);
 	}
 
 	public Cookies add(String name, String value) {
-		return add(new Cookie(name, value));
+		Cookies cookies = new Cookies(this.cookies);
+		cookies.addNew(new Cookie(name, value));
+		return cookies;
 	}
 
 	public Cookies add(Cookie cookie) {
+		Cookies cookies = new Cookies(this.cookies);
+		cookies.addNew(cookie);
+		return cookies;
+	}
+
+	private void addNew(Cookie cookie) {
 		cookies.add(cookie);
-		return this;
+	}
+
+	public Optional<Cookie> get(String name) {
+		return cookies.stream().filter(c -> c.name().equals(name)).findFirst();
+	}
+
+	public boolean empty() {
+		return cookies.isEmpty();
 	}
 
 	@Override
@@ -66,5 +78,15 @@ public class Cookies {
 				.collect(Collectors.joining("; "));
 
 		return content;
+	}
+
+	public static final Cookies of(String cookies) {
+		Collection<Cookie> cookiesAsCollection = Arrays.stream(cookies.split(";"))
+			.map(c -> c.split("="))
+				.filter(c -> c.length == 2)
+					.map(c -> new Cookie(c[0].trim(), c[1].trim()))
+						.collect(Collectors.toList());
+
+		return new Cookies(cookiesAsCollection);
 	}
 }

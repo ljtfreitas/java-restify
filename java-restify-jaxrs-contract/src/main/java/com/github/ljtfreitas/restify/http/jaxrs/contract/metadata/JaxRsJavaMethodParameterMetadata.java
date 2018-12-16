@@ -32,13 +32,14 @@ import java.lang.annotation.Annotation;
 import java.util.Arrays;
 import java.util.Optional;
 
+import javax.ws.rs.CookieParam;
 import javax.ws.rs.HeaderParam;
 import javax.ws.rs.PathParam;
 import javax.ws.rs.QueryParam;
 
 import com.github.ljtfreitas.restify.http.contract.ParameterSerializer;
 import com.github.ljtfreitas.restify.http.contract.QueryParameterSerializer;
-import com.github.ljtfreitas.restify.http.contract.SimpleParameterSerializer;
+import com.github.ljtfreitas.restify.http.contract.DefaultParameterSerializer;
 import com.github.ljtfreitas.restify.reflection.JavaType;
 import com.github.ljtfreitas.restify.reflection.JavaTypeResolver;
 
@@ -50,15 +51,16 @@ class JaxRsJavaMethodParameterMetadata {
 	private final ParameterSerializer serializer;
 
 	public JaxRsJavaMethodParameterMetadata(java.lang.reflect.Parameter javaMethodParameter, Class<?> targetClassType) {
+		isTrue(javaMethodParameter.getAnnotations().length <= 1, "Parameter " + javaMethodParameter + " has more than one annotation.");
+
 		this.type = JavaType.of(new JavaTypeResolver(targetClassType).parameterizedTypeOf(javaMethodParameter));
 
 		PathParam pathParameter = javaMethodParameter.getAnnotation(PathParam.class);
 		HeaderParam headerParameter = javaMethodParameter.getAnnotation(HeaderParam.class);
+		CookieParam cookieParameter = javaMethodParameter.getAnnotation(CookieParam.class);
 		QueryParam queryParameter = javaMethodParameter.getAnnotation(QueryParam.class);
 
-		isTrue(javaMethodParameter.getAnnotations().length <= 1, "Parameter " + javaMethodParameter + " has more than one annotation.");
-
-		this.annotationParameter = Arrays.asList(pathParameter, headerParameter, queryParameter)
+		this.annotationParameter = Arrays.asList(pathParameter, headerParameter, queryParameter, cookieParameter)
 				.stream().filter(a -> a != null).findFirst().orElse(null);
 
 		String name = Optional.ofNullable(pathParameter)
@@ -67,22 +69,25 @@ class JaxRsJavaMethodParameterMetadata {
 						.map(HeaderParam::value).filter(s -> !s.trim().isEmpty())
 							.orElseGet(() -> Optional.ofNullable(queryParameter)
 								.map(QueryParam::value).filter(s -> !s.trim().isEmpty())
-									.orElseGet(() -> Optional.ofNullable(javaMethodParameter.getName())
-											.filter(n -> javaMethodParameter.isNamePresent() && !n.isEmpty())
-												.orElseGet(() -> "unknown"))));
+									.orElseGet(() -> Optional.ofNullable(cookieParameter)
+										.map(CookieParam::value).filter(s -> !s.trim().isEmpty())
+											.orElseGet(() -> Optional.ofNullable(javaMethodParameter.getName())
+												.filter(n -> javaMethodParameter.isNamePresent() && !n.isEmpty())
+													.orElseGet(() -> "unknown")))));
 
 		isFalse(needName() && name == null, "Could not get the name of the parameter [" + javaMethodParameter + "], "
 				+ "from method [" + javaMethodParameter.getDeclaringExecutable() + "]");
 		this.name = name;
 
 		this.serializer = (queryParameter != null) ? new QueryParameterSerializer()
-				: new SimpleParameterSerializer();
+				: new DefaultParameterSerializer();
 	}
 
 	private boolean needName() {
 		return annotationParameter instanceof PathParam
 			|| annotationParameter instanceof QueryParam
-			|| annotationParameter instanceof HeaderParam;
+			|| annotationParameter instanceof HeaderParam
+			|| annotationParameter instanceof CookieParam;
 	}
 
 	public String name() {
@@ -103,6 +108,10 @@ class JaxRsJavaMethodParameterMetadata {
 
 	public boolean header() {
 		return annotationParameter instanceof HeaderParam;
+	}
+
+	public boolean cookie() {
+		return annotationParameter instanceof CookieParam;
 	}
 
 	public boolean query() {

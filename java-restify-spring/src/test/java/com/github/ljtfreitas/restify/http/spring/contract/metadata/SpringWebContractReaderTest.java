@@ -1,13 +1,14 @@
 package com.github.ljtfreitas.restify.http.spring.contract.metadata;
 
 import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNotNull;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertTrue;
 import static org.mockito.AdditionalAnswers.returnsFirstArg;
 import static org.mockito.Matchers.anyString;
 import static org.mockito.Mockito.when;
 
 import java.lang.reflect.Type;
+import java.net.URL;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -19,6 +20,7 @@ import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -35,7 +37,6 @@ import com.github.ljtfreitas.restify.http.contract.metadata.EndpointHeader;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethod;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethodParameter;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointTarget;
-import com.github.ljtfreitas.restify.http.spring.contract.metadata.SpringWebContractReader;
 import com.github.ljtfreitas.restify.reflection.JavaType;
 import com.github.ljtfreitas.restify.reflection.SimpleGenericArrayType;
 import com.github.ljtfreitas.restify.reflection.SimpleParameterizedType;
@@ -54,11 +55,13 @@ public class SpringWebContractReaderTest {
 
 	private EndpointTarget mySimpleCrudApiTarget;
 
+	private EndpointTarget myFullyDynamicApiTarget;
+
 	@Mock
 	private ContractExpressionResolver expressionResolverMock;
 
 	@InjectMocks
-	private SpringWebContractReader springMvcContractReader;
+	private SpringWebContractReader springWebContractReader;
 
 	@Before
 	public void setup() {
@@ -72,13 +75,15 @@ public class SpringWebContractReaderTest {
 
 		mySimpleCrudApiTarget = new EndpointTarget(MySimpleCrudApi.class, "http://my.api.com");
 
+		myFullyDynamicApiTarget = new EndpointTarget(MyFullyDynamicApi.class);
+
 		when(expressionResolverMock.resolve(anyString()))
 			.then(returnsFirstArg());
 	}
 
 	@Test
 	public void shouldCreateEndpointMethodWhenMethodHasNoParameter() throws Exception {
-		EndpointMethod endpointMethod = springMvcContractReader.read(myApiTypeTarget)
+		EndpointMethod endpointMethod = springWebContractReader.read(myApiTypeTarget)
 				.find(MyApiType.class.getMethod("method"))
 					.orElseThrow(() -> new IllegalStateException("Method not found..."));
 
@@ -89,7 +94,7 @@ public class SpringWebContractReaderTest {
 
 	@Test
 	public void shouldCreateEndpointMethodWhenMethodHasSingleParameter() throws Exception {
-		EndpointMethod endpointMethod = springMvcContractReader.read(myApiTypeTarget)
+		EndpointMethod endpointMethod = springWebContractReader.read(myApiTypeTarget)
 				.find(MyApiType.class.getMethod("method", new Class[] { String.class }))
 					.orElseThrow(() -> new IllegalStateException("Method not found..."));;
 
@@ -106,7 +111,7 @@ public class SpringWebContractReaderTest {
 
 	@Test
 	public void shouldCreateEndpointMethodWhenMethodHasMultiplesParameters() throws Exception {
-		EndpointMethod endpointMethod = springMvcContractReader.read(myApiTypeTarget)
+		EndpointMethod endpointMethod = springWebContractReader.read(myApiTypeTarget)
 				.find(MyApiType.class.getMethod("method", new Class[] { String.class, String.class, Object.class }))
 					.orElseThrow(() -> new IllegalStateException("Method not found..."));
 
@@ -121,7 +126,7 @@ public class SpringWebContractReaderTest {
 
 		Optional<EndpointMethodParameter> headerParameter = endpointMethod.parameters().get(1);
 		assertTrue(headerParameter.isPresent());
-		assertEquals("contentType", headerParameter.get().name());
+		assertEquals("Content-Type", headerParameter.get().name());
 		assertTrue(headerParameter.get().header());
 
 		Optional<EndpointMethodParameter> bodyParameter = endpointMethod.parameters().get(2);
@@ -129,14 +134,12 @@ public class SpringWebContractReaderTest {
 		assertEquals("body", bodyParameter.get().name());
 		assertTrue(bodyParameter.get().body());
 
-		EndpointHeader acceptHeader = endpointMethod.headers().first("Accept").orElse(null);
-		assertNotNull(acceptHeader);
-		assertEquals("{contentType}", acceptHeader.value());
+		assertFalse(endpointMethod.headers().first("Content-Type").isPresent());
 	}
 
 	@Test
 	public void shouldCreateEndpointMethodWhenPathAnnotationOnMethodHasNoSlashOnStart() throws Exception {
-		EndpointMethod endpointMethod = springMvcContractReader.read(myApiTypeTarget)
+		EndpointMethod endpointMethod = springWebContractReader.read(myApiTypeTarget)
 				.find(MyApiType.class.getMethod("pathWithoutSlash"))
 					.orElseThrow(() -> new IllegalStateException("Method not found..."));
 
@@ -147,7 +150,7 @@ public class SpringWebContractReaderTest {
 
 	@Test
 	public void shouldCreateEndpointMethodMergingEndpointHeadersDeclaredOnTypeWithDeclaredOnMethod() throws Exception {
-		EndpointMethod endpointMethod = springMvcContractReader.read(myApiTypeTarget)
+		EndpointMethod endpointMethod = springWebContractReader.read(myApiTypeTarget)
 				.find(MyApiType.class.getMethod("mergeHeaders"))
 					.orElseThrow(() -> new IllegalStateException("Method not found..."));;
 
@@ -174,7 +177,7 @@ public class SpringWebContractReaderTest {
 
 	@Test
 	public void shouldCreateEndpointMethodWhenMethodHasCustomizedParameterNames() throws Exception {
-		EndpointMethod endpointMethod = springMvcContractReader.read(myApiTypeTarget)
+		EndpointMethod endpointMethod = springWebContractReader.read(myApiTypeTarget)
 				.find(MyApiType.class.getMethod("customizedNames", new Class[] { String.class, String.class }))
 					.orElseThrow(() -> new IllegalStateException("Method not found..."));
 
@@ -189,17 +192,15 @@ public class SpringWebContractReaderTest {
 
 		Optional<EndpointMethodParameter> headerParameter = endpointMethod.parameters().get(1);
 		assertTrue(headerParameter.isPresent());
-		assertEquals("customArgumentContentType", headerParameter.get().name());
+		assertEquals("X-Custom-Header", headerParameter.get().name());
 		assertTrue(headerParameter.get().header());
 
-		EndpointHeader acceptHeader = endpointMethod.headers().first("Accept").get();
-		assertNotNull(acceptHeader);
-		assertEquals("{customArgumentContentType}", acceptHeader.value());
+		assertFalse(endpointMethod.headers().first("X-Custom-Header").isPresent());
 	}
 
 	@Test
 	public void shouldReadMetadataOfMethodWithHttpMethodMetaAnnotation() throws Exception {
-		EndpointMethod endpointMethod = springMvcContractReader.read(myApiTypeTarget)
+		EndpointMethod endpointMethod = springWebContractReader.read(myApiTypeTarget)
 				.find(MyApiType.class.getMethod("metaAnnotationOfHttpMethod"))
 					.orElseThrow(() -> new IllegalStateException("Method not found..."));;
 
@@ -210,7 +211,7 @@ public class SpringWebContractReaderTest {
 
 	@Test
 	public void shouldReadMetadataOfMethodWithQueryStringParameter() throws Exception {
-		EndpointMethod endpointMethod = springMvcContractReader.read(myApiTypeTarget)
+		EndpointMethod endpointMethod = springWebContractReader.read(myApiTypeTarget)
 				.find(MyApiType.class.getMethod("queryString", new Class[] { Map.class }))
 					.orElseThrow(() -> new IllegalStateException("Method not found..."));
 
@@ -226,17 +227,17 @@ public class SpringWebContractReaderTest {
 
 	@Test(expected = IllegalArgumentException.class)
 	public void shouldThrowExceptionWhenMethodHasMoreThanOneBodyParameter() throws Exception {
-		springMvcContractReader.read(new EndpointTarget(MyWrongApiWithTwoBodyParameters.class, "http://my.api.com"));
+		springWebContractReader.read(new EndpointTarget(MyWrongApiWithTwoBodyParameters.class, "http://my.api.com"));
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void shouldThrowExceptionWhenMethodParameterHasNoAnnotations() throws Exception {
-		springMvcContractReader.read(new EndpointTarget(MyWrongApiWithoutParameterAnnotation.class, "http://my.api.com"));
+		springWebContractReader.read(new EndpointTarget(MyWrongApiWithoutParameterAnnotation.class, "http://my.api.com"));
 	}
 
 	@Test
 	public void shouldCreateEndpointMethodWhenInterfaceHasAInheritance() throws Exception {
-		EndpointMethod endpointMethod = springMvcContractReader.read(myInheritanceApiTarget)
+		EndpointMethod endpointMethod = springWebContractReader.read(myInheritanceApiTarget)
 				.find(MyInheritanceApiType.class.getMethod("method"))
 					.orElseThrow(() -> new IllegalStateException("Method not found..."));
 
@@ -245,7 +246,7 @@ public class SpringWebContractReaderTest {
 
 	@Test
 	public void shouldCreateEndpointMethodWhenMethodIsInherited() throws Exception {
-		EndpointMethod endpointMethod = springMvcContractReader.read(myInheritanceApiTarget)
+		EndpointMethod endpointMethod = springWebContractReader.read(myInheritanceApiTarget)
 				.find(MyInheritanceApiType.class.getMethod("inheritedMethod"))
 					.orElseThrow(() -> new IllegalStateException("Method not found..."));
 
@@ -254,7 +255,7 @@ public class SpringWebContractReaderTest {
 
 	@Test
 	public void shouldCreateEndpointMethodWhenMethodHasAGenericParameter() throws Exception {
-		EndpointMethod endpointMethod = springMvcContractReader.read(myGenericSpecificApiTarget)
+		EndpointMethod endpointMethod = springWebContractReader.read(myGenericSpecificApiTarget)
 				.find(MySpecificApi.class.getMethod("create", new Class[] { Object.class }))
 					.orElseThrow(() -> new IllegalStateException("Method not found..."));
 
@@ -267,7 +268,7 @@ public class SpringWebContractReaderTest {
 
 	@Test
 	public void shouldCreateEndpointMethodWhenMethodReturnTypeIsASimpleGenericType() throws Exception {
-		EndpointMethod endpointMethod = springMvcContractReader.read(myGenericSpecificApiTarget)
+		EndpointMethod endpointMethod = springWebContractReader.read(myGenericSpecificApiTarget)
 				.find(MySpecificApi.class.getMethod("find", new Class[] { int.class }))
 					.orElseThrow(() -> new IllegalStateException("Method not found..."));;
 
@@ -277,7 +278,7 @@ public class SpringWebContractReaderTest {
 
 	@Test
 	public void shouldCreateEndpointMethodWhenMethodReturnTypeIsACollectionWithGenericType() throws Exception {
-		EndpointMethod endpointMethod = springMvcContractReader.read(myGenericSpecificApiTarget)
+		EndpointMethod endpointMethod = springWebContractReader.read(myGenericSpecificApiTarget)
 				.find(MySpecificApi.class.getMethod("allAsList"))
 					.orElseThrow(() -> new IllegalStateException("Method not found..."));;
 
@@ -287,7 +288,7 @@ public class SpringWebContractReaderTest {
 
 	@Test
 	public void shouldCreateEndpointMethodWhenMethodReturnTypeIsGenericArray() throws Exception {
-		EndpointMethod endpointMethod = springMvcContractReader.read(myGenericSpecificApiTarget)
+		EndpointMethod endpointMethod = springWebContractReader.read(myGenericSpecificApiTarget)
 				.find(MySpecificApi.class.getMethod("allAsArray"))
 					.orElseThrow(() -> new IllegalStateException("Method not found..."));;
 
@@ -297,7 +298,7 @@ public class SpringWebContractReaderTest {
 
 	@Test
 	public void shouldCreateEndpointMethodWhenMethodReturnTypeIsArray() throws Exception {
-		EndpointMethod endpointMethod = springMvcContractReader.read(myGenericSpecificApiTarget)
+		EndpointMethod endpointMethod = springWebContractReader.read(myGenericSpecificApiTarget)
 				.find(MySpecificApi.class.getMethod("myModelArray"))
 					.orElseThrow(() -> new IllegalStateException("Method not found..."));;
 
@@ -307,7 +308,7 @@ public class SpringWebContractReaderTest {
 
 	@Test
 	public void shouldCreateEndpointMethodWhenMethodReturnTypeIsMap() throws Exception {
-		EndpointMethod endpointMethod = springMvcContractReader.read(myGenericSpecificApiTarget)
+		EndpointMethod endpointMethod = springWebContractReader.read(myGenericSpecificApiTarget)
 				.find(MySpecificApi.class.getMethod("myModelAsMap"))
 					.orElseThrow(() -> new IllegalStateException("Method not found..."));;
 
@@ -318,7 +319,7 @@ public class SpringWebContractReaderTest {
 
 	@Test
 	public void shouldCreateEndpointMethodWhenMethodReturnTypeIsMapWithGenericValue() throws Exception {
-		EndpointMethod endpointMethod = springMvcContractReader.read(myGenericSpecificApiTarget)
+		EndpointMethod endpointMethod = springWebContractReader.read(myGenericSpecificApiTarget)
 				.find(MySpecificApi.class.getMethod("allAsMap"))
 					.orElseThrow(() -> new IllegalStateException("Method not found..."));;
 
@@ -329,7 +330,7 @@ public class SpringWebContractReaderTest {
 
 	@Test
 	public void shouldCreateEndpointMethodWhenMethodReturnTypeIsMapWithGenericKeyAndValue() throws Exception {
-		EndpointMethod endpointMethod = springMvcContractReader.read(myGenericSpecificApiTarget)
+		EndpointMethod endpointMethod = springWebContractReader.read(myGenericSpecificApiTarget)
 				.find(MySpecificApi.class.getMethod("anyAsMap"))
 					.orElseThrow(() -> new IllegalStateException("Method not found..."));;
 
@@ -343,7 +344,7 @@ public class SpringWebContractReaderTest {
 
 	@Test
 	public void shouldCreateEndpointMethodWhenTargetHasEndpointUrl() throws Exception {
-		EndpointMethod endpointMethod = springMvcContractReader.read(myContextApiTarget)
+		EndpointMethod endpointMethod = springWebContractReader.read(myContextApiTarget)
 				.find(MyContextApi.class.getMethod("method"))
 					.orElseThrow(() -> new IllegalStateException("Method not found..."));;
 
@@ -352,12 +353,43 @@ public class SpringWebContractReaderTest {
 
 	@Test
 	public void shouldCreateEndpointMethodWhenJavaMethodHasNoPathOnRequestMappingAnnotation() throws Exception {
-		EndpointMethod endpointMethod = springMvcContractReader.read(mySimpleCrudApiTarget)
+		EndpointMethod endpointMethod = springWebContractReader.read(mySimpleCrudApiTarget)
 				.find(MySimpleCrudApi.class.getMethod("post", MyModel.class))
 					.orElseThrow(() -> new IllegalStateException("Method not found..."));;
 
 		assertEquals("http://my.api.com/context", endpointMethod.path());
 		assertEquals("POST", endpointMethod.httpMethod());
+	}
+
+	@Test
+	public void shouldCreateEndpointMethodWithDynamicUrlDefinition() throws Exception {
+		EndpointMethod endpointMethod = springWebContractReader.read(myFullyDynamicApiTarget)
+			.find(MyFullyDynamicApi.class.getMethod("dynamic", URL.class))
+				.orElseThrow(() -> new IllegalStateException("Method not found..."));;
+
+		assertEquals("{endpoint}", endpointMethod.path());
+
+		Optional<EndpointMethodParameter> parameter = endpointMethod.parameters().get(0);
+
+		assertTrue(parameter.isPresent());
+		assertEquals("endpoint", parameter.get().name());
+		assertEquals(URL.class, parameter.get().javaType().unwrap());
+	}
+
+	@Test
+	public void shouldCreateEndpointMethodWithCookieParameter() throws Exception {
+		EndpointMethod endpointMethod = springWebContractReader.read(myApiTypeTarget)
+			.find(MyApiType.class.getMethod("cookie", String.class))
+				.orElseThrow(() -> new IllegalStateException("Method not found..."));;
+
+		assertEquals("http://my.api.com/cookie", endpointMethod.path());
+
+		Optional<EndpointMethodParameter> parameter = endpointMethod.parameters().get(0);
+
+		assertTrue(parameter.isPresent());
+		assertTrue(parameter.get().cookie());
+		assertEquals("jsessionid", parameter.get().name());
+		assertEquals(String.class, parameter.get().javaType().unwrap());
 	}
 
 	@RequestMapping(path = "http://my.api.com", headers = "X-My-Type=MyApiType")
@@ -369,8 +401,8 @@ public class SpringWebContractReaderTest {
 		@RequestMapping(path = "/{path}", method = RequestMethod.GET)
 		public String method(@PathVariable String path);
 
-		@RequestMapping(path = "/{path}", method = RequestMethod.GET, produces = "{contentType}")
-		public String method(@PathVariable String path, @RequestHeader String contentType, @RequestBody Object body);
+		@RequestMapping(path = "/{path}", method = RequestMethod.GET)
+		public String method(@PathVariable String path, @RequestHeader("Content-Type") String contentType, @RequestBody Object body);
 
 		@RequestMapping(path = "path", method = RequestMethod.GET)
 		public String pathWithoutSlash();
@@ -379,16 +411,18 @@ public class SpringWebContractReaderTest {
 				consumes = "application/json", headers = "User-Agent=Spring-Restify-Agent")
 		public String mergeHeaders();
 
-		@RequestMapping(value = "/{customArgumentPath}", method = RequestMethod.GET,
-				produces = "{customArgumentContentType}")
+		@RequestMapping(value = "/{customArgumentPath}", method = RequestMethod.GET)
 		public void customizedNames(@PathVariable("customArgumentPath") String path,
-				@RequestHeader("customArgumentContentType") String contentType);
+				@RequestHeader("X-Custom-Header") String customHeader);
 
 		@PostMapping("/some-method")
 		public void metaAnnotationOfHttpMethod();
 
 		@RequestMapping(value = "/query", method = RequestMethod.GET)
 		public Void queryString(@RequestParam Map<String, String> parameters);
+
+		@GetMapping("/cookie")
+		public void cookie(@CookieValue("jsessionid") String jSessionId);
 	}
 
 	interface MyWrongApiWithTwoBodyParameters {
@@ -475,6 +509,12 @@ public class SpringWebContractReaderTest {
 
 		@DeleteMapping
 		public void delete();
+	}
+
+	interface MyFullyDynamicApi {
+
+		@GetMapping("{endpoint}")
+		public String dynamic(@PathVariable URL endpoint);
 	}
 
 	class MyModel {

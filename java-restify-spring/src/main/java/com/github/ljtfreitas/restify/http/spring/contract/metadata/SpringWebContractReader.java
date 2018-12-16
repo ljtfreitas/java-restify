@@ -30,7 +30,6 @@ import static com.github.ljtfreitas.restify.util.Preconditions.nonNull;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.lang.reflect.Type;
-import java.net.URL;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashSet;
@@ -47,20 +46,20 @@ import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethodParame
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethodParameter.EndpointMethodParameterType;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethodParameters;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethods;
+import com.github.ljtfreitas.restify.http.contract.metadata.EndpointPathBuilder;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointTarget;
 import com.github.ljtfreitas.restify.http.contract.metadata.SimpleContractExpressionResolver;
-import com.github.ljtfreitas.restify.util.Tryable;
 
 public class SpringWebContractReader implements ContractReader {
 
-	private final ContractExpressionResolver expressionsolver;
+	private final ContractExpressionResolver expressionResolver;
 
 	public SpringWebContractReader() {
 		this(new SimpleContractExpressionResolver());
 	}
 
 	public SpringWebContractReader(ContractExpressionResolver expressionResolver) {
-		this.expressionsolver = expressionResolver;
+		this.expressionResolver = expressionResolver;
 	}
 
 	@Override
@@ -93,10 +92,13 @@ public class SpringWebContractReader implements ContractReader {
 	}
 
 	private String endpointPath(EndpointTarget target, SpringWebJavaTypeMetadata javaTypeMetadata, SpringWebJavaMethodMetadata javaMethodMetadata) {
-		String endpoint = expressionsolver.resolve(endpointTarget(target) + endpointTypePath(javaTypeMetadata) +
-				endpointMethodPath(javaMethodMetadata));
+		String endpoint = new EndpointPathBuilder()
+				.append(endpointTarget(target))
+				.append(endpointTypePath(javaTypeMetadata))
+				.append(endpointMethodPath(javaMethodMetadata))
+				.build();
 
-		return Tryable.of(() -> new URL(endpoint)).toString();
+		return expressionResolver.resolve(endpoint);
 	}
 
 	private String endpointTarget(EndpointTarget target) {
@@ -128,13 +130,14 @@ public class SpringWebContractReader implements ContractReader {
 			EndpointMethodParameterType type = nonNull(javaMethodParameterMetadata.path()? EndpointMethodParameterType.PATH :
 				javaMethodParameterMetadata.header()? EndpointMethodParameterType.HEADER :
 					javaMethodParameterMetadata.body() ? EndpointMethodParameterType.BODY :
-						javaMethodParameterMetadata.query() ? EndpointMethodParameterType.QUERY_STRING : null,
+						javaMethodParameterMetadata.query() ? EndpointMethodParameterType.QUERY_STRING :
+							javaMethodParameterMetadata.cookie() ? EndpointMethodParameterType.COOKIE : null,
 								"The parameter [" + javaMethodParameterMetadata.name() + "] of method [" + javaMethod + "] "
-										+ "is not annotated with @PathVariable, @RequestHeader, @RequestBody or @RequestParam");
+										+ "isn't annotated with @PathVariable, @RequestHeader, @CookieValue, @RequestBody or @RequestParam");
 
 			ParameterSerializer serializer = serializerOf(javaMethodParameterMetadata);
 
-			parameters.put(new EndpointMethodParameter(position, javaMethodParameterMetadata.name(), javaMethodParameterMetadata.javaType(),
+			parameters = parameters.put(new EndpointMethodParameter(position, javaMethodParameterMetadata.name(), javaMethodParameterMetadata.javaType(),
 					type, serializer));
 		}
 
@@ -156,7 +159,7 @@ public class SpringWebContractReader implements ContractReader {
 					Stream.concat(Arrays.stream(javaTypeMetadata.headers()), Arrays.stream(javaMethodMetadata.headers()))
 						.map(h -> h.split("="))
 							.filter(h -> h.length == 2)
-								.map(h -> new EndpointHeader(h[0], expressionsolver.resolve(h[1])))
+								.map(h -> new EndpointHeader(h[0], expressionResolver.resolve(h[1])))
 									.collect(Collectors.toCollection(LinkedHashSet::new));
 
 			return new EndpointHeaders(headers);
