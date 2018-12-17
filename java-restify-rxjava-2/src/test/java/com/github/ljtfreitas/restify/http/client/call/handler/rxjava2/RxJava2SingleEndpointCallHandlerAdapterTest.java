@@ -81,7 +81,7 @@ public class RxJava2SingleEndpointCallHandlerAdapterTest {
 		when(delegate.handle(notNull(EndpointCall.class), anyVararg()))
 			.then(i -> i.getArgumentAt(0, EndpointCall.class).execute());
 
-		Single<String> single = handler.handle(asyncEndpointCall, null);
+		Single<String> single = handler.handleAsync(asyncEndpointCall, null);
 
 		assertNotNull(single);
 
@@ -95,8 +95,8 @@ public class RxJava2SingleEndpointCallHandlerAdapterTest {
 
 	@Test
 	public void shouldSubscribeErrorOnSingleWhenCreatedHandlerWithRxJava2SingleReturnTypeThrowException() throws Exception {
-		EndpointCallHandler<Single<String>, String> handler = adapter
-				.adapt(new SimpleEndpointMethod(SomeType.class.getMethod("single")), delegate);
+		AsyncEndpointCallHandler<Single<String>, String> handler = adapter
+				.adaptAsync(new SimpleEndpointMethod(SomeType.class.getMethod("single")), delegate);
 
 		RuntimeException exception = new RuntimeException();
 
@@ -106,6 +106,27 @@ public class RxJava2SingleEndpointCallHandlerAdapterTest {
 		when(asyncEndpointCall.executeAsync())
 			.thenReturn(future);
 
+		Single<String> single = handler.handleAsync(asyncEndpointCall, null);
+
+		assertNotNull(single);
+
+		TestObserver<String> subscriber = single.subscribeOn(scheduler).test();
+
+		subscriber.await()
+			.assertError(exception);
+	}
+
+	@SuppressWarnings("unchecked")
+	@Test
+	public void shouldCreateSyncHandlerFromEndpointMethodWithRxJava2SingleReturnType() throws Exception {
+		EndpointCallHandler<Single<String>, String> handler = adapter
+				.adapt(new SimpleEndpointMethod(SomeType.class.getMethod("single")), delegate);
+
+		String result = "single result";
+
+		when(delegate.handle(notNull(EndpointCall.class), anyVararg()))
+			.thenReturn(result);
+
 		Single<String> single = handler.handle(asyncEndpointCall, null);
 
 		assertNotNull(single);
@@ -113,7 +134,9 @@ public class RxJava2SingleEndpointCallHandlerAdapterTest {
 		TestObserver<String> subscriber = single.subscribeOn(scheduler).test();
 		subscriber.await();
 
-		subscriber.assertError(t -> t.getCause().equals(exception));
+		subscriber.assertNoErrors()
+			.assertComplete()
+			.assertResult(result);
 	}
 
 	interface SomeType {

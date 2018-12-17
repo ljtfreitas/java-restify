@@ -8,6 +8,8 @@ import static org.mockito.Matchers.anyVararg;
 import static org.mockito.Matchers.notNull;
 import static org.mockito.Mockito.when;
 
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
 
 import org.junit.Before;
@@ -18,6 +20,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import com.github.ljtfreitas.restify.http.client.call.EndpointCall;
 import com.github.ljtfreitas.restify.http.client.call.async.AsyncEndpointCall;
+import com.github.ljtfreitas.restify.http.client.call.handler.EndpointCallHandler;
 import com.github.ljtfreitas.restify.http.client.call.handler.async.AsyncEndpointCallHandler;
 import com.github.ljtfreitas.restify.reflection.JavaType;
 
@@ -30,12 +33,12 @@ import reactor.test.StepVerifier;
 public class FluxEndpointCallHandlerAdapterTest {
 
 	@Mock
-	private AsyncEndpointCallHandler<String, String> delegate;
+	private EndpointCallHandler<Collection<String>, Collection<String>> delegate;
 
 	@Mock
-	private AsyncEndpointCall<String> asyncEndpointCall;
+	private AsyncEndpointCall<Collection<String>> asyncEndpointCall;
 
-	private FluxEndpointCallHandlerAdapter<String, String> adapter;
+	private FluxEndpointCallHandlerAdapter<String, Collection<String>> adapter;
 
 	private Scheduler scheduler;
 
@@ -51,10 +54,10 @@ public class FluxEndpointCallHandlerAdapterTest {
 		expectedAsyncResult = "flux result";
 
 		when(asyncEndpointCall.executeAsync())
-			.thenReturn(CompletableFuture.completedFuture(expectedAsyncResult));
+			.thenReturn(CompletableFuture.completedFuture(Arrays.asList(expectedAsyncResult)));
 
 		when(delegate.handle(notNull(EndpointCall.class), anyVararg()))
-			.then(o -> o.getArgumentAt(0, EndpointCall.class).execute());
+			.then(i -> i.getArgumentAt(0, EndpointCall.class).execute());
 	}
 
 	@Test
@@ -68,18 +71,18 @@ public class FluxEndpointCallHandlerAdapterTest {
 	}
 
 	@Test
-	public void shouldReturnArgumentTypeOfFlux() throws Exception {
-		assertEquals(JavaType.of(String.class), adapter.returnType(new SimpleEndpointMethod(SomeType.class.getMethod("flux"))));
+	public void shouldReturnCollectionWithArgumentTypeOfFlux() throws Exception {
+		assertEquals(JavaType.of(JavaType.parameterizedType(Collection.class, String.class)), adapter.returnType(new SimpleEndpointMethod(SomeType.class.getMethod("flux"))));
 	}
 
 	@Test
-	public void shouldReturnObjectTypeWhenFluxIsNotParameterized() throws Exception {
-		assertEquals(JavaType.of(Object.class), adapter.returnType(new SimpleEndpointMethod(SomeType.class.getMethod("dumbFlux"))));
+	public void shouldReturnCollectionWithObjectTypeWhenFluxIsNotParameterized() throws Exception {
+		assertEquals(JavaType.of(JavaType.parameterizedType(Collection.class, Object.class)), adapter.returnType(new SimpleEndpointMethod(SomeType.class.getMethod("dumbFlux"))));
 	}
 
 	@Test
 	public void shouldCreateHandlerFromEndpointMethodWithFluxReturnType() throws Exception {
-		AsyncEndpointCallHandler<Flux<String>, String> handler = adapter
+		AsyncEndpointCallHandler<Flux<String>, Collection<String>> handler = adapter
 				.adaptAsync(new SimpleEndpointMethod(SomeType.class.getMethod("flux")), delegate);
 
 		Flux<String> flux = handler.handleAsync(asyncEndpointCall, null);
@@ -94,12 +97,12 @@ public class FluxEndpointCallHandlerAdapterTest {
 
 	@Test
 	public void shouldSubscribeErrorOnObservableWhenCreatedHandlerWithRxJava2ObservableReturnTypeThrowException() throws Exception {
-		AsyncEndpointCallHandler<Flux<String>, String> handler = adapter
+		AsyncEndpointCallHandler<Flux<String>, Collection<String>> handler = adapter
 				.adaptAsync(new SimpleEndpointMethod(SomeType.class.getMethod("flux")), delegate);
 
-		RuntimeException exception = new RuntimeException("ooooops...");
+		IllegalArgumentException exception = new IllegalArgumentException("ooooops...");
 
-		CompletableFuture<String> completableFuture = new CompletableFuture<>();
+		CompletableFuture<Collection<String>> completableFuture = new CompletableFuture<>();
 		completableFuture.completeExceptionally(exception);
 
 		when(asyncEndpointCall.executeAsync())
@@ -110,7 +113,25 @@ public class FluxEndpointCallHandlerAdapterTest {
 		assertNotNull(flux);
 
 		StepVerifier.create(flux)
-			.expectError()
+			.expectError(exception.getClass())
+			.verify();
+	}
+
+	@Test
+	public void shouldCreateSyncHandlerFromEndpointMethodWithFluxReturnType() throws Exception {
+		EndpointCallHandler<Flux<String>, Collection<String>> handler = adapter
+				.adapt(new SimpleEndpointMethod(SomeType.class.getMethod("flux")), delegate);
+
+		when(asyncEndpointCall.execute())
+			.thenReturn(Arrays.asList(expectedAsyncResult));
+
+		Flux<String> flux = handler.handle(asyncEndpointCall, null);
+
+		assertNotNull(flux);
+
+		StepVerifier.create(flux)
+			.expectNext(expectedAsyncResult)
+			.expectComplete()
 			.verify();
 	}
 

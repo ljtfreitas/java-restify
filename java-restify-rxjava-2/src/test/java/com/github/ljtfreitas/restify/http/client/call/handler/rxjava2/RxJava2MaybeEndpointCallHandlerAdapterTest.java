@@ -95,16 +95,37 @@ public class RxJava2MaybeEndpointCallHandlerAdapterTest {
 
 	@Test
 	public void shouldSubscribeErrorOnMaybeWhenCreatedHandlerWithRxJava2MaybeReturnTypeThrowException() throws Exception {
-		EndpointCallHandler<Maybe<String>, String> handler = adapter
-				.adapt(new SimpleEndpointMethod(SomeType.class.getMethod("maybe")), delegate);
+		AsyncEndpointCallHandler<Maybe<String>, String> handler = adapter
+				.adaptAsync(new SimpleEndpointMethod(SomeType.class.getMethod("maybe")), delegate);
 
-		RuntimeException exception = new RuntimeException();
+		IllegalArgumentException exception = new IllegalArgumentException("ooops");
 
 		CompletableFuture<String> future = new CompletableFuture<>();
 		future.completeExceptionally(exception);
 
 		when(asyncEndpointCall.executeAsync())
 			.thenReturn(future);
+
+		Maybe<String> maybe = handler.handleAsync(asyncEndpointCall, null);
+
+		assertNotNull(maybe);
+
+		TestObserver<String> subscriber = maybe.subscribeOn(scheduler).test();
+
+		subscriber.await()
+				  .assertError(exception);
+	}
+
+	@SuppressWarnings("unchecked")
+	@Test
+	public void shouldCreateSyncHandlerFromEndpointMethodWithRxJava2MaybeReturnType() throws Exception {
+		EndpointCallHandler<Maybe<String>, String> handler = adapter
+				.adapt(new SimpleEndpointMethod(SomeType.class.getMethod("maybe")), delegate);
+
+		String result = "maybe result";
+
+		when(delegate.handle(notNull(EndpointCall.class), anyVararg()))
+			.thenReturn(result);
 
 		Maybe<String> maybe = handler.handle(asyncEndpointCall, null);
 
@@ -113,7 +134,9 @@ public class RxJava2MaybeEndpointCallHandlerAdapterTest {
 		TestObserver<String> subscriber = maybe.subscribeOn(scheduler).test();
 		subscriber.await();
 
-		subscriber.assertError(exception);
+		subscriber.assertNoErrors()
+			.assertComplete()
+			.assertResult(result);
 	}
 
 	interface SomeType {
