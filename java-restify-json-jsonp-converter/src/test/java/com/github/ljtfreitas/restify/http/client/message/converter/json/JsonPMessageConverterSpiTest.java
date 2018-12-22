@@ -8,7 +8,7 @@ import java.util.ServiceLoader;
 
 import org.junit.Test;
 
-public class JsonpMessageConverterSpiTest {
+public class JsonPMessageConverterSpiTest {
 
 	@SuppressWarnings({ "rawtypes" })
 	@Test
@@ -16,6 +16,6 @@ public class JsonpMessageConverterSpiTest {
 		Iterable<JsonMessageConverter> services = ServiceLoader.load(JsonMessageConverter.class);
 
 		assertThat(services, contains(
-				instanceOf(JsonpMessageConverter.class)));
+				instanceOf(JsonPMessageConverter.class)));
 	}
 }

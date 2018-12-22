@@ -31,6 +31,7 @@ import java.util.Arrays;
 
 import com.fasterxml.jackson.core.JsonEncoding;
 import com.fasterxml.jackson.core.JsonGenerator;
+import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.github.ljtfreitas.restify.http.client.message.converter.HttpMessageReadException;
@@ -43,7 +44,12 @@ public class JacksonMessageConverter<T> implements JsonMessageConverter<T> {
 	private final ObjectMapper objectMapper;
 
 	public JacksonMessageConverter() {
-		this(new ObjectMapper());
+		this(configure(new ObjectMapper()));
+	}
+
+	private static ObjectMapper configure(ObjectMapper objectMapper) {
+		objectMapper.disable(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES);
+		return objectMapper;
 	}
 
 	public JacksonMessageConverter(ObjectMapper objectMapper) {

@@ -44,16 +44,16 @@ import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMess
 import com.github.ljtfreitas.restify.http.client.message.response.HttpResponseMessage;
 import com.github.ljtfreitas.restify.util.Tryable;
 
-public class JsonpMessageConverter implements JsonMessageConverter<JsonStructure> {
+public class JsonPMessageConverter implements JsonMessageConverter<JsonStructure> {
 
 	private final JsonReaderFactory jsonReaderFactory;
 	private final JsonWriterFactory jsonWriterFactory;
 
-	public JsonpMessageConverter() {
+	public JsonPMessageConverter() {
 		this(Collections.emptyMap());
 	}
 
-	public JsonpMessageConverter(Map<String, ?> configuration) {
+	public JsonPMessageConverter(Map<String, ?> configuration) {
 		this.jsonReaderFactory = Json.createReaderFactory(configuration);
 		this.jsonWriterFactory = Json.createWriterFactory(configuration);
 	}

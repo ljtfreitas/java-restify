@@ -1,1 +1,2 @@
-com.github.ljtfreitas.restify.http.client.message.converter.json.JsonpMessageConverter
+com.github.ljtfreitas.restify.http.client.message.converter.json.JsonPMessageConverter
+
