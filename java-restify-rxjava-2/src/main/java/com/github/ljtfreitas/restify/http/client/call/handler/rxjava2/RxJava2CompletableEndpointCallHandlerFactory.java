@@ -25,6 +25,9 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.call.handler.rxjava2;
 
+import java.util.concurrent.CompletionException;
+import java.util.concurrent.ExecutionException;
+
 import com.github.ljtfreitas.restify.http.client.call.EndpointCall;
 import com.github.ljtfreitas.restify.http.client.call.async.AsyncEndpointCall;
 import com.github.ljtfreitas.restify.http.client.call.handler.async.AsyncEndpointCallHandler;
@@ -74,13 +77,21 @@ public class RxJava2CompletableEndpointCallHandlerFactory implements AsyncEndpoi
 		@Override
 		public Completable handle(EndpointCall<Void> call, Object[] args) {
 			return Completable.fromRunnable(call::execute)
-					.subscribeOn(scheduler);
+				.subscribeOn(scheduler);
 		}
 
 		@Override
 		public Completable handleAsync(AsyncEndpointCall<Void> call, Object[] args) {
 			return Completable.fromFuture(call.executeAsync().toCompletableFuture())
-				.subscribeOn(scheduler);
+				.onErrorResumeNext(this::handleAsyncException)
+					.subscribeOn(scheduler);
+		}
+
+		private Completable handleAsyncException(Throwable throwable) {
+			return Completable.error(() ->
+				(ExecutionException.class.equals(throwable.getClass()) || CompletionException.class.equals(throwable.getClass())) ?
+						throwable.getCause() :
+							throwable);
 		}
 	}
 }

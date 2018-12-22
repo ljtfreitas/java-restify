@@ -6,7 +6,6 @@ import static org.junit.Assert.assertTrue;
 import static org.mockito.Mockito.when;
 
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -15,6 +14,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import com.github.ljtfreitas.restify.http.client.call.async.AsyncEndpointCall;
+import com.github.ljtfreitas.restify.http.client.call.handler.EndpointCallHandler;
 import com.github.ljtfreitas.restify.http.client.call.handler.async.AsyncEndpointCallHandler;
 
 import rx.Completable;
@@ -23,7 +23,7 @@ import rx.observers.AssertableSubscriber;
 import rx.schedulers.Schedulers;
 
 @RunWith(MockitoJUnitRunner.class)
-public class RxJavaCompletableEndpointCallHandlerAdapterTest {
+public class RxJavaCompletableEndpointCallHandlerFactoryTest {
 
 	@Mock
 	private AsyncEndpointCall<Void> endpointCall;
@@ -81,13 +81,32 @@ public class RxJavaCompletableEndpointCallHandlerAdapterTest {
 		when(endpointCall.executeAsync())
 			.thenReturn(future);
 
+		Completable completable = handler.handleAsync(endpointCall, null);
+
+		assertNotNull(completable);
+
+		AssertableSubscriber<Void> subscriber = completable.subscribeOn(scheduler).test();
+
+		subscriber.assertError(exception);
+	}
+
+	@Test
+	public void shouldCreateSyncHandlerFromEndpointMethodWithRxJavaCompletableReturnType() throws Exception {
+		EndpointCallHandler<Completable, Void> handler = adapter
+				.create(new SimpleEndpointMethod(SomeType.class.getMethod("completable")));
+
+		when(endpointCall.execute())
+			.thenReturn(null);
+
 		Completable completable = handler.handle(endpointCall, null);
 
 		assertNotNull(completable);
 
 		AssertableSubscriber<Void> subscriber = completable.subscribeOn(scheduler).test();
 
-		subscriber.assertError(ExecutionException.class);
+		subscriber.assertCompleted()
+			.assertNoErrors()
+			.assertNoValues();
 	}
 
 	interface SomeType {

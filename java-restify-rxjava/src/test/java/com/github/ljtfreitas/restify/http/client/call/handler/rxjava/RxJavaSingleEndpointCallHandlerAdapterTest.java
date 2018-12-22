@@ -9,7 +9,6 @@ import static org.mockito.Matchers.anyVararg;
 import static org.mockito.Mockito.when;
 
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -18,6 +17,7 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import com.github.ljtfreitas.restify.http.client.call.async.AsyncEndpointCall;
+import com.github.ljtfreitas.restify.http.client.call.handler.EndpointCallHandler;
 import com.github.ljtfreitas.restify.http.client.call.handler.async.AsyncEndpointCallHandler;
 import com.github.ljtfreitas.restify.reflection.JavaType;
 
@@ -119,7 +119,30 @@ public class RxJavaSingleEndpointCallHandlerAdapterTest {
 
 		single.subscribeOn(scheduler).subscribe(subscriber);
 
-		subscriber.assertError(ExecutionException.class);
+		subscriber.assertError(exception);
+	}
+
+	@Test
+	public void shouldCreateSyncHandlerFromEndpointMethodWithRxJavaSingleReturnType() throws Exception {
+		EndpointCallHandler<Single<String>, String> handler = adapter
+				.adapt(new SimpleEndpointMethod(SomeType.class.getMethod("single")), delegate);
+
+		String result = "single result";
+
+		when(delegate.handle(any(), anyVararg()))
+			.thenReturn(result);
+
+		Single<String> single = handler.handle(asyncEndpointCall, null);
+
+		assertNotNull(single);
+
+		TestSubscriber<String> subscriber = TestSubscriber.create();
+
+		single.subscribeOn(scheduler).subscribe(subscriber);
+
+		subscriber.assertCompleted();
+		subscriber.assertNoErrors();
+		subscriber.assertValue(result);
 	}
 
 	interface SomeType {

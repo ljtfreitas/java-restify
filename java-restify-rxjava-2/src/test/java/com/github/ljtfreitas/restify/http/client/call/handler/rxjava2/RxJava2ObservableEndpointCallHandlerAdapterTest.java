@@ -8,8 +8,9 @@ import static org.mockito.Matchers.anyVararg;
 import static org.mockito.Matchers.notNull;
 import static org.mockito.Mockito.when;
 
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ExecutionException;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -32,12 +33,12 @@ import io.reactivex.schedulers.Schedulers;
 public class RxJava2ObservableEndpointCallHandlerAdapterTest {
 
 	@Mock
-	private EndpointCallHandler<String, String> delegate;
+	private EndpointCallHandler<Collection<String>, Collection<String>> delegate;
 
 	@Mock
-	private AsyncEndpointCall<String> asyncEndpointCall;
+	private AsyncEndpointCall<Collection<String>> asyncEndpointCall;
 
-	private RxJava2ObservableEndpointCallHandlerAdapter<String, String> adapter;
+	private RxJava2ObservableEndpointCallHandlerAdapter<String, Collection<String>> adapter;
 
 	private Scheduler scheduler;
 
@@ -59,30 +60,30 @@ public class RxJava2ObservableEndpointCallHandlerAdapterTest {
 	}
 
 	@Test
-	public void shouldReturnArgumentTypeOfRxJava2Observable() throws Exception {
-		assertEquals(JavaType.of(String.class), adapter.returnType(new SimpleEndpointMethod(SomeType.class.getMethod("observable"))));
+	public void shouldReturnCollectionWithArgumentTypeOfRxJava2Observable() throws Exception {
+		assertEquals(JavaType.of(JavaType.parameterizedType(Collection.class, String.class)), adapter.returnType(new SimpleEndpointMethod(SomeType.class.getMethod("observable"))));
 	}
 
 	@Test
-	public void shouldReturnObjectTypeWhenRxJava2ObservableIsNotParameterized() throws Exception {
-		assertEquals(JavaType.of(Object.class), adapter.returnType(new SimpleEndpointMethod(SomeType.class.getMethod("dumbObservable"))));
+	public void shouldReturnCollectionWithObjectTypeWhenRxJava2ObservableIsNotParameterized() throws Exception {
+		assertEquals(JavaType.of(JavaType.parameterizedType(Collection.class, Object.class)), adapter.returnType(new SimpleEndpointMethod(SomeType.class.getMethod("dumbObservable"))));
 	}
 
 	@SuppressWarnings("unchecked")
 	@Test
 	public void shouldCreateHandlerFromEndpointMethodWithRxJava2ObservableReturnType() throws Exception {
-		AsyncEndpointCallHandler<Observable<String>, String> handler = adapter
+		AsyncEndpointCallHandler<Observable<String>, Collection<String>> handler = adapter
 				.adaptAsync(new SimpleEndpointMethod(SomeType.class.getMethod("observable")), delegate);
 
 		String result = "observable result";
 
 		when(asyncEndpointCall.executeAsync())
-			.thenReturn(CompletableFuture.completedFuture(result));
+			.thenReturn(CompletableFuture.completedFuture(Arrays.asList(result)));
 
 		when(delegate.handle(notNull(EndpointCall.class), anyVararg()))
 			.then(i -> i.getArgumentAt(0, EndpointCall.class).execute());
 
-		Observable<String> observable = handler.handle(asyncEndpointCall, null);
+		Observable<String> observable = handler.handleAsync(asyncEndpointCall, null);
 
 		assertNotNull(observable);
 
@@ -96,16 +97,37 @@ public class RxJava2ObservableEndpointCallHandlerAdapterTest {
 
 	@Test
 	public void shouldSubscribeErrorOnObservableWhenCreatedHandlerWithRxJava2ObservableReturnTypeThrowException() throws Exception {
-		AsyncEndpointCallHandler<Observable<String>, String> handler = adapter
+		AsyncEndpointCallHandler<Observable<String>, Collection<String>> handler = adapter
 				.adaptAsync(new SimpleEndpointMethod(SomeType.class.getMethod("observable")), delegate);
 
 		RuntimeException exception = new RuntimeException();
 
-		CompletableFuture<String> future = new CompletableFuture<>();
+		CompletableFuture<Collection<String>> future = new CompletableFuture<>();
 		future.completeExceptionally(exception);
 
 		when(asyncEndpointCall.executeAsync())
 			.thenReturn(future);
+
+		Observable<String> observable = handler.handleAsync(asyncEndpointCall, null);
+
+		assertNotNull(observable);
+
+		TestObserver<String> subscriber = observable.subscribeOn(scheduler).test();
+
+		subscriber.await()
+				  .assertError(exception);
+	}
+
+	@SuppressWarnings("unchecked")
+	@Test
+	public void shouldCreateSyncHandlerFromEndpointMethodWithRxJava2ObservableReturnType() throws Exception {
+		EndpointCallHandler<Observable<String>, Collection<String>> handler = adapter
+				.adapt(new SimpleEndpointMethod(SomeType.class.getMethod("observable")), delegate);
+
+		String result = "observable result";
+
+		when(delegate.handle(notNull(EndpointCall.class), anyVararg()))
+			.thenReturn(Arrays.asList(result));
 
 		Observable<String> observable = handler.handle(asyncEndpointCall, null);
 
@@ -114,7 +136,9 @@ public class RxJava2ObservableEndpointCallHandlerAdapterTest {
 		TestObserver<String> subscriber = observable.subscribeOn(scheduler).test();
 		subscriber.await();
 
-		subscriber.assertError(ExecutionException.class);
+		subscriber.assertNoErrors()
+			.assertComplete()
+			.assertResult(result);
 	}
 
 	interface SomeType {

@@ -25,6 +25,10 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.call.handler.reactor;
 
+import java.util.concurrent.CompletionException;
+import java.util.concurrent.ExecutionException;
+
+import com.github.ljtfreitas.restify.http.client.call.EndpointCall;
 import com.github.ljtfreitas.restify.http.client.call.async.AsyncEndpointCall;
 import com.github.ljtfreitas.restify.http.client.call.handler.EndpointCallHandler;
 import com.github.ljtfreitas.restify.http.client.call.handler.async.AsyncEndpointCallHandler;
@@ -49,9 +53,22 @@ class MonoEndpointCallHandler<T, O> implements AsyncEndpointCallHandler<Mono<T>,
 	}
 
 	@Override
+	public Mono<T> handle(EndpointCall<O> call, Object[] args) {
+		return Mono.fromCallable(() -> delegate.handle(call, args))
+			.subscribeOn(scheduler);
+	}
+
+	@Override
 	public Mono<T> handleAsync(AsyncEndpointCall<O> call, Object[] args) {
 		return Mono.fromFuture(call.executeAsync().toCompletableFuture())
-			.subscribeOn(scheduler)
-				.map(o -> delegate.handle(() -> o, args));
+			.onErrorMap(this::handleAsyncException)
+				.subscribeOn(scheduler)
+					.map(o -> delegate.handle(() -> o, args));
+	}
+
+	private Throwable handleAsyncException(Throwable throwable) {
+		return (ExecutionException.class.equals(throwable.getClass()) || CompletionException.class.equals(throwable.getClass())) ?
+				throwable.getCause() :
+					throwable;
 	}
 }

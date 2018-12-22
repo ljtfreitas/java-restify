@@ -27,7 +27,9 @@ package com.github.ljtfreitas.restify.http.client.call.handler.reactor;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.Collection;
 
+import com.github.ljtfreitas.restify.http.client.call.EndpointCall;
 import com.github.ljtfreitas.restify.http.client.call.async.AsyncEndpointCall;
 import com.github.ljtfreitas.restify.http.client.call.handler.EndpointCallHandler;
 import com.github.ljtfreitas.restify.http.client.call.handler.async.AsyncEndpointCallHandler;
@@ -36,11 +38,10 @@ import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethod;
 import com.github.ljtfreitas.restify.reflection.JavaType;
 
 import reactor.core.publisher.Flux;
-import reactor.core.publisher.Mono;
 import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
 
-public class FluxEndpointCallHandlerAdapter<T, O> implements AsyncEndpointCallHandlerAdapter<Flux<T>, T, O> {
+public class FluxEndpointCallHandlerAdapter<T, O> implements AsyncEndpointCallHandlerAdapter<Flux<T>, Collection<T>, O> {
 
 	public final Scheduler scheduler;
 
@@ -59,7 +60,7 @@ public class FluxEndpointCallHandlerAdapter<T, O> implements AsyncEndpointCallHa
 
 	@Override
 	public JavaType returnType(EndpointMethod endpointMethod) {
-		return JavaType.of(unwrap(endpointMethod.returnType()));
+		return JavaType.of(JavaType.parameterizedType(Collection.class, unwrap(endpointMethod.returnType())));
 	}
 
 	private Type unwrap(JavaType declaredReturnType) {
@@ -69,16 +70,16 @@ public class FluxEndpointCallHandlerAdapter<T, O> implements AsyncEndpointCallHa
 	}
 
 	@Override
-	public AsyncEndpointCallHandler<Flux<T>, O> adaptAsync(EndpointMethod endpointMethod, EndpointCallHandler<T, O> handler) {
+	public AsyncEndpointCallHandler<Flux<T>, O> adaptAsync(EndpointMethod endpointMethod, EndpointCallHandler<Collection<T>, O> handler) {
 		return new FluxEndpointCallHandler(handler);
 	}
 
 	private class FluxEndpointCallHandler implements AsyncEndpointCallHandler<Flux<T>, O> {
 
-		private final MonoEndpointCallHandler<T, O> delegate;
+		private final MonoEndpointCallHandler<Collection<T>, O> delegate;
 
-		public FluxEndpointCallHandler(EndpointCallHandler<T, O> delegate) {
-			this.delegate = new MonoEndpointCallHandler<>(delegate, scheduler);
+		public FluxEndpointCallHandler(EndpointCallHandler<Collection<T>, O> handler) {
+			this.delegate = new MonoEndpointCallHandler<>(handler, scheduler);
 		}
 
 		@Override
@@ -87,12 +88,17 @@ public class FluxEndpointCallHandlerAdapter<T, O> implements AsyncEndpointCallHa
 		}
 
 		@Override
-		public Flux<T> handleAsync(AsyncEndpointCall<O> call, Object[] args) {
-			Mono<T> mono = delegate.handleAsync(call, args);
+		public Flux<T> handle(EndpointCall<O> call, Object[] args) {
+			return delegate.handle(call, args)
+					.flatMapMany(Flux::fromIterable)
+						.subscribeOn(scheduler);
+		}
 
-			return mono
-				.flux()
-					.subscribeOn(scheduler);
+		@Override
+		public Flux<T> handleAsync(AsyncEndpointCall<O> call, Object[] args) {
+			return delegate.handleAsync(call, args)
+					.flatMapMany(Flux::fromIterable)
+						.subscribeOn(scheduler);
 		}
 	}
 }
