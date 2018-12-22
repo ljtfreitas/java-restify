@@ -115,6 +115,24 @@ public class MonoEndpointCallHandlerAdapterTest {
 			.verify();
 	}
 
+	@Test
+	public void shouldCreateSyncHandlerFromEndpointMethodWithMonoReturnType() throws Exception {
+		EndpointCallHandler<Mono<String>, String> handler = adapter
+				.adapt(new SimpleEndpointMethod(SomeType.class.getMethod("mono")), delegate);
+
+		when(asyncEndpointCall.execute())
+			.thenReturn(asyncResult);
+
+		Mono<String> mono = handler.handle(asyncEndpointCall, null);
+
+		assertNotNull(mono);
+
+		StepVerifier.create(mono)
+			.expectNext(asyncResult)
+			.expectComplete()
+			.verify();
+	}
+
 	interface SomeType {
 
 		Mono<String> mono();

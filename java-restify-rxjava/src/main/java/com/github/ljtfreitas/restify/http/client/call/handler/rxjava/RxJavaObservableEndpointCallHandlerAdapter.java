@@ -27,6 +27,9 @@ package com.github.ljtfreitas.restify.http.client.call.handler.rxjava;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.Collection;
+import java.util.concurrent.CompletionException;
+import java.util.concurrent.ExecutionException;
 
 import com.github.ljtfreitas.restify.http.client.call.EndpointCall;
 import com.github.ljtfreitas.restify.http.client.call.async.AsyncEndpointCall;
@@ -40,7 +43,7 @@ import rx.Observable;
 import rx.Scheduler;
 import rx.schedulers.Schedulers;
 
-public class RxJavaObservableEndpointCallHandlerAdapter<T, O> implements AsyncEndpointCallHandlerAdapter<Observable<T>, T, O> {
+public class RxJavaObservableEndpointCallHandlerAdapter<T, O> implements AsyncEndpointCallHandlerAdapter<Observable<T>, Collection<T>, O> {
 
 	public final Scheduler scheduler;
 
@@ -59,7 +62,7 @@ public class RxJavaObservableEndpointCallHandlerAdapter<T, O> implements AsyncEn
 
 	@Override
 	public JavaType returnType(EndpointMethod endpointMethod) {
-		return JavaType.of(unwrap(endpointMethod.returnType()));
+		return JavaType.of(JavaType.parameterizedType(Collection.class, unwrap(endpointMethod.returnType())));
 	}
 
 	private Type unwrap(JavaType declaredReturnType) {
@@ -69,15 +72,15 @@ public class RxJavaObservableEndpointCallHandlerAdapter<T, O> implements AsyncEn
 	}
 
 	@Override
-	public AsyncEndpointCallHandler<Observable<T>, O> adaptAsync(EndpointMethod endpointMethod, EndpointCallHandler<T, O> handler) {
+	public AsyncEndpointCallHandler<Observable<T>, O> adaptAsync(EndpointMethod endpointMethod, EndpointCallHandler<Collection<T>, O> handler) {
 		return new RxJavaObservableEndpointCallHandler(handler);
 	}
 
 	private class RxJavaObservableEndpointCallHandler implements AsyncEndpointCallHandler<Observable<T>, O> {
 
-		private EndpointCallHandler<T, O> delegate;
+		private EndpointCallHandler<Collection<T>, O> delegate;
 
-		public RxJavaObservableEndpointCallHandler(EndpointCallHandler<T, O> delegate) {
+		public RxJavaObservableEndpointCallHandler(EndpointCallHandler<Collection<T>, O> delegate) {
 			this.delegate = delegate;
 		}
 
@@ -88,15 +91,24 @@ public class RxJavaObservableEndpointCallHandlerAdapter<T, O> implements AsyncEn
 
 		@Override
 		public Observable<T> handle(EndpointCall<O> call, Object[] args) {
-			return Observable.fromCallable(() -> delegate.handle(call, args))
-					.subscribeOn(scheduler);
+			return Observable.defer(() -> Observable.from(delegate.handle(call, args)))
+				.subscribeOn(scheduler);
 		}
 
 		@Override
 		public Observable<T> handleAsync(AsyncEndpointCall<O> call, Object[] args) {
 			return Observable.from(call.executeAsync().toCompletableFuture(), scheduler)
-				.map(o -> delegate.handle(() -> o, args))
-					.subscribeOn(scheduler);
+				.onErrorResumeNext(this::handleAsyncException)
+					.map(o -> delegate.handle(() -> o, args))
+						.flatMap(Observable::from)
+							.subscribeOn(scheduler);
+		}
+
+		private Observable<O> handleAsyncException(Throwable throwable) {
+			return Observable.error(
+				(ExecutionException.class.equals(throwable.getClass()) || CompletionException.class.equals(throwable.getClass())) ?
+						throwable.getCause() :
+							throwable);
 		}
 	}
 }

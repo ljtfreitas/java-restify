@@ -25,6 +25,10 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.call.handler.rxjava;
 
+import java.util.concurrent.CompletionException;
+import java.util.concurrent.ExecutionException;
+
+import com.github.ljtfreitas.restify.http.client.call.EndpointCall;
 import com.github.ljtfreitas.restify.http.client.call.async.AsyncEndpointCall;
 import com.github.ljtfreitas.restify.http.client.call.handler.async.AsyncEndpointCallHandler;
 import com.github.ljtfreitas.restify.http.client.call.handler.async.AsyncEndpointCallHandlerFactory;
@@ -36,6 +40,8 @@ import rx.Scheduler;
 import rx.schedulers.Schedulers;
 
 public class RxJavaCompletableEndpointCallHandlerFactory implements AsyncEndpointCallHandlerFactory<Completable, Void> {
+
+	private static final JavaType VOID_TYPE = JavaType.of(Void.class);
 
 	public final Scheduler scheduler;
 
@@ -54,26 +60,34 @@ public class RxJavaCompletableEndpointCallHandlerFactory implements AsyncEndpoin
 
 	@Override
 	public AsyncEndpointCallHandler<Completable, Void> createAsync(EndpointMethod endpointMethod) {
-		return new RxJavaCompletableEndpointCallHandler(endpointMethod.returnType());
+		return new RxJavaCompletableEndpointCallHandler();
 	}
 
 	private class RxJavaCompletableEndpointCallHandler implements AsyncEndpointCallHandler<Completable, Void> {
 
-		private final JavaType javaType;
-
-		public RxJavaCompletableEndpointCallHandler(JavaType javaType) {
-			this.javaType = javaType;
+		@Override
+		public JavaType returnType() {
+			return VOID_TYPE;
 		}
 
 		@Override
-		public JavaType returnType() {
-			return javaType;
+		public Completable handle(EndpointCall<Void> call, Object[] args) {
+			return Completable.fromAction(call::execute)
+				.subscribeOn(scheduler);
 		}
 
 		@Override
 		public Completable handleAsync(AsyncEndpointCall<Void> call, Object[] args) {
 			return Completable.fromFuture(call.executeAsync().toCompletableFuture())
-				.subscribeOn(scheduler);
+				.onErrorResumeNext(this::handleAsyncException)
+					.subscribeOn(scheduler);
+		}
+
+		private Completable handleAsyncException(Throwable throwable) {
+			return Completable.error(() ->
+				(ExecutionException.class.equals(throwable.getClass()) || CompletionException.class.equals(throwable.getClass())) ?
+						throwable.getCause() :
+							throwable);
 		}
 	}
 }

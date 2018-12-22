@@ -27,7 +27,10 @@ package com.github.ljtfreitas.restify.http.client.call.handler.rxjava2;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.concurrent.CompletionException;
+import java.util.concurrent.ExecutionException;
 
+import com.github.ljtfreitas.restify.http.client.call.EndpointCall;
 import com.github.ljtfreitas.restify.http.client.call.async.AsyncEndpointCall;
 import com.github.ljtfreitas.restify.http.client.call.handler.EndpointCallHandler;
 import com.github.ljtfreitas.restify.http.client.call.handler.async.AsyncEndpointCallHandler;
@@ -86,10 +89,24 @@ public class RxJava2SingleEndpointCallHandlerAdapter<T, O> implements AsyncEndpo
 		}
 
 		@Override
+		public Single<T> handle(EndpointCall<O> call, Object[] args) {
+			return Single.fromCallable(() -> delegate.handle(call, args))
+				.subscribeOn(scheduler);
+		}
+
+		@Override
 		public Single<T> handleAsync(AsyncEndpointCall<O> call, Object[] args) {
 			return Single.fromFuture(call.executeAsync().toCompletableFuture())
-				.map(o -> delegate.handle(() -> o, args))
-					.subscribeOn(scheduler);
+				.onErrorResumeNext(this::handleAsyncException)
+					.map(o -> delegate.handle(() -> o, args))
+						.subscribeOn(scheduler);
+		}
+
+		private Single<O> handleAsyncException(Throwable throwable) {
+			return Single.error(() ->
+				(ExecutionException.class.equals(throwable.getClass()) || CompletionException.class.equals(throwable.getClass())) ?
+						throwable.getCause() :
+							throwable);
 		}
 	}
 }
