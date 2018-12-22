@@ -1,6 +1,8 @@
 package com.github.ljtfreitas.restify.http.client.message.converter.json;
 
+import static org.hamcrest.Matchers.iterableWithSize;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayInputStream;
@@ -18,9 +20,9 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import com.github.ljtfreitas.restify.http.client.message.Encoding;
-import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
-import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestBody;
 import com.github.ljtfreitas.restify.http.client.message.request.BufferedByteArrayHttpRequestBody;
+import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestBody;
+import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
 import com.github.ljtfreitas.restify.http.client.message.response.HttpResponseMessage;
 import com.github.ljtfreitas.restify.reflection.SimpleParameterizedType;
 
@@ -130,6 +132,30 @@ public class JacksonMessageConverterTest {
 		assertEquals(2, collectionOfMyJsonModel.size());
 
 		Iterator<MyJsonModel> iterator = collectionOfMyJsonModel.iterator();
+
+		MyJsonModel myJsonModel = iterator.next();
+		assertEquals("Tiago de Freitas Lima 1", myJsonModel.name);
+		assertEquals(31, myJsonModel.age);
+
+		myJsonModel = iterator.next();
+		assertEquals("Tiago de Freitas Lima 2", myJsonModel.name);
+		assertEquals(32, myJsonModel.age);
+	}
+
+	@SuppressWarnings("unchecked")
+	@Test
+	public void shouldReadIterableOfJsonMessage() throws Exception {
+		ByteArrayInputStream input = new ByteArrayInputStream(collectionOfJson.getBytes());
+
+		when(response.body().input()).thenReturn(input);
+
+		Type genericIterableType = new SimpleParameterizedType(Iterable.class, null, MyJsonModel.class);
+
+		Iterable<MyJsonModel> iterableOfMyJsonModel = (Iterable<MyJsonModel>) converter.read(response, genericIterableType);
+
+		assertThat(iterableOfMyJsonModel, iterableWithSize(2));
+
+		Iterator<MyJsonModel> iterator = iterableOfMyJsonModel.iterator();
 
 		MyJsonModel myJsonModel = iterator.next();
 		assertEquals("Tiago de Freitas Lima 1", myJsonModel.name);
