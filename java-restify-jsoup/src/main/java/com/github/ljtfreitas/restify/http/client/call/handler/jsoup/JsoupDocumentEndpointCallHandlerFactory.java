@@ -36,6 +36,8 @@ import com.github.ljtfreitas.restify.reflection.JavaType;
 
 public class JsoupDocumentEndpointCallHandlerFactory implements EndpointCallHandlerFactory<Document, String> {
 
+	private static final JavaType STRING_JAVA_TYPE = JavaType.of(String.class);
+
 	@Override
 	public boolean supports(EndpointMethod endpointMethod) {
 		return endpointMethod.returnType().is(Document.class);
@@ -43,20 +45,14 @@ public class JsoupDocumentEndpointCallHandlerFactory implements EndpointCallHand
 
 	@Override
 	public EndpointCallHandler<Document, String> create(EndpointMethod endpointMethod) {
-		return new JsoupDocumentEndpointCallHandler(endpointMethod.returnType());
+		return new JsoupDocumentEndpointCallHandler();
 	}
 
 	private class JsoupDocumentEndpointCallHandler implements EndpointCallHandler<Document, String> {
 
-		private final JavaType returnType;
-
-		private JsoupDocumentEndpointCallHandler(JavaType returnType) {
-			this.returnType = returnType;
-		}
-
 		@Override
 		public JavaType returnType() {
-			return returnType;
+			return STRING_JAVA_TYPE;
 		}
 
 		@Override
