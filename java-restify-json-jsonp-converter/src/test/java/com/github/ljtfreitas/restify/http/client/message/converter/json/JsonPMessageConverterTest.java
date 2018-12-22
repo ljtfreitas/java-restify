@@ -24,7 +24,7 @@ import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestBody
 import com.github.ljtfreitas.restify.http.client.message.response.HttpResponseMessage;
 
 @RunWith(MockitoJUnitRunner.class)
-public class JsonpMessageConverterTest {
+public class JsonPMessageConverterTest {
 
 	@Mock
 	private HttpRequestMessage request;
@@ -32,7 +32,7 @@ public class JsonpMessageConverterTest {
 	@Mock(answer = Answers.RETURNS_DEEP_STUBS)
 	private HttpResponseMessage response;
 
-	private JsonpMessageConverter converter = new JsonpMessageConverter();
+	private JsonPMessageConverter converter = new JsonPMessageConverter();
 
 	private JsonObject jsonObject;
 
