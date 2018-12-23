@@ -13,6 +13,10 @@ import com.github.ljtfreitas.restify.http.netflix.client.call.handler.hystrix.On
 import com.netflix.hystrix.HystrixCommand;
 import com.netflix.hystrix.HystrixCommandProperties.ExecutionIsolationStrategy;
 
+import rx.Observable;
+
+import com.netflix.hystrix.HystrixObservableCommand;
+
 public class HystrixCommandMetadataFactoryTest {
 
 	private HystrixCommandMetadataFactory factory;
@@ -21,9 +25,22 @@ public class HystrixCommandMetadataFactoryTest {
 	public void shouldBuildHystrixCommandKeysUsingMethodMetadata() throws Exception {
 		factory = new HystrixCommandMetadataFactory(new SimpleEndpointMethod(MyApiWithCircuitBreaker.class.getMethod("simple")));
 
-		HystrixCommand.Setter hystrixMetadata = factory.create();
+		HystrixCommand.Setter hystrixCommandProperties = factory.create().asCommand();
 
-		EmptyHystrixCommand command = new EmptyHystrixCommand(hystrixMetadata);
+		EmptyHystrixCommand command = new EmptyHystrixCommand(hystrixCommandProperties);
+
+		assertEquals("MyApiWithCircuitBreaker", command.getCommandGroup().name());
+		assertEquals("simple", command.getCommandKey().name());
+		assertEquals("MyApiWithCircuitBreaker", command.getThreadPoolKey().name());
+	}
+
+	@Test
+	public void shouldBuildHystrixObservableCommandKeysUsingMethodMetadata() throws Exception {
+		factory = new HystrixCommandMetadataFactory(new SimpleEndpointMethod(MyApiWithCircuitBreaker.class.getMethod("simple")));
+
+		HystrixObservableCommand.Setter hystrixCommandProperties = factory.create().asObservableCommand();
+
+		EmptyHystrixObservableCommand command = new EmptyHystrixObservableCommand(hystrixCommandProperties);
 
 		assertEquals("MyApiWithCircuitBreaker", command.getCommandGroup().name());
 		assertEquals("simple", command.getCommandKey().name());
@@ -34,9 +51,9 @@ public class HystrixCommandMetadataFactoryTest {
 	public void shouldBuildHystrixCommandKeysUsingMethodAnnotation() throws Exception {
 		factory = new HystrixCommandMetadataFactory(new SimpleEndpointMethod(MyApiWithCircuitBreaker.class.getMethod("customizedKeys")));
 
-		HystrixCommand.Setter hystrixMetadata = factory.create();
+		HystrixCommand.Setter hystrixCommandProperties = factory.create().asCommand();
 
-		EmptyHystrixCommand command = new EmptyHystrixCommand(hystrixMetadata);
+		EmptyHystrixCommand command = new EmptyHystrixCommand(hystrixCommandProperties);
 
 		assertEquals("myGroupKey", command.getCommandGroup().name());
 		assertEquals("myTestCommandKey", command.getCommandKey().name());
@@ -44,12 +61,41 @@ public class HystrixCommandMetadataFactoryTest {
 	}
 
 	@Test
+	public void shouldBuildHystrixObservableCommandKeysUsingMethodAnnotation() throws Exception {
+		factory = new HystrixCommandMetadataFactory(new SimpleEndpointMethod(MyApiWithCircuitBreaker.class.getMethod("customizedKeys")));
+
+		HystrixObservableCommand.Setter hystrixCommandProperties = factory.create().asObservableCommand();
+
+		EmptyHystrixObservableCommand command = new EmptyHystrixObservableCommand(hystrixCommandProperties);
+
+		assertEquals("myGroupKey", command.getCommandGroup().name());
+		assertEquals("myTestCommandKey", command.getCommandKey().name());
+		assertEquals("myGroupKey", command.getThreadPoolKey().name());
+	}
+
+	@Test
 	public void shouldBuildHystrixCommandPropertiesUsingMethodAnnotation() throws Exception {
 		factory = new HystrixCommandMetadataFactory(new SimpleEndpointMethod(MyApiWithCircuitBreaker.class.getMethod("customizedProperties")));
 
-		HystrixCommand.Setter hystrixMetadata = factory.create();
+		HystrixCommand.Setter hystrixCommandProperties = factory.create().asCommand();
 
-		EmptyHystrixCommand command = new EmptyHystrixCommand(hystrixMetadata);
+		EmptyHystrixCommand command = new EmptyHystrixCommand(hystrixCommandProperties);
+
+		assertEquals("MyApiWithCircuitBreaker", command.getCommandGroup().name());
+		assertEquals("customizedProperties", command.getCommandKey().name());
+		assertEquals("MyApiWithCircuitBreaker", command.getThreadPoolKey().name());
+
+		assertEquals(ExecutionIsolationStrategy.SEMAPHORE, command.getProperties().executionIsolationStrategy().get());
+		assertEquals(Integer.valueOf(2500), command.getProperties().executionTimeoutInMilliseconds().get());
+	}
+
+	@Test
+	public void shouldBuildHystrixObservableCommandPropertiesUsingMethodAnnotation() throws Exception {
+		factory = new HystrixCommandMetadataFactory(new SimpleEndpointMethod(MyApiWithCircuitBreaker.class.getMethod("customizedProperties")));
+
+		HystrixObservableCommand.Setter hystrixCommandProperties = factory.create().asObservableCommand();
+
+		EmptyHystrixObservableCommand command = new EmptyHystrixObservableCommand(hystrixCommandProperties);
 
 		assertEquals("MyApiWithCircuitBreaker", command.getCommandGroup().name());
 		assertEquals("customizedProperties", command.getCommandKey().name());
@@ -68,6 +114,18 @@ public class HystrixCommandMetadataFactoryTest {
 		@Override
 		protected String run() throws Exception {
 			return "empty";
+		}
+	}
+
+	private class EmptyHystrixObservableCommand extends HystrixObservableCommand<String> {
+
+		protected EmptyHystrixObservableCommand(HystrixObservableCommand.Setter setter) {
+			super(setter);
+		}
+
+		@Override
+		protected Observable<String> construct() {
+			return Observable.just("empty");
 		}
 	}
 

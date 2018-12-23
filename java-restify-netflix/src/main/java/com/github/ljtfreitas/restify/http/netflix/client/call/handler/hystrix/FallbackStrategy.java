@@ -23,22 +23,12 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.spring.netflix.autoconfigure.hystrix;
+package com.github.ljtfreitas.restify.http.netflix.client.call.handler.hystrix;
 
-import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethod;
-import com.github.ljtfreitas.restify.http.netflix.client.call.handler.hystrix.BaseHystrixCommandEndpointCallHandlerAdapter;
+import java.lang.reflect.Method;
 
-class HystrixCommandFallbackEndpointCallHandlerAdapter extends BaseHystrixCommandEndpointCallHandlerAdapter<Object, Object> {
+interface FallbackStrategy {
 
-	private final HystrixFallbackRegistry hystrixFallbackRegistry;
+	<T> FallbackResult<T> execute(Method javaMethod, Object[] args) throws Exception;
 
-	public HystrixCommandFallbackEndpointCallHandlerAdapter(HystrixFallbackRegistry hystrixFallbackRegistry) {
-		this.hystrixFallbackRegistry = hystrixFallbackRegistry;
-	}
-
-	@Override
-	protected Object fallbackTo(EndpointMethod endpointMethod) {
-		return hystrixFallbackRegistry.get(endpointMethod.javaMethod().getDeclaringClass())
-				.orElse(null);
-	}
 }

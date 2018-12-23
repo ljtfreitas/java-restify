@@ -26,17 +26,19 @@
 package com.github.ljtfreitas.restify.http.netflix.client.call.handler.hystrix;
 
 import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 
-import com.github.ljtfreitas.restify.http.client.call.EndpointCall;
+import com.github.ljtfreitas.restify.http.client.call.async.AsyncEndpointCall;
 import com.github.ljtfreitas.restify.http.client.call.handler.EndpointCallHandler;
-import com.github.ljtfreitas.restify.http.client.call.handler.EndpointCallHandlerAdapter;
+import com.github.ljtfreitas.restify.http.client.call.handler.async.AsyncEndpointCallHandler;
+import com.github.ljtfreitas.restify.http.client.call.handler.async.AsyncEndpointCallHandlerAdapter;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethod;
 import com.github.ljtfreitas.restify.reflection.JavaType;
-import com.netflix.hystrix.HystrixCommand;
+import com.netflix.hystrix.HystrixObservableCommand;
 
 import rx.Observable;
 
-public class HystrixObservableEndpointCallHandlerAdapter<T, O> implements EndpointCallHandlerAdapter<Observable<T>, HystrixCommand<T>, O> {
+public class HystrixObservableEndpointCallHandlerAdapter<T, O> implements AsyncEndpointCallHandlerAdapter<Observable<T>, HystrixObservableCommand<T>, O> {
 
 	private final HystrixEndpointCallHandlerAdapter<T, O> hystrixEndpointCallHandlerAdapter = new HystrixEndpointCallHandlerAdapter<>();
 	
@@ -48,25 +50,26 @@ public class HystrixObservableEndpointCallHandlerAdapter<T, O> implements Endpoi
 
 	@Override
 	public JavaType returnType(EndpointMethod endpointMethod) {
-		return hystrixEndpointCallHandlerAdapter.returnType(endpointMethod.returns(unwrap(endpointMethod.returnType())));
+		return JavaType.of(JavaType.parameterizedType(HystrixObservableCommand.class, unwrap(endpointMethod.returnType())));
 	}
 	
-	private JavaType unwrap(JavaType declaredReturnType) {
-		return JavaType.of(declaredReturnType.parameterized() ?
+	private Type unwrap(JavaType declaredReturnType) {
+		return declaredReturnType.parameterized() ?
 				declaredReturnType.as(ParameterizedType.class).getActualTypeArguments()[0] :
-					Object.class);
+					Object.class;
 	}
 
 	@Override
-	public EndpointCallHandler<Observable<T>, O> adapt(EndpointMethod endpointMethod, EndpointCallHandler<HystrixCommand<T>, O> handler) {
+	public AsyncEndpointCallHandler<Observable<T>, O> adaptAsync(EndpointMethod endpointMethod,
+			EndpointCallHandler<HystrixObservableCommand<T>, O> handler) {
 		return new HystrixObservableEndpointCallHandler(handler);
 	}
 
-	private class HystrixObservableEndpointCallHandler implements EndpointCallHandler<Observable<T>, O> {
+	private class HystrixObservableEndpointCallHandler implements AsyncEndpointCallHandler<Observable<T>, O> {
 
-		private final EndpointCallHandler<HystrixCommand<T>, O> delegate;
+		private final EndpointCallHandler<HystrixObservableCommand<T>, O> delegate;
 
-		private HystrixObservableEndpointCallHandler(EndpointCallHandler<HystrixCommand<T>, O> delegate) {
+		private HystrixObservableEndpointCallHandler(EndpointCallHandler<HystrixObservableCommand<T>, O> delegate) {
 			this.delegate = delegate;
 		}
 
@@ -74,11 +77,11 @@ public class HystrixObservableEndpointCallHandlerAdapter<T, O> implements Endpoi
 		public JavaType returnType() {
 			return delegate.returnType();
 		}
-		
+
 		@Override
-		public Observable<T> handle(EndpointCall<O> call, Object[] args) {
-			HystrixCommand<T> command = delegate.handle(call, args);
-			return command.observe();
+		public Observable<T> handleAsync(AsyncEndpointCall<O> call, Object[] args) {
+			HystrixObservableCommand<T> command = delegate.handle(call, args);
+			return command.toObservable();
 		}
 	}
 }

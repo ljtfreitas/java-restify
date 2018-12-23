@@ -25,20 +25,21 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.spring.netflix.autoconfigure.hystrix;
 
-import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.BeanFactoryAnnotationUtils;
 
+import com.github.ljtfreitas.restify.http.netflix.client.call.handler.hystrix.WithFallback;
 import com.github.ljtfreitas.restify.util.Tryable;
 
 class HystrixFallbackRegistry {
 
 	static final String QUALIFIER_NAME = "fallback";
 
-	private static final Map<Class<?>, Object> cache = new HashMap<>();
+	private final Map<Class<?>, Object> cache = new ConcurrentHashMap<>();
 
 	private final BeanFactory beanFactory;
 
@@ -46,21 +47,27 @@ class HystrixFallbackRegistry {
 		this.beanFactory = beanFactory;
 	}
 
-	@SuppressWarnings("unchecked")
-	public <T> Optional<T> get(Class<? extends T> classType) {
-		T fallback = (T) (cache.containsKey(classType) ? cache.get(classType) : search(classType));
+	Optional<Object> get(Class<?> classType) {
+		Object fallback = (cache.containsKey(classType) ? cache.get(classType) : search(classType));
 		return Optional.ofNullable(fallback);
 	}
 
 	private Object search(Class<?> classType) {
-		Object bean = doSearch(classType);
+		Object bean = searchWithQualifier(classType)
+				.orElseGet(() -> searchWithType(classType.getAnnotation(WithFallback.class))
+						.orElseGet(null));
 
-		cache.put(classType, bean);
+		if (bean != null) cache.put(classType, bean);
 
 		return bean;
 	}
 
-	private Object doSearch(Class<?> classType) {
-		return Tryable.or(() -> BeanFactoryAnnotationUtils.qualifiedBeanOfType(beanFactory, classType, QUALIFIER_NAME), null);
+	private Optional<Object> searchWithType(WithFallback withFallback) {
+		return Optional.ofNullable(withFallback)
+			.map(w -> Tryable.or(() -> beanFactory.getBean(w.value()), null));
+	}
+
+	private Optional<Object> searchWithQualifier(Class<?> classType) {
+		return Optional.ofNullable(Tryable.or(() -> BeanFactoryAnnotationUtils.qualifiedBeanOfType(beanFactory, classType, QUALIFIER_NAME), null));
 	}
 }

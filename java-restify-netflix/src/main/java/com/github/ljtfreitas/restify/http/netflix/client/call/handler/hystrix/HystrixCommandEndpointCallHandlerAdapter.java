@@ -25,15 +25,65 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.netflix.client.call.handler.hystrix;
 
-import com.netflix.hystrix.HystrixCommand.Setter;
+import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
+import java.util.Optional;
 
-public class HystrixCommandEndpointCallHandlerAdapter<T, O> extends BaseHystrixCommandEndpointCallHandlerAdapter<T, O> {
+import com.github.ljtfreitas.restify.http.client.call.handler.EndpointCallHandler;
+import com.github.ljtfreitas.restify.http.client.call.handler.EndpointCallHandlerAdapter;
+import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethod;
+import com.github.ljtfreitas.restify.reflection.JavaType;
+import com.netflix.hystrix.HystrixCommand;
+
+public class HystrixCommandEndpointCallHandlerAdapter<T, O> implements EndpointCallHandlerAdapter<HystrixCommand<T>, T, O> {
+
+	protected final HystrixCommand.Setter properties;
+	protected final FallbackProvider fallback;
 
 	public HystrixCommandEndpointCallHandlerAdapter() {
-		super();
+		this(null, (FallbackProvider) null);
 	}
 
-	public HystrixCommandEndpointCallHandlerAdapter(Setter hystrixMetadata) {
-		super(hystrixMetadata);
+	public HystrixCommandEndpointCallHandlerAdapter(HystrixCommand.Setter properties) {
+		this(properties, (FallbackProvider) null);
+	}
+
+	public HystrixCommandEndpointCallHandlerAdapter(Fallback fallback) {
+		this(null, (FallbackProvider) (t) -> fallback);
+	}
+
+	public HystrixCommandEndpointCallHandlerAdapter(FallbackProvider fallback) {
+		this(null, fallback);
+	}
+
+	public HystrixCommandEndpointCallHandlerAdapter(HystrixCommand.Setter properties, Fallback fallback) {
+		this(properties, (FallbackProvider) (t) -> fallback);
+	}
+
+	public HystrixCommandEndpointCallHandlerAdapter(HystrixCommand.Setter properties, FallbackProvider fallback) {
+		this.properties = properties;
+		this.fallback = fallback;
+	}
+
+	@Override
+	public final boolean supports(EndpointMethod endpointMethod) {
+		return endpointMethod.returnType().is(HystrixCommand.class);
+	}
+
+	@Override
+	public JavaType returnType(EndpointMethod endpointMethod) {
+		return JavaType.of(unwrap(endpointMethod.returnType()));
+	}
+
+	private Type unwrap(JavaType declaredReturnType) {
+		return declaredReturnType.parameterized() ?
+				declaredReturnType.as(ParameterizedType.class).getActualTypeArguments()[0] :
+					Object.class;
+	}
+
+	@Override
+	public EndpointCallHandler<HystrixCommand<T>, O> adapt(EndpointMethod endpointMethod, EndpointCallHandler<T, O> delegate) {
+		return new HystrixCommandEndpointCallHandler<T, O>(properties, endpointMethod, delegate,
+				Optional.ofNullable(fallback).orElseGet(WithFallbackProvider::new));
 	}
 }

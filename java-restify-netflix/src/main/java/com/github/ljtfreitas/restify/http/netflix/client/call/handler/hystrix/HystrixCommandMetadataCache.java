@@ -23,17 +23,24 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.spring.netflix.autoconfigure.hystrix;
+package com.github.ljtfreitas.restify.http.netflix.client.call.handler.hystrix;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.util.Map;
+import java.util.Optional;
+import java.util.concurrent.ConcurrentHashMap;
 
-import org.springframework.beans.factory.annotation.Qualifier;
+import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethod;
 
-@Target(ElementType.TYPE)
-@Retention(RetentionPolicy.RUNTIME)
-@Qualifier(HystrixFallbackRegistry.QUALIFIER_NAME)
-public @interface Fallback {
+class HystrixCommandMetadataCache {
+
+	private static final Map<EndpointMethod, HystrixCommandMetadata> cache = new ConcurrentHashMap<>();
+
+	Optional<HystrixCommandMetadata> get(EndpointMethod endpointMethod) {
+		return Optional.ofNullable(cache.get(endpointMethod));
+	}
+
+	HystrixCommandMetadata put(EndpointMethod endpointMethod, HystrixCommandMetadata metadata) {
+		cache.put(endpointMethod, metadata);
+		return metadata;
+	}
 }

@@ -27,24 +27,26 @@ package com.github.ljtfreitas.restify.http.netflix.client.call.handler.hystrix;
 
 import java.util.Optional;
 
-import com.github.ljtfreitas.restify.http.client.call.EndpointCall;
+import com.github.ljtfreitas.restify.http.client.call.async.AsyncEndpointCall;
 import com.github.ljtfreitas.restify.http.client.call.handler.EndpointCallHandler;
+import com.github.ljtfreitas.restify.http.client.call.handler.async.AsyncEndpointCallHandler;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethod;
 import com.github.ljtfreitas.restify.reflection.JavaType;
 import com.github.ljtfreitas.restify.util.Tryable;
-import com.netflix.hystrix.HystrixCommand;
+import com.netflix.hystrix.HystrixObservableCommand;
 
-class HystrixCommandEndpointCallHandler<T, O> implements EndpointCallHandler<HystrixCommand<T>, O> {
+import rx.Observable;
 
-	private final HystrixCommand.Setter properties;
+class HystrixObservableCommandEndpointCallHandler<T, O> implements AsyncEndpointCallHandler<HystrixObservableCommand<T>, O> {
+
+	private final HystrixObservableCommand.Setter properties;
 	private final EndpointMethod endpointMethod;
 	private final EndpointCallHandler<T, O> delegate;
 	private final FallbackProvider fallback;
 	private final HystrixCommandMetadataCache hystrixCommandMetadataCache = new HystrixCommandMetadataCache();
 
-	HystrixCommandEndpointCallHandler(HystrixCommand.Setter properties, EndpointMethod endpointMethod,
+	HystrixObservableCommandEndpointCallHandler(HystrixObservableCommand.Setter properties, EndpointMethod endpointMethod,
 			EndpointCallHandler<T, O> delegate, FallbackProvider fallback) {
-
 		this.properties = properties;
 		this.endpointMethod = endpointMethod;
 		this.delegate = delegate;
@@ -57,33 +59,36 @@ class HystrixCommandEndpointCallHandler<T, O> implements EndpointCallHandler<Hys
 	}
 
 	@Override
-	public HystrixCommand<T> handle(EndpointCall<O> call, Object[] args) {
-		return new HystrixCommand<T>(hystrixProperties()) {
+	public HystrixObservableCommand<T> handleAsync(AsyncEndpointCall<O> call, Object[] args) {
+		return new HystrixObservableCommand<T>(hystrixProperties()) {
+
 			@Override
-			protected T run() throws Exception {
-				return delegate.handle(call, args);
+			protected Observable<T> construct() {
+				return Observable.from(call.executeAsync().toCompletableFuture())
+					.map(o -> delegate.handle(() -> o, args));
 			}
 
 			@Override
-			protected T getFallback() {
-				return fallback == null ? super.getFallback() : Tryable.of(() -> doFallback());
+			protected Observable<T> resumeWithFallback() {
+				return fallback == null ? super.resumeWithFallback() : Tryable.of(this::doFallback);
 			}
 
 			@SuppressWarnings("unchecked")
-			private T doFallback() throws Exception {
-				return (T) fallback.provides(endpointMethod.javaMethod().getDeclaringClass())
+			private Observable<T> doFallback() throws Exception {
+				ObservableFallbackResult fallbackAsObservable = new ObservableFallbackResult(fallback.provides(endpointMethod.javaMethod().getDeclaringClass())
 						.strategy(endpointMethod.javaMethod().getDeclaringClass())
-							.execute(endpointMethod.javaMethod(), args)
-								.get();
+							.execute(endpointMethod.javaMethod(), args));
+
+				return (Observable<T>) fallbackAsObservable.get();
 			}
 		};
 	}
 
-	private HystrixCommand.Setter hystrixProperties() {
+	private HystrixObservableCommand.Setter hystrixProperties() {
 		return Optional.ofNullable(properties)
 				.orElseGet(() ->
 					hystrixCommandMetadataCache.get(endpointMethod)
-						.orElseGet(this::buildHystrixProperties).asCommand());
+						.orElseGet(this::buildHystrixProperties).asObservableCommand());
 	}
 
 	private HystrixCommandMetadata buildHystrixProperties() {

@@ -23,17 +23,44 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.spring.netflix.autoconfigure.hystrix;
+package com.github.ljtfreitas.restify.http.netflix.client.call.handler.hystrix;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.lang.reflect.Method;
 
-import org.springframework.beans.factory.annotation.Qualifier;
+class DefaultFallback implements Fallback {
 
-@Target(ElementType.TYPE)
-@Retention(RetentionPolicy.RUNTIME)
-@Qualifier(HystrixFallbackRegistry.QUALIFIER_NAME)
-public @interface Fallback {
+	private final Object fallback;
+
+	public DefaultFallback(Object fallback) {
+		this.fallback = fallback;
+	}
+
+	@Override
+	public FallbackStrategy strategy(Class<?> declaringClass) {
+		return fallback == null ? new FallbackNotImplementedStrategy() :
+			declaringClass.isAssignableFrom(fallback.getClass()) ?
+				new FallbackOfSameType() : new FallbackByMethod();
+	}
+
+	private class FallbackOfSameType implements FallbackStrategy {
+
+		@Override
+		public FallbackResult<Object> execute(Method javaMethod, Object[] args) throws Exception {
+			return new DefaultFallbackResult(javaMethod.invoke(fallback, args));
+		}
+	}
+
+	private class FallbackByMethod implements FallbackStrategy {
+
+		@Override
+		public FallbackResult<Object> execute(Method javaMethod, Object[] args) throws Exception {
+			Method fallbackMethod = fallback.getClass()
+					.getMethod(javaMethod.getName(), javaMethod.getParameterTypes());
+			return new DefaultFallbackResult(fallbackMethod.invoke(fallback, args));
+		}
+	}
+
+	static DefaultFallback empty() {
+		return new DefaultFallback(null);
+	}
 }

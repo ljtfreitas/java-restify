@@ -15,11 +15,11 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import com.github.ljtfreitas.restify.http.client.call.EndpointCall;
-import com.github.ljtfreitas.restify.http.client.call.handler.EndpointCallHandler;
+import com.github.ljtfreitas.restify.http.client.call.async.AsyncEndpointCall;
+import com.github.ljtfreitas.restify.http.client.call.handler.async.AsyncEndpointCallHandler;
 import com.github.ljtfreitas.restify.reflection.JavaType;
-import com.netflix.hystrix.HystrixCommand;
 import com.netflix.hystrix.HystrixCommandGroupKey;
+import com.netflix.hystrix.HystrixObservableCommand;
 
 import rx.Observable;
 
@@ -27,10 +27,10 @@ import rx.Observable;
 public class HystrixObservableEndpointCallHandlerAdapterTest {
 
 	@Mock
-	private EndpointCallHandler<HystrixCommand<String>, String> hystrixCommandHandler;
+	private AsyncEndpointCallHandler<HystrixObservableCommand<String>, String> delegate;
 
 	@Mock
-	private EndpointCall<String> call;
+	private AsyncEndpointCall<String> call;
 
 	private HystrixObservableEndpointCallHandlerAdapter<String, String> adapter;
 
@@ -40,31 +40,31 @@ public class HystrixObservableEndpointCallHandlerAdapterTest {
 	public void setup() {
 		arguments = new Object[0];
 
-		when(hystrixCommandHandler.handle(call, arguments))
-			.thenReturn(new SuccessHystrixCommand());
+		when(delegate.handle(call, arguments))
+			.thenReturn(new SuccessHystrixObservableCommand());
 
 		adapter = new HystrixObservableEndpointCallHandlerAdapter<>();
 	}
 
 	@Test
 	public void shouldGetObservableFromHystrixCommand() throws Exception {
-		EndpointCallHandler<Observable<String>, String> handler = adapter
-				.adapt(new SimpleEndpointMethod(SomeType.class.getMethod("observableOnCircuitBreaker")), hystrixCommandHandler);
+		AsyncEndpointCallHandler<Observable<String>, String> handler = adapter
+				.adaptAsync(new SimpleEndpointMethod(SomeType.class.getMethod("observableOnCircuitBreaker")), delegate);
 
-		Observable<String> observable = handler.handle(call, arguments);
+		Observable<String> observable = handler.handleAsync(call, arguments);
 
 		assertEquals("call result", observable.toBlocking().first());
 	}
 
 	@Test
 	public void shouldGetObservableWithFallbackWhenHystrixCommandFail() throws Exception {
-		when(hystrixCommandHandler.handle(same(call), any()))
-			.thenReturn(new FailHystrixCommand());
+		when(delegate.handle(same(call), any()))
+			.thenReturn(new FailHystrixObservableCommand());
 
-		EndpointCallHandler<Observable<String>, String> handler = adapter
-				.adapt(new SimpleEndpointMethod(SomeType.class.getMethod("observableOnCircuitBreaker")), hystrixCommandHandler);
+		AsyncEndpointCallHandler<Observable<String>, String> handler = adapter
+				.adaptAsync(new SimpleEndpointMethod(SomeType.class.getMethod("observableOnCircuitBreaker")), delegate);
 
-		Observable<String> observable = handler.handle(call, arguments);
+		Observable<String> observable = handler.handleAsync(call, arguments);
 
 		assertEquals("fallback result", observable.toBlocking().first());
 	}
@@ -85,26 +85,26 @@ public class HystrixObservableEndpointCallHandlerAdapterTest {
 	}
 
 	@Test
-	public void shouldReturnHystrixCommandAsReturnTypeWithObservableParameterizedType() throws Exception {
+	public void shouldReturnHystrixObservableCommandAsReturnTypeWithObservableParameterizedType() throws Exception {
 		JavaType returnType = adapter.returnType(new SimpleEndpointMethod(SomeType.class.getMethod("observableOnCircuitBreaker")));
 		
 		assertTrue(returnType.parameterized());
 		
 		ParameterizedType parameterizedReturnType = returnType.as(ParameterizedType.class);
 	
-		assertEquals(HystrixCommand.class, parameterizedReturnType.getRawType());
+		assertEquals(HystrixObservableCommand.class, parameterizedReturnType.getRawType());
 		assertEquals(String.class, parameterizedReturnType.getActualTypeArguments()[0]);
 	}
 
 	@Test
-	public void shouldReturnHystrixCommandAsReturnTypeWithObjectTypeWhenObservableIsNotParameterized() throws Exception {
+	public void shouldReturnHystrixObservableCommandAsReturnTypeWithObjectTypeWhenObservableIsNotParameterized() throws Exception {
 		JavaType returnType = adapter.returnType(new SimpleEndpointMethod(SomeType.class.getMethod("dumbObservable")));
 		
 		assertTrue(returnType.parameterized());
 		
 		ParameterizedType parameterizedReturnType = returnType.as(ParameterizedType.class);
 	
-		assertEquals(HystrixCommand.class, parameterizedReturnType.getRawType());
+		assertEquals(HystrixObservableCommand.class, parameterizedReturnType.getRawType());
 		assertEquals(Object.class, parameterizedReturnType.getActualTypeArguments()[0]);
 	}
 
@@ -122,32 +122,32 @@ public class HystrixObservableEndpointCallHandlerAdapterTest {
 		String onCircuitBreakerOtherType();
 	}
 	
-	private class SuccessHystrixCommand extends HystrixCommand<String> {
+	private class SuccessHystrixObservableCommand extends HystrixObservableCommand<String> {
 
-		private SuccessHystrixCommand() {
+		private SuccessHystrixObservableCommand() {
 			super(HystrixCommandGroupKey.Factory.asKey("success"));
 		}
 
 		@Override
-		protected String run() throws Exception {
-			return "call result";
+		protected Observable<String> construct() {
+			return Observable.just("call result");
 		}
 	}
 
-	private class FailHystrixCommand extends HystrixCommand<String> {
+	private class FailHystrixObservableCommand extends HystrixObservableCommand<String> {
 
-		private FailHystrixCommand() {
+		private FailHystrixObservableCommand() {
 			super(HystrixCommandGroupKey.Factory.asKey("simple"));
 		}
 
 		@Override
-		protected String run() throws Exception {
-			throw new RuntimeException("ooops");
+		protected Observable<String> construct() {
+			return Observable.error(new RuntimeException("ooops"));
 		}
 
 		@Override
-		protected String getFallback() {
-			return "fallback result";
+		protected Observable<String> resumeWithFallback() {
+			return Observable.just("fallback result");
 		}
 	}
 }

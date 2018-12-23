@@ -27,43 +27,48 @@ package com.github.ljtfreitas.restify.http.netflix.client.call.handler.hystrix;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.Optional;
 
 import com.github.ljtfreitas.restify.http.client.call.handler.EndpointCallHandler;
-import com.github.ljtfreitas.restify.http.client.call.handler.EndpointCallHandlerAdapter;
+import com.github.ljtfreitas.restify.http.client.call.handler.async.AsyncEndpointCallHandler;
+import com.github.ljtfreitas.restify.http.client.call.handler.async.AsyncEndpointCallHandlerAdapter;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethod;
 import com.github.ljtfreitas.restify.reflection.JavaType;
-import com.netflix.hystrix.HystrixCommand;
+import com.netflix.hystrix.HystrixObservableCommand;
 
-public abstract class BaseHystrixCommandEndpointCallHandlerAdapter<T, O> implements EndpointCallHandlerAdapter<HystrixCommand<T>, T, O> {
+public class HystrixObservableCommandEndpointCallHandlerAdapter<T, O> implements AsyncEndpointCallHandlerAdapter<HystrixObservableCommand<T>, T, O> {
 
-	private final HystrixCommand.Setter hystrixMetadata;
-	private final Object fallback;
+	protected final HystrixObservableCommand.Setter properties;
+	protected final FallbackProvider fallback;
 
-	protected BaseHystrixCommandEndpointCallHandlerAdapter() {
-		this(null, null);
+	public HystrixObservableCommandEndpointCallHandlerAdapter() {
+		this(null, (FallbackProvider) null);
 	}
 
-	protected BaseHystrixCommandEndpointCallHandlerAdapter(HystrixCommand.Setter hystrixMetadata) {
-		this(hystrixMetadata, null);
+	public HystrixObservableCommandEndpointCallHandlerAdapter(HystrixObservableCommand.Setter properties) {
+		this(properties, (FallbackProvider) null);
 	}
 
-	protected BaseHystrixCommandEndpointCallHandlerAdapter(HystrixCommand.Setter hystrixMetadata, Object fallback) {
-		this.hystrixMetadata = hystrixMetadata;
+	public HystrixObservableCommandEndpointCallHandlerAdapter(Fallback fallback) {
+		this(null, (FallbackProvider) (t) -> fallback);
+	}
+
+	public HystrixObservableCommandEndpointCallHandlerAdapter(FallbackProvider fallback) {
+		this(null, (FallbackProvider) fallback);
+	}
+
+	public HystrixObservableCommandEndpointCallHandlerAdapter(HystrixObservableCommand.Setter properties, Fallback fallback) {
+		this(properties, (FallbackProvider) (t) -> fallback);
+	}
+
+	public HystrixObservableCommandEndpointCallHandlerAdapter(HystrixObservableCommand.Setter properties, FallbackProvider fallback) {
+		this.properties = properties;
 		this.fallback = fallback;
 	}
 
 	@Override
 	public final boolean supports(EndpointMethod endpointMethod) {
-		return returnHystrixCommand(endpointMethod)
-				&& (fallback == null || sameTypeOfFallback(endpointMethod.javaMethod().getDeclaringClass()));
-	}
-
-	private boolean returnHystrixCommand(EndpointMethod endpointMethod) {
-		return endpointMethod.returnType().is(HystrixCommand.class);
-	}
-
-	private boolean sameTypeOfFallback(Class<?> classType) {
-		return classType.isAssignableFrom(fallback.getClass());
+		return endpointMethod.returnType().is(HystrixObservableCommand.class);
 	}
 
 	@Override
@@ -78,15 +83,9 @@ public abstract class BaseHystrixCommandEndpointCallHandlerAdapter<T, O> impleme
 	}
 
 	@Override
-	public EndpointCallHandler<HystrixCommand<T>, O> adapt(EndpointMethod endpointMethod, EndpointCallHandler<T, O> delegate) {
-		return new HystrixCommandEndpointCallHandler<T, O>(hystrixMetadata, endpointMethod, delegate, fallback(endpointMethod));
-	}
-
-	private Object fallback(EndpointMethod endpointMethod) {
-		return fallback == null ? fallbackTo(endpointMethod) : fallback;
-	}
-
-	protected Object fallbackTo(EndpointMethod endpointMethod) {
-		return null;
+	public AsyncEndpointCallHandler<HystrixObservableCommand<T>, O> adaptAsync(EndpointMethod endpointMethod,
+			EndpointCallHandler<T, O> delegate) {
+		return new HystrixObservableCommandEndpointCallHandler<>(properties, endpointMethod, delegate,
+				Optional.ofNullable(fallback).orElseGet(WithFallbackProvider::new));
 	}
 }

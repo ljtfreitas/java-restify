@@ -25,15 +25,20 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.spring.netflix.autoconfigure.hystrix;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import com.github.ljtfreitas.restify.http.netflix.client.call.handler.hystrix.Fallback;
+import com.github.ljtfreitas.restify.http.netflix.client.call.handler.hystrix.FallbackProvider;
 
-import org.springframework.beans.factory.annotation.Qualifier;
+class HystrixFallbackProvider implements FallbackProvider {
 
-@Target(ElementType.TYPE)
-@Retention(RetentionPolicy.RUNTIME)
-@Qualifier(HystrixFallbackRegistry.QUALIFIER_NAME)
-public @interface Fallback {
+	private final HystrixFallbackRegistry hystrixFallbackRegistry;
+
+	HystrixFallbackProvider(HystrixFallbackRegistry hystrixFallbackRegistry) {
+		this.hystrixFallbackRegistry = hystrixFallbackRegistry;
+	}
+
+	@Override
+	public Fallback provides(Class<?> type) {
+		return hystrixFallbackRegistry.get(type).map(Fallback::of).orElseGet(Fallback::empty);
+	}
+
 }

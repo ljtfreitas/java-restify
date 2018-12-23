@@ -28,7 +28,6 @@ package com.github.ljtfreitas.restify.http.netflix.client.call.handler.hystrix;
 import java.util.Optional;
 
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethod;
-import com.netflix.hystrix.HystrixCommand;
 import com.netflix.hystrix.HystrixCommandGroupKey;
 import com.netflix.hystrix.HystrixCommandKey;
 import com.netflix.hystrix.HystrixCommandProperties;
@@ -45,15 +44,14 @@ class HystrixCommandMetadataFactory {
 		this.onCircuitBreaker = endpointMethod.metadata().get(OnCircuitBreaker.class);
 	}
 
-	public HystrixCommand.Setter create() {
-		HystrixCommand.Setter setter = HystrixCommand.Setter
+	public HystrixCommandMetadata create() {
+		return new HystrixCommandMetadata.HystrixCommandMetadataBuilder()
 				.withGroupKey(groupKey())
 					.andCommandKey(commandKey())
 						.andThreadPoolKey(threadPoolKey())
 							.andCommandPropertiesDefaults(commandProperties())
-								.andThreadPoolPropertiesDefaults(threadPoolProperties());
-
-		return setter;
+								.andThreadPoolPropertiesDefaults(threadPoolProperties())
+									.build();
 	}
 
 	private HystrixCommandGroupKey groupKey() {

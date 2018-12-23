@@ -25,17 +25,7 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.netflix.client.call.handler.hystrix;
 
-import static com.github.ljtfreitas.restify.util.Preconditions.nonNull;
+interface FallbackResult<T> {
 
-import com.netflix.hystrix.HystrixCommand;
-
-public class HystrixCommandFallbackEndpointCallHandlerAdapter<T, O, F> extends BaseHystrixCommandEndpointCallHandlerAdapter<T, O> {
-
-	public HystrixCommandFallbackEndpointCallHandlerAdapter(F fallback) {
-		this(null, fallback);
-	}
-
-	public HystrixCommandFallbackEndpointCallHandlerAdapter(HystrixCommand.Setter hystrixMetadata, F fallback) {
-		super(hystrixMetadata, nonNull(fallback, "Your fallback cannot be null!"));
-	}
+	T get() throws Exception;
 }

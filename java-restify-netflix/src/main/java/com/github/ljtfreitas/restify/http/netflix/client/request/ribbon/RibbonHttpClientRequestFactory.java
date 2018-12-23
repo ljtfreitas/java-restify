@@ -38,7 +38,7 @@ import com.netflix.loadbalancer.ILoadBalancer;
 
 public class RibbonHttpClientRequestFactory implements HttpClientRequestFactory {
 
-	private final DefaultRibbonLoadBalancedClient ribbonLoadBalancedClient;
+	private final RibbonLoadBalancedClient ribbonLoadBalancedClient;
 	private final Charset charset;
 
 	public RibbonHttpClientRequestFactory(ILoadBalancer loadBalancer) {
@@ -84,11 +84,11 @@ public class RibbonHttpClientRequestFactory implements HttpClientRequestFactory 
 		this(new DefaultRibbonLoadBalancedClient(loadBalancer, clientConfig, delegate, ribbonExceptionHandler), charset);
 	}
 
-	public RibbonHttpClientRequestFactory(DefaultRibbonLoadBalancedClient ribbonLoadBalancedClient) {
+	public RibbonHttpClientRequestFactory(RibbonLoadBalancedClient ribbonLoadBalancedClient) {
 		this(ribbonLoadBalancedClient, Encoding.UTF_8.charset());
 	}
 
-	public RibbonHttpClientRequestFactory(DefaultRibbonLoadBalancedClient ribbonLoadBalancedClient, Charset charset) {
+	public RibbonHttpClientRequestFactory(RibbonLoadBalancedClient ribbonLoadBalancedClient, Charset charset) {
 		this.ribbonLoadBalancedClient = ribbonLoadBalancedClient;
 		this.charset = charset;
 	}

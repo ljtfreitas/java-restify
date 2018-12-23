@@ -23,17 +23,15 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.spring.netflix.autoconfigure.hystrix;
+package com.github.ljtfreitas.restify.http.netflix.client.call.handler.hystrix;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.lang.reflect.Method;
 
-import org.springframework.beans.factory.annotation.Qualifier;
+class FallbackNotImplementedStrategy implements FallbackStrategy {
 
-@Target(ElementType.TYPE)
-@Retention(RetentionPolicy.RUNTIME)
-@Qualifier(HystrixFallbackRegistry.QUALIFIER_NAME)
-public @interface Fallback {
+	@Override
+	public <T> FallbackResult<T> execute(Method javaMethod, Object[] args) throws Exception {
+		throw new UnsupportedOperationException("No fallback available.");
+	}
+
 }

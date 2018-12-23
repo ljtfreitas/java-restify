@@ -33,7 +33,9 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import com.github.ljtfreitas.restify.http.netflix.client.call.handler.hystrix.HystrixCommandEndpointCallHandlerAdapter;
 import com.github.ljtfreitas.restify.http.netflix.client.call.handler.hystrix.HystrixEndpointCallHandlerAdapter;
+import com.github.ljtfreitas.restify.http.netflix.client.call.handler.hystrix.HystrixObservableCommandEndpointCallHandlerAdapter;
 import com.github.ljtfreitas.restify.spring.autoconfigure.RestifyAutoConfiguration;
 
 @Configuration
@@ -42,9 +44,16 @@ public class RestifyHystrixAutoConfiguration {
 
 	@ConditionalOnMissingBean
 	@Bean
-	public HystrixCommandFallbackEndpointCallHandlerAdapter hystrixCommandFallbackEndpointCallHandlerAdapter(
-			HystrixFallbackRegistry fallbackObjectFactory) {
-		return new HystrixCommandFallbackEndpointCallHandlerAdapter(fallbackObjectFactory);
+	public HystrixCommandEndpointCallHandlerAdapter<Object, Object> hystrixCommandFallbackEndpointCallHandlerAdapter(
+			HystrixFallbackProvider hystrixFallbackProvider) {
+		return new HystrixCommandEndpointCallHandlerAdapter<>(hystrixFallbackProvider);
+	}
+
+	@ConditionalOnMissingBean
+	@Bean
+	public HystrixObservableCommandEndpointCallHandlerAdapter<Object, Object> hystrixObservableCommandFallbackEndpointCallHandlerAdapter(
+			HystrixFallbackProvider hystrixFallbackProvider) {
+		return new HystrixObservableCommandEndpointCallHandlerAdapter<>(hystrixFallbackProvider);
 	}
 
 	@ConditionalOnMissingBean
@@ -60,7 +69,12 @@ public class RestifyHystrixAutoConfiguration {
 		private BeanFactory beanFactory;
 
 		@Bean
-		public HystrixFallbackRegistry restifyFallbackObjectFactory() {
+		public HystrixFallbackProvider hystrixFallbackProvider() {
+			return new HystrixFallbackProvider(hystrixFallbackRegistry());
+		}
+
+		@Bean
+		public HystrixFallbackRegistry hystrixFallbackRegistry() {
 			return new HystrixFallbackRegistry(beanFactory);
 		}
 

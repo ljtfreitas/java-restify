@@ -23,17 +23,17 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.spring.netflix.autoconfigure.hystrix;
+package com.github.ljtfreitas.restify.http.netflix.client.call.handler.hystrix;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+public interface Fallback {
 
-import org.springframework.beans.factory.annotation.Qualifier;
+	FallbackStrategy strategy(Class<?> declaringClass);
 
-@Target(ElementType.TYPE)
-@Retention(RetentionPolicy.RUNTIME)
-@Qualifier(HystrixFallbackRegistry.QUALIFIER_NAME)
-public @interface Fallback {
+	public static Fallback of(Object fallback) {
+		return new DefaultFallback(fallback);
+	}
+
+	public static Fallback empty() {
+		return DefaultFallback.empty();
+	}
 }
