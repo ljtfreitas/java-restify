@@ -25,8 +25,10 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.spring.netflix.autoconfigure.hystrix;
 
-import com.github.ljtfreitas.restify.http.netflix.client.call.handler.hystrix.Fallback;
-import com.github.ljtfreitas.restify.http.netflix.client.call.handler.hystrix.FallbackProvider;
+import java.lang.reflect.Method;
+
+import com.github.ljtfreitas.restify.http.client.call.handler.circuitbreaker.Fallback;
+import com.github.ljtfreitas.restify.http.client.call.handler.circuitbreaker.FallbackProvider;
 
 class HystrixFallbackProvider implements FallbackProvider {
 
@@ -37,8 +39,8 @@ class HystrixFallbackProvider implements FallbackProvider {
 	}
 
 	@Override
-	public Fallback provides(Class<?> type) {
-		return hystrixFallbackRegistry.get(type).map(Fallback::of).orElseGet(Fallback::empty);
+	public Fallback provides(Method javaMethod) {
+		return hystrixFallbackRegistry.get(javaMethod.getDeclaringClass()).map(Fallback::of).orElseGet(Fallback::empty);
 	}
 
 }

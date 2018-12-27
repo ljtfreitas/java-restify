@@ -21,7 +21,12 @@
 		</dependency>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
-			<artifactId>java-restify-netflix</artifactId>
+			<artifactId>java-restify-netflix-hystrix</artifactId>
+			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>java-restify-netflix-ribbon</artifactId>
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>

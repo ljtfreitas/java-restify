@@ -53,7 +53,8 @@ public class DefaultZookeeperServiceDiscoveryTest {
 
 	@Before
 	public void setup() throws Exception {
-		zookeeperServer = new TestingServer(2181, true);
+		zookeeperServer = new TestingServer(2181, false);
+		zookeeperServer.restart();
 
 		ZookeeperConfiguration zookeeperConfiguration = new ZookeeperConfiguration(ZookeeperQuorum.of("localhost:2181"), "/services");
 
@@ -84,6 +85,7 @@ public class DefaultZookeeperServiceDiscoveryTest {
 
 		requestExecutor = new DefaultEndpointRequestExecutor(ribbonHttpClientRequestFactory, new EndpointRequestWriter(messageConverters),
 				new EndpointResponseReader(messageConverters));
+
 	}
 
 	@After

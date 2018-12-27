@@ -32,7 +32,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.BeanFactoryAnnotationUtils;
 
-import com.github.ljtfreitas.restify.http.netflix.client.call.handler.hystrix.WithFallback;
+import com.github.ljtfreitas.restify.http.client.call.handler.circuitbreaker.WithFallback;
 import com.github.ljtfreitas.restify.util.Tryable;
 
 class HystrixFallbackRegistry {
