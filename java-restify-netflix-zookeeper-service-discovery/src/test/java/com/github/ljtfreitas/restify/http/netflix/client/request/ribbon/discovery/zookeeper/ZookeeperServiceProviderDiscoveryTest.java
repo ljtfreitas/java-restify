@@ -31,17 +31,7 @@ import com.github.ljtfreitas.restify.http.client.request.EndpointRequestWriter;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponseReader;
 import com.github.ljtfreitas.restify.http.netflix.client.request.ribbon.RibbonHttpClientRequestFactory;
-import com.github.ljtfreitas.restify.http.netflix.client.request.ribbon.discovery.DiscoveryServerList;
 import com.github.ljtfreitas.restify.http.netflix.client.request.ribbon.discovery.ServiceFailureExceptionHandler;
-import com.github.ljtfreitas.restify.http.netflix.client.request.ribbon.discovery.zookeeper.DefaultZookeeperServiceRegistry;
-import com.github.ljtfreitas.restify.http.netflix.client.request.ribbon.discovery.zookeeper.ZookeeperConfiguration;
-import com.github.ljtfreitas.restify.http.netflix.client.request.ribbon.discovery.zookeeper.ZookeeperCuratorServiceDiscovery;
-import com.github.ljtfreitas.restify.http.netflix.client.request.ribbon.discovery.zookeeper.ZookeeperInstanceSerializer;
-import com.github.ljtfreitas.restify.http.netflix.client.request.ribbon.discovery.zookeeper.ZookeeperQuorum;
-import com.github.ljtfreitas.restify.http.netflix.client.request.ribbon.discovery.zookeeper.ZookeeperServiceInstance;
-import com.github.ljtfreitas.restify.http.netflix.client.request.ribbon.discovery.zookeeper.ZookeeperServiceProviderDiscovery;
-import com.github.ljtfreitas.restify.http.netflix.client.request.ribbon.discovery.zookeeper.ZookeeperServiceRegistry;
-import com.github.ljtfreitas.restify.http.netflix.client.request.ribbon.discovery.zookeeper.ZookeeperServiceRegistryRequest;
 import com.github.ljtfreitas.restify.http.netflix.client.request.ribbon.discovery.zookeeper.ZookeeperServiceRegistryRequest.Payload;
 import com.netflix.loadbalancer.ILoadBalancer;
 import com.netflix.loadbalancer.LoadBalancerBuilder;
@@ -64,7 +54,8 @@ public class ZookeeperServiceProviderDiscoveryTest {
 
 	@Before
 	public void setup() throws Exception {
-		zookeeperServer = new TestingServer(2181, true);
+		zookeeperServer = new TestingServer(2181, false);
+		zookeeperServer.restart();
 
 		ZookeeperConfiguration zookeeperConfiguration = new ZookeeperConfiguration(ZookeeperQuorum.of("localhost:2181/services"));
 
@@ -83,7 +74,7 @@ public class ZookeeperServiceProviderDiscoveryTest {
 
 		zookeeperServiceDiscovery = new ZookeeperServiceProviderDiscovery<>("myApi", zookeeperCuratorServiceDiscovery);
 
-		DiscoveryServerList<ZookeeperServiceInstance> zookeeperServers = new DiscoveryServerList<>(zookeeperServiceDiscovery, "myApi");
+		ZookeeperServerList zookeeperServers = new ZookeeperServerList(zookeeperServiceDiscovery, "myApi");
 
 		ILoadBalancer loadBalancer = LoadBalancerBuilder.newBuilder()
 				.withDynamicServerList(zookeeperServers)
@@ -95,6 +86,7 @@ public class ZookeeperServiceProviderDiscoveryTest {
 
 		requestExecutor = new DefaultEndpointRequestExecutor(ribbonHttpClientRequestFactory, new EndpointRequestWriter(messageConverters),
 				new EndpointResponseReader(messageConverters));
+
 	}
 
 	@After
