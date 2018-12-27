@@ -63,7 +63,8 @@ public class ZookeeperServiceCacheDiscoveryTest {
 
 	@Before
 	public void setup() throws Exception {
-		zookeeperServer = new TestingServer(2181, true);
+		zookeeperServer = new TestingServer(2181, false);
+		zookeeperServer.restart();
 
 		ZookeeperConfiguration zookeeperConfiguration = new ZookeeperConfiguration(ZookeeperQuorum.of("localhost:2181"), "/services");
 

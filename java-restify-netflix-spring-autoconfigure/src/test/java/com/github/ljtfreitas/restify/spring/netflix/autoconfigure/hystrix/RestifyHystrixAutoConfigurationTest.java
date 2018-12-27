@@ -29,6 +29,9 @@ public class RestifyHystrixAutoConfigurationTest {
 	private BadApi badApi;
 
 	@Autowired
+	private AnnotatedBadApi annotatedBadApi;
+
+	@Autowired
 	private GoodApi goodApi;
 
 	@Rule
@@ -87,6 +90,21 @@ public class RestifyHystrixAutoConfigurationTest {
 		String result = goodApi.get(); // response is 200
 
 		assertEquals("It's works!", result);
+	}
+
+	@Test
+	public void shouldGetFallbackToBadApiFromWithFallbackAnnotation() {
+		mockServerClient
+			.when(request()
+					.withMethod("GET")
+					.withPath("/bad"))
+			.respond(response()
+					.withStatusCode(500));
+
+		String result = annotatedBadApi.get(); // break (response is 500) -> go to fallback...
+
+		// see FallbackBadApi class
+		assertEquals("this is BadApi fallback!", result);
 	}
 
 	@Test
