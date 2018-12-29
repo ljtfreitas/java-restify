@@ -39,7 +39,7 @@ import org.apache.curator.x.discovery.details.InstanceSerializer;
 import org.apache.curator.x.discovery.strategies.RoundRobinStrategy;
 
 import com.github.ljtfreitas.restify.http.netflix.client.request.ribbon.discovery.ServiceInstance;
-import com.github.ljtfreitas.restify.util.Tryable;
+import com.github.ljtfreitas.restify.util.Try;
 
 public class ZookeeperServiceProviderDiscovery<T> implements ZookeeperServiceDiscovery<T> {
 
@@ -93,9 +93,9 @@ public class ZookeeperServiceProviderDiscovery<T> implements ZookeeperServiceDis
 				"ZookeeperServiceProviderDiscovery it's configured for services named [" + this.serviceName + "], "
 						+ "not [" + serviceName + "]");
 
-		return Tryable.of(() -> serviceProvider.getAllInstances()
-				.stream().map(ZookeeperServiceInstance::of)
-					.collect(Collectors.toList()));
+		return Try.of(() -> serviceProvider.getAllInstances())
+				.map(instances -> instances.stream().map(ZookeeperServiceInstance::of).collect(Collectors.toList()))
+					.get();
 	}
 
 	@Override
@@ -106,9 +106,9 @@ public class ZookeeperServiceProviderDiscovery<T> implements ZookeeperServiceDis
 
 	@Override
 	public void close() throws IOException {
-		Tryable.silently(serviceProvider::close);
+		serviceProvider.close();
 		if (serviceDiscovery != null) {
-			Tryable.silently(serviceDiscovery::close);
+			serviceDiscovery.close();
 		}
 	}
 }

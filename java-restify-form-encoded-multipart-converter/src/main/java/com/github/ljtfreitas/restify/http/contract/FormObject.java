@@ -36,7 +36,7 @@ import java.util.Optional;
 
 import com.github.ljtfreitas.restify.http.contract.Form.Field;
 import com.github.ljtfreitas.restify.http.contract.Parameters.Parameter;
-import com.github.ljtfreitas.restify.util.Tryable;
+import com.github.ljtfreitas.restify.util.Try;
 
 public class FormObject {
 
@@ -67,7 +67,7 @@ public class FormObject {
 		String prefix = name.isEmpty() || name.endsWith(".") ? name : name + ".";
 
 		return fields.values().stream()
-			.reduce(new Parameters(prefix), (parameters, field) -> Tryable.of(() -> parameters.putAll(field.serialize(source))),
+			.reduce(new Parameters(prefix), (parameters, field) -> Try.of(() -> field.serialize(source)).map(parameters::putAll).get(),
 					(a, b) -> b);
 	}
 
@@ -246,8 +246,9 @@ public class FormObject {
 			String name = annotation.value().isEmpty() ? field.getName() : annotation.value();
 			boolean indexed = annotation.indexed();
 
-			FormFieldSerializer serializer = Tryable.of(annotation.serializer()::newInstance,
-					(e) -> new UnsupportedOperationException("Cannot create a instance of serializer " + annotation.serializer(), e));
+			FormFieldSerializer serializer = Try.of(annotation.serializer()::newInstance)
+					.error(e -> new UnsupportedOperationException("Cannot create a instance of serializer " + annotation.serializer(), e))
+						.get();
 
 			return new FormObjectField(name, indexed, serializer, field);
 		}

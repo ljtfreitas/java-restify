@@ -34,7 +34,7 @@ import com.github.ljtfreitas.restify.http.client.call.handler.circuitbreaker.Fal
 import com.github.ljtfreitas.restify.http.client.call.handler.circuitbreaker.FallbackStrategy;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethod;
 import com.github.ljtfreitas.restify.reflection.JavaType;
-import com.github.ljtfreitas.restify.util.Tryable;
+import com.github.ljtfreitas.restify.util.Try;
 import com.netflix.hystrix.HystrixObservableCommand;
 
 import rx.Observable;
@@ -72,7 +72,7 @@ class HystrixObservableCommandEndpointCallHandler<T, O> implements AsyncEndpoint
 
 			@Override
 			protected Observable<T> resumeWithFallback() {
-				return fallback == null ? super.resumeWithFallback() : Tryable.of(this::doFallback);
+				return fallback == null ? super.resumeWithFallback() : Try.of(this::doFallback).get();
 			}
 
 			private Observable<T> doFallback() throws Exception {

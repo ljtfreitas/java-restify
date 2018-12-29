@@ -42,7 +42,7 @@ import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestBody
 import com.github.ljtfreitas.restify.http.client.message.response.StatusCode;
 import com.github.ljtfreitas.restify.http.client.request.async.AsyncHttpClientRequest;
 import com.github.ljtfreitas.restify.http.client.response.HttpClientResponse;
-import com.github.ljtfreitas.restify.util.Tryable;
+import com.github.ljtfreitas.restify.util.Try;
 
 import okhttp3.Call;
 import okhttp3.Callback;
@@ -148,7 +148,7 @@ class OkHttpClientRequest implements AsyncHttpClientRequest {
 
 		okhttp3.RequestBody body = (content.length > 0 ? okhttp3.RequestBody.create(contentType, content) : null);
 
-		URL url = Tryable.of(() -> uri.toURL());
+		URL url = Try.of(uri::toURL).get();
 
 		Request.Builder builder = new Request.Builder();
 

@@ -25,6 +25,7 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.message.converter.json;
 
+import java.io.OutputStream;
 import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.Map;
@@ -42,7 +43,7 @@ import com.github.ljtfreitas.restify.http.client.message.converter.HttpMessageRe
 import com.github.ljtfreitas.restify.http.client.message.converter.HttpMessageWriteException;
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
 import com.github.ljtfreitas.restify.http.client.message.response.HttpResponseMessage;
-import com.github.ljtfreitas.restify.util.Tryable;
+import com.github.ljtfreitas.restify.util.Try;
 
 public class JsonPMessageConverter implements JsonMessageConverter<JsonStructure> {
 
@@ -99,10 +100,8 @@ public class JsonPMessageConverter implements JsonMessageConverter<JsonStructure
 
 		consumer.accept(writer);
 
-		Tryable.run(() -> {;
-			httpRequestMessage.body().output().flush();
-			httpRequestMessage.body().output().close();
-
-		}, e -> new HttpMessageWriteException(e));
+		Try.withResources(httpRequestMessage.body()::output)
+			.apply(OutputStream::flush)
+				.error(HttpMessageWriteException::new);
 	}
 }

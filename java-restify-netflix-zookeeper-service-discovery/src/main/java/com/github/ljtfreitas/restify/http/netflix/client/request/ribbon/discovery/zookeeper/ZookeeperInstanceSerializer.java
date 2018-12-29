@@ -35,7 +35,7 @@ import org.apache.curator.x.discovery.details.InstanceSerializer;
 import org.codehaus.jackson.JsonNode;
 import org.codehaus.jackson.map.ObjectMapper;
 
-import com.github.ljtfreitas.restify.util.Tryable;
+import com.github.ljtfreitas.restify.util.Try;
 
 public class ZookeeperInstanceSerializer implements InstanceSerializer<ZookeeperServiceInstance> {
 
@@ -80,7 +80,7 @@ public class ZookeeperInstanceSerializer implements InstanceSerializer<Zookeeper
 		JsonNode payload = tree.get("payload");
 
 		ZookeeperServiceInstance zookeeperInstance = Optional.ofNullable(payload)
-				.map(p -> Tryable.of(() -> mapper.readValue(p, ZookeeperServiceInstance.class)))
+				.map(p -> Try.of(() -> mapper.readValue(p, ZookeeperServiceInstance.class)).get())
 					.orElse(null);
 
 		return new ServiceInstance<>(name, id, address, port, sslPort, zookeeperInstance, registrationTimeUTC,

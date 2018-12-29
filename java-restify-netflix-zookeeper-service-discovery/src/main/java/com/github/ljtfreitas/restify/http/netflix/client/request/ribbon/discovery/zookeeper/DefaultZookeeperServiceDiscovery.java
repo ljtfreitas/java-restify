@@ -35,7 +35,7 @@ import org.apache.curator.framework.CuratorFramework;
 import org.apache.curator.x.discovery.details.InstanceSerializer;
 
 import com.github.ljtfreitas.restify.http.netflix.client.request.ribbon.discovery.ServiceInstance;
-import com.github.ljtfreitas.restify.util.Tryable;
+import com.github.ljtfreitas.restify.util.Try;
 
 public class DefaultZookeeperServiceDiscovery<T> implements ZookeeperServiceDiscovery<T> {
 
@@ -58,14 +58,14 @@ public class DefaultZookeeperServiceDiscovery<T> implements ZookeeperServiceDisc
 	@Override
 	public Collection<ZookeeperServiceInstance> queryForInstances(String serviceName) {
 		nonNull(serviceName, "Service name must be provided!");
-		return Tryable.of(() -> serviceDiscovery.queryForInstances(serviceName)
-				.stream().map(ZookeeperServiceInstance::of)
-					.collect(Collectors.toList()));
+		return Try.of(() -> serviceDiscovery.queryForInstances(serviceName))
+					.map(instances -> instances.stream().map(ZookeeperServiceInstance::of).collect(Collectors.toList()))
+					.get();
 	}
 
 	@Override
 	public void onFailure(ServiceInstance instance, Throwable cause) {
-		Tryable.run(() -> serviceDiscovery.unregisterService(new ZookeeperServiceInstance(instance)));
+		Try.run(() -> serviceDiscovery.unregisterService(new ZookeeperServiceInstance(instance)));
 	}
 
 	@Override

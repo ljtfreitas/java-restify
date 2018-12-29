@@ -41,6 +41,7 @@ import com.github.ljtfreitas.restify.http.client.retry.BackOffPolicy;
 import com.github.ljtfreitas.restify.http.client.retry.RetryConditionMatcher;
 import com.github.ljtfreitas.restify.http.client.retry.RetryExhaustedException;
 import com.github.ljtfreitas.restify.http.client.retry.RetryPolicy;
+import com.github.ljtfreitas.restify.util.Try;
 
 class AsyncRetryableLoop {
 
@@ -67,16 +68,9 @@ class AsyncRetryableLoop {
 		this.retryPolicy = nonNull(retryPolicy, "Retry policy cannot be null");
 	}
 
-	public <T> CompletionStage<T> repeat(int attempts, AsyncRetryable<T> retryable) throws RetryExhaustedException {
-		try {
-			return new AsyncRetryLoop(attempts, retryPolicy.refresh(), backOffPolicy).repeat(retryable);
-
-		} catch (RuntimeException e) {
-			throw e;
-
-		} catch (Exception e) {
-			throw new RetryExhaustedException(e);
-		}
+	public <T> CompletionStage<T> repeat(int attempts, AsyncRetryable<T> retryable) {
+		AsyncRetryLoop loop = new AsyncRetryLoop(attempts, retryPolicy.refresh(), backOffPolicy);
+		return loop.repeat(retryable).thenApply(Try::get);
 	}
 
 	private class AsyncRetryLoop {
@@ -91,12 +85,12 @@ class AsyncRetryableLoop {
 			this.backOffPolicy = backOffPolicy;
 		}
 
-		private <T> CompletionStage<T> repeat(AsyncRetryable<T> retryable) throws Exception {
+		private <T> CompletionStage<Try<T>> repeat(AsyncRetryable<T> retryable) {
 			CompletableFuture<T> retryableCompletableFuture = new CompletableFuture<>();
 
 			scheduler.schedule(new AsyncRetryableRunnable<>(retryable, new AsyncRetryableExecution<>(1, retryableCompletableFuture)), 0, TimeUnit.MILLISECONDS);
 
-			return retryableCompletableFuture;
+			return retryableCompletableFuture.handle((value, e) -> value != null ? Try.success(value) : Try.failure(e));
 		}
 
 		private class AsyncRetryableExecution<T> {

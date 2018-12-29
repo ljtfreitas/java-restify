@@ -30,7 +30,7 @@ import static org.springframework.core.annotation.AnnotationUtils.findAnnotation
 import java.beans.Introspector;
 import java.util.Optional;
 
-import com.github.ljtfreitas.restify.util.Tryable;
+import com.github.ljtfreitas.restify.util.Try;
 
 class RestifyableType {
 
@@ -39,8 +39,9 @@ class RestifyableType {
 
 
 	RestifyableType(String objectTypeName) {
-		this(Tryable.of(() -> Class.forName(objectTypeName), e ->
-			new IllegalArgumentException("@Restifyable type not found on classpath: [" + objectTypeName + "]", e)));
+		this(Try.of(() -> Class.forName(objectTypeName))
+				.error(e -> new IllegalArgumentException("@Restifyable type not found on classpath: [" + objectTypeName + "]", e))
+					.get());
 	}
 
 	RestifyableType(Class<?> objectType) {

@@ -42,7 +42,7 @@ import org.apache.curator.x.discovery.ServiceInstance;
 import org.apache.curator.x.discovery.ServiceProviderBuilder;
 import org.apache.curator.x.discovery.details.InstanceSerializer;
 
-import com.github.ljtfreitas.restify.util.Tryable;
+import com.github.ljtfreitas.restify.util.Try;
 
 public class ZookeeperCuratorServiceDiscovery<T> implements Closeable {
 
@@ -103,10 +103,11 @@ public class ZookeeperCuratorServiceDiscovery<T> implements Closeable {
 	}
 
 	private Optional<ServiceInstance<T>> doQueryForInstance(ZookeeperServiceInstance instance) {
-		return Tryable.of(() -> serviceDiscovery.queryForInstances(instance.name()))
-				.stream()
-					.filter(i -> i.getAddress().equals(instance.host()) && i.getPort().equals(instance.port()))
-						.findFirst();
+		return Try.of(() -> serviceDiscovery.queryForInstances(instance.name()))
+					.map(instances -> instances.stream()
+							.filter(i -> i.getAddress().equals(instance.host()) && i.getPort().equals(instance.port()))
+							.findFirst())
+					.get();
 	}
 
 	public Collection<String> queryForNames() throws Exception {
@@ -123,7 +124,7 @@ public class ZookeeperCuratorServiceDiscovery<T> implements Closeable {
 
 	public void unregisterService(ZookeeperServiceInstance serviceInstance) throws Exception {
 		doQueryForInstance(serviceInstance)
-			.ifPresent(server -> Tryable.run(() -> serviceDiscovery.unregisterService(server)));
+			.ifPresent(server -> Try.run(() -> serviceDiscovery.unregisterService(server)));
 	}
 
 	public void updateService(ServiceInstance<T> serviceInstance) throws Exception {
@@ -141,8 +142,8 @@ public class ZookeeperCuratorServiceDiscovery<T> implements Closeable {
 	@Override
 	public final void close() throws IOException {
 		if (!CuratorFrameworkState.STOPPED.equals(curator.getState())) {
-			Tryable.silently(serviceDiscovery::close);
-			Tryable.silently(curator::close);
+			serviceDiscovery.close();
+			curator.close();
 		}
 	}
 

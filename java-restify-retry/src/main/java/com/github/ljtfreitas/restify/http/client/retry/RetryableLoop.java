@@ -27,7 +27,7 @@ package com.github.ljtfreitas.restify.http.client.retry;
 
 import static com.github.ljtfreitas.restify.util.Preconditions.nonNull;
 
-import com.github.ljtfreitas.restify.util.Tryable;
+import com.github.ljtfreitas.restify.util.Try;
 
 class RetryableLoop {
 
@@ -53,15 +53,8 @@ class RetryableLoop {
 	}
 
 	public <T> T repeat(int attempts, Retryable<T> retryable) throws RetryExhaustedException {
-		try {
-			return new RetryLoop(attempts, retryPolicy.refresh(), backOffPolicy).repeat(retryable);
-
-		} catch (RuntimeException e) {
-			throw e;
-
-		} catch (Exception e) {
-			throw new RetryExhaustedException(e);
-		}
+		RetryLoop loop = new RetryLoop(attempts, retryPolicy.refresh(), backOffPolicy);
+		return loop.repeat(retryable).get();
 	}
 
 	private class RetryLoop {
@@ -76,36 +69,32 @@ class RetryableLoop {
 			this.backOffPolicy = backOffPolicy;
 		}
 
-		private <T> T repeat(Retryable<T> retryable) throws Exception {
+		private <T> Try<T> repeat(Retryable<T> retryable) {
 			return doRepeat(0, retryable, null);
 		}
 
-		private <T> T doRepeat(int attempt, Retryable<T> retryable, Exception last) throws Exception {
-			Exception current = last;
+		private <T> Try<T> doRepeat(int attempt, Retryable<T> retryable, Throwable last) {			
+			int current = ++attempt;
 
-			while (retryable(++attempt) && retryPolicy.retryable()) {
-				try {
-					return retryable.execute();
-				} catch (Exception e) {
-					current = e;
-					if (retryable(current)) return retry(attempt, retryable, current); else throw current;
-				}
+			while (retryable(current) && retryPolicy.retryable()) {
+				return Try.of(retryable::execute)
+						.recover(e -> retryable(e) ? retry(current, retryable, e) : Try.failure(e));
 			}
 
-			if (current == null) throw new RetryExhaustedException("Exhausted with " + attempt + " attempts."); throw current;
+			return Try.failure(last == null ? new RetryExhaustedException("Exhausted with " + attempt + " attempts.") : last);
 		}
 
-		private <T> T retry(int attempt, Retryable<T> retryable, Exception last) throws Exception {
-			Tryable.run(() -> Thread.sleep(backOffPolicy.backOff(attempt).toMillis()));
-			return doRepeat(attempt, retryable, last);
+		private <T> Try<T> retry(int attempt, Retryable<T> retryable, Throwable cause) {
+			return Try.run(() -> Thread.sleep(backOffPolicy.backOff(attempt).toMillis()))
+					.flatMap(signal -> doRepeat(attempt, retryable, cause));
 		}
 
 		private boolean retryable(int counter) {
 			return (counter) <= attempts;
 		}
 
-		private boolean retryable(Exception exception) {
-			return retryConditionMatcher.match(exception);
+		private boolean retryable(Throwable cause) {
+			return retryConditionMatcher.match(cause);
 		}
 	}
 }

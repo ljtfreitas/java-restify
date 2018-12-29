@@ -40,7 +40,7 @@ import com.fasterxml.jackson.databind.introspect.Annotated;
 import com.fasterxml.jackson.databind.jsontype.TypeIdResolver;
 import com.fasterxml.jackson.databind.jsontype.TypeResolverBuilder;
 import com.github.ljtfreitas.restify.http.client.hateoas.browser.HypermediaBrowser;
-import com.github.ljtfreitas.restify.util.Tryable;
+import com.github.ljtfreitas.restify.util.Try;
 
 class HypermediaHalHandlerInstantiator extends HandlerInstantiator {
 
@@ -85,7 +85,7 @@ class HypermediaHalHandlerInstantiator extends HandlerInstantiator {
 
 	@SuppressWarnings("unchecked")
 	private <T> T instantiate(Class<?> classType) {
-		return (T) Tryable.of(() -> classType.newInstance());
+		return (T) Try.of(() -> classType.newInstance()).get();
 	}
 
 }

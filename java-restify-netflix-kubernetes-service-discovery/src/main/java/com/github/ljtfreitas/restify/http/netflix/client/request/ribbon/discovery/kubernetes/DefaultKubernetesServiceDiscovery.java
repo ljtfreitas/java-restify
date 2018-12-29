@@ -32,8 +32,6 @@ import java.util.Collection;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import com.github.ljtfreitas.restify.util.Tryable;
-
 import io.fabric8.kubernetes.api.model.EndpointAddress;
 import io.fabric8.kubernetes.api.model.EndpointPort;
 import io.fabric8.kubernetes.api.model.Endpoints;
@@ -78,7 +76,6 @@ public class DefaultKubernetesServiceDiscovery implements KubernetesServiceDisco
 
 	@Override
 	public void close() throws IOException {
-		Tryable.silently(kubernetesClient::close);
+		kubernetesClient.close();
 	}
-
 }

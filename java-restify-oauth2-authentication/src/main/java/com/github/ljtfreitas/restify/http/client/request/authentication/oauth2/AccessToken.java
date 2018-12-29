@@ -37,7 +37,7 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-import com.github.ljtfreitas.restify.util.Tryable;
+import com.github.ljtfreitas.restify.util.Try;
 
 public class AccessToken implements Serializable {
 
@@ -154,7 +154,7 @@ public class AccessToken implements Serializable {
 
 	public static AccessToken of(AccessTokenResponseBody source) {
 		AccessTokenType tokenType = Optional.ofNullable(source.tokenType())
-				.map(t -> Tryable.or(() -> AccessTokenType.of(t), AccessTokenType.BEARER))
+				.map(t -> Try.of(() -> AccessTokenType.of(t)).or(() -> AccessTokenType.BEARER))
 					.orElse(AccessTokenType.BEARER);
 
 		AccessToken.Builder accessTokenBuilder = AccessToken.Builder.of(tokenType, source.accessToken());

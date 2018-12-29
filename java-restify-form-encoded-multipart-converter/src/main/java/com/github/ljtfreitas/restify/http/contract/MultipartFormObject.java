@@ -39,7 +39,7 @@ import java.util.stream.Collectors;
 import com.github.ljtfreitas.restify.http.contract.Form.Field;
 import com.github.ljtfreitas.restify.http.contract.FormObject.FormObjectField;
 import com.github.ljtfreitas.restify.http.contract.MultipartForm.MultipartField;
-import com.github.ljtfreitas.restify.util.Tryable;
+import com.github.ljtfreitas.restify.util.Try;
 
 public class MultipartFormObject {
 
@@ -132,7 +132,7 @@ public class MultipartFormObject {
 		}
 
 		public Object valueOn(Object instance) {
-			return Tryable.of(() -> doValueOn(instance),e -> new UnsupportedOperationException(e));
+			return Try.of(() -> doValueOn(instance)).error(UnsupportedOperationException::new).get();
 		}
 
 		public Object doValueOn(Object instance) throws IllegalArgumentException, IllegalAccessException {
@@ -174,8 +174,9 @@ public class MultipartFormObject {
 
 				String contentType = annotation.contentType();
 
-				FormFieldSerializer serializer = Tryable.of(annotation.serializer()::newInstance, 
-						(e) -> new UnsupportedOperationException("Cannot create a instance of serializer " + annotation.serializer(), e));
+				FormFieldSerializer serializer = Try.of(annotation.serializer()::newInstance)
+						.error(e -> new UnsupportedOperationException("Cannot create a instance of serializer " + annotation.serializer(), e))
+							.get();
 
 				return new MultipartFormObjectField(name, indexed, contentType, serializer, field);
 

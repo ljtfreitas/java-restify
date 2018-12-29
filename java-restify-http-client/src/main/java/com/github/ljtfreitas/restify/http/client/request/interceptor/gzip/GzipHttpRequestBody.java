@@ -30,7 +30,7 @@ import java.util.zip.GZIPOutputStream;
 
 import com.github.ljtfreitas.restify.http.client.message.converter.HttpMessageWriteException;
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestBody;
-import com.github.ljtfreitas.restify.util.Tryable;
+import com.github.ljtfreitas.restify.util.Try;
 
 public class GzipHttpRequestBody implements HttpRequestBody {
 
@@ -39,7 +39,7 @@ public class GzipHttpRequestBody implements HttpRequestBody {
 
 	public GzipHttpRequestBody(HttpRequestBody source) {
 		this.source = source;
-		this.output = Tryable.of(() -> new GZIPOutputStream(source.output()), HttpMessageWriteException::new);
+		this.output = Try.of(() -> new GZIPOutputStream(source.output())).error(HttpMessageWriteException::new).get();
 	}
 
 	@Override

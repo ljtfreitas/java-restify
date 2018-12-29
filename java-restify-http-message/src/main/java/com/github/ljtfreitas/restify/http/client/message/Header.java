@@ -41,7 +41,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import com.github.ljtfreitas.restify.util.Tryable;
+import com.github.ljtfreitas.restify.util.Try;
 
 public class Header {
 
@@ -379,7 +379,7 @@ public class Header {
 	}
 
 	public static Header referer(URL referer) {
-		return referer(Tryable.of(referer::toURI));
+		return referer(Try.of(referer::toURI).get());
 	}
 
 	public static Header referer(URI referer) {

@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
-import com.github.ljtfreitas.restify.util.Tryable;
+import com.github.ljtfreitas.restify.util.Try;
 
 public class OAuth2AuthenticatedEndpointRequest {
 
@@ -72,8 +72,9 @@ public class OAuth2AuthenticatedEndpointRequest {
 	}
 
 	public <T extends GrantProperties> T properties(Class<T> type) {
-		return Tryable.of(() -> type.cast(properties),
-				() -> new ClassCastException("Your GrantProperties must be a instance of [" + type + "]."));
+		return Try.of(() -> type.cast(properties))
+				.error(e -> new ClassCastException("Your GrantProperties must be a instance of [" + type + "]."))
+					.get();
 	}
 
 	public Optional<Principal> user() {
