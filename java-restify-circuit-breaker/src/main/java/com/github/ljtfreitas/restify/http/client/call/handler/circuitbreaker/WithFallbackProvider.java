@@ -30,7 +30,7 @@ import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.util.Optional;
 
-import com.github.ljtfreitas.restify.util.Tryable;
+import com.github.ljtfreitas.restify.util.Try;
 
 public class WithFallbackProvider implements FallbackProvider {
 
@@ -51,7 +51,7 @@ public class WithFallbackProvider implements FallbackProvider {
 	}
 
 	private Object using(Class<?> type) {
-		return cache.get(type).orElseGet(() -> Tryable.of(() -> instantiate(type), e -> new IllegalArgumentException(e)));
+		return cache.get(type).orElseGet(() -> Try.of(() -> instantiate(type)).error(IllegalArgumentException::new).get());
 	}
 
 	private Object instantiate(Class<?> type) throws NoSuchMethodException, SecurityException, InstantiationException, IllegalAccessException, IllegalArgumentException, InvocationTargetException {

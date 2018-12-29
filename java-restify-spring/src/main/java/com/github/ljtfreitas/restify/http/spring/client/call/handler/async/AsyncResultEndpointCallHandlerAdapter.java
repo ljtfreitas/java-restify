@@ -27,6 +27,7 @@ package com.github.ljtfreitas.restify.http.spring.client.call.handler.async;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Executor;
 
 import org.springframework.scheduling.annotation.AsyncResult;
@@ -38,7 +39,7 @@ import com.github.ljtfreitas.restify.http.client.call.handler.async.AsyncEndpoin
 import com.github.ljtfreitas.restify.http.client.call.handler.async.AsyncEndpointCallHandlerAdapter;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethod;
 import com.github.ljtfreitas.restify.reflection.JavaType;
-import com.github.ljtfreitas.restify.util.Tryable;
+import com.github.ljtfreitas.restify.util.Try;
 
 public class AsyncResultEndpointCallHandlerAdapter<T, O> implements AsyncEndpointCallHandlerAdapter<AsyncResult<T>, T, O> {
 
@@ -89,11 +90,16 @@ public class AsyncResultEndpointCallHandlerAdapter<T, O> implements AsyncEndpoin
 
 		@Override
 		public AsyncResult<T> handleAsync(AsyncEndpointCall<O> call, Object[] args) {
-			return Tryable.of(() -> call.executeAsync()
+			return Try.of(() -> doHandleAsync(call, args))
+				.map(c -> c.join())
+					.get();
+		}
+
+		private CompletableFuture<AsyncResult<T>> doHandleAsync(AsyncEndpointCall<O> call, Object[] args) {
+			return call.executeAsync()
 				.thenApplyAsync(o -> delegate.handle(() -> o, args), executor)
 					.handleAsync(this::handle, executor)
-						.toCompletableFuture()
-							.join());
+						.toCompletableFuture();
 		}
 
 		@SuppressWarnings("unchecked")

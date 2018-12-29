@@ -25,6 +25,7 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.netflix.client.request.ribbon.async;
 
+import java.io.OutputStream;
 import java.net.URI;
 import java.nio.charset.Charset;
 import java.util.concurrent.CompletionStage;
@@ -44,7 +45,7 @@ import com.github.ljtfreitas.restify.http.netflix.client.request.ribbon.BaseRibb
 import com.github.ljtfreitas.restify.http.netflix.client.request.ribbon.RibbonHttpClientRequest;
 import com.github.ljtfreitas.restify.http.netflix.client.request.ribbon.RibbonRequest;
 import com.github.ljtfreitas.restify.http.netflix.client.request.ribbon.RibbonResponse;
-import com.github.ljtfreitas.restify.util.Tryable;
+import com.github.ljtfreitas.restify.util.Try;
 import com.netflix.client.ClientException;
 
 public class AsyncRibbonHttpClientRequest extends BaseRibbonHttpClientRequest implements AsyncHttpClientRequest {
@@ -101,11 +102,10 @@ public class AsyncRibbonHttpClientRequest extends BaseRibbonHttpClientRequest im
 	@Override
 	public void writeTo(HttpClientRequest httpRequestMessage) {
 		endpointRequest.body()
-			.ifPresent(b -> Tryable.run(() -> {
+			.ifPresent(b -> {
 				body.writeTo(httpRequestMessage.body().output());
-				httpRequestMessage.body().output().flush();
-				httpRequestMessage.body().output().close();
-			}));
+				Try.withResources(httpRequestMessage.body()::output).apply(OutputStream::flush);
+			});
 	}
 
 	@Override

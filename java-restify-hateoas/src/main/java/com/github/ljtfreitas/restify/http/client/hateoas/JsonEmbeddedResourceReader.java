@@ -25,16 +25,14 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.hateoas;
 
-import java.io.IOException;
 import java.util.Collection;
 
-import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.core.ObjectCodec;
 import com.fasterxml.jackson.core.TreeNode;
 import com.fasterxml.jackson.core.type.ResolvedType;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.type.TypeFactory;
-import com.github.ljtfreitas.restify.util.Tryable;
+import com.github.ljtfreitas.restify.util.Try;
 
 public class JsonEmbeddedResourceReader {
 
@@ -47,17 +45,18 @@ public class JsonEmbeddedResourceReader {
 	}
 
 	public <T> Resource<T> readAs(Class<? extends T> type, TreeNode tree) {
-		return Tryable.of(() -> this.readAs(typeFactory.constructParametricType(Resource.class, type), tree));
+		Try<Resource<T>> value = this.doRead(typeFactory.constructParametricType(Resource.class, type), tree);
+		return value.get();
 	}
 
 	public <T> Collection<Resource<T>> readAsCollectionOf(Class<? extends T> type, TreeNode tree) {
 		JavaType resourceType = typeFactory.constructParametricType(Resource.class, type);
-		return Tryable.of(() -> this.readAs(typeFactory.constructParametricType(Collection.class, resourceType), tree));
+		Try<Collection<Resource<T>>> value = this.doRead(typeFactory.constructParametricType(Collection.class, resourceType), tree);
+		return value.get();
 	}
 
-	private <T> T readAs(ResolvedType resolvedType, TreeNode tree) throws IOException {
-		try (JsonParser parser = tree.traverse(codec)) {
-			return codec.readValue(parser, resolvedType);
-		}
+	private <T> Try<T> doRead(ResolvedType resolvedType, TreeNode tree) {
+		return Try.withResources(() -> tree.traverse(codec))
+				.map(parser -> codec.readValue(parser, resolvedType));
 	}
 }

@@ -30,7 +30,7 @@ import java.nio.ByteBuffer;
 import java.nio.channels.Channels;
 import java.nio.channels.WritableByteChannel;
 
-import com.github.ljtfreitas.restify.util.Tryable;
+import com.github.ljtfreitas.restify.util.Try;
 
 public interface HttpRequestBody {
 
@@ -42,8 +42,6 @@ public interface HttpRequestBody {
 
 	default void writeTo(OutputStream other) {
 		WritableByteChannel channel = Channels.newChannel(other);
-		Tryable.run(() -> {
-			channel.write(ByteBuffer.wrap(asBytes()));
-		});
+		Try.run(() -> channel.write(ByteBuffer.wrap(asBytes())));
 	}
 }

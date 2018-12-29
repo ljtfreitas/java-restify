@@ -32,7 +32,7 @@ import java.io.OutputStream;
 import java.nio.charset.Charset;
 
 import com.github.ljtfreitas.restify.http.client.message.Encoding;
-import com.github.ljtfreitas.restify.util.Tryable;
+import com.github.ljtfreitas.restify.util.Try;
 
 public class BufferedByteArrayHttpRequestBody implements HttpRequestBody {
 
@@ -71,12 +71,12 @@ public class BufferedByteArrayHttpRequestBody implements HttpRequestBody {
 
 	@Override
 	public String toString() {
-		return Tryable.of(() -> output.source.toString(charset.name()));
+		return Try.of(() -> output.source.toString(charset.name())).get();
 	}
 
 	@Override
 	public void writeTo(OutputStream other) {
-		Tryable.run(() -> output.source.writeTo(other));
+		Try.run(() -> output.source.writeTo(other));
 	}
 
 	private class BufferedOutput extends OutputStream {

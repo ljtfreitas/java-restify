@@ -29,7 +29,7 @@ import com.github.ljtfreitas.restify.http.client.message.response.BufferedHttpRe
 import com.github.ljtfreitas.restify.http.client.message.response.ByteArrayHttpResponseBody;
 import com.github.ljtfreitas.restify.http.client.request.HttpClientRequest;
 import com.github.ljtfreitas.restify.http.client.response.HttpClientResponse;
-import com.github.ljtfreitas.restify.util.Tryable;
+import com.github.ljtfreitas.restify.util.Try;
 
 public class CurlPrinter {
 
@@ -59,7 +59,7 @@ public class CurlPrinter {
 		BufferedHttpResponseBody bufferedHttpResponseBody = ByteArrayHttpResponseBody.of(response.body());
 
 		if (response.available() && !bufferedHttpResponseBody.empty()) {
-			message.append("\n").append("< " + Tryable.of(bufferedHttpResponseBody::asString));
+			message.append("\n").append("< " + Try.of(bufferedHttpResponseBody::asString).get());
 		}
 
 		message.append("\n").append("<");

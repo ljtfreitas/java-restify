@@ -33,7 +33,7 @@ import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.annotation.BeanFactoryAnnotationUtils;
 
 import com.github.ljtfreitas.restify.http.client.call.handler.circuitbreaker.WithFallback;
-import com.github.ljtfreitas.restify.util.Tryable;
+import com.github.ljtfreitas.restify.util.Try;
 
 class HystrixFallbackRegistry {
 
@@ -64,10 +64,10 @@ class HystrixFallbackRegistry {
 
 	private Optional<Object> searchWithType(WithFallback withFallback) {
 		return Optional.ofNullable(withFallback)
-			.map(w -> Tryable.or(() -> beanFactory.getBean(w.value()), null));
+			.map(w -> Try.of(() -> beanFactory.getBean(w.value())).or(() -> null));
 	}
 
 	private Optional<Object> searchWithQualifier(Class<?> classType) {
-		return Optional.ofNullable(Tryable.or(() -> BeanFactoryAnnotationUtils.qualifiedBeanOfType(beanFactory, classType, QUALIFIER_NAME), null));
+		return Optional.ofNullable(Try.of(() -> BeanFactoryAnnotationUtils.qualifiedBeanOfType(beanFactory, classType, QUALIFIER_NAME)).or(() -> null));
 	}
 }

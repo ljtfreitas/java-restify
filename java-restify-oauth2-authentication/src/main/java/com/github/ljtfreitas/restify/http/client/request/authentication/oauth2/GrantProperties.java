@@ -34,7 +34,7 @@ import java.util.Collections;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import com.github.ljtfreitas.restify.util.Tryable;
+import com.github.ljtfreitas.restify.util.Try;
 
 public class GrantProperties {
 
@@ -93,7 +93,7 @@ public class GrantProperties {
 		}
 
 		public Builder accessTokenUri(URL acessTokenUri) {
-			properties.accessTokenUri = Tryable.of(acessTokenUri::toURI);
+			properties.accessTokenUri = Try.of(acessTokenUri::toURI).get();
 			return this;
 		}
 

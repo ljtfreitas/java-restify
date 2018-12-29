@@ -48,7 +48,7 @@ import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMess
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestBody;
 import com.github.ljtfreitas.restify.http.client.request.async.AsyncHttpClientRequest;
 import com.github.ljtfreitas.restify.http.client.response.HttpClientResponse;
-import com.github.ljtfreitas.restify.util.Tryable;
+import com.github.ljtfreitas.restify.util.Try;
 
 class ApacheAsyncHttpClientRequest implements AsyncHttpClientRequest {
 
@@ -160,7 +160,7 @@ class ApacheAsyncHttpClientRequest implements AsyncHttpClientRequest {
 		public void completed(HttpResponse httpResponse) {
 			ApacheHttpResponseReader reader = new ApacheHttpResponseReader(httpResponse, ApacheAsyncHttpClientRequest.this);
 
-			ApacheHttpClientResponse apacheHttpClientResponse = Tryable.of(reader::read, e -> new HttpClientException(e));
+			ApacheHttpClientResponse apacheHttpClientResponse = Try.of(reader::read).error(HttpClientException::new).get();
 
 			future.complete(apacheHttpClientResponse);
 		}

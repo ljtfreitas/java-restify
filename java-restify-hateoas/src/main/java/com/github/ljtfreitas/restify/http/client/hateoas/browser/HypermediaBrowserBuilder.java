@@ -76,7 +76,7 @@ import com.github.ljtfreitas.restify.http.client.retry.RetryCondition.StatusCode
 import com.github.ljtfreitas.restify.http.client.retry.RetryCondition.ThrowableRetryCondition;
 import com.github.ljtfreitas.restify.http.client.retry.RetryConfiguration;
 import com.github.ljtfreitas.restify.http.client.retry.async.AsyncRetryableEndpointRequestExecutor;
-import com.github.ljtfreitas.restify.util.Tryable;
+import com.github.ljtfreitas.restify.util.Try;
 import com.github.ljtfreitas.restify.util.async.DisposableExecutors;
 
 public class HypermediaBrowserBuilder {
@@ -102,7 +102,7 @@ public class HypermediaBrowserBuilder {
 	private AsyncBuilder asyncBuilder = new AsyncBuilder(this);
 
 	public HypermediaBrowserBuilder baseURL(String baseUrl) {
-		this.baseURL = Tryable.of(() -> new URL(baseUrl));
+		this.baseURL = Try.of(() -> new URL(baseUrl)).get();
 		return this;
 	}
 
@@ -112,7 +112,7 @@ public class HypermediaBrowserBuilder {
 	}
 
 	public HypermediaBrowserBuilder baseURL(URI baseUrl) {
-		this.baseURL = Tryable.of(baseUrl::toURL);
+		this.baseURL = Try.of(baseUrl::toURL).get();
 		return this;
 	}
 

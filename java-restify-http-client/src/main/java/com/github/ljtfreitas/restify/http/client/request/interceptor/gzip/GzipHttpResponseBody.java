@@ -31,7 +31,7 @@ import java.util.zip.GZIPInputStream;
 import com.github.ljtfreitas.restify.http.client.message.converter.HttpMessageReadException;
 import com.github.ljtfreitas.restify.http.client.message.response.HttpResponseBody;
 import com.github.ljtfreitas.restify.http.client.message.response.InputStreamHttpResponseBody;
-import com.github.ljtfreitas.restify.util.Tryable;
+import com.github.ljtfreitas.restify.util.Try;
 
 class GzipHttpResponseBody implements HttpResponseBody {
 
@@ -47,7 +47,7 @@ class GzipHttpResponseBody implements HttpResponseBody {
 	}
 
 	static HttpResponseBody of(HttpResponseBody source) {
-		GZIPInputStream gzipContent = Tryable.of(() -> new GZIPInputStream(source.input()), HttpMessageReadException::new);
+		GZIPInputStream gzipContent = Try.of(() -> new GZIPInputStream(source.input())).error(HttpMessageReadException::new).get();
 		return new GzipHttpResponseBody(new InputStreamHttpResponseBody(gzipContent));
 	}
 }
