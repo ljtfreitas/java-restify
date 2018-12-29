@@ -2,6 +2,7 @@ package com.github.ljtfreitas.restify.http.client.retry;
 
 import static org.junit.Assert.assertEquals;
 import static org.mockito.Matchers.anyInt;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -33,11 +34,13 @@ public class RetryableLoopTest {
 	@Rule
 	public ExpectedException expectedException = ExpectedException.none();
 
+	private RetryConfiguration configuration;
+
 	private RetryableLoop retryableLoop;
 
 	@Before
 	public void setup() {
-		RetryConfiguration configuration = new RetryConfiguration.Builder()
+		configuration = new RetryConfiguration.Builder()
 				.when(MyException.class)
 				.when(HttpStatusCode.INTERNAL_SERVER_ERROR, HttpStatusCode.GATEWAY_TIMEOUT)
 					.build();
@@ -97,6 +100,31 @@ public class RetryableLoopTest {
 			.thenThrow(new MyException("1st and unique error..."));
 
 		retryableLoop.repeat(1, myObject::bla);
+	}
+
+	@Test
+	public void shouldThrowExceptionWhenPolicyIsNotRetryable() {
+		expectedException.expect(RetryExhaustedException.class);
+
+		RetryPolicy retryPolicy = new RetryPolicy() {
+
+			@Override
+			public boolean retryable() {
+				return false;
+			}
+
+			@Override
+			public RetryPolicy refresh() {
+				return this;
+			}
+		};
+
+		retryableLoop = new RetryableLoop(new RetryConditionMatcher(configuration.conditions()), backOffPolicy,
+				retryPolicy);
+
+		retryableLoop.repeat(1, myObject::bla);
+
+		verify(myObject.bla(), never());
 	}
 
 	private interface MyObject {

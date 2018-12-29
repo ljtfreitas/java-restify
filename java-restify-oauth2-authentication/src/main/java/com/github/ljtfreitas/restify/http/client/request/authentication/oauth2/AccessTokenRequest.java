@@ -34,7 +34,7 @@ import com.github.ljtfreitas.restify.http.client.message.Header;
 import com.github.ljtfreitas.restify.http.client.message.Headers;
 import com.github.ljtfreitas.restify.http.contract.Parameters;
 import com.github.ljtfreitas.restify.http.contract.Parameters.Parameter;
-import com.github.ljtfreitas.restify.util.Tryable;
+import com.github.ljtfreitas.restify.util.Try;
 
 public class AccessTokenRequest {
 
@@ -136,7 +136,7 @@ public class AccessTokenRequest {
 		}
 
 		public Builder accessTokenUri(URL acessTokenUri) {
-			this.accessTokenUri = Tryable.of(acessTokenUri::toURI);
+			this.accessTokenUri = Try.of(acessTokenUri::toURI).get();
 			return this;
 		}
 

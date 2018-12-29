@@ -33,7 +33,7 @@ import com.github.ljtfreitas.restify.http.client.call.handler.circuitbreaker.Fal
 import com.github.ljtfreitas.restify.http.client.call.handler.circuitbreaker.FallbackStrategy;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethod;
 import com.github.ljtfreitas.restify.reflection.JavaType;
-import com.github.ljtfreitas.restify.util.Tryable;
+import com.github.ljtfreitas.restify.util.Try;
 import com.netflix.hystrix.HystrixCommand;
 
 class HystrixCommandEndpointCallHandler<T, O> implements EndpointCallHandler<HystrixCommand<T>, O> {
@@ -68,7 +68,7 @@ class HystrixCommandEndpointCallHandler<T, O> implements EndpointCallHandler<Hys
 
 			@Override
 			protected T getFallback() {
-				return fallback == null ? super.getFallback() : Tryable.of(() -> doFallback());
+				return fallback == null ? super.getFallback() : Try.of(this::doFallback).get();
 			}
 
 			private T doFallback() throws Exception {

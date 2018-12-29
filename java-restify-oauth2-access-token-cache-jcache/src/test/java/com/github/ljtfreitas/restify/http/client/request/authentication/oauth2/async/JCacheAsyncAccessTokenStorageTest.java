@@ -21,7 +21,7 @@ import com.github.ljtfreitas.restify.http.client.request.authentication.oauth2.A
 import com.github.ljtfreitas.restify.http.client.request.authentication.oauth2.ClientCredentials;
 import com.github.ljtfreitas.restify.http.client.request.authentication.oauth2.GrantProperties;
 import com.github.ljtfreitas.restify.http.client.request.authentication.oauth2.OAuth2AuthenticatedEndpointRequest;
-import com.github.ljtfreitas.restify.util.Tryable;
+import com.github.ljtfreitas.restify.util.Try;
 import com.github.ljtfreitas.restify.util.async.DisposableExecutors;
 
 public class JCacheAsyncAccessTokenStorageTest {
@@ -98,7 +98,7 @@ public class JCacheAsyncAccessTokenStorageTest {
 				assertEquals(newAccessToken, foundAccessToken.get());
 			})
 
-			.thenRun(() -> Tryable.run(() -> Thread.sleep(5500)))
+			.thenRun(() -> Try.run(() -> Thread.sleep(5500)))
 
 			.thenCompose(a -> jCacheAsyncAccessTokenStorage.findBy(key))
 

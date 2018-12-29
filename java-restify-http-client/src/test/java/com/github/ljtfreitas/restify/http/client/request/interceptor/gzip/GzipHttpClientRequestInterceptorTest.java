@@ -28,7 +28,7 @@ import com.github.ljtfreitas.restify.http.client.message.response.ByteArrayHttpR
 import com.github.ljtfreitas.restify.http.client.message.response.InputStreamHttpResponseBody;
 import com.github.ljtfreitas.restify.http.client.request.HttpClientRequest;
 import com.github.ljtfreitas.restify.http.client.response.HttpClientResponse;
-import com.github.ljtfreitas.restify.util.Tryable;
+import com.github.ljtfreitas.restify.util.Try;
 
 @RunWith(MockitoJUnitRunner.class)
 public class GzipHttpClientRequestInterceptorTest {
@@ -59,10 +59,9 @@ public class GzipHttpClientRequestInterceptorTest {
 	public void shouldReadGzippedResponseBody() throws Exception {
 		ByteArrayOutputStream output = new ByteArrayOutputStream();
 
-		try (GZIPOutputStream gzipContentOutput = Tryable.of(() -> new GZIPOutputStream(output))) {
-			gzipContentOutput.write("http response".getBytes());
-			gzipContentOutput.flush();
-		}
+		Try.withResources(() -> new GZIPOutputStream(output))
+			.apply(gzipContentOutput -> gzipContentOutput.write("http response".getBytes()))
+			.apply(gzipContentOutput -> gzipContentOutput.flush());
 
 		when(response.body())
 			.thenReturn(new InputStreamHttpResponseBody(new ByteArrayInputStream(output.toByteArray())));

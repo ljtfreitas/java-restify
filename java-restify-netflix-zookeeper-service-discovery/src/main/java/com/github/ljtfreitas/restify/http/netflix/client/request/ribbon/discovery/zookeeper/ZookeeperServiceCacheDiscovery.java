@@ -37,7 +37,7 @@ import org.apache.curator.x.discovery.ServiceCacheBuilder;
 import org.apache.curator.x.discovery.details.InstanceSerializer;
 
 import com.github.ljtfreitas.restify.http.netflix.client.request.ribbon.discovery.ServiceInstance;
-import com.github.ljtfreitas.restify.util.Tryable;
+import com.github.ljtfreitas.restify.util.Try;
 
 public class ZookeeperServiceCacheDiscovery<T> implements ZookeeperServiceDiscovery<T> {
 
@@ -90,19 +90,19 @@ public class ZookeeperServiceCacheDiscovery<T> implements ZookeeperServiceDiscov
 				"ZookeeperServiceCacheDiscovery it's configured for services named [" + this.serviceName + "], "
 						+ "not [" + serviceName + "]");
 
-		return Tryable.of(() -> serviceCache.getInstances()
-				.stream().map(ZookeeperServiceInstance::of)
-					.collect(Collectors.toList()));
+		return Try.of(() -> serviceCache.getInstances())
+				.map(instances -> instances.stream().map(ZookeeperServiceInstance::of).collect(Collectors.toList()))
+					.get();
 	}
 
 	@Override
 	public void onFailure(ServiceInstance instance, Throwable cause) {
-		Tryable.run(() -> serviceDiscovery.unregisterService(new ZookeeperServiceInstance(instance)));
+		Try.run(() -> serviceDiscovery.unregisterService(new ZookeeperServiceInstance(instance)));
 	}
 
 	@Override
 	public void close() throws IOException {
-		Tryable.silently(serviceCache::close);
+		serviceCache.close();
 		if (serviceDiscovery != null) {
 			serviceDiscovery.close();
 		}

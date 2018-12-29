@@ -33,7 +33,7 @@ import org.apache.curator.x.discovery.ServiceInstanceBuilder;
 import org.apache.curator.x.discovery.UriSpec;
 import org.apache.curator.x.discovery.details.InstanceSerializer;
 
-import com.github.ljtfreitas.restify.util.Tryable;
+import com.github.ljtfreitas.restify.util.Try;
 
 public class DefaultZookeeperServiceRegistry<T> implements ZookeeperServiceRegistry<T> {
 
@@ -88,7 +88,7 @@ public class DefaultZookeeperServiceRegistry<T> implements ZookeeperServiceRegis
 	public void unregister(ZookeeperServiceInstance instance) {
 		try {
 			serviceDiscovery.queryForInstance(instance)
-				.ifPresent(service -> Tryable.run(() -> serviceDiscovery.unregisterService(service)));
+				.ifPresent(service -> Try.run(() -> serviceDiscovery.unregisterService(service)));
 
 		} catch (Exception e) {
 			throw new ZookeeperServiceDiscoveryException("Exception on unregister Zookeeper service instance [" + instance + "]" , e);

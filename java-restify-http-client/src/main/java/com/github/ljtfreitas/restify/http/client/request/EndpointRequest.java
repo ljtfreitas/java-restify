@@ -34,7 +34,7 @@ import com.github.ljtfreitas.restify.http.client.message.Header;
 import com.github.ljtfreitas.restify.http.client.message.Headers;
 import com.github.ljtfreitas.restify.http.contract.Parameters;
 import com.github.ljtfreitas.restify.reflection.JavaType;
-import com.github.ljtfreitas.restify.util.Tryable;
+import com.github.ljtfreitas.restify.util.Try;
 
 public class EndpointRequest {
 
@@ -187,7 +187,9 @@ public class EndpointRequest {
 					.concat(appender)
 						.concat(query);
 
-		return Tryable.of(() -> cloneWithQuery(newQuery), (e) -> new IllegalArgumentException(e));
+		return Try.of(() -> cloneWithQuery(newQuery))
+				.error(IllegalArgumentException::new)
+					.get();
 	}
 
 	private EndpointRequest cloneWithQuery(String query) throws URISyntaxException {

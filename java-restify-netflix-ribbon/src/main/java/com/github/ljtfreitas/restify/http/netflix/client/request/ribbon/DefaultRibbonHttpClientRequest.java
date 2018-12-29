@@ -25,6 +25,7 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.netflix.client.request.ribbon;
 
+import java.io.OutputStream;
 import java.net.URI;
 import java.nio.charset.Charset;
 
@@ -38,7 +39,7 @@ import com.github.ljtfreitas.restify.http.client.message.request.BufferedByteArr
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
 import com.github.ljtfreitas.restify.http.client.request.HttpClientRequest;
 import com.github.ljtfreitas.restify.http.client.response.HttpClientResponse;
-import com.github.ljtfreitas.restify.util.Tryable;
+import com.github.ljtfreitas.restify.util.Try;
 import com.netflix.client.ClientException;
 
 public class DefaultRibbonHttpClientRequest extends BaseRibbonHttpClientRequest implements HttpClientRequest {
@@ -107,13 +108,10 @@ public class DefaultRibbonHttpClientRequest extends BaseRibbonHttpClientRequest 
 	@Override
 	public void writeTo(HttpClientRequest httpRequestMessage) {
 		endpointRequest.body()
-			.ifPresent(b ->
-				Tryable.run(() -> {
-					body.writeTo(httpRequestMessage.body().output());
-					httpRequestMessage.body().output().flush();
-					httpRequestMessage.body().output().close();
-				})
-			);
+			.ifPresent(b -> {
+				body.writeTo(httpRequestMessage.body().output());
+				Try.withResources(httpRequestMessage.body()::output).apply(OutputStream::flush);
+			});
 	}
 
 	@Override

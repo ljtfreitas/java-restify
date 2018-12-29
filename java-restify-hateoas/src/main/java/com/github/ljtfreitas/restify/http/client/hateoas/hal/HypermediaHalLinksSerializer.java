@@ -54,7 +54,7 @@ import com.fasterxml.jackson.databind.ser.std.MapSerializer;
 import com.fasterxml.jackson.databind.type.TypeFactory;
 import com.github.ljtfreitas.restify.http.client.hateoas.Link;
 import com.github.ljtfreitas.restify.http.client.hateoas.Links;
-import com.github.ljtfreitas.restify.util.Tryable;
+import com.github.ljtfreitas.restify.util.Try;
 
 class HypermediaHalLinksSerializer extends ContainerSerializer<Links> implements ContextualSerializer {
 
@@ -178,7 +178,8 @@ class HypermediaHalLinksSerializer extends ContainerSerializer<Links> implements
 				throws IOException, JsonGenerationException {
 
 			list.forEach(link -> {
-				Tryable.run(() -> provider.findValueSerializer(HalLink.class, property).serialize(link, jgen, provider));
+				Try.of(() -> provider.findValueSerializer(HalLink.class, property))
+					.apply(serializer -> serializer.serialize(link, jgen, provider));
 			});
 		}
 

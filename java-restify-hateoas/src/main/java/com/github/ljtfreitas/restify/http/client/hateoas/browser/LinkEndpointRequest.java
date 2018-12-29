@@ -33,7 +33,7 @@ import java.util.Optional;
 import com.github.ljtfreitas.restify.http.client.hateoas.Link;
 import com.github.ljtfreitas.restify.http.client.message.Headers;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
-import com.github.ljtfreitas.restify.util.Tryable;
+import com.github.ljtfreitas.restify.util.Try;
 
 public class LinkEndpointRequest {
 
@@ -90,7 +90,7 @@ public class LinkEndpointRequest {
 		URI href = new LinkURITemplate(link.href()).expand(parameters);
 
 		URI endpoint = Optional.ofNullable(source)
-			.map(s -> href.isAbsolute() ? href : Tryable.of(s::toURI).resolve(href))
+			.map(s -> href.isAbsolute() ? href : Try.of(s::toURI).map(u -> u.resolve(href)).get())
 				.orElse(href);
 		return endpoint;
 	}

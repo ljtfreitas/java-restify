@@ -43,7 +43,7 @@ import org.springframework.core.type.filter.AssignableTypeFilter;
 import org.springframework.core.type.filter.RegexPatternTypeFilter;
 import org.springframework.core.type.filter.TypeFilter;
 
-import com.github.ljtfreitas.restify.util.Tryable;
+import com.github.ljtfreitas.restify.util.Try;
 
 class RestifyConfigurationRegistrar extends BaseRestifyConfigurationRegistrar {
 
@@ -62,7 +62,7 @@ class RestifyConfigurationRegistrar extends BaseRestifyConfigurationRegistrar {
 	}
 
 	private String packageOf(String className) {
-		return Tryable.of(() -> Class.forName(className)).getPackage().getName();
+		return Try.of(() -> Class.forName(className)).map(Class::getPackage).map(Package::getName).get();
 	}
 
 	@SuppressWarnings("unchecked")
@@ -81,8 +81,10 @@ class RestifyConfigurationRegistrar extends BaseRestifyConfigurationRegistrar {
 						break;
 					}
 					case CUSTOM: {
-						typeFilters.add(Tryable.of(() -> (TypeFilter) classType.newInstance(),
-								() -> new IllegalArgumentException("Cannot construct your custom TypeFilter of type [" + classType + "]")));
+						typeFilters.add(Try.of(() -> (TypeFilter) classType.newInstance())
+								.error(e -> new IllegalArgumentException("Cannot construct your custom TypeFilter of type [" + classType + "]"))
+									.get());
+						break;
 					}
 					default: {
 						throw new IllegalArgumentException("Illegal @Filter use. "
@@ -139,7 +141,7 @@ class RestifyConfigurationRegistrar extends BaseRestifyConfigurationRegistrar {
 
 		Class<?>[] classes() {
 			return Arrays.stream((String[]) attributes.get("classes"))
-					.map(name -> Tryable.of(() -> Class.forName(name)))
+					.map(name -> Try.of(() -> Class.forName(name)))
 						.toArray(Class<?>[]::new);
 		}
 

@@ -30,6 +30,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URI;
+import java.net.URL;
 import java.nio.charset.Charset;
 import java.util.Collection;
 
@@ -42,7 +43,7 @@ import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestBody
 import com.github.ljtfreitas.restify.http.client.message.response.StatusCode;
 import com.github.ljtfreitas.restify.http.client.request.HttpClientRequest;
 import com.github.ljtfreitas.restify.http.client.response.HttpClientResponse;
-import com.github.ljtfreitas.restify.util.Tryable;
+import com.github.ljtfreitas.restify.util.Try;
 
 class JdkHttpClientRequest implements HttpClientRequest {
 
@@ -88,15 +89,15 @@ class JdkHttpClientRequest implements HttpClientRequest {
 					(a, b) -> a.add(new Header(b.getKey(), b.getValue().stream().findFirst().get())),
 						(a, b) -> b);
 
-		InputStream stream = Tryable.or(() -> connection.getErrorStream() == null ? connection.getInputStream() : connection.getErrorStream(),
-				new ByteArrayInputStream(new byte[0]));
+		InputStream stream = Try.of(() -> connection.getErrorStream() == null ? connection.getInputStream() : connection.getErrorStream())
+				.or(() -> new ByteArrayInputStream(new byte[0]));
 
 		return new JdkHttpClientResponse(status, headers, stream, connection, this);
 	}
 
 	@Override
 	public URI uri() {
-		return Tryable.of(() -> connection.getURL().toURI());
+		return Try.of(() -> connection.getURL()).map(URL::toURI).get();
 	}
 
 	@Override

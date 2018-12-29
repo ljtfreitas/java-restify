@@ -27,7 +27,7 @@ package com.github.ljtfreitas.restify.http.client.call.handler.circuitbreaker;
 
 import java.lang.reflect.Method;
 
-import com.github.ljtfreitas.restify.util.Tryable;
+import com.github.ljtfreitas.restify.util.Try;
 
 class DefaultFallback implements Fallback {
 
@@ -54,7 +54,7 @@ class DefaultFallback implements Fallback {
 
 		@Override
 		public FallbackResult<Object> execute(Method javaMethod, Object[] args) throws Exception {
-			Tryable.run(() -> javaMethod.setAccessible(true));
+			Try.run(() -> javaMethod.setAccessible(true));
 			return new DefaultFallbackResult<>(javaMethod.invoke(fallback, args));
 		}
 	}
@@ -66,7 +66,7 @@ class DefaultFallback implements Fallback {
 			Method fallbackMethod = fallback.getClass()
 					.getMethod(method == null ? javaMethod.getName() : method, javaMethod.getParameterTypes());
 
-			Tryable.run(() -> fallbackMethod.setAccessible(true));
+			Try.run(() -> fallbackMethod.setAccessible(true));
 
 			return new DefaultFallbackResult<>(fallbackMethod.invoke(fallback, args));
 		}

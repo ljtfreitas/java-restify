@@ -17,7 +17,7 @@ import com.github.ljtfreitas.restify.http.client.request.authentication.oauth2.A
 import com.github.ljtfreitas.restify.http.client.request.authentication.oauth2.ClientCredentials;
 import com.github.ljtfreitas.restify.http.client.request.authentication.oauth2.GrantProperties;
 import com.github.ljtfreitas.restify.http.client.request.authentication.oauth2.OAuth2AuthenticatedEndpointRequest;
-import com.github.ljtfreitas.restify.util.Tryable;
+import com.github.ljtfreitas.restify.util.Try;
 
 public class CaffeineAsyncAccessTokenStorageTest {
 
@@ -84,7 +84,7 @@ public class CaffeineAsyncAccessTokenStorageTest {
 				assertEquals(newAccessToken, foundAccessToken.get());
 			})
 
-			.thenRun(() -> Tryable.run(() -> Thread.sleep(5500)))
+			.thenRun(() -> Try.run(() -> Thread.sleep(5500)))
 
 			.thenCompose(a -> caffeineAsyncAccessTokenStorage.findBy(key))
 
