@@ -145,6 +145,8 @@ public class RestifyProxyBuilder {
 
 	private Provider provider = new Provider();
 
+	private ClassLoader classloader = null;
+
 	public RestifyProxyBuilder client(HttpClientRequestFactory httpClientRequestFactory) {
 		this.httpClientRequestFactory = httpClientRequestFactory;
 		return this;
@@ -209,6 +211,11 @@ public class RestifyProxyBuilder {
 		return retryBuilder;
 	}
 
+	public RestifyProxyBuilder classLoader(ClassLoader classLoader) {
+		this.classloader = classLoader;
+		return this;
+	}
+
 	public <T> RestifyProxyBuilderOnTarget<T> target(Class<T> target) {
 		return new RestifyProxyBuilderOnTarget<>(target, null);
 	}
@@ -237,7 +244,7 @@ public class RestifyProxyBuilder {
 		public T build() {
 			RestifyProxyHandler restifyProxyHandler = doBuild();
 
-			return new ProxyFactory(restifyProxyHandler).create(type);
+			return new ProxyFactory(restifyProxyHandler, classloader).create(type);
 		}
 
 		private RestifyProxyHandler doBuild() {
