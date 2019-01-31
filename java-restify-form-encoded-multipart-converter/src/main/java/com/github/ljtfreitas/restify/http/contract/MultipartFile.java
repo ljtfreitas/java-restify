@@ -73,7 +73,7 @@ public class MultipartFile {
 	}
 
 	public static MultipartFile create(String name, String fileName, InputStream content) {
-		return new MultipartFile(name, null, null, content);
+		return new MultipartFile(name, null, fileName, content);
 	}
 
 	public static MultipartFile create(String name, String fileName, String contentType, InputStream content) {

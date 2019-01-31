@@ -84,7 +84,7 @@ public class CaffeineAsyncAccessTokenStorageTest {
 				assertEquals(newAccessToken, foundAccessToken.get());
 			})
 
-			.thenRun(() -> Try.run(() -> Thread.sleep(5500)))
+			.thenRun(() -> Try.run(() -> Thread.sleep(5500)).apply())
 
 			.thenCompose(a -> caffeineAsyncAccessTokenStorage.findBy(key))
 

@@ -14,7 +14,6 @@ import com.github.ljtfreitas.restify.http.client.message.Header;
 import com.github.ljtfreitas.restify.http.client.message.Headers;
 import com.github.ljtfreitas.restify.http.client.message.response.StatusCode;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
-import com.github.ljtfreitas.restify.http.spring.client.call.handler.ResponseEntityConverter;
 
 public class ResponseEntityConverterTest {
 
@@ -28,7 +27,7 @@ public class ResponseEntityConverterTest {
 				.add(Header.contentType(MediaType.TEXT_PLAIN_VALUE))
 				.add(Header.of("X-Header-Whatever", "whatever"));
 
-		endpointResponse = new EndpointResponse<>(StatusCode.ok(), headers, "expected result");
+		endpointResponse = EndpointResponse.of(StatusCode.ok(), "expected result", headers);
 	}
 
 	@Test

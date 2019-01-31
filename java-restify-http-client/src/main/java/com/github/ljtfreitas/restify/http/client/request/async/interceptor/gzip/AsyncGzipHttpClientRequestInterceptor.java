@@ -39,7 +39,6 @@ import com.github.ljtfreitas.restify.http.client.request.async.AsyncHttpClientRe
 import com.github.ljtfreitas.restify.http.client.request.async.interceptor.AsyncHttpClientRequestInterceptor;
 import com.github.ljtfreitas.restify.http.client.request.interceptor.gzip.Gzip;
 import com.github.ljtfreitas.restify.http.client.request.interceptor.gzip.GzipHttpClientRequestInterceptor;
-import com.github.ljtfreitas.restify.http.client.request.interceptor.gzip.GzipHttpRequestBody;
 import com.github.ljtfreitas.restify.http.client.response.HttpClientResponse;
 
 public class AsyncGzipHttpClientRequestInterceptor implements AsyncHttpClientRequestInterceptor {
@@ -79,7 +78,7 @@ public class AsyncGzipHttpClientRequestInterceptor implements AsyncHttpClientReq
 
 		private AsyncGzipHttpClientRequest(AsyncHttpClientRequest source) {
 			this.source = source;
-			this.body = applyToRequest ? new GzipHttpRequestBody(source.body()) : source.body();
+			this.body = applyToRequest ? new AsyncGzipHttpRequestBody(source.body()) : source.body();
 		}
 
 		@Override

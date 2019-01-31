@@ -27,11 +27,7 @@ package com.github.ljtfreitas.restify.http.client.message.converter.form.multipa
 
 import java.io.IOException;
 
-import com.github.ljtfreitas.restify.http.client.message.converter.form.multipart.MultipartFormObjectHolder.MultipartFormObjectFieldHolder;
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
-import com.github.ljtfreitas.restify.http.contract.MultipartForm;
-import com.github.ljtfreitas.restify.http.contract.MultipartFormObject;
-import com.github.ljtfreitas.restify.http.contract.MultipartFormObjects;
 
 public class MultipartFormObjectMessageWriter extends BaseMultipartFormMessageWriter<Object> {
 
@@ -44,7 +40,7 @@ public class MultipartFormObjectMessageWriter extends BaseMultipartFormMessageWr
 
 	@Override
 	public boolean canWrite(Class<?> type) {
-		return type.isAnnotationPresent(MultipartForm.class);
+		return MultipartFormObject.is(type);
 	}
 
 	@Override

@@ -55,8 +55,28 @@ public class JsonPMessageConverter implements JsonMessageConverter<JsonStructure
 	}
 
 	public JsonPMessageConverter(Map<String, ?> configuration) {
-		this.jsonReaderFactory = Json.createReaderFactory(configuration);
-		this.jsonWriterFactory = Json.createWriterFactory(configuration);
+		this(Json.createReaderFactory(configuration), Json.createWriterFactory(configuration));
+	}
+
+	public JsonPMessageConverter(Map<String, ?> configuration, JsonReaderFactory jsonReaderFactory) {
+		this(jsonReaderFactory, Json.createWriterFactory(configuration));
+	}
+
+	public JsonPMessageConverter(JsonReaderFactory jsonReaderFactory) {
+		this(jsonReaderFactory, Json.createWriterFactory(Collections.emptyMap()));
+	}
+
+	public JsonPMessageConverter(Map<String, ?> configuration, JsonWriterFactory jsonWriterFactory) {
+		this(Json.createReaderFactory(configuration), jsonWriterFactory);
+	}
+
+	public JsonPMessageConverter(JsonWriterFactory jsonWriterFactory) {
+		this(Json.createReaderFactory(Collections.emptyMap()), jsonWriterFactory);
+	}
+
+	public JsonPMessageConverter(JsonReaderFactory jsonReaderFactory, JsonWriterFactory jsonWriterFactory) {
+		this.jsonReaderFactory = jsonReaderFactory;
+		this.jsonWriterFactory = jsonWriterFactory;
 	}
 
 	@Override

@@ -67,7 +67,7 @@ public class AsyncRetryableEndpointRequestExecutorTest {
 	@Test
 	public void shouldWrapEndpointRequestExecutorOnLoop() throws Exception {
 		when(asyncEndpointRequestExecutor.executeAsync(notNull(EndpointRequest.class)))
-			.thenReturn(CompletableFuture.completedFuture(new EndpointResponse<>(StatusCode.of(HttpStatusCode.OK), "success")));
+			.thenReturn(CompletableFuture.completedFuture(EndpointResponse.of(StatusCode.of(HttpStatusCode.OK), "success")));
 
 		RetryableEndpointRequest request = new RetryableEndpointRequest();
 
@@ -154,7 +154,7 @@ public class AsyncRetryableEndpointRequestExecutorTest {
 		CompletableFuture<EndpointResponse<Object>> second = new CompletableFuture<>();
 		second.completeExceptionally(new EndpointResponseUnauthorizedException("2st attempt...", Headers.empty(), "2st error..."));
 
-		CompletableFuture<EndpointResponse<Object>> third = CompletableFuture.completedFuture(new EndpointResponse<>(StatusCode.of(HttpStatusCode.OK), "success"));
+		CompletableFuture<EndpointResponse<Object>> third = CompletableFuture.completedFuture(EndpointResponse.of(StatusCode.of(HttpStatusCode.OK), "success"));
 
 		when(asyncEndpointRequestExecutor.executeAsync(notNull(EndpointRequest.class)))
 			.thenReturn(first)
@@ -246,7 +246,7 @@ public class AsyncRetryableEndpointRequestExecutorTest {
 		CompletableFuture<EndpointResponse<Object>> unretryableFuture = new CompletableFuture<>();
 		unretryableFuture.completeExceptionally(new EndpointResponseUnauthorizedException("2st attempt...", Headers.empty(), "2st error..."));
 
-		CompletableFuture<EndpointResponse<Object>> third = CompletableFuture.completedFuture(new EndpointResponse<>(StatusCode.of(HttpStatusCode.OK), "success"));
+		CompletableFuture<EndpointResponse<Object>> third = CompletableFuture.completedFuture(EndpointResponse.of(StatusCode.of(HttpStatusCode.OK), "success"));
 
 		RetryableEndpointRequest request = new RetryableEndpointRequest(retry);
 
@@ -337,7 +337,7 @@ public class AsyncRetryableEndpointRequestExecutorTest {
 		CompletableFuture<EndpointResponse<Object>> second = new CompletableFuture<>();
 		second.completeExceptionally(new EndpointResponseInternalServerErrorException("2st attempt...", Headers.empty(), "2st error..."));
 
-		CompletableFuture<EndpointResponse<Object>> third = CompletableFuture.completedFuture(new EndpointResponse<>(StatusCode.of(HttpStatusCode.OK), "success"));
+		CompletableFuture<EndpointResponse<Object>> third = CompletableFuture.completedFuture(EndpointResponse.of(StatusCode.of(HttpStatusCode.OK), "success"));
 
 		RetryableEndpointRequest request = new RetryableEndpointRequest(retry);
 
@@ -431,7 +431,7 @@ public class AsyncRetryableEndpointRequestExecutorTest {
 				Headers.empty(), "2st error...");
 		unretryableFuture.completeExceptionally(unretryableException);
 
-		CompletableFuture<EndpointResponse<Object>> third = CompletableFuture.completedFuture(new EndpointResponse<>(StatusCode.of(HttpStatusCode.OK), "success"));
+		CompletableFuture<EndpointResponse<Object>> third = CompletableFuture.completedFuture(EndpointResponse.of(StatusCode.of(HttpStatusCode.OK), "success"));
 
 		RetryableEndpointRequest request = new RetryableEndpointRequest(retry);
 
@@ -525,7 +525,7 @@ public class AsyncRetryableEndpointRequestExecutorTest {
 		CompletableFuture<EndpointResponse<Object>> second = new CompletableFuture<>();
 		second.completeExceptionally(new EndpointResponseConflictException("2st attempt...", Headers.empty(), "2st error..."));
 
-		CompletableFuture<EndpointResponse<Object>> third = CompletableFuture.completedFuture(new EndpointResponse<>(StatusCode.of(HttpStatusCode.OK), "success"));
+		CompletableFuture<EndpointResponse<Object>> third = CompletableFuture.completedFuture(EndpointResponse.of(StatusCode.of(HttpStatusCode.OK), "success"));
 
 		RetryableEndpointRequest request = new RetryableEndpointRequest(retry);
 
@@ -620,7 +620,7 @@ public class AsyncRetryableEndpointRequestExecutorTest {
 				Headers.empty(), "2st error...");
 		unretryableFuture.completeExceptionally(unretryableException);
 
-		CompletableFuture<EndpointResponse<Object>> third = CompletableFuture.completedFuture(new EndpointResponse<>(StatusCode.of(HttpStatusCode.OK), "success"));
+		CompletableFuture<EndpointResponse<Object>> third = CompletableFuture.completedFuture(EndpointResponse.of(StatusCode.of(HttpStatusCode.OK), "success"));
 
 		RetryableEndpointRequest request = new RetryableEndpointRequest(retry);
 
@@ -713,7 +713,7 @@ public class AsyncRetryableEndpointRequestExecutorTest {
 		CompletableFuture<EndpointResponse<Object>> second = new CompletableFuture<>();
 		second.completeExceptionally(new RuntimeException(new UnknownHostException("2st attempt...")));
 
-		CompletableFuture<EndpointResponse<Object>> third = CompletableFuture.completedFuture(new EndpointResponse<>(StatusCode.of(HttpStatusCode.OK), "success"));
+		CompletableFuture<EndpointResponse<Object>> third = CompletableFuture.completedFuture(EndpointResponse.of(StatusCode.of(HttpStatusCode.OK), "success"));
 
 		RetryableEndpointRequest request = new RetryableEndpointRequest(retry);
 
@@ -806,7 +806,7 @@ public class AsyncRetryableEndpointRequestExecutorTest {
 		IllegalStateException unretryableException = new IllegalStateException("2st attempt...");
 		unretryableFuture.completeExceptionally(unretryableException);
 
-		CompletableFuture<EndpointResponse<Object>> third = CompletableFuture.completedFuture(new EndpointResponse<>(StatusCode.of(HttpStatusCode.OK), "success"));
+		CompletableFuture<EndpointResponse<Object>> third = CompletableFuture.completedFuture(EndpointResponse.of(StatusCode.of(HttpStatusCode.OK), "success"));
 
 		RetryableEndpointRequest request = new RetryableEndpointRequest(retry);
 
@@ -899,7 +899,7 @@ public class AsyncRetryableEndpointRequestExecutorTest {
 		CompletableFuture<EndpointResponse<Object>> second = new CompletableFuture<>();
 		second.completeExceptionally(new RuntimeException(new SocketException("2st attempt...")));
 
-		CompletableFuture<EndpointResponse<Object>> third = CompletableFuture.completedFuture(new EndpointResponse<>(StatusCode.of(HttpStatusCode.OK), "success"));
+		CompletableFuture<EndpointResponse<Object>> third = CompletableFuture.completedFuture(EndpointResponse.of(StatusCode.of(HttpStatusCode.OK), "success"));
 
 		RetryableEndpointRequest request = new RetryableEndpointRequest(retry);
 
@@ -992,7 +992,7 @@ public class AsyncRetryableEndpointRequestExecutorTest {
 		IllegalStateException unretryableException = new IllegalStateException("2st attempt...");
 		unretryableFuture.completeExceptionally(unretryableException);
 
-		CompletableFuture<EndpointResponse<Object>> third = CompletableFuture.completedFuture(new EndpointResponse<>(StatusCode.of(HttpStatusCode.OK), "success"));
+		CompletableFuture<EndpointResponse<Object>> third = CompletableFuture.completedFuture(EndpointResponse.of(StatusCode.of(HttpStatusCode.OK), "success"));
 
 		RetryableEndpointRequest request = new RetryableEndpointRequest(retry);
 
@@ -1025,7 +1025,7 @@ public class AsyncRetryableEndpointRequestExecutorTest {
 		CompletableFuture<EndpointResponse<Object>> second = new CompletableFuture<>();
 		second.completeExceptionally(new EndpointResponseUnauthorizedException("2st attempt...", Headers.empty(), "2st error..."));
 
-		CompletableFuture<EndpointResponse<Object>> third = CompletableFuture.completedFuture(new EndpointResponse<>(StatusCode.of(HttpStatusCode.OK), "success"));
+		CompletableFuture<EndpointResponse<Object>> third = CompletableFuture.completedFuture(EndpointResponse.of(StatusCode.of(HttpStatusCode.OK), "success"));
 
 		RetryableEndpointRequest request = new RetryableEndpointRequest();
 

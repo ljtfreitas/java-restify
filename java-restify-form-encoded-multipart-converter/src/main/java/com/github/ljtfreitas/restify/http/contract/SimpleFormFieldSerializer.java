@@ -33,5 +33,4 @@ public class SimpleFormFieldSerializer implements FormFieldSerializer {
 	public Object serialize(Type type, Object source) {
 		return source;
 	}
-
 }

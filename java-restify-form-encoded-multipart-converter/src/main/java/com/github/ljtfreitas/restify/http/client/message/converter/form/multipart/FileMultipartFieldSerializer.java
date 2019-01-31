@@ -25,11 +25,13 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.message.converter.form.multipart;
 
-import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.charset.Charset;
 import java.nio.file.Files;
+
+import com.github.ljtfreitas.restify.util.Try;
 
 class FileMultipartFieldSerializer extends BaseMultipartFieldSerializer<File> {
 
@@ -45,22 +47,17 @@ class FileMultipartFieldSerializer extends BaseMultipartFieldSerializer<File> {
 
 	@Override
 	protected String contentTypeOf(File value) {
-		try {
-			return Files.probeContentType(value.toPath());
-		} catch (IOException e) {
-			return null;
-		}
+		return Try.of(() -> Files.probeContentType(value.toPath()))
+					.recover(IOException.class, e -> null)
+						.get();
 	}
 
 	@Override
-	protected byte[] valueOf(MultipartField<File> field, Charset charset) {
+	protected void writeContent(MultipartField<File> field, Charset charset, OutputStream output) throws IOException {
 		try {
-			ByteArrayOutputStream output = new ByteArrayOutputStream();
 			Files.copy(field.value().toPath(), output);
-			return output.toByteArray();
 		} catch (IOException e) {
-			throw new IllegalArgumentException("Cannot read data of parameter [" + field.name() + "] (File)", e);
+			throw new IOException("Cannot read data of parameter [" + field.name() + "] (File)", e);
 		}
 	}
-
 }

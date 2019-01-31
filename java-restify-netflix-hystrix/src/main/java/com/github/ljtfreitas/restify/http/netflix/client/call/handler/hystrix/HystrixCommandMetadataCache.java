@@ -26,30 +26,30 @@
 package com.github.ljtfreitas.restify.http.netflix.client.call.handler.hystrix;
 
 import java.util.Map;
-import java.util.Optional;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.function.Supplier;
 
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethod;
 
-class HystrixCommandMetadataCache {
+public class HystrixCommandMetadataCache {
 
-	private static final HystrixCommandMetadataCache instance = new HystrixCommandMetadataCache();
+	private static final HystrixCommandMetadataCache SINGLE_INSTANCE = new HystrixCommandMetadataCache();
 
 	private final Map<EndpointMethod, HystrixCommandMetadata> cache = new ConcurrentHashMap<>();
 
 	private HystrixCommandMetadataCache() {
 	}
 
-	Optional<HystrixCommandMetadata> get(EndpointMethod endpointMethod) {
-		return Optional.ofNullable(cache.get(endpointMethod));
+	public HystrixCommandMetadata compute(EndpointMethod endpointMethod, Supplier<HystrixCommandMetadata> supplier) {
+		return cache.computeIfAbsent(endpointMethod, e -> supplier.get());
 	}
 
-	HystrixCommandMetadata put(EndpointMethod endpointMethod, HystrixCommandMetadata metadata) {
+	public HystrixCommandMetadata put(EndpointMethod endpointMethod, HystrixCommandMetadata metadata) {
 		cache.put(endpointMethod, metadata);
 		return metadata;
 	}
 
-	static HystrixCommandMetadataCache instance() {
-		return instance;
+	public static HystrixCommandMetadataCache instance() {
+		return SINGLE_INSTANCE;
 	}
 }

@@ -42,15 +42,16 @@ class HystrixCommandEndpointCallHandler<T, O> implements EndpointCallHandler<Hys
 	private final EndpointMethod endpointMethod;
 	private final EndpointCallHandler<T, O> delegate;
 	private final FallbackProvider fallback;
-	private final HystrixCommandMetadataCache hystrixCommandMetadataCache = HystrixCommandMetadataCache.instance();
+	private final HystrixCommandMetadataFactory hystrixCommandMetadataFactory;
 
 	HystrixCommandEndpointCallHandler(HystrixCommand.Setter properties, EndpointMethod endpointMethod,
-			EndpointCallHandler<T, O> delegate, FallbackProvider fallback) {
+			EndpointCallHandler<T, O> delegate, FallbackProvider fallback, HystrixCommandMetadataFactory hystrixCommandMetadataFactory) {
 
 		this.properties = properties;
 		this.endpointMethod = endpointMethod;
 		this.delegate = delegate;
 		this.fallback = fallback;
+		this.hystrixCommandMetadataFactory = hystrixCommandMetadataFactory;
 	}
 
 	@Override
@@ -75,7 +76,7 @@ class HystrixCommandEndpointCallHandler<T, O> implements EndpointCallHandler<Hys
 				FallbackStrategy strategy = fallback.provides(endpointMethod.javaMethod())
 						.strategy(endpointMethod.javaMethod().getDeclaringClass());
 
-				HystrixFallbackResult<T> result = new HystrixFallbackResult<>(strategy.execute(endpointMethod.javaMethod(), args));
+				HystrixFallbackResult<T> result = new HystrixFallbackResult<>(strategy.execute(endpointMethod.javaMethod(), args, getExecutionException()));
 
 				return result.get();
 			}
@@ -84,12 +85,6 @@ class HystrixCommandEndpointCallHandler<T, O> implements EndpointCallHandler<Hys
 
 	private HystrixCommand.Setter hystrixProperties() {
 		return Optional.ofNullable(properties)
-				.orElseGet(() ->
-					hystrixCommandMetadataCache.get(endpointMethod)
-						.orElseGet(this::buildHystrixProperties).asCommand());
-	}
-
-	private HystrixCommandMetadata buildHystrixProperties() {
-		return hystrixCommandMetadataCache.put(endpointMethod, new HystrixCommandMetadataFactory(endpointMethod).create());
+				.orElseGet(() -> hystrixCommandMetadataFactory.create(endpointMethod).asCommand());
 	}
 }

@@ -25,6 +25,9 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.message.converter.text;
 
+import java.util.Arrays;
+import java.util.Collection;
+
 import com.github.ljtfreitas.restify.http.client.message.ContentType;
 
 public class TextHtmlMessageConverter extends StringMessageConverter {
@@ -32,8 +35,8 @@ public class TextHtmlMessageConverter extends StringMessageConverter {
 	private static final ContentType TEXT_HTML_CONTENT_TYPE = ContentType.of("text/html");
 
 	@Override
-	public ContentType contentType() {
-		return TEXT_HTML_CONTENT_TYPE;
+	public Collection<ContentType> contentTypes() {
+		return Arrays.asList(TEXT_HTML_CONTENT_TYPE);
 	}
 
 }

@@ -1,0 +1,2 @@
+com.github.ljtfreitas.restify.http.client.call.handler.reactor.HystrixMonoEndpointCallHandlerAdapter
+com.github.ljtfreitas.restify.http.client.call.handler.reactor.HystrixFluxEndpointCallHandlerAdapter

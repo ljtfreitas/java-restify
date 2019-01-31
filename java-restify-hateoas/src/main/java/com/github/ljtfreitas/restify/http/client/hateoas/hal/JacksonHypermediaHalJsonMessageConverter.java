@@ -25,6 +25,9 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.hateoas.hal;
 
+import java.util.Arrays;
+import java.util.Collection;
+
 import com.fasterxml.jackson.databind.DeserializationFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.ljtfreitas.restify.http.client.hateoas.browser.HypermediaBrowser;
@@ -60,8 +63,8 @@ public class JacksonHypermediaHalJsonMessageConverter<T> extends JacksonMessageC
 	}
 
 	@Override
-	public ContentType contentType() {
-		return HYPERMEDIA_JSON_CONTENT_TYPE;
+	public Collection<ContentType> contentTypes() {
+		return Arrays.asList(HYPERMEDIA_JSON_CONTENT_TYPE);
 	}
 
 	public static <T> JacksonHypermediaHalJsonMessageConverter<T> unfollow() {

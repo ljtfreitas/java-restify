@@ -1,6 +1,7 @@
 package com.github.ljtfreitas.restify.http.client.request.interceptor.log;
 
 import static org.hamcrest.Matchers.containsString;
+import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
 import static org.mockito.Mockito.when;
 
@@ -23,10 +24,11 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import com.github.ljtfreitas.restify.http.client.message.Header;
 import com.github.ljtfreitas.restify.http.client.message.Headers;
+import com.github.ljtfreitas.restify.http.client.message.io.InputStreamContent;
 import com.github.ljtfreitas.restify.http.client.message.request.BufferedByteArrayHttpRequestBody;
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestBody;
-import com.github.ljtfreitas.restify.http.client.message.response.InputStreamHttpResponseBody;
 import com.github.ljtfreitas.restify.http.client.message.response.HttpResponseBody;
+import com.github.ljtfreitas.restify.http.client.message.response.InputStreamHttpResponseBody;
 import com.github.ljtfreitas.restify.http.client.message.response.StatusCode;
 import com.github.ljtfreitas.restify.http.client.request.HttpClientRequest;
 import com.github.ljtfreitas.restify.http.client.response.HttpClientResponse;
@@ -70,7 +72,7 @@ public class LogHttpClientRequestInterceptorTest {
 
 		handler = new MyHandler();
 
-		Logger.getLogger(LogHttpClientRequestInterceptor.class.getCanonicalName()).addHandler(handler);
+		Logger.getLogger(LoggableHttpClientRequest.class.getCanonicalName()).addHandler(handler);
 	}
 
 	@Test
@@ -83,10 +85,10 @@ public class LogHttpClientRequestInterceptorTest {
 
 		String message = record.getMessage();
 
-		assertThat(message, containsString("> GET http://my.api.com/path"));
-		assertThat(message, containsString("> Host: http://my.api.com"));
-		assertThat(message, containsString("> User-Agent: http-java-restify-2.0"));
-		assertThat(message, containsString("> Date: "));
+		assertThat(message, containsString("GET http://my.api.com/path"));
+		assertThat(message, containsString("Host: http://my.api.com"));
+		assertThat(message, containsString("User-Agent: http-java-restify-2.0"));
+		assertThat(message, containsString("Date: "));
 	}
 
 	@Test
@@ -99,22 +101,19 @@ public class LogHttpClientRequestInterceptorTest {
 
 		String message = record.getMessage();
 
-		assertThat(message, containsString("< 200 Ok"));
-		assertThat(message, containsString("< Date: "));
-		assertThat(message, containsString("< Content-Type: text/plain"));
-		assertThat(message, containsString("< Cache-Control: private, max-age=0"));
+		assertThat(message, containsString("200 Ok"));
+		assertThat(message, containsString("Date: "));
+		assertThat(message, containsString("Content-Type: text/plain"));
+		assertThat(message, containsString("Cache-Control: private, max-age=0"));
 	}
 
 	@Test
 	public void shouldLogHttpRequestWithBody() throws IOException {
-		HttpRequestBody body = new BufferedByteArrayHttpRequestBody();
+		HttpClientRequest loggableHttpClientRequest = interceptor.intercepts(request);
+
+		HttpRequestBody body = loggableHttpClientRequest.body();
 		body.output().write("This is a message body".getBytes());
 		body.output().flush();
-
-		when(request.body())
-			.thenReturn(body);
-
-		HttpClientRequest loggableHttpClientRequest = interceptor.intercepts(request);
 
 		loggableHttpClientRequest.execute();
 
@@ -122,11 +121,11 @@ public class LogHttpClientRequestInterceptorTest {
 
 		String message = record.getMessage();
 
-		assertThat(message, containsString("> GET http://my.api.com/path"));
-		assertThat(message, containsString("> Host: http://my.api.com"));
-		assertThat(message, containsString("> User-Agent: http-java-restify-2.0"));
-		assertThat(message, containsString("> Date: "));
-		assertThat(message, containsString("> This is a message body"));
+		assertThat(message, containsString("GET http://my.api.com/path"));
+		assertThat(message, containsString("Host: http://my.api.com"));
+		assertThat(message, containsString("User-Agent: http-java-restify-2.0"));
+		assertThat(message, containsString("Date: "));
+		assertThat(message, containsString("This is a message body"));
 	}
 
 	@Test
@@ -141,17 +140,20 @@ public class LogHttpClientRequestInterceptorTest {
 
 		HttpClientRequest loggableHttpClientRequest = interceptor.intercepts(request);
 
-		loggableHttpClientRequest.execute();
+		HttpClientResponse loggableHttpClientResponse = loggableHttpClientRequest.execute();
 
 		LogRecord record = handler.entries.pollLast();
 
 		String message = record.getMessage();
 
-		assertThat(message, containsString("< 200 Ok"));
-		assertThat(message, containsString("< Date: "));
-		assertThat(message, containsString("< Content-Type: text/plain"));
-		assertThat(message, containsString("< Cache-Control: private, max-age=0"));
-		assertThat(message, containsString("< This is a message body"));
+		assertThat(message, containsString("200 Ok"));
+		assertThat(message, containsString("Date: "));
+		assertThat(message, containsString("Content-Type: text/plain"));
+		assertThat(message, containsString("Cache-Control: private, max-age=0"));
+		assertThat(message, containsString("This is a message body"));
+
+		String responseAsString = new InputStreamContent(loggableHttpClientResponse.body().input()).asString();
+		assertEquals("This is a message body", responseAsString);
 	}
 
 	private class MyHandler extends Handler {

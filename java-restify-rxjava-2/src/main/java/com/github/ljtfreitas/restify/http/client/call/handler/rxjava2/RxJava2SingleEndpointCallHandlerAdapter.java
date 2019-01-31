@@ -27,10 +27,11 @@ package com.github.ljtfreitas.restify.http.client.call.handler.rxjava2;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
+import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutionException;
 
-import com.github.ljtfreitas.restify.http.client.call.EndpointCall;
 import com.github.ljtfreitas.restify.http.client.call.async.AsyncEndpointCall;
 import com.github.ljtfreitas.restify.http.client.call.handler.EndpointCallHandler;
 import com.github.ljtfreitas.restify.http.client.call.handler.async.AsyncEndpointCallHandler;
@@ -40,6 +41,8 @@ import com.github.ljtfreitas.restify.reflection.JavaType;
 
 import io.reactivex.Scheduler;
 import io.reactivex.Single;
+import io.reactivex.SingleEmitter;
+import io.reactivex.SingleOnSubscribe;
 import io.reactivex.schedulers.Schedulers;
 
 public class RxJava2SingleEndpointCallHandlerAdapter<T, O> implements AsyncEndpointCallHandlerAdapter<Single<T>, T, O> {
@@ -47,7 +50,7 @@ public class RxJava2SingleEndpointCallHandlerAdapter<T, O> implements AsyncEndpo
 	public final Scheduler scheduler;
 
 	public RxJava2SingleEndpointCallHandlerAdapter() {
-		this.scheduler = Schedulers.io();
+		this(Schedulers.io());
 	}
 
 	public RxJava2SingleEndpointCallHandlerAdapter(Scheduler scheduler) {
@@ -89,14 +92,8 @@ public class RxJava2SingleEndpointCallHandlerAdapter<T, O> implements AsyncEndpo
 		}
 
 		@Override
-		public Single<T> handle(EndpointCall<O> call, Object[] args) {
-			return Single.fromCallable(() -> delegate.handle(call, args))
-				.subscribeOn(scheduler);
-		}
-
-		@Override
 		public Single<T> handleAsync(AsyncEndpointCall<O> call, Object[] args) {
-			return Single.fromFuture(call.executeAsync().toCompletableFuture())
+			return Single.create(new CompletionStageSingleSubscribe(call.executeAsync()))
 				.onErrorResumeNext(this::handleAsyncException)
 					.map(o -> delegate.handle(() -> o, args))
 						.subscribeOn(scheduler);
@@ -107,6 +104,30 @@ public class RxJava2SingleEndpointCallHandlerAdapter<T, O> implements AsyncEndpo
 				(ExecutionException.class.equals(throwable.getClass()) || CompletionException.class.equals(throwable.getClass())) ?
 						throwable.getCause() :
 							throwable);
+		}
+	}
+
+	private class CompletionStageSingleSubscribe implements SingleOnSubscribe<O> {
+
+		private final CompletionStage<O> stage;
+
+		private CompletionStageSingleSubscribe(CompletionStage<O> stage) {
+			this.stage = stage;
+		}
+
+		@Override
+		public void subscribe(SingleEmitter<O> emitter) throws Exception {
+			CompletableFuture<O> future = stage.toCompletableFuture();
+
+			future.whenComplete((value, throwable) -> {
+				if (throwable != null) {
+					emitter.onError(throwable);
+				} else {
+					emitter.onSuccess(value);
+				}
+			});
+
+			emitter.setCancellable(() -> future.cancel(true));
 		}
 	}
 }

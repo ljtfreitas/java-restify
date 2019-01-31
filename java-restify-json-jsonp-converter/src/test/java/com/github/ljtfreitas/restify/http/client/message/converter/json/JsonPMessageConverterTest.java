@@ -19,8 +19,8 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import com.github.ljtfreitas.restify.http.client.message.request.BufferedByteArrayHttpRequestBody;
+import com.github.ljtfreitas.restify.http.client.message.request.BufferedHttpRequestBody;
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
-import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestBody;
 import com.github.ljtfreitas.restify.http.client.message.response.HttpResponseMessage;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -64,7 +64,7 @@ public class JsonPMessageConverterTest {
 
 	@Test
 	public void shouldWriteJsonObject() {
-		HttpRequestBody output = new BufferedByteArrayHttpRequestBody();
+		BufferedHttpRequestBody output = new BufferedByteArrayHttpRequestBody();
 
 		when(request.body()).thenReturn(output);
 
@@ -97,7 +97,7 @@ public class JsonPMessageConverterTest {
 
 	@Test
 	public void shouldWriteJsonArray() {
-		HttpRequestBody output = new BufferedByteArrayHttpRequestBody();
+		BufferedHttpRequestBody output = new BufferedByteArrayHttpRequestBody();
 
 		when(request.body()).thenReturn(output);
 

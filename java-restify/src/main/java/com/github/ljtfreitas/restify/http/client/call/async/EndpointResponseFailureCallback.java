@@ -49,7 +49,7 @@ public abstract class EndpointResponseFailureCallback implements EndpointCallFai
 		throw newException;
 	}
 
-	protected void onResponseFailure(EndpointResponseException exception) {
+	private void onResponseFailure(EndpointResponseException exception) {
 		StatusCode responseStatusCode = exception.status();
 
 		EndpointResponse<String> response = exception.response();
@@ -124,102 +124,102 @@ public abstract class EndpointResponseFailureCallback implements EndpointCallFai
 			onHttpVersionNotSupported(response);
 
 		} else {
-			unhandled(response);
+			onFailure(response);
 		}
 	}
 
 	protected void onBadRequest(EndpointResponse<String> response) {
-		unhandled(response);
+		onFailure(response);
 	}
 
 	protected void onUnauthorized(EndpointResponse<String> response) {
-		unhandled(response);
+		onFailure(response);
 	}
 
 	protected void onForbidden(EndpointResponse<String> response) {
-		unhandled(response);
+		onFailure(response);
 	}
 
 	protected void onNotFound(EndpointResponse<String> response) {
-		unhandled(response);
+		onFailure(response);
 	}
 
 	protected void onMethodNotAllowed(EndpointResponse<String> response) {
-		unhandled(response);
+		onFailure(response);
 	}
 
 	protected void onNotAcceptable(EndpointResponse<String> response) {
-		unhandled(response);
+		onFailure(response);
 	}
 
 	protected void onProxyAuthenticationRequired(EndpointResponse<String> response) {
-		unhandled(response);
+		onFailure(response);
 	}
 
 	protected void onRequestTimeout(EndpointResponse<String> response) {
-		unhandled(response);
+		onFailure(response);
 	}
 
 	protected void onConflict(EndpointResponse<String> response) {
-		unhandled(response);
+		onFailure(response);
 	}
 
 	protected void onGone(EndpointResponse<String> response) {
-		unhandled(response);
+		onFailure(response);
 	}
 
 	protected void onLengthRequired(EndpointResponse<String> response) {
-		unhandled(response);
+		onFailure(response);
 	}
 
 	protected void onPreconditionFailed(EndpointResponse<String> response) {
-		unhandled(response);
+		onFailure(response);
 	}
 
 	protected void onRequestEntityTooLarge(EndpointResponse<String> response) {
-		unhandled(response);
+		onFailure(response);
 	}
 
 	protected void onRequestUriTooLong(EndpointResponse<String> response) {
-		unhandled(response);
+		onFailure(response);
 	}
 
 	protected void onUnsupportedMediaType(EndpointResponse<String> response) {
-		unhandled(response);
+		onFailure(response);
 	}
 
 	protected void onRequestedRangeNotSatisfiable(EndpointResponse<String> response) {
-		unhandled(response);
+		onFailure(response);
 	}
 
 	protected void onExpectationFailed(EndpointResponse<String> response) {
-		unhandled(response);
+		onFailure(response);
 	}
 
 	protected void onInternalServerError(EndpointResponse<String> response) {
-		unhandled(response);
+		onFailure(response);
 	}
 
 	protected void onNotImplemented(EndpointResponse<String> response) {
-		unhandled(response);
+		onFailure(response);
 	}
 
 	protected void onBadGateway(EndpointResponse<String> response) {
-		unhandled(response);
+		onFailure(response);
 	}
 
 	protected void onServiceUnavailable(EndpointResponse<String> response) {
-		unhandled(response);
+		onFailure(response);
 	}
 
 	protected void onGatewayTimeout(EndpointResponse<String> response) {
-		unhandled(response);
+		onFailure(response);
 	}
 
 	protected void onHttpVersionNotSupported(EndpointResponse<String> response) {
-		unhandled(response);
+		onFailure(response);
 	}
 
-	protected void unhandled(EndpointResponse<String> response) {
+	protected void onFailure(EndpointResponse<String> response) {
 	}
 }

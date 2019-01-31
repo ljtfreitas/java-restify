@@ -41,6 +41,7 @@ import com.github.ljtfreitas.restify.spring.configure.BaseRestifyConfigurationRe
 import com.github.ljtfreitas.restify.spring.configure.RestifyAsyncConfiguration;
 import com.github.ljtfreitas.restify.spring.configure.RestifyConfigurationProperties;
 import com.github.ljtfreitas.restify.spring.configure.RestifyDefaultConfiguration;
+import com.github.ljtfreitas.restify.spring.configure.RestifyHttpMessageConvertersConfiguration;
 import com.github.ljtfreitas.restify.spring.configure.RestifyContractConfiguration;
 import com.github.ljtfreitas.restify.spring.configure.RestifyProxyFactoryBean;
 import com.github.ljtfreitas.restify.spring.configure.RestifySpringWebConfiguration;
@@ -50,7 +51,8 @@ import com.github.ljtfreitas.restify.spring.configure.RestifyableTypeScanner;
 @Configuration
 @EnableConfigurationProperties(RestifyConfigurationProperties.class)
 @Import({RestifyDefaultConfiguration.class, RestifyAsyncConfiguration.class, RestifySpringWebFluxConfiguration.class,
-	RestifySpringWebConfiguration.class, RestifyContractConfiguration.class, RestifyAutoConfigurationRegistrar.class})
+	RestifySpringWebConfiguration.class, RestifyContractConfiguration.class, RestifyHttpMessageConvertersConfiguration.class,
+	RestifyAutoConfigurationRegistrar.class})
 @ConditionalOnMissingBean(RestifyProxyFactoryBean.class)
 @AutoConfigureAfter({RestTemplateAutoConfiguration.class, WebClientAutoConfiguration.class})
 public class RestifyAutoConfiguration {

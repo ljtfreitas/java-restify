@@ -69,7 +69,7 @@ public enum HttpStatusCode {
 	REQUEST_URI_TOO_LONG(414, "Request-URI Too Long"),
 	UNSUPPORTED_MEDIA_TYPE(415, "Unsupported Media Type"),
 	REQUESTED_RANGE_NOT_SATISFIABLE(416, "Requested Range Not Satisfiable"),
-	EXPECTIATION_FAILED(417, "Expectation Failed"),
+	EXPECTATION_FAILED(417, "Expectation Failed"),
 
 	// Server Error 5xx
 	INTERNAL_SERVER_ERROR(500, "Internal Server Error"),

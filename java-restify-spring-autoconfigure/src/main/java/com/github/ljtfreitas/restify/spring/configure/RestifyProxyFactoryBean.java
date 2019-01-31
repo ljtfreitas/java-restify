@@ -86,6 +86,7 @@ public class RestifyProxyFactoryBean implements FactoryBean<Object> {
 					.disabled()
 				.and()
 			.converters()
+				.wildcard()
 				.add(converters())
 				.discovery()
 					.disabled()

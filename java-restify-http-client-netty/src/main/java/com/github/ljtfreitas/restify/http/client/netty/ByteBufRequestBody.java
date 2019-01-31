@@ -42,16 +42,6 @@ class ByteBufRequestBody implements HttpRequestBody {
 		return output;
 	}
 
-	@Override
-	public byte[] asBytes() {
-		return output.buffer().array();
-	}
-
-	@Override
-	public boolean empty() {
-		return output.buffer().hasArray() && output.buffer().array().length == 0;
-	}
-
 	ByteBuf asByteBuf() {
 		return output.buffer();
 	}

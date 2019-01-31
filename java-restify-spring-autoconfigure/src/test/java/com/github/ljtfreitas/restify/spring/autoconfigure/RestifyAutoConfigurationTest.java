@@ -1,5 +1,6 @@
 package com.github.ljtfreitas.restify.spring.autoconfigure;
 
+import static org.assertj.core.api.Assertions.assertThat;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.mockserver.model.HttpRequest.request;
@@ -30,6 +31,31 @@ import org.springframework.web.reactive.function.client.WebClient;
 
 import com.github.ljtfreitas.restify.http.client.call.handler.reactor.FluxEndpointCallHandlerAdapter;
 import com.github.ljtfreitas.restify.http.client.call.handler.reactor.MonoEndpointCallHandlerAdapter;
+import com.github.ljtfreitas.restify.http.client.message.converter.HttpMessageConverter;
+import com.github.ljtfreitas.restify.http.client.message.converter.form.FormURLEncodedFormObjectMessageConverter;
+import com.github.ljtfreitas.restify.http.client.message.converter.form.FormURLEncodedMapMessageConverter;
+import com.github.ljtfreitas.restify.http.client.message.converter.form.FormURLEncodedMessageConverter;
+import com.github.ljtfreitas.restify.http.client.message.converter.form.FormURLEncodedParametersMessageConverter;
+import com.github.ljtfreitas.restify.http.client.message.converter.form.multipart.MultipartFormFileObjectMessageWriter;
+import com.github.ljtfreitas.restify.http.client.message.converter.form.multipart.MultipartFormMapMessageWriter;
+import com.github.ljtfreitas.restify.http.client.message.converter.form.multipart.MultipartFormMessageWriter;
+import com.github.ljtfreitas.restify.http.client.message.converter.form.multipart.MultipartFormObjectMessageWriter;
+import com.github.ljtfreitas.restify.http.client.message.converter.form.multipart.MultipartFormParametersMessageWriter;
+import com.github.ljtfreitas.restify.http.client.message.converter.json.GsonMessageConverter;
+import com.github.ljtfreitas.restify.http.client.message.converter.json.JacksonMessageConverter;
+import com.github.ljtfreitas.restify.http.client.message.converter.json.JsonBMessageConverter;
+import com.github.ljtfreitas.restify.http.client.message.converter.json.JsonMessageConverter;
+import com.github.ljtfreitas.restify.http.client.message.converter.json.JsonPMessageConverter;
+import com.github.ljtfreitas.restify.http.client.message.converter.octet.OctetByteArrayMessageConverter;
+import com.github.ljtfreitas.restify.http.client.message.converter.octet.OctetInputStreamMessageConverter;
+import com.github.ljtfreitas.restify.http.client.message.converter.octet.OctetSerializableMessageConverter;
+import com.github.ljtfreitas.restify.http.client.message.converter.octet.OctetStreamMessageConverter;
+import com.github.ljtfreitas.restify.http.client.message.converter.text.ScalarMessageConverter;
+import com.github.ljtfreitas.restify.http.client.message.converter.text.TextHtmlMessageConverter;
+import com.github.ljtfreitas.restify.http.client.message.converter.text.TextMessageConverter;
+import com.github.ljtfreitas.restify.http.client.message.converter.text.TextPlainMessageConverter;
+import com.github.ljtfreitas.restify.http.client.message.converter.xml.JaxBXmlMessageConverter;
+import com.github.ljtfreitas.restify.http.client.message.converter.xml.XmlMessageConverter;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponseErrorFallback;
 import com.github.ljtfreitas.restify.http.jaxrs.contract.metadata.JaxRsContractReader;
 import com.github.ljtfreitas.restify.http.spring.client.call.handler.HttpHeadersEndpointCallHandlerAdapter;
@@ -104,7 +130,7 @@ public class RestifyAutoConfigurationTest {
 				assertNotNull(context.getBean(EndpointResponseErrorFallback.class));
 			});
 		}
-		
+
 		@Test
 		public void shouldCreateWebFluxBeans() {
 			contextRunner.run(context -> {
@@ -186,7 +212,201 @@ public class RestifyAutoConfigurationTest {
 				});
 		}
 	}
+
+	public abstract static class HttpMessageConvertersConfigurationTest {
+		
+		protected ApplicationContextRunner contextRunner;
+
+		@Before
+		public void setup() {
+			contextRunner = new ApplicationContextRunner()
+					.withUserConfiguration(TestRestifyConfiguration.class)
+					.withConfiguration(AutoConfigurations.of(RestifyAutoConfiguration.class));
+		}
+		
+	}
 	
+	public static class JacksonJsonHttpMessageConvertersConfigurationTest extends HttpMessageConvertersConfigurationTest {
+		
+		@Test
+		public void shouldCreateJacksonMessageConverter() {
+			contextRunner
+				.withClassLoader(new FilteredClassLoader(GsonMessageConverter.class, JsonPMessageConverter.class, JsonBMessageConverter.class))
+				.run(context -> {
+					assertThat(context)
+						.hasSingleBean(JacksonMessageConverter.class)
+						.hasSingleBean(JsonMessageConverter.class)
+						.getBeans(HttpMessageConverter.class)
+							.size()
+								.isGreaterThanOrEqualTo(1);
+				});
+		}
+	}
+
+	public static class GsonJsonHttpMessageConvertersConfigurationTest extends HttpMessageConvertersConfigurationTest {
+		
+		@Test
+		public void shouldCreateGsonMessageConverter() {
+			contextRunner
+				.withClassLoader(new FilteredClassLoader(JacksonMessageConverter.class, JsonPMessageConverter.class, JsonBMessageConverter.class))
+				.run(context -> {
+					assertThat(context)
+						.hasSingleBean(GsonMessageConverter.class)
+						.hasSingleBean(JsonMessageConverter.class)
+						.getBeans(HttpMessageConverter.class)
+							.size()
+								.isGreaterThanOrEqualTo(1);
+				});
+		}
+	}
+
+	public static class JsonBJsonHttpMessageConvertersConfigurationTest extends HttpMessageConvertersConfigurationTest {
+		
+		@Test
+		public void shouldCreateJsonBMessageConverter() {
+			contextRunner
+				.withClassLoader(new FilteredClassLoader(JacksonMessageConverter.class, JsonPMessageConverter.class, GsonMessageConverter.class))
+				.run(context -> {
+					assertThat(context)
+						.hasSingleBean(JsonBMessageConverter.class)
+						.hasSingleBean(JsonMessageConverter.class)
+						.getBeans(HttpMessageConverter.class)
+							.size()
+								.isGreaterThanOrEqualTo(1);
+				});
+		}
+	}
+
+	public static class JsonPJsonHttpMessageConvertersConfigurationTest extends HttpMessageConvertersConfigurationTest {
+		
+		@Test
+		public void shouldCreateJsonPMessageConverter() {
+			contextRunner
+				.withClassLoader(new FilteredClassLoader(JacksonMessageConverter.class, GsonMessageConverter.class, JsonBMessageConverter.class))
+				.run(context -> {
+					assertThat(context)
+						.hasSingleBean(JsonPMessageConverter.class)
+						.hasSingleBean(JsonMessageConverter.class)
+						.getBeans(HttpMessageConverter.class)
+							.size()
+								.isGreaterThanOrEqualTo(1);
+				});
+		}
+	}
+
+	public static class JaxBXmlHttpMessageConvertersConfigurationTest extends HttpMessageConvertersConfigurationTest {
+		
+		@Test
+		public void shouldCreateJaxBMessageConverter() {
+			contextRunner
+				.run(context -> {
+					assertThat(context)
+						.hasSingleBean(JaxBXmlMessageConverter.class)
+						.hasSingleBean(XmlMessageConverter.class)
+						.getBeans(HttpMessageConverter.class)
+							.size()
+								.isGreaterThanOrEqualTo(1);
+				});
+		}
+	}
+
+	public static class FormUrlEncodedHttpMessageConvertersConfigurationTest extends HttpMessageConvertersConfigurationTest {
+		
+		@Test
+		public void shouldCreateFormUrlEncodedMessageConverters() {
+			contextRunner
+				.run(context -> {
+					assertThat(context)
+						.hasSingleBean(FormURLEncodedFormObjectMessageConverter.class)
+						.hasSingleBean(FormURLEncodedMapMessageConverter.class)
+						.hasSingleBean(FormURLEncodedParametersMessageConverter.class);
+
+					assertThat(context)
+						.getBeans(FormURLEncodedMessageConverter.class)
+							.size()
+								.isEqualTo(3);
+
+					assertThat(context)
+						.getBeans(HttpMessageConverter.class)
+							.size()
+								.isGreaterThanOrEqualTo(3);
+				});
+		}
+	}
+
+	public static class MultipartFormHttpMessageConvertersConfigurationTest extends HttpMessageConvertersConfigurationTest {
+
+		@Test
+		public void shouldCreateMultipartFormMessageConverters() {
+			contextRunner
+				.run(context -> {
+					assertThat(context)
+						.hasSingleBean(MultipartFormFileObjectMessageWriter.class)
+						.hasSingleBean(MultipartFormMapMessageWriter.class)
+						.hasSingleBean(MultipartFormObjectMessageWriter.class)
+						.hasSingleBean(MultipartFormParametersMessageWriter.class);
+
+					assertThat(context)
+						.getBeans(MultipartFormMessageWriter.class)
+							.size()
+								.isEqualTo(4);
+
+					assertThat(context)
+						.getBeans(HttpMessageConverter.class)
+							.size()
+								.isGreaterThanOrEqualTo(4);
+				});
+		}
+	}
+
+	public static class TextHttpMessageConvertersConfigurationTest extends HttpMessageConvertersConfigurationTest {
+
+		@Test
+		public void shouldCreateTextMessageConverters() {
+			contextRunner
+				.run(context -> {
+					assertThat(context)
+						.hasSingleBean(ScalarMessageConverter.class)
+						.hasSingleBean(TextHtmlMessageConverter.class)
+						.hasSingleBean(TextPlainMessageConverter.class);
+
+					assertThat(context)
+						.getBeans(TextMessageConverter.class)
+							.size()
+								.isEqualTo(3);
+
+					assertThat(context)
+						.getBeans(HttpMessageConverter.class)
+							.size()
+								.isGreaterThanOrEqualTo(4);
+				});
+		}
+	}
+
+	public static class OctetStreamHttpMessageConvertersConfigurationTest extends HttpMessageConvertersConfigurationTest {
+
+		@Test
+		public void shouldCreateOctetStreamMessageConverters() {
+			contextRunner
+				.run(context -> {
+					assertThat(context)
+						.hasSingleBean(OctetByteArrayMessageConverter.class)
+						.hasSingleBean(OctetInputStreamMessageConverter.class)
+						.hasSingleBean(OctetSerializableMessageConverter.class);
+
+					assertThat(context)
+						.getBeans(OctetStreamMessageConverter.class)
+							.size()
+								.isEqualTo(3);
+
+					assertThat(context)
+						.getBeans(HttpMessageConverter.class)
+							.size()
+								.isGreaterThanOrEqualTo(3);
+				});
+		}
+	}
+
 	@Configuration
 	@Import(TestRestifyConfigurationRegistrar.class)
 	static class TestRestifyConfiguration {

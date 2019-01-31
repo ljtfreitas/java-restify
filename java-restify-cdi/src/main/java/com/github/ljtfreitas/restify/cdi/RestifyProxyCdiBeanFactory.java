@@ -74,6 +74,7 @@ class RestifyProxyCdiBeanFactory {
 					.disabled()
 				.and()
 			.converters()
+				.wildcard()
 				.add(httpMessageConverters())
 				.discovery()
 					.disabled()

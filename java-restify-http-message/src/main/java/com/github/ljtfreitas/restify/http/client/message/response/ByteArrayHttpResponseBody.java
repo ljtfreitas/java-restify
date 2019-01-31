@@ -25,24 +25,23 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.message.response;
 
+import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 
 import com.github.ljtfreitas.restify.http.client.message.io.InputStreamContent;
 
-public class ByteArrayHttpResponseBody implements BufferedHttpResponseBody {
+public class ByteArrayHttpResponseBody implements StringHttpResponseBody {
 
 	private final byte[] contentAsBytes;
-	private final ByteArrayInputStream input;
 
 	private ByteArrayHttpResponseBody(byte[] contentAsBytes) {
 		this.contentAsBytes = contentAsBytes;
-		this.input = new ByteArrayInputStream(contentAsBytes);
 	}
 
 	@Override
 	public InputStream input() {
-		return input;
+		return new BufferedInputStream(new ByteArrayInputStream(contentAsBytes));
 	}
 
 	@Override
@@ -55,7 +54,7 @@ public class ByteArrayHttpResponseBody implements BufferedHttpResponseBody {
 		return new String(contentAsBytes);
 	}
 
-	public static BufferedHttpResponseBody of(HttpResponseBody source) {
+	public static ByteArrayHttpResponseBody of(HttpResponseBody source) {
 		InputStreamContent content = new InputStreamContent(source.input());
 		return new ByteArrayHttpResponseBody(content.asBytes());
 	}

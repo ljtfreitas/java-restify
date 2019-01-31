@@ -36,7 +36,7 @@ class AuthorizationServerResponseErrorFallback implements EndpointResponseErrorF
 	private final EndpointResponseExceptionFactory endpointResponseExceptionFactory = new EndpointResponseExceptionFactory();
 
 	@Override
-	public <T> EndpointResponse<T> onError(HttpResponseMessage response, JavaType responseType) {
+	public <T extends Object> EndpointResponse<T> onError(HttpResponseMessage response, JavaType responseType) {
 		throw new OAuth2Exception("OAuth response error", endpointResponseExceptionFactory.create(response));
 	}
 }

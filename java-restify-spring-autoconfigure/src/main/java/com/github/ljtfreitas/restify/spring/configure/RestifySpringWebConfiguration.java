@@ -30,6 +30,7 @@ import java.util.Optional;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
@@ -49,6 +50,7 @@ import com.github.ljtfreitas.restify.http.spring.contract.metadata.SpringWebCont
 public class RestifySpringWebConfiguration {
 
 	@ConditionalOnMissingBean
+	@ConditionalOnMissingClass("org.springframework.web.reactive.function.client.WebClient")
 	@Bean
 	public EndpointRequestExecutor endpointRequestExecutor(EndpointResponseErrorFallback endpointResponseErrorFallback,
 			ObjectProvider<RestTemplateBuilder> restTemplateBuilderProvider,

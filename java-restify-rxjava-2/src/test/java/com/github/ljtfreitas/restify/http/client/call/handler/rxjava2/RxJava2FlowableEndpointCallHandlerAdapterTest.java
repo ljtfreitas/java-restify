@@ -4,6 +4,7 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyVararg;
 import static org.mockito.Matchers.notNull;
 import static org.mockito.Mockito.verify;
@@ -26,7 +27,6 @@ import com.github.ljtfreitas.restify.http.client.call.handler.async.AsyncEndpoin
 import com.github.ljtfreitas.restify.reflection.JavaType;
 
 import io.reactivex.Flowable;
-import io.reactivex.Scheduler;
 import io.reactivex.schedulers.Schedulers;
 import io.reactivex.subscribers.TestSubscriber;
 
@@ -37,17 +37,16 @@ public class RxJava2FlowableEndpointCallHandlerAdapterTest {
 	private AsyncEndpointCallHandler<Collection<String>, Collection<String>> delegate;
 
 	@Mock
-	private AsyncEndpointCall<Collection<String>> endpointCallMock;
+	private AsyncEndpointCall<Collection<String>> asyncEndpointCallMock;
+
+	@Mock
+	private EndpointCall<Collection<String>> endpointCallMock;
 
 	private RxJava2FlowableEndpointCallHandlerAdapter<String, Collection<String>> adapter;
 
-	private Scheduler scheduler;
-
 	@Before
 	public void setup() {
-		scheduler = Schedulers.single();
-
-		adapter = new RxJava2FlowableEndpointCallHandlerAdapter<>(scheduler);
+		adapter = new RxJava2FlowableEndpointCallHandlerAdapter<>(Schedulers.single());
 	}
 
 	@Test
@@ -62,12 +61,12 @@ public class RxJava2FlowableEndpointCallHandlerAdapterTest {
 
 	@Test
 	public void shouldReturnArgumentTypeOfRxJava2Flowable() throws Exception {
-		assertEquals(JavaType.of(JavaType.parameterizedType(Collection.class, String.class)), adapter.returnType(new SimpleEndpointMethod(SomeType.class.getMethod("flowable"))));
+		assertEquals(JavaType.parameterizedType(Collection.class, String.class), adapter.returnType(new SimpleEndpointMethod(SomeType.class.getMethod("flowable"))));
 	}
 
 	@Test
 	public void shouldReturnCollectionWithObjectTypeWhenRxJava2FlowableIsNotParameterized() throws Exception {
-		assertEquals(JavaType.of(JavaType.parameterizedType(Collection.class, Object.class)), adapter.returnType(new SimpleEndpointMethod(SomeType.class.getMethod("dumbFlowable"))));
+		assertEquals(JavaType.parameterizedType(Collection.class, Object.class), adapter.returnType(new SimpleEndpointMethod(SomeType.class.getMethod("dumbFlowable"))));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -78,24 +77,24 @@ public class RxJava2FlowableEndpointCallHandlerAdapterTest {
 
 		String result = "flowable result";
 
-		when(endpointCallMock.executeAsync())
+		when(asyncEndpointCallMock.executeAsync())
 			.thenReturn(CompletableFuture.completedFuture(Arrays.asList(result)));
 
 		when(delegate.handle(notNull(EndpointCall.class), anyVararg()))
 			.then(i -> i.getArgumentAt(0, EndpointCall.class).execute());
 
-		Flowable<String> flowable = handler.handleAsync(endpointCallMock, null);
+		Flowable<String> flowable = handler.handleAsync(asyncEndpointCallMock, null);
 
 		assertNotNull(flowable);
 
-		TestSubscriber<String> subscriber = flowable.subscribeOn(scheduler).test();
+		TestSubscriber<String> subscriber = flowable.test();
 		subscriber.await();
 
 		subscriber.assertNoErrors()
 			.assertComplete()
 			.assertResult(result);
 
-		verify(endpointCallMock).executeAsync();
+		verify(asyncEndpointCallMock).executeAsync();
 		verify(delegate).handle(notNull(EndpointCall.class), anyVararg());
 	}
 
@@ -109,21 +108,22 @@ public class RxJava2FlowableEndpointCallHandlerAdapterTest {
 		CompletableFuture<Collection<String>> futureAsException = new CompletableFuture<>();
 		futureAsException.completeExceptionally(exception);
 
-		when(endpointCallMock.executeAsync())
+		when(asyncEndpointCallMock.executeAsync())
 			.thenReturn(futureAsException);
 
-		Flowable<String> flowable = handler.handleAsync(endpointCallMock, null);
+		Flowable<String> flowable = handler.handleAsync(asyncEndpointCallMock, null);
 
 		assertNotNull(flowable);
 
-		TestSubscriber<String> subscriber = flowable.subscribeOn(scheduler).test();
+		TestSubscriber<String> subscriber = flowable.test();
 
 		subscriber.await()
 			.assertError(exception);
 
-		verify(endpointCallMock).executeAsync();
+		verify(asyncEndpointCallMock).executeAsync();
 	}
 
+	@SuppressWarnings("unchecked")
 	@Test
 	public void shouldCreateSyncHandlerFromEndpointMethodWithRxJava2FlowableReturnType() throws Exception {
 		EndpointCallHandler<Flowable<String>, Collection<String>> handler = adapter
@@ -131,21 +131,24 @@ public class RxJava2FlowableEndpointCallHandlerAdapterTest {
 
 		String result = "flowable result";
 
-		when(delegate.handle(endpointCallMock, null))
+		when(endpointCallMock.execute())
 			.thenReturn(Arrays.asList(result));
+		
+		when(delegate.handle(any(EndpointCall.class), any()))
+			.then(i -> i.getArgumentAt(0, EndpointCall.class).execute());
 
 		Flowable<String> flowable = handler.handle(endpointCallMock, null);
 
 		assertNotNull(flowable);
 
-		TestSubscriber<String> subscriber = flowable.subscribeOn(scheduler).test();
+		TestSubscriber<String> subscriber = flowable.test();
 
 		subscriber.await()
 			.assertNoErrors()
 			.assertComplete()
 			.assertResult(result);
 
-		verify(delegate).handle(endpointCallMock, null);
+		verify(endpointCallMock).execute();
 	}
 
 	interface SomeType {

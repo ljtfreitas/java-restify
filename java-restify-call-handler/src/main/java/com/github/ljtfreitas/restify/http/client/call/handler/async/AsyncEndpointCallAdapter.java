@@ -26,6 +26,7 @@
 package com.github.ljtfreitas.restify.http.client.call.handler.async;
 
 import java.util.concurrent.CompletionStage;
+import java.util.concurrent.Executor;
 
 import com.github.ljtfreitas.restify.http.client.call.EndpointCall;
 import com.github.ljtfreitas.restify.http.client.call.async.AsyncEndpointCall;
@@ -33,13 +34,16 @@ import com.github.ljtfreitas.restify.http.client.call.async.EndpointCallCallback
 import com.github.ljtfreitas.restify.http.client.call.async.EndpointCallFailureCallback;
 import com.github.ljtfreitas.restify.http.client.call.async.EndpointCallSuccessCallback;
 import com.github.ljtfreitas.restify.http.client.call.async.ExecutorAsyncEndpointCall;
+import com.github.ljtfreitas.restify.util.async.DisposableExecutors;
 
 class AsyncEndpointCallAdapter<T> implements AsyncEndpointCall<T> {
+
+	private static final Executor DEFAULT_EXECUTOR = DisposableExecutors.immediate();
 
 	private final ExecutorAsyncEndpointCall<T> delegate;
 
 	public AsyncEndpointCallAdapter(EndpointCall<T> delegate) {
-		this.delegate = new ExecutorAsyncEndpointCall<>(delegate);
+		this.delegate = new ExecutorAsyncEndpointCall<>(delegate, DEFAULT_EXECUTOR);
 	}
 
 	@Override

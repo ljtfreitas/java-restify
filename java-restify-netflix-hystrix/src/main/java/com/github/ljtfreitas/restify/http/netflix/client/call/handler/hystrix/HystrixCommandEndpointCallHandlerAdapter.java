@@ -33,6 +33,7 @@ import com.github.ljtfreitas.restify.http.client.call.handler.EndpointCallHandle
 import com.github.ljtfreitas.restify.http.client.call.handler.EndpointCallHandlerAdapter;
 import com.github.ljtfreitas.restify.http.client.call.handler.circuitbreaker.Fallback;
 import com.github.ljtfreitas.restify.http.client.call.handler.circuitbreaker.FallbackProvider;
+import com.github.ljtfreitas.restify.http.client.call.handler.circuitbreaker.OnCircuitBreakerMetadataResolver;
 import com.github.ljtfreitas.restify.http.client.call.handler.circuitbreaker.WithFallbackProvider;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethod;
 import com.github.ljtfreitas.restify.reflection.JavaType;
@@ -40,23 +41,38 @@ import com.netflix.hystrix.HystrixCommand;
 
 public class HystrixCommandEndpointCallHandlerAdapter<T, O> implements EndpointCallHandlerAdapter<HystrixCommand<T>, T, O> {
 
-	protected final HystrixCommand.Setter properties;
-	protected final FallbackProvider fallback;
+	private final HystrixCommand.Setter properties;
+	private final FallbackProvider fallback;
+	private final HystrixCommandMetadataFactory hystrixCommandMetadataFactory;
 
 	public HystrixCommandEndpointCallHandlerAdapter() {
-		this(null, (FallbackProvider) null);
+		this(null, (FallbackProvider) null, null);
 	}
 
 	public HystrixCommandEndpointCallHandlerAdapter(HystrixCommand.Setter properties) {
-		this(properties, (FallbackProvider) null);
+		this(properties, (FallbackProvider) null, null);
+	}
+
+	public HystrixCommandEndpointCallHandlerAdapter(OnCircuitBreakerMetadataResolver onCircuitBreakerMetadataResolver) {
+		this(null, (FallbackProvider) null, onCircuitBreakerMetadataResolver);
 	}
 
 	public HystrixCommandEndpointCallHandlerAdapter(Fallback fallback) {
-		this(null, (FallbackProvider) (t) -> fallback);
+		this(null, (FallbackProvider) (t) -> fallback, null);
+	}
+
+	public HystrixCommandEndpointCallHandlerAdapter(Fallback fallback,
+			OnCircuitBreakerMetadataResolver onCircuitBreakerMetadataResolver) {
+		this(null, (FallbackProvider) (t) -> fallback, onCircuitBreakerMetadataResolver);
 	}
 
 	public HystrixCommandEndpointCallHandlerAdapter(FallbackProvider fallback) {
-		this(null, fallback);
+		this(null, fallback, null);
+	}
+
+	public HystrixCommandEndpointCallHandlerAdapter(FallbackProvider fallback,
+			OnCircuitBreakerMetadataResolver onCircuitBreakerMetadataResolver) {
+		this(null, fallback, onCircuitBreakerMetadataResolver);
 	}
 
 	public HystrixCommandEndpointCallHandlerAdapter(HystrixCommand.Setter properties, Fallback fallback) {
@@ -64,8 +80,16 @@ public class HystrixCommandEndpointCallHandlerAdapter<T, O> implements EndpointC
 	}
 
 	public HystrixCommandEndpointCallHandlerAdapter(HystrixCommand.Setter properties, FallbackProvider fallback) {
+		this(properties, fallback, null);
+	}
+
+	private HystrixCommandEndpointCallHandlerAdapter(HystrixCommand.Setter properties, FallbackProvider fallback,
+			OnCircuitBreakerMetadataResolver onCircuitBreakerMetadataResolver) {
 		this.properties = properties;
-		this.fallback = fallback;
+		this.fallback = Optional.ofNullable(fallback).orElseGet(WithFallbackProvider::new);
+		this.hystrixCommandMetadataFactory = Optional.ofNullable(onCircuitBreakerMetadataResolver)
+				.map(HystrixCommandMetadataFactory::new)
+					.orElseGet(HystrixCommandMetadataFactory::new);
 	}
 
 	@Override
@@ -87,6 +111,6 @@ public class HystrixCommandEndpointCallHandlerAdapter<T, O> implements EndpointC
 	@Override
 	public EndpointCallHandler<HystrixCommand<T>, O> adapt(EndpointMethod endpointMethod, EndpointCallHandler<T, O> delegate) {
 		return new HystrixCommandEndpointCallHandler<T, O>(properties, endpointMethod, delegate,
-				Optional.ofNullable(fallback).orElseGet(WithFallbackProvider::new));
+				fallback, hystrixCommandMetadataFactory);
 	}
 }

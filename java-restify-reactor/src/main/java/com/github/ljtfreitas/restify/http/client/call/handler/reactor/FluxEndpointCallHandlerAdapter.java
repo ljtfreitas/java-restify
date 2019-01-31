@@ -29,7 +29,6 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Collection;
 
-import com.github.ljtfreitas.restify.http.client.call.EndpointCall;
 import com.github.ljtfreitas.restify.http.client.call.async.AsyncEndpointCall;
 import com.github.ljtfreitas.restify.http.client.call.handler.EndpointCallHandler;
 import com.github.ljtfreitas.restify.http.client.call.handler.async.AsyncEndpointCallHandler;
@@ -43,10 +42,10 @@ import reactor.core.scheduler.Schedulers;
 
 public class FluxEndpointCallHandlerAdapter<T, O> implements AsyncEndpointCallHandlerAdapter<Flux<T>, Collection<T>, O> {
 
-	public final Scheduler scheduler;
+	private final Scheduler scheduler;
 
 	public FluxEndpointCallHandlerAdapter() {
-		this.scheduler = Schedulers.elastic();
+		this(Schedulers.elastic());
 	}
 
 	public FluxEndpointCallHandlerAdapter(Scheduler scheduler) {
@@ -60,7 +59,7 @@ public class FluxEndpointCallHandlerAdapter<T, O> implements AsyncEndpointCallHa
 
 	@Override
 	public JavaType returnType(EndpointMethod endpointMethod) {
-		return JavaType.of(JavaType.parameterizedType(Collection.class, unwrap(endpointMethod.returnType())));
+		return JavaType.parameterizedType(Collection.class, unwrap(endpointMethod.returnType()));
 	}
 
 	private Type unwrap(JavaType declaredReturnType) {
@@ -85,13 +84,6 @@ public class FluxEndpointCallHandlerAdapter<T, O> implements AsyncEndpointCallHa
 		@Override
 		public JavaType returnType() {
 			return delegate.returnType();
-		}
-
-		@Override
-		public Flux<T> handle(EndpointCall<O> call, Object[] args) {
-			return delegate.handle(call, args)
-					.flatMapMany(Flux::fromIterable)
-						.subscribeOn(scheduler);
 		}
 
 		@Override

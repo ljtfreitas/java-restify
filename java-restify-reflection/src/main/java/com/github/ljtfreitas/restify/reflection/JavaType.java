@@ -25,10 +25,8 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.reflection;
 
-import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.lang.reflect.WildcardType;
 
 public class JavaType {
 
@@ -64,7 +62,7 @@ public class JavaType {
 		return rawClassType().equals(classType);
 	}
 
-	public boolean isAssignableFrom(Class<?> classType) {
+	public boolean assignable(Class<?> classType) {
 		return rawClassType().isAssignableFrom(classType);
 	}
 
@@ -94,15 +92,15 @@ public class JavaType {
 		return "JavaType:[" + type + "]";
 	}
 
-	public static ParameterizedType parameterizedType(Class<?> rawType, Type... typeArguments) {
-		return new SimpleParameterizedType(rawType, null, typeArguments);
+	public static JavaType parameterizedType(Class<?> rawType, Type... typeArguments) {
+		return new JavaType(new SimpleParameterizedType(rawType, null, typeArguments));
 	}
 
-	public static GenericArrayType arrayType(Type componentType) {
-		return new SimpleGenericArrayType(componentType);
+	public static JavaType arrayType(Type componentType) {
+		return new JavaType(new SimpleGenericArrayType(componentType));
 	}
 
-	public static WildcardType wildcardType(Type[] upperBounds, Type[] lowerBounds) {
-		return new SimpleWildcardType(upperBounds, lowerBounds);
+	public static JavaType wildcardType(Type[] upperBounds, Type[] lowerBounds) {
+		return new JavaType(new SimpleWildcardType(upperBounds, lowerBounds));
 	}
 }

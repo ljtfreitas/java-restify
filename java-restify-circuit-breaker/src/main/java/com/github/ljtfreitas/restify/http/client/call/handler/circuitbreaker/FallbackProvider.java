@@ -30,4 +30,5 @@ import java.lang.reflect.Method;
 public interface FallbackProvider {
 
 	Fallback provides(Method javaMethod);
+
 }

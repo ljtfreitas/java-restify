@@ -16,14 +16,14 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import com.github.ljtfreitas.restify.http.client.call.EndpointCall;
 import com.github.ljtfreitas.restify.http.client.call.async.AsyncEndpointCall;
 import com.github.ljtfreitas.restify.http.client.call.handler.EndpointCallHandler;
 import com.github.ljtfreitas.restify.http.client.call.handler.async.AsyncEndpointCallHandler;
 import com.github.ljtfreitas.restify.reflection.JavaType;
 
-import rx.Scheduler;
 import rx.Single;
-import rx.observers.TestSubscriber;
+import rx.observers.AssertableSubscriber;
 import rx.schedulers.Schedulers;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -35,15 +35,14 @@ public class RxJavaSingleEndpointCallHandlerAdapterTest {
 	@Mock
 	private AsyncEndpointCall<String> asyncEndpointCall;
 
+	@Mock
+	private EndpointCall<String> endpointCall;
+	
 	private RxJavaSingleEndpointCallHandlerAdapter<String, String> adapter;
-
-	private Scheduler scheduler;
 
 	@Before
 	public void setup() {
-		scheduler = Schedulers.immediate();
-
-		adapter = new RxJavaSingleEndpointCallHandlerAdapter<>(scheduler);
+		adapter = new RxJavaSingleEndpointCallHandlerAdapter<>(Schedulers.immediate());
 
 		when(delegate.returnType())
 			.thenReturn(JavaType.of(String.class));
@@ -89,13 +88,11 @@ public class RxJavaSingleEndpointCallHandlerAdapterTest {
 
 		assertNotNull(single);
 
-		TestSubscriber<String> subscriber = TestSubscriber.create();
+		AssertableSubscriber<String> subscriber = single.test();
 
-		single.subscribeOn(scheduler).subscribe(subscriber);
-
-		subscriber.assertCompleted();
-		subscriber.assertNoErrors();
-		subscriber.assertValue(result);
+		subscriber.assertCompleted()
+				  .assertNoErrors()
+				  .assertValue(result);
 	}
 
 	@Test
@@ -115,9 +112,7 @@ public class RxJavaSingleEndpointCallHandlerAdapterTest {
 
 		assertNotNull(single);
 
-		TestSubscriber<String> subscriber = TestSubscriber.create();
-
-		single.subscribeOn(scheduler).subscribe(subscriber);
+		AssertableSubscriber<String> subscriber = single.test();
 
 		subscriber.assertError(exception);
 	}
@@ -129,20 +124,21 @@ public class RxJavaSingleEndpointCallHandlerAdapterTest {
 
 		String result = "single result";
 
-		when(delegate.handle(any(), anyVararg()))
+		when(endpointCall.execute())
 			.thenReturn(result);
+		
+		when(delegate.handle(any(), anyVararg()))
+			.then(i -> i.getArgumentAt(0, EndpointCall.class).execute());
 
-		Single<String> single = handler.handle(asyncEndpointCall, null);
+		Single<String> single = handler.handle(endpointCall, null);
 
 		assertNotNull(single);
 
-		TestSubscriber<String> subscriber = TestSubscriber.create();
+		AssertableSubscriber<String> subscriber = single.test();
 
-		single.subscribeOn(scheduler).subscribe(subscriber);
-
-		subscriber.assertCompleted();
-		subscriber.assertNoErrors();
-		subscriber.assertValue(result);
+		subscriber.assertCompleted()
+				  .assertNoErrors()
+				  .assertValue(result);
 	}
 	
 	interface SomeType {

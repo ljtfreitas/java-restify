@@ -50,7 +50,7 @@ public class RetryableEndpointRequestExecutorTest {
 	@Test
 	public void shouldWrapEndpointRequestExecutorOnLoop() {
 		when(delegate.execute(notNull(EndpointRequest.class)))
-			.thenReturn(new EndpointResponse<>(StatusCode.of(HttpStatusCode.OK), "success"));
+			.thenReturn(EndpointResponse.of(StatusCode.of(HttpStatusCode.OK), "success"));
 
 		RetryableEndpointRequest request = new RetryableEndpointRequest();
 
@@ -132,7 +132,7 @@ public class RetryableEndpointRequestExecutorTest {
 		when(delegate.execute(notNull(EndpointRequest.class)))
 			.thenThrow(new EndpointResponseInternalServerErrorException("1st attempt...", Headers.empty(), "1st error..."))
 			.thenThrow(new EndpointResponseUnauthorizedException("2st attempt...", Headers.empty(), "2st error..."))
-			.thenReturn(new EndpointResponse<>(StatusCode.of(HttpStatusCode.OK), "success"));;
+			.thenReturn(EndpointResponse.of(StatusCode.of(HttpStatusCode.OK), "success"));;
 
 		RetryableEndpointRequest request = new RetryableEndpointRequest(retry);
 
@@ -217,7 +217,7 @@ public class RetryableEndpointRequestExecutorTest {
 		when(delegate.execute(notNull(EndpointRequest.class)))
 			.thenThrow(new EndpointResponseInternalServerErrorException("1st attempt...", Headers.empty(), "1st error..."))
 			.thenThrow(unretryableException)
-			.thenReturn(new EndpointResponse<>(StatusCode.of(HttpStatusCode.OK), "success"));;
+			.thenReturn(EndpointResponse.of(StatusCode.of(HttpStatusCode.OK), "success"));;
 
 		RetryableEndpointRequest request = new RetryableEndpointRequest(retry);
 
@@ -298,7 +298,7 @@ public class RetryableEndpointRequestExecutorTest {
 		when(delegate.execute(notNull(EndpointRequest.class)))
 			.thenThrow(new EndpointResponseInternalServerErrorException("1st attempt...", Headers.empty(), "1st error..."))
 			.thenThrow(new EndpointResponseInternalServerErrorException("2st attempt...", Headers.empty(), "2st error..."))
-			.thenReturn(new EndpointResponse<>(StatusCode.of(HttpStatusCode.OK), "success"));;
+			.thenReturn(EndpointResponse.of(StatusCode.of(HttpStatusCode.OK), "success"));;
 
 		RetryableEndpointRequest request = new RetryableEndpointRequest(retry);
 
@@ -383,7 +383,7 @@ public class RetryableEndpointRequestExecutorTest {
 		when(delegate.execute(notNull(EndpointRequest.class)))
 			.thenThrow(new EndpointResponseInternalServerErrorException("1st attempt...", Headers.empty(), "1st error..."))
 			.thenThrow(unretryableException)
-			.thenReturn(new EndpointResponse<>(StatusCode.of(HttpStatusCode.OK), "success"));;
+			.thenReturn(EndpointResponse.of(StatusCode.of(HttpStatusCode.OK), "success"));;
 
 		RetryableEndpointRequest request = new RetryableEndpointRequest(retry);
 
@@ -464,7 +464,7 @@ public class RetryableEndpointRequestExecutorTest {
 		when(delegate.execute(notNull(EndpointRequest.class)))
 			.thenThrow(new EndpointResponseConflictException("1st attempt...", Headers.empty(), "1st error..."))
 			.thenThrow(new EndpointResponseConflictException("2st attempt...", Headers.empty(), "2st error..."))
-			.thenReturn(new EndpointResponse<>(StatusCode.of(HttpStatusCode.OK), "success"));;
+			.thenReturn(EndpointResponse.of(StatusCode.of(HttpStatusCode.OK), "success"));;
 
 		RetryableEndpointRequest request = new RetryableEndpointRequest(retry);
 
@@ -549,7 +549,7 @@ public class RetryableEndpointRequestExecutorTest {
 		when(delegate.execute(notNull(EndpointRequest.class)))
 			.thenThrow(new EndpointResponseConflictException("1st attempt...", Headers.empty(), "1st error..."))
 			.thenThrow(unretryableException)
-			.thenReturn(new EndpointResponse<>(StatusCode.of(HttpStatusCode.OK), "success"));;
+			.thenReturn(EndpointResponse.of(StatusCode.of(HttpStatusCode.OK), "success"));;
 
 		RetryableEndpointRequest request = new RetryableEndpointRequest(retry);
 
@@ -630,7 +630,7 @@ public class RetryableEndpointRequestExecutorTest {
 		when(delegate.execute(notNull(EndpointRequest.class)))
 			.thenThrow(new RuntimeException(new IOException("1st attempt...")))
 			.thenThrow(new RuntimeException(new UnknownHostException("2st attempt...")))
-			.thenReturn(new EndpointResponse<>(StatusCode.of(HttpStatusCode.OK), "success"));;
+			.thenReturn(EndpointResponse.of(StatusCode.of(HttpStatusCode.OK), "success"));;
 
 		RetryableEndpointRequest request = new RetryableEndpointRequest(retry);
 
@@ -714,7 +714,7 @@ public class RetryableEndpointRequestExecutorTest {
 		when(delegate.execute(notNull(EndpointRequest.class)))
 			.thenThrow(new RuntimeException(new InterruptedIOException("1st attempt...")))
 			.thenThrow(unretryableException)
-			.thenReturn(new EndpointResponse<>(StatusCode.of(HttpStatusCode.OK), "success"));;
+			.thenReturn(EndpointResponse.of(StatusCode.of(HttpStatusCode.OK), "success"));;
 
 		RetryableEndpointRequest request = new RetryableEndpointRequest(retry);
 
@@ -795,7 +795,7 @@ public class RetryableEndpointRequestExecutorTest {
 		when(delegate.execute(notNull(EndpointRequest.class)))
 			.thenThrow(new RuntimeException(new SocketException("1st attempt...")))
 			.thenThrow(new RuntimeException(new SocketException("2st attempt...")))
-			.thenReturn(new EndpointResponse<>(StatusCode.of(HttpStatusCode.OK), "success"));;
+			.thenReturn(EndpointResponse.of(StatusCode.of(HttpStatusCode.OK), "success"));;
 
 		RetryableEndpointRequest request = new RetryableEndpointRequest(retry);
 
@@ -879,7 +879,7 @@ public class RetryableEndpointRequestExecutorTest {
 		when(delegate.execute(notNull(EndpointRequest.class)))
 			.thenThrow(new RuntimeException(new SocketException("1st attempt...")))
 			.thenThrow(unretryableException)
-			.thenReturn(new EndpointResponse<>(StatusCode.of(HttpStatusCode.OK), "success"));;
+			.thenReturn(EndpointResponse.of(StatusCode.of(HttpStatusCode.OK), "success"));;
 
 		RetryableEndpointRequest request = new RetryableEndpointRequest(retry);
 
@@ -900,7 +900,7 @@ public class RetryableEndpointRequestExecutorTest {
 		when(delegate.execute(notNull(EndpointRequest.class)))
 			.thenThrow(new EndpointResponseInternalServerErrorException("1st attempt...", Headers.empty(), "1st error..."))
 			.thenThrow(new EndpointResponseUnauthorizedException("2st attempt...", Headers.empty(), "2st error..."))
-			.thenReturn(new EndpointResponse<>(StatusCode.of(HttpStatusCode.OK), "success"));;
+			.thenReturn(EndpointResponse.of(StatusCode.of(HttpStatusCode.OK), "success"));;
 
 		RetryableEndpointRequest request = new RetryableEndpointRequest();
 

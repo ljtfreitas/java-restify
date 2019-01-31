@@ -26,8 +26,11 @@
 package com.github.ljtfreitas.restify.http.client.message.converter.form.multipart;
 
 import java.io.IOException;
+import java.io.OutputStream;
+import java.io.UncheckedIOException;
 import java.nio.charset.Charset;
 
+import com.github.ljtfreitas.restify.http.client.message.io.InputStreamContent;
 import com.github.ljtfreitas.restify.http.contract.MultipartFile;
 
 class MultipartFileFieldSerializer extends BaseMultipartFieldSerializer<MultipartFile> {
@@ -48,13 +51,14 @@ class MultipartFileFieldSerializer extends BaseMultipartFieldSerializer<Multipar
 	}
 
 	@Override
-	protected byte[] valueOf(MultipartField<MultipartFile> field, Charset charset) {
+	protected void writeContent(MultipartField<MultipartFile> field, Charset charset, OutputStream output)
+			throws IOException {
 		try {
-			return new InputStreamMultipartFieldReader(field.value().content()).read();
-		} catch (IOException e) {
+			InputStreamContent content = new InputStreamContent(field.value().content());
+			content.transferTo(output);
+		} catch (UncheckedIOException e) {
 			throw new IllegalArgumentException(
 					"Cannot read data of parameter [" + field.name() + "] (MultipartFileField)", e);
 		}
 	}
-
 }

@@ -27,5 +27,5 @@ package com.github.ljtfreitas.restify.http.client.call.handler.circuitbreaker;
 
 public interface FallbackResult<T> {
 
-	T get() throws Exception;
+	T get() ;
 }

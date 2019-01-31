@@ -54,7 +54,7 @@ public class MultipartFormParametersMessageWriter extends BaseMultipartFormMessa
 
 		Map<String, Object> bodyAsMap = new LinkedHashMap<>();
 
-		body.all().forEach(part -> bodyAsMap.put(part.name(), part.values()));
+		body.forEach(part -> bodyAsMap.put(part.name(), part.values()));
 
 		mapMessageConverter.doWrite(boundary, bodyAsMap, httpRequestMessage);
 	}

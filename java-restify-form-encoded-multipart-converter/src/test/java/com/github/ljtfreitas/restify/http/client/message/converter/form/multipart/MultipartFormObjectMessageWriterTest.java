@@ -25,8 +25,8 @@ import com.github.ljtfreitas.restify.http.client.message.request.BufferedByteArr
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
 import com.github.ljtfreitas.restify.http.contract.Form;
 import com.github.ljtfreitas.restify.http.contract.Form.Field;
-import com.github.ljtfreitas.restify.http.contract.MultipartForm;
-import com.github.ljtfreitas.restify.http.contract.MultipartForm.MultipartField;
+import com.github.ljtfreitas.restify.http.contract.MultipartField;
+import com.github.ljtfreitas.restify.http.contract.Notation;
 
 @RunWith(MockitoJUnitRunner.class)
 public class MultipartFormObjectMessageWriterTest {
@@ -120,7 +120,7 @@ public class MultipartFormObjectMessageWriterTest {
 
 		String body = "------myBoundary"
 			 + "\r\n"
-			 + "Content-Disposition: form-data; name=\"form.name\""
+			 + "Content-Disposition: form-data; name=\"form[name]\""
 			 + "\r\n"
 			 + "Content-Type: text/plain"
 			 + "\r\n"
@@ -129,7 +129,7 @@ public class MultipartFormObjectMessageWriterTest {
 			 + "\r\n"
 			 + "------myBoundary"
 			 + "\r\n"
-			 + "Content-Disposition: form-data; name=\"form.file\"; filename=\"" + file.getName() + "\""
+			 + "Content-Disposition: form-data; name=\"form[file]\"; filename=\"" + file.getName() + "\""
 			 + "\r\n"
 			 + "Content-Type: text/plain"
 			 + "\r\n"
@@ -140,7 +140,7 @@ public class MultipartFormObjectMessageWriterTest {
 			 + "\r\n"
 			 + "------myBoundary"
 			 + "\r\n"
-			 + "Content-Disposition: form-data; name=\"form.whatever.nested.name\""
+			 + "Content-Disposition: form-data; name=\"form[whatever][nested][name]\""
 			 + "\r\n"
 			 + "Content-Type: text/plain"
 			 + "\r\n"
@@ -149,7 +149,7 @@ public class MultipartFormObjectMessageWriterTest {
 			 + "\r\n"
 			 + "------myBoundary"
 			 + "\r\n"
-			 + "Content-Disposition: form-data; name=\"form.whatever.nested.age\""
+			 + "Content-Disposition: form-data; name=\"form[whatever][nested][age]\""
 			 + "\r\n"
 			 + "Content-Type: text/plain"
 			 + "\r\n"
@@ -158,7 +158,7 @@ public class MultipartFormObjectMessageWriterTest {
 			 + "\r\n"
 			 + "------myBoundary"
 			 + "\r\n"
-			 + "Content-Disposition: form-data; name=\"form.whatever.nested.values[0]\""
+			 + "Content-Disposition: form-data; name=\"form[whatever][nested][values][0]\""
 			 + "\r\n"
 			 + "Content-Type: text/plain"
 			 + "\r\n"
@@ -167,7 +167,7 @@ public class MultipartFormObjectMessageWriterTest {
 			 + "\r\n"
 			 + "------myBoundary"
 			 + "\r\n"
-			 + "Content-Disposition: form-data; name=\"form.whatever.nested.values[1]\""
+			 + "Content-Disposition: form-data; name=\"form[whatever][nested][values][1]\""
 			 + "\r\n"
 			 + "Content-Type: text/plain"
 			 + "\r\n"
@@ -176,7 +176,7 @@ public class MultipartFormObjectMessageWriterTest {
 			 + "\r\n"
 			 + "------myBoundary"
 			 + "\r\n"
-			 + "Content-Disposition: form-data; name=\"form.other.timestamp\""
+			 + "Content-Disposition: form-data; name=\"form[other][timestamp]\""
 			 + "\r\n"
 			 + "Content-Type: text/plain"
 			 + "\r\n"
@@ -185,7 +185,7 @@ public class MultipartFormObjectMessageWriterTest {
 			 + "\r\n"
 			 + "------myBoundary"
 			 + "\r\n"
-			 + "Content-Disposition: form-data; name=\"form.others[0].timestamp\""
+			 + "Content-Disposition: form-data; name=\"form[others][0][timestamp]\""
 			 + "\r\n"
 			 + "Content-Type: text/plain"
 			 + "\r\n"
@@ -258,7 +258,7 @@ public class MultipartFormObjectMessageWriterTest {
 		assertEquals(body, new String(output.asBytes()));
 	}
 
-	@MultipartForm
+	@Form
 	static class MyMultipartFormObject {
 
 		@Field
@@ -268,7 +268,7 @@ public class MultipartFormObjectMessageWriterTest {
 		File file;
 	}
 
-	@MultipartForm("form")
+	@Form(value = "form", notation = @Notation(prefix = "[", suffix = "]", delimiter = ""))
 	static class ComplexMultipartFormObject {
 
 		@Field
@@ -287,7 +287,7 @@ public class MultipartFormObjectMessageWriterTest {
 		Collection<OtherFormObject> others;
 	}
 
-	@Form("nested")
+	@Form(value = "nested")
 	static class NestedFormObject {
 
 		@Field
@@ -308,7 +308,7 @@ public class MultipartFormObjectMessageWriterTest {
 
 	}
 
-	@MultipartForm
+	@Form
 	static class MyContentFormObject {
 
 		@MultipartField(contentType = "application/json")

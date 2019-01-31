@@ -33,12 +33,10 @@ import static com.github.ljtfreitas.restify.http.client.call.handler.circuitbrea
 import static com.github.ljtfreitas.restify.http.client.call.handler.circuitbreaker.CircuitBreakerProperty.THREAD_POOL_METRICS_ROLLING_STATS_TIME_IN_MILLISECONDS;
 import static com.github.ljtfreitas.restify.http.client.call.handler.circuitbreaker.CircuitBreakerProperty.THREAD_POOL_QUEUE_SIZE_REJECTION_THRESHOLD;
 
-import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import com.github.ljtfreitas.restify.http.client.call.handler.circuitbreaker.CircuitBreakerProperty;
 import com.netflix.hystrix.HystrixThreadPoolProperties;
 
 class HystrixThreadPoolPropertyWriter {
@@ -46,16 +44,16 @@ class HystrixThreadPoolPropertyWriter {
 	private static final Map<String, HystrixPropertyWriter<HystrixThreadPoolProperties.Setter>> HYSTRIX_THREAD_POOL_PROPERTIES_SETTERS
 		= new LinkedHashMap<>();
 
-	private final CircuitBreakerProperty[] properties;
+	private final Map<String, String> properties;
 
-	public HystrixThreadPoolPropertyWriter(CircuitBreakerProperty[] properties) {
+	public HystrixThreadPoolPropertyWriter(Map<String, String> properties) {
 		this.properties = properties;
 	}
 
 	public void applyTo(HystrixThreadPoolProperties.Setter hystrixtThreadPoolProperties) {
-		Arrays.stream(properties)
-			.forEach(p -> Optional.ofNullable(HYSTRIX_THREAD_POOL_PROPERTIES_SETTERS.get(p.name()))
-					.ifPresent(s -> s.set(hystrixtThreadPoolProperties, p.value())));
+		properties.entrySet().stream()
+			.forEach(property -> Optional.ofNullable(HYSTRIX_THREAD_POOL_PROPERTIES_SETTERS.get(property.getKey()))
+					.ifPresent(s -> s.set(hystrixtThreadPoolProperties, property.getValue())));
 	}
 
 	static {

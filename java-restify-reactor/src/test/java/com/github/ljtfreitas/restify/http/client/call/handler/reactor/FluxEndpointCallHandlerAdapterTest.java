@@ -25,7 +25,6 @@ import com.github.ljtfreitas.restify.http.client.call.handler.async.AsyncEndpoin
 import com.github.ljtfreitas.restify.reflection.JavaType;
 
 import reactor.core.publisher.Flux;
-import reactor.core.scheduler.Scheduler;
 import reactor.core.scheduler.Schedulers;
 import reactor.test.StepVerifier;
 
@@ -40,16 +39,12 @@ public class FluxEndpointCallHandlerAdapterTest {
 
 	private FluxEndpointCallHandlerAdapter<String, Collection<String>> adapter;
 
-	private Scheduler scheduler;
-
 	private String expectedAsyncResult;
 
 	@SuppressWarnings("unchecked")
 	@Before
 	public void setup() {
-		scheduler = Schedulers.single();
-
-		adapter = new FluxEndpointCallHandlerAdapter<>(scheduler);
+		adapter = new FluxEndpointCallHandlerAdapter<>(Schedulers.single());
 
 		expectedAsyncResult = "flux result";
 
@@ -72,12 +67,12 @@ public class FluxEndpointCallHandlerAdapterTest {
 
 	@Test
 	public void shouldReturnCollectionWithArgumentTypeOfFlux() throws Exception {
-		assertEquals(JavaType.of(JavaType.parameterizedType(Collection.class, String.class)), adapter.returnType(new SimpleEndpointMethod(SomeType.class.getMethod("flux"))));
+		assertEquals(JavaType.parameterizedType(Collection.class, String.class), adapter.returnType(new SimpleEndpointMethod(SomeType.class.getMethod("flux"))));
 	}
 
 	@Test
 	public void shouldReturnCollectionWithObjectTypeWhenFluxIsNotParameterized() throws Exception {
-		assertEquals(JavaType.of(JavaType.parameterizedType(Collection.class, Object.class)), adapter.returnType(new SimpleEndpointMethod(SomeType.class.getMethod("dumbFlux"))));
+		assertEquals(JavaType.parameterizedType(Collection.class, Object.class), adapter.returnType(new SimpleEndpointMethod(SomeType.class.getMethod("dumbFlux"))));
 	}
 
 	@Test

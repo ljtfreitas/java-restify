@@ -42,7 +42,7 @@ public class EndpointResponseException extends HttpMessageReadException {
 
 	public EndpointResponseException(String message, StatusCode statusCode, Headers headers, String body) {
 		super(message);
-		this.response = new EndpointResponse<>(statusCode, headers, body);
+		this.response = EndpointResponse.of(statusCode, body, headers);
 	}
 
 	public StatusCode status() {

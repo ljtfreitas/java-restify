@@ -35,6 +35,7 @@ import com.github.ljtfreitas.restify.http.client.call.EndpointMethodExecutor;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethod;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointType;
 import com.github.ljtfreitas.restify.reflection.JavaDefaultMethodExecutor;
+import com.github.ljtfreitas.restify.util.Try;
 
 public class RestifyProxyHandler implements InvocationHandler {
 
@@ -66,12 +67,10 @@ public class RestifyProxyHandler implements InvocationHandler {
 	}
 
 	private Object executeObjectMethod(Method method, Object proxy, Object[] args) {
-		try {
-			return method.invoke(this, args);
-		} catch (Exception e) {
-			throw new ProxyMethodException("Error on execution Object method [" + method + "], "
-					+ "with method args " + Arrays.toString(args) + ". Method " + method + " is a Object method?", e);
-		}
+		return Try.of(() -> method.invoke(this, args))
+					.error(e -> new ProxyMethodException("Error on execution Object method [" + method + "], "
+							+ "with method args " + Arrays.toString(args) + ". Method " + method + " is a Object method?", e))
+					.get();
 	}
 
 	@Override

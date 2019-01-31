@@ -28,6 +28,7 @@ package com.github.ljtfreitas.restify.http.netflix.client.call.handler.hystrix;
 import java.util.concurrent.Future;
 
 import com.github.ljtfreitas.restify.http.client.call.handler.circuitbreaker.FallbackResult;
+import com.github.ljtfreitas.restify.util.Try;
 import com.netflix.hystrix.HystrixCommand;
 import com.netflix.hystrix.HystrixObservableCommand;
 
@@ -42,7 +43,7 @@ class HystrixFallbackResult<T> implements FallbackResult<T> {
 	}
 
 	@Override
-	public T get() throws Exception {
+	public T get() {
 		T value = delegate.get();
 
 		if (value instanceof HystrixCommand) {
@@ -52,7 +53,7 @@ class HystrixFallbackResult<T> implements FallbackResult<T> {
 			return asObservableCommand(value).toObservable().toBlocking().singleOrDefault(null);
 
 		} else if (value instanceof Future) {
-			return asFuture(value).get();
+			return Try.of(() -> asFuture(value).get()).get();
 
 		} else if (value instanceof Observable) {
 			return asObservable(value).toBlocking().singleOrDefault(null);

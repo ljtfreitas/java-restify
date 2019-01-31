@@ -6,13 +6,15 @@ import com.netflix.hystrix.HystrixCommand;
 import com.netflix.hystrix.HystrixCommand.Setter;
 import com.netflix.hystrix.HystrixCommandGroupKey;
 
-@Service
-public class FallbackBadApi {
+@Service @Fallback
+public class FallbackBadApi implements BadApi {
 
+	@Override
 	public String get() {
 		return "this is BadApi fallback!";
 	}
 
+	@Override
 	public HystrixCommand<String> getAsHystrixCommand() {
 		Setter hystrixMetadata = HystrixCommand.Setter
 				.withGroupKey(HystrixCommandGroupKey.Factory.asKey("FallbackUnknownApi"));

@@ -37,6 +37,7 @@ import com.github.ljtfreitas.restify.http.client.message.Headers;
 import com.github.ljtfreitas.restify.http.client.message.request.BufferedByteArrayHttpRequestBody;
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestBody;
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
+import com.github.ljtfreitas.restify.http.client.message.request.StreamableHttpRequestBody;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
 import com.github.ljtfreitas.restify.http.client.request.HttpClientRequest;
 import com.github.ljtfreitas.restify.http.client.request.async.AsyncHttpClientRequest;
@@ -53,14 +54,14 @@ public class AsyncRibbonHttpClientRequest extends BaseRibbonHttpClientRequest im
 	private final EndpointRequest endpointRequest;
 	private final AsyncRibbonLoadBalancedClient ribbonLoadBalancedClient;
 	private final Charset charset;
-	private final HttpRequestBody body;
+	private final StreamableHttpRequestBody body;
 
 	public AsyncRibbonHttpClientRequest(EndpointRequest endpointRequest, AsyncRibbonLoadBalancedClient ribbonLoadBalancedClient, Charset charset) {
 		this(endpointRequest, ribbonLoadBalancedClient, charset, new BufferedByteArrayHttpRequestBody(charset));
 	}
 
 	private AsyncRibbonHttpClientRequest(EndpointRequest endpointRequest, AsyncRibbonLoadBalancedClient ribbonLoadBalancedClient, Charset charset,
-			HttpRequestBody body) {
+			StreamableHttpRequestBody body) {
 		super(endpointRequest);
 		this.endpointRequest = endpointRequest;
 		this.ribbonLoadBalancedClient = ribbonLoadBalancedClient;
@@ -103,8 +104,9 @@ public class AsyncRibbonHttpClientRequest extends BaseRibbonHttpClientRequest im
 	public void writeTo(HttpClientRequest httpRequestMessage) {
 		endpointRequest.body()
 			.ifPresent(b -> {
-				body.writeTo(httpRequestMessage.body().output());
-				Try.withResources(httpRequestMessage.body()::output).apply(OutputStream::flush);
+				Try.withResources(httpRequestMessage.body()::output)
+					.apply(o -> body.writeTo(o))
+					.apply(OutputStream::flush);
 			});
 	}
 

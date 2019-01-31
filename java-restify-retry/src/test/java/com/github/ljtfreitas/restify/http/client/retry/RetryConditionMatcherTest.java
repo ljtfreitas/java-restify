@@ -89,8 +89,7 @@ public class RetryConditionMatcherTest {
 
 	@Test
 	public void shouldBeRetryableForEndpointResponseWhenHasConfigured() {
-		EndpointResponse<String> response = new EndpointResponse<>(StatusCode.of(429), new Headers(Header.of("X-Header-Retry-2", "retry!")),
-				"bla");
+		EndpointResponse<String> response = EndpointResponse.of(StatusCode.of(429), "bla", new Headers(Header.of("X-Header-Retry-2", "retry!")));
 		EndpointResponseException exception = new EndpointResponseException("whatever error", response);
 
 		assertTrue(matcher.match(exception));

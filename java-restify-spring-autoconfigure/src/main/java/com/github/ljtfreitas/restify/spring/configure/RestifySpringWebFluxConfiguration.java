@@ -52,7 +52,7 @@ public class RestifySpringWebFluxConfiguration {
 		return Optional.ofNullable(webClientProvider.getIfAvailable())
 			.map(webClient -> new WebClientEndpointRequestExecutor(webClient))
 				.orElseGet(() -> Optional.ofNullable(webClientBuilderProvider.getIfAvailable())
-						.map(builder -> new WebClientEndpointRequestExecutor(builder))
+						.map(WebClientEndpointRequestExecutor::new)
 							.orElseGet(WebClientEndpointRequestExecutor::new));
 	}
 

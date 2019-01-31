@@ -42,7 +42,7 @@ class HystrixObservableFallbackResult<T> implements FallbackResult<Observable<T>
 	}
 
 	@Override
-	public Observable<T> get() throws Exception {
+	public Observable<T> get() {
 		T value = delegate.get();
 
 		if (value instanceof HystrixCommand) {
@@ -57,12 +57,20 @@ class HystrixObservableFallbackResult<T> implements FallbackResult<Observable<T>
 		} else if (value instanceof Observable) {
 			return asObservable(value);
 
+		} else if (value instanceof Iterable) {
+			return Observable.from(asIterable(value));
+
 		} else if (value == null) {
 			return Observable.empty();
 
 		} else return Observable.just(value);
 	}
 
+
+	@SuppressWarnings("unchecked")
+	private Iterable<T> asIterable(T value) {
+		return (Iterable<T>) value;
+	}
 
 	@SuppressWarnings("unchecked")
 	private HystrixCommand<T> asCommand(T value) {
