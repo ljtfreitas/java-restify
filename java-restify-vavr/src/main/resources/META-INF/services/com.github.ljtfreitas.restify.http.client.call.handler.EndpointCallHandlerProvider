@@ -1,0 +1,13 @@
+com.github.ljtfreitas.restify.http.client.call.handler.vavr.ArrayEndpointCallHandlerAdapter
+com.github.ljtfreitas.restify.http.client.call.handler.vavr.EitherWithStringEndpointCallHandlerAdapter
+com.github.ljtfreitas.restify.http.client.call.handler.vavr.EitherWithThrowableEndpointCallHandlerAdapter
+com.github.ljtfreitas.restify.http.client.call.handler.vavr.FutureEndpointCallHandlerAdapter
+com.github.ljtfreitas.restify.http.client.call.handler.vavr.IndexedSeqEndpointCallHandlerAdapter
+com.github.ljtfreitas.restify.http.client.call.handler.vavr.LazyEndpointCallHandlerAdapter
+com.github.ljtfreitas.restify.http.client.call.handler.vavr.ListEndpointCallHandlerAdapter
+com.github.ljtfreitas.restify.http.client.call.handler.vavr.OptionEndpointCallHandlerFactory
+com.github.ljtfreitas.restify.http.client.call.handler.vavr.QueueEndpointCallHandlerAdapter
+com.github.ljtfreitas.restify.http.client.call.handler.vavr.SeqEndpointCallHandlerAdapter
+com.github.ljtfreitas.restify.http.client.call.handler.vavr.SetEndpointCallHandlerAdapter
+com.github.ljtfreitas.restify.http.client.call.handler.vavr.TraversableEndpointCallHandlerAdapter
+com.github.ljtfreitas.restify.http.client.call.handler.vavr.TryEndpointCallHandlerAdapter

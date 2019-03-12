@@ -24,7 +24,7 @@
 		<module>java-restify-reflection</module>
 		<module>java-restify-contract</module>
 		<module>java-restify-call-handler</module>
-		
+
 		<module>java-restify-http-client</module>
 		<module>java-restify-http-client-apache-httpclient</module>
 		<module>java-restify-http-client-okhttp</module>
@@ -38,6 +38,7 @@
 		<module>java-restify-jsoup</module>
 		<module>java-restify-reactor</module>
 		<module>java-restify-reactor-hystrix</module>
+		<module>java-restify-vavr</module>
 
 		<module>java-restify-http-message</module>
 		<module>java-restify-wildcard-converter</module>
@@ -65,7 +66,7 @@
 		<module>java-restify-netflix-spring-autoconfigure</module>
 		<module>java-restify-netflix-spring-starter</module>
 
-		<module>java-restify-cdi</module>		
+		<module>java-restify-cdi</module>
 		<module>java-restify-jaxrs-contract</module>
 
 		<module>java-restify-hateoas</module>
