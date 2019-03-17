@@ -27,11 +27,13 @@ package com.github.ljtfreitas.restify.spring.netflix.autoconfigure.ribbon;
 
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.cloud.client.loadbalancer.LoadBalanced;
+import org.springframework.cloud.client.loadbalancer.LoadBalancerClient;
 import org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoadBalancerAutoConfiguration;
 import org.springframework.cloud.netflix.ribbon.RibbonAutoConfiguration;
 import org.springframework.context.annotation.Bean;
@@ -48,6 +50,7 @@ import com.netflix.loadbalancer.ILoadBalancer;
 @Configuration
 @ConditionalOnProperty(value = "restify.ribbon.enabled")
 @ConditionalOnClass(ILoadBalancer.class)
+@ConditionalOnBean(LoadBalancerClient.class)
 @AutoConfigureBefore(RestifyAutoConfiguration.class)
 @AutoConfigureAfter(RibbonAutoConfiguration.class)
 public class RestifyRibbonAutoConfiguration {

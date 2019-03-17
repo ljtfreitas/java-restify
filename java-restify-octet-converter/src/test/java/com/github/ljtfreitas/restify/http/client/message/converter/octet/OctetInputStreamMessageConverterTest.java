@@ -18,9 +18,9 @@ import org.mockito.Answers;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
-import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestBody;
 import com.github.ljtfreitas.restify.http.client.message.request.BufferedByteArrayHttpRequestBody;
+import com.github.ljtfreitas.restify.http.client.message.request.BufferedHttpRequestBody;
+import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
 import com.github.ljtfreitas.restify.http.client.message.response.HttpResponseMessage;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -78,7 +78,7 @@ public class OctetInputStreamMessageConverterTest {
 	public void shouldWriteInputStreamBodyToOutputStream() {
 		String body = "request body";
 
-		HttpRequestBody buffer = new BufferedByteArrayHttpRequestBody();
+		BufferedHttpRequestBody buffer = new BufferedByteArrayHttpRequestBody();
 
 		when(request.body()).thenReturn(buffer);
 

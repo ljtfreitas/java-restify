@@ -27,7 +27,6 @@ package com.github.ljtfreitas.restify.http.client.message.converter.form.multipa
 
 import java.util.Collection;
 
-import com.github.ljtfreitas.restify.http.client.message.converter.form.multipart.MultipartFormObjectHolder.MultipartFormObjectFieldHolder;
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
 
 class MultipartFormObjectFieldSerializer implements MultipartFieldSerializer<MultipartFormObjectFieldHolder> {

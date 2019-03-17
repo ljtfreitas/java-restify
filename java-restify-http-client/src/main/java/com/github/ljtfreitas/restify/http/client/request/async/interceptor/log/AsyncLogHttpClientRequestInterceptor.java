@@ -25,26 +25,12 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.request.async.interceptor.log;
 
-import java.net.URI;
-import java.nio.charset.Charset;
-import java.util.concurrent.CompletionStage;
-import java.util.logging.Logger;
-
-import com.github.ljtfreitas.restify.http.client.HttpClientException;
-import com.github.ljtfreitas.restify.http.client.message.Header;
-import com.github.ljtfreitas.restify.http.client.message.Headers;
-import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestBody;
-import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
 import com.github.ljtfreitas.restify.http.client.request.HttpClientRequest;
 import com.github.ljtfreitas.restify.http.client.request.async.AsyncHttpClientRequest;
 import com.github.ljtfreitas.restify.http.client.request.async.interceptor.AsyncHttpClientRequestInterceptor;
-import com.github.ljtfreitas.restify.http.client.request.interceptor.log.CurlPrinter;
 import com.github.ljtfreitas.restify.http.client.request.interceptor.log.LogHttpClientRequestInterceptor;
-import com.github.ljtfreitas.restify.http.client.response.HttpClientResponse;
 
 public class AsyncLogHttpClientRequestInterceptor implements AsyncHttpClientRequestInterceptor {
-
-	private static final Logger log = Logger.getLogger(AsyncLogHttpClientRequestInterceptor.class.getCanonicalName());
 
 	private final LogHttpClientRequestInterceptor delegate = new LogHttpClientRequestInterceptor();
 
@@ -55,65 +41,6 @@ public class AsyncLogHttpClientRequestInterceptor implements AsyncHttpClientRequ
 
 	@Override
 	public AsyncHttpClientRequest interceptsAsync(AsyncHttpClientRequest request) {
-		return new AsyncLogHttpClientRequest(request);
-	}
-
-	private class AsyncLogHttpClientRequest implements AsyncHttpClientRequest {
-
-		private final AsyncHttpClientRequest source;
-
-		private AsyncLogHttpClientRequest(AsyncHttpClientRequest source) {
-			this.source = source;
-		}
-
-		@Override
-		public URI uri() {
-			return source.uri();
-		}
-
-		@Override
-		public String method() {
-			return source.method();
-		}
-
-		@Override
-		public HttpRequestBody body() {
-			return source.body();
-		}
-
-		@Override
-		public Charset charset() {
-			return source.charset();
-		}
-
-		@Override
-		public HttpRequestMessage replace(Header header) {
-			return source.replace(header);
-		}
-
-		@Override
-		public Headers headers() {
-			return source.headers();
-		}
-
-		@Override
-		public HttpClientResponse execute() throws HttpClientException {
-			return source.execute();
-		}
-
-		@Override
-		public CompletionStage<HttpClientResponse> executeAsync() throws HttpClientException {
-			CurlPrinter printer = new CurlPrinter();
-
-			log.info(printer.print(source));
-
-			CompletionStage<HttpClientResponse> responseAsFuture = source.executeAsync();
-
-			return responseAsFuture.thenApplyAsync(response -> {
-				log.info(printer.print(response));
-
-				return response;
-			});
-		}
+		return new AsyncLoggableHttpClientRequest(request);
 	}
 }

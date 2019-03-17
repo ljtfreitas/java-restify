@@ -3,9 +3,12 @@ package com.github.ljtfreitas.restify.http.netflix.client.call.handler.hystrix;
 import static org.hamcrest.Matchers.empty;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertThat;
+import static org.mockito.Matchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Collections;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 
@@ -20,6 +23,8 @@ import org.mockito.runners.MockitoJUnitRunner;
 import com.github.ljtfreitas.restify.http.client.call.async.AsyncEndpointCall;
 import com.github.ljtfreitas.restify.http.client.call.handler.async.AsyncEndpointCallHandler;
 import com.github.ljtfreitas.restify.http.client.call.handler.circuitbreaker.Fallback;
+import com.github.ljtfreitas.restify.http.client.call.handler.circuitbreaker.OnCircuitBreakerMetadata;
+import com.github.ljtfreitas.restify.http.client.call.handler.circuitbreaker.OnCircuitBreakerMetadataResolver;
 import com.github.ljtfreitas.restify.http.client.call.handler.circuitbreaker.WithFallback;
 import com.github.ljtfreitas.restify.reflection.JavaType;
 import com.netflix.hystrix.HystrixCommand;
@@ -38,6 +43,12 @@ public class HystrixObservableCommandFallbackEndpointCallHandlerAdapterTest {
 	@Mock
 	private AsyncEndpointCall<String> asyncCall;
 
+	@Mock
+	private OnCircuitBreakerMetadataResolver onCircuitBreakerMetadataResolver;
+
+	@Mock
+	private OnCircuitBreakerMetadata onCircuitBreakerMetadata;
+	
 	private HystrixObservableCommandEndpointCallHandlerAdapter<String, String> adapter;
 
 	@Spy
@@ -51,10 +62,18 @@ public class HystrixObservableCommandFallbackEndpointCallHandlerAdapterTest {
 
 	@Before
 	public void setup() {
-		adapter = new HystrixObservableCommandEndpointCallHandlerAdapter<>(Fallback.of(fallback));
+		adapter = new HystrixObservableCommandEndpointCallHandlerAdapter<>(Fallback.of(fallback), onCircuitBreakerMetadataResolver);
 
 		when(delegate.returnType())
 			.thenReturn(JavaType.of(String.class));
+		
+		when(onCircuitBreakerMetadataResolver.resolve(any()))
+			.thenReturn(onCircuitBreakerMetadata);
+
+		when(onCircuitBreakerMetadata.groupKey()).thenReturn(Optional.empty());
+		when(onCircuitBreakerMetadata.commandKey()).thenReturn(Optional.empty());
+		when(onCircuitBreakerMetadata.threadPoolKey()).thenReturn(Optional.empty());
+		when(onCircuitBreakerMetadata.properties()).thenReturn(Collections.emptyMap());
 	}
 
 	@Test
@@ -148,7 +167,7 @@ public class HystrixObservableCommandFallbackEndpointCallHandlerAdapterTest {
 
 	@Test
 	public void shouldReturnValueFromFallbackOfOtherTypeWhenHystrixObservableCommandExecutionThrowException() throws Exception {
-		adapter = new HystrixObservableCommandEndpointCallHandlerAdapter<>(Fallback.of(fallbackOfOtherType));
+		adapter = new HystrixObservableCommandEndpointCallHandlerAdapter<>(Fallback.of(fallbackOfOtherType), onCircuitBreakerMetadataResolver);
 
 		AsyncEndpointCallHandler<HystrixObservableCommand<String>, String> handler = adapter
 				.adaptAsync(new SimpleEndpointMethod(SomeType.class.getMethod("command")), delegate);
@@ -182,7 +201,7 @@ public class HystrixObservableCommandFallbackEndpointCallHandlerAdapterTest {
 
 	@Test
 	public void shouldReturnFallbackValueFromMethodWithArgsFromFallbackOfOtherTypeWhenHystrixObservableCommandExecutionThrowException() throws Exception {
-		adapter = new HystrixObservableCommandEndpointCallHandlerAdapter<>(Fallback.of(fallbackOfOtherType));
+		adapter = new HystrixObservableCommandEndpointCallHandlerAdapter<>(Fallback.of(fallbackOfOtherType), onCircuitBreakerMetadataResolver);
 
 		AsyncEndpointCallHandler<HystrixObservableCommand<String>, String> handler = adapter
 				.adaptAsync(new SimpleEndpointMethod(SomeType.class.getMethod("args", String.class)), delegate);
@@ -201,7 +220,7 @@ public class HystrixObservableCommandFallbackEndpointCallHandlerAdapterTest {
 
 	@Test
 	public void shouldReturnFallbackValueFromWithFallbackAnnotationWhenHystrixObservableCommandExecutionThrowException() throws Exception {
-		adapter = new HystrixObservableCommandEndpointCallHandlerAdapter<>(Fallback.of(fallbackOfOtherType));
+		adapter = new HystrixObservableCommandEndpointCallHandlerAdapter<>(Fallback.of(fallbackOfOtherType), onCircuitBreakerMetadataResolver);
 
 		AsyncEndpointCallHandler<HystrixObservableCommand<String>, String> handler = adapter
 				.adaptAsync(new SimpleEndpointMethod(OtherType.class.getMethod("command")), delegate);
@@ -216,7 +235,7 @@ public class HystrixObservableCommandFallbackEndpointCallHandlerAdapterTest {
 
 	@Test
 	public void shouldReturnEmptyObservableAsFallbackWhenHystrixObservableCommandExecutionThrowException() throws Exception {
-		adapter = new HystrixObservableCommandEndpointCallHandlerAdapter<>(Fallback.of(fallbackWithEmptyObservable));
+		adapter = new HystrixObservableCommandEndpointCallHandlerAdapter<>(Fallback.of(fallbackWithEmptyObservable), onCircuitBreakerMetadataResolver);
 
 		AsyncEndpointCallHandler<HystrixObservableCommand<String>, String> handler = adapter
 				.adaptAsync(new SimpleEndpointMethod(SomeType.class.getMethod("observable")), delegate);
@@ -232,7 +251,7 @@ public class HystrixObservableCommandFallbackEndpointCallHandlerAdapterTest {
 
 	@Test
 	public void shouldReturnEmptyObservableWhenHystrixObservableCommandExecutionThrowExceptionWithNullAsFallbackValue() throws Exception {
-		adapter = new HystrixObservableCommandEndpointCallHandlerAdapter<>(Fallback.of(fallbackWithEmptyObservable));
+		adapter = new HystrixObservableCommandEndpointCallHandlerAdapter<>(Fallback.of(fallbackWithEmptyObservable), onCircuitBreakerMetadataResolver);
 
 		AsyncEndpointCallHandler<HystrixObservableCommand<String>, String> handler = adapter
 				.adaptAsync(new SimpleEndpointMethod(SomeType.class.getMethod("string")), delegate);

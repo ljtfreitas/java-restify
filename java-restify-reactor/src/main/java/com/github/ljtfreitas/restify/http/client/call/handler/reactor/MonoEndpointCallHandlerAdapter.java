@@ -40,10 +40,10 @@ import reactor.core.scheduler.Schedulers;
 
 public class MonoEndpointCallHandlerAdapter<T, O> implements AsyncEndpointCallHandlerAdapter<Mono<T>, T, O> {
 
-	public final Scheduler scheduler;
+	private final Scheduler scheduler;
 
 	public MonoEndpointCallHandlerAdapter() {
-		this.scheduler = Schedulers.elastic();
+		this(Schedulers.elastic());
 	}
 
 	public MonoEndpointCallHandlerAdapter(Scheduler scheduler) {

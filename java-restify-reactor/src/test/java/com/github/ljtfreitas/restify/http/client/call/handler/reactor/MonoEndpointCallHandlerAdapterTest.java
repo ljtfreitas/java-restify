@@ -23,8 +23,6 @@ import com.github.ljtfreitas.restify.http.client.call.handler.async.AsyncEndpoin
 import com.github.ljtfreitas.restify.reflection.JavaType;
 
 import reactor.core.publisher.Mono;
-import reactor.core.scheduler.Scheduler;
-import reactor.core.scheduler.Schedulers;
 import reactor.test.StepVerifier;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -38,16 +36,12 @@ public class MonoEndpointCallHandlerAdapterTest {
 
 	private MonoEndpointCallHandlerAdapter<String, String> adapter;
 
-	private Scheduler scheduler;
-
 	private String asyncResult;
 
 	@SuppressWarnings("unchecked")
 	@Before
 	public void setup() {
-		scheduler = Schedulers.single();
-
-		adapter = new MonoEndpointCallHandlerAdapter<>(scheduler);
+		adapter = new MonoEndpointCallHandlerAdapter<>();
 
 		when(delegate.handle(notNull(EndpointCall.class), anyVararg()))
 			.then(invocation -> invocation.getArgumentAt(0, EndpointCall.class).execute());

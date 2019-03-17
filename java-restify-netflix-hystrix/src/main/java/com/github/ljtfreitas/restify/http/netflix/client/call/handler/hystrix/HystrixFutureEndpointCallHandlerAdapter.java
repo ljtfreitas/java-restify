@@ -26,6 +26,7 @@
 package com.github.ljtfreitas.restify.http.netflix.client.call.handler.hystrix;
 
 import java.lang.reflect.ParameterizedType;
+import java.lang.reflect.Type;
 import java.util.concurrent.Future;
 
 import com.github.ljtfreitas.restify.http.client.call.EndpointCall;
@@ -37,22 +38,22 @@ import com.netflix.hystrix.HystrixCommand;
 
 public class HystrixFutureEndpointCallHandlerAdapter<T, O> implements EndpointCallHandlerAdapter<Future<T>, HystrixCommand<T>, O> {
 
-	private final HystrixEndpointCallHandlerAdapter<T, O> hystrixEndpointCallHandlerAdapter = new HystrixEndpointCallHandlerAdapter<>();
+	private final HystrixOnCircuitBreakerPredicate predicate = new HystrixOnCircuitBreakerPredicate();
 
 	@Override
 	public boolean supports(EndpointMethod endpointMethod) {
-		return hystrixEndpointCallHandlerAdapter.supports(endpointMethod) && endpointMethod.returnType().is(Future.class);
+		return predicate.test(endpointMethod) && endpointMethod.returnType().is(Future.class);
 	}
 
 	@Override
 	public JavaType returnType(EndpointMethod endpointMethod) {
-		return hystrixEndpointCallHandlerAdapter.returnType(endpointMethod.returns(unwrap(endpointMethod.returnType())));
+		return JavaType.parameterizedType(HystrixCommand.class, unwrap(endpointMethod.returnType()));
 	}
 	
-	private JavaType unwrap(JavaType declaredReturnType) {
-		return JavaType.of(declaredReturnType.parameterized() ?
+	private Type unwrap(JavaType declaredReturnType) {
+		return declaredReturnType.parameterized() ?
 				declaredReturnType.as(ParameterizedType.class).getActualTypeArguments()[0] :
-					Object.class);
+					Object.class;
 	}
 
 	@Override

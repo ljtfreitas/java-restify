@@ -173,7 +173,7 @@ public class OAuth2AsyncAuthenticationBuilderTest {
 		AccessTokenResponseBody accessTokenResponseBody = new AccessTokenResponseBody.Builder().type("Bearer").token("aaa111").build();
 
 		when(authorizationServer.requireToken(notNull(AccessTokenRequest.class)))
-			.thenReturn(CompletableFuture.completedFuture(new AccessTokenResponse(new EndpointResponse<>(StatusCode.ok(), accessTokenResponseBody))));
+			.thenReturn(CompletableFuture.completedFuture(new AccessTokenResponse(EndpointResponse.of(StatusCode.ok(), accessTokenResponseBody))));
 
 		OAuth2AsyncAuthentication authentication = new OAuth2AsyncAuthenticationBuilder()
 				.grantType()
@@ -317,7 +317,7 @@ public class OAuth2AsyncAuthenticationBuilderTest {
 		AccessTokenResponseBody accessTokenResponseBody = new AccessTokenResponseBody.Builder().type("Bearer").token("aaa111").build();
 
 		when(authorizationServer.requireToken(notNull(AccessTokenRequest.class)))
-			.thenReturn(CompletableFuture.completedFuture(new AccessTokenResponse(new EndpointResponse<>(StatusCode.ok(), accessTokenResponseBody))));
+			.thenReturn(CompletableFuture.completedFuture(new AccessTokenResponse(EndpointResponse.of(StatusCode.ok(), accessTokenResponseBody))));
 
 		OAuth2AsyncAuthentication authentication = new OAuth2AsyncAuthenticationBuilder()
 				.grantType()
@@ -467,7 +467,7 @@ public class OAuth2AsyncAuthenticationBuilderTest {
 		AsyncAuthorizationServer authorizationServer = mock(AsyncAuthorizationServer.class);
 
 		Header location = new Header("Location", "http://my.web.app/oauth/callback#access_token=aaa111&token_type=bearer&state=current-state&expires_in=3600&scope=read%20write");
-		AuthorizationCodeResponse response = new AuthorizationCodeResponse(new EndpointResponse<>(StatusCode.found(), new Headers(location),  "hello"));
+		AuthorizationCodeResponse response = new AuthorizationCodeResponse(EndpointResponse.of(StatusCode.found(), "hello", new Headers(location)));
 
 		when(authorizationServer.authorize(notNull(AuthorizationCodeRequest.class)))
 			.thenReturn(CompletableFuture.completedFuture(response));
@@ -612,13 +612,13 @@ public class OAuth2AsyncAuthenticationBuilderTest {
 		AsyncAuthorizationServer authorizationServer = mock(AsyncAuthorizationServer.class);
 
 		Header location = new Header("Location", "http://my.web.app/oauth/callback?code=abc1234&state=current-state");
-		AuthorizationCodeResponse response = new AuthorizationCodeResponse(new EndpointResponse<>(StatusCode.found(), new Headers(location), "hello"));
+		AuthorizationCodeResponse response = new AuthorizationCodeResponse(EndpointResponse.of(StatusCode.found(), "hello", new Headers(location)));
 		when(authorizationServer.authorize(notNull(AuthorizationCodeRequest.class)))
 			.thenReturn(CompletableFuture.completedFuture(response));
 
 		AccessTokenResponseBody accessTokenResponseBody = new AccessTokenResponseBody.Builder().type("Bearer").token("aaa111").build();
 		when(authorizationServer.requireToken(notNull(AccessTokenRequest.class)))
-			.thenReturn(CompletableFuture.completedFuture(new AccessTokenResponse(new EndpointResponse<>(StatusCode.ok(), new Headers(), accessTokenResponseBody))));
+			.thenReturn(CompletableFuture.completedFuture(new AccessTokenResponse(EndpointResponse.of(StatusCode.ok(), accessTokenResponseBody, new Headers()))));
 
 		OAuth2AsyncAuthentication authentication = new OAuth2AsyncAuthenticationBuilder()
 				.grantType()

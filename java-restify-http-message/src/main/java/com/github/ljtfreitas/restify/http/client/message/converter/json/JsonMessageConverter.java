@@ -25,6 +25,9 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.message.converter.json;
 
+import java.util.Arrays;
+import java.util.Collection;
+
 import com.github.ljtfreitas.restify.http.client.message.ContentType;
 import com.github.ljtfreitas.restify.http.client.message.converter.HttpMessageReader;
 import com.github.ljtfreitas.restify.http.client.message.converter.HttpMessageWriter;
@@ -34,8 +37,8 @@ public interface JsonMessageConverter<T> extends HttpMessageReader<T>, HttpMessa
 	public static final ContentType APPLICATION_JSON_CONTENT_TYPE = ContentType.of("application/json");
 
 	@Override
-	public default ContentType contentType() {
-		return APPLICATION_JSON_CONTENT_TYPE;
+	public default Collection<ContentType> contentTypes() {
+		return Arrays.asList(APPLICATION_JSON_CONTENT_TYPE);
 	}
 
 }

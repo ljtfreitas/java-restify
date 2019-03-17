@@ -57,7 +57,7 @@ class EndpointResponseConverter {
 
 	private <T> EndpointResponse<T> doConvert(Response response, JavaType responseType) {
 		T responseBody = response.hasEntity() ? entityOf(response, responseType) : null;
-		return new EndpointResponse<>(StatusCode.of(response.getStatus()), headersOf(response), responseBody);
+		return EndpointResponse.of(StatusCode.of(response.getStatus()), responseBody, headersOf(response));
 	}
 
 	private <T> T entityOf(Response response, JavaType responseType) {

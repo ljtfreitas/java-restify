@@ -9,6 +9,8 @@ import static org.mockito.Mockito.when;
 import java.io.ByteArrayInputStream;
 import java.net.URI;
 import java.nio.charset.Charset;
+import java.util.function.Function;
+import java.util.function.Predicate;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -22,10 +24,12 @@ import com.github.ljtfreitas.restify.http.client.message.Encoding;
 import com.github.ljtfreitas.restify.http.client.message.Header;
 import com.github.ljtfreitas.restify.http.client.message.Headers;
 import com.github.ljtfreitas.restify.http.client.message.request.BufferedByteArrayHttpRequestBody;
+import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestBody;
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
 import com.github.ljtfreitas.restify.http.client.message.response.HttpResponseBody;
-import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestBody;
+import com.github.ljtfreitas.restify.http.client.message.response.StatusCode;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
+import com.github.ljtfreitas.restify.http.client.response.EndpointResponseException;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponseReader;
 import com.github.ljtfreitas.restify.http.client.response.HttpClientResponse;
 import com.github.ljtfreitas.restify.reflection.JavaType;
@@ -147,9 +151,44 @@ public class DefaultEndpointRequestExecutorTest {
 		}
 	}
 
-	private class SimpleEndpointResponse<T> extends EndpointResponse<T> {
+	private class SimpleEndpointResponse<T> implements EndpointResponse<T> {
+
+		private final T body;
+
 		public SimpleEndpointResponse(T body) {
-			super(null, null, body);
+			this.body = body;
+		}
+
+		@Override
+		public Headers headers() {
+			return new Headers();
+		}
+
+		@Override
+		public StatusCode status() {
+			return StatusCode.ok();
+		}
+
+		@Override
+		public T body() {
+			return body;
+		}
+
+		@Override
+		public <E extends EndpointResponseException> EndpointResponse<T> recover(Class<? extends E> predicate,
+				Function<E, EndpointResponse<T>> mapper) {
+			return this;
+		}
+
+		@Override
+		public EndpointResponse<T> recover(Function<EndpointResponseException, EndpointResponse<T>> mapper) {
+			return this;
+		}
+
+		@Override
+		public EndpointResponse<T> recover(Predicate<EndpointResponseException> predicate,
+				Function<EndpointResponseException, EndpointResponse<T>> mapper) {
+			return this;
 		}
 	}
 }

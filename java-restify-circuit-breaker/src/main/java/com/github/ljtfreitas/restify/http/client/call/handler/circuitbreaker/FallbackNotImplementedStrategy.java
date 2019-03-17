@@ -30,7 +30,7 @@ import java.lang.reflect.Method;
 class FallbackNotImplementedStrategy implements FallbackStrategy {
 
 	@Override
-	public <T> FallbackResult<T> execute(Method javaMethod, Object[] args) throws Exception {
+	public <T> FallbackResult<T> execute(Method javaMethod, Object[] args, Throwable throwable) {
 		throw new UnsupportedOperationException("No fallback available.");
 	}
 

@@ -8,10 +8,8 @@ import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 
-import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
-import java.lang.reflect.WildcardType;
 import java.util.Collection;
 import java.util.List;
 
@@ -21,29 +19,23 @@ public class JavaTypeTest {
 
 	@Test
 	public void shouldGetRawClassTypeOfParameterizedType() {
-		ParameterizedType parameterizedType = JavaType.parameterizedType(Collection.class, String.class);
+		JavaType parameterizedType = JavaType.parameterizedType(Collection.class, String.class);
 
-		JavaType type = JavaType.of(parameterizedType);
-
-		assertEquals(Collection.class, type.classType());
+		assertEquals(Collection.class, parameterizedType.classType());
 	}
 
 	@Test
 	public void shouldGetRawClassTypeOfGenericArrayType() {
-		GenericArrayType arrayType = JavaType.arrayType(String.class);
+		JavaType arrayType = JavaType.arrayType(String.class);
 
-		JavaType type = JavaType.of(arrayType);
-
-		assertEquals(String[].class, type.classType());
+		assertEquals(String[].class, arrayType.classType());
 	}
 
 	@Test
 	public void shouldGetRawClassTypeOfWildcardType() throws Exception {
-		WildcardType wildcardType = JavaType.wildcardType(new Type[] { Number.class }, null);
+		JavaType wildcardType = JavaType.wildcardType(new Type[] { Number.class }, null);
 
-		JavaType type = JavaType.of(wildcardType);
-
-		assertEquals(Number.class, type.classType());
+		assertEquals(Number.class, wildcardType.classType());
 	}
 
 	@Test
@@ -77,7 +69,7 @@ public class JavaTypeTest {
 
 	@Test
 	public void shouldCheckTypeByParameterizedType() throws Exception {
-		JavaType type = JavaType.of(JavaType.parameterizedType(Collection.class, String.class));
+		JavaType type = JavaType.parameterizedType(Collection.class, String.class);
 
 		assertTrue(type.is(Collection.class));
 		assertFalse(type.is(Integer.class));
@@ -85,14 +77,14 @@ public class JavaTypeTest {
 
 	@Test
 	public void shouldCheckAssignableFromType() throws Exception {
-		JavaType type = JavaType.of(JavaType.parameterizedType(Collection.class, String.class));
+		JavaType type = JavaType.parameterizedType(Collection.class, String.class);
 
-		assertTrue(type.isAssignableFrom(List.class));
+		assertTrue(type.assignable(List.class));
 	}
 
 	@Test
 	public void shouldCheckWhenTypeIsParameterized() throws Exception {
-		JavaType type = JavaType.of(JavaType.parameterizedType(Collection.class, String.class));
+		JavaType type = JavaType.parameterizedType(Collection.class, String.class);
 		assertTrue(type.parameterized());
 
 		type = JavaType.of(String.class);
@@ -117,7 +109,7 @@ public class JavaTypeTest {
 
 	@Test
 	public void shouldUnwrapJavaTypeToLowLevelType() throws Exception {
-		JavaType type = JavaType.of(JavaType.parameterizedType(Collection.class, String.class));
+		JavaType type = JavaType.parameterizedType(Collection.class, String.class);
 
 		Type lowLevelType = type.unwrap();
 

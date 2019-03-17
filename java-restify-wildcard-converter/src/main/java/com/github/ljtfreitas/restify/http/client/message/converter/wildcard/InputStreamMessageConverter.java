@@ -25,6 +25,7 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.message.converter.wildcard;
 
+import java.io.BufferedInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.lang.reflect.Type;
@@ -53,6 +54,6 @@ public class InputStreamMessageConverter implements WildcardMessageConverter<Inp
 	public InputStream read(HttpResponseMessage httpResponseMessage, Type expectedType)
 			throws HttpMessageReadException {
 
-		return new ByteArrayInputStream(byteArrayMessageConverter.read(httpResponseMessage, expectedType));
+		return new BufferedInputStream(new ByteArrayInputStream(byteArrayMessageConverter.read(httpResponseMessage, expectedType)));
 	}
 }

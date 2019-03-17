@@ -79,7 +79,7 @@ public class DefaultAsyncEndpointRequestExecutorTest {
 	public void shouldExecuteHttpClientRequestWithoutBody() throws Exception {
 		EndpointRequest endpointRequest = new EndpointRequest(new URI("http://my.api.com/path"), "GET", String.class);
 
-		EndpointResponse<Object> endpointResponse = new EndpointResponse<>(StatusCode.ok(), new Headers(), "hello");
+		EndpointResponse<Object> endpointResponse = EndpointResponse.of(StatusCode.ok(), "hello", new Headers());
 
 		when(reader.read(httpClientResponse, endpointRequest.responseType()))
 			.thenReturn(endpointResponse);
@@ -97,7 +97,7 @@ public class DefaultAsyncEndpointRequestExecutorTest {
 		EndpointRequest endpointRequest = new EndpointRequest(new URI("http://my.api.com/path"), "POST", new Headers(),
 				"endpoint request body", String.class);
 
-		EndpointResponse<Object> endpointResponse = new EndpointResponse<>(StatusCode.ok(), new Headers(), "hello");
+		EndpointResponse<Object> endpointResponse = EndpointResponse.of(StatusCode.ok(), "hello", new Headers());
 
 		when(reader.read(httpClientResponse, endpointRequest.responseType()))
 			.thenReturn(endpointResponse);

@@ -3,7 +3,7 @@ package com.github.ljtfreitas.restify.http.client.call.async;
 import static org.mockito.Matchers.argThat;
 import static org.mockito.Mockito.verify;
 
-import java.util.Optional;
+import java.util.Objects;
 
 import org.hamcrest.Matcher;
 import org.junit.Test;
@@ -12,7 +12,6 @@ import org.mockito.ArgumentMatcher;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import com.github.ljtfreitas.restify.http.client.call.async.EndpointResponseFailureCallback;
 import com.github.ljtfreitas.restify.http.client.message.Headers;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponseBadGatewayException;
@@ -261,7 +260,7 @@ public class EndpointResponseFailureCallbackTest {
 				EndpointResponse<String> response = (EndpointResponse<String>) argument;
 				return exception.status() == response.status()
 						&& exception.headers() == response.headers()
-						&& Optional.ofNullable(exception.bodyAsString()).orElse("").equals(response.body());
+						&& Objects.equals(exception.bodyAsString(), response.body());
 			}
 		};
 	}

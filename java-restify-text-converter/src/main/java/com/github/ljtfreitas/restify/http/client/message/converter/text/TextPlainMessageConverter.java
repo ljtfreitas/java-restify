@@ -25,6 +25,9 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.message.converter.text;
 
+import java.util.Arrays;
+import java.util.Collection;
+
 import com.github.ljtfreitas.restify.http.client.message.ContentType;
 
 public class TextPlainMessageConverter extends StringMessageConverter {
@@ -32,8 +35,8 @@ public class TextPlainMessageConverter extends StringMessageConverter {
 	public static final ContentType TEXT_PLAIN_CONTENT_TYPE = ContentType.of("text/plain");
 
 	@Override
-	public ContentType contentType() {
-		return TEXT_PLAIN_CONTENT_TYPE;
+	public Collection<ContentType> contentTypes() {
+		return Arrays.asList(TEXT_PLAIN_CONTENT_TYPE);
 	}
 
 }

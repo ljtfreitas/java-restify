@@ -27,8 +27,9 @@ package com.github.ljtfreitas.restify.http.netflix.client.call.handler.hystrix;
 
 import java.util.Optional;
 
-import com.github.ljtfreitas.restify.http.client.call.handler.circuitbreaker.CircuitBreakerProperty;
-import com.github.ljtfreitas.restify.http.client.call.handler.circuitbreaker.OnCircuitBreaker;
+import com.github.ljtfreitas.restify.http.client.call.handler.circuitbreaker.OnCircuitBreakerMetadata;
+import com.github.ljtfreitas.restify.http.client.call.handler.circuitbreaker.OnCircuitBreakerMetadataResolver;
+import com.github.ljtfreitas.restify.http.client.call.handler.circuitbreaker.SimpleOnCircuitBreakerMetadataResolver;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethod;
 import com.netflix.hystrix.HystrixCommandGroupKey;
 import com.netflix.hystrix.HystrixCommandKey;
@@ -36,70 +37,70 @@ import com.netflix.hystrix.HystrixCommandProperties;
 import com.netflix.hystrix.HystrixThreadPoolKey;
 import com.netflix.hystrix.HystrixThreadPoolProperties;
 
-class HystrixCommandMetadataFactory {
+public class HystrixCommandMetadataFactory {
 
-	private final EndpointMethod endpointMethod;
-	private final Optional<OnCircuitBreaker> onCircuitBreaker;
+	private final OnCircuitBreakerMetadataResolver onCircuitBreakerMetadataResolver;
 
-	public HystrixCommandMetadataFactory(EndpointMethod endpointMethod) {
-		this.endpointMethod = endpointMethod;
-		this.onCircuitBreaker = endpointMethod.metadata().get(OnCircuitBreaker.class);
+	public HystrixCommandMetadataFactory() {
+		this.onCircuitBreakerMetadataResolver = new SimpleOnCircuitBreakerMetadataResolver();
 	}
 
-	public HystrixCommandMetadata create() {
+	public HystrixCommandMetadataFactory(OnCircuitBreakerMetadataResolver onCircuitBreakerMetadataResolver) {
+		this.onCircuitBreakerMetadataResolver = onCircuitBreakerMetadataResolver;
+	}
+
+	public HystrixCommandMetadata create(EndpointMethod endpointMethod) {
+		return HystrixCommandMetadataCache.instance()
+				.compute(endpointMethod, () -> doCreate(endpointMethod));
+	}
+
+	private HystrixCommandMetadata doCreate(EndpointMethod endpointMethod) {
+		OnCircuitBreakerMetadata onCircuitBreaker = onCircuitBreakerMetadataResolver.resolve(endpointMethod);
+
 		return new HystrixCommandMetadata.HystrixCommandMetadataBuilder()
-				.withGroupKey(groupKey())
-					.andCommandKey(commandKey())
-						.andThreadPoolKey(threadPoolKey())
-							.andCommandPropertiesDefaults(commandProperties())
-								.andThreadPoolPropertiesDefaults(threadPoolProperties())
+				.withGroupKey(groupKey(endpointMethod, onCircuitBreaker))
+					.andCommandKey(commandKey(endpointMethod, onCircuitBreaker))
+						.andThreadPoolKey(threadPoolKey(onCircuitBreaker))
+							.andCommandPropertiesDefaults(commandProperties(onCircuitBreaker))
+								.andThreadPoolPropertiesDefaults(threadPoolProperties(onCircuitBreaker))
 									.build();
 	}
 
-	private HystrixCommandGroupKey groupKey() {
-		String groupKey = onCircuitBreaker.map(a -> a.groupKey())
-				.filter(g -> g != null && !"".equals(g))
+	private HystrixCommandGroupKey groupKey(EndpointMethod endpointMethod, OnCircuitBreakerMetadata onCircuitBreaker) {
+		String groupKey = onCircuitBreaker.groupKey()
 					.orElseGet(() -> endpointMethod.javaMethod().getDeclaringClass().getSimpleName());
 
 		return HystrixCommandGroupKey.Factory.asKey(groupKey);
 	}
 
-	private HystrixCommandKey commandKey() {
-		String commandKey = onCircuitBreaker.map(a -> a.commandKey())
-				.filter(g -> g != null && !"".equals(g))
+	private HystrixCommandKey commandKey(EndpointMethod endpointMethod, OnCircuitBreakerMetadata onCircuitBreaker) {
+		String commandKey = onCircuitBreaker.commandKey()
 					.orElseGet(() -> endpointMethod.javaMethod().getName());
 
 		return HystrixCommandKey.Factory.asKey(commandKey);
 	}
 
-	private HystrixThreadPoolKey threadPoolKey() {
-		String threadPoolKey = onCircuitBreaker.map(a -> a.threadPoolKey())
-				.filter(g -> g != null && !"".equals(g))
+	private HystrixThreadPoolKey threadPoolKey(OnCircuitBreakerMetadata onCircuitBreaker) {
+		String threadPoolKey = onCircuitBreaker.threadPoolKey()
 					.orElse(null);
 
 		return Optional.ofNullable(threadPoolKey)
 					.map(k -> HystrixThreadPoolKey.Factory.asKey(k)).orElse(null);
 	}
 
-	private HystrixCommandProperties.Setter commandProperties() {
-		CircuitBreakerProperty[] properties = onCircuitBreaker.map(a -> a.properties())
-				.orElseGet(() -> new CircuitBreakerProperty[0]);
-
+	private HystrixCommandProperties.Setter commandProperties(OnCircuitBreakerMetadata onCircuitBreaker) {
 		HystrixCommandProperties.Setter hystrixCommandProperties = HystrixCommandProperties.defaultSetter();
 
-		HystrixCommandPropertiesWriter propertiesSetter = new HystrixCommandPropertiesWriter(properties);
+		HystrixCommandPropertiesWriter propertiesSetter = new HystrixCommandPropertiesWriter(onCircuitBreaker.properties());
 		propertiesSetter.applyTo(hystrixCommandProperties);
 
 		return hystrixCommandProperties;
 	}
 
-	private HystrixThreadPoolProperties.Setter threadPoolProperties() {
-		CircuitBreakerProperty[] properties = onCircuitBreaker.map(a -> a.properties())
-				.orElseGet(() -> new CircuitBreakerProperty[0]);
-
+	private HystrixThreadPoolProperties.Setter threadPoolProperties(OnCircuitBreakerMetadata onCircuitBreaker) {
 		HystrixThreadPoolProperties.Setter hystrixThreadPoolProperties = HystrixThreadPoolProperties.defaultSetter();
 
-		HystrixThreadPoolPropertyWriter propertiesSetter = new HystrixThreadPoolPropertyWriter(properties);
+		HystrixThreadPoolPropertyWriter propertiesSetter = new HystrixThreadPoolPropertyWriter(onCircuitBreaker.properties());
 		propertiesSetter.applyTo(hystrixThreadPoolProperties);
 
 		return hystrixThreadPoolProperties;

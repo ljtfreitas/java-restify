@@ -75,7 +75,7 @@ public class RestOperationsEndpointRequestExecutorTest {
 			.thenReturn(responseEntity);
 
 		when(responseEntityConverterMock.convert(notNull(ResponseEntity.class)))
-			.thenReturn(new EndpointResponse<>(StatusCode.ok(), null, responseEntity.getBody()));
+			.thenReturn(EndpointResponse.of(StatusCode.ok(), responseEntity.getBody()));
 	}
 
 	@Test

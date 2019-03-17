@@ -36,7 +36,7 @@ import com.github.ljtfreitas.restify.http.client.HttpException;
 import com.github.ljtfreitas.restify.http.client.message.converter.HttpMessageReadException;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequestExecutor;
-import com.github.ljtfreitas.restify.http.client.response.DefaultEndpointResponseErrorFallback;
+import com.github.ljtfreitas.restify.http.client.response.EmptyOnNotFoundEndpointResponseErrorFallback;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponseErrorFallback;
 
@@ -62,7 +62,7 @@ public class JaxRsHttpClientEndpointRequestExecutor implements EndpointRequestEx
 	}
 
 	public JaxRsHttpClientEndpointRequestExecutor(Client client) {
-		this(client, DefaultEndpointResponseErrorFallback.emptyOnNotFound());
+		this(client, new EmptyOnNotFoundEndpointResponseErrorFallback());
 	}
 
 	public JaxRsHttpClientEndpointRequestExecutor(Client client, EndpointResponseErrorFallback endpointResponseErrorFallback) {

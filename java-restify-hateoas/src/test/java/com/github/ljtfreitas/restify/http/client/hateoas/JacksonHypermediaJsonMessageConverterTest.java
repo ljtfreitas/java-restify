@@ -41,7 +41,7 @@ public class JacksonHypermediaJsonMessageConverterTest {
 
 		when(response.body().input()).thenReturn(new ByteArrayInputStream(json.getBytes()));
 
-		Resource<MyModel> resource = jsonConverter.read(response, JavaType.parameterizedType(Resource.class, MyModel.class));
+		Resource<MyModel> resource = jsonConverter.read(response, JavaType.parameterizedType(Resource.class, MyModel.class).unwrap());
 
 		MyModel myModel = resource.content();
 

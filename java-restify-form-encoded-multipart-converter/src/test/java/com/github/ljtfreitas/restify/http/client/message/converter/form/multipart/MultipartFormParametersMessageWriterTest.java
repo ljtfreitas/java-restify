@@ -130,7 +130,7 @@ public class MultipartFormParametersMessageWriterTest {
 
 		String body = "------myBoundary"
 				+ "\r\n"
-				+ "Content-Disposition: form-data; name=\"inputStream\""
+				+ "Content-Disposition: form-data; name=\"inputStream\"; filename=\"" + file.getName() + "\""
 				+ "\r\n"
 				+ "\r\n"
 				+ "file content...line 1"

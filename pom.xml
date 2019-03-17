@@ -37,6 +37,7 @@
 		<module>java-restify-rxjava-2</module>
 		<module>java-restify-jsoup</module>
 		<module>java-restify-reactor</module>
+		<module>java-restify-reactor-hystrix</module>
 
 		<module>java-restify-http-message</module>
 		<module>java-restify-wildcard-converter</module>
@@ -143,6 +144,26 @@
 						<configuration>
 							<argLine>-Xms1024m -Xmx3g</argLine>
 						</configuration>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+		<profile>
+			<id>source</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-source-plugin</artifactId>
+						<version>2.0.4</version>
+						<executions>
+							<execution>
+								<id>attach-sources</id>
+								<goals>
+									<goal>jar</goal>
+								</goals>
+							</execution>
+						</executions>
 					</plugin>
 				</plugins>
 			</build>

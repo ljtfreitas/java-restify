@@ -23,7 +23,6 @@ import com.github.ljtfreitas.restify.http.client.call.handler.async.AsyncEndpoin
 import com.github.ljtfreitas.restify.reflection.JavaType;
 
 import io.reactivex.Maybe;
-import io.reactivex.Scheduler;
 import io.reactivex.observers.TestObserver;
 import io.reactivex.schedulers.Schedulers;
 
@@ -36,15 +35,14 @@ public class RxJava2MaybeEndpointCallHandlerAdapterTest {
 	@Mock
 	private AsyncEndpointCall<String> asyncEndpointCall;
 
-	private RxJava2MaybeEndpointCallHandlerAdapter<String, String> adapter;
+	@Mock
+	private EndpointCall<String> endpointCall;
 
-	private Scheduler scheduler;
+	private RxJava2MaybeEndpointCallHandlerAdapter<String, String> adapter;
 
 	@Before
 	public void setup() {
-		scheduler = Schedulers.single();
-
-		adapter = new RxJava2MaybeEndpointCallHandlerAdapter<>(scheduler);
+		adapter = new RxJava2MaybeEndpointCallHandlerAdapter<>(Schedulers.single());
 	}
 
 	@Test
@@ -85,12 +83,35 @@ public class RxJava2MaybeEndpointCallHandlerAdapterTest {
 
 		assertNotNull(maybe);
 
-		TestObserver<String> subscriber = maybe.subscribeOn(scheduler).test();
+		TestObserver<String> subscriber = maybe.test();
 		subscriber.await();
 
 		subscriber.assertNoErrors()
 			.assertComplete()
 			.assertResult(result);
+	}
+
+	@SuppressWarnings("unchecked")
+	@Test
+	public void shouldCreateMaybeOnHandlerWhenAsyncEndpointCallResultIsNull() throws Exception {
+		AsyncEndpointCallHandler<Maybe<String>, String> handler = adapter
+				.adaptAsync(new SimpleEndpointMethod(SomeType.class.getMethod("maybe")), delegate);
+
+		when(asyncEndpointCall.executeAsync())
+			.thenReturn(CompletableFuture.completedFuture(null));
+
+		when(delegate.handle(notNull(EndpointCall.class), anyVararg()))
+			.then(i -> i.getArgumentAt(0, EndpointCall.class).execute());
+
+		Maybe<String> maybe = handler.handleAsync(asyncEndpointCall, null);
+
+		assertNotNull(maybe);
+
+		TestObserver<String> subscriber = maybe.test();
+		subscriber.await();
+
+		subscriber.assertNoErrors()
+			.assertComplete();
 	}
 
 	@Test
@@ -110,7 +131,7 @@ public class RxJava2MaybeEndpointCallHandlerAdapterTest {
 
 		assertNotNull(maybe);
 
-		TestObserver<String> subscriber = maybe.subscribeOn(scheduler).test();
+		TestObserver<String> subscriber = maybe.test();
 
 		subscriber.await()
 				  .assertError(exception);
@@ -124,14 +145,17 @@ public class RxJava2MaybeEndpointCallHandlerAdapterTest {
 
 		String result = "maybe result";
 
-		when(delegate.handle(notNull(EndpointCall.class), anyVararg()))
+		when(endpointCall.execute())
 			.thenReturn(result);
+		
+		when(delegate.handle(notNull(EndpointCall.class), anyVararg()))
+			.then(i -> i.getArgumentAt(0, EndpointCall.class).execute());
 
-		Maybe<String> maybe = handler.handle(asyncEndpointCall, null);
+		Maybe<String> maybe = handler.handle(endpointCall, null);
 
 		assertNotNull(maybe);
 
-		TestObserver<String> subscriber = maybe.subscribeOn(scheduler).test();
+		TestObserver<String> subscriber = maybe.test();
 		subscriber.await();
 
 		subscriber.assertNoErrors()

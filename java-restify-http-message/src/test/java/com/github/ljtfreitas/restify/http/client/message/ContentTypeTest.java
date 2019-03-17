@@ -72,6 +72,7 @@ public class ContentTypeTest {
 		ContentType textPlainContentType = ContentType.of("text/plain");
 
 		assertTrue(wildcardContentType.compatible(textPlainContentType));
+		assertTrue(textPlainContentType.compatible(wildcardContentType));
 	}
 
 	@Test
@@ -81,6 +82,7 @@ public class ContentTypeTest {
 		ContentType textPlainContentType = ContentType.of("text/plain");
 
 		assertTrue(genericTextContentType.compatible(textPlainContentType));
+		assertTrue(textPlainContentType.compatible(genericTextContentType));
 	}
 
 	@Test
@@ -90,6 +92,7 @@ public class ContentTypeTest {
 		ContentType xmlContentType = ContentType.of("application/xml");
 
 		assertFalse(jsonContentType.compatible(xmlContentType));
+		assertFalse(xmlContentType.compatible(jsonContentType));
 	}
 
 	@Test
@@ -99,6 +102,7 @@ public class ContentTypeTest {
 		ContentType jsonVendorContentVersionTwo = ContentType.of("application/vnd.bla+json;version=2");
 
 		assertTrue(jsonVendorContentVersionOne.compatible(jsonVendorContentVersionTwo));
+		assertTrue(jsonVendorContentVersionTwo.compatible(jsonVendorContentVersionOne));
 	}
 
 	@Test
@@ -108,6 +112,7 @@ public class ContentTypeTest {
 		ContentType jsonVendorContent = ContentType.of("application/vnd.bla+json");
 
 		assertFalse(xmlVendorContent.compatible(jsonVendorContent));
+		assertFalse(jsonVendorContent.compatible(xmlVendorContent));
 	}
 	
 	@Test
@@ -127,5 +132,6 @@ public class ContentTypeTest {
 		ContentType halJsonContentType = ContentType.of("application/hal+json");
 
 		assertTrue(wildcardContentType.compatible(halJsonContentType));
+		assertTrue(halJsonContentType.compatible(wildcardContentType));
 	}
 }

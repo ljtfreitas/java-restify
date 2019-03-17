@@ -25,6 +25,9 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.message.converter.xml;
 
+import java.util.Arrays;
+import java.util.Collection;
+
 import com.github.ljtfreitas.restify.http.client.message.ContentType;
 import com.github.ljtfreitas.restify.http.client.message.converter.HttpMessageReader;
 import com.github.ljtfreitas.restify.http.client.message.converter.HttpMessageWriter;
@@ -32,9 +35,10 @@ import com.github.ljtfreitas.restify.http.client.message.converter.HttpMessageWr
 public interface XmlMessageConverter<T> extends HttpMessageReader<T>, HttpMessageWriter<T> {
 
 	public static final ContentType APPLICATION_XML_CONTENT_TYPE = ContentType.of("application/xml");
+	public static final ContentType TEXT_XML_CONTENT_TYPE = ContentType.of("text/xml");
 	
 	@Override
-	public default ContentType contentType() {
-		return APPLICATION_XML_CONTENT_TYPE;
+	public default Collection<ContentType> contentTypes() {
+		return Arrays.asList(APPLICATION_XML_CONTENT_TYPE, TEXT_XML_CONTENT_TYPE);
 	}
 }

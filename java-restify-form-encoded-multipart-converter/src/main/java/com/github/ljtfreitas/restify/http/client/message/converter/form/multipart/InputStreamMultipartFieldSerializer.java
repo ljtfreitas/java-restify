@@ -27,10 +27,16 @@ package com.github.ljtfreitas.restify.http.client.message.converter.form.multipa
 
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.UncheckedIOException;
 import java.nio.charset.Charset;
+
+import com.github.ljtfreitas.restify.http.client.message.io.InputStreamContent;
 
 class InputStreamMultipartFieldSerializer extends BaseMultipartFieldSerializer<InputStream> {
 
+	private static final int BUFFER_SIZE = 4096;
+	
 	@Override
 	public boolean supports(Class<?> type) {
 		return InputStream.class.isAssignableFrom(type);
@@ -42,12 +48,13 @@ class InputStreamMultipartFieldSerializer extends BaseMultipartFieldSerializer<I
 	}
 
 	@Override
-	protected byte[] valueOf(MultipartField<InputStream> field, Charset charset) {
+	protected void writeContent(MultipartField<InputStream> field, Charset charset, OutputStream output)
+			throws IOException {
 		try {
-			return new InputStreamMultipartFieldReader(field.value()).read();
-		} catch (IOException e) {
-			throw new IllegalArgumentException("Cannot read data of parameter [" + field.name() + "] (InputStream)", e);
+			InputStreamContent content = new InputStreamContent(field.value(), BUFFER_SIZE);
+			content.transferTo(output);
+		} catch (UncheckedIOException e) {
+			throw new IOException("Cannot read data of parameter [" + field.name() + "] (InputStream)", e);
 		}
 	}
-
 }

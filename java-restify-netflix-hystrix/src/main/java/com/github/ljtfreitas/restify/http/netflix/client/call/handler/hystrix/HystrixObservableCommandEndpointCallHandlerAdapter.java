@@ -34,6 +34,7 @@ import com.github.ljtfreitas.restify.http.client.call.handler.async.AsyncEndpoin
 import com.github.ljtfreitas.restify.http.client.call.handler.async.AsyncEndpointCallHandlerAdapter;
 import com.github.ljtfreitas.restify.http.client.call.handler.circuitbreaker.Fallback;
 import com.github.ljtfreitas.restify.http.client.call.handler.circuitbreaker.FallbackProvider;
+import com.github.ljtfreitas.restify.http.client.call.handler.circuitbreaker.OnCircuitBreakerMetadataResolver;
 import com.github.ljtfreitas.restify.http.client.call.handler.circuitbreaker.WithFallbackProvider;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethod;
 import com.github.ljtfreitas.restify.reflection.JavaType;
@@ -41,23 +42,36 @@ import com.netflix.hystrix.HystrixObservableCommand;
 
 public class HystrixObservableCommandEndpointCallHandlerAdapter<T, O> implements AsyncEndpointCallHandlerAdapter<HystrixObservableCommand<T>, T, O> {
 
-	protected final HystrixObservableCommand.Setter properties;
-	protected final FallbackProvider fallback;
+	private final HystrixObservableCommand.Setter properties;
+	private final FallbackProvider fallback;
+	private final HystrixCommandMetadataFactory hystrixCommandMetadataFactory;
 
 	public HystrixObservableCommandEndpointCallHandlerAdapter() {
-		this(null, (FallbackProvider) null);
+		this(null, (FallbackProvider) null, null);
 	}
 
 	public HystrixObservableCommandEndpointCallHandlerAdapter(HystrixObservableCommand.Setter properties) {
-		this(properties, (FallbackProvider) null);
+		this(properties, (FallbackProvider) null, null);
+	}
+
+	public HystrixObservableCommandEndpointCallHandlerAdapter(OnCircuitBreakerMetadataResolver onCircuitBreakerMetadataResolver) {
+		this(null, (FallbackProvider) null, onCircuitBreakerMetadataResolver);
 	}
 
 	public HystrixObservableCommandEndpointCallHandlerAdapter(Fallback fallback) {
 		this(null, (FallbackProvider) (t) -> fallback);
 	}
+	
+	public HystrixObservableCommandEndpointCallHandlerAdapter(Fallback fallback, OnCircuitBreakerMetadataResolver onCircuitBreakerMetadataResolver) {
+		this(null, (FallbackProvider) (t) -> fallback, onCircuitBreakerMetadataResolver);
+	}
 
 	public HystrixObservableCommandEndpointCallHandlerAdapter(FallbackProvider fallback) {
 		this(null, (FallbackProvider) fallback);
+	}
+	
+	public HystrixObservableCommandEndpointCallHandlerAdapter(FallbackProvider fallback, OnCircuitBreakerMetadataResolver onCircuitBreakerMetadataResolver) {
+		this(null, (FallbackProvider) fallback, onCircuitBreakerMetadataResolver);
 	}
 
 	public HystrixObservableCommandEndpointCallHandlerAdapter(HystrixObservableCommand.Setter properties, Fallback fallback) {
@@ -65,8 +79,16 @@ public class HystrixObservableCommandEndpointCallHandlerAdapter<T, O> implements
 	}
 
 	public HystrixObservableCommandEndpointCallHandlerAdapter(HystrixObservableCommand.Setter properties, FallbackProvider fallback) {
+		this(properties, fallback, null);
+	}
+	
+	private HystrixObservableCommandEndpointCallHandlerAdapter(HystrixObservableCommand.Setter properties, FallbackProvider fallback,
+			OnCircuitBreakerMetadataResolver onCircuitBreakerMetadataResolver) {
 		this.properties = properties;
-		this.fallback = fallback;
+		this.fallback = Optional.ofNullable(fallback).orElseGet(WithFallbackProvider::new);
+		this.hystrixCommandMetadataFactory = Optional.ofNullable(onCircuitBreakerMetadataResolver)
+				.map(HystrixCommandMetadataFactory::new)
+					.orElseGet(HystrixCommandMetadataFactory::new);
 	}
 
 	@Override
@@ -88,7 +110,6 @@ public class HystrixObservableCommandEndpointCallHandlerAdapter<T, O> implements
 	@Override
 	public AsyncEndpointCallHandler<HystrixObservableCommand<T>, O> adaptAsync(EndpointMethod endpointMethod,
 			EndpointCallHandler<T, O> delegate) {
-		return new HystrixObservableCommandEndpointCallHandler<>(properties, endpointMethod, delegate,
-				Optional.ofNullable(fallback).orElseGet(WithFallbackProvider::new));
+		return new HystrixObservableCommandEndpointCallHandler<>(properties, endpointMethod, delegate, fallback, hystrixCommandMetadataFactory);
 	}
 }

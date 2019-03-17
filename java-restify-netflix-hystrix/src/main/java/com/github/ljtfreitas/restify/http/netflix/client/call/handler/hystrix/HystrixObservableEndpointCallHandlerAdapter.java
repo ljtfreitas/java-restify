@@ -37,20 +37,31 @@ import com.github.ljtfreitas.restify.reflection.JavaType;
 import com.netflix.hystrix.HystrixObservableCommand;
 
 import rx.Observable;
+import rx.Scheduler;
+import rx.schedulers.Schedulers;
 
 public class HystrixObservableEndpointCallHandlerAdapter<T, O> implements AsyncEndpointCallHandlerAdapter<Observable<T>, HystrixObservableCommand<T>, O> {
 
-	private final HystrixEndpointCallHandlerAdapter<T, O> hystrixEndpointCallHandlerAdapter = new HystrixEndpointCallHandlerAdapter<>();
-	
+	private final Scheduler scheduler;
+	private final HystrixOnCircuitBreakerPredicate predicate = new HystrixOnCircuitBreakerPredicate();
+
+	public HystrixObservableEndpointCallHandlerAdapter() {
+		this(Schedulers.io());
+	}
+
+	public HystrixObservableEndpointCallHandlerAdapter(Scheduler scheduler) {
+		this.scheduler = scheduler;
+	}
+
 	@Override
 	public boolean supports(EndpointMethod endpointMethod) {
-		return hystrixEndpointCallHandlerAdapter.supports(endpointMethod)
+		return predicate.test(endpointMethod)
 			&& endpointMethod.returnType().is(Observable.class);
 	}
 
 	@Override
 	public JavaType returnType(EndpointMethod endpointMethod) {
-		return JavaType.of(JavaType.parameterizedType(HystrixObservableCommand.class, unwrap(endpointMethod.returnType())));
+		return JavaType.parameterizedType(HystrixObservableCommand.class, unwrap(endpointMethod.returnType()));
 	}
 	
 	private Type unwrap(JavaType declaredReturnType) {
@@ -81,7 +92,7 @@ public class HystrixObservableEndpointCallHandlerAdapter<T, O> implements AsyncE
 		@Override
 		public Observable<T> handleAsync(AsyncEndpointCall<O> call, Object[] args) {
 			HystrixObservableCommand<T> command = delegate.handle(call, args);
-			return command.toObservable();
+			return command.toObservable().subscribeOn(scheduler);
 		}
 	}
 }

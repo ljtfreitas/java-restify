@@ -45,7 +45,7 @@ public class JacksonHypermediaHalJsonMessageConverterTest {
 
 		when(response.body().input()).thenReturn(new ByteArrayInputStream(json.getBytes()));
 
-		Resource<MyModel> resource = (Resource<MyModel>) jsonConverter.read(response, JavaType.parameterizedType(Resource.class, MyModel.class));
+		Resource<MyModel> resource = (Resource<MyModel>) jsonConverter.read(response, JavaType.parameterizedType(Resource.class, MyModel.class).unwrap());
 
 		MyModel myModel = resource.content();
 
@@ -75,7 +75,7 @@ public class JacksonHypermediaHalJsonMessageConverterTest {
 
 		when(response.body().input()).thenReturn(new ByteArrayInputStream(json.getBytes()));
 		
-		Resource<User> resource = (Resource<User>) jsonConverter.read(response, JavaType.parameterizedType(Resource.class, User.class));
+		Resource<User> resource = (Resource<User>) jsonConverter.read(response, JavaType.parameterizedType(Resource.class, User.class).unwrap());
 
 		User user = resource.content();
 

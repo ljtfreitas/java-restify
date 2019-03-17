@@ -37,7 +37,6 @@ class RestifyableType {
 	private final Class<?> objectType;
 	private final Restifyable restifyable;
 
-
 	RestifyableType(String objectTypeName) {
 		this(Try.of(() -> Class.forName(objectTypeName))
 				.error(e -> new IllegalArgumentException("@Restifyable type not found on classpath: [" + objectTypeName + "]", e))
@@ -75,13 +74,13 @@ class RestifyableType {
 		private final String name;
 
 		private RestifyableTypeName(String name) {
-			this.name = Introspector.decapitalize(name);
+			this.name = Introspector.decapitalize(name).replaceAll("([a-z])([A-Z])", "$1-$2")
+					.toLowerCase();
 		}
 
 		@Override
 		public String toString() {
-			return name.replaceAll("([a-z])([A-Z])", "$1-$2")
-				.toLowerCase();
+			return name;
 		}
 	}
 }

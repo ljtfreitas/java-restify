@@ -25,6 +25,8 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.message.converter.form.multipart;
 
+import java.io.IOException;
+import java.io.OutputStream;
 import java.nio.charset.Charset;
 
 class SimpleMultipartFieldSerializer extends BaseMultipartFieldSerializer<Object> {
@@ -40,10 +42,10 @@ class SimpleMultipartFieldSerializer extends BaseMultipartFieldSerializer<Object
 	}
 
 	@Override
-	protected byte[] valueOf(MultipartField<Object> field, Charset charset) {
-		return field.value().toString().getBytes(charset);
+	protected void writeContent(MultipartField<Object> field, Charset charset, OutputStream output) throws IOException {
+		output.write(field.value().toString().getBytes(charset));
 	}
-
+	
 	@Override
 	protected String contentTypeOf(Object value) {
 		return "text/plain";

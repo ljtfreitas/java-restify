@@ -37,6 +37,7 @@ import javax.net.ssl.HttpsURLConnection;
 import com.github.ljtfreitas.restify.http.client.HttpClientException;
 import com.github.ljtfreitas.restify.http.client.message.Encoding;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
+import com.github.ljtfreitas.restify.http.client.request.HttpClientRequest;
 import com.github.ljtfreitas.restify.http.client.request.HttpClientRequestFactory;
 import com.github.ljtfreitas.restify.http.client.request.Timeout;
 
@@ -63,13 +64,13 @@ public class JdkHttpClientRequestFactory implements HttpClientRequestFactory {
 	}
 
 	@Override
-	public JdkHttpClientRequest createOf(EndpointRequest request) {
+	public HttpClientRequest createOf(EndpointRequest request) {
 		try {
-			HttpURLConnection connection = open(request.endpoint().toURL());
+			HttpURLConnection connection = configure(request, open(request.endpoint().toURL()));
 
-			configure(request, connection);
-
-			return new JdkHttpClientRequest(connection, charset, request.headers());
+			return httpClientRequestConfiguration.bufferRequestBody() ?
+					new BufferedJdkHttpClientRequestFactory(charset, httpClientRequestConfiguration).create(connection, request) :
+						new StreamingJdkHttpClientRequestFactory(charset, httpClientRequestConfiguration).create(connection, request);
 
 		} catch (IOException e) {
 			throw new HttpClientException(e);
@@ -84,13 +85,12 @@ public class JdkHttpClientRequestFactory implements HttpClientRequestFactory {
 		return (HttpURLConnection) connection;
 	}
 
-	private void configure(EndpointRequest source, HttpURLConnection connection) throws IOException {
+	private HttpURLConnection configure(EndpointRequest source, HttpURLConnection connection) throws IOException {
 		connection.setConnectTimeout(httpClientRequestConfiguration.connectionTimeout());
 		connection.setReadTimeout(httpClientRequestConfiguration.readTimeout());
 		connection.setInstanceFollowRedirects(httpClientRequestConfiguration.followRedirects());
 		connection.setUseCaches(httpClientRequestConfiguration.useCaches());
-
-		connection.setDoOutput(true);
+		connection.setDoOutput(source.body().isPresent());
 		connection.setAllowUserInteraction(false);
 		connection.setRequestMethod(source.method());
 
@@ -108,5 +108,7 @@ public class JdkHttpClientRequestFactory implements HttpClientRequestFactory {
 			connection.setConnectTimeout((int) (timeout.connection() <= 0 ? 0 : timeout.connection()));
 			connection.setReadTimeout((int) (timeout.read() <= 0 ? 0 : timeout.read()));
 		});
+
+		return connection;
 	}
 }

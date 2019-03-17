@@ -27,19 +27,19 @@ package com.github.ljtfreitas.restify.http.client.message.request;
 
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.OutputStream;
 import java.nio.charset.Charset;
 
 import com.github.ljtfreitas.restify.http.client.message.Encoding;
 import com.github.ljtfreitas.restify.util.Try;
 
-public class BufferedByteArrayHttpRequestBody implements HttpRequestBody {
+public class BufferedByteArrayHttpRequestBody implements BufferedHttpRequestBody {
 
 	private static final int DEFAULT_BUFFER_SIZE = 1024 * 100;
 
 	private final Charset charset;
-	private final BufferedOutput output;
+	private final ByteArrayOutputStream source;
+	private final BufferedOutputStream buffer;
 
 	public BufferedByteArrayHttpRequestBody() {
 		this(Encoding.UTF_8.charset());
@@ -51,67 +51,26 @@ public class BufferedByteArrayHttpRequestBody implements HttpRequestBody {
 
 	public BufferedByteArrayHttpRequestBody(Charset charset, int size) {
 		this.charset = charset;
-		this.output = new BufferedOutput(size);
+		this.source = new ByteArrayOutputStream(size);
+		this.buffer = new BufferedOutputStream(this.source);
 	}
 
 	@Override
 	public OutputStream output() {
-		return output;
+		return buffer;
 	}
 
 	@Override
 	public byte[] asBytes() {
-		return output.source.toByteArray();
-	}
-
-	@Override
-	public boolean empty() {
-		return output.source.size() == 0;
+		return source.toByteArray();
 	}
 
 	@Override
 	public String toString() {
-		return Try.of(() -> output.source.toString(charset.name())).get();
+		return Try.of(() -> source.toString(charset.name())).get();
 	}
 
-	@Override
-	public void writeTo(OutputStream other) {
-		Try.run(() -> output.source.writeTo(other));
-	}
-
-	private class BufferedOutput extends OutputStream {
-
-		private final ByteArrayOutputStream source;
-		private final BufferedOutputStream buffer;
-
-		private BufferedOutput(int size) {
-			this.source = new ByteArrayOutputStream(size);
-			this.buffer = new BufferedOutputStream(source);
-		}
-
-		@Override
-		public void write(byte[] b) throws IOException {
-			buffer.write(b);
-		}
-
-		@Override
-		public void write(int b) throws IOException {
-			buffer.write(b);
-		}
-
-		@Override
-		public void write(byte[] b, int off, int len) throws IOException {
-			buffer.write(b, off, len);
-		}
-
-		@Override
-		public void flush() throws IOException {
-			buffer.flush();
-		}
-
-		@Override
-		public void close() throws IOException {
-			buffer.close();
-		}
+	public static BufferedHttpRequestBody empty() {
+		return new BufferedByteArrayHttpRequestBody(Encoding.UTF_8.charset(), 0);
 	}
 }

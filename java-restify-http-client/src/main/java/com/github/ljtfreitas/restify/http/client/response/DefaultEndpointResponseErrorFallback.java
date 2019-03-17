@@ -30,33 +30,14 @@ import com.github.ljtfreitas.restify.reflection.JavaType;
 
 public class DefaultEndpointResponseErrorFallback implements EndpointResponseErrorFallback {
 
-	private final boolean emptyOnNotFound;
-
 	private final EndpointResponseExceptionFactory endpointResponseExceptionFactory = new EndpointResponseExceptionFactory();
-
-	public DefaultEndpointResponseErrorFallback() {
-		this.emptyOnNotFound = false;
-	}
-
-	private DefaultEndpointResponseErrorFallback(boolean emptyOnNotFound) {
-		this.emptyOnNotFound = emptyOnNotFound;
-	}
 
 	@Override
 	public <T> EndpointResponse<T> onError(HttpResponseMessage response, JavaType responseType) {
-		if (response.status().isNotFound() && emptyOnNotFound) {
-			return EndpointResponse.empty(response.status(), response.headers());
-
-		} else {
-			throw exception(response);
-		}
+		throw exception(response);
 	}
 
 	private EndpointResponseException exception(HttpResponseMessage response) {
 		return endpointResponseExceptionFactory.create(response);
-	}
-
-	public static DefaultEndpointResponseErrorFallback emptyOnNotFound() {
-		return new DefaultEndpointResponseErrorFallback(true);
 	}
 }

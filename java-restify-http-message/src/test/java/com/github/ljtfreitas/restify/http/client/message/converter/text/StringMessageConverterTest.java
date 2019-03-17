@@ -7,6 +7,8 @@ import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayInputStream;
 import java.nio.charset.Charset;
+import java.util.Arrays;
+import java.util.Collection;
 
 import org.junit.Before;
 import org.junit.Test;
@@ -16,9 +18,9 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import com.github.ljtfreitas.restify.http.client.message.ContentType;
-import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
-import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestBody;
 import com.github.ljtfreitas.restify.http.client.message.request.BufferedByteArrayHttpRequestBody;
+import com.github.ljtfreitas.restify.http.client.message.request.BufferedHttpRequestBody;
+import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
 import com.github.ljtfreitas.restify.http.client.message.response.HttpResponseMessage;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -38,8 +40,8 @@ public class StringMessageConverterTest {
 	public void setup() {
 		converter = new StringMessageConverter() {
 			@Override
-			public ContentType contentType() {
-				return ContentType.of("*");
+			public Collection<ContentType> contentTypes() {
+				return Arrays.asList(ContentType.of("*"));
 			}
 		};
 
@@ -71,7 +73,7 @@ public class StringMessageConverterTest {
 
 	@Test
 	public void shouldWriteStringMessage() {
-		HttpRequestBody output = new BufferedByteArrayHttpRequestBody();
+		BufferedHttpRequestBody output = new BufferedByteArrayHttpRequestBody();
 
 		when(request.body()).thenReturn(output);
 

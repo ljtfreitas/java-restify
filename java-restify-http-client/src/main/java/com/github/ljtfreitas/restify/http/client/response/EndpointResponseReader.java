@@ -103,7 +103,7 @@ public class EndpointResponseReader {
 				T responseObject = (T) converter.read(response, responseType);
 				response.body().input().close();
 
-				return new EndpointResponse<>(response.status(), response.headers(), responseObject);
+				return EndpointResponse.of(response.status(), responseObject, response.headers());
 
 			} catch (IOException e) {
 				throw new HttpMessageReadException(

@@ -25,6 +25,9 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.message.converter.octet;
 
+import java.util.Arrays;
+import java.util.Collection;
+
 import com.github.ljtfreitas.restify.http.client.message.ContentType;
 import com.github.ljtfreitas.restify.http.client.message.converter.HttpMessageReader;
 import com.github.ljtfreitas.restify.http.client.message.converter.HttpMessageWriter;
@@ -34,7 +37,7 @@ public interface OctetStreamMessageConverter<T> extends HttpMessageReader<T>, Ht
 	public static final ContentType OCTET_STREAM_MEDIA_TYPE = ContentType.of("application/octet-stream");
 
 	@Override
-	public default ContentType contentType() {
-		return OCTET_STREAM_MEDIA_TYPE;
+	public default Collection<ContentType> contentTypes() {
+		return Arrays.asList(OCTET_STREAM_MEDIA_TYPE);
 	}
 }

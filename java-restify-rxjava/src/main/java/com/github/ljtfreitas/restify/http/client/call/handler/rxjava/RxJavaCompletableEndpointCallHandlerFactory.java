@@ -25,10 +25,11 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.call.handler.rxjava;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
+import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutionException;
 
-import com.github.ljtfreitas.restify.http.client.call.EndpointCall;
 import com.github.ljtfreitas.restify.http.client.call.async.AsyncEndpointCall;
 import com.github.ljtfreitas.restify.http.client.call.handler.async.AsyncEndpointCallHandler;
 import com.github.ljtfreitas.restify.http.client.call.handler.async.AsyncEndpointCallHandlerFactory;
@@ -36,7 +37,9 @@ import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethod;
 import com.github.ljtfreitas.restify.reflection.JavaType;
 
 import rx.Completable;
+import rx.CompletableEmitter;
 import rx.Scheduler;
+import rx.functions.Action1;
 import rx.schedulers.Schedulers;
 
 public class RxJavaCompletableEndpointCallHandlerFactory implements AsyncEndpointCallHandlerFactory<Completable, Void> {
@@ -46,7 +49,7 @@ public class RxJavaCompletableEndpointCallHandlerFactory implements AsyncEndpoin
 	public final Scheduler scheduler;
 
 	public RxJavaCompletableEndpointCallHandlerFactory() {
-		this.scheduler = Schedulers.io();
+		this(Schedulers.io());
 	}
 
 	public RxJavaCompletableEndpointCallHandlerFactory(Scheduler scheduler) {
@@ -71,14 +74,8 @@ public class RxJavaCompletableEndpointCallHandlerFactory implements AsyncEndpoin
 		}
 
 		@Override
-		public Completable handle(EndpointCall<Void> call, Object[] args) {
-			return Completable.fromAction(call::execute)
-				.subscribeOn(scheduler);
-		}
-
-		@Override
 		public Completable handleAsync(AsyncEndpointCall<Void> call, Object[] args) {
-			return Completable.fromFuture(call.executeAsync().toCompletableFuture())
+			return Completable.fromEmitter(new CompletionStageCompletableEmitter(call.executeAsync()))
 				.onErrorResumeNext(this::handleAsyncException)
 					.subscribeOn(scheduler);
 		}
@@ -88,6 +85,30 @@ public class RxJavaCompletableEndpointCallHandlerFactory implements AsyncEndpoin
 				(ExecutionException.class.equals(throwable.getClass()) || CompletionException.class.equals(throwable.getClass())) ?
 						throwable.getCause() :
 							throwable);
+		}
+	}
+	
+	private class CompletionStageCompletableEmitter implements Action1<CompletableEmitter> {
+
+		private final CompletionStage<Void> stage;
+		
+		private CompletionStageCompletableEmitter(CompletionStage<Void> stage) {
+			this.stage = stage;
+		}
+
+		@Override
+		public void call(CompletableEmitter emitter) {
+			CompletableFuture<Void> future = stage.toCompletableFuture();
+
+			future.whenComplete((signal, throwable) -> {
+				if (throwable != null) {
+					emitter.onError(throwable);
+				} else {
+					emitter.onCompleted();
+				}
+			});
+
+			emitter.setCancellation(() -> future.cancel(true));
 		}
 	}
 }

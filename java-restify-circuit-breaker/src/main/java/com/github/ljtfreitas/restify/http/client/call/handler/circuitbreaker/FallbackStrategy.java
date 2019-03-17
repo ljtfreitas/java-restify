@@ -29,6 +29,6 @@ import java.lang.reflect.Method;
 
 public interface FallbackStrategy {
 
-	<T> FallbackResult<T> execute(Method javaMethod, Object[] args) throws Exception;
+	<T> FallbackResult<T> execute(Method javaMethod, Object[] args, Throwable throwable);
 
 }

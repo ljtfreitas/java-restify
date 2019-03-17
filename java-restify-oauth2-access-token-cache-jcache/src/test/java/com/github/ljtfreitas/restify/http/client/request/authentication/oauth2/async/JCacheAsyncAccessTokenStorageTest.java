@@ -98,7 +98,7 @@ public class JCacheAsyncAccessTokenStorageTest {
 				assertEquals(newAccessToken, foundAccessToken.get());
 			})
 
-			.thenRun(() -> Try.run(() -> Thread.sleep(5500)))
+			.thenRun(() -> Try.run(() -> Thread.sleep(5500)).apply())
 
 			.thenCompose(a -> jCacheAsyncAccessTokenStorage.findBy(key))
 

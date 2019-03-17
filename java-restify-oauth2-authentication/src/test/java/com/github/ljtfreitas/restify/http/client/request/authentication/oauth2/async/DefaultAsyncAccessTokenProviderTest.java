@@ -65,7 +65,7 @@ public class DefaultAsyncAccessTokenProviderTest {
 			.thenReturn(CompletableFuture.completedFuture(accessTokenRequest));
 
 		when(authorizationServer.requireToken(accessTokenRequest))
-			.thenReturn(CompletableFuture.completedFuture(new AccessTokenResponse(new EndpointResponse<>(StatusCode.ok(), accessTokenResponseBody))));
+			.thenReturn(CompletableFuture.completedFuture(new AccessTokenResponse(EndpointResponse.of(StatusCode.ok(), accessTokenResponseBody))));
 
 		CompletableFuture<AccessToken> newAccessTokenAsFuture = provider.provides(authenticatedRequest).toCompletableFuture();
 
@@ -92,7 +92,7 @@ public class DefaultAsyncAccessTokenProviderTest {
 			.thenReturn(CompletableFuture.completedFuture(accessTokenRequest));
 
 		when(authorizationServer.requireToken(accessTokenRequest))
-			.thenReturn(CompletableFuture.completedFuture(new AccessTokenResponse(new EndpointResponse<>(StatusCode.ok(), refreshedAccessTokenResponseBody))));
+			.thenReturn(CompletableFuture.completedFuture(new AccessTokenResponse(EndpointResponse.of(StatusCode.ok(), refreshedAccessTokenResponseBody))));
 
 		CompletableFuture<AccessToken> newAccessTokenAsFuture = provider.refresh(refreshedAccessToken, authenticatedRequest).toCompletableFuture();
 

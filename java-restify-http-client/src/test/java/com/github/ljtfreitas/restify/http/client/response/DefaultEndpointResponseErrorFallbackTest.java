@@ -5,9 +5,6 @@ import static org.hamcrest.CoreMatchers.containsString;
 import static org.hamcrest.CoreMatchers.endsWith;
 import static org.hamcrest.CoreMatchers.is;
 import static org.hamcrest.CoreMatchers.sameInstance;
-import static org.junit.Assert.assertEquals;
-import static org.junit.Assert.assertNull;
-import static org.junit.Assert.assertSame;
 import static org.mockito.Mockito.when;
 
 import java.io.ByteArrayInputStream;
@@ -77,19 +74,6 @@ public class DefaultEndpointResponseErrorFallbackTest {
 		expectedException.expect(method(e -> e.bodyAsString(), is(body)));
 
 		fallback.onError(response, null);
-	}
-
-	@Test
-	public void shouldReturnEmptyEndpointResponseWhenHttpResponseIsNotFoundAndEmptyOnNotFoundIsTrue() {
-		when(response.status()).thenReturn(StatusCode.notFound());
-
-		fallback = DefaultEndpointResponseErrorFallback.emptyOnNotFound();
-
-		EndpointResponse<Object> newEndpointResponse = fallback.onError(response, null);
-
-		assertEquals(response.status(), newEndpointResponse.status());
-		assertSame(response.headers(), newEndpointResponse.headers());
-		assertNull(newEndpointResponse.body());
 	}
 
 	private <T> FeatureMatcher<EndpointResponseException, T> method(Function<EndpointResponseException, T> function, Matcher<T> matcher) {

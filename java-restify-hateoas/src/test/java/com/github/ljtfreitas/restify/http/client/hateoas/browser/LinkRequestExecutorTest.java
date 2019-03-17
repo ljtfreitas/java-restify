@@ -21,6 +21,7 @@ import com.github.ljtfreitas.restify.http.client.message.response.StatusCode;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
 import com.github.ljtfreitas.restify.http.client.request.async.AsyncEndpointRequestExecutor;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
+import com.github.ljtfreitas.restify.reflection.JavaType;
 
 @RunWith(MockitoJUnitRunner.class)
 public class LinkRequestExecutorTest {
@@ -37,9 +38,9 @@ public class LinkRequestExecutorTest {
 	@Test
 	public void shouldExecuteEndpointRequestFromLink() {
 		Link link = Link.self("http://localhost:8080/me");
-		LinkEndpointRequest linkEndpointRequest = new LinkEndpointRequest(link, String.class);
+		LinkEndpointRequest linkEndpointRequest = new LinkEndpointRequest(link, JavaType.of(String.class));
 
-		EndpointResponse<Object> expectedEndpointResponse = new EndpointResponse<>(StatusCode.ok(), new Headers(), "hello");
+		EndpointResponse<Object> expectedEndpointResponse = EndpointResponse.of(StatusCode.ok(), "hello", new Headers());
 
 		when(asyncEndpointRequestExecutor.executeAsync(notNull(EndpointRequest.class)))
 			.thenReturn(CompletableFuture.completedFuture(expectedEndpointResponse));

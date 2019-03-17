@@ -115,29 +115,29 @@ public class HypermediaBrowser {
 		}
 
 		public <T> CompletionStage<T> as(Type type) {
-			CompletionStage<EndpointResponse<T>> response = tryExecute(type);
-			return response.thenApply(EndpointResponse::body);
+			CompletionStage<EndpointResponse<T>> response = tryExecute(JavaType.of(type));
+			return response.thenApply(e -> e.body());
 		}
 
 		public <T> CompletionStage<Collection<T>> asCollection(Type type) {
 			CompletionStage<EndpointResponse<List<T>>> response = tryExecute(JavaType.parameterizedType(List.class, type));
-			return response.thenApply(EndpointResponse::body);
+			return response.thenApply(e -> e.body());
 		}
 
 		public <T> CompletionStage<Resource<T>> asResource(Type type) {
 			CompletionStage<EndpointResponse<Resource<T>>> response = tryExecute(JavaType.parameterizedType(Resource.class, type));
-			return response.thenApply(EndpointResponse::body);
+			return response.thenApply(e -> e.body());
 		}
 
 		public <T> CompletionStage<EndpointResponse<T>> asResponse(Type type) {
-			return tryExecute(type);
+			return tryExecute(JavaType.of(type));
 		}
 
 		public CompletionStage<EndpointResponse<Void>> execute() {
-			return tryExecute(void.class);
+			return tryExecute(JavaType.of(void.class));
 		}
 		
-		private <T> CompletionStage<EndpointResponse<T>> tryExecute(Type responseType) {
+		private <T> CompletionStage<EndpointResponse<T>> tryExecute(JavaType responseType) {
 			CompletionStage<EndpointResponse<T>> responseAsFuture = traverse()
 					.thenCompose(linkURI -> execute(linkURI, responseType));
 
@@ -154,7 +154,7 @@ public class HypermediaBrowser {
 		private CompletionStage<LinkURI> traverse(LinkURI linkURI, Hop relation) {
 			if (relation == null) return CompletableFuture.completedFuture(linkURI);
 
-			return execute(linkURI, String.class)
+			return execute(linkURI, JavaType.of(String.class))
 				.thenCompose(resource -> {
 
 					String resourceBody = (String) resource.body();
@@ -171,7 +171,7 @@ public class HypermediaBrowser {
 				});
 		}
 
-		private <T> CompletionStage<EndpointResponse<T>> execute(LinkURI linkURI, Type responseType) {
+		private <T> CompletionStage<EndpointResponse<T>> execute(LinkURI linkURI, JavaType responseType) {
 			LinkEndpointRequest request = new LinkEndpointRequest(baseURL, linkURI.link, linkURI.parameters, responseType, linkURI.method,
 					linkURI.headers, linkURI.body);
 

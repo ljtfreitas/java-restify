@@ -48,15 +48,15 @@ public class InputStreamContent {
 		this.bufferSize = bufferSize;
 	}
 
-	public void transferTo(OutputStream output) {
+	public int transferTo(OutputStream output) throws UncheckedIOException {
 		try {
-			doTransfer(output);
+			return doTransfer(output);
 		} catch (IOException e) {
 			throw new UncheckedIOException(e);
 		}
 	}
 
-	public byte[] asBytes() {
+	public byte[] asBytes() throws UncheckedIOException {
 		try {
 			return read().toByteArray();
 
@@ -77,7 +77,7 @@ public class InputStreamContent {
 		return output;
 	}
 
-	public String asString() {
+	public String asString() throws UncheckedIOException {
 		try {
 			return new String(read().toByteArray());
 
@@ -86,12 +86,16 @@ public class InputStreamContent {
 		}
 	}
 
-	private void doTransfer(OutputStream output) throws IOException {
-		int length = 0;
+	private int doTransfer(OutputStream output) throws IOException {
+		int length, readed = 0;
 		byte[] data = new byte[bufferSize];
 		
 		while ((length = source.read(data, 0, data.length)) != -1) {
 			output.write(data, 0, length);
+			readed += length;
 		}
+
+		return readed;
 	}
+
 }

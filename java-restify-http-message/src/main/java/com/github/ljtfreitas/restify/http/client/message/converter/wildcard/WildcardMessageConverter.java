@@ -25,6 +25,9 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.message.converter.wildcard;
 
+import java.util.Arrays;
+import java.util.Collection;
+
 import com.github.ljtfreitas.restify.http.client.message.ContentType;
 import com.github.ljtfreitas.restify.http.client.message.converter.HttpMessageReader;
 
@@ -33,7 +36,7 @@ public interface WildcardMessageConverter<T> extends HttpMessageReader<T> {
 	public  static final ContentType WILDCARD_CONTENT_TYPE = ContentType.of("*/*");
 
 	@Override
-	public default ContentType contentType() {
-		return WILDCARD_CONTENT_TYPE;
+	public default Collection<ContentType> contentTypes() {
+		return Arrays.asList(WILDCARD_CONTENT_TYPE);
 	}
 }

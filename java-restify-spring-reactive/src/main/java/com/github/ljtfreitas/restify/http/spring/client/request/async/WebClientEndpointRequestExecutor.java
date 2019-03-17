@@ -31,10 +31,8 @@ import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.lang.reflect.Type;
-import java.util.Optional;
 import java.util.concurrent.CompletionStage;
 import java.util.function.Supplier;
-import java.util.stream.Stream;
 
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.core.codec.CodecException;
@@ -120,14 +118,13 @@ public class WebClientEndpointRequestExecutor implements AsyncEndpointRequestExe
 	}
 
 	private <T> Mono<EndpointResponse<T>> read(ClientResponse response, JavaType responseType) {
-		Optional<Mono<EndpointResponse<T>>> mono = Stream.of(response.statusCode())
-				.filter(HttpStatus::isError)
-				.findFirst()
-				.map(status -> tryFallback(response, responseType));
+		Mono<EndpointResponse<T>> mono = Mono.just(response.statusCode())
+			.filter(HttpStatus::isError)
+			.flatMap(status -> tryFallback(response, responseType));
 
-		return mono.orElseGet(() -> response.bodyToMono(new JavaTypeReference<T>(responseType))
-				.map(body -> convert(response, body)))
-				.switchIfEmpty(Mono.defer(() -> Mono.just(convert(response, null))));
+		return mono.switchIfEmpty(response.bodyToMono(new JavaTypeReference<T>(responseType))
+						.map(body -> convert(response, body)))
+					.switchIfEmpty(Mono.defer(() -> Mono.just(convert(response, null))));
 	}
 
 	private <T> Mono<EndpointResponse<T>> tryFallback(ClientResponse response, JavaType responseType) {
@@ -145,7 +142,7 @@ public class WebClientEndpointRequestExecutor implements AsyncEndpointRequestExe
 				.stream()
 				.reduce(new Headers(), (a, b) -> a.add(b.getKey(), b.getValue()), (a, b) -> b);
 
-		return new EndpointResponse<>(statusCode, headers, body);
+		return EndpointResponse.of(statusCode, body, headers);
 	}
 
 	private Throwable onError(Throwable source) {

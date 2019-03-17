@@ -26,6 +26,7 @@
 package com.github.ljtfreitas.restify.http.client.response;
 
 import java.net.URI;
+import java.util.Collection;
 import java.util.Optional;
 
 import com.github.ljtfreitas.restify.http.client.message.ContentType;
@@ -242,7 +243,7 @@ public class EndpointResponseExceptionFactory {
 	private static class SimpleStringMessageConverter extends StringMessageConverter {
 
 		@Override
-		public ContentType contentType() {
+		public Collection<ContentType> contentTypes() {
 			throw new UnsupportedOperationException();
 		}
 		

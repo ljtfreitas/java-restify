@@ -1,5 +1,6 @@
 /*******************************************************************************
  *
+ * MIT License
  *
  * Copyright (c) 2016 Tiago de Freitas Lima
  *
@@ -37,6 +38,8 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import com.github.ljtfreitas.restify.util.Try;
 
 public class Parameters implements Iterable<Parameters.Parameter> {
 
@@ -248,11 +251,9 @@ public class Parameters implements Iterable<Parameters.Parameter> {
 		}
 
 		private String encode(String value) {
-			try {
-				return URLEncoder.encode(value, "UTF-8");
-			} catch (UnsupportedEncodingException e) {
-				return value;
-			}
+			return Try.of(() -> URLEncoder.encode(value, "UTF-8"))
+						.recover(UnsupportedEncodingException.class, e -> Try.success(value))
+							.get();
 		}
 		
 		@Override

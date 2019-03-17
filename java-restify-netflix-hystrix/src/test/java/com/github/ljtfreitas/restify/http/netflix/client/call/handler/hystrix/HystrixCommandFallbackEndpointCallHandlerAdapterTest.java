@@ -1,17 +1,21 @@
 package com.github.ljtfreitas.restify.http.netflix.client.call.handler.hystrix;
 
 import static org.junit.Assert.assertEquals;
+import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyVararg;
 import static org.mockito.Matchers.notNull;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Collections;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.Future;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
@@ -19,6 +23,8 @@ import org.mockito.runners.MockitoJUnitRunner;
 import com.github.ljtfreitas.restify.http.client.call.EndpointCall;
 import com.github.ljtfreitas.restify.http.client.call.handler.EndpointCallHandler;
 import com.github.ljtfreitas.restify.http.client.call.handler.circuitbreaker.Fallback;
+import com.github.ljtfreitas.restify.http.client.call.handler.circuitbreaker.OnCircuitBreakerMetadata;
+import com.github.ljtfreitas.restify.http.client.call.handler.circuitbreaker.OnCircuitBreakerMetadataResolver;
 import com.github.ljtfreitas.restify.http.client.call.handler.circuitbreaker.WithFallback;
 import com.github.ljtfreitas.restify.reflection.JavaType;
 import com.netflix.hystrix.HystrixCommand;
@@ -32,6 +38,13 @@ public class HystrixCommandFallbackEndpointCallHandlerAdapterTest {
 	@Mock
 	private EndpointCallHandler<String, String> delegate;
 
+	@Mock
+	private OnCircuitBreakerMetadataResolver onCircuitBreakerMetadataResolver;
+
+	@Mock
+	private OnCircuitBreakerMetadata onCircuitBreakerMetadata;
+	
+	@InjectMocks
 	private HystrixCommandEndpointCallHandlerAdapter<String, String> adapter;
 
 	@Spy
@@ -40,16 +53,28 @@ public class HystrixCommandFallbackEndpointCallHandlerAdapterTest {
 	@Spy
 	private FallbackOfOtherType fallbackOfOtherType = new FallbackOfOtherType();
 
+	private RuntimeException exception;
+
 	@SuppressWarnings("unchecked")
 	@Before
 	public void setup() {
-		adapter = new HystrixCommandEndpointCallHandlerAdapter<>(Fallback.of(fallback));
+		adapter = new HystrixCommandEndpointCallHandlerAdapter<>(Fallback.of(fallback), onCircuitBreakerMetadataResolver);
 
 		when(delegate.handle(notNull(EndpointCall.class), anyVararg()))
 			.then(invocation -> invocation.getArgumentAt(0, EndpointCall.class).execute());
 
 		when(delegate.returnType())
 			.thenReturn(JavaType.of(String.class));
+
+		exception = new RuntimeException("oooh!");
+		
+		when(onCircuitBreakerMetadataResolver.resolve(any()))
+			.thenReturn(onCircuitBreakerMetadata);
+
+		when(onCircuitBreakerMetadata.groupKey()).thenReturn(Optional.empty());
+		when(onCircuitBreakerMetadata.commandKey()).thenReturn(Optional.empty());
+		when(onCircuitBreakerMetadata.threadPoolKey()).thenReturn(Optional.empty());
+		when(onCircuitBreakerMetadata.properties()).thenReturn(Collections.emptyMap());
 	}
 
 	@SuppressWarnings("unchecked")
@@ -58,7 +83,7 @@ public class HystrixCommandFallbackEndpointCallHandlerAdapterTest {
 		EndpointCallHandler<HystrixCommand<String>, String> handler = adapter
 				.adapt(new SimpleEndpointMethod(SomeType.class.getMethod("command")), delegate);
 
-		HystrixCommand<String> hystrixCommand = handler.handle(() -> {throw new RuntimeException("oooh!");}, null);
+		HystrixCommand<String> hystrixCommand = handler.handle(() -> {throw exception;}, null);
 
 		String result = hystrixCommand.execute();
 
@@ -75,7 +100,7 @@ public class HystrixCommandFallbackEndpointCallHandlerAdapterTest {
 		EndpointCallHandler<HystrixCommand<String>, String> handler = adapter
 				.adapt(new SimpleEndpointMethod(SomeType.class.getMethod("string")), delegate);
 
-		HystrixCommand<String> hystrixCommand = handler.handle(() -> {throw new RuntimeException("oooh!");}, null);
+		HystrixCommand<String> hystrixCommand = handler.handle(() -> {throw exception;}, null);
 
 		String result = hystrixCommand.execute();
 
@@ -92,7 +117,7 @@ public class HystrixCommandFallbackEndpointCallHandlerAdapterTest {
 		EndpointCallHandler<HystrixCommand<String>, String> handler = adapter
 				.adapt(new SimpleEndpointMethod(SomeType.class.getMethod("future")), delegate);
 
-		HystrixCommand<String> hystrixCommand = handler.handle(() -> {throw new RuntimeException("oooh!");}, null);
+		HystrixCommand<String> hystrixCommand = handler.handle(() -> {throw exception;}, null);
 
 		String result = hystrixCommand.execute();
 
@@ -109,7 +134,7 @@ public class HystrixCommandFallbackEndpointCallHandlerAdapterTest {
 		EndpointCallHandler<HystrixCommand<String>, String> handler = adapter
 				.adapt(new SimpleEndpointMethod(SomeType.class.getMethod("observable")), delegate);
 
-		HystrixCommand<String> hystrixCommand = handler.handle(() -> {throw new RuntimeException("oooh!");}, null);
+		HystrixCommand<String> hystrixCommand = handler.handle(() -> {throw exception;}, null);
 
 		String result = hystrixCommand.execute();
 
@@ -128,7 +153,7 @@ public class HystrixCommandFallbackEndpointCallHandlerAdapterTest {
 
 		String arg = "whatever";
 
-		HystrixCommand<String> hystrixCommand = handler.handle(() -> {throw new RuntimeException("oooh!");}, new Object[] {arg});
+		HystrixCommand<String> hystrixCommand = handler.handle(() -> {throw exception;}, new Object[] {arg});
 
 		String result = hystrixCommand.execute();
 
@@ -141,21 +166,57 @@ public class HystrixCommandFallbackEndpointCallHandlerAdapterTest {
 
 	@SuppressWarnings("unchecked")
 	@Test
+	public void shouldReturnFallbackValueFromMethodWithoutArgsWhenHystrixCommandExecutionThrowException() throws Exception {
+		EndpointCallHandler<HystrixCommand<String>, String> handler = adapter
+				.adapt(new SimpleEndpointMethod(SomeType.class.getMethod("withoutArgs")), delegate);
+
+		HystrixCommand<String> hystrixCommand = handler.handle(() -> {throw exception;}, new Object[0]);
+
+		String result = hystrixCommand.execute();
+
+		assertEquals("fallback without args", result);
+		assertEquals(delegate.returnType(), handler.returnType());
+
+		verify(delegate).handle(notNull(EndpointCall.class), anyVararg());
+		verify(fallback).withoutArgs();
+	}
+
+	@SuppressWarnings("unchecked")
+	@Test
 	public void shouldReturnValueFromFallbackOfOtherTypeWhenHystrixCommandExecutionThrowException() throws Exception {
 		adapter = new HystrixCommandEndpointCallHandlerAdapter<>(Fallback.of(fallbackOfOtherType));
 
 		EndpointCallHandler<HystrixCommand<String>, String> handler = adapter
 				.adapt(new SimpleEndpointMethod(SomeType.class.getMethod("command")), delegate);
 
-		HystrixCommand<String> hystrixCommand = handler.handle(() -> {throw new RuntimeException("oooh!");}, null);
+		HystrixCommand<String> hystrixCommand = handler.handle(() -> {throw exception;}, null);
 
 		String result = hystrixCommand.execute();
 
-		assertEquals("fallback", result);
+		assertEquals("fallback to exception: " + exception.getMessage(), result);
 		assertEquals(delegate.returnType(), handler.returnType());
 
 		verify(delegate).handle(notNull(EndpointCall.class), anyVararg());
-		verify(fallbackOfOtherType).command();
+		verify(fallbackOfOtherType).command(exception);
+	}
+
+	@SuppressWarnings("unchecked")
+	@Test
+	public void shouldReturnValueFromFallbackOfOtherTypeUsingThrowableAsArgumentWhenHystrixCommandExecutionThrowException() throws Exception {
+		adapter = new HystrixCommandEndpointCallHandlerAdapter<>(Fallback.of(fallbackOfOtherType));
+
+		EndpointCallHandler<HystrixCommand<String>, String> handler = adapter
+				.adapt(new SimpleEndpointMethod(SomeType.class.getMethod("command")), delegate);
+
+		HystrixCommand<String> hystrixCommand = handler.handle(() -> {throw exception;}, null);
+
+		String result = hystrixCommand.execute();
+
+		assertEquals("fallback to exception: oooh!", result);
+		assertEquals(delegate.returnType(), handler.returnType());
+
+		verify(delegate).handle(notNull(EndpointCall.class), anyVararg());
+		verify(fallbackOfOtherType).command(exception);
 	}
 
 	@SuppressWarnings("unchecked")
@@ -166,7 +227,7 @@ public class HystrixCommandFallbackEndpointCallHandlerAdapterTest {
 		EndpointCallHandler<HystrixCommand<String>, String> handler = adapter
 				.adapt(new SimpleEndpointMethod(SomeType.class.getMethod("future")), delegate);
 
-		HystrixCommand<String> hystrixCommand = handler.handle(() -> {throw new RuntimeException("oooh!");}, null);
+		HystrixCommand<String> hystrixCommand = handler.handle(() -> {throw exception;}, null);
 
 		String result = hystrixCommand.execute();
 
@@ -180,37 +241,56 @@ public class HystrixCommandFallbackEndpointCallHandlerAdapterTest {
 	@SuppressWarnings("unchecked")
 	@Test
 	public void shouldReturnFallbackValueFromMethodWithArgsFromFallbackOfOtherTypeWhenHystrixCommandExecutionThrowException() throws Exception {
-		adapter = new HystrixCommandEndpointCallHandlerAdapter<>(Fallback.of(fallbackOfOtherType));
+		adapter = new HystrixCommandEndpointCallHandlerAdapter<>(Fallback.of(fallbackOfOtherType), onCircuitBreakerMetadataResolver);
 
 		EndpointCallHandler<HystrixCommand<String>, String> handler = adapter
 				.adapt(new SimpleEndpointMethod(SomeType.class.getMethod("args", String.class)), delegate);
 
 		String arg = "whatever";
 
-		HystrixCommand<String> hystrixCommand = handler.handle(() -> {throw new RuntimeException("oooh!");}, new Object[] {arg});
+		HystrixCommand<String> hystrixCommand = handler.handle(() -> {throw exception;}, new Object[] {arg});
 
 		String result = hystrixCommand.execute();
 
-		assertEquals("fallback with arg " + arg, result);
+		assertEquals("fallback with arg " + arg + " and exception: " + exception.getMessage(), result);
 		assertEquals(delegate.returnType(), handler.returnType());
 
 		verify(delegate).handle(notNull(EndpointCall.class), anyVararg());
-		verify(fallbackOfOtherType).args(arg);
+		verify(fallbackOfOtherType).args(arg, exception);
+	}
+
+	@SuppressWarnings("unchecked")
+	@Test
+	public void shouldReturnFallbackValueFromMethodWithoutArgsFromFallbackOfOtherTypeWhenHystrixCommandExecutionThrowException() throws Exception {
+		adapter = new HystrixCommandEndpointCallHandlerAdapter<>(Fallback.of(fallbackOfOtherType));
+
+		EndpointCallHandler<HystrixCommand<String>, String> handler = adapter
+				.adapt(new SimpleEndpointMethod(SomeType.class.getMethod("withoutArgs")), delegate);
+
+		HystrixCommand<String> hystrixCommand = handler.handle(() -> {throw exception;}, new Object[0]);
+
+		String result = hystrixCommand.execute();
+
+		assertEquals("fallback without args", result);
+		assertEquals(delegate.returnType(), handler.returnType());
+
+		verify(delegate).handle(notNull(EndpointCall.class), anyVararg());
+		verify(fallbackOfOtherType).withoutArgs();
 	}
 
 	@SuppressWarnings("unchecked")
 	@Test
 	public void shouldReturnFallbackValueFromWithFallbackAnnotationWhenHystrixCommandExecutionThrowException() throws Exception {
-		adapter = new HystrixCommandEndpointCallHandlerAdapter<>();
+		adapter = new HystrixCommandEndpointCallHandlerAdapter<>(onCircuitBreakerMetadataResolver);
 
 		EndpointCallHandler<HystrixCommand<String>, String> handler = adapter
 				.adapt(new SimpleEndpointMethod(OtherType.class.getMethod("command")), delegate);
 
-		HystrixCommand<String> hystrixCommand = handler.handle(() -> {throw new RuntimeException("oooh!");}, null);
+		HystrixCommand<String> hystrixCommand = handler.handle(() -> {throw exception;}, null);
 
 		String result = hystrixCommand.execute();
 
-		assertEquals("fallback", result);
+		assertEquals("fallback to exception: " + exception.getMessage(), result);
 		assertEquals(delegate.returnType(), handler.returnType());
 
 		verify(delegate).handle(notNull(EndpointCall.class), anyVararg());
@@ -219,12 +299,12 @@ public class HystrixCommandFallbackEndpointCallHandlerAdapterTest {
 	@SuppressWarnings("unchecked")
 	@Test
 	public void shouldReturnFallbackValueFromMethodPresentOnWithFallbackAnnotationWhenHystrixCommandExecutionThrowException() throws Exception {
-		adapter = new HystrixCommandEndpointCallHandlerAdapter<>();
+		adapter = new HystrixCommandEndpointCallHandlerAdapter<>(onCircuitBreakerMetadataResolver);
 
 		EndpointCallHandler<HystrixCommand<String>, String> handler = adapter
 				.adapt(new SimpleEndpointMethod(OtherType.class.getMethod("otherCommand")), delegate);
 
-		HystrixCommand<String> hystrixCommand = handler.handle(() -> {throw new RuntimeException("oooh!");}, null);
+		HystrixCommand<String> hystrixCommand = handler.handle(() -> {throw exception;}, null);
 
 		String result = hystrixCommand.execute();
 
@@ -248,6 +328,8 @@ public class HystrixCommandFallbackEndpointCallHandlerAdapterTest {
 		Observable<String> observable();
 
 		String args(String arg);
+
+		String withoutArgs();
 	}
 
 	@WithFallback(FallbackOfOtherType.class)
@@ -301,20 +383,29 @@ public class HystrixCommandFallbackEndpointCallHandlerAdapterTest {
 		public String args(String arg) {
 			return "fallback with arg " + arg;
 		}
+
+		@Override
+		public String withoutArgs() {
+			return "fallback without args";
+		}
 	}
 
 	static class FallbackOfOtherType {
 
-		public String command() {
-			return "fallback";
+		public String command(Throwable t) {
+			return "fallback to exception: " + t.getMessage();
 		}
 
 		public String future() {
 			return "future fallback";
 		}
 
-		public String args(String arg) {
-			return "fallback with arg " + arg;
+		public String args(String arg, Throwable t) {
+			return "fallback with arg " + arg + " and exception: " + t.getMessage();
+		}
+
+		public String withoutArgs() {
+			return "fallback without args";
 		}
 
 		public String whatever() {
