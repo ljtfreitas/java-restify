@@ -25,6 +25,9 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.message.converter.form;
 
+import java.util.Arrays;
+import java.util.Collection;
+
 import com.github.ljtfreitas.restify.http.client.message.ContentType;
 import com.github.ljtfreitas.restify.http.client.message.converter.HttpMessageReader;
 import com.github.ljtfreitas.restify.http.client.message.converter.HttpMessageWriter;
@@ -34,7 +37,7 @@ public interface FormURLEncodedMessageConverter<T> extends HttpMessageReader<T>,
 	public static final ContentType APPLICATION_X_WWW_FORM_URLENCODED = ContentType.of("application/x-www-form-urlencoded");
 
 	@Override
-	public default ContentType contentType() {
-		return APPLICATION_X_WWW_FORM_URLENCODED;
+	public default Collection<ContentType> contentTypes() {
+		return Arrays.asList(APPLICATION_X_WWW_FORM_URLENCODED);
 	}
 }

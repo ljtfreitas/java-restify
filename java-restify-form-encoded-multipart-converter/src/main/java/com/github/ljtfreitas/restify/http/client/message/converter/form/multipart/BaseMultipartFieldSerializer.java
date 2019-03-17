@@ -34,6 +34,8 @@ import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMess
 
 abstract class BaseMultipartFieldSerializer<T> implements MultipartFieldSerializer<T> {
 
+	private static final String CONTENT_TYPE_HEADER_NAME = "Content-Type: ";
+
 	@Override
 	public void write(String boundary, MultipartField<T> field, HttpRequestMessage httpRequestMessage) {
 		try {
@@ -43,11 +45,12 @@ abstract class BaseMultipartFieldSerializer<T> implements MultipartFieldSerializ
 			output.write('\r');
 			output.write('\n');
 
-			new MultipartFieldHeaders(field).writeOn(output);
+			writeHeaders(field, output);
+
 			output.write('\r');
 			output.write('\n');
 
-			output.write(valueOf(field, httpRequestMessage.charset()));
+			writeContent(field, httpRequestMessage.charset(), output);
 
 			output.write('\r');
 			output.write('\n');
@@ -63,33 +66,25 @@ abstract class BaseMultipartFieldSerializer<T> implements MultipartFieldSerializ
 		return null;
 	}
 
-	class MultipartFieldHeaders {
+	private void writeHeaders(MultipartField<T> field, OutputStream output) throws IOException {
+		ContentDisposition contentDisposition = contentDispositionOf(field);
+		String contentType = field.contentType().orElseGet(() -> contentTypeOf(field.value()));
 
-		private final ContentDisposition contentDisposition;
-		private final String contentType;
+		output.write(contentDisposition.toString().getBytes());
+		output.write('\r');
+		output.write('\n');
 
-		private MultipartFieldHeaders(MultipartField<T> field) {
-			this.contentDisposition = contentDispositionOf(field);
-			this.contentType = field.contentType().orElseGet(() -> contentTypeOf(field.value()));
-		}
-
-		private void writeOn(OutputStream output) throws IOException {
-			output.write(contentDisposition.toString().getBytes());
+		if (contentType != null) {
+			output.write(CONTENT_TYPE_HEADER_NAME.getBytes());
+			output.write(contentType.getBytes());
 			output.write('\r');
 			output.write('\n');
-
-			if (contentType != null) {
-				output.write("Content-Type: ".getBytes());
-				output.write(contentType.getBytes());
-				output.write('\r');
-				output.write('\n');
-			}
 		}
 	}
 
 	protected abstract ContentDisposition contentDispositionOf(MultipartField<T> field);
 
-	protected abstract byte[] valueOf(MultipartField<T> field, Charset charset);
+	protected abstract void writeContent(MultipartField<T> field, Charset charset, OutputStream output) throws IOException;
 
 	class ContentDisposition {
 

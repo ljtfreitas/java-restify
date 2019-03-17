@@ -68,6 +68,7 @@ import com.github.ljtfreitas.restify.http.client.request.interceptor.EndpointReq
 import com.github.ljtfreitas.restify.http.client.request.interceptor.HttpClientRequestInterceptor;
 import com.github.ljtfreitas.restify.http.client.request.interceptor.authentication.AuthenticationEndpoinRequestInterceptor;
 import com.github.ljtfreitas.restify.http.client.response.DefaultEndpointResponseErrorFallback;
+import com.github.ljtfreitas.restify.http.client.response.EmptyOnNotFoundEndpointResponseErrorFallback;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponseErrorFallback;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponseReader;
 import com.github.ljtfreitas.restify.http.client.retry.RetryCondition.EndpointResponseRetryCondition;
@@ -284,7 +285,7 @@ public class HypermediaBrowserBuilder {
 
 		private EndpointResponseErrorFallback build() {
 			return Optional.ofNullable(fallback)
-					.orElseGet(() -> emptyOnNotFound ? DefaultEndpointResponseErrorFallback.emptyOnNotFound()
+					.orElseGet(() -> emptyOnNotFound ? new EmptyOnNotFoundEndpointResponseErrorFallback()
 							: new DefaultEndpointResponseErrorFallback());
 		}
 	}

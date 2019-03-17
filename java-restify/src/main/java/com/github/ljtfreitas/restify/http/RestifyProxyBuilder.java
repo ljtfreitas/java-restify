@@ -45,7 +45,6 @@ import com.github.ljtfreitas.restify.http.client.call.DefaultEndpointCallFactory
 import com.github.ljtfreitas.restify.http.client.call.EndpointCallFactory;
 import com.github.ljtfreitas.restify.http.client.call.EndpointMethodExecutor;
 import com.github.ljtfreitas.restify.http.client.call.async.DefaultAsyncEndpointCallFactory;
-import com.github.ljtfreitas.restify.http.client.call.async.ExecutorAsyncEndpointCall;
 import com.github.ljtfreitas.restify.http.client.call.handler.EndpointCallHandlerProvider;
 import com.github.ljtfreitas.restify.http.client.call.handler.EndpointCallHandlers;
 import com.github.ljtfreitas.restify.http.client.call.handler.EndpointCallObjectHandlerAdapter;
@@ -103,6 +102,7 @@ import com.github.ljtfreitas.restify.http.client.request.interceptor.Intercepted
 import com.github.ljtfreitas.restify.http.client.request.interceptor.InterceptedHttpClientRequestFactory;
 import com.github.ljtfreitas.restify.http.client.request.interceptor.authentication.AuthenticationEndpoinRequestInterceptor;
 import com.github.ljtfreitas.restify.http.client.response.DefaultEndpointResponseErrorFallback;
+import com.github.ljtfreitas.restify.http.client.response.EmptyOnNotFoundEndpointResponseErrorFallback;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponseErrorFallback;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponseReader;
 import com.github.ljtfreitas.restify.http.client.retry.RetryCondition.EndpointResponseRetryCondition;
@@ -139,7 +139,7 @@ public class RestifyProxyBuilder {
 
 	private EndpointResponseErrorFallbackBuilder endpointResponseErrorFallbackBuilder = new EndpointResponseErrorFallbackBuilder(this);
 
-	private HttpClientRequestConfigurationBuilder httpClientRequestConfigurationBuilder = new HttpClientRequestConfigurationBuilder(this);
+	private HttpClientRequestFactoryBuilder httpClientRequestConfigurationBuilder = new HttpClientRequestFactoryBuilder(this);
 
 	private RetryBuilder retryBuilder = new RetryBuilder(this);
 
@@ -147,12 +147,14 @@ public class RestifyProxyBuilder {
 
 	private ClassLoader classloader = null;
 
+	private Executor asyncThreadPool = DisposableExecutors.newCachedThreadPool();
+
 	public RestifyProxyBuilder client(HttpClientRequestFactory httpClientRequestFactory) {
 		this.httpClientRequestFactory = httpClientRequestFactory;
 		return this;
 	}
 
-	public HttpClientRequestConfigurationBuilder client() {
+	public HttpClientRequestFactoryBuilder client() {
 		return httpClientRequestConfigurationBuilder;
 	}
 
@@ -312,7 +314,7 @@ public class RestifyProxyBuilder {
 
 		private EndpointRequestExecutor asyncEndpointRequestExecutor(AsyncHttpClientRequestFactory asyncHttpClientRequestFactory,
 				EndpointRequestWriter writer, EndpointResponseReader reader) {
-			return new DefaultAsyncEndpointRequestExecutor(endpointCallHandlersBuilder.async.executor,
+			return new DefaultAsyncEndpointRequestExecutor(httpClientRequestConfigurationBuilder.async.executor,
 					(AsyncHttpClientRequestFactory) httpClientRequestFactory, writer, reader,
 						endpointRequestExecutor(asyncHttpClientRequestFactory, writer, reader));
 		}
@@ -348,7 +350,7 @@ public class RestifyProxyBuilder {
 		}
 
 		private HttpClientRequestConfiguration httpClientRequestConfiguration() {
-			return httpClientRequestConfigurationBuilder.build();
+			return httpClientRequestConfigurationBuilder.configuration.build();
 		}
 
 		private Contract contract() {
@@ -523,12 +525,12 @@ public class RestifyProxyBuilder {
 		}
 
 		public EndpointCallHandlersBuilder async(Executor executor) {
-			async.with(executor);
+			async.using(executor);
 			return this;
 		}
 
 		public EndpointCallHandlersBuilder async(ExecutorService executorService) {
-			async.with(executorService);
+			async.using(executorService);
 			return this;
 		}
 
@@ -567,7 +569,7 @@ public class RestifyProxyBuilder {
 
 		private final Collection<EndpointCallHandlerProvider> providers = new ArrayList<>();
 
-		private Executor executor = ExecutorAsyncEndpointCall.pool();
+		private Executor executor = asyncThreadPool;
 
 		private AsyncEndpointCallHandlersBuilder all() {
 			providers.add(new FutureEndpointCallHandlerAdapter<Object, Object>(executor));
@@ -583,7 +585,7 @@ public class RestifyProxyBuilder {
 			return this;
 		}
 
-		private AsyncEndpointCallHandlersBuilder with(Executor executor) {
+		private AsyncEndpointCallHandlersBuilder using(Executor executor) {
 			this.executor = executor;
 			return this;
 		}
@@ -621,135 +623,53 @@ public class RestifyProxyBuilder {
 
 		private EndpointResponseErrorFallback build() {
 			return Optional.ofNullable(fallback)
-					.orElseGet(() -> emptyOnNotFound ? DefaultEndpointResponseErrorFallback.emptyOnNotFound() : new DefaultEndpointResponseErrorFallback());
+					.orElseGet(() -> emptyOnNotFound ? new EmptyOnNotFoundEndpointResponseErrorFallback() : new DefaultEndpointResponseErrorFallback());
 		}
 	}
 
-	public class HttpClientRequestConfigurationBuilder {
+	public class HttpClientRequestFactoryBuilder {
 
 		private final RestifyProxyBuilder context;
-		private final HttpClientRequestConfiguration.Builder httpClientRequestConfigurationBuilder = new HttpClientRequestConfiguration.Builder();
+		private final HttpClientRequestConfigurationBuilder configuration = new HttpClientRequestConfigurationBuilder(this);
 		private final HttpClientRequestInterceptorsBuilder interceptors = new HttpClientRequestInterceptorsBuilder();
+		private final HttpClientRequestAsyncBuilder async = new HttpClientRequestAsyncBuilder();
 
-		private HttpClientRequestConfiguration httpClientRequestConfiguration = null;
-
-		private HttpClientRequestConfigurationBuilder(RestifyProxyBuilder context) {
+		private HttpClientRequestFactoryBuilder(RestifyProxyBuilder context) {
 			this.context = context;
 		}
 
-		public HttpClientRequestConfigurationBuilder connectionTimeout(int connectionTimeout) {
-			httpClientRequestConfigurationBuilder.connectionTimeout(connectionTimeout);
+		public HttpClientRequestAsyncBuilder async() {
+			return async;
+		}
+
+		public HttpClientRequestFactoryBuilder async(Executor executor) {
+			async.using(executor);
 			return this;
-		}
-
-		public HttpClientRequestConfigurationBuilder connectionTimeout(Duration connectionTimeout) {
-			httpClientRequestConfigurationBuilder.connectionTimeout(connectionTimeout);
-			return this;
-		}
-
-		public HttpClientRequestConfigurationBuilder readTimeout(int readTimeout) {
-			httpClientRequestConfigurationBuilder.readTimeout(readTimeout);
-			return this;
-		}
-
-		public HttpClientRequestConfigurationBuilder readTimeout(Duration readTimeout) {
-			httpClientRequestConfigurationBuilder.readTimeout(readTimeout);
-			return this;
-		}
-
-		public HttpClientRequestConfigurationBuilder charset(Charset charset) {
-			httpClientRequestConfigurationBuilder.charset(charset);
-			return this;
-		}
-
-		public HttpClientRequestConfigurationBuilder proxy(Proxy proxy) {
-			httpClientRequestConfigurationBuilder.proxy(proxy);
-			return this;
-		}
-
-		public HttpClientRequestFollowRedirectsConfigurationBuilder followRedirects() {
-			return new HttpClientRequestFollowRedirectsConfigurationBuilder();
-		}
-
-		public HttpClientRequestConfigurationBuilder followRedirects(boolean enabled) {
-			httpClientRequestConfigurationBuilder.followRedirects(enabled);
-			return this;
-		}
-
-		public HttpClientRequestUseCachesConfigurationBuilder useCaches() {
-			return new HttpClientRequestUseCachesConfigurationBuilder();
-		}
-
-		public HttpClientRequestConfigurationBuilder useCaches(boolean enabled) {
-			httpClientRequestConfigurationBuilder.useCaches(enabled);
-			return this;
-		}
-
-		public HttpClientRequestSslConfigurationBuilder ssl() {
-			return new HttpClientRequestSslConfigurationBuilder();
 		}
 
 		public HttpClientRequestInterceptorsBuilder interceptors() {
 			return interceptors;
 		}
 
-		public RestifyProxyBuilder interceptors(HttpClientRequestInterceptor...interceptors) {
+		public HttpClientRequestFactoryBuilder interceptors(HttpClientRequestInterceptor... interceptors) {
 			this.interceptors.add(interceptors);
-			return context;
+			return this;
 		}
 
-		public RestifyProxyBuilder using(HttpClientRequestConfiguration httpClientRequestConfiguration) {
-			this.httpClientRequestConfiguration = httpClientRequestConfiguration;
-			return context;
+		public HttpClientRequestConfigurationBuilder configure() {
+			return configuration;
 		}
 
 		public RestifyProxyBuilder and() {
 			return context;
 		}
 
-		private HttpClientRequestConfiguration build() {
-			return Optional.ofNullable(httpClientRequestConfiguration).orElseGet(() -> httpClientRequestConfigurationBuilder.build());
-		}
+		private class HttpClientRequestAsyncBuilder {
 
-		public class HttpClientRequestFollowRedirectsConfigurationBuilder {
+			private Executor executor = asyncThreadPool;
 
-			public HttpClientRequestConfigurationBuilder enabled() {
-				httpClientRequestConfigurationBuilder.followRedirects().enabled();
-				return HttpClientRequestConfigurationBuilder.this;
-			}
-
-			public HttpClientRequestConfigurationBuilder disabled() {
-				httpClientRequestConfigurationBuilder.followRedirects().disabled();
-				return HttpClientRequestConfigurationBuilder.this;
-			}
-		}
-
-		public class HttpClientRequestUseCachesConfigurationBuilder {
-
-			public HttpClientRequestConfigurationBuilder enabled() {
-				httpClientRequestConfigurationBuilder.useCaches().enabled();
-				return HttpClientRequestConfigurationBuilder.this;
-			}
-
-			public HttpClientRequestConfigurationBuilder disabled() {
-				httpClientRequestConfigurationBuilder.useCaches().disabled();
-				return HttpClientRequestConfigurationBuilder.this;
-			}
-		}
-
-		public class HttpClientRequestSslConfigurationBuilder {
-
-			public HttpClientRequestSslConfigurationBuilder sslSocketFactory(SSLSocketFactory sslSocketFactory) {
-				httpClientRequestConfigurationBuilder.ssl().sslSocketFactory(sslSocketFactory);
-				return this;
-			}
-
-			public HttpClientRequestSslConfigurationBuilder hostnameVerifier(HostnameVerifier hostnameVerifier) {
-				httpClientRequestConfigurationBuilder.ssl().hostnameVerifier(hostnameVerifier);
-				return this;
-			}
-
-			public RestifyProxyBuilder and() {
+			private RestifyProxyBuilder using(Executor executor) {
+				this.executor = executor;
 				return context;
 			}
 		}
@@ -765,6 +685,181 @@ public class RestifyProxyBuilder {
 
 			public RestifyProxyBuilder and() {
 				return context;
+			}
+		}
+
+		public class HttpClientRequestConfigurationBuilder {
+
+			private final HttpClientRequestFactoryBuilder context;
+
+			private final HttpClientRequestConfiguration.Builder delegate = new HttpClientRequestConfiguration.Builder();
+			private final HttpClientRequestFollowRedirectsConfigurationBuilder followRedirects = new HttpClientRequestFollowRedirectsConfigurationBuilder();
+			private final HttpClientRequestUseCachesConfigurationBuilder useCaches = new HttpClientRequestUseCachesConfigurationBuilder();
+			private final HttpClientRequestBufferRequestBodyConfigurationBuilder bufferRequestBody = new HttpClientRequestBufferRequestBodyConfigurationBuilder();
+			private final HttpClientRequestOutputStreamingConfigurationBuilder outputStreaming = new HttpClientRequestOutputStreamingConfigurationBuilder();
+			private final HttpClientRequestSslConfigurationBuilder ssl = new HttpClientRequestSslConfigurationBuilder();
+
+			private HttpClientRequestConfiguration httpClientRequestConfiguration = null;
+
+			private HttpClientRequestConfigurationBuilder(HttpClientRequestFactoryBuilder context) {
+				this.context = context;
+			}
+
+			public HttpClientRequestConfigurationBuilder connectionTimeout(int connectionTimeout) {
+				delegate.connectionTimeout(connectionTimeout);
+				return this;
+			}
+
+			public HttpClientRequestConfigurationBuilder connectionTimeout(Duration connectionTimeout) {
+				delegate.connectionTimeout(connectionTimeout);
+				return this;
+			}
+
+			public HttpClientRequestConfigurationBuilder readTimeout(int readTimeout) {
+				delegate.readTimeout(readTimeout);
+				return this;
+			}
+
+			public HttpClientRequestConfigurationBuilder readTimeout(Duration readTimeout) {
+				delegate.readTimeout(readTimeout);
+				return this;
+			}
+
+			public HttpClientRequestConfigurationBuilder charset(Charset charset) {
+				delegate.charset(charset);
+				return this;
+			}
+
+			public HttpClientRequestConfigurationBuilder proxy(Proxy proxy) {
+				delegate.proxy(proxy);
+				return this;
+			}
+
+			public HttpClientRequestFollowRedirectsConfigurationBuilder followRedirects() {
+				return followRedirects;
+			}
+
+			public HttpClientRequestConfigurationBuilder followRedirects(boolean enabled) {
+				delegate.followRedirects(enabled);
+				return this;
+			}
+
+			public HttpClientRequestUseCachesConfigurationBuilder useCaches() {
+				return useCaches;
+			}
+
+			public HttpClientRequestConfigurationBuilder useCaches(boolean enabled) {
+				delegate.useCaches(enabled);
+				return this;
+			}
+
+			public HttpClientRequestBufferRequestBodyConfigurationBuilder bufferRequestBody() {
+				return bufferRequestBody;
+			}
+
+			public HttpClientRequestConfigurationBuilder bufferRequestBody(boolean enabled) {
+				delegate.bufferRequestBody(enabled);
+				return this;
+			}
+
+			public HttpClientRequestOutputStreamingConfigurationBuilder outputStreaming() {
+				return outputStreaming;
+			}
+
+			public HttpClientRequestConfigurationBuilder outputStreaming(boolean enabled) {
+				delegate.outputStreaming(enabled);
+				return this;
+			}
+
+			public HttpClientRequestSslConfigurationBuilder ssl() {
+				return ssl;
+			}
+
+			public HttpClientRequestFactoryBuilder using(HttpClientRequestConfiguration httpClientRequestConfiguration) {
+				this.httpClientRequestConfiguration = httpClientRequestConfiguration;
+				return context;
+			}
+
+			private HttpClientRequestConfiguration build() {
+				return Optional.ofNullable(httpClientRequestConfiguration).orElseGet(() -> delegate.build());
+			}
+
+			public class HttpClientRequestFollowRedirectsConfigurationBuilder {
+
+				public HttpClientRequestFactoryBuilder enabled() {
+					delegate.followRedirects().enabled();
+					return HttpClientRequestFactoryBuilder.this;
+				}
+
+				public HttpClientRequestFactoryBuilder disabled() {
+					delegate.followRedirects().disabled();
+					return HttpClientRequestFactoryBuilder.this;
+				}
+			}
+
+			public class HttpClientRequestUseCachesConfigurationBuilder {
+
+				public HttpClientRequestFactoryBuilder enabled() {
+					delegate.useCaches().enabled();
+					return HttpClientRequestFactoryBuilder.this;
+				}
+
+				public HttpClientRequestFactoryBuilder disabled() {
+					delegate.useCaches().disabled();
+					return HttpClientRequestFactoryBuilder.this;
+				}
+			}
+
+			public class HttpClientRequestBufferRequestBodyConfigurationBuilder {
+
+				public HttpClientRequestFactoryBuilder enabled() {
+					delegate.bufferRequestBody().enabled();
+					return HttpClientRequestFactoryBuilder.this;
+				}
+
+				public HttpClientRequestFactoryBuilder disabled() {
+					delegate.bufferRequestBody().disabled();
+					return HttpClientRequestFactoryBuilder.this;
+				}
+			}
+
+			public class HttpClientRequestOutputStreamingConfigurationBuilder {
+
+				public HttpClientRequestOutputStreamingConfigurationBuilder enabled() {
+					delegate.outputStreaming().enabled();
+					return this;
+				}
+
+				public HttpClientRequestFactoryBuilder disabled() {
+					delegate.outputStreaming().disabled();
+					return HttpClientRequestFactoryBuilder.this;
+				}
+
+				public HttpClientRequestOutputStreamingConfigurationBuilder chunkSize(int chunkSize) {
+					delegate.outputStreaming().chunkSize(chunkSize);
+					return this;
+				}
+
+				public HttpClientRequestFactoryBuilder and() {
+					return HttpClientRequestFactoryBuilder.this;
+				}
+			}
+
+			public class HttpClientRequestSslConfigurationBuilder {
+
+				public HttpClientRequestSslConfigurationBuilder sslSocketFactory(SSLSocketFactory sslSocketFactory) {
+					delegate.ssl().sslSocketFactory(sslSocketFactory);
+					return this;
+				}
+
+				public HttpClientRequestSslConfigurationBuilder hostnameVerifier(HostnameVerifier hostnameVerifier) {
+					delegate.ssl().hostnameVerifier(hostnameVerifier);
+					return this;
+				}
+
+				public HttpClientRequestFactoryBuilder and() {
+					return HttpClientRequestFactoryBuilder.this;
+				}
 			}
 		}
 	}

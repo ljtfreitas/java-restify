@@ -20,9 +20,9 @@ import org.mockito.stubbing.Answer;
 
 import com.github.ljtfreitas.restify.http.client.message.Header;
 import com.github.ljtfreitas.restify.http.client.message.Headers;
-import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
-import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestBody;
 import com.github.ljtfreitas.restify.http.client.message.request.BufferedByteArrayHttpRequestBody;
+import com.github.ljtfreitas.restify.http.client.message.request.BufferedHttpRequestBody;
+import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
 
 @RunWith(MockitoJUnitRunner.class)
 public class BaseMultipartFormMessageWriterTest {
@@ -90,7 +90,7 @@ public class BaseMultipartFormMessageWriterTest {
 
 	@Test
 	public void shouldWriteHttpRequestBody() {
-		HttpRequestBody output = new BufferedByteArrayHttpRequestBody();
+		BufferedHttpRequestBody output = new BufferedByteArrayHttpRequestBody();
 
 		when(request.body()).thenReturn(output);
 

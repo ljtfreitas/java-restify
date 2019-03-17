@@ -26,6 +26,8 @@
 package com.github.ljtfreitas.restify.http.netflix.client.call.handler.hystrix;
 
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
 
 import com.github.ljtfreitas.restify.http.client.call.async.AsyncEndpointCall;
 import com.github.ljtfreitas.restify.http.client.call.handler.EndpointCallHandler;
@@ -38,6 +40,8 @@ import com.github.ljtfreitas.restify.util.Try;
 import com.netflix.hystrix.HystrixObservableCommand;
 
 import rx.Observable;
+import rx.Observer;
+import rx.observables.SyncOnSubscribe;
 
 class HystrixObservableCommandEndpointCallHandler<T, O> implements AsyncEndpointCallHandler<HystrixObservableCommand<T>, O> {
 
@@ -45,14 +49,15 @@ class HystrixObservableCommandEndpointCallHandler<T, O> implements AsyncEndpoint
 	private final EndpointMethod endpointMethod;
 	private final EndpointCallHandler<T, O> delegate;
 	private final FallbackProvider fallback;
-	private final HystrixCommandMetadataCache hystrixCommandMetadataCache = HystrixCommandMetadataCache.instance();
+	private final HystrixCommandMetadataFactory hystrixCommandMetadataFactory;
 
 	HystrixObservableCommandEndpointCallHandler(HystrixObservableCommand.Setter properties, EndpointMethod endpointMethod,
-			EndpointCallHandler<T, O> delegate, FallbackProvider fallback) {
+			EndpointCallHandler<T, O> delegate, FallbackProvider fallback, HystrixCommandMetadataFactory hystrixCommandMetadataFactory) {
 		this.properties = properties;
 		this.endpointMethod = endpointMethod;
 		this.delegate = delegate;
 		this.fallback = fallback;
+		this.hystrixCommandMetadataFactory = hystrixCommandMetadataFactory;
 	}
 
 	@Override
@@ -66,20 +71,22 @@ class HystrixObservableCommandEndpointCallHandler<T, O> implements AsyncEndpoint
 
 			@Override
 			protected Observable<T> construct() {
-				return Observable.from(call.executeAsync().toCompletableFuture())
+				return Observable.create(new CompletionStageOnSubscribe(call.executeAsync()))
 					.map(o -> delegate.handle(() -> o, args));
 			}
 
 			@Override
 			protected Observable<T> resumeWithFallback() {
-				return fallback == null ? super.resumeWithFallback() : Try.of(this::doFallback).get();
+				return fallback == null ?
+							super.resumeWithFallback() :
+								Try.of(this::doFallback).recover(e -> Try.success(Observable.error(e))).get();
 			}
 
-			private Observable<T> doFallback() throws Exception {
+			private Observable<T> doFallback() {
 				FallbackStrategy strategy = fallback.provides(endpointMethod.javaMethod())
 						.strategy(endpointMethod.javaMethod().getDeclaringClass());
 
-				HystrixObservableFallbackResult<T> result = new HystrixObservableFallbackResult<>(strategy.execute(endpointMethod.javaMethod(), args));
+				HystrixObservableFallbackResult<T> result = new HystrixObservableFallbackResult<>(strategy.execute(endpointMethod.javaMethod(), args, getExecutionException()));
 
 				return result.get();
 			}
@@ -88,12 +95,36 @@ class HystrixObservableCommandEndpointCallHandler<T, O> implements AsyncEndpoint
 
 	private HystrixObservableCommand.Setter hystrixProperties() {
 		return Optional.ofNullable(properties)
-				.orElseGet(() ->
-					hystrixCommandMetadataCache.get(endpointMethod)
-						.orElseGet(this::buildHystrixProperties).asObservableCommand());
+				.orElseGet(() -> hystrixCommandMetadataFactory.create(endpointMethod).asObservableCommand());
 	}
 
-	private HystrixCommandMetadata buildHystrixProperties() {
-		return hystrixCommandMetadataCache.put(endpointMethod, new HystrixCommandMetadataFactory(endpointMethod).create());
+	private class CompletionStageOnSubscribe extends SyncOnSubscribe<CompletionStage<O>, O> {
+
+		private final CompletionStage<O> stage;
+
+		private CompletionStageOnSubscribe(CompletionStage<O> stage) {
+			this.stage = stage;
+		}
+
+		@Override
+		protected CompletionStage<O> generateState() {
+			return stage;
+		}
+
+		@Override
+		protected CompletionStage<O> next(CompletionStage<O> state, Observer<? super O> observer) {
+			CompletableFuture<O> future = state.toCompletableFuture();
+
+			future.whenComplete((value, throwable) -> {
+				if (throwable != null) {
+					observer.onError(throwable);
+				} else {
+					observer.onNext(value);
+					observer.onCompleted();
+				}
+			});
+
+			return state;
+		}
 	}
 }

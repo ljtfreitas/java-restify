@@ -26,22 +26,9 @@
 package com.github.ljtfreitas.restify.http.client.message.request;
 
 import java.io.OutputStream;
-import java.nio.ByteBuffer;
-import java.nio.channels.Channels;
-import java.nio.channels.WritableByteChannel;
-
-import com.github.ljtfreitas.restify.util.Try;
 
 public interface HttpRequestBody {
 
 	OutputStream output();
 
-	byte[] asBytes();
-
-	boolean empty();
-
-	default void writeTo(OutputStream other) {
-		WritableByteChannel channel = Channels.newChannel(other);
-		Try.run(() -> channel.write(ByteBuffer.wrap(asBytes())));
-	}
 }

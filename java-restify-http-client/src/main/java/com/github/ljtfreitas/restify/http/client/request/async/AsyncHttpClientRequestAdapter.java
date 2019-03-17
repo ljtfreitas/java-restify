@@ -42,7 +42,7 @@ import com.github.ljtfreitas.restify.util.async.DisposableExecutors;
 
 public class AsyncHttpClientRequestAdapter implements AsyncHttpClientRequest  {
 
-	private static final Executor DEFAULT_EXECUTOR = DisposableExecutors.newCachedThreadPool();
+	private static final Executor DEFAULT_EXECUTOR = DisposableExecutors.immediate();
 
 	private final HttpClientRequest source;
 	private final Executor executor;

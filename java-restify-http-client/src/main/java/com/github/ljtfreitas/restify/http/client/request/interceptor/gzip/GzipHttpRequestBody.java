@@ -32,13 +32,11 @@ import com.github.ljtfreitas.restify.http.client.message.converter.HttpMessageWr
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestBody;
 import com.github.ljtfreitas.restify.util.Try;
 
-public class GzipHttpRequestBody implements HttpRequestBody {
+class GzipHttpRequestBody implements HttpRequestBody {
 
-	private final HttpRequestBody source;
 	private final GZIPOutputStream output;
 
-	public GzipHttpRequestBody(HttpRequestBody source) {
-		this.source = source;
+	GzipHttpRequestBody(HttpRequestBody source) {
 		this.output = Try.of(() -> new GZIPOutputStream(source.output())).error(HttpMessageWriteException::new).get();
 	}
 
@@ -46,15 +44,4 @@ public class GzipHttpRequestBody implements HttpRequestBody {
 	public OutputStream output() {
 		return output;
 	}
-
-	@Override
-	public byte[] asBytes() {
-		return source.asBytes();
-	}
-
-	@Override
-	public boolean empty() {
-		return source.empty();
-	}
-
 }

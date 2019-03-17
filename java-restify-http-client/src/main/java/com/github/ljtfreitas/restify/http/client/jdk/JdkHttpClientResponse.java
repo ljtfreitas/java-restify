@@ -33,6 +33,7 @@ import com.github.ljtfreitas.restify.http.client.message.Headers;
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
 import com.github.ljtfreitas.restify.http.client.message.response.StatusCode;
 import com.github.ljtfreitas.restify.http.client.response.BaseHttpClientResponse;
+import com.github.ljtfreitas.restify.util.Try;
 
 class JdkHttpClientResponse extends BaseHttpClientResponse {
 
@@ -45,7 +46,7 @@ class JdkHttpClientResponse extends BaseHttpClientResponse {
 
 	@Override
 	public void close() throws IOException {
-		connection.disconnect();
+		Try.of(connection::getInputStream).apply(InputStream::close);
+		Try.of(connection::getErrorStream).apply(InputStream::close);
 	}
-
 }

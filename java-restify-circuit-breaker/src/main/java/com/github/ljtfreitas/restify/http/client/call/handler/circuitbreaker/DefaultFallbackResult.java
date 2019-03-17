@@ -34,7 +34,7 @@ class DefaultFallbackResult<T> implements FallbackResult<T> {
 	}
 
 	@Override
-	public T get() throws Exception {
+	public T get() {
 		return value;
 	}
 }

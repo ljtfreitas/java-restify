@@ -29,7 +29,6 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.concurrent.Future;
 
-import com.github.ljtfreitas.restify.http.client.call.EndpointCall;
 import com.github.ljtfreitas.restify.http.client.call.async.AsyncEndpointCall;
 import com.github.ljtfreitas.restify.http.client.call.handler.EndpointCallHandler;
 import com.github.ljtfreitas.restify.http.client.call.handler.async.AsyncEndpointCallHandler;
@@ -86,11 +85,6 @@ public class ListenableFutureEndpointCallHandlerAdapter<T, O> implements AsyncEn
 		@Override
 		public JavaType returnType() {
 			return delegate.returnType();
-		}
-
-		@Override
-		public ListenableFuture<T> handle(EndpointCall<O> call, Object[] args) {
-			return executorService.submit(() -> delegate.handle(call, args));
 		}
 
 		@Override

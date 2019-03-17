@@ -37,10 +37,6 @@ public class CompletionStageAsyncEndpointCall<T> implements AsyncEndpointCall<T>
 	private final CompletionStage<T> stage;
 	private final Executor executor;
 
-	public CompletionStageAsyncEndpointCall(CompletionStage<T> stage) {
-		this(stage, ExecutorAsyncEndpointCall.pool());
-	}
-
 	public CompletionStageAsyncEndpointCall(CompletionStage<T> stage, Executor executor) {
 		this.stage = stage;
 		this.executor = executor;

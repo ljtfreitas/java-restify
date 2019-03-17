@@ -28,6 +28,7 @@ package com.github.ljtfreitas.restify.http.client.request.async;
 import java.io.IOException;
 import java.util.concurrent.CompletionException;
 import java.util.concurrent.CompletionStage;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 
 import com.github.ljtfreitas.restify.http.client.HttpClientException;
@@ -42,6 +43,7 @@ import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponseReader;
 import com.github.ljtfreitas.restify.http.client.response.HttpClientResponse;
 import com.github.ljtfreitas.restify.reflection.JavaType;
+import com.github.ljtfreitas.restify.util.Try;
 
 public class DefaultAsyncEndpointRequestExecutor implements AsyncEndpointRequestExecutor {
 
@@ -88,12 +90,17 @@ public class DefaultAsyncEndpointRequestExecutor implements AsyncEndpointRequest
 		return httpClientRequest.executeAsync();
 	}
 
+	@SuppressWarnings("unchecked")
 	private <T> EndpointResponse<T> doRead(HttpResponseMessage response, JavaType responseType) {
-		return endpointResponseReader.read(response, responseType);
+		return Try.withResources(() -> response)
+				.map(r -> (EndpointResponse<T>) endpointResponseReader.read(r, responseType))
+					.get();
 	}
 
 	private Throwable deepCause(Throwable throwable) {
-		return (throwable instanceof CompletionException) ? deepCause(throwable.getCause()) : throwable;
+		return (throwable instanceof CompletionException || throwable instanceof ExecutionException) ?
+				deepCause(throwable.getCause()) :
+					throwable;
 	}
 
 	private <T> EndpointResponse<T> doHandle(EndpointResponse<T> response, Throwable exception, EndpointRequest endpointRequest) {

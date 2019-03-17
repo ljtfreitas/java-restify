@@ -28,10 +28,11 @@ package com.github.ljtfreitas.restify.http.client.call.handler.rxjava2;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Collection;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
+import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutionException;
 
-import com.github.ljtfreitas.restify.http.client.call.EndpointCall;
 import com.github.ljtfreitas.restify.http.client.call.async.AsyncEndpointCall;
 import com.github.ljtfreitas.restify.http.client.call.handler.EndpointCallHandler;
 import com.github.ljtfreitas.restify.http.client.call.handler.async.AsyncEndpointCallHandler;
@@ -40,6 +41,8 @@ import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethod;
 import com.github.ljtfreitas.restify.reflection.JavaType;
 
 import io.reactivex.Observable;
+import io.reactivex.ObservableEmitter;
+import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.Scheduler;
 import io.reactivex.schedulers.Schedulers;
 
@@ -48,7 +51,7 @@ public class RxJava2ObservableEndpointCallHandlerAdapter<T, O> implements AsyncE
 	public final Scheduler scheduler;
 
 	public RxJava2ObservableEndpointCallHandlerAdapter() {
-		this.scheduler = Schedulers.io();
+		this(Schedulers.io());
 	}
 
 	public RxJava2ObservableEndpointCallHandlerAdapter(Scheduler scheduler) {
@@ -62,7 +65,7 @@ public class RxJava2ObservableEndpointCallHandlerAdapter<T, O> implements AsyncE
 
 	@Override
 	public JavaType returnType(EndpointMethod endpointMethod) {
-		return JavaType.of(JavaType.parameterizedType(Collection.class, unwrap(endpointMethod.returnType())));
+		return JavaType.parameterizedType(Collection.class, unwrap(endpointMethod.returnType()));
 	}
 
 	private Type unwrap(JavaType declaredReturnType) {
@@ -90,14 +93,8 @@ public class RxJava2ObservableEndpointCallHandlerAdapter<T, O> implements AsyncE
 		}
 
 		@Override
-		public Observable<T> handle(EndpointCall<O> call, Object[] args) {
-			return Observable.defer(() -> Observable.fromIterable(delegate.handle(call, args)))
-				.subscribeOn(scheduler);
-		}
-
-		@Override
 		public Observable<T> handleAsync(AsyncEndpointCall<O> call, Object[] args) {
-			return Observable.fromFuture(call.executeAsync().toCompletableFuture())
+			return Observable.create(new CompletionStageObservableSubscribe(call.executeAsync()))
 				.onErrorResumeNext(this::handleAsyncException)
 				.map(o -> delegate.handle(() -> o, args))
 					.flatMap(Observable::fromIterable)
@@ -109,6 +106,31 @@ public class RxJava2ObservableEndpointCallHandlerAdapter<T, O> implements AsyncE
 				(ExecutionException.class.equals(throwable.getClass()) || CompletionException.class.equals(throwable.getClass())) ?
 						throwable.getCause() :
 							throwable);
+		}
+	}
+
+	private class CompletionStageObservableSubscribe implements ObservableOnSubscribe<O> {
+
+		private final CompletionStage<O> stage;
+
+		private CompletionStageObservableSubscribe(CompletionStage<O> stage) {
+			this.stage = stage;
+		}
+
+		@Override
+		public void subscribe(ObservableEmitter<O> emitter) throws Exception {
+			CompletableFuture<O> future = stage.toCompletableFuture();
+
+			future.whenComplete((value, throwable) -> {
+				if (throwable != null) {
+					emitter.onError(throwable);
+				} else {
+					emitter.onNext(value);
+					emitter.onComplete();
+				}
+			});
+
+			emitter.setCancellable(() -> future.cancel(true));
 		}
 	}
 }

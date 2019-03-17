@@ -33,7 +33,7 @@ public class JavaTypeResolverTest {
 
 		Type returnType = resolver.returnTypeOf(MyTyped.class.getMethod("method2"));
 
-		assertEquals(JavaType.parameterizedType(Collection.class, String.class), returnType);
+		assertEquals(new SimpleParameterizedType(Collection.class, null, String.class), returnType);
 	}
 
 	@Test
@@ -51,7 +51,7 @@ public class JavaTypeResolverTest {
 
 		Type returnType = resolver.returnTypeOf(MyTyped.class.getMethod("method4"));
 
-		assertEquals(JavaType.arrayType(String.class), returnType);
+		assertEquals(new SimpleGenericArrayType(String.class), returnType);
 	}
 
 	@Test
@@ -99,21 +99,21 @@ public class JavaTypeResolverTest {
 
 	@Test
 	public void shouldGetRawClassOfParameterizedType() {
-		ParameterizedType parameterizedType = JavaType.parameterizedType(Collection.class, String.class);
+		ParameterizedType parameterizedType = new SimpleParameterizedType(Collection.class, String.class);
 
 		assertEquals(Collection.class, JavaTypeResolver.rawClassTypeOf(parameterizedType));
 	}
 
 	@Test
 	public void shouldGetRawClassOfArrayType() {
-		GenericArrayType arrayType = JavaType.arrayType(String.class);
+		GenericArrayType arrayType = new SimpleGenericArrayType(String.class);
 
 		assertEquals(String[].class, JavaTypeResolver.rawClassTypeOf(arrayType));
 	}
 
 	@Test
 	public void shouldGetRawClassOfWildcardType() {
-		WildcardType wildcardType = JavaType.wildcardType(new Type[] { Object.class }, new Type[] { String.class });
+		WildcardType wildcardType = new SimpleWildcardType(new Type[] { Object.class }, new Type[] { String.class });
 
 		assertEquals(Object.class, JavaTypeResolver.rawClassTypeOf(wildcardType));
 	}

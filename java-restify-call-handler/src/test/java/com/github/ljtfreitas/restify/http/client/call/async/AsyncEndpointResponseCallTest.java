@@ -71,7 +71,7 @@ public class AsyncEndpointResponseCallTest {
 	public void setup() {
 		request = new EndpointRequest(URI.create("http://my.api.com"), "GET");
 
-		response = new EndpointResponse<>(StatusCode.ok(), "async result");
+		response = EndpointResponse.of(StatusCode.ok(), "async result");
 
 		CompletableFuture<EndpointResponse<Object>> completedFuture = CompletableFuture
 				.completedFuture(response);

@@ -25,18 +25,6 @@ import com.github.ljtfreitas.restify.http.client.message.Header;
 import com.github.ljtfreitas.restify.http.client.message.Headers;
 import com.github.ljtfreitas.restify.http.client.message.response.StatusCode;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
-import com.github.ljtfreitas.restify.http.client.request.authentication.oauth2.AccessToken;
-import com.github.ljtfreitas.restify.http.client.request.authentication.oauth2.AccessTokenProvider;
-import com.github.ljtfreitas.restify.http.client.request.authentication.oauth2.AccessTokenRepository;
-import com.github.ljtfreitas.restify.http.client.request.authentication.oauth2.AccessTokenRequest;
-import com.github.ljtfreitas.restify.http.client.request.authentication.oauth2.AccessTokenStorage;
-import com.github.ljtfreitas.restify.http.client.request.authentication.oauth2.AuthorizationCodeProvider;
-import com.github.ljtfreitas.restify.http.client.request.authentication.oauth2.AuthorizationCodeRequest;
-import com.github.ljtfreitas.restify.http.client.request.authentication.oauth2.AuthorizationServer;
-import com.github.ljtfreitas.restify.http.client.request.authentication.oauth2.ClientCredentials;
-import com.github.ljtfreitas.restify.http.client.request.authentication.oauth2.OAuth2AuthenticatedEndpointRequest;
-import com.github.ljtfreitas.restify.http.client.request.authentication.oauth2.OAuth2Authentication;
-import com.github.ljtfreitas.restify.http.client.request.authentication.oauth2.OAuth2AuthenticationBuilder;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
 
 public class OAuth2AuthenticationBuilderTest {
@@ -172,7 +160,7 @@ public class OAuth2AuthenticationBuilderTest {
 		AccessTokenResponseBody accessTokenResponseBody = new AccessTokenResponseBody.Builder().type("Bearer").token("aaa111").build();
 
 		when(authorizationServer.requireToken(notNull(AccessTokenRequest.class)))
-			.thenReturn(new AccessTokenResponse(new EndpointResponse<>(StatusCode.ok(), accessTokenResponseBody)));
+			.thenReturn(new AccessTokenResponse(EndpointResponse.of(StatusCode.ok(), accessTokenResponseBody)));
 
 		OAuth2Authentication authentication = new OAuth2AuthenticationBuilder()
 				.grantType()
@@ -315,7 +303,7 @@ public class OAuth2AuthenticationBuilderTest {
 		AccessTokenResponseBody accessTokenResponseBody = new AccessTokenResponseBody.Builder().type("Bearer").token("aaa111").build();
 
 		when(authorizationServer.requireToken(notNull(AccessTokenRequest.class)))
-			.thenReturn(new AccessTokenResponse(new EndpointResponse<>(StatusCode.ok(), accessTokenResponseBody)));
+			.thenReturn(new AccessTokenResponse(EndpointResponse.of(StatusCode.ok(), accessTokenResponseBody)));
 
 		OAuth2Authentication authentication = new OAuth2AuthenticationBuilder()
 				.grantType()
@@ -464,7 +452,7 @@ public class OAuth2AuthenticationBuilderTest {
 		AuthorizationServer authorizationServer = mock(AuthorizationServer.class);
 
 		Header location = new Header("Location", "http://my.web.app/oauth/callback#access_token=aaa111&token_type=bearer&state=current-state&expires_in=3600&scope=read%20write");
-		AuthorizationCodeResponse response = new AuthorizationCodeResponse(new EndpointResponse<>(StatusCode.found(), new Headers(location),  "hello"));
+		AuthorizationCodeResponse response = new AuthorizationCodeResponse(EndpointResponse.of(StatusCode.found(), "hello", new Headers(location)));
 
 		when(authorizationServer.authorize(notNull(AuthorizationCodeRequest.class))).thenReturn(response);
 
@@ -604,13 +592,13 @@ public class OAuth2AuthenticationBuilderTest {
 		AuthorizationServer authorizationServer = mock(AuthorizationServer.class);
 
 		Header location = new Header("Location", "http://my.web.app/oauth/callback?code=abc1234&state=current-state");
-		AuthorizationCodeResponse response = new AuthorizationCodeResponse(new EndpointResponse<>(StatusCode.found(), new Headers(location), "hello"));
+		AuthorizationCodeResponse response = new AuthorizationCodeResponse(EndpointResponse.of(StatusCode.found(), "hello", new Headers(location)));
 		when(authorizationServer.authorize(notNull(AuthorizationCodeRequest.class)))
 			.thenReturn(response);
 
 		AccessTokenResponseBody accessTokenResponseBody = new AccessTokenResponseBody.Builder().type("Bearer").token("aaa111").build();
 		when(authorizationServer.requireToken(notNull(AccessTokenRequest.class)))
-			.thenReturn(new AccessTokenResponse(new EndpointResponse<>(StatusCode.ok(), new Headers(), accessTokenResponseBody)));
+			.thenReturn(new AccessTokenResponse(EndpointResponse.of(StatusCode.ok(), accessTokenResponseBody, new Headers())));
 
 		OAuth2Authentication authentication = new OAuth2AuthenticationBuilder()
 				.grantType()

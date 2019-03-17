@@ -25,26 +25,33 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.util.async;
 
+import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 
 public class DisposableExecutors {
 
+	private static final Executor IMMEDIATE_EXECUTOR = Runnable::run;
+
+	public static Executor immediate() {
+		return IMMEDIATE_EXECUTOR;
+	}
+
 	public static ExecutorService newCachedThreadPool() {
-		return disposable(Executors.newCachedThreadPool(DaemonThreadFactory.instance()));
+		return disposable(Executors.newCachedThreadPool(new DaemonThreadFactory("java-restify-cached-thread-pool")));
 	}
 
 	public static ExecutorService newSingleThreadExecutor() {
-		return disposable(Executors.newSingleThreadExecutor(DaemonThreadFactory.instance()));
+		return disposable(Executors.newSingleThreadExecutor(new DaemonThreadFactory("java-restify-single-thread-executor")));
 	}
 
 	public static ScheduledExecutorService newSingleThreadScheduledExecutor() {
-		return (ScheduledExecutorService) disposable(Executors.newSingleThreadScheduledExecutor(DaemonThreadFactory.instance()));
+		return (ScheduledExecutorService) disposable(Executors.newSingleThreadScheduledExecutor(new DaemonThreadFactory("java-restify-single-thread-scheduled")));
 	}
 
 	public static ScheduledExecutorService newScheduledThreadPool(int size) {
-		return (ScheduledExecutorService) disposable(Executors.newScheduledThreadPool(size, DaemonThreadFactory.instance()));
+		return (ScheduledExecutorService) disposable(Executors.newScheduledThreadPool(size, new DaemonThreadFactory("java-restify-scheduled-thread-pool")));
 	}
 
 	private static ExecutorService disposable(ExecutorService executorService) {

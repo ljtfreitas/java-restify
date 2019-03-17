@@ -28,30 +28,22 @@ package com.github.ljtfreitas.restify.http.netflix.client.call.handler.hystrix;
 import com.github.ljtfreitas.restify.http.client.call.EndpointCall;
 import com.github.ljtfreitas.restify.http.client.call.handler.EndpointCallHandler;
 import com.github.ljtfreitas.restify.http.client.call.handler.EndpointCallHandlerAdapter;
-import com.github.ljtfreitas.restify.http.client.call.handler.circuitbreaker.OnCircuitBreaker;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethod;
 import com.github.ljtfreitas.restify.reflection.JavaType;
 import com.netflix.hystrix.HystrixCommand;
 
 public class HystrixEndpointCallHandlerAdapter<T, O> implements EndpointCallHandlerAdapter<T, HystrixCommand<T>, O> {
 
+	private final HystrixOnCircuitBreakerPredicate predicate = new HystrixOnCircuitBreakerPredicate();
+
 	@Override
 	public JavaType returnType(EndpointMethod endpointMethod) {
-		return JavaType.of(JavaType.parameterizedType(HystrixCommand.class, endpointMethod.returnType().unwrap()));
+		return JavaType.parameterizedType(HystrixCommand.class, endpointMethod.returnType().unwrap());
 	}
 
 	@Override
 	public boolean supports(EndpointMethod endpointMethod) {
-		return onCircuitBreaker(endpointMethod)
-			&& !returnHystrixCommand(endpointMethod);
-	}
-
-	private boolean onCircuitBreaker(EndpointMethod endpointMethod) {
-		return endpointMethod.metadata().contains(OnCircuitBreaker.class);
-	}
-
-	private boolean returnHystrixCommand(EndpointMethod endpointMethod) {
-		return endpointMethod.returnType().is(HystrixCommand.class);
+		return predicate.test(endpointMethod);
 	}
 
 	@Override

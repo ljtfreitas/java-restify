@@ -33,7 +33,7 @@ import com.netflix.hystrix.HystrixObservableCommand;
 import com.netflix.hystrix.HystrixThreadPoolKey;
 import com.netflix.hystrix.HystrixThreadPoolProperties;
 
-class HystrixCommandMetadata {
+public class HystrixCommandMetadata {
 
 	private final HystrixCommandGroupKey groupKey;
 	private final HystrixCommandKey commandKey;
@@ -51,7 +51,7 @@ class HystrixCommandMetadata {
 				this.threadPoolProperties = threadPoolProperties;
 	}
 
-	HystrixCommand.Setter asCommand() {
+	public HystrixCommand.Setter asCommand() {
 		return HystrixCommand.Setter
 				.withGroupKey(groupKey)
 					.andCommandKey(commandKey)
@@ -60,7 +60,7 @@ class HystrixCommandMetadata {
 								.andThreadPoolPropertiesDefaults(threadPoolProperties);
 	}
 
-	HystrixObservableCommand.Setter asObservableCommand() {
+	public HystrixObservableCommand.Setter asObservableCommand() {
 		return HystrixObservableCommand.Setter
 				.withGroupKey(groupKey)
 					.andCommandKey(commandKey)

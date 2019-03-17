@@ -74,13 +74,18 @@ public interface Try<T> {
 
 	public Try<T> apply(TryableConsumer<T> consumes);
 
+
 	public Try<T> error(Function<? super Throwable, ? extends Throwable> mapper);
 
 	public Try<T> recover(Function<? super Throwable, Try<? extends T>> mapper);
 
+	public <E extends Throwable> Try<T> recover(Class<E> type, Function<E, Try<? extends T>> mapper);
+
 	public T or(Supplier<T> mapper);
 
 	public T get();
+
+	public void apply();
 
 	public class Success<T> implements Try<T> {
 
@@ -126,6 +131,11 @@ public interface Try<T> {
 		}
 
 		@Override
+		public <E extends Throwable> Try<T> recover(Class<E> type, Function<E, Try<? extends T>> mapper) {
+			return this;
+		}
+
+		@Override
 		public T or(Supplier<T> mapper) {
 			return value;
 		}
@@ -133,6 +143,10 @@ public interface Try<T> {
 		@Override
 		public T get() {
 			return value;
+		}
+
+		@Override
+		public void apply() {
 		}
 	}
 
@@ -172,6 +186,16 @@ public interface Try<T> {
 			return (Try<T>) mapper.apply(cause);
 		}
 
+		@SuppressWarnings("unchecked")
+		@Override
+		public <E extends Throwable> Try<T> recover(Class<E> type, Function<E, Try<? extends T>> mapper) {
+			if (type.isAssignableFrom(cause.getClass())) {
+				return (Try<T>) mapper.apply((E) cause);
+			} else {
+				return this;
+			}
+		}
+
 		@Override
 		public T or(Supplier<T> mapper) {
 			return mapper.get();
@@ -179,6 +203,11 @@ public interface Try<T> {
 
 		@Override
 		public T get() {
+			throw (cause instanceof RuntimeException) ? (RuntimeException) cause : new RuntimeException(cause);
+		}
+
+		@Override
+		public void apply() {
 			throw (cause instanceof RuntimeException) ? (RuntimeException) cause : new RuntimeException(cause);
 		}
 	}
@@ -211,6 +240,10 @@ public interface Try<T> {
 
 	public interface TryableSupplier<T> {
 		T get() throws Exception;
+	}
+
+	public interface TrowableSupplier<T> {
+		T get() throws Throwable;
 	}
 
 	public interface TryableConsumer<T> {

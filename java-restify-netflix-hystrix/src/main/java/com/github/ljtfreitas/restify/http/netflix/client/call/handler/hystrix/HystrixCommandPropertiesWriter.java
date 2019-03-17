@@ -47,12 +47,10 @@ import static com.github.ljtfreitas.restify.http.client.call.handler.circuitbrea
 import static com.github.ljtfreitas.restify.http.client.call.handler.circuitbreaker.CircuitBreakerProperty.METRICS_ROLLING_STATS_NUM_BUCKETS;
 import static com.github.ljtfreitas.restify.http.client.call.handler.circuitbreaker.CircuitBreakerProperty.METRICS_ROLLING_STATS_TIME_IN_MILLISECONDS;
 
-import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import com.github.ljtfreitas.restify.http.client.call.handler.circuitbreaker.CircuitBreakerProperty;
 import com.netflix.hystrix.HystrixCommandProperties;
 import com.netflix.hystrix.HystrixCommandProperties.ExecutionIsolationStrategy;
 
@@ -61,16 +59,16 @@ class HystrixCommandPropertiesWriter {
 	private static final Map<String, HystrixPropertyWriter<HystrixCommandProperties.Setter>> HYSTRIX_COMMAND_PROPERTY_WRITERS
 		= new LinkedHashMap<>();
 
-	private final CircuitBreakerProperty[] properties;
+	private final Map<String, String> properties;
 
-	public HystrixCommandPropertiesWriter(CircuitBreakerProperty[] properties) {
+	public HystrixCommandPropertiesWriter(Map<String, String> properties) {
 		this.properties = properties;
 	}
 
 	public void applyTo(HystrixCommandProperties.Setter hystrixCommandProperties) {
-		Arrays.stream(properties)
-			.forEach(p -> Optional.ofNullable(HYSTRIX_COMMAND_PROPERTY_WRITERS.get(p.name()))
-					.ifPresent(s -> s.set(hystrixCommandProperties, p.value())));
+		properties.entrySet().stream()
+			.forEach(property -> Optional.ofNullable(HYSTRIX_COMMAND_PROPERTY_WRITERS.get(property.getKey()))
+					.ifPresent(s -> s.set(hystrixCommandProperties, property.getValue())));
 	}
 
 	static {

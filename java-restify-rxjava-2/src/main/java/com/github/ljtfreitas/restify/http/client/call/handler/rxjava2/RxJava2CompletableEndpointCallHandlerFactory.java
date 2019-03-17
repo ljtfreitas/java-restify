@@ -25,10 +25,11 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.call.handler.rxjava2;
 
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
+import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutionException;
 
-import com.github.ljtfreitas.restify.http.client.call.EndpointCall;
 import com.github.ljtfreitas.restify.http.client.call.async.AsyncEndpointCall;
 import com.github.ljtfreitas.restify.http.client.call.handler.async.AsyncEndpointCallHandler;
 import com.github.ljtfreitas.restify.http.client.call.handler.async.AsyncEndpointCallHandlerFactory;
@@ -36,15 +37,19 @@ import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethod;
 import com.github.ljtfreitas.restify.reflection.JavaType;
 
 import io.reactivex.Completable;
+import io.reactivex.CompletableEmitter;
+import io.reactivex.CompletableOnSubscribe;
 import io.reactivex.Scheduler;
 import io.reactivex.schedulers.Schedulers;
 
 public class RxJava2CompletableEndpointCallHandlerFactory implements AsyncEndpointCallHandlerFactory<Completable, Void> {
 
+	private static final JavaType VOID_TYPE = JavaType.of(Void.class);
+
 	public final Scheduler scheduler;
 
 	public RxJava2CompletableEndpointCallHandlerFactory() {
-		this.scheduler = Schedulers.io();
+		this(Schedulers.io());
 	}
 
 	public RxJava2CompletableEndpointCallHandlerFactory(Scheduler scheduler) {
@@ -58,31 +63,19 @@ public class RxJava2CompletableEndpointCallHandlerFactory implements AsyncEndpoi
 
 	@Override
 	public AsyncEndpointCallHandler<Completable, Void> createAsync(EndpointMethod endpointMethod) {
-		return new RxJava2CompletableEndpointCallHandler(endpointMethod.returnType());
+		return new RxJava2CompletableEndpointCallHandler();
 	}
 
 	private class RxJava2CompletableEndpointCallHandler implements AsyncEndpointCallHandler<Completable, Void> {
 
-		private final JavaType javaType;
-
-		public RxJava2CompletableEndpointCallHandler(JavaType javaType) {
-			this.javaType = javaType;
-		}
-
 		@Override
 		public JavaType returnType() {
-			return javaType;
-		}
-
-		@Override
-		public Completable handle(EndpointCall<Void> call, Object[] args) {
-			return Completable.fromRunnable(call::execute)
-				.subscribeOn(scheduler);
+			return VOID_TYPE;
 		}
 
 		@Override
 		public Completable handleAsync(AsyncEndpointCall<Void> call, Object[] args) {
-			return Completable.fromFuture(call.executeAsync().toCompletableFuture())
+			return Completable.create(new CompletionStageCompletableSubscribe(call.executeAsync()))
 				.onErrorResumeNext(this::handleAsyncException)
 					.subscribeOn(scheduler);
 		}
@@ -92,6 +85,30 @@ public class RxJava2CompletableEndpointCallHandlerFactory implements AsyncEndpoi
 				(ExecutionException.class.equals(throwable.getClass()) || CompletionException.class.equals(throwable.getClass())) ?
 						throwable.getCause() :
 							throwable);
+		}
+	}
+
+	private class CompletionStageCompletableSubscribe implements CompletableOnSubscribe {
+
+		private final CompletionStage<Void> stage;
+
+		private CompletionStageCompletableSubscribe(CompletionStage<Void> stage) {
+			this.stage = stage;
+		}
+
+		@Override
+		public void subscribe(CompletableEmitter emitter) throws Exception {
+			CompletableFuture<Void> future = stage.toCompletableFuture();
+
+			future.whenComplete((signal, throwable) -> {
+				if (throwable != null) {
+					emitter.onError(throwable);
+				} else {
+					emitter.onComplete();
+				}
+			});
+
+			emitter.setCancellable(() -> future.cancel(true));
 		}
 	}
 }

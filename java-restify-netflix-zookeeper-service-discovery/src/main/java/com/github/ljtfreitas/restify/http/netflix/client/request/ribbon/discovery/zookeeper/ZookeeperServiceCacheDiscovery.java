@@ -97,7 +97,7 @@ public class ZookeeperServiceCacheDiscovery<T> implements ZookeeperServiceDiscov
 
 	@Override
 	public void onFailure(ServiceInstance instance, Throwable cause) {
-		Try.run(() -> serviceDiscovery.unregisterService(new ZookeeperServiceInstance(instance)));
+		Try.run(() -> serviceDiscovery.unregisterService(new ZookeeperServiceInstance(instance))).apply();
 	}
 
 	@Override

@@ -124,7 +124,7 @@ public class ZookeeperCuratorServiceDiscovery<T> implements Closeable {
 
 	public void unregisterService(ZookeeperServiceInstance serviceInstance) throws Exception {
 		doQueryForInstance(serviceInstance)
-			.ifPresent(server -> Try.run(() -> serviceDiscovery.unregisterService(server)));
+			.ifPresent(server -> Try.run(() -> serviceDiscovery.unregisterService(server)).apply());
 	}
 
 	public void updateService(ServiceInstance<T> serviceInstance) throws Exception {

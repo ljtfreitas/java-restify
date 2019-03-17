@@ -25,6 +25,13 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.retry;
 
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
+
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.ANNOTATION_TYPE)
 public @interface BackOff {
 
 	long delay() default BackOffPolicy.DEFAULT_BACKOFF_DELAY;

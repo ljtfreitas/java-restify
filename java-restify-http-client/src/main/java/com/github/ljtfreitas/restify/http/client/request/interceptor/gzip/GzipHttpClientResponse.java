@@ -33,12 +33,12 @@ import com.github.ljtfreitas.restify.http.client.message.response.HttpResponseBo
 import com.github.ljtfreitas.restify.http.client.message.response.StatusCode;
 import com.github.ljtfreitas.restify.http.client.response.HttpClientResponse;
 
-public class GzipHttpClientResponse implements HttpClientResponse {
+class GzipHttpClientResponse implements HttpClientResponse {
 
 	private final HttpClientResponse source;
 	private final HttpResponseBody body;
 
-	public GzipHttpClientResponse(HttpClientResponse source) {
+	GzipHttpClientResponse(HttpClientResponse source) {
 		this.source = source;
 		this.body = GzipHttpResponseBody.of(source.body());
 	}

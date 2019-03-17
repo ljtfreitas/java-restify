@@ -37,8 +37,9 @@ import com.github.ljtfreitas.restify.http.client.HttpClientException;
 import com.github.ljtfreitas.restify.http.client.message.Header;
 import com.github.ljtfreitas.restify.http.client.message.Headers;
 import com.github.ljtfreitas.restify.http.client.message.request.BufferedByteArrayHttpRequestBody;
-import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
+import com.github.ljtfreitas.restify.http.client.message.request.BufferedHttpRequestBody;
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestBody;
+import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
 import com.github.ljtfreitas.restify.http.client.message.response.StatusCode;
 import com.github.ljtfreitas.restify.http.client.request.async.AsyncHttpClientRequest;
 import com.github.ljtfreitas.restify.http.client.response.HttpClientResponse;
@@ -58,14 +59,14 @@ class OkHttpClientRequest implements AsyncHttpClientRequest {
 	private final String method;
 	private final Headers headers;
 	private final Charset charset;
-	private final HttpRequestBody body;
+	private final BufferedHttpRequestBody body;
 
 	public OkHttpClientRequest(OkHttpClient okHttpClient, URI uri, String method, Headers headers, Charset charset) {
 		this(okHttpClient, uri, method, headers, charset, new BufferedByteArrayHttpRequestBody(charset));
 	}
 
 	private OkHttpClientRequest(OkHttpClient okHttpClient, URI uri, String method, Headers headers, Charset charset,
-			BufferedByteArrayHttpRequestBody body) {
+			BufferedHttpRequestBody body) {
 		this.okHttpClient = okHttpClient;
 		this.uri = uri;
 		this.method = method;
@@ -101,7 +102,7 @@ class OkHttpClientRequest implements AsyncHttpClientRequest {
 
 	@Override
 	public HttpRequestMessage replace(Header header) {
-		return new OkHttpClientRequest(okHttpClient, uri, method, headers.replace(header), charset);
+		return new OkHttpClientRequest(okHttpClient, uri, method, headers.replace(header), charset, body);
 	}
 
 	@Override

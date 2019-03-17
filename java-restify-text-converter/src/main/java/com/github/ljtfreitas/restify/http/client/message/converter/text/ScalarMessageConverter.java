@@ -31,6 +31,7 @@ import static com.github.ljtfreitas.restify.util.Preconditions.isTrue;
 import java.io.IOException;
 import java.lang.reflect.Type;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.HashSet;
 import java.util.Set;
 
@@ -66,8 +67,8 @@ public class ScalarMessageConverter implements TextMessageConverter<Object> {
 	}
 
 	@Override
-	public ContentType contentType() {
-		return TEXT_PLAIN_CONTENT_TYPE;
+	public Collection<ContentType> contentTypes() {
+		return Arrays.asList(TEXT_PLAIN_CONTENT_TYPE);
 	}
 
 	@Override

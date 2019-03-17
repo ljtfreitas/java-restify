@@ -114,14 +114,14 @@ class NettyHttpClientRequest implements AsyncHttpClientRequest {
 	@Override
 	public HttpClientResponse execute() throws HttpClientException {
 		try {
-			return doExecuteAsync().toCompletableFuture().get();
+			return doExecuteAsync().get();
 
 		} catch (InterruptedException | ExecutionException e) {
 			throw new HttpClientException("I/O error on HTTP request: [" + method + " " + uri + "]", e);
 		}
 	}
 
-	private CompletionStage<HttpClientResponse> doExecuteAsync() {
+	private CompletableFuture<HttpClientResponse> doExecuteAsync() {
 		final CompletableFuture<HttpClientResponse> responseAsFuture = new CompletableFuture<>();
 
 		NettyRequestExecuteHandler nettyRequestExecuteHandler = new NettyRequestExecuteHandler(responseAsFuture, this);

@@ -32,7 +32,6 @@ import java.util.concurrent.Executor;
 
 import org.springframework.scheduling.annotation.AsyncResult;
 
-import com.github.ljtfreitas.restify.http.client.call.EndpointCall;
 import com.github.ljtfreitas.restify.http.client.call.async.AsyncEndpointCall;
 import com.github.ljtfreitas.restify.http.client.call.handler.EndpointCallHandler;
 import com.github.ljtfreitas.restify.http.client.call.handler.async.AsyncEndpointCallHandler;
@@ -81,11 +80,6 @@ public class AsyncResultEndpointCallHandlerAdapter<T, O> implements AsyncEndpoin
 		@Override
 		public JavaType returnType() {
 			return delegate.returnType();
-		}
-
-		@Override
-		public AsyncResult<T> handle(EndpointCall<O> call, Object[] args) {
-			return new AsyncResult<>(delegate.handle(call, args));
 		}
 
 		@Override

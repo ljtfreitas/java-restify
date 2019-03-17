@@ -8,17 +8,22 @@ import static org.mockito.Matchers.notNull;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.util.Collections;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
+import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import com.github.ljtfreitas.restify.http.client.call.EndpointCall;
 import com.github.ljtfreitas.restify.http.client.call.async.AsyncEndpointCall;
 import com.github.ljtfreitas.restify.http.client.call.handler.async.AsyncEndpointCallHandler;
+import com.github.ljtfreitas.restify.http.client.call.handler.circuitbreaker.OnCircuitBreakerMetadata;
+import com.github.ljtfreitas.restify.http.client.call.handler.circuitbreaker.OnCircuitBreakerMetadataResolver;
 import com.github.ljtfreitas.restify.reflection.JavaType;
 import com.netflix.hystrix.HystrixObservableCommand;
 
@@ -33,17 +38,30 @@ public class HystrixObservableCommandEndpointCallHandlerAdapterTest {
 	@Mock
 	private AsyncEndpointCall<String> asyncEndpointCall;
 
+	@Mock
+	private OnCircuitBreakerMetadataResolver onCircuitBreakerMetadataResolver;
+
+	@Mock
+	private OnCircuitBreakerMetadata onCircuitBreakerMetadata;
+
+	@InjectMocks
 	private HystrixObservableCommandEndpointCallHandlerAdapter<String, String> adapter;
 
 	@Before
 	public void setup() {
-		adapter = new HystrixObservableCommandEndpointCallHandlerAdapter<>();
-
 		when(delegate.handle(any(), any()))
 			.then(invocation -> invocation.getArgumentAt(0, EndpointCall.class).execute());
 
 		when(delegate.returnType())
 			.thenReturn(JavaType.of(String.class));
+
+		when(onCircuitBreakerMetadataResolver.resolve(any()))
+			.thenReturn(onCircuitBreakerMetadata);
+
+		when(onCircuitBreakerMetadata.groupKey()).thenReturn(Optional.empty());
+		when(onCircuitBreakerMetadata.commandKey()).thenReturn(Optional.empty());
+		when(onCircuitBreakerMetadata.threadPoolKey()).thenReturn(Optional.empty());
+		when(onCircuitBreakerMetadata.properties()).thenReturn(Collections.emptyMap());
 	}
 
 	@Test

@@ -14,12 +14,12 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import com.github.ljtfreitas.restify.http.client.call.EndpointCall;
 import com.github.ljtfreitas.restify.http.client.call.async.AsyncEndpointCall;
 import com.github.ljtfreitas.restify.http.client.call.handler.EndpointCallHandler;
 import com.github.ljtfreitas.restify.http.client.call.handler.async.AsyncEndpointCallHandler;
 
 import io.reactivex.Completable;
-import io.reactivex.Scheduler;
 import io.reactivex.observers.TestObserver;
 import io.reactivex.schedulers.Schedulers;
 
@@ -27,17 +27,16 @@ import io.reactivex.schedulers.Schedulers;
 public class RxJava2CompletableEndpointCallHandlerFactoryTest {
 
 	@Mock
-	private AsyncEndpointCall<Void> endpointCallMock;
+	private AsyncEndpointCall<Void> asyncEndpointCallMock;
+
+	@Mock
+	private EndpointCall<Void> endpointCall;
 
 	private RxJava2CompletableEndpointCallHandlerFactory adapter;
 
-	private Scheduler scheduler;
-
 	@Before
 	public void setup() {
-		scheduler = Schedulers.single();
-
-		adapter = new RxJava2CompletableEndpointCallHandlerFactory(scheduler);
+		adapter = new RxJava2CompletableEndpointCallHandlerFactory(Schedulers.single());
 	}
 
 	@Test
@@ -55,21 +54,21 @@ public class RxJava2CompletableEndpointCallHandlerFactoryTest {
 		AsyncEndpointCallHandler<Completable, Void> handler = adapter
 				.createAsync(new SimpleEndpointMethod(SomeType.class.getMethod("completable")));
 
-		when(endpointCallMock.executeAsync())
+		when(asyncEndpointCallMock.executeAsync())
 			.thenReturn(CompletableFuture.completedFuture(null));
 
-		Completable completable = handler.handleAsync(endpointCallMock, null);
+		Completable completable = handler.handleAsync(asyncEndpointCallMock, null);
 
 		assertNotNull(completable);
 
-		TestObserver<Void> subscriber = completable.subscribeOn(scheduler).test();
+		TestObserver<Void> subscriber = completable.test();
 		subscriber.await();
 
 		subscriber.assertNoErrors();
 		subscriber.assertNoValues();
 		subscriber.assertComplete();
 
-		verify(endpointCallMock).executeAsync();
+		verify(asyncEndpointCallMock).executeAsync();
 	}
 
 	@Test
@@ -82,19 +81,19 @@ public class RxJava2CompletableEndpointCallHandlerFactoryTest {
 		CompletableFuture<Void> futureAsException = new CompletableFuture<>();
 		futureAsException.completeExceptionally(exception);
 
-		when(endpointCallMock.executeAsync())
+		when(asyncEndpointCallMock.executeAsync())
 			.thenReturn(futureAsException);
 
-		Completable completable = handler.handleAsync(endpointCallMock, null);
+		Completable completable = handler.handleAsync(asyncEndpointCallMock, null);
 
 		assertNotNull(completable);
 
-		TestObserver<Void> subscriber = completable.subscribeOn(scheduler).test();
+		TestObserver<Void> subscriber = completable.test();
 
 		subscriber.await()
 			.assertError(exception);
 
-		verify(endpointCallMock).executeAsync();
+		verify(asyncEndpointCallMock).executeAsync();
 	}
 
 	@Test
@@ -102,18 +101,18 @@ public class RxJava2CompletableEndpointCallHandlerFactoryTest {
 		EndpointCallHandler<Completable, Void> handler = adapter
 				.create(new SimpleEndpointMethod(SomeType.class.getMethod("completable")));
 
-		Completable completable = handler.handle(endpointCallMock, null);
+		Completable completable = handler.handle(endpointCall, null);
 
 		assertNotNull(completable);
 
-		TestObserver<Void> subscriber = completable.subscribeOn(scheduler).test();
+		TestObserver<Void> subscriber = completable.test();
 		subscriber.await();
 
 		subscriber.assertNoErrors();
 		subscriber.assertNoValues();
 		subscriber.assertComplete();
 
-		verify(endpointCallMock).execute();
+		verify(endpointCall).execute();
 	}
 
 	interface SomeType {

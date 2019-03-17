@@ -26,19 +26,25 @@
 package com.github.ljtfreitas.restify.util.async;
 
 import java.util.concurrent.ThreadFactory;
+import java.util.concurrent.atomic.AtomicInteger;
 
-public class DaemonThreadFactory implements ThreadFactory {
+class DaemonThreadFactory implements ThreadFactory {
 
-	private static final DaemonThreadFactory INSTANCE = new DaemonThreadFactory();
+	private final AtomicInteger count = new AtomicInteger(0);
+
+	private final String name;
+
+	DaemonThreadFactory(String name) {
+		this.name = name;
+	}
 
 	@Override
 	public Thread newThread(Runnable r) {
 		Thread newThread = new Thread(r);
 		newThread.setDaemon(true);
+		newThread.setPriority(Thread.NORM_PRIORITY);
+		newThread.setName(name + "-" + count.incrementAndGet());
 		return newThread;
 	}
 
-	public static ThreadFactory instance() {
-		return INSTANCE;
-	}
 }

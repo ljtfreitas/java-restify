@@ -25,6 +25,9 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.message.converter.form.multipart;
 
+import java.util.Arrays;
+import java.util.Collection;
+
 import com.github.ljtfreitas.restify.http.client.message.ContentType;
 import com.github.ljtfreitas.restify.http.client.message.converter.HttpMessageWriter;
 
@@ -33,7 +36,7 @@ public interface MultipartFormMessageWriter<T> extends HttpMessageWriter<T> {
 	public static final ContentType MULTIPART_FORM_DATA_CONTENT_TYPE = ContentType.of("multipart/form-data");
 
 	@Override
-	public default ContentType contentType() {
-		return MULTIPART_FORM_DATA_CONTENT_TYPE;
+	public default Collection<ContentType> contentTypes() {
+		return Arrays.asList(MULTIPART_FORM_DATA_CONTENT_TYPE);
 	}
 }

@@ -26,6 +26,7 @@
 package com.github.ljtfreitas.restify.http.client.message.converter.wildcard;
 
 import java.lang.reflect.Type;
+import java.util.Collection;
 
 import com.github.ljtfreitas.restify.http.client.message.ContentType;
 import com.github.ljtfreitas.restify.http.client.message.converter.HttpMessageReadException;
@@ -37,7 +38,7 @@ public class SimpleTextMessageConverter implements WildcardMessageConverter<Stri
 
 	private final TextMessageConverter<String> delegate = new StringMessageConverter() {
 		@Override
-		public ContentType contentType() {
+		public Collection<ContentType> contentTypes() {
 			return null;
 		}
 	};

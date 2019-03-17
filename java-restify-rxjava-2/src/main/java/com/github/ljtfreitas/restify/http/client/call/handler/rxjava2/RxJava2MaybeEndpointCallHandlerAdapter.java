@@ -27,10 +27,11 @@ package com.github.ljtfreitas.restify.http.client.call.handler.rxjava2;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
+import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutionException;
 
-import com.github.ljtfreitas.restify.http.client.call.EndpointCall;
 import com.github.ljtfreitas.restify.http.client.call.async.AsyncEndpointCall;
 import com.github.ljtfreitas.restify.http.client.call.handler.EndpointCallHandler;
 import com.github.ljtfreitas.restify.http.client.call.handler.async.AsyncEndpointCallHandler;
@@ -39,6 +40,8 @@ import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethod;
 import com.github.ljtfreitas.restify.reflection.JavaType;
 
 import io.reactivex.Maybe;
+import io.reactivex.MaybeEmitter;
+import io.reactivex.MaybeOnSubscribe;
 import io.reactivex.Scheduler;
 import io.reactivex.schedulers.Schedulers;
 
@@ -47,7 +50,7 @@ public class RxJava2MaybeEndpointCallHandlerAdapter<T, O> implements AsyncEndpoi
 	public final Scheduler scheduler;
 
 	public RxJava2MaybeEndpointCallHandlerAdapter() {
-		this.scheduler = Schedulers.io();
+		this(Schedulers.io());
 	}
 
 	public RxJava2MaybeEndpointCallHandlerAdapter(Scheduler scheduler) {
@@ -89,14 +92,8 @@ public class RxJava2MaybeEndpointCallHandlerAdapter<T, O> implements AsyncEndpoi
 		}
 
 		@Override
-		public Maybe<T> handle(EndpointCall<O> call, Object[] args) {
-			return Maybe.fromCallable(() -> delegate.handle(call, args))
-				.subscribeOn(scheduler);
-		}
-
-		@Override
 		public Maybe<T> handleAsync(AsyncEndpointCall<O> call, Object[] args) {
-			return Maybe.fromFuture(call.executeAsync().toCompletableFuture())
+			return Maybe.create(new CompletionStageMaybeSubscribe(call.executeAsync()))
 					.onErrorResumeNext(this::handleAsyncException)
 					.map(o -> delegate.handle(() -> o, args))
 						.subscribeOn(scheduler);
@@ -107,6 +104,34 @@ public class RxJava2MaybeEndpointCallHandlerAdapter<T, O> implements AsyncEndpoi
 				(ExecutionException.class.equals(throwable.getClass()) || CompletionException.class.equals(throwable.getClass())) ?
 						throwable.getCause() :
 							throwable);
+		}
+	}
+
+	private class CompletionStageMaybeSubscribe implements MaybeOnSubscribe<O> {
+
+		private final CompletionStage<O> stage;
+
+		private CompletionStageMaybeSubscribe(CompletionStage<O> stage) {
+			this.stage = stage;
+		}
+
+		@Override
+		public void subscribe(MaybeEmitter<O> emitter) throws Exception {
+			CompletableFuture<O> future = stage.toCompletableFuture();
+
+			future.whenComplete((value, throwable) -> {
+				if (throwable != null) {
+					emitter.onError(throwable);
+				} else {
+					if (value == null) {
+						emitter.onComplete();
+					} else {
+						emitter.onSuccess(value);
+					}
+				}
+			});
+
+			emitter.setCancellable(() -> future.cancel(true));
 		}
 	}
 }

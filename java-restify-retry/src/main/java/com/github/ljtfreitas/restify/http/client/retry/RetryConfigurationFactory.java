@@ -37,7 +37,6 @@ public class RetryConfigurationFactory {
 	private final RetryConfiguration retryConfiguration;
 
 	public RetryConfigurationFactory(RetryConfiguration retryConfiguration) {
-		super();
 		this.retryConfiguration = retryConfiguration;
 	}
 

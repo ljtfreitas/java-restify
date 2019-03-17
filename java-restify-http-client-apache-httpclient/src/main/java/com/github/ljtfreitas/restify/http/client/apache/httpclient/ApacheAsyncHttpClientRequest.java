@@ -44,6 +44,7 @@ import com.github.ljtfreitas.restify.http.client.HttpClientException;
 import com.github.ljtfreitas.restify.http.client.message.Header;
 import com.github.ljtfreitas.restify.http.client.message.Headers;
 import com.github.ljtfreitas.restify.http.client.message.request.BufferedByteArrayHttpRequestBody;
+import com.github.ljtfreitas.restify.http.client.message.request.BufferedHttpRequestBody;
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestBody;
 import com.github.ljtfreitas.restify.http.client.request.async.AsyncHttpClientRequest;
@@ -57,7 +58,7 @@ class ApacheAsyncHttpClientRequest implements AsyncHttpClientRequest {
 	private final HttpContext httpContext;
 	private final Charset charset;
 	private final Headers headers;
-	private final HttpRequestBody body;
+	private final BufferedHttpRequestBody body;
 
 	ApacheAsyncHttpClientRequest(HttpAsyncClient httpAsyncClient, HttpUriRequest httpRequest, HttpContext context,
 			Charset charset, Headers headers) {
@@ -65,7 +66,7 @@ class ApacheAsyncHttpClientRequest implements AsyncHttpClientRequest {
 	}
 
 	private ApacheAsyncHttpClientRequest(HttpAsyncClient httpAsyncClient, HttpUriRequest httpRequest,
-			HttpContext context, Charset charset, Headers headers, HttpRequestBody body) {
+			HttpContext context, Charset charset, Headers headers, BufferedHttpRequestBody body) {
 		this.httpAsyncClient = httpAsyncClient;
 		this.httpRequest = httpRequest;
 		this.httpContext = context;

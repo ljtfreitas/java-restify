@@ -2,6 +2,7 @@ package com.github.ljtfreitas.restify.reflection;
 
 import static org.hamcrest.Matchers.contains;
 import static org.hamcrest.Matchers.empty;
+import static org.hamcrest.Matchers.hasSize;
 import static org.hamcrest.Matchers.instanceOf;
 import static org.hamcrest.Matchers.not;
 import static org.junit.Assert.assertFalse;
@@ -60,6 +61,16 @@ public class JavaAnnotationScannerTest {
 		Collection<Meta> annotations = scanner.scanAll(Meta.class);
 
 		assertThat(annotations, not(empty()));
+
+	}
+
+	@Test
+	public void shouldScanAllMetaAnnotationsByType() throws Exception {
+		scanner = new JavaAnnotationScanner(MyType.class.getMethod("method"));
+
+		Collection<Annotation> annotations = scanner.allWith(Embedded.class);
+
+		assertThat(annotations, hasSize(1));
 	}
 
 	@Test
@@ -93,7 +104,8 @@ public class JavaAnnotationScannerTest {
 	}
 
 	@Retention(RetentionPolicy.RUNTIME)
-	@Target(ElementType.TYPE)
+	@Target({ElementType.TYPE, ElementType.METHOD})
+	@Embedded
 	@interface Other {
 	}
 
@@ -102,6 +114,7 @@ public class JavaAnnotationScannerTest {
 
 		@Meta
 		@Meta
+		@Other
 		void method();
 	}
 }

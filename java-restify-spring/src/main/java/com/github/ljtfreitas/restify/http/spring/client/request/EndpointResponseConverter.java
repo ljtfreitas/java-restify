@@ -39,7 +39,7 @@ public class EndpointResponseConverter implements Converter<ResponseEntity<Objec
 	public EndpointResponse<Object> convert(ResponseEntity<Object> source) {
 		StatusCode status = StatusCode.of(source.getStatusCodeValue(), source.getStatusCode().getReasonPhrase());
 		Headers headers = headersOf(source.getHeaders());
-		return new EndpointResponse<>(status, headers, source.getBody());
+		return EndpointResponse.of(status, source.getBody(), headers);
 	}
 
 	private Headers headersOf(HttpHeaders httpHeaders) {

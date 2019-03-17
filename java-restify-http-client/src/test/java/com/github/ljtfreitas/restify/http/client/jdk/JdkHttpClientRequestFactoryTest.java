@@ -37,6 +37,7 @@ import com.github.ljtfreitas.restify.http.client.message.response.HttpResponseMe
 import com.github.ljtfreitas.restify.http.client.message.response.StatusCode;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequestMetadata;
+import com.github.ljtfreitas.restify.http.client.request.HttpClientRequest;
 import com.github.ljtfreitas.restify.http.client.request.Timeout;
 
 public class JdkHttpClientRequestFactoryTest {
@@ -100,7 +101,7 @@ public class JdkHttpClientRequestFactoryTest {
 		EndpointRequest endpointRequest = new EndpointRequest(URI.create("http://localhost:7080/json"), "POST",
 				new Headers(Header.contentType("application/json")), requestBody);
 
-		JdkHttpClientRequest request = jdkHttpClientRequestFactory.createOf(endpointRequest);
+		HttpClientRequest request = jdkHttpClientRequestFactory.createOf(endpointRequest);
 		request.body().output().write(requestBody.getBytes());
 		request.body().output().flush();
 
@@ -240,6 +241,160 @@ public class JdkHttpClientRequestFactoryTest {
 
 		assertEquals(responseBody, new InputStreamContent(response.body().input()).asString());
 		assertEquals("application/json", response.headers().get("Content-Type").get().value());
+		assertEquals(StatusCode.ok(), response.status());
+	}
+
+	@Test
+	public void shouldSendRequestWithHeaders() {
+		String responseBody = "{\"name\": \"Tiago de Freitas Lima\",\"age\":31}";
+
+		mockServerClient
+			.when(request()
+					.withMethod("GET")
+					.withPath("/json")
+					.withHeader("X-Header-1", "value-1")
+					.withHeader("X-Header-2", "value-2"))
+			.respond(response()
+					.withStatusCode(200)
+					.withHeader("Content-Type", "application/json")
+					.withBody(json(responseBody)));
+
+		Headers headers = new Headers(Header.of("X-Header-1", "value-1"), Header.of("X-Header-2", "value-2"));
+
+		EndpointRequest request = new EndpointRequest(URI.create("http://localhost:7080/json"), "GET", headers, String.class);
+
+		HttpResponseMessage response = jdkHttpClientRequestFactory.createOf(request)
+				.execute();
+
+		assertEquals(responseBody, new InputStreamContent(response.body().input()).asString());
+		assertEquals("application/json", response.headers().get("Content-Type").get().value());
+		assertEquals(StatusCode.ok(), response.status());
+	}
+
+	@Test
+	public void shouldSendRequestWithHeadersReplaced() {
+		String responseBody = "{\"name\": \"Tiago de Freitas Lima\",\"age\":31}";
+
+		mockServerClient
+			.when(request()
+					.withMethod("GET")
+					.withPath("/json")
+					.withHeader("X-Header-1", "new-value-1")
+					.withHeader("X-Header-2", "value-2"))
+			.respond(response()
+					.withStatusCode(200)
+					.withHeader("Content-Type", "application/json")
+					.withBody(json(responseBody)));
+
+		Headers headers = new Headers(Header.of("X-Header-1", "value-1"), Header.of("X-Header-2", "value-2"));
+
+		EndpointRequest request = new EndpointRequest(URI.create("http://localhost:7080/json"), "GET", headers, String.class);
+
+		HttpClientRequest httpClientRequest = jdkHttpClientRequestFactory.createOf(request);
+
+		httpClientRequest = (HttpClientRequest) httpClientRequest.replace(Header.of("X-Header-1", "new-value-1"));
+
+		HttpResponseMessage response = httpClientRequest.execute();
+
+		assertEquals(responseBody, new InputStreamContent(response.body().input()).asString());
+		assertEquals("application/json", response.headers().get("Content-Type").get().value());
+		assertEquals(StatusCode.ok(), response.status());
+	}
+
+	@Test
+	public void shouldSendRequestUsingStreamingMode() throws Exception {
+		HttpClientRequestConfiguration configuration = new HttpClientRequestConfiguration.Builder()
+				.bufferRequestBody()
+					.disabled()
+				.outputStreaming()
+					.enabled()
+				.chunkSize(128) // 128 bytes
+					.and()
+				.build();
+
+		jdkHttpClientRequestFactory = new JdkHttpClientRequestFactory(configuration);
+
+		char[] chars = new char[1024]; // 1kb
+		Arrays.fill(chars, 'a');
+
+		String requestBody = new String(chars);
+		String responseBody = "OK";
+
+		HttpRequest httpRequest = request()
+			.withMethod("POST")
+			.withPath("/large")
+			.withHeader("Content-Type", "text/plain")
+			.withBody(exact(requestBody));
+
+		mockServerClient
+			.when(httpRequest)
+			.respond(response()
+				.withStatusCode(200)
+				.withHeader("Content-Type", "text/plain")
+				.withBody(exact(responseBody)));
+
+		EndpointRequest endpointRequest = new EndpointRequest(URI.create("http://localhost:7080/large"), "POST",
+				new Headers(Header.contentType("text/plain")), requestBody);
+
+		HttpClientRequest request = jdkHttpClientRequestFactory.createOf(endpointRequest);
+
+		request.body().output().write(requestBody.getBytes());
+		request.body().output().flush();
+
+		HttpResponseMessage response = request.execute();
+
+		assertEquals(responseBody, new InputStreamContent(response.body().input()).asString());
+		assertEquals("text/plain", response.headers().get("Content-Type").get().value());
+		assertEquals(StatusCode.ok(), response.status());
+	}
+
+	@Test
+	public void shouldSendRequestUsingStreamingModeWithHeadersReplaced() throws Exception {
+		HttpClientRequestConfiguration configuration = new HttpClientRequestConfiguration.Builder()
+				.bufferRequestBody()
+					.disabled()
+				.outputStreaming()
+					.enabled()
+				.chunkSize(128) // 128 bytes
+					.and()
+				.build();
+
+		jdkHttpClientRequestFactory = new JdkHttpClientRequestFactory(configuration);
+
+		char[] chars = new char[1024]; // 1kb
+		Arrays.fill(chars, 'a');
+
+		String requestBody = new String(chars);
+		String responseBody = "OK";
+
+		HttpRequest httpRequest = request()
+			.withMethod("POST")
+			.withPath("/large")
+			.withHeader("Content-Type", "text/plain")
+			.withHeader("X-Header-1", "value-1")
+			.withBody(exact(requestBody));
+
+		mockServerClient
+			.when(httpRequest)
+			.respond(response()
+				.withStatusCode(200)
+				.withHeader("Content-Type", "text/plain")
+				.withBody(exact(responseBody)));
+
+		EndpointRequest endpointRequest = new EndpointRequest(URI.create("http://localhost:7080/large"), "POST",
+				new Headers(Header.contentType("text/plain")), requestBody);
+
+		HttpClientRequest httpClientRequest = jdkHttpClientRequestFactory.createOf(endpointRequest);
+
+		httpClientRequest = (HttpClientRequest) httpClientRequest.replace(Header.of("X-Header-1", "value-1"));
+
+		httpClientRequest.body().output().write(requestBody.getBytes());
+		httpClientRequest.body().output().flush();
+
+		HttpResponseMessage response = httpClientRequest.execute();
+
+		assertEquals(responseBody, new InputStreamContent(response.body().input()).asString());
+		assertEquals("text/plain", response.headers().get("Content-Type").get().value());
 		assertEquals(StatusCode.ok(), response.status());
 	}
 }

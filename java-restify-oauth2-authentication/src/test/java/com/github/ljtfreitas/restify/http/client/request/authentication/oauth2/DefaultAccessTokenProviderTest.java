@@ -58,7 +58,7 @@ public class DefaultAccessTokenProviderTest {
 			.thenReturn(accessTokenRequest);
 
 		when(authorizationServer.requireToken(accessTokenRequest))
-			.thenReturn(new AccessTokenResponse(new EndpointResponse<>(StatusCode.ok(), accessTokenResponseBody)));
+			.thenReturn(new AccessTokenResponse(EndpointResponse.of(StatusCode.ok(), accessTokenResponseBody)));
 
 		AccessToken newAccessToken = provider.provides(authenticatedRequest);
 
@@ -83,7 +83,7 @@ public class DefaultAccessTokenProviderTest {
 			.thenReturn(accessTokenRequest);
 
 		when(authorizationServer.requireToken(accessTokenRequest))
-			.thenReturn(new AccessTokenResponse(new EndpointResponse<>(StatusCode.ok(), refreshedAccessTokenResponseBody)));
+			.thenReturn(new AccessTokenResponse(EndpointResponse.of(StatusCode.ok(), refreshedAccessTokenResponseBody)));
 
 		AccessToken newAccessToken = provider.refresh(refreshedAccessToken, authenticatedRequest);
 

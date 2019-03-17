@@ -31,7 +31,7 @@ import static com.github.ljtfreitas.restify.http.client.message.response.HttpSta
 import static com.github.ljtfreitas.restify.http.client.message.response.HttpStatusCode.CONFLICT;
 import static com.github.ljtfreitas.restify.http.client.message.response.HttpStatusCode.CONTINUE;
 import static com.github.ljtfreitas.restify.http.client.message.response.HttpStatusCode.CREATED;
-import static com.github.ljtfreitas.restify.http.client.message.response.HttpStatusCode.EXPECTIATION_FAILED;
+import static com.github.ljtfreitas.restify.http.client.message.response.HttpStatusCode.EXPECTATION_FAILED;
 import static com.github.ljtfreitas.restify.http.client.message.response.HttpStatusCode.FORBIDDEN;
 import static com.github.ljtfreitas.restify.http.client.message.response.HttpStatusCode.FOUND;
 import static com.github.ljtfreitas.restify.http.client.message.response.HttpStatusCode.GATEWAY_TIMEOUT;
@@ -226,7 +226,7 @@ public class StatusCode {
 	}
 
 	public boolean isExpectationFailed() {
-		return code == EXPECTIATION_FAILED.value();
+		return code == EXPECTATION_FAILED.value();
 	}
 
 	public boolean isInternalServerError() {
@@ -369,7 +369,7 @@ public class StatusCode {
 	}
 
 	public static StatusCode expectationFailed() {
-		return new StatusCode(EXPECTIATION_FAILED);
+		return new StatusCode(EXPECTATION_FAILED);
 	}
 
 	public static StatusCode internalServerError() {

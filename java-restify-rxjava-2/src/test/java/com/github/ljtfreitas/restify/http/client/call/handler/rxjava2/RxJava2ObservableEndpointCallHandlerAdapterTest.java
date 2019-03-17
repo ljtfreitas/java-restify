@@ -38,6 +38,9 @@ public class RxJava2ObservableEndpointCallHandlerAdapterTest {
 	@Mock
 	private AsyncEndpointCall<Collection<String>> asyncEndpointCall;
 
+	@Mock
+	private EndpointCall<Collection<String>> endpointCall;
+
 	private RxJava2ObservableEndpointCallHandlerAdapter<String, Collection<String>> adapter;
 
 	private Scheduler scheduler;
@@ -61,12 +64,12 @@ public class RxJava2ObservableEndpointCallHandlerAdapterTest {
 
 	@Test
 	public void shouldReturnCollectionWithArgumentTypeOfRxJava2Observable() throws Exception {
-		assertEquals(JavaType.of(JavaType.parameterizedType(Collection.class, String.class)), adapter.returnType(new SimpleEndpointMethod(SomeType.class.getMethod("observable"))));
+		assertEquals(JavaType.parameterizedType(Collection.class, String.class), adapter.returnType(new SimpleEndpointMethod(SomeType.class.getMethod("observable"))));
 	}
 
 	@Test
 	public void shouldReturnCollectionWithObjectTypeWhenRxJava2ObservableIsNotParameterized() throws Exception {
-		assertEquals(JavaType.of(JavaType.parameterizedType(Collection.class, Object.class)), adapter.returnType(new SimpleEndpointMethod(SomeType.class.getMethod("dumbObservable"))));
+		assertEquals(JavaType.parameterizedType(Collection.class, Object.class), adapter.returnType(new SimpleEndpointMethod(SomeType.class.getMethod("dumbObservable"))));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -126,10 +129,13 @@ public class RxJava2ObservableEndpointCallHandlerAdapterTest {
 
 		String result = "observable result";
 
-		when(delegate.handle(notNull(EndpointCall.class), anyVararg()))
+		when(endpointCall.execute())
 			.thenReturn(Arrays.asList(result));
 
-		Observable<String> observable = handler.handle(asyncEndpointCall, null);
+		when(delegate.handle(notNull(EndpointCall.class), anyVararg()))
+			.then(i -> i.getArgumentAt(0, EndpointCall.class).execute());
+
+		Observable<String> observable = handler.handle(endpointCall, null);
 
 		assertNotNull(observable);
 

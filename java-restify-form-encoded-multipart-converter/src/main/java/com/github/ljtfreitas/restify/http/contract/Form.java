@@ -30,11 +30,13 @@ import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 
-@Target({ElementType.TYPE, ElementType.ANNOTATION_TYPE})
 @Retention(RetentionPolicy.RUNTIME)
+@Target({ElementType.TYPE, ElementType.ANNOTATION_TYPE})
 public @interface Form {
 
 	String value() default "";
+
+	Notation notation() default @Notation;
 
 	@Target({ElementType.FIELD})
 	@Retention(RetentionPolicy.RUNTIME)
@@ -46,4 +48,5 @@ public @interface Form {
 
 		Class<? extends FormFieldSerializer> serializer() default SimpleFormFieldSerializer.class;
 	}
+
 }

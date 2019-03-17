@@ -38,12 +38,9 @@ public class Gzip {
 
 	@SuppressWarnings("unchecked")
 	public <T extends HttpClientRequest> T applyTo(T request) {
-		if (!request.body().empty()) {
-			return request.headers().get(Headers.CONTENT_ENCODING)
-				.map(h -> request)
-					.orElseGet(() -> (T) request.replace(Header.contentEncoding(GZIP_ALGORITHM)));
-
-		} else return request;
+		return request.headers().get(Headers.CONTENT_ENCODING)
+			.map(h -> request)
+				.orElseGet(() -> (T) request.replace(Header.contentEncoding(GZIP_ALGORITHM)));
 	}
 
 	public HttpClientResponse applyTo(HttpClientResponse response) {

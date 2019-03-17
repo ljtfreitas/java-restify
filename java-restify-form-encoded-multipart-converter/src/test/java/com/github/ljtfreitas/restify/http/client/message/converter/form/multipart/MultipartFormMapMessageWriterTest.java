@@ -22,9 +22,9 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import com.github.ljtfreitas.restify.http.client.message.Header;
 import com.github.ljtfreitas.restify.http.client.message.Headers;
-import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
-import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestBody;
 import com.github.ljtfreitas.restify.http.client.message.request.BufferedByteArrayHttpRequestBody;
+import com.github.ljtfreitas.restify.http.client.message.request.BufferedHttpRequestBody;
+import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
 import com.github.ljtfreitas.restify.http.contract.MultipartFile;
 
 @RunWith(MockitoJUnitRunner.class)
@@ -34,7 +34,7 @@ public class MultipartFormMapMessageWriterTest {
 
 	private Map<String, Object> parameters;
 
-	private HttpRequestBody output;
+	private BufferedHttpRequestBody output;
 
 	private File file;
 

@@ -22,7 +22,6 @@ import com.github.ljtfreitas.restify.http.client.call.handler.EndpointCallHandle
 import com.github.ljtfreitas.restify.http.client.call.handler.async.AsyncEndpointCallHandler;
 import com.github.ljtfreitas.restify.reflection.JavaType;
 
-import io.reactivex.Scheduler;
 import io.reactivex.Single;
 import io.reactivex.observers.TestObserver;
 import io.reactivex.schedulers.Schedulers;
@@ -36,15 +35,14 @@ public class RxJava2SingleEndpointCallHandlerAdapterTest {
 	@Mock
 	private AsyncEndpointCall<String> asyncEndpointCall;
 
-	private RxJava2SingleEndpointCallHandlerAdapter<String, String> adapter;
+	@Mock
+	private EndpointCall<String> endpointCall;
 
-	private Scheduler scheduler;
+	private RxJava2SingleEndpointCallHandlerAdapter<String, String> adapter;
 
 	@Before
 	public void setup() {
-		scheduler = Schedulers.single();
-
-		adapter = new RxJava2SingleEndpointCallHandlerAdapter<>(scheduler);
+		adapter = new RxJava2SingleEndpointCallHandlerAdapter<>(Schedulers.single());
 	}
 
 	@Test
@@ -85,7 +83,7 @@ public class RxJava2SingleEndpointCallHandlerAdapterTest {
 
 		assertNotNull(single);
 
-		TestObserver<String> subscriber = single.subscribeOn(scheduler).test();
+		TestObserver<String> subscriber = single.test();
 		subscriber.await();
 
 		subscriber.assertNoErrors()
@@ -110,7 +108,7 @@ public class RxJava2SingleEndpointCallHandlerAdapterTest {
 
 		assertNotNull(single);
 
-		TestObserver<String> subscriber = single.subscribeOn(scheduler).test();
+		TestObserver<String> subscriber = single.test();
 
 		subscriber.await()
 			.assertError(exception);
@@ -124,14 +122,17 @@ public class RxJava2SingleEndpointCallHandlerAdapterTest {
 
 		String result = "single result";
 
-		when(delegate.handle(notNull(EndpointCall.class), anyVararg()))
+		when(endpointCall.execute())
 			.thenReturn(result);
 
-		Single<String> single = handler.handle(asyncEndpointCall, null);
+		when(delegate.handle(notNull(EndpointCall.class), anyVararg()))
+			.then(i -> i.getArgumentAt(0, EndpointCall.class).execute());
+
+		Single<String> single = handler.handle(endpointCall, null);
 
 		assertNotNull(single);
 
-		TestObserver<String> subscriber = single.subscribeOn(scheduler).test();
+		TestObserver<String> subscriber = single.test();
 		subscriber.await();
 
 		subscriber.assertNoErrors()

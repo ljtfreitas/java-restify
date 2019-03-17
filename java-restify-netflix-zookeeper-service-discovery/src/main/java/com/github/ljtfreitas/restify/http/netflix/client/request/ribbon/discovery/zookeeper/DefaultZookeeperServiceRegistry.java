@@ -86,12 +86,11 @@ public class DefaultZookeeperServiceRegistry<T> implements ZookeeperServiceRegis
 
 	@Override
 	public void unregister(ZookeeperServiceInstance instance) {
-		try {
-			serviceDiscovery.queryForInstance(instance)
-				.ifPresent(service -> Try.run(() -> serviceDiscovery.unregisterService(service)));
+		serviceDiscovery.queryForInstance(instance)
+			.ifPresent(service ->
+				Try.run(() -> serviceDiscovery.unregisterService(service))
+				   .error(e -> new ZookeeperServiceDiscoveryException("Exception on unregister Zookeeper service instance [" + instance + "]" , e))
+				   .apply());
 
-		} catch (Exception e) {
-			throw new ZookeeperServiceDiscoveryException("Exception on unregister Zookeeper service instance [" + instance + "]" , e);
-		}
 	}
 }

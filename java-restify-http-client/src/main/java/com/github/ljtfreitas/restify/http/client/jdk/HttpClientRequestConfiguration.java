@@ -35,10 +35,15 @@ import javax.net.ssl.SSLSocketFactory;
 
 public class HttpClientRequestConfiguration {
 
+	private static final int DEFAULT_CHUNK_SIZE = 4096;
+
 	private int connectionTimeout = 0;
 	private int readTimeout = 0;
 	private boolean followRedirects = true;
 	private boolean useCaches = true;
+	private boolean bufferRequestBody = true;
+	private boolean outputStreaming = true;
+	private int chunkSize = DEFAULT_CHUNK_SIZE;
 
 	private Charset charset = Charset.forName("UTF-8");
 	private Proxy proxy = null;
@@ -53,6 +58,9 @@ public class HttpClientRequestConfiguration {
 		this.readTimeout = source.readTimeout;
 		this.followRedirects = source.followRedirects;
 		this.useCaches = source.useCaches;
+		this.bufferRequestBody = source.bufferRequestBody;
+		this.outputStreaming = source.outputStreaming;
+		this.chunkSize = source.chunkSize;
 		this.charset = source.charset;
 		this.proxy = source.proxy;
 		this.ssl = new HttpClientRequestSsl(source.ssl);
@@ -72,6 +80,18 @@ public class HttpClientRequestConfiguration {
 
 	public boolean useCaches() {
 		return useCaches;
+	}
+
+	public boolean bufferRequestBody() {
+		return bufferRequestBody;
+	}
+
+	public boolean outputStreaming() {
+		return outputStreaming;
+	}
+
+	public int chunkSize() {
+		return chunkSize;
 	}
 
 	public Charset charset() {
@@ -164,6 +184,24 @@ public class HttpClientRequestConfiguration {
 			return this;
 		}
 
+		public BufferRequestBodyBuilder bufferRequestBody() {
+			return new BufferRequestBodyBuilder();
+		}
+
+		public Builder bufferRequestBody(boolean enabled) {
+			configuration.bufferRequestBody = enabled;
+			return this;
+		}
+
+		public OutputStreamingBuilder outputStreaming() {
+			return new OutputStreamingBuilder();
+		}
+
+		public Builder outputStreaming(boolean enabled) {
+			configuration.outputStreaming = enabled;
+			return this;
+		}
+
 		public SslBuilder ssl() {
 			return new SslBuilder();
 		}
@@ -194,6 +232,41 @@ public class HttpClientRequestConfiguration {
 
 			public Builder disabled() {
 				configuration.followRedirects = false;
+				return Builder.this;
+			}
+		}
+
+		public class BufferRequestBodyBuilder {
+
+			public Builder enabled() {
+				configuration.bufferRequestBody = true;
+				return Builder.this;
+			}
+
+			public Builder disabled() {
+				configuration.bufferRequestBody = false;
+				return Builder.this;
+			}
+		}
+
+		public class OutputStreamingBuilder {
+
+			public OutputStreamingBuilder enabled() {
+				configuration.outputStreaming = true;
+				return this;
+			}
+
+			public Builder disabled() {
+				configuration.outputStreaming = false;
+				return Builder.this;
+			}
+
+			public OutputStreamingBuilder chunkSize(int chunkSize) {
+				configuration.chunkSize = chunkSize;
+				return this;
+			}
+
+			public Builder and() {
 				return Builder.this;
 			}
 		}

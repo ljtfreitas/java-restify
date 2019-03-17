@@ -51,7 +51,6 @@ public class ZookeeperServiceProviderDiscoveryTest {
 
 	private ZookeeperServiceRegistry<ZookeeperServiceInstance> zookeeperServiceRegister;
 
-
 	@Before
 	public void setup() throws Exception {
 		zookeeperServer = new TestingServer(2181, false);

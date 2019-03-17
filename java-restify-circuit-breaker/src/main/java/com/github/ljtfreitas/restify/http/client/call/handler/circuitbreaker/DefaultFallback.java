@@ -25,51 +25,33 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.call.handler.circuitbreaker;
 
-import java.lang.reflect.Method;
-
-import com.github.ljtfreitas.restify.util.Try;
-
 class DefaultFallback implements Fallback {
 
 	private final Object fallback;
 	private final String method;
 
-	public DefaultFallback(Object fallback) {
+	DefaultFallback(Object fallback) {
 		this(fallback, null);
 	}
 
-	public DefaultFallback(Object fallback, String method) {
+	DefaultFallback(Object fallback, String method) {
 		this.fallback = fallback;
 		this.method = method;
+	}
+
+	Object instance() {
+		return fallback;
+	}
+
+	String method() {
+		return method;
 	}
 
 	@Override
 	public FallbackStrategy strategy(Class<?> declaringClass) {
 		return fallback == null ? new FallbackNotImplementedStrategy() :
 			declaringClass.isAssignableFrom(fallback.getClass()) ?
-				new FallbackOfSameType() : new FallbackByMethod();
-	}
-
-	private class FallbackOfSameType implements FallbackStrategy {
-
-		@Override
-		public FallbackResult<Object> execute(Method javaMethod, Object[] args) throws Exception {
-			Try.run(() -> javaMethod.setAccessible(true));
-			return new DefaultFallbackResult<>(javaMethod.invoke(fallback, args));
-		}
-	}
-
-	private class FallbackByMethod implements FallbackStrategy {
-
-		@Override
-		public FallbackResult<Object> execute(Method javaMethod, Object[] args) throws Exception {
-			Method fallbackMethod = fallback.getClass()
-					.getMethod(method == null ? javaMethod.getName() : method, javaMethod.getParameterTypes());
-
-			Try.run(() -> fallbackMethod.setAccessible(true));
-
-			return new DefaultFallbackResult<>(fallbackMethod.invoke(fallback, args));
-		}
+				new FallbackOfSameTypeStrategy(fallback) : new FallbackByMethodStrategy(fallback, method);
 	}
 
 	static DefaultFallback empty() {

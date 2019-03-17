@@ -25,94 +25,46 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.response;
 
-import static com.github.ljtfreitas.restify.util.Preconditions.isTrue;
+import java.util.function.Function;
+import java.util.function.Predicate;
 
 import com.github.ljtfreitas.restify.http.client.message.Headers;
 import com.github.ljtfreitas.restify.http.client.message.response.StatusCode;
 
-public class EndpointResponse<T> {
+public interface EndpointResponse<T> {
 
-	private final StatusCode statusCode;
-	private final Headers headers;
-	private final T body;
+	public Headers headers();
 
-	public EndpointResponse(StatusCode statusCode, T body) {
-		this(statusCode, new Headers(), body);
+	public StatusCode status();
+
+	public T body();
+
+	public EndpointResponse<T> recover(
+			Function<EndpointResponseException, EndpointResponse<T>> mapper);
+
+	public EndpointResponse<T> recover(Predicate<EndpointResponseException> predicate,
+			Function<EndpointResponseException, EndpointResponse<T>> mapper);
+
+	public <E extends EndpointResponseException> EndpointResponse<T> recover(Class<? extends E> predicate,
+			Function<E, EndpointResponse<T>> mapper);
+
+	public static <T> EndpointResponse<T> of(StatusCode statusCode, T body) {
+		return new SimpleEndpointResponse<T>(statusCode, Headers.empty(), body);
 	}
 
-	public EndpointResponse(StatusCode statusCode, Headers headers, T body) {
-		this.statusCode = statusCode;
-		this.headers = headers;
-		this.body = body;
+	public static <T> EndpointResponse<T> of(StatusCode statusCode, T body, Headers headers) {
+		return new SimpleEndpointResponse<>(statusCode, headers, body);
 	}
 
-	public Headers headers() {
-		return headers;
-	}
-
-	public StatusCode status() {
-		return statusCode;
-	}
-
-	public T body() {
-		return body;
-	}
-
-	@Override
-	public String toString() {
-		StringBuilder report = new StringBuilder();
-
-		report
-			.append("EndpointResponse: [")
-				.append("HTTP Status code: ")
-					.append(statusCode)
-				.append(", ")
-				.append("Headers: ")
-					.append(headers)
-				.append(", ")
-				.append("Body: ")
-					.append(body)
-			.append("]");
-
-		return report.toString();
+	public static <T> EndpointResponse<T> empty(StatusCode statusCode) {
+		return empty(statusCode, Headers.empty());
 	}
 
 	public static <T> EndpointResponse<T> empty(StatusCode statusCode, Headers headers) {
-		return new EndpointResponse<T>(statusCode, headers, null);
+		return new SimpleEndpointResponse<>(statusCode, headers, null);
 	}
 
-	public static <T> EndpointResponse<T> error(StatusCode statusCode, Headers headers, String body) {
-		isTrue(statusCode.isError(), "StatusCode [" + statusCode + "] is not a HTTP error!");
-
-		String message = new StringBuilder("HTTP response is a error of type ")
-				.append("[")
-					.append(statusCode)
-				.append("].")
-					.append("\n")
-				.append("Raw response body is:")
-					.append("\n")
-				.append(body)
-					.toString();
-
-		return error(new RestifyEndpointResponseException(message, statusCode, headers, body));
-	}
-
-	public static <T> EndpointResponse<T> error(RestifyEndpointResponseException exception) {
-		return new EndpointResponse<T>(exception.statusCode(), exception.headers(), null) {
-			@Override
-			public T body() {
-				String message = new StringBuilder("HTTP response is a error of type ")
-						.append("[")
-							.append(statusCode)
-						.append("].")
-							.append("\n")
-						.append("Raw response body is:")
-							.append("\n")
-						.append(body)
-							.toString();
-
-				throw new EndpointResponseException(message, statusCode, headers, body);
-			}
-		};
+	public static <T> EndpointResponse<T> error(EndpointResponseException e) {
+		return new FailureEndpointResponse<>(e);
 	}
 }

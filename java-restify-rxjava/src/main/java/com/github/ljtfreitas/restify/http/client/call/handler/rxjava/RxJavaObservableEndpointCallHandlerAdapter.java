@@ -28,10 +28,11 @@ package com.github.ljtfreitas.restify.http.client.call.handler.rxjava;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Collection;
+import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
+import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutionException;
 
-import com.github.ljtfreitas.restify.http.client.call.EndpointCall;
 import com.github.ljtfreitas.restify.http.client.call.async.AsyncEndpointCall;
 import com.github.ljtfreitas.restify.http.client.call.handler.EndpointCallHandler;
 import com.github.ljtfreitas.restify.http.client.call.handler.async.AsyncEndpointCallHandler;
@@ -39,8 +40,11 @@ import com.github.ljtfreitas.restify.http.client.call.handler.async.AsyncEndpoin
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethod;
 import com.github.ljtfreitas.restify.reflection.JavaType;
 
+import rx.Emitter;
+import rx.Emitter.BackpressureMode;
 import rx.Observable;
 import rx.Scheduler;
+import rx.functions.Action1;
 import rx.schedulers.Schedulers;
 
 public class RxJavaObservableEndpointCallHandlerAdapter<T, O> implements AsyncEndpointCallHandlerAdapter<Observable<T>, Collection<T>, O> {
@@ -48,7 +52,7 @@ public class RxJavaObservableEndpointCallHandlerAdapter<T, O> implements AsyncEn
 	public final Scheduler scheduler;
 
 	public RxJavaObservableEndpointCallHandlerAdapter() {
-		this.scheduler = Schedulers.io();
+		this(Schedulers.io());
 	}
 
 	public RxJavaObservableEndpointCallHandlerAdapter(Scheduler scheduler) {
@@ -62,7 +66,7 @@ public class RxJavaObservableEndpointCallHandlerAdapter<T, O> implements AsyncEn
 
 	@Override
 	public JavaType returnType(EndpointMethod endpointMethod) {
-		return JavaType.of(JavaType.parameterizedType(Collection.class, unwrap(endpointMethod.returnType())));
+		return JavaType.parameterizedType(Collection.class, unwrap(endpointMethod.returnType()));
 	}
 
 	private Type unwrap(JavaType declaredReturnType) {
@@ -90,14 +94,8 @@ public class RxJavaObservableEndpointCallHandlerAdapter<T, O> implements AsyncEn
 		}
 
 		@Override
-		public Observable<T> handle(EndpointCall<O> call, Object[] args) {
-			return Observable.defer(() -> Observable.from(delegate.handle(call, args)))
-				.subscribeOn(scheduler);
-		}
-
-		@Override
 		public Observable<T> handleAsync(AsyncEndpointCall<O> call, Object[] args) {
-			return Observable.from(call.executeAsync().toCompletableFuture(), scheduler)
+			return Observable.create(new CompletionStageObservableEmitter(call.executeAsync()), BackpressureMode.NONE)
 				.onErrorResumeNext(this::handleAsyncException)
 					.map(o -> delegate.handle(() -> o, args))
 						.flatMap(Observable::from)
@@ -109,6 +107,31 @@ public class RxJavaObservableEndpointCallHandlerAdapter<T, O> implements AsyncEn
 				(ExecutionException.class.equals(throwable.getClass()) || CompletionException.class.equals(throwable.getClass())) ?
 						throwable.getCause() :
 							throwable);
+		}
+	}
+
+	private class CompletionStageObservableEmitter implements Action1<Emitter<O>> {
+
+		private final CompletionStage<O> stage;
+
+		private CompletionStageObservableEmitter(CompletionStage<O> stage) {
+			this.stage = stage;
+		}
+
+		@Override
+		public void call(Emitter<O> emitter) {
+			CompletableFuture<O> future = stage.toCompletableFuture();
+
+			future.whenComplete((value, throwable) -> {
+				if (throwable != null) {
+					emitter.onError(throwable);
+				} else {
+					emitter.onNext(value);
+					emitter.onCompleted();
+				}
+			});
+
+			emitter.setCancellation(() -> future.cancel(true));
 		}
 	}
 }

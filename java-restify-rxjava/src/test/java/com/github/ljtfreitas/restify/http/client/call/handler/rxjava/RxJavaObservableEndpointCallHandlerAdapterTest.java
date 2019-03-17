@@ -28,7 +28,6 @@ import com.github.ljtfreitas.restify.http.client.call.handler.async.AsyncEndpoin
 import com.github.ljtfreitas.restify.reflection.JavaType;
 
 import rx.Observable;
-import rx.Scheduler;
 import rx.observers.AssertableSubscriber;
 import rx.schedulers.Schedulers;
 
@@ -39,17 +38,16 @@ public class RxJavaObservableEndpointCallHandlerAdapterTest {
 	private AsyncEndpointCallHandler<Collection<String>, Collection<String>> delegate;
 
 	@Mock
-	private AsyncEndpointCall<Collection<String>> endpointCallMock;
+	private AsyncEndpointCall<Collection<String>> asyncEndpointCallMock;
+
+	@Mock
+	private EndpointCall<Collection<String>> endpointCallMock;
 
 	private RxJavaObservableEndpointCallHandlerAdapter<String, Collection<String>> adapter;
 
-	private Scheduler scheduler;
-
 	@Before
 	public void setup() {
-		scheduler = Schedulers.immediate();
-
-		adapter = new RxJavaObservableEndpointCallHandlerAdapter<>(scheduler);
+		adapter = new RxJavaObservableEndpointCallHandlerAdapter<>(Schedulers.immediate());
 
 		when(delegate.returnType())
 			.thenReturn(JavaType.of(String.class));
@@ -67,12 +65,12 @@ public class RxJavaObservableEndpointCallHandlerAdapterTest {
 
 	@Test
 	public void shouldReturnCollectionWithArgumentTypeOfRxJavObservable() throws Exception {
-		assertEquals(JavaType.of(JavaType.parameterizedType(Collection.class, String.class)), adapter.returnType(new SimpleEndpointMethod(SomeType.class.getMethod("observable"))));
+		assertEquals(JavaType.parameterizedType(Collection.class, String.class), adapter.returnType(new SimpleEndpointMethod(SomeType.class.getMethod("observable"))));
 	}
 
 	@Test
 	public void shouldReturnCollectionWithObjectTypeWhenRxJavaObservableIsNotParameterized() throws Exception {
-		assertEquals(JavaType.of(JavaType.parameterizedType(Collection.class, Object.class)), adapter.returnType(new SimpleEndpointMethod(SomeType.class.getMethod("dumbObservable"))));
+		assertEquals(JavaType.parameterizedType(Collection.class, Object.class), adapter.returnType(new SimpleEndpointMethod(SomeType.class.getMethod("dumbObservable"))));
 	}
 
 	@SuppressWarnings("unchecked")
@@ -83,17 +81,17 @@ public class RxJavaObservableEndpointCallHandlerAdapterTest {
 
 		String result = "observable result";
 
-		when(endpointCallMock.executeAsync())
+		when(asyncEndpointCallMock.executeAsync())
 			.thenReturn(CompletableFuture.completedFuture(Arrays.asList(result)));
 
 		when(delegate.handle(notNull(EndpointCall.class), anyVararg()))
 			.then(i -> i.getArgumentAt(0, EndpointCall.class).execute());
 
-		Observable<String> observable = handler.handleAsync(endpointCallMock, null);
+		Observable<String> observable = handler.handleAsync(asyncEndpointCallMock, null);
 
 		assertNotNull(observable);
 
-		AssertableSubscriber<String> subscriber = observable.subscribeOn(scheduler).test();
+		AssertableSubscriber<String> subscriber = observable.test();
 
 		subscriber.assertValue(result)
 			.assertCompleted()
@@ -112,14 +110,14 @@ public class RxJavaObservableEndpointCallHandlerAdapterTest {
 		CompletableFuture<Collection<String>> futureAsException = new CompletableFuture<>();
 		futureAsException.completeExceptionally(exception);
 
-		when(endpointCallMock.executeAsync())
+		when(asyncEndpointCallMock.executeAsync())
 			.thenReturn(futureAsException);
 
-		Observable<String> observable = handler.handleAsync(endpointCallMock, null);
+		Observable<String> observable = handler.handleAsync(asyncEndpointCallMock, null);
 
 		assertNotNull(observable);
 
-		AssertableSubscriber<String> subscriber = observable.subscribeOn(scheduler).test();
+		AssertableSubscriber<String> subscriber = observable.test();
 
 		subscriber.assertError(exception);
 
@@ -144,7 +142,7 @@ public class RxJavaObservableEndpointCallHandlerAdapterTest {
 
 		assertNotNull(observable);
 
-		AssertableSubscriber<String> subscriber = observable.subscribeOn(scheduler).test();
+		AssertableSubscriber<String> subscriber = observable.test();
 
 		subscriber.assertValue(result)
 			.assertCompleted()

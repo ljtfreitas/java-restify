@@ -28,21 +28,13 @@ package com.github.ljtfreitas.restify.http.client.call.async;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
 import java.util.concurrent.Executor;
-import java.util.concurrent.ExecutorService;
 
 import com.github.ljtfreitas.restify.http.client.call.EndpointCall;
-import com.github.ljtfreitas.restify.util.async.DisposableExecutors;
 
 public class ExecutorAsyncEndpointCall<T> implements AsyncEndpointCall<T> {
 
-	private static final ExecutorService DEFAULT_EXECUTOR = DisposableExecutors.newCachedThreadPool();
-
 	private final Executor executor;
 	private final EndpointCall<T> source;
-
-	public ExecutorAsyncEndpointCall(EndpointCall<T> source) {
-		this(source, DEFAULT_EXECUTOR);
-	}
 
 	public ExecutorAsyncEndpointCall(EndpointCall<T> source, Executor executor) {
 		this.source = source;
@@ -74,9 +66,5 @@ public class ExecutorAsyncEndpointCall<T> implements AsyncEndpointCall<T> {
 	private CompletionStage<T> doExecuteAsync() {
 		return CompletableFuture
 				.supplyAsync(() -> source.execute(), executor);
-	}
-
-	public static Executor pool() {
-		return DEFAULT_EXECUTOR;
 	}
 }
