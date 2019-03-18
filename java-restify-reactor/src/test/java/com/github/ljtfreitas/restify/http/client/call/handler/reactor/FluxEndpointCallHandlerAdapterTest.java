@@ -91,7 +91,7 @@ public class FluxEndpointCallHandlerAdapterTest {
 	}
 
 	@Test
-	public void shouldSubscribeErrorOnObservableWhenCreatedHandlerWithRxJava2ObservableReturnTypeThrowException() throws Exception {
+	public void shouldSubscribeErrorOnFluxWhenCreatedHandlerWithFluxReturnTypeThrowException() throws Exception {
 		AsyncEndpointCallHandler<Flux<String>, Collection<String>> handler = adapter
 				.adaptAsync(new SimpleEndpointMethod(SomeType.class.getMethod("flux")), delegate);
 

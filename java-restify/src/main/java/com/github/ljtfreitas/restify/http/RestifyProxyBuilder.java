@@ -63,7 +63,9 @@ import com.github.ljtfreitas.restify.http.client.call.handler.jdk.IterableEndpoi
 import com.github.ljtfreitas.restify.http.client.call.handler.jdk.IteratorEndpointCallHandlerAdapter;
 import com.github.ljtfreitas.restify.http.client.call.handler.jdk.ListIteratorEndpointCallHandlerAdapter;
 import com.github.ljtfreitas.restify.http.client.call.handler.jdk.OptionalEndpointCallHandlerFactory;
+import com.github.ljtfreitas.restify.http.client.call.handler.jdk.QueueEndpointCallHandlerAdapter;
 import com.github.ljtfreitas.restify.http.client.call.handler.jdk.RunnableEndpointCallHandlerFactory;
+import com.github.ljtfreitas.restify.http.client.call.handler.jdk.StreamEndpointCallHandlerAdapter;
 import com.github.ljtfreitas.restify.http.client.jdk.HttpClientRequestConfiguration;
 import com.github.ljtfreitas.restify.http.client.jdk.JdkHttpClientRequestFactory;
 import com.github.ljtfreitas.restify.http.client.message.Header;
@@ -514,6 +516,8 @@ public class RestifyProxyBuilder {
 			this.built.add(IteratorEndpointCallHandlerAdapter.instance());
 			this.built.add(ListIteratorEndpointCallHandlerAdapter.instance());
 			this.built.add(IterableEndpointCallHandlerAdapter.instance());
+			this.built.add(QueueEndpointCallHandlerAdapter.instance());
+			this.built.add(StreamEndpointCallHandlerAdapter.instance());
 			this.built.add(EndpointCallObjectHandlerAdapter.instance());
 			this.built.add(HeadersEndpointCallHandlerAdapter.instance());
 			this.built.add(StatusCodeEndpointCallHandlerAdapter.instance());
