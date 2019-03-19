@@ -93,6 +93,17 @@ public class RestifyAutoConfigurationTest {
 						.withStatusCode(200)
 						.withHeader("Content-Type", "text/plain")
 						.withBody("It's works!"));
+			
+			mockServerClient
+				.when(request()
+					.withMethod("GET")
+					.withPath("/sample-customized")
+					.withHeader("X-Customized", "true")
+					.withHeader("Authorization", "Basic dXNlcm5hbWU6cGFzc3dvcmQ="))
+				.respond(response()
+					.withStatusCode(200)
+					.withHeader("Content-Type", "text/plain")
+					.withBody("It's works!"));
 		}
 	
 		@Test
@@ -106,6 +117,20 @@ public class RestifyAutoConfigurationTest {
 				MyApi myApi = context.getBean(MyApi.class);
 	
 				assertEquals("It's works!", myApi.sample());
+			});
+		}
+
+		@Test
+		public void shouldCreateBeanOfMyCustomizedApiType() {
+			ApplicationContextRunner contextRunner = new ApplicationContextRunner()
+					.withUserConfiguration(TestRestifyConfiguration.class)
+					.withConfiguration(AutoConfigurations.of(RestifyAutoConfiguration.class))
+					.withPropertyValues("restify.my-customized-api.endpoint:http://localhost:8080");
+	
+			contextRunner.run(context -> {
+				MyCustomizedApi myCustomizedApi = context.getBean(MyCustomizedApi.class);
+
+				assertEquals("It's works!", myCustomizedApi.sample());
 			});
 		}
 	}
@@ -408,7 +433,7 @@ public class RestifyAutoConfigurationTest {
 	}
 
 	@Configuration
-	@Import(TestRestifyConfigurationRegistrar.class)
+	@Import({MyCustomizedApiConfiguration.class, TestRestifyConfigurationRegistrar.class})
 	static class TestRestifyConfiguration {
 
 		static class TestRestifyConfigurationRegistrar implements ImportBeanDefinitionRegistrar {

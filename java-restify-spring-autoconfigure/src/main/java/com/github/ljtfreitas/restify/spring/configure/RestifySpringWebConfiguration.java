@@ -74,10 +74,11 @@ public class RestifySpringWebConfiguration {
 			return new SpringWebContractReader(expressionResolver);
 		}
 
-		@ConditionalOnMissingBean
-		@Bean
-		public ContractExpressionResolver spelDynamicExpressionResolver(ConfigurableBeanFactory beanFactory) {
-			return new SpelDynamicParameterExpressionResolver(beanFactory);
-		}
+	}
+
+	@ConditionalOnMissingBean
+	@Bean
+	public ContractExpressionResolver spelDynamicExpressionResolver(ConfigurableBeanFactory beanFactory) {
+		return new SpelDynamicParameterExpressionResolver(beanFactory);
 	}
 }

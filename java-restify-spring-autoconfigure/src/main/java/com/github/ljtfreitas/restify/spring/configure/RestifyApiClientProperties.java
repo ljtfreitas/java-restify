@@ -32,16 +32,18 @@ import org.springframework.core.env.Environment;
 
 class RestifyApiClientProperties {
 
+	private static final String RESTIFY_PROPERTY_PREFIX = "restify.";
+
 	private final Environment environment;
+	private final Binder binder;
 
 	RestifyApiClientProperties(Environment environment) {
 		this.environment = environment;
+		this.binder = Binder.get(environment);
 	}
 
 	public RestifyApiClient client(RestifyableType type) {
-		Binder binder = Binder.get(environment);
-
-		BindResult<RestifyApiClient> result = binder.bind("restify." + type.name(), RestifyApiClient.class);
+		BindResult<RestifyApiClient> result = binder.bind(RESTIFY_PROPERTY_PREFIX + type.name(), RestifyApiClient.class);
 
 		return result.orElseGet(RestifyApiClient::new);
 	}

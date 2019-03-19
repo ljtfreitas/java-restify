@@ -125,34 +125,28 @@ import com.github.ljtfreitas.restify.util.async.DisposableExecutors;
 
 public class RestifyProxyBuilder {
 
-	private ContractReader contractReader;
+	private final ContractBuilder contractBuilder = new ContractBuilder();
 
-	private ContractExpressionResolver expressionResolver;
+	private final EndpointRequestExecutorBuilder endpointRequestExecutorBuilder = new EndpointRequestExecutorBuilder();
 
-	private HttpClientRequestFactory httpClientRequestFactory;
+	private final HttpMessageConvertersBuilder httpMessageConvertersBuilder = new HttpMessageConvertersBuilder();
 
-	private EndpointRequestExecutor endpointRequestExecutor;
+	private final EndpointCallHandlersBuilder endpointCallHandlersBuilder = new EndpointCallHandlersBuilder();
 
-	private HttpMessageConvertersBuilder httpMessageConvertersBuilder = new HttpMessageConvertersBuilder(this);
+	private final EndpointResponseErrorFallbackBuilder endpointResponseErrorFallbackBuilder = new EndpointResponseErrorFallbackBuilder();
 
-	private EndpointRequestInterceptorsBuilder endpointRequestInterceptorsBuilder = new EndpointRequestInterceptorsBuilder(this);
+	private final HttpClientRequestFactoryBuilder httpClientRequestConfigurationBuilder = new HttpClientRequestFactoryBuilder();
 
-	private EndpointCallHandlersBuilder endpointCallHandlersBuilder = new EndpointCallHandlersBuilder(this);
+	private final RetryBuilder retryBuilder = new RetryBuilder();
 
-	private EndpointResponseErrorFallbackBuilder endpointResponseErrorFallbackBuilder = new EndpointResponseErrorFallbackBuilder(this);
-
-	private HttpClientRequestFactoryBuilder httpClientRequestConfigurationBuilder = new HttpClientRequestFactoryBuilder(this);
-
-	private RetryBuilder retryBuilder = new RetryBuilder(this);
-
-	private Provider provider = new Provider();
+	private final Provider provider = new Provider();
 
 	private ClassLoader classloader = null;
 
 	private Executor asyncThreadPool = DisposableExecutors.newCachedThreadPool();
 
 	public RestifyProxyBuilder client(HttpClientRequestFactory httpClientRequestFactory) {
-		this.httpClientRequestFactory = httpClientRequestFactory;
+		this.httpClientRequestConfigurationBuilder.httpClientRequestFactory = httpClientRequestFactory;
 		return this;
 	}
 
@@ -161,18 +155,21 @@ public class RestifyProxyBuilder {
 	}
 
 	public RestifyProxyBuilder contract(ContractReader contract) {
-		this.contractReader = contract;
+		this.contractBuilder.contract = contract;
 		return this;
 	}
 
-	public RestifyProxyBuilder expression(ContractExpressionResolver expression) {
-		this.expressionResolver = expression;
-		return this;
+	public ContractBuilder contract() {
+		return contractBuilder;
 	}
 
 	public RestifyProxyBuilder executor(EndpointRequestExecutor endpointRequestExecutor) {
-		this.endpointRequestExecutor = endpointRequestExecutor;
+		this.endpointRequestExecutorBuilder.endpointRequestExecutor = endpointRequestExecutor;
 		return this;
+	}
+
+	public EndpointRequestExecutorBuilder executor() {
+		return endpointRequestExecutorBuilder;
 	}
 
 	public HttpMessageConvertersBuilder converters() {
@@ -181,15 +178,6 @@ public class RestifyProxyBuilder {
 
 	public RestifyProxyBuilder converters(HttpMessageConverter...converters) {
 		this.httpMessageConvertersBuilder.add(converters);
-		return this;
-	}
-
-	public EndpointRequestInterceptorsBuilder interceptors() {
-		return this.endpointRequestInterceptorsBuilder;
-	}
-
-	public RestifyProxyBuilder interceptors(EndpointRequestInterceptor...interceptors) {
-		this.endpointRequestInterceptorsBuilder.add(interceptors);
 		return this;
 	}
 
@@ -207,7 +195,7 @@ public class RestifyProxyBuilder {
 	}
 
 	public RestifyProxyBuilder error(EndpointResponseErrorFallback fallback) {
-		this.endpointResponseErrorFallbackBuilder = new EndpointResponseErrorFallbackBuilder(this, fallback);
+		this.endpointResponseErrorFallbackBuilder.fallback = fallback;
 		return this;
 	}
 
@@ -291,12 +279,12 @@ public class RestifyProxyBuilder {
 		}
 
 		private EndpointRequestExecutor endpointRequestExecutor() {
-			return Optional.ofNullable(endpointRequestExecutor)
+			return Optional.ofNullable(endpointRequestExecutorBuilder.endpointRequestExecutor)
 				.orElseGet(() -> endpointRequestExecutor(intercepted(httpClientRequestFactory())));
 		}
 
 		private EndpointRequestExecutor intercepted(EndpointRequestExecutor delegate) {
-			Collection<EndpointRequestInterceptor> interceptors = endpointRequestInterceptorsBuilder.all;
+			Collection<EndpointRequestInterceptor> interceptors = endpointRequestExecutorBuilder.interceptors.all;
 			if (interceptors.isEmpty()) return delegate;
 			else return delegate instanceof AsyncEndpointRequestExecutor ?
 					new AsyncInterceptedEndpointRequestExecutor((AsyncEndpointRequestExecutor) delegate, AsyncEndpointRequestInterceptorChain.of(interceptors)) :
@@ -317,7 +305,7 @@ public class RestifyProxyBuilder {
 		private EndpointRequestExecutor asyncEndpointRequestExecutor(AsyncHttpClientRequestFactory asyncHttpClientRequestFactory,
 				EndpointRequestWriter writer, EndpointResponseReader reader) {
 			return new DefaultAsyncEndpointRequestExecutor(httpClientRequestConfigurationBuilder.async.executor,
-					(AsyncHttpClientRequestFactory) httpClientRequestFactory, writer, reader,
+					asyncHttpClientRequestFactory, writer, reader,
 						endpointRequestExecutor(asyncHttpClientRequestFactory, writer, reader));
 		}
 
@@ -339,7 +327,7 @@ public class RestifyProxyBuilder {
 		}
 
 		private HttpClientRequestFactory httpClientRequestFactory() {
-			return Optional.ofNullable(httpClientRequestFactory)
+			return Optional.ofNullable(httpClientRequestConfigurationBuilder.httpClientRequestFactory)
 					.orElseGet(() -> new JdkHttpClientRequestFactory(httpClientRequestConfiguration()));
 		}
 
@@ -356,28 +344,43 @@ public class RestifyProxyBuilder {
 		}
 
 		private Contract contract() {
-			return Optional.ofNullable(contractReader)
+			return Optional.ofNullable(contractBuilder.contract)
 					.map(c -> new Contract(c))
 					.orElseGet(() -> new Contract(new DefaultContractReader(expressionResolver())));
 		}
 
 		private ContractExpressionResolver expressionResolver() {
-			return Optional.ofNullable(expressionResolver)
+			return Optional.ofNullable(contractBuilder.resolver)
 					.orElseGet(() -> new SimpleContractExpressionResolver());
 		}
 	}
 
+	public class ContractBuilder {
+
+		private ContractReader contract = null;
+		private ContractExpressionResolver resolver = null;
+
+		public ContractBuilder using(ContractReader contract) {
+			this.contract = contract;
+			return this;
+		}
+
+		public ContractBuilder resolver(ContractExpressionResolver resolver) {
+			this.resolver = resolver;
+			return this;
+		}
+
+		public RestifyProxyBuilder and() {
+			return RestifyProxyBuilder.this;
+		}
+	}
+	
 	public class HttpMessageConvertersBuilder {
 
-		private final RestifyProxyBuilder context;
 		private final Collection<HttpMessageConverter> converters = new ArrayList<>();
 
 		private final DiscoveryComponentConfigurationBuilder<HttpMessageConvertersBuilder> discoveryComponentConfiguration =
 				new DiscoveryComponentConfigurationBuilder<>(this);
-		
-		private HttpMessageConvertersBuilder(RestifyProxyBuilder context) {
-			this.context = context;
-		}
 
 		public HttpMessageConvertersBuilder wildcard() {
 			converters.addAll(provider.all(WildcardMessageConverter.class));
@@ -429,7 +432,7 @@ public class RestifyProxyBuilder {
 		}
 		
 		public RestifyProxyBuilder and() {
-			return context;
+			return RestifyProxyBuilder.this;
 		}
 
 		private HttpMessageConverters build() {
@@ -441,63 +444,8 @@ public class RestifyProxyBuilder {
 		}
 	}
 
-	public class EndpointRequestInterceptorsBuilder {
-
-		private final RestifyProxyBuilder context;
-		private final Collection<EndpointRequestInterceptor> all = new ArrayList<>();
-
-		private EndpointRequestInterceptorsBuilder(RestifyProxyBuilder context) {
-			this.context = context;
-		}
-
-		public EndpointRequestInterceptorsBuilder authentication(Authentication authentication) {
-			all.add(new AuthenticationEndpoinRequestInterceptor(authentication));
-			return this;
-		}
-
-		public EndpointRequestInterceptorsBuilder acceptVersion() {
-			all.add(new AcceptVersionHeaderEndpointRequestInterceptor());
-			return this;
-		}
-
-		public EndpointRequestInterceptorsBuilder acceptVersion(String version) {
-			all.add(new AcceptVersionHeaderEndpointRequestInterceptor(EndpointVersion.of(version)));
-			return this;
-		}
-
-		public EndpointRequestInterceptorsBuilder acceptVersion(EndpointVersion version) {
-			all.add(new AcceptVersionHeaderEndpointRequestInterceptor(version));
-			return this;
-		}
-
-		public EndpointRequestInterceptorsBuilder headers(Header... headers) {
-			this.all.add(new HeaderEndpointRequestInterceptor(headers));
-			return this;
-		}
-
-		public EndpointRequestInterceptorsBuilder headers(Collection<Header> headers) {
-			this.all.add(new HeaderEndpointRequestInterceptor(headers));
-			return this;
-		}
-
-		public EndpointRequestInterceptorsBuilder headers(Headers headers) {
-			this.all.add(new HeaderEndpointRequestInterceptor(headers));
-			return this;
-		}
-
-		public EndpointRequestInterceptorsBuilder add(EndpointRequestInterceptor...interceptors) {
-			this.all.addAll(Arrays.asList(interceptors));
-			return this;
-		}
-
-		public RestifyProxyBuilder and() {
-			return context;
-		}
-	}
-
 	public class EndpointCallHandlersBuilder {
 
-		private final RestifyProxyBuilder context;
 		private final AsyncEndpointCallHandlersBuilder async = new AsyncEndpointCallHandlersBuilder();
 
 		private final Collection<EndpointCallHandlerProvider> built = new ArrayList<>();
@@ -506,8 +454,7 @@ public class RestifyProxyBuilder {
 		private final DiscoveryComponentConfigurationBuilder<EndpointCallHandlersBuilder> discoveryComponentConfiguration =
 				new DiscoveryComponentConfigurationBuilder<>(this);
 
-		private EndpointCallHandlersBuilder(RestifyProxyBuilder context) {
-			this.context = context;
+		private EndpointCallHandlersBuilder() {
 			this.built.add(OptionalEndpointCallHandlerFactory.instance());
 			this.built.add(CallableEndpointCallHandlerFactory.instance());
 			this.built.add(RunnableEndpointCallHandlerFactory.instance());
@@ -553,7 +500,7 @@ public class RestifyProxyBuilder {
 		}
 
 		public RestifyProxyBuilder and() {
-			return context;
+			return RestifyProxyBuilder.this;
 		}
 
 		private EndpointCallHandlers build() {
@@ -601,28 +548,25 @@ public class RestifyProxyBuilder {
 
 	public class EndpointResponseErrorFallbackBuilder {
 
-		private final RestifyProxyBuilder context;
-
 		private EndpointResponseErrorFallback fallback = null;
 		private boolean emptyOnNotFound = false;
 
-		private EndpointResponseErrorFallbackBuilder(RestifyProxyBuilder context) {
-			this.context = context;
+		private EndpointResponseErrorFallbackBuilder() {
+			this(null);
 		}
 
-		private EndpointResponseErrorFallbackBuilder(RestifyProxyBuilder context, EndpointResponseErrorFallback fallback) {
-			this.context = context;
+		private EndpointResponseErrorFallbackBuilder(EndpointResponseErrorFallback fallback) {
 			this.fallback = fallback;
 		}
 
 		public RestifyProxyBuilder emptyOnNotFound() {
 			this.emptyOnNotFound = true;
-			return context;
+			return RestifyProxyBuilder.this;
 		}
 
 		public RestifyProxyBuilder using(EndpointResponseErrorFallback fallback) {
 			this.fallback = fallback;
-			return context;
+			return RestifyProxyBuilder.this;
 		}
 
 		private EndpointResponseErrorFallback build() {
@@ -633,14 +577,11 @@ public class RestifyProxyBuilder {
 
 	public class HttpClientRequestFactoryBuilder {
 
-		private final RestifyProxyBuilder context;
-		private final HttpClientRequestConfigurationBuilder configuration = new HttpClientRequestConfigurationBuilder(this);
+		private final HttpClientRequestConfigurationBuilder configuration = new HttpClientRequestConfigurationBuilder();
 		private final HttpClientRequestInterceptorsBuilder interceptors = new HttpClientRequestInterceptorsBuilder();
 		private final HttpClientRequestAsyncBuilder async = new HttpClientRequestAsyncBuilder();
 
-		private HttpClientRequestFactoryBuilder(RestifyProxyBuilder context) {
-			this.context = context;
-		}
+		private HttpClientRequestFactory httpClientRequestFactory = null;
 
 		public HttpClientRequestAsyncBuilder async() {
 			return async;
@@ -664,8 +605,13 @@ public class RestifyProxyBuilder {
 			return configuration;
 		}
 
+		public HttpClientRequestFactoryBuilder using(HttpClientRequestFactory httpClientRequestFactory) {
+			this.httpClientRequestFactory = httpClientRequestFactory;
+			return this;
+		}
+
 		public RestifyProxyBuilder and() {
-			return context;
+			return RestifyProxyBuilder.this;
 		}
 
 		private class HttpClientRequestAsyncBuilder {
@@ -674,7 +620,7 @@ public class RestifyProxyBuilder {
 
 			private RestifyProxyBuilder using(Executor executor) {
 				this.executor = executor;
-				return context;
+				return RestifyProxyBuilder.this;
 			}
 		}
 
@@ -688,13 +634,11 @@ public class RestifyProxyBuilder {
 			}
 
 			public RestifyProxyBuilder and() {
-				return context;
+				return RestifyProxyBuilder.this;
 			}
 		}
 
 		public class HttpClientRequestConfigurationBuilder {
-
-			private final HttpClientRequestFactoryBuilder context;
 
 			private final HttpClientRequestConfiguration.Builder delegate = new HttpClientRequestConfiguration.Builder();
 			private final HttpClientRequestFollowRedirectsConfigurationBuilder followRedirects = new HttpClientRequestFollowRedirectsConfigurationBuilder();
@@ -704,10 +648,6 @@ public class RestifyProxyBuilder {
 			private final HttpClientRequestSslConfigurationBuilder ssl = new HttpClientRequestSslConfigurationBuilder();
 
 			private HttpClientRequestConfiguration httpClientRequestConfiguration = null;
-	
-			private HttpClientRequestConfigurationBuilder(HttpClientRequestFactoryBuilder context) {
-				this.context = context;
-			}
 			
 			public HttpClientRequestConfigurationBuilder connectionTimeout(int connectionTimeout) {
 				delegate.connectionTimeout(connectionTimeout);
@@ -781,7 +721,7 @@ public class RestifyProxyBuilder {
 	
 			public HttpClientRequestFactoryBuilder using(HttpClientRequestConfiguration httpClientRequestConfiguration) {
 				this.httpClientRequestConfiguration = httpClientRequestConfiguration;
-				return context;
+				return HttpClientRequestFactoryBuilder.this;
 			}
 	
 			private HttpClientRequestConfiguration build() {
@@ -868,18 +808,87 @@ public class RestifyProxyBuilder {
 		}
 	}
 
+	public class EndpointRequestExecutorBuilder {
+
+		private final EndpointRequestInterceptorsBuilder interceptors = new EndpointRequestInterceptorsBuilder();
+		
+		private EndpointRequestExecutor endpointRequestExecutor = null;
+
+		public EndpointRequestExecutorBuilder using(EndpointRequestExecutor endpointRequestExecutor) {
+			this.endpointRequestExecutor = endpointRequestExecutor;
+			return this;
+		}
+		
+		public EndpointRequestInterceptorsBuilder interceptors() {
+			return interceptors;
+		}
+
+		public EndpointRequestExecutorBuilder interceptors(EndpointRequestInterceptor...interceptors) {
+			this.interceptors.add(interceptors);
+			return this;
+		}
+
+		public RestifyProxyBuilder and() {
+			return RestifyProxyBuilder.this;
+		}
+
+		public class EndpointRequestInterceptorsBuilder {
+
+			private final Collection<EndpointRequestInterceptor> all = new ArrayList<>();
+
+			public EndpointRequestInterceptorsBuilder authentication(Authentication authentication) {
+				all.add(new AuthenticationEndpoinRequestInterceptor(authentication));
+				return this;
+			}
+
+			public EndpointRequestInterceptorsBuilder acceptVersion() {
+				all.add(new AcceptVersionHeaderEndpointRequestInterceptor());
+				return this;
+			}
+
+			public EndpointRequestInterceptorsBuilder acceptVersion(String version) {
+				all.add(new AcceptVersionHeaderEndpointRequestInterceptor(EndpointVersion.of(version)));
+				return this;
+			}
+
+			public EndpointRequestInterceptorsBuilder acceptVersion(EndpointVersion version) {
+				all.add(new AcceptVersionHeaderEndpointRequestInterceptor(version));
+				return this;
+			}
+
+			public EndpointRequestInterceptorsBuilder headers(Header... headers) {
+				this.all.add(new HeaderEndpointRequestInterceptor(headers));
+				return this;
+			}
+
+			public EndpointRequestInterceptorsBuilder headers(Collection<Header> headers) {
+				this.all.add(new HeaderEndpointRequestInterceptor(headers));
+				return this;
+			}
+
+			public EndpointRequestInterceptorsBuilder headers(Headers headers) {
+				this.all.add(new HeaderEndpointRequestInterceptor(headers));
+				return this;
+			}
+
+			public EndpointRequestInterceptorsBuilder add(EndpointRequestInterceptor...interceptors) {
+				this.all.addAll(Arrays.asList(interceptors));
+				return this;
+			}
+
+			public EndpointRequestExecutorBuilder and() {
+				return EndpointRequestExecutorBuilder.this;
+			}
+		}
+	}
+	
 	public class RetryBuilder {
 
-		private final RestifyProxyBuilder context;
 		private final RetryConfigurationBuilder builder = new RetryConfigurationBuilder();
-		private final AsyncRetryConfigurationBuilder async = new AsyncRetryConfigurationBuilder(this);
+		private final AsyncRetryConfigurationBuilder async = new AsyncRetryConfigurationBuilder();
 
 		private boolean enabled = false;
 		private RetryConfiguration configuration;
-
-		public RetryBuilder(RestifyProxyBuilder context) {
-			this.context = context;
-		}
 
 		public RetryBuilder enabled() {
 			this.enabled = true;
@@ -888,7 +897,12 @@ public class RestifyProxyBuilder {
 
 		public RestifyProxyBuilder disabled() {
 			this.enabled = false;
-			return context;
+			return RestifyProxyBuilder.this;
+		}
+
+		public RetryBuilder enabled(boolean enabled) {
+			this.enabled = enabled;
+			return this;
 		}
 
 		public RetryConfigurationBuilder configure() {
@@ -899,7 +913,7 @@ public class RestifyProxyBuilder {
 		public RestifyProxyBuilder using(RetryConfiguration configuration) {
 			this.enabled = true;
 			this.configuration = configuration;
-			return context;
+			return RestifyProxyBuilder.this;
 		}
 
 		public AsyncRetryConfigurationBuilder async() {
@@ -907,7 +921,7 @@ public class RestifyProxyBuilder {
 		}
 
 		public RestifyProxyBuilder and() {
-			return context;
+			return RestifyProxyBuilder.this;
 		}
 
 		private RetryConfiguration build() {
@@ -917,7 +931,7 @@ public class RestifyProxyBuilder {
 		public class RetryConfigurationBuilder {
 
 			private final RetryConfiguration.Builder delegate = new RetryConfiguration.Builder();
-			private final RetryConfigurationBackOffBuilder backOff = new RetryConfigurationBackOffBuilder(this);
+			private final RetryConfigurationBackOffBuilder backOff = new RetryConfigurationBackOffBuilder();
 
 			public RetryConfigurationBuilder attempts(int attempts) {
 				delegate.attempts(attempts);
@@ -970,7 +984,7 @@ public class RestifyProxyBuilder {
 			}
 
 			public RestifyProxyBuilder and() {
-				return context;
+				return RestifyProxyBuilder.this;
 			}
 
 			private RetryConfiguration build() {
@@ -978,12 +992,6 @@ public class RestifyProxyBuilder {
 			}
 
 			public class RetryConfigurationBackOffBuilder {
-
-				private final RetryConfigurationBuilder context;
-
-				private RetryConfigurationBackOffBuilder(RetryConfigurationBuilder context) {
-					this.context = context;
-				}
 
 				public RetryConfigurationBackOffBuilder delay(long delay) {
 					delegate.backOff().delay(delay);
@@ -1001,24 +1009,18 @@ public class RestifyProxyBuilder {
 				}
 
 				public RetryConfigurationBuilder and() {
-					return context;
+					return RetryConfigurationBuilder.this;
 				}
 			}
 		}
 
 		public class AsyncRetryConfigurationBuilder {
 
-			private final RetryBuilder context;
-
 			private ScheduledExecutorService scheduler = DisposableExecutors.newSingleThreadScheduledExecutor();
-
-			private AsyncRetryConfigurationBuilder(RetryBuilder context) {
-				this.context = context;
-			}
 
 			public RetryBuilder scheduler(ScheduledExecutorService scheduler) {
 				this.scheduler = scheduler;
-				return context;
+				return RetryBuilder.this;
 			}
 		}
 	}

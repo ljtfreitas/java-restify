@@ -23,22 +23,28 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.spring.configure;
+package com.github.ljtfreitas.restify.spring.autoconfigure;
 
-import java.lang.annotation.ElementType;
-import java.lang.annotation.Retention;
-import java.lang.annotation.RetentionPolicy;
-import java.lang.annotation.Target;
+import java.util.Arrays;
+import java.util.Collection;
 
-@Target(ElementType.TYPE)
-@Retention(RetentionPolicy.RUNTIME)
-public @interface Restifyable {
+import org.springframework.context.annotation.Configuration;
 
-	String name() default "";
+import com.github.ljtfreitas.restify.http.client.message.Header;
+import com.github.ljtfreitas.restify.http.client.request.authentication.BasicAuthentication;
+import com.github.ljtfreitas.restify.http.client.request.interceptor.EndpointRequestInterceptor;
+import com.github.ljtfreitas.restify.http.client.request.interceptor.HeaderEndpointRequestInterceptor;
+import com.github.ljtfreitas.restify.http.client.request.interceptor.authentication.AuthenticationEndpoinRequestInterceptor;
+import com.github.ljtfreitas.restify.spring.configure.RestifyProxyConfiguration;
 
-	String description() default "";
+@Configuration
+class MyCustomizedApiConfiguration implements RestifyProxyConfiguration {
+	
+	@Override
+	public Collection<EndpointRequestInterceptor> endpointRequestInterceptors() {
+		EndpointRequestInterceptor header = new HeaderEndpointRequestInterceptor(Header.of("X-Customized", "true"));
+		EndpointRequestInterceptor authentication = new AuthenticationEndpoinRequestInterceptor(new BasicAuthentication("username", "password"));
 
-	String endpoint() default "";
-
-	Class<? extends RestifyProxyConfiguration>[] configuration() default {};
+		return Arrays.asList(header, authentication);
+	}
 }

@@ -63,7 +63,10 @@ class RestifyProxyCdiBeanFactory {
 		builder.client(httpClientRequestFactory())
 			.contract(contractReader())
 			.expression(expressionResolver())
-			.executor(endpointRequestExecutor())
+			.executor()
+				.using(endpointRequestExecutor())
+				.interceptors(endpointRequestInterceptors())
+				.and()
 			.retry()
 				.enabled()
 				.and()
@@ -79,8 +82,7 @@ class RestifyProxyCdiBeanFactory {
 				.discovery()
 					.disabled()
 				.and()
-			.error(endpointResponseErrorFallback())
-			.interceptors(endpointRequestInterceptors());
+			.error(endpointResponseErrorFallback());
 
 		return builder.target(javaType, restifyable.endpoint()).build();
 	}
