@@ -6,11 +6,14 @@ import static org.mockserver.integration.ClientAndServer.startClientAndServer;
 import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
 
-import java.util.Arrays;
-import java.util.Collection;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 
 import javax.enterprise.inject.spi.Extension;
 import javax.inject.Inject;
+import javax.inject.Qualifier;
 
 import org.jglue.cdiunit.AdditionalClasses;
 import org.jglue.cdiunit.CdiRunner;
@@ -21,16 +24,21 @@ import org.junit.runner.RunWith;
 import org.mockserver.client.server.MockServerClient;
 import org.mockserver.integration.ClientAndServer;
 
-import com.github.ljtfreitas.restify.http.client.request.interceptor.HttpClientRequestInterceptor;
-import com.github.ljtfreitas.restify.http.client.request.interceptor.log.LogHttpClientRequestInterceptor;
 import com.github.ljtfreitas.restify.http.contract.Get;
 import com.github.ljtfreitas.restify.http.contract.Path;
 
 @RunWith(CdiRunner.class)
-@AdditionalClasses(value = {Extension.class, RestifyCdiExtension.class, TestComponentFactory.class, RestifyCdiExtensionExtendedTest.MyApiConfiguration.class})
-public class RestifyCdiExtensionExtendedTest {
+@AdditionalClasses(value = {Extension.class, RestifyCdiExtension.class, TestComponentFactory.class})
+public class RestifyCdiExtensionQualifiedTest {
 
-	@Restifyable(endpoint = "http://localhost:8090/api", configuration = MyApiConfiguration.class)
+	@Target({ElementType.TYPE, ElementType.FIELD})
+	@Retention(RetentionPolicy.RUNTIME)
+	@Qualifier
+	public @interface Whatever {
+	}
+	
+	@Restifyable(endpoint = "http://localhost:8090/api")
+	@Whatever
 	public interface MyApiType {
 
 		@Path("/test")
@@ -38,7 +46,7 @@ public class RestifyCdiExtensionExtendedTest {
 		String test();
 	}
 
-	@Inject	
+	@Inject @Whatever
 	private MyApiType myApiType;
 
 	private ClientAndServer mockServer;
@@ -55,8 +63,8 @@ public class RestifyCdiExtensionExtendedTest {
 				.withPath("/api/test"))
 			.respond(response()
 				.withStatusCode(200)
-				.withHeader("Content-Type", "text/plain")
-				.withBody("Hello, Restify CDI extension it's works!"));
+				.withHeader("Content-Type", "text/plain; charset=UTF-8")
+				.withBody("Hello, Restify CDI extension (with qualifiers!) it's works!"));
 	}
 
 	@After
@@ -68,14 +76,6 @@ public class RestifyCdiExtensionExtendedTest {
 	public void shouldInjectRestifyableType() {
 		assertNotNull(myApiType);
 
-		assertEquals("Hello, Restify CDI extension it's works!", myApiType.test());
-	}
-	
-	static class MyApiConfiguration implements RestifyProxyConfiguration {
-		
-		@Override
-		public Collection<HttpClientRequestInterceptor> httpClientRequestInterceptors() {
-			return Arrays.asList(new LogHttpClientRequestInterceptor());
-		}
+		assertEquals("Hello, Restify CDI extension (with qualifiers!) it's works!", myApiType.test());
 	}
 }

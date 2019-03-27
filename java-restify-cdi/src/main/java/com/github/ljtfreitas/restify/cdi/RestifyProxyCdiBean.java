@@ -28,6 +28,7 @@ package com.github.ljtfreitas.restify.cdi;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Type;
 import java.util.Arrays;
+import java.util.Collection;
 import java.util.Collections;
 import java.util.HashSet;
 import java.util.LinkedHashSet;
@@ -40,7 +41,10 @@ import javax.enterprise.inject.Stereotype;
 import javax.enterprise.inject.spi.Bean;
 import javax.enterprise.inject.spi.InjectionPoint;
 import javax.enterprise.util.AnnotationLiteral;
+import javax.inject.Qualifier;
 import javax.inject.Scope;
+
+import com.github.ljtfreitas.restify.reflection.JavaAnnotationScanner;
 
 class RestifyProxyCdiBean implements Bean<Object> {
 
@@ -67,7 +71,13 @@ class RestifyProxyCdiBean implements Bean<Object> {
 	@Override
 	public Set<Annotation> getQualifiers() {
 		Set<Annotation> qualifiers = new LinkedHashSet<>();
-		qualifiers.add(new DefaultLiteral());
+
+		JavaAnnotationScanner scanner = new JavaAnnotationScanner(javaType);
+		
+		Collection<Annotation> annotations = scanner.allWith(Qualifier.class);
+
+		if (annotations.isEmpty()) qualifiers.add(new DefaultLiteral()); else qualifiers.addAll(annotations);
+
 		return qualifiers;
 	}
 

@@ -238,7 +238,7 @@
 		<developerConnection>scm:git:git@github.com:ljtfreitas/java-restify.git</developerConnection>
 		<url>https://github.com/ljtfreitas/java-restify</url>
 	  <tag>HEAD</tag>
-  </scm>
+  	</scm>
 
 	<issueManagement>
 		<system>Github Issues</system>

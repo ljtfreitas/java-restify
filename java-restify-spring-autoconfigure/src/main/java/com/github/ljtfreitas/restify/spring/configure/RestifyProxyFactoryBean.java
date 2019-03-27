@@ -30,6 +30,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
 import java.util.function.Function;
 import java.util.stream.Stream;
@@ -108,7 +109,6 @@ public class RestifyProxyFactoryBean implements FactoryBean<Object> {
 				.using(retry())
 			.handlers()
 				.add(handlers())
-					.async(asyncExecutorService())
 				.discovery()
 					.disabled()
 				.and()
@@ -118,6 +118,7 @@ public class RestifyProxyFactoryBean implements FactoryBean<Object> {
 				.discovery()
 					.disabled()
 				.and()
+			.async(asyncExecutor())
 			.error(endpointResponseErrorFallback());
 
 		authentication()
@@ -126,7 +127,8 @@ public class RestifyProxyFactoryBean implements FactoryBean<Object> {
 									.interceptors()
 										.authentication(a));
 
-		return builder.target(objectType, endpoint()).build();
+		return builder.target(objectType, endpoint())
+				.build();
 	}
 
 	@Override
@@ -258,8 +260,8 @@ public class RestifyProxyFactoryBean implements FactoryBean<Object> {
 					.toArray(EndpointCallHandlerProvider[]::new);
 	}
 
-	private ExecutorService asyncExecutorService() {
-		return configured(RestifyProxyConfiguration::asyncExecutorService)
+	private Executor asyncExecutor() {
+		return configured(RestifyProxyConfiguration::asyncExecutor)
 				.orElse(asyncExecutorService);
 	}
 

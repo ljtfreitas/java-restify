@@ -89,7 +89,7 @@ public class JavaType {
 
 	@Override
 	public String toString() {
-		return "JavaType:[" + type + "]";
+		return type.toString();
 	}
 
 	public static JavaType parameterizedType(Class<?> rawType, Type... typeArguments) {

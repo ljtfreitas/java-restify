@@ -64,21 +64,20 @@ public class RestifySpringWebConfiguration {
 		return new RestOperationsEndpointRequestExecutor(restOperations, endpointResponseErrorFallback);
 	}
 
+	@ConditionalOnMissingBean
+	@Bean
+	public ContractExpressionResolver spelDynamicExpressionResolver(ConfigurableBeanFactory beanFactory) {
+		return new SpelDynamicParameterExpressionResolver(beanFactory);
+	}
+
 	@Configuration
 	@ConditionalOnProperty(name = "restify.contract", havingValue = "spring-web", matchIfMissing = true)
-	public static class RestifySpringWebContractConfiguration {
+	static class SpringWebContractConfiguration {
 
 		@ConditionalOnMissingBean
 		@Bean
 		public ContractReader springWebContractReader(ContractExpressionResolver expressionResolver) {
 			return new SpringWebContractReader(expressionResolver);
 		}
-
-	}
-
-	@ConditionalOnMissingBean
-	@Bean
-	public ContractExpressionResolver spelDynamicExpressionResolver(ConfigurableBeanFactory beanFactory) {
-		return new SpelDynamicParameterExpressionResolver(beanFactory);
 	}
 }

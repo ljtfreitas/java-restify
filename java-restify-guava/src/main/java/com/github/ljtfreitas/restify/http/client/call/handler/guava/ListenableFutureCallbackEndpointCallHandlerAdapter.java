@@ -28,6 +28,7 @@ package com.github.ljtfreitas.restify.http.client.call.handler.guava;
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.Collection;
+import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Future;
 
 import com.github.ljtfreitas.restify.http.client.call.async.AsyncEndpointCall;
@@ -51,7 +52,11 @@ public class ListenableFutureCallbackEndpointCallHandlerAdapter<T, O> implements
 	private final ListeningExecutorService executorService;
 
 	public ListenableFutureCallbackEndpointCallHandlerAdapter() {
-		this(MoreExecutors.listeningDecorator(DisposableExecutors.newCachedThreadPool()));
+		this(DisposableExecutors.newCachedThreadPool());
+	}
+
+	public ListenableFutureCallbackEndpointCallHandlerAdapter(ExecutorService executorService) {
+		this(MoreExecutors.listeningDecorator(executorService));
 	}
 
 	public ListenableFutureCallbackEndpointCallHandlerAdapter(ListeningExecutorService executorService) {

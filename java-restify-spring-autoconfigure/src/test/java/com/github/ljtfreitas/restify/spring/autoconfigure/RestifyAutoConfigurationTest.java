@@ -29,8 +29,30 @@ import org.springframework.core.task.support.ExecutorServiceAdapter;
 import org.springframework.core.type.AnnotationMetadata;
 import org.springframework.web.reactive.function.client.WebClient;
 
+import com.github.ljtfreitas.restify.http.client.call.handler.jsoup.JsoupDocumentEndpointCallHandlerFactory;
 import com.github.ljtfreitas.restify.http.client.call.handler.reactor.FluxEndpointCallHandlerAdapter;
 import com.github.ljtfreitas.restify.http.client.call.handler.reactor.MonoEndpointCallHandlerAdapter;
+import com.github.ljtfreitas.restify.http.client.call.handler.rxjava.RxJavaCompletableEndpointCallHandlerFactory;
+import com.github.ljtfreitas.restify.http.client.call.handler.rxjava.RxJavaObservableEndpointCallHandlerAdapter;
+import com.github.ljtfreitas.restify.http.client.call.handler.rxjava.RxJavaSingleEndpointCallHandlerAdapter;
+import com.github.ljtfreitas.restify.http.client.call.handler.rxjava2.RxJava2CompletableEndpointCallHandlerFactory;
+import com.github.ljtfreitas.restify.http.client.call.handler.rxjava2.RxJava2FlowableEndpointCallHandlerAdapter;
+import com.github.ljtfreitas.restify.http.client.call.handler.rxjava2.RxJava2MaybeEndpointCallHandlerAdapter;
+import com.github.ljtfreitas.restify.http.client.call.handler.rxjava2.RxJava2ObservableEndpointCallHandlerAdapter;
+import com.github.ljtfreitas.restify.http.client.call.handler.rxjava2.RxJava2SingleEndpointCallHandlerAdapter;
+import com.github.ljtfreitas.restify.http.client.call.handler.vavr.ArrayEndpointCallHandlerAdapter;
+import com.github.ljtfreitas.restify.http.client.call.handler.vavr.EitherWithStringEndpointCallHandlerAdapter;
+import com.github.ljtfreitas.restify.http.client.call.handler.vavr.EitherWithThrowableEndpointCallHandlerAdapter;
+import com.github.ljtfreitas.restify.http.client.call.handler.vavr.FutureEndpointCallHandlerAdapter;
+import com.github.ljtfreitas.restify.http.client.call.handler.vavr.IndexedSeqEndpointCallHandlerAdapter;
+import com.github.ljtfreitas.restify.http.client.call.handler.vavr.LazyEndpointCallHandlerAdapter;
+import com.github.ljtfreitas.restify.http.client.call.handler.vavr.ListEndpointCallHandlerAdapter;
+import com.github.ljtfreitas.restify.http.client.call.handler.vavr.OptionEndpointCallHandlerFactory;
+import com.github.ljtfreitas.restify.http.client.call.handler.vavr.QueueEndpointCallHandlerAdapter;
+import com.github.ljtfreitas.restify.http.client.call.handler.vavr.SeqEndpointCallHandlerAdapter;
+import com.github.ljtfreitas.restify.http.client.call.handler.vavr.SetEndpointCallHandlerAdapter;
+import com.github.ljtfreitas.restify.http.client.call.handler.vavr.TraversableEndpointCallHandlerAdapter;
+import com.github.ljtfreitas.restify.http.client.call.handler.vavr.TryEndpointCallHandlerAdapter;
 import com.github.ljtfreitas.restify.http.client.message.converter.HttpMessageConverter;
 import com.github.ljtfreitas.restify.http.client.message.converter.form.FormURLEncodedFormObjectMessageConverter;
 import com.github.ljtfreitas.restify.http.client.message.converter.form.FormURLEncodedMapMessageConverter;
@@ -160,6 +182,7 @@ public class RestifyAutoConfigurationTest {
 		public void shouldCreateWebFluxBeans() {
 			contextRunner.run(context -> {
 				assertNotNull(context.getBean(WebClientEndpointRequestExecutor.class));
+				assertNotNull(context.getBean(reactor.core.scheduler.Scheduler.class));
 				assertNotNull(context.getBean(FluxEndpointCallHandlerAdapter.class));
 				assertNotNull(context.getBean(MonoEndpointCallHandlerAdapter.class));
 			});
@@ -194,8 +217,8 @@ public class RestifyAutoConfigurationTest {
 				assertNotNull(context.getBean(ExecutorService.class));
 				assertNotNull(context.getBean(AsyncResultEndpointCallHandlerAdapter.class));
 				assertNotNull(context.getBean(DeferredResultEndpointCallHandlerAdapter.class));
-				assertNotNull(context.getBean(ListenableFutureEndpointCallHandlerAdapter.class));
 				assertNotNull(context.getBean(ListenableFutureTaskEndpointCallHandlerAdapter.class));
+				assertNotNull(context.getBean(ListenableFutureEndpointCallHandlerAdapter.class));
 				assertNotNull(context.getBean(WebAsyncTaskEndpointCallHandlerAdapter.class));
 			});
 		}
@@ -248,187 +271,281 @@ public class RestifyAutoConfigurationTest {
 					.withUserConfiguration(TestRestifyConfiguration.class)
 					.withConfiguration(AutoConfigurations.of(RestifyAutoConfiguration.class));
 		}
-		
-	}
 	
-	public static class JacksonJsonHttpMessageConvertersConfigurationTest extends HttpMessageConvertersConfigurationTest {
+		public static class JacksonJsonHttpMessageConvertersConfigurationTest extends HttpMessageConvertersConfigurationTest {
+			
+			@Test
+			public void shouldCreateJacksonMessageConverter() {
+				contextRunner
+					.withClassLoader(new FilteredClassLoader(GsonMessageConverter.class, JsonPMessageConverter.class, JsonBMessageConverter.class))
+					.run(context -> {
+						assertThat(context)
+							.hasSingleBean(JacksonMessageConverter.class)
+							.hasSingleBean(JsonMessageConverter.class)
+							.getBeans(HttpMessageConverter.class)
+								.size()
+									.isGreaterThanOrEqualTo(1);
+					});
+			}
+		}
+	
+		public static class GsonJsonHttpMessageConvertersConfigurationTest extends HttpMessageConvertersConfigurationTest {
+			
+			@Test
+			public void shouldCreateGsonMessageConverter() {
+				contextRunner
+					.withClassLoader(new FilteredClassLoader(JacksonMessageConverter.class, JsonPMessageConverter.class, JsonBMessageConverter.class))
+					.run(context -> {
+						assertThat(context)
+							.hasSingleBean(GsonMessageConverter.class)
+							.hasSingleBean(JsonMessageConverter.class)
+							.getBeans(HttpMessageConverter.class)
+								.size()
+									.isGreaterThanOrEqualTo(1);
+					});
+			}
+		}
+	
+		public static class JsonBJsonHttpMessageConvertersConfigurationTest extends HttpMessageConvertersConfigurationTest {
+			
+			@Test
+			public void shouldCreateJsonBMessageConverter() {
+				contextRunner
+					.withClassLoader(new FilteredClassLoader(JacksonMessageConverter.class, JsonPMessageConverter.class, GsonMessageConverter.class))
+					.run(context -> {
+						assertThat(context)
+							.hasSingleBean(JsonBMessageConverter.class)
+							.hasSingleBean(JsonMessageConverter.class)
+							.getBeans(HttpMessageConverter.class)
+								.size()
+									.isGreaterThanOrEqualTo(1);
+					});
+			}
+		}
+	
+		public static class JsonPJsonHttpMessageConvertersConfigurationTest extends HttpMessageConvertersConfigurationTest {
+			
+			@Test
+			public void shouldCreateJsonPMessageConverter() {
+				contextRunner
+					.withClassLoader(new FilteredClassLoader(JacksonMessageConverter.class, GsonMessageConverter.class, JsonBMessageConverter.class))
+					.run(context -> {
+						assertThat(context)
+							.hasSingleBean(JsonPMessageConverter.class)
+							.hasSingleBean(JsonMessageConverter.class)
+							.getBeans(HttpMessageConverter.class)
+								.size()
+									.isGreaterThanOrEqualTo(1);
+					});
+			}
+		}
+	
+		public static class JaxBXmlHttpMessageConvertersConfigurationTest extends HttpMessageConvertersConfigurationTest {
+			
+			@Test
+			public void shouldCreateJaxBMessageConverter() {
+				contextRunner
+					.run(context -> {
+						assertThat(context)
+							.hasSingleBean(JaxBXmlMessageConverter.class)
+							.hasSingleBean(XmlMessageConverter.class)
+							.getBeans(HttpMessageConverter.class)
+								.size()
+									.isGreaterThanOrEqualTo(1);
+					});
+			}
+		}
+	
+		public static class FormUrlEncodedHttpMessageConvertersConfigurationTest extends HttpMessageConvertersConfigurationTest {
+			
+			@Test
+			public void shouldCreateFormUrlEncodedMessageConverters() {
+				contextRunner
+					.run(context -> {
+						assertThat(context)
+							.hasSingleBean(FormURLEncodedFormObjectMessageConverter.class)
+							.hasSingleBean(FormURLEncodedMapMessageConverter.class)
+							.hasSingleBean(FormURLEncodedParametersMessageConverter.class);
+	
+						assertThat(context)
+							.getBeans(FormURLEncodedMessageConverter.class)
+								.size()
+									.isEqualTo(3);
+	
+						assertThat(context)
+							.getBeans(HttpMessageConverter.class)
+								.size()
+									.isGreaterThanOrEqualTo(3);
+					});
+			}
+		}
+	
+		public static class MultipartFormHttpMessageConvertersConfigurationTest extends HttpMessageConvertersConfigurationTest {
+	
+			@Test
+			public void shouldCreateMultipartFormMessageConverters() {
+				contextRunner
+					.run(context -> {
+						assertThat(context)
+							.hasSingleBean(MultipartFormFileObjectMessageWriter.class)
+							.hasSingleBean(MultipartFormMapMessageWriter.class)
+							.hasSingleBean(MultipartFormObjectMessageWriter.class)
+							.hasSingleBean(MultipartFormParametersMessageWriter.class);
+	
+						assertThat(context)
+							.getBeans(MultipartFormMessageWriter.class)
+								.size()
+									.isEqualTo(4);
+	
+						assertThat(context)
+							.getBeans(HttpMessageConverter.class)
+								.size()
+									.isGreaterThanOrEqualTo(4);
+					});
+			}
+		}
+	
+		public static class TextHttpMessageConvertersConfigurationTest extends HttpMessageConvertersConfigurationTest {
+	
+			@Test
+			public void shouldCreateTextMessageConverters() {
+				contextRunner
+					.run(context -> {
+						assertThat(context)
+							.hasSingleBean(ScalarMessageConverter.class)
+							.hasSingleBean(TextHtmlMessageConverter.class)
+							.hasSingleBean(TextPlainMessageConverter.class);
+	
+						assertThat(context)
+							.getBeans(TextMessageConverter.class)
+								.size()
+									.isEqualTo(3);
+	
+						assertThat(context)
+							.getBeans(HttpMessageConverter.class)
+								.size()
+									.isGreaterThanOrEqualTo(4);
+					});
+			}
+		}
+	
+		public static class OctetStreamHttpMessageConvertersConfigurationTest extends HttpMessageConvertersConfigurationTest {
+	
+			@Test
+			public void shouldCreateOctetStreamMessageConverters() {
+				contextRunner
+					.run(context -> {
+						assertThat(context)
+							.hasSingleBean(OctetByteArrayMessageConverter.class)
+							.hasSingleBean(OctetInputStreamMessageConverter.class)
+							.hasSingleBean(OctetSerializableMessageConverter.class);
+	
+						assertThat(context)
+							.getBeans(OctetStreamMessageConverter.class)
+								.size()
+									.isEqualTo(3);
+	
+						assertThat(context)
+							.getBeans(HttpMessageConverter.class)
+								.size()
+									.isGreaterThanOrEqualTo(3);
+					});
+			}
+		}
+	}
+
+	public abstract static class EndpointCallHandlersConfigurationTest {
 		
-		@Test
-		public void shouldCreateJacksonMessageConverter() {
-			contextRunner
-				.withClassLoader(new FilteredClassLoader(GsonMessageConverter.class, JsonPMessageConverter.class, JsonBMessageConverter.class))
-				.run(context -> {
-					assertThat(context)
-						.hasSingleBean(JacksonMessageConverter.class)
-						.hasSingleBean(JsonMessageConverter.class)
-						.getBeans(HttpMessageConverter.class)
-							.size()
-								.isGreaterThanOrEqualTo(1);
-				});
+		protected ApplicationContextRunner contextRunner;
+
+		@Before
+		public void setup() {
+			contextRunner = new ApplicationContextRunner()
+					.withUserConfiguration(TestRestifyConfiguration.class)
+					.withConfiguration(AutoConfigurations.of(RestifyAutoConfiguration.class));
 		}
-	}
 
-	public static class GsonJsonHttpMessageConvertersConfigurationTest extends HttpMessageConvertersConfigurationTest {
-		
-		@Test
-		public void shouldCreateGsonMessageConverter() {
-			contextRunner
-				.withClassLoader(new FilteredClassLoader(JacksonMessageConverter.class, JsonPMessageConverter.class, JsonBMessageConverter.class))
-				.run(context -> {
-					assertThat(context)
-						.hasSingleBean(GsonMessageConverter.class)
-						.hasSingleBean(JsonMessageConverter.class)
-						.getBeans(HttpMessageConverter.class)
-							.size()
-								.isGreaterThanOrEqualTo(1);
-				});
+		public static class GuavaEndpointCallHandlersConfigurationTest extends EndpointCallHandlersConfigurationTest {
+			
+			@Test
+			public void shouldCreateGuavaEndpointCallHandlers() {
+				contextRunner
+					.run(context -> {
+						assertThat(context)
+							.hasSingleBean(com.github.ljtfreitas.restify.http.client.call.handler.guava.OptionalEndpointCallHandlerFactory.class)
+							.hasSingleBean(com.github.ljtfreitas.restify.http.client.call.handler.guava.ListenableFutureCallbackEndpointCallHandlerAdapter.class)
+							.hasSingleBean(com.github.ljtfreitas.restify.http.client.call.handler.guava.ListenableFutureEndpointCallHandlerAdapter.class)
+							.hasSingleBean(com.github.ljtfreitas.restify.http.client.call.handler.guava.ListenableFutureTaskEndpointCallHandlerAdapter.class);
+					});
+			}
 		}
-	}
 
-	public static class JsonBJsonHttpMessageConvertersConfigurationTest extends HttpMessageConvertersConfigurationTest {
-		
-		@Test
-		public void shouldCreateJsonBMessageConverter() {
-			contextRunner
-				.withClassLoader(new FilteredClassLoader(JacksonMessageConverter.class, JsonPMessageConverter.class, GsonMessageConverter.class))
-				.run(context -> {
-					assertThat(context)
-						.hasSingleBean(JsonBMessageConverter.class)
-						.hasSingleBean(JsonMessageConverter.class)
-						.getBeans(HttpMessageConverter.class)
-							.size()
-								.isGreaterThanOrEqualTo(1);
-				});
+		public static class JsoupEndpointCallHandlersConfigurationTest extends EndpointCallHandlersConfigurationTest {
+			
+			@Test
+			public void shouldCreateJsoupEndpointCallHandlers() {
+				contextRunner
+					.run(context -> {
+						assertThat(context)
+							.hasSingleBean(JsoupDocumentEndpointCallHandlerFactory.class);
+					});
+			}
 		}
-	}
 
-	public static class JsonPJsonHttpMessageConvertersConfigurationTest extends HttpMessageConvertersConfigurationTest {
-		
-		@Test
-		public void shouldCreateJsonPMessageConverter() {
-			contextRunner
-				.withClassLoader(new FilteredClassLoader(JacksonMessageConverter.class, GsonMessageConverter.class, JsonBMessageConverter.class))
-				.run(context -> {
-					assertThat(context)
-						.hasSingleBean(JsonPMessageConverter.class)
-						.hasSingleBean(JsonMessageConverter.class)
-						.getBeans(HttpMessageConverter.class)
-							.size()
-								.isGreaterThanOrEqualTo(1);
-				});
+		public static class RxJavaEndpointCallHandlersConfigurationTest extends EndpointCallHandlersConfigurationTest {
+			
+			@Test
+			public void shouldCreateRxJavaEndpointCallHandlers() {
+				contextRunner
+					.run(context -> {
+						assertThat(context)
+							.hasSingleBean(rx.Scheduler.class)
+							.hasSingleBean(RxJavaCompletableEndpointCallHandlerFactory.class)
+							.hasSingleBean(RxJavaObservableEndpointCallHandlerAdapter.class)
+							.hasSingleBean(RxJavaSingleEndpointCallHandlerAdapter.class);
+					});
+			}
 		}
-	}
 
-	public static class JaxBXmlHttpMessageConvertersConfigurationTest extends HttpMessageConvertersConfigurationTest {
-		
-		@Test
-		public void shouldCreateJaxBMessageConverter() {
-			contextRunner
-				.run(context -> {
-					assertThat(context)
-						.hasSingleBean(JaxBXmlMessageConverter.class)
-						.hasSingleBean(XmlMessageConverter.class)
-						.getBeans(HttpMessageConverter.class)
-							.size()
-								.isGreaterThanOrEqualTo(1);
-				});
+		public static class RxJava2EndpointCallHandlersConfigurationTest extends EndpointCallHandlersConfigurationTest {
+			
+			@Test
+			public void shouldCreateRxJava2EndpointCallHandlers() {
+				contextRunner
+					.run(context -> {
+						assertThat(context)
+							.hasSingleBean(io.reactivex.Scheduler.class)
+							.hasSingleBean(RxJava2CompletableEndpointCallHandlerFactory.class)
+							.hasSingleBean(RxJava2FlowableEndpointCallHandlerAdapter.class)
+							.hasSingleBean(RxJava2MaybeEndpointCallHandlerAdapter.class)
+							.hasSingleBean(RxJava2ObservableEndpointCallHandlerAdapter.class)
+							.hasSingleBean(RxJava2SingleEndpointCallHandlerAdapter.class);
+					});
+			}
 		}
-	}
 
-	public static class FormUrlEncodedHttpMessageConvertersConfigurationTest extends HttpMessageConvertersConfigurationTest {
-		
-		@Test
-		public void shouldCreateFormUrlEncodedMessageConverters() {
-			contextRunner
-				.run(context -> {
-					assertThat(context)
-						.hasSingleBean(FormURLEncodedFormObjectMessageConverter.class)
-						.hasSingleBean(FormURLEncodedMapMessageConverter.class)
-						.hasSingleBean(FormURLEncodedParametersMessageConverter.class);
-
-					assertThat(context)
-						.getBeans(FormURLEncodedMessageConverter.class)
-							.size()
-								.isEqualTo(3);
-
-					assertThat(context)
-						.getBeans(HttpMessageConverter.class)
-							.size()
-								.isGreaterThanOrEqualTo(3);
-				});
-		}
-	}
-
-	public static class MultipartFormHttpMessageConvertersConfigurationTest extends HttpMessageConvertersConfigurationTest {
-
-		@Test
-		public void shouldCreateMultipartFormMessageConverters() {
-			contextRunner
-				.run(context -> {
-					assertThat(context)
-						.hasSingleBean(MultipartFormFileObjectMessageWriter.class)
-						.hasSingleBean(MultipartFormMapMessageWriter.class)
-						.hasSingleBean(MultipartFormObjectMessageWriter.class)
-						.hasSingleBean(MultipartFormParametersMessageWriter.class);
-
-					assertThat(context)
-						.getBeans(MultipartFormMessageWriter.class)
-							.size()
-								.isEqualTo(4);
-
-					assertThat(context)
-						.getBeans(HttpMessageConverter.class)
-							.size()
-								.isGreaterThanOrEqualTo(4);
-				});
-		}
-	}
-
-	public static class TextHttpMessageConvertersConfigurationTest extends HttpMessageConvertersConfigurationTest {
-
-		@Test
-		public void shouldCreateTextMessageConverters() {
-			contextRunner
-				.run(context -> {
-					assertThat(context)
-						.hasSingleBean(ScalarMessageConverter.class)
-						.hasSingleBean(TextHtmlMessageConverter.class)
-						.hasSingleBean(TextPlainMessageConverter.class);
-
-					assertThat(context)
-						.getBeans(TextMessageConverter.class)
-							.size()
-								.isEqualTo(3);
-
-					assertThat(context)
-						.getBeans(HttpMessageConverter.class)
-							.size()
-								.isGreaterThanOrEqualTo(4);
-				});
-		}
-	}
-
-	public static class OctetStreamHttpMessageConvertersConfigurationTest extends HttpMessageConvertersConfigurationTest {
-
-		@Test
-		public void shouldCreateOctetStreamMessageConverters() {
-			contextRunner
-				.run(context -> {
-					assertThat(context)
-						.hasSingleBean(OctetByteArrayMessageConverter.class)
-						.hasSingleBean(OctetInputStreamMessageConverter.class)
-						.hasSingleBean(OctetSerializableMessageConverter.class);
-
-					assertThat(context)
-						.getBeans(OctetStreamMessageConverter.class)
-							.size()
-								.isEqualTo(3);
-
-					assertThat(context)
-						.getBeans(HttpMessageConverter.class)
-							.size()
-								.isGreaterThanOrEqualTo(3);
-				});
+		public static class VavrEndpointCallHandlersConfigurationTest extends EndpointCallHandlersConfigurationTest {
+			
+			@Test
+			public void shouldCreateVavrEndpointCallHandlers() {
+				contextRunner
+					.run(context -> {
+						assertThat(context)
+							.hasSingleBean(ArrayEndpointCallHandlerAdapter.class)
+							.hasSingleBean(EitherWithStringEndpointCallHandlerAdapter.class)
+							.hasSingleBean(EitherWithThrowableEndpointCallHandlerAdapter.class)
+							.hasSingleBean(FutureEndpointCallHandlerAdapter.class)
+							.hasSingleBean(IndexedSeqEndpointCallHandlerAdapter.class)
+							.hasSingleBean(LazyEndpointCallHandlerAdapter.class)
+							.hasSingleBean(ListEndpointCallHandlerAdapter.class)
+							.hasSingleBean(OptionEndpointCallHandlerFactory.class)
+							.hasSingleBean(QueueEndpointCallHandlerAdapter.class)
+							.hasSingleBean(SeqEndpointCallHandlerAdapter.class)
+							.hasSingleBean(SetEndpointCallHandlerAdapter.class)
+							.hasSingleBean(TraversableEndpointCallHandlerAdapter.class)
+							.hasSingleBean(TryEndpointCallHandlerAdapter.class);
+					});
+			}
 		}
 	}
 

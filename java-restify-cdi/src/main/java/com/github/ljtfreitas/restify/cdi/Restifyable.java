@@ -39,4 +39,6 @@ public @interface Restifyable {
 	String description() default "";
 
 	String endpoint() default "";
+
+	Class<? extends RestifyProxyConfiguration>[] configuration() default {};
 }

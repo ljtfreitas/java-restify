@@ -25,6 +25,8 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.hateoas.browser;
 
+import static com.github.ljtfreitas.restify.util.Preconditions.nonNull;
+
 import java.net.Proxy;
 import java.net.URI;
 import java.net.URL;
@@ -84,23 +86,19 @@ public class HypermediaBrowserBuilder {
 
 	private URL baseURL;
 
-	private HttpClientRequestFactory httpClientRequestFactory;
+	private final EndpointRequestExecutorBuilder endpointRequestExecutorBuilder = new EndpointRequestExecutorBuilder();
 
-	private EndpointRequestExecutor endpointRequestExecutor;
+	private final HttpMessageConvertersBuilder httpMessageConvertersBuilder = new HttpMessageConvertersBuilder();
 
-	private HttpMessageConvertersBuilder httpMessageConvertersBuilder = new HttpMessageConvertersBuilder(this);
+	private final EndpointResponseErrorFallbackBuilder endpointResponseErrorFallbackBuilder = new EndpointResponseErrorFallbackBuilder();
 
-	private EndpointRequestInterceptorsBuilder endpointRequestInterceptorsBuilder = new EndpointRequestInterceptorsBuilder(this);
+	private final HttpClientRequestFactoryBuilder httpClientRequestFactoryBuilder = new HttpClientRequestFactoryBuilder();
 
-	private EndpointResponseErrorFallbackBuilder endpointResponseErrorFallbackBuilder = new EndpointResponseErrorFallbackBuilder(this);
+	private final RetryBuilder retryBuilder = new RetryBuilder();
 
-	private HttpClientRequestConfigurationBuilder httpClientRequestConfigurationBuilder = new HttpClientRequestConfigurationBuilder(this);
+	private final AsyncBuilder asyncBuilder = new AsyncBuilder();
 
-	private RetryBuilder retryBuilder = new RetryBuilder(this);
-
-	private ResourceLinkDiscoveryBuilder resourceLinkDiscoveryBuilder = new ResourceLinkDiscoveryBuilder(this);
-
-	private AsyncBuilder asyncBuilder = new AsyncBuilder(this);
+	private final ResourceLinkDiscoveryBuilder resourceLinkDiscoveryBuilder = new ResourceLinkDiscoveryBuilder();
 
 	public HypermediaBrowserBuilder baseURL(String baseUrl) {
 		this.baseURL = Try.of(() -> new URL(baseUrl)).get();
@@ -116,18 +114,18 @@ public class HypermediaBrowserBuilder {
 		this.baseURL = Try.of(baseUrl::toURL).get();
 		return this;
 	}
-
-	public HypermediaBrowserBuilder client(HttpClientRequestFactory httpClientRequestFactory) {
-		this.httpClientRequestFactory = httpClientRequestFactory;
+	
+	public HypermediaBrowserBuilder executor(EndpointRequestExecutor endpointRequestExecutor) {
+		this.endpointRequestExecutorBuilder.using(endpointRequestExecutor);
 		return this;
 	}
 
-	public HttpClientRequestConfigurationBuilder client() {
-		return httpClientRequestConfigurationBuilder;
+	public EndpointRequestExecutorBuilder executor() {
+		return endpointRequestExecutorBuilder;
 	}
 
-	public HypermediaBrowserBuilder executor(EndpointRequestExecutor endpointRequestExecutor) {
-		this.endpointRequestExecutor = endpointRequestExecutor;
+	public HypermediaBrowserBuilder converters(HttpMessageConverter...converters) {
+		this.httpMessageConvertersBuilder.add(converters);
 		return this;
 	}
 
@@ -135,39 +133,28 @@ public class HypermediaBrowserBuilder {
 		return this.httpMessageConvertersBuilder;
 	}
 
-	public HypermediaBrowserBuilder converters(HttpMessageConverter... converters) {
-		this.httpMessageConvertersBuilder.add(converters);
-		return this;
-	}
-
-	public EndpointRequestInterceptorsBuilder interceptors() {
-		return this.endpointRequestInterceptorsBuilder;
-	}
-
-	public HypermediaBrowserBuilder interceptors(EndpointRequestInterceptor... interceptors) {
-		this.endpointRequestInterceptorsBuilder.add(interceptors);
-		return this;
+	public HypermediaBrowserBuilder error(EndpointResponseErrorFallback fallback) {
+		return endpointResponseErrorFallbackBuilder.using(fallback);
 	}
 
 	public EndpointResponseErrorFallbackBuilder error() {
 		return endpointResponseErrorFallbackBuilder;
 	}
 
-	public HypermediaBrowserBuilder error(EndpointResponseErrorFallback fallback) {
-		this.endpointResponseErrorFallbackBuilder = new EndpointResponseErrorFallbackBuilder(this, fallback);
-		return this;
+	public RetryBuilder retry() {
+		return retryBuilder;
 	}
 
-	public ResourceLinkDiscoveryBuilder discovery() {
-		return resourceLinkDiscoveryBuilder;
+	public HypermediaBrowserBuilder async(Executor executor) {
+		return this.asyncBuilder.using(executor);
 	}
 
 	public AsyncBuilder async() {
 		return asyncBuilder;
 	}
 
-	public RetryBuilder retry() {
-		return retryBuilder;
+	public ResourceLinkDiscoveryBuilder discovery() {
+		return resourceLinkDiscoveryBuilder;
 	}
 
 	public HypermediaBrowser build() {
@@ -189,19 +176,19 @@ public class HypermediaBrowserBuilder {
 	}
 
 	private AsyncEndpointRequestExecutor intercepted(AsyncEndpointRequestExecutor delegate) {
-		Collection<EndpointRequestInterceptor> interceptors = endpointRequestInterceptorsBuilder.all;
+		Collection<EndpointRequestInterceptor> interceptors = endpointRequestExecutorBuilder.interceptors.all;
 		return interceptors.isEmpty() ?
 				delegate :
-					new AsyncInterceptedEndpointRequestExecutor(delegate, AsyncEndpointRequestInterceptorChain.of(interceptors));
+					new AsyncInterceptedEndpointRequestExecutor(delegate, AsyncEndpointRequestInterceptorChain.of(interceptors, asyncBuilder.executor));
 	}
 
 	private AsyncEndpointRequestExecutor asyncEndpointRequestExecutor() {
-		EndpointRequestExecutor endpointRequestExecutor = Optional.ofNullable(this.endpointRequestExecutor)
+		EndpointRequestExecutor endpointRequestExecutor = Optional.ofNullable(endpointRequestExecutorBuilder.endpointRequestExecutor)
 				.orElseGet(this::defaultAsyncEndpointRequestExecutor);
 
 		return endpointRequestExecutor instanceof AsyncEndpointRequestExecutor ?
 				(AsyncEndpointRequestExecutor) endpointRequestExecutor :
-					new AsyncEndpointRequestExecutorAdapter(asyncBuilder.pool, endpointRequestExecutor);
+					new AsyncEndpointRequestExecutorAdapter(asyncBuilder.executor, endpointRequestExecutor);
 	}
 
 	private AsyncEndpointRequestExecutor defaultAsyncEndpointRequestExecutor() {
@@ -209,94 +196,71 @@ public class HypermediaBrowserBuilder {
 		EndpointRequestWriter writer = new EndpointRequestWriter(messageConverters);
 		EndpointResponseReader reader = new EndpointResponseReader(messageConverters, endpointResponseErrorFallbackBuilder.build());
 
-		return new DefaultAsyncEndpointRequestExecutor(asyncBuilder.pool, asyncHttpClientRequestFactory(), writer, reader);
+		return new DefaultAsyncEndpointRequestExecutor(asyncBuilder.executor, asyncHttpClientRequestFactory(), writer, reader);
 	}
-
+	
 	private AsyncHttpClientRequestFactory asyncHttpClientRequestFactory() {
-		HttpClientRequestFactory httpClientRequestFactory = Optional.ofNullable(this.httpClientRequestFactory)
+		HttpClientRequestFactory httpClientRequestFactory = Optional.ofNullable(httpClientRequestFactoryBuilder.httpClientRequestFactory)
 				.orElseGet(() -> defaultHttpClientRequestFactory());
 
 		return httpClientRequestFactory instanceof AsyncHttpClientRequestFactory ?
 				(AsyncHttpClientRequestFactory) httpClientRequestFactory :
-					new AsyncHttpClientRequestFactoryAdapter(asyncBuilder.pool, defaultHttpClientRequestFactory());
+					new AsyncHttpClientRequestFactoryAdapter(asyncBuilder.executor, defaultHttpClientRequestFactory());
 	}
 
 	private JdkHttpClientRequestFactory defaultHttpClientRequestFactory() {
-		return new JdkHttpClientRequestFactory(httpClientRequestConfiguration());
+		return new JdkHttpClientRequestFactory(httpClientRequestFactoryBuilder.configuration.build());
 	}
 
-	private HttpClientRequestConfiguration httpClientRequestConfiguration() {
-		return httpClientRequestConfigurationBuilder.build();
-	}
+	public class EndpointRequestExecutorBuilder {
 
-	public class EndpointRequestInterceptorsBuilder {
+		private final EndpointRequestInterceptorsBuilder interceptors = new EndpointRequestInterceptorsBuilder();
+		
+		private EndpointRequestExecutor endpointRequestExecutor = null;
 
-		private final HypermediaBrowserBuilder context;
-		private final Collection<EndpointRequestInterceptor> all = new ArrayList<>();
-
-		private EndpointRequestInterceptorsBuilder(HypermediaBrowserBuilder context) {
-			this.context = context;
-		}
-
-		public EndpointRequestInterceptorsBuilder authentication(Authentication authentication) {
-			all.add(new AuthenticationEndpoinRequestInterceptor(authentication));
+		public EndpointRequestExecutorBuilder using(EndpointRequestExecutor endpointRequestExecutor) {
+			this.endpointRequestExecutor = endpointRequestExecutor;
 			return this;
 		}
+		
+		public EndpointRequestInterceptorsBuilder interceptors() {
+			return interceptors;
+		}
 
-		public EndpointRequestInterceptorsBuilder add(EndpointRequestInterceptor...interceptors) {
-			this.all.addAll(Arrays.asList(interceptors));
+		public EndpointRequestExecutorBuilder interceptors(EndpointRequestInterceptor...interceptors) {
+			this.interceptors.add(interceptors);
 			return this;
 		}
 
 		public HypermediaBrowserBuilder and() {
-			return context;
+			return HypermediaBrowserBuilder.this;
 		}
 
-		public AsyncEndpointRequestInterceptorChain build() {
-			return AsyncEndpointRequestInterceptorChain.of(all);
-		}
-	}
+		public class EndpointRequestInterceptorsBuilder {
 
-	public class EndpointResponseErrorFallbackBuilder {
+			private final Collection<EndpointRequestInterceptor> all = new ArrayList<>();
 
-		private final HypermediaBrowserBuilder context;
+			public EndpointRequestInterceptorsBuilder authentication(Authentication authentication) {
+				all.add(new AuthenticationEndpoinRequestInterceptor(authentication));
+				return this;
+			}
 
-		private EndpointResponseErrorFallback fallback = null;
-		private boolean emptyOnNotFound = false;
+			public EndpointRequestInterceptorsBuilder add(EndpointRequestInterceptor...interceptors) {
+				this.all.addAll(Arrays.asList(interceptors));
+				return this;
+			}
 
-		private EndpointResponseErrorFallbackBuilder(HypermediaBrowserBuilder context) {
-			this.context = context;
-		}
-
-		private EndpointResponseErrorFallbackBuilder(HypermediaBrowserBuilder context, EndpointResponseErrorFallback fallback) {
-			this.context = context;
-			this.fallback = fallback;
-		}
-
-		public HypermediaBrowserBuilder emptyOnNotFound() {
-			this.emptyOnNotFound = true;
-			return context;
-		}
-
-		public HypermediaBrowserBuilder using(EndpointResponseErrorFallback fallback) {
-			this.fallback = fallback;
-			return context;
-		}
-
-		private EndpointResponseErrorFallback build() {
-			return Optional.ofNullable(fallback)
-					.orElseGet(() -> emptyOnNotFound ? new EmptyOnNotFoundEndpointResponseErrorFallback()
-							: new DefaultEndpointResponseErrorFallback());
+			public EndpointRequestExecutorBuilder and() {
+				return EndpointRequestExecutorBuilder.this;
+			}
 		}
 	}
 
 	public class HttpMessageConvertersBuilder {
 
-		private final HypermediaBrowserBuilder context;
 		private final Collection<HttpMessageConverter> converters = new ArrayList<>();
 
-		private HttpMessageConvertersBuilder(HypermediaBrowserBuilder context) {
-			this.context = context;
+		private HttpMessageConvertersBuilder() {
 			this.converters.add(new SimpleTextMessageConverter());
 		}
 
@@ -320,7 +284,7 @@ public class HypermediaBrowserBuilder {
 		}
 
 		public HypermediaBrowserBuilder and() {
-			return context;
+			return HypermediaBrowserBuilder.this;
 		}
 
 		private HttpMessageConverters build() {
@@ -328,185 +292,62 @@ public class HypermediaBrowserBuilder {
 		}
 	}
 
-	public class ResourceLinkDiscoveryBuilder {
+	public class EndpointResponseErrorFallbackBuilder {
 
-		private final HypermediaBrowserBuilder context;
-		private final Collection<LinkDiscovery> resolvers = new ArrayList<>();
+		private EndpointResponseErrorFallback fallback = null;
+		private boolean emptyOnNotFound = false;
 
-		private ResourceLinkDiscoveryBuilder(HypermediaBrowserBuilder context) {
-			this.context = context;
+		private EndpointResponseErrorFallbackBuilder() {
+			this(null);
 		}
 
-		public ResourceLinkDiscoveryBuilder jsonLink() {
-			resolvers.add(new HypermediaJsonPathLinkDiscovery());
-			return this;
+		private EndpointResponseErrorFallbackBuilder(EndpointResponseErrorFallback fallback) {
+			this.fallback = fallback;
 		}
 
-		public ResourceLinkDiscoveryBuilder hal() {
-			resolvers.add(new HypermediaHalJsonPathLinkDiscovery());
-			return this;
+		public HypermediaBrowserBuilder emptyOnNotFound() {
+			this.emptyOnNotFound = true;
+			return HypermediaBrowserBuilder.this;
 		}
 
-		public ResourceLinkDiscoveryBuilder jsonPath() {
-			resolvers.add(new JsonPathLinkDiscovery("$.%s"));
-			return this;
+		public HypermediaBrowserBuilder using(EndpointResponseErrorFallback fallback) {
+			this.fallback = fallback;
+			return HypermediaBrowserBuilder.this;
 		}
 
-		public ResourceLinkDiscoveryBuilder jsonPath(String template) {
-			resolvers.add(new JsonPathLinkDiscovery(template));
-			return this;
-		}
-
-		public ResourceLinkDiscoveryBuilder jsonPathTemplate(String jsonPathTemplate) {
-			resolvers.add(new HypermediaHalJsonPathLinkDiscovery());
-			return this;
-		}
-
-		public ResourceLinkDiscoveryBuilder all() {
-			return jsonLink().hal();
-		}
-
-		public ResourceLinkDiscoveryBuilder add(LinkDiscovery... resolvers) {
-			this.resolvers.addAll(Arrays.asList(resolvers));
-			return this;
-		}
-
-		public HypermediaBrowserBuilder and() {
-			return context;
-		}
-
-		private HypermediaLinkDiscovery build() {
-			return resolvers.isEmpty() ? all().build() : new HypermediaLinkDiscovery(resolvers);
+		private EndpointResponseErrorFallback build() {
+			return Optional.ofNullable(fallback)
+					.orElseGet(() -> emptyOnNotFound ? new EmptyOnNotFoundEndpointResponseErrorFallback() : new DefaultEndpointResponseErrorFallback());
 		}
 	}
 
-	public class HttpClientRequestConfigurationBuilder {
+	public class HttpClientRequestFactoryBuilder {
 
-		private final HypermediaBrowserBuilder context;
-		private final HttpClientRequestConfiguration.Builder httpClientRequestConfigurationBuilder = new HttpClientRequestConfiguration.Builder();
+		private final HttpClientRequestConfigurationBuilder configuration = new HttpClientRequestConfigurationBuilder();
 		private final HttpClientRequestInterceptorsBuilder interceptors = new HttpClientRequestInterceptorsBuilder();
 
-		private HttpClientRequestConfiguration httpClientRequestConfiguration = null;
-
-		private HttpClientRequestConfigurationBuilder(HypermediaBrowserBuilder context) {
-			this.context = context;
-		}
-
-		public HttpClientRequestConfigurationBuilder connectionTimeout(int connectionTimeout) {
-			httpClientRequestConfigurationBuilder.connectionTimeout(connectionTimeout);
-			return this;
-		}
-
-		public HttpClientRequestConfigurationBuilder connectionTimeout(Duration connectionTimeout) {
-			httpClientRequestConfigurationBuilder.connectionTimeout(connectionTimeout);
-			return this;
-		}
-
-		public HttpClientRequestConfigurationBuilder readTimeout(int readTimeout) {
-			httpClientRequestConfigurationBuilder.readTimeout(readTimeout);
-			return this;
-		}
-
-		public HttpClientRequestConfigurationBuilder readTimeout(Duration readTimeout) {
-			httpClientRequestConfigurationBuilder.readTimeout(readTimeout);
-			return this;
-		}
-
-		public HttpClientRequestConfigurationBuilder charset(Charset charset) {
-			httpClientRequestConfigurationBuilder.charset(charset);
-			return this;
-		}
-
-		public HttpClientRequestConfigurationBuilder proxy(Proxy proxy) {
-			httpClientRequestConfigurationBuilder.proxy(proxy);
-			return this;
-		}
-
-		public HttpClientRequestFollowRedirectsConfigurationBuilder followRedirects() {
-			return new HttpClientRequestFollowRedirectsConfigurationBuilder();
-		}
-
-		public HttpClientRequestConfigurationBuilder followRedirects(boolean enabled) {
-			httpClientRequestConfigurationBuilder.followRedirects(enabled);
-			return this;
-		}
-
-		public HttpClientRequestUseCachesConfigurationBuilder useCaches() {
-			return new HttpClientRequestUseCachesConfigurationBuilder();
-		}
-
-		public HttpClientRequestConfigurationBuilder useCaches(boolean enabled) {
-			httpClientRequestConfigurationBuilder.useCaches(enabled);
-			return this;
-		}
-
-		public HttpClientRequestSslConfigurationBuilder ssl() {
-			return new HttpClientRequestSslConfigurationBuilder();
-		}
+		private HttpClientRequestFactory httpClientRequestFactory = null;
 
 		public HttpClientRequestInterceptorsBuilder interceptors() {
 			return interceptors;
 		}
 
-		public HypermediaBrowserBuilder interceptors(HttpClientRequestInterceptor...interceptors) {
+		public HttpClientRequestFactoryBuilder interceptors(HttpClientRequestInterceptor... interceptors) {
 			this.interceptors.add(interceptors);
-			return context;
+			return this;
 		}
 
-		public HypermediaBrowserBuilder using(HttpClientRequestConfiguration httpClientRequestConfiguration) {
-			this.httpClientRequestConfiguration = httpClientRequestConfiguration;
-			return context;
+		public HttpClientRequestConfigurationBuilder configure() {
+			return configuration;
+		}
+
+		public HttpClientRequestFactoryBuilder using(HttpClientRequestFactory httpClientRequestFactory) {
+			this.httpClientRequestFactory = httpClientRequestFactory;
+			return this;
 		}
 
 		public HypermediaBrowserBuilder and() {
-			return context;
-		}
-
-		private HttpClientRequestConfiguration build() {
-			return Optional.ofNullable(httpClientRequestConfiguration).orElseGet(() -> httpClientRequestConfigurationBuilder.build());
-		}
-
-		public class HttpClientRequestFollowRedirectsConfigurationBuilder {
-
-			public HttpClientRequestConfigurationBuilder enabled() {
-				httpClientRequestConfigurationBuilder.followRedirects().enabled();
-				return HttpClientRequestConfigurationBuilder.this;
-			}
-
-			public HttpClientRequestConfigurationBuilder disabled() {
-				httpClientRequestConfigurationBuilder.followRedirects().disabled();
-				return HttpClientRequestConfigurationBuilder.this;
-			}
-		}
-
-		public class HttpClientRequestUseCachesConfigurationBuilder {
-
-			public HttpClientRequestConfigurationBuilder enabled() {
-				httpClientRequestConfigurationBuilder.useCaches().enabled();
-				return HttpClientRequestConfigurationBuilder.this;
-			}
-
-			public HttpClientRequestConfigurationBuilder disabled() {
-				httpClientRequestConfigurationBuilder.useCaches().disabled();
-				return HttpClientRequestConfigurationBuilder.this;
-			}
-		}
-
-		public class HttpClientRequestSslConfigurationBuilder {
-
-			public HttpClientRequestConfigurationBuilder sslSocketFactory(SSLSocketFactory sslSocketFactory) {
-				httpClientRequestConfigurationBuilder.ssl().sslSocketFactory(sslSocketFactory);
-				return HttpClientRequestConfigurationBuilder.this;
-			}
-
-			public HttpClientRequestConfigurationBuilder hostnameVerifier(HostnameVerifier hostnameVerifier) {
-				httpClientRequestConfigurationBuilder.ssl().hostnameVerifier(hostnameVerifier);
-				return HttpClientRequestConfigurationBuilder.this;
-			}
-
-			public HypermediaBrowserBuilder and() {
-				return context;
-			}
+			return HypermediaBrowserBuilder.this;
 		}
 
 		public class HttpClientRequestInterceptorsBuilder {
@@ -519,23 +360,187 @@ public class HypermediaBrowserBuilder {
 			}
 
 			public HypermediaBrowserBuilder and() {
-				return context;
+				return HypermediaBrowserBuilder.this;
+			}
+		}
+
+		public class HttpClientRequestConfigurationBuilder {
+
+			private final HttpClientRequestConfiguration.Builder delegate = new HttpClientRequestConfiguration.Builder();
+			private final HttpClientRequestFollowRedirectsConfigurationBuilder followRedirects = new HttpClientRequestFollowRedirectsConfigurationBuilder();
+			private final HttpClientRequestUseCachesConfigurationBuilder useCaches = new HttpClientRequestUseCachesConfigurationBuilder();
+			private final HttpClientRequestBufferRequestBodyConfigurationBuilder bufferRequestBody = new HttpClientRequestBufferRequestBodyConfigurationBuilder();
+			private final HttpClientRequestOutputStreamingConfigurationBuilder outputStreaming = new HttpClientRequestOutputStreamingConfigurationBuilder();
+			private final HttpClientRequestSslConfigurationBuilder ssl = new HttpClientRequestSslConfigurationBuilder();
+
+			private HttpClientRequestConfiguration httpClientRequestConfiguration = null;
+			
+			public HttpClientRequestConfigurationBuilder connectionTimeout(int connectionTimeout) {
+				delegate.connectionTimeout(connectionTimeout);
+				return this;
+			}
+	
+			public HttpClientRequestConfigurationBuilder connectionTimeout(Duration connectionTimeout) {
+				delegate.connectionTimeout(connectionTimeout);
+				return this;
+			}
+	
+			public HttpClientRequestConfigurationBuilder readTimeout(int readTimeout) {
+				delegate.readTimeout(readTimeout);
+				return this;
+			}
+	
+			public HttpClientRequestConfigurationBuilder readTimeout(Duration readTimeout) {
+				delegate.readTimeout(readTimeout);
+				return this;
+			}
+	
+			public HttpClientRequestConfigurationBuilder charset(Charset charset) {
+				delegate.charset(charset);
+				return this;
+			}
+	
+			public HttpClientRequestConfigurationBuilder proxy(Proxy proxy) {
+				delegate.proxy(proxy);
+				return this;
+			}
+	
+			public HttpClientRequestFollowRedirectsConfigurationBuilder followRedirects() {
+				return followRedirects;
+			}
+	
+			public HttpClientRequestConfigurationBuilder followRedirects(boolean enabled) {
+				delegate.followRedirects(enabled);
+				return this;
+			}
+	
+			public HttpClientRequestUseCachesConfigurationBuilder useCaches() {
+				return useCaches;
+			}
+	
+			public HttpClientRequestConfigurationBuilder useCaches(boolean enabled) {
+				delegate.useCaches(enabled);
+				return this;
+			}
+	
+			public HttpClientRequestBufferRequestBodyConfigurationBuilder bufferRequestBody() {
+				return bufferRequestBody;
+			}
+	
+			public HttpClientRequestConfigurationBuilder bufferRequestBody(boolean enabled) {
+				delegate.bufferRequestBody(enabled);
+				return this;
+			}
+	
+			public HttpClientRequestOutputStreamingConfigurationBuilder outputStreaming() {
+				return outputStreaming;
+			}
+	
+			public HttpClientRequestConfigurationBuilder outputStreaming(boolean enabled) {
+				delegate.outputStreaming(enabled);
+				return this;
+			}
+	
+			public HttpClientRequestSslConfigurationBuilder ssl() {
+				return ssl;
+			}
+	
+			public HttpClientRequestFactoryBuilder using(HttpClientRequestConfiguration httpClientRequestConfiguration) {
+				this.httpClientRequestConfiguration = httpClientRequestConfiguration;
+				return HttpClientRequestFactoryBuilder.this;
+			}
+	
+			private HttpClientRequestConfiguration build() {
+				return Optional.ofNullable(httpClientRequestConfiguration).orElseGet(() -> delegate.build());
+			}
+	
+			public class HttpClientRequestFollowRedirectsConfigurationBuilder {
+	
+				public HttpClientRequestFactoryBuilder enabled() {
+					delegate.followRedirects().enabled();
+					return HttpClientRequestFactoryBuilder.this;
+				}
+	
+				public HttpClientRequestFactoryBuilder disabled() {
+					delegate.followRedirects().disabled();
+					return HttpClientRequestFactoryBuilder.this;
+				}
+			}
+	
+			public class HttpClientRequestUseCachesConfigurationBuilder {
+	
+				public HttpClientRequestFactoryBuilder enabled() {
+					delegate.useCaches().enabled();
+					return HttpClientRequestFactoryBuilder.this;
+				}
+	
+				public HttpClientRequestFactoryBuilder disabled() {
+					delegate.useCaches().disabled();
+					return HttpClientRequestFactoryBuilder.this;
+				}
+			}
+	
+			public class HttpClientRequestBufferRequestBodyConfigurationBuilder {
+	
+				public HttpClientRequestFactoryBuilder enabled() {
+					delegate.bufferRequestBody().enabled();
+					return HttpClientRequestFactoryBuilder.this;
+				}
+	
+				public HttpClientRequestFactoryBuilder disabled() {
+					delegate.bufferRequestBody().disabled();
+					return HttpClientRequestFactoryBuilder.this;
+				}
+			}
+	
+			public class HttpClientRequestOutputStreamingConfigurationBuilder {
+	
+				public HttpClientRequestOutputStreamingConfigurationBuilder enabled() {
+					delegate.outputStreaming().enabled();
+					return this;
+				}
+	
+				public HttpClientRequestFactoryBuilder disabled() {
+					delegate.outputStreaming().disabled();
+					return HttpClientRequestFactoryBuilder.this;
+				}
+	
+				public HttpClientRequestOutputStreamingConfigurationBuilder chunkSize(int chunkSize) {
+					delegate.outputStreaming().chunkSize(chunkSize);
+					return this;
+				}
+	
+				public HttpClientRequestFactoryBuilder and() {
+					return HttpClientRequestFactoryBuilder.this;
+				}
+			}
+	
+			public class HttpClientRequestSslConfigurationBuilder {
+	
+				public HttpClientRequestSslConfigurationBuilder sslSocketFactory(SSLSocketFactory sslSocketFactory) {
+					delegate.ssl().sslSocketFactory(sslSocketFactory);
+					return this;
+				}
+	
+				public HttpClientRequestSslConfigurationBuilder hostnameVerifier(HostnameVerifier hostnameVerifier) {
+					delegate.ssl().hostnameVerifier(hostnameVerifier);
+					return this;
+				}
+	
+				public HttpClientRequestFactoryBuilder and() {
+					return HttpClientRequestFactoryBuilder.this;
+				}
 			}
 		}
 	}
 
 	public class RetryBuilder {
 
-		private final HypermediaBrowserBuilder context;
 		private final RetryConfigurationBuilder builder = new RetryConfigurationBuilder();
-		private final AsyncRetryConfigurationBuilder async = new AsyncRetryConfigurationBuilder(this);
+		private final AsyncRetryConfigurationBuilder async = new AsyncRetryConfigurationBuilder();
 
 		private boolean enabled = false;
 		private RetryConfiguration configuration;
-
-		public RetryBuilder(HypermediaBrowserBuilder context) {
-			this.context = context;
-		}
 
 		public RetryBuilder enabled() {
 			this.enabled = true;
@@ -544,7 +549,12 @@ public class HypermediaBrowserBuilder {
 
 		public HypermediaBrowserBuilder disabled() {
 			this.enabled = false;
-			return context;
+			return HypermediaBrowserBuilder.this;
+		}
+
+		public RetryBuilder enabled(boolean enabled) {
+			this.enabled = enabled;
+			return this;
 		}
 
 		public RetryConfigurationBuilder configure() {
@@ -555,7 +565,7 @@ public class HypermediaBrowserBuilder {
 		public HypermediaBrowserBuilder using(RetryConfiguration configuration) {
 			this.enabled = true;
 			this.configuration = configuration;
-			return context;
+			return HypermediaBrowserBuilder.this;
 		}
 
 		public AsyncRetryConfigurationBuilder async() {
@@ -563,7 +573,7 @@ public class HypermediaBrowserBuilder {
 		}
 
 		public HypermediaBrowserBuilder and() {
-			return context;
+			return HypermediaBrowserBuilder.this;
 		}
 
 		private RetryConfiguration build() {
@@ -573,7 +583,7 @@ public class HypermediaBrowserBuilder {
 		public class RetryConfigurationBuilder {
 
 			private final RetryConfiguration.Builder delegate = new RetryConfiguration.Builder();
-			private final RetryConfigurationBackOffBuilder backOff = new RetryConfigurationBackOffBuilder(this);
+			private final RetryConfigurationBackOffBuilder backOff = new RetryConfigurationBackOffBuilder();
 
 			public RetryConfigurationBuilder attempts(int attempts) {
 				delegate.attempts(attempts);
@@ -626,7 +636,7 @@ public class HypermediaBrowserBuilder {
 			}
 
 			public HypermediaBrowserBuilder and() {
-				return context;
+				return HypermediaBrowserBuilder.this;
 			}
 
 			private RetryConfiguration build() {
@@ -634,12 +644,6 @@ public class HypermediaBrowserBuilder {
 			}
 
 			public class RetryConfigurationBackOffBuilder {
-
-				private final RetryConfigurationBuilder context;
-
-				private RetryConfigurationBackOffBuilder(RetryConfigurationBuilder context) {
-					this.context = context;
-				}
 
 				public RetryConfigurationBackOffBuilder delay(long delay) {
 					delegate.backOff().delay(delay);
@@ -657,45 +661,76 @@ public class HypermediaBrowserBuilder {
 				}
 
 				public RetryConfigurationBuilder and() {
-					return context;
+					return RetryConfigurationBuilder.this;
 				}
 			}
 		}
 
 		public class AsyncRetryConfigurationBuilder {
 
-			private final RetryBuilder context;
-
 			private ScheduledExecutorService scheduler = DisposableExecutors.newScheduledThreadPool(10);
 
-			private AsyncRetryConfigurationBuilder(RetryBuilder context) {
-				this.context = context;
-			}
-
 			public RetryBuilder scheduler(ScheduledExecutorService scheduler) {
-				this.scheduler = scheduler;
-				return context;
+				this.scheduler = nonNull(scheduler);
+				return RetryBuilder.this;
 			}
+		}
+	}
+
+	public class ResourceLinkDiscoveryBuilder {
+
+		private final Collection<LinkDiscovery> resolvers = new ArrayList<>();
+
+		public ResourceLinkDiscoveryBuilder jsonLink() {
+			resolvers.add(new HypermediaJsonPathLinkDiscovery());
+			return this;
+		}
+
+		public ResourceLinkDiscoveryBuilder hal() {
+			resolvers.add(new HypermediaHalJsonPathLinkDiscovery());
+			return this;
+		}
+
+		public ResourceLinkDiscoveryBuilder jsonPath() {
+			resolvers.add(new JsonPathLinkDiscovery("$.%s"));
+			return this;
+		}
+
+		public ResourceLinkDiscoveryBuilder jsonPath(String template) {
+			resolvers.add(new JsonPathLinkDiscovery(template));
+			return this;
+		}
+
+		public ResourceLinkDiscoveryBuilder jsonPathTemplate(String jsonPathTemplate) {
+			resolvers.add(new HypermediaHalJsonPathLinkDiscovery());
+			return this;
+		}
+
+		public ResourceLinkDiscoveryBuilder all() {
+			return jsonLink().hal();
+		}
+
+		public ResourceLinkDiscoveryBuilder add(LinkDiscovery... resolvers) {
+			this.resolvers.addAll(Arrays.asList(resolvers));
+			return this;
+		}
+
+		public HypermediaBrowserBuilder and() {
+			return HypermediaBrowserBuilder.this;
+		}
+
+		private HypermediaLinkDiscovery build() {
+			return resolvers.isEmpty() ? all().build() : new HypermediaLinkDiscovery(resolvers);
 		}
 	}
 
 	public class AsyncBuilder {
 
-		private final HypermediaBrowserBuilder context;
+		private Executor executor = DisposableExecutors.newCachedThreadPool();;
 
-		private Executor pool = DisposableExecutors.newCachedThreadPool();
-
-		private AsyncBuilder(HypermediaBrowserBuilder context) {
-			this.context = context;
-		}
-
-		public AsyncBuilder with(Executor executor) {
-			this.pool = executor;
-			return this;
-		}
-
-		public HypermediaBrowserBuilder and() {
-			return context;
+		public HypermediaBrowserBuilder using(Executor executor) {
+			this.executor = nonNull(executor);
+			return HypermediaBrowserBuilder.this;
 		}
 	}
 }

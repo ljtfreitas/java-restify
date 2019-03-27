@@ -38,7 +38,7 @@ import com.github.ljtfreitas.restify.util.async.DisposableExecutors;
 
 class AsyncEndpointCallAdapter<T> implements AsyncEndpointCall<T> {
 
-	private static final Executor DEFAULT_EXECUTOR = DisposableExecutors.immediate();
+	private static final Executor DEFAULT_EXECUTOR = DisposableExecutors.newCachedThreadPool();
 
 	private final ExecutorAsyncEndpointCall<T> delegate;
 

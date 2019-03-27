@@ -29,6 +29,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
+import java.util.concurrent.Executor;
 import java.util.stream.Collectors;
 
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
@@ -54,10 +55,10 @@ public class AsyncEndpointRequestInterceptorChain {
 		return interceptors.stream().reduce(completed, (r, i) -> i.interceptsAsync(r), (a, b) -> b);
 	}
 
-	public static AsyncEndpointRequestInterceptorChain of(Collection<EndpointRequestInterceptor> interceptors) {
+	public static AsyncEndpointRequestInterceptorChain of(Collection<EndpointRequestInterceptor> interceptors, Executor executor) {
 		Collection<AsyncEndpointRequestInterceptor> all = interceptors
 			.stream()
-			.map(i -> (i instanceof AsyncEndpointRequestInterceptor) ? i : new AsyncEndpointRequestInterceptorAdapter(i))
+			.map(i -> (i instanceof AsyncEndpointRequestInterceptor) ? i : new AsyncEndpointRequestInterceptorAdapter(i, executor))
 			.map(AsyncEndpointRequestInterceptor.class::cast)
 			.collect(Collectors.toList());
 
@@ -67,9 +68,11 @@ public class AsyncEndpointRequestInterceptorChain {
 	private static class AsyncEndpointRequestInterceptorAdapter implements AsyncEndpointRequestInterceptor {
 
 		private final EndpointRequestInterceptor delegate;
+		private final Executor executor;
 
-		private AsyncEndpointRequestInterceptorAdapter(EndpointRequestInterceptor delegate) {
+		private AsyncEndpointRequestInterceptorAdapter(EndpointRequestInterceptor delegate, Executor executor) {
 			this.delegate = delegate;
+			this.executor = executor;
 		}
 
 		@Override
@@ -79,7 +82,7 @@ public class AsyncEndpointRequestInterceptorChain {
 
 		@Override
 		public CompletionStage<EndpointRequest> interceptsAsync(CompletionStage<EndpointRequest> endpointRequest) {
-			return endpointRequest.thenApplyAsync(r -> delegate.intercepts(r));
+			return endpointRequest.thenApplyAsync(r -> delegate.intercepts(r), executor);
 		}
 	}
 }

@@ -66,11 +66,11 @@ import com.google.gson.Gson;
 public class RestifyHttpMessageConvertersConfiguration {
 
 	@Configuration
-	public static class JsonHttpMessageConverterConfiguration {
+	static class JsonHttpMessageConverterConfiguration {
 	
 		@Configuration
 		@ConditionalOnClass(JacksonMessageConverter.class)
-		public static class JacksonHttpMesssageConverterConfiguration {
+		static class JacksonHttpMesssageConverterConfiguration {
 		
 			@ConditionalOnMissingBean
 			@Bean
@@ -82,7 +82,7 @@ public class RestifyHttpMessageConvertersConfiguration {
 		
 		@Configuration
 		@ConditionalOnClass(GsonMessageConverter.class)
-		public static class GsonHttpMesssageConverterConfiguration {
+		static class GsonHttpMesssageConverterConfiguration {
 		
 			@ConditionalOnMissingBean
 			@Bean
@@ -94,7 +94,7 @@ public class RestifyHttpMessageConvertersConfiguration {
 
 		@Configuration
 		@ConditionalOnClass(JsonPMessageConverter.class)
-		public static class JsonPHttpMesssageConverterConfiguration {
+		static class JsonPHttpMesssageConverterConfiguration {
 		
 			@ConditionalOnMissingBean
 			@Bean
@@ -122,7 +122,7 @@ public class RestifyHttpMessageConvertersConfiguration {
 
 		@Configuration
 		@ConditionalOnClass(JsonBMessageConverter.class)
-		public static class JsonBHttpMesssageConverterConfiguration {
+		static class JsonBHttpMesssageConverterConfiguration {
 		
 			@ConditionalOnMissingBean
 			@Bean
@@ -145,11 +145,11 @@ public class RestifyHttpMessageConvertersConfiguration {
 	}
 	
 	@Configuration
-	public static class XmlHttpMessageConverterConfiguration {
+	static class XmlHttpMessageConverterConfiguration {
 	
 		@Configuration
 		@ConditionalOnClass(JaxBXmlMessageConverter.class)
-		public static class JaxBHttpMesssageConverterConfiguration {
+		static class JaxBHttpMesssageConverterConfiguration {
 		
 			@ConditionalOnMissingBean
 			@Bean
@@ -160,11 +160,11 @@ public class RestifyHttpMessageConvertersConfiguration {
 	}
 	
 	@Configuration
-	public static class FormUrlEncodedHttpMessageConverterConfiguration {
+	static class FormUrlEncodedHttpMessageConverterConfiguration {
 	
 		@Configuration
 		@ConditionalOnClass(FormURLEncodedFormObjectMessageConverter.class)
-		public static class FormURLEncodedFormObjectHttpMesssageConverterConfiguration {
+		static class FormURLEncodedFormObjectHttpMesssageConverterConfiguration {
 		
 			@ConditionalOnMissingBean
 			@Bean
@@ -175,7 +175,7 @@ public class RestifyHttpMessageConvertersConfiguration {
 
 		@Configuration
 		@ConditionalOnClass(FormURLEncodedMapMessageConverter.class)
-		public static class FormURLEncodedMapHttpMesssageConverterConfiguration {
+		static class FormURLEncodedMapHttpMesssageConverterConfiguration {
 		
 			@ConditionalOnMissingBean
 			@Bean
@@ -186,7 +186,7 @@ public class RestifyHttpMessageConvertersConfiguration {
 
 		@Configuration
 		@ConditionalOnClass(FormURLEncodedParametersMessageConverter.class)
-		public static class FormURLEncodedParametersHttpMesssageConverterConfiguration {
+		static class FormURLEncodedParametersHttpMesssageConverterConfiguration {
 		
 			@ConditionalOnMissingBean
 			@Bean
@@ -197,11 +197,11 @@ public class RestifyHttpMessageConvertersConfiguration {
 	}
 
 	@Configuration
-	public static class MultipartFormHttpMessageConverterConfiguration {
+	static class MultipartFormHttpMessageConverterConfiguration {
 	
 		@Configuration
 		@ConditionalOnClass(MultipartFormFileObjectMessageWriter.class)
-		public static class MultipartFormFileObjectHttpMesssageConverterConfiguration {
+		static class MultipartFormFileObjectHttpMesssageConverterConfiguration {
 		
 			@ConditionalOnMissingBean
 			@Bean
@@ -212,7 +212,7 @@ public class RestifyHttpMessageConvertersConfiguration {
 
 		@Configuration
 		@ConditionalOnClass(MultipartFormMapMessageWriter.class)
-		public static class MultipartFormMapHttpMesssageConverterConfiguration {
+		static class MultipartFormMapHttpMesssageConverterConfiguration {
 		
 			@ConditionalOnMissingBean
 			@Bean
@@ -223,7 +223,7 @@ public class RestifyHttpMessageConvertersConfiguration {
 
 		@Configuration
 		@ConditionalOnClass(MultipartFormObjectMessageWriter.class)
-		public static class MultipartFormObjectHttpMesssageConverterConfiguration {
+		static class MultipartFormObjectHttpMesssageConverterConfiguration {
 		
 			@ConditionalOnMissingBean
 			@Bean
@@ -234,7 +234,7 @@ public class RestifyHttpMessageConvertersConfiguration {
 
 		@Configuration
 		@ConditionalOnClass(MultipartFormParametersMessageWriter.class)
-		public static class MultipartFormParametersHttpMesssageConverterConfiguration {
+		static class MultipartFormParametersHttpMesssageConverterConfiguration {
 		
 			@ConditionalOnMissingBean
 			@Bean
@@ -245,11 +245,11 @@ public class RestifyHttpMessageConvertersConfiguration {
 	}
 
 	@Configuration
-	public static class TextHttpMessageConverterConfiguration {
+	static class TextHttpMessageConverterConfiguration {
 	
 		@Configuration
 		@ConditionalOnClass(ScalarMessageConverter.class)
-		public static class ScalarHttpMesssageConverterConfiguration {
+		static class ScalarHttpMesssageConverterConfiguration {
 		
 			@ConditionalOnMissingBean
 			@Bean
@@ -260,7 +260,7 @@ public class RestifyHttpMessageConvertersConfiguration {
 
 		@Configuration
 		@ConditionalOnClass(TextHtmlMessageConverter.class)
-		public static class TextHtmlHttpMesssageConverterConfiguration {
+		static class TextHtmlHttpMesssageConverterConfiguration {
 		
 			@ConditionalOnMissingBean
 			@Bean
@@ -271,7 +271,7 @@ public class RestifyHttpMessageConvertersConfiguration {
 
 		@Configuration
 		@ConditionalOnClass(TextPlainMessageConverter.class)
-		public static class TextPlainHttpMesssageConverterConfiguration {
+		static class TextPlainHttpMesssageConverterConfiguration {
 		
 			@ConditionalOnMissingBean
 			@Bean
@@ -282,11 +282,11 @@ public class RestifyHttpMessageConvertersConfiguration {
 	}
 
 	@Configuration
-	public static class OctetStreamHttpMessageConverterConfiguration {
+	static class OctetStreamHttpMessageConverterConfiguration {
 	
 		@Configuration
 		@ConditionalOnClass(OctetByteArrayMessageConverter.class)
-		public static class OctetStreamHttpMesssageConverterConfiguration {
+		static class OctetStreamHttpMesssageConverterConfiguration {
 		
 			@ConditionalOnMissingBean
 			@Bean
@@ -297,7 +297,7 @@ public class RestifyHttpMessageConvertersConfiguration {
 
 		@Configuration
 		@ConditionalOnClass(OctetInputStreamMessageConverter.class)
-		public static class OctetInputHttpMesssageConverterConfiguration {
+		static class OctetInputHttpMesssageConverterConfiguration {
 		
 			@ConditionalOnMissingBean
 			@Bean
@@ -308,7 +308,7 @@ public class RestifyHttpMessageConvertersConfiguration {
 
 		@Configuration
 		@ConditionalOnClass(OctetSerializableMessageConverter.class)
-		public static class OctetSerializableHttpMesssageConverterConfiguration {
+		static class OctetSerializableHttpMesssageConverterConfiguration {
 		
 			@ConditionalOnMissingBean
 			@Bean

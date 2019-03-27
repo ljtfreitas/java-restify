@@ -23,7 +23,7 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.spring.configure;
+package com.github.ljtfreitas.restify.cdi;
 
 import java.util.Collection;
 import java.util.Collections;
@@ -44,6 +44,10 @@ import com.github.ljtfreitas.restify.http.contract.metadata.ContractReader;
 
 public interface RestifyProxyConfiguration {
 
+	public default String endpoint() {
+		return null;
+	}
+	
 	public default HttpClientRequestFactory httpClientRequestFactory() {
 		return null;
 	}

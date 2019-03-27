@@ -608,8 +608,10 @@ public class HypermediaBrowserTest {
 					.withBody(json("{\"name\":\"Tiago de Freitas Lima\",\"birth_date\":\"1985-07-02\"}")));
 
 		hypermediaBrowser = new HypermediaBrowserBuilder()
-				.interceptors()
-					.add(r -> r.add(header))
+				.executor()
+					.interceptors()
+						.add(r -> r.add(header))
+						.and()
 					.and()
 				.build();
 
