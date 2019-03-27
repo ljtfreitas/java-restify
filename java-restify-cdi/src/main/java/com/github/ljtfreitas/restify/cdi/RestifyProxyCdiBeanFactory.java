@@ -26,10 +26,15 @@
 package com.github.ljtfreitas.restify.cdi;
 
 import java.lang.annotation.Annotation;
-import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.concurrent.Executor;
+import java.util.function.Function;
 import java.util.function.Supplier;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import javax.enterprise.inject.Instance;
 import javax.enterprise.inject.spi.CDI;
@@ -37,12 +42,16 @@ import javax.enterprise.util.AnnotationLiteral;
 
 import com.github.ljtfreitas.restify.http.RestifyProxyBuilder;
 import com.github.ljtfreitas.restify.http.client.call.handler.EndpointCallHandlerProvider;
+import com.github.ljtfreitas.restify.http.client.jdk.HttpClientRequestConfiguration;
 import com.github.ljtfreitas.restify.http.client.jdk.JdkHttpClientRequestFactory;
 import com.github.ljtfreitas.restify.http.client.message.converter.HttpMessageConverter;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequestExecutor;
 import com.github.ljtfreitas.restify.http.client.request.HttpClientRequestFactory;
+import com.github.ljtfreitas.restify.http.client.request.authentication.Authentication;
 import com.github.ljtfreitas.restify.http.client.request.interceptor.EndpointRequestInterceptor;
+import com.github.ljtfreitas.restify.http.client.request.interceptor.HttpClientRequestInterceptor;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponseErrorFallback;
+import com.github.ljtfreitas.restify.http.client.retry.RetryConfiguration;
 import com.github.ljtfreitas.restify.http.contract.metadata.ContractExpressionResolver;
 import com.github.ljtfreitas.restify.http.contract.metadata.ContractReader;
 import com.github.ljtfreitas.restify.util.async.DisposableExecutors;
@@ -51,75 +60,151 @@ class RestifyProxyCdiBeanFactory {
 
 	private final Class<?> javaType;
 	private final Restifyable restifyable;
+	private final Collection<RestifyProxyConfiguration> configurations;
 	
 	public RestifyProxyCdiBeanFactory(Class<?> javaType) {
 		this.javaType = javaType;
 		this.restifyable = javaType.getAnnotation(Restifyable.class);
+		this.configurations = configurationsOf(restifyable.configuration());
+	}
+
+	private Collection<RestifyProxyConfiguration> configurationsOf(Class<? extends RestifyProxyConfiguration>[] configurations) {
+		return Arrays.stream(configurations)
+				.map(c -> get(c))
+				.filter(Objects::nonNull)
+				.collect(Collectors.toList());
 	}
 
 	public Object create() {
 		RestifyProxyBuilder builder = new RestifyProxyBuilder();
 
-		builder.client(httpClientRequestFactory())
-			.contract(contractReader())
-			.expression(expressionResolver())
-			.executor(endpointRequestExecutor())
-			.retry()
-				.enabled()
+		builder
+			.client()
+				.using(httpClientRequestFactory())
+				.interceptors(httpClientRequestInterceptors())
+				.configure()
+					.using(httpClientRequestConfiguration())
 				.and()
+			.contract()
+				.using(contractReader())
+				.resolver(contractExpressionResolver())
+				.and()
+			.executor()
+				.using(endpointRequestExecutor())
+				.interceptors(endpointRequestInterceptors())
+				.and()
+			.retry()
+				.enabled(withRetry())
+				.using(retry())
 			.handlers()
 				.add(handlers())
-					.async(executor())
 				.discovery()
 					.disabled()
 				.and()
 			.converters()
 				.wildcard()
-				.add(httpMessageConverters())
+				.add(converters())
 				.discovery()
 					.disabled()
 				.and()
-			.error(endpointResponseErrorFallback())
-			.interceptors(endpointRequestInterceptors());
+			.async(asyncExecutorService())
+			.error(endpointResponseErrorFallback());
 
-		return builder.target(javaType, restifyable.endpoint()).build();
-	}
+		authentication()
+			.ifPresent(a -> builder
+								.executor()
+									.interceptors()
+										.authentication(a));
 
-	private EndpointRequestInterceptor[] endpointRequestInterceptors() {
-		return all(EndpointRequestInterceptor.class).toArray(new EndpointRequestInterceptor[0]);
-	}
-
-	private EndpointResponseErrorFallback endpointResponseErrorFallback() {
-		return get(EndpointResponseErrorFallback.class, () -> null);
-	}
-
-	private HttpMessageConverter[] httpMessageConverters() {
-		return all(HttpMessageConverter.class).toArray(new HttpMessageConverter[0]);
-	}
-
-	private Executor executor() {
-		return get(Executor.class, new AsyncAnnotationLiteral(), DisposableExecutors::newCachedThreadPool);
-	}
-
-
-	private EndpointCallHandlerProvider[] handlers() {
-		return all(EndpointCallHandlerProvider.class).toArray(new EndpointCallHandlerProvider[0]);
-	}
-
-	private EndpointRequestExecutor endpointRequestExecutor() {
-		return get(EndpointRequestExecutor.class, () -> null);
-	}
-
-	private ContractReader contractReader() {
-		return get(ContractReader.class, () -> null);
-	}
-
-	private ContractExpressionResolver expressionResolver() {
-		return get(ContractExpressionResolver.class, () -> null);
+		return builder.target(javaType, endpoint())
+				.build();
 	}
 
 	private HttpClientRequestFactory httpClientRequestFactory() {
-		return get(HttpClientRequestFactory.class, () -> new JdkHttpClientRequestFactory());
+		return configured(RestifyProxyConfiguration::httpClientRequestFactory)
+				.orElseGet(() -> get(HttpClientRequestFactory.class, () -> new JdkHttpClientRequestFactory()));
+	}
+
+	private HttpClientRequestInterceptor[] httpClientRequestInterceptors() {
+		return Stream.concat(configurations.stream()
+				.map(RestifyProxyConfiguration::httpClientRequestInterceptors)
+				.flatMap(Collection::stream), all(HttpClientRequestInterceptor.class))
+					.toArray(HttpClientRequestInterceptor[]::new);
+	}
+
+	private HttpClientRequestConfiguration httpClientRequestConfiguration() {
+		return configured(RestifyProxyConfiguration::httpClientRequestConfiguration)
+				.orElseGet(() -> get(HttpClientRequestConfiguration.class));
+	}
+
+	private ContractReader contractReader() {
+		return configured(RestifyProxyConfiguration::contractReader)
+				.orElseGet(() -> get(ContractReader.class));
+	}
+
+	private ContractExpressionResolver contractExpressionResolver() {
+		return configured(RestifyProxyConfiguration::contractExpressionResolver)
+				.orElseGet(() -> get(ContractExpressionResolver.class));
+	}
+
+
+	private EndpointRequestExecutor endpointRequestExecutor() {
+		return configured(RestifyProxyConfiguration::endpointRequestExecutor)
+				.orElseGet(() -> get(EndpointRequestExecutor.class));
+	}
+
+	private EndpointRequestInterceptor[] endpointRequestInterceptors() {
+		return Stream.concat(configurations.stream()
+				.map(RestifyProxyConfiguration::endpointRequestInterceptors)
+				.flatMap(Collection::stream), all(EndpointRequestInterceptor.class))
+					.toArray(EndpointRequestInterceptor[]::new);
+	}
+
+	private boolean withRetry() {
+		return retry() != null;
+	}
+
+	private RetryConfiguration retry() {
+		return configured(RestifyProxyConfiguration::retry)
+				.orElseGet(() -> get(RetryConfiguration.class));
+	}
+
+	private EndpointCallHandlerProvider[] handlers() {
+		return Stream.concat(configurations.stream()
+				.map(RestifyProxyConfiguration::handlers)
+				.flatMap(Collection::stream), all(EndpointCallHandlerProvider.class))
+					.toArray(EndpointCallHandlerProvider[]::new);
+	}
+
+	private Executor asyncExecutorService() {
+		return configured(RestifyProxyConfiguration::asyncExecutor)
+				.orElseGet(() -> get(Executor.class, new AsyncAnnotationLiteral(), DisposableExecutors::newCachedThreadPool));
+	}
+
+	private HttpMessageConverter[] converters() {
+		return Stream.concat(configurations.stream()
+				.map(RestifyProxyConfiguration::converters)
+				.flatMap(Collection::stream), all(HttpMessageConverter.class))
+					.toArray(HttpMessageConverter[]::new);
+	}
+
+	private EndpointResponseErrorFallback endpointResponseErrorFallback() {
+		return configured(RestifyProxyConfiguration::endpointResponseErrorFallback)
+				.orElseGet(() -> get(EndpointResponseErrorFallback.class));
+	}
+
+	private Optional<Authentication> authentication() {
+		return Optional.ofNullable(configured(RestifyProxyConfiguration::authentication)
+				.orElseGet(() -> get(Authentication.class)));
+	}
+
+	private String endpoint() {
+		return configured(RestifyProxyConfiguration::endpoint)
+				.orElseGet(restifyable::endpoint);
+	}
+
+	private <T> T get(Class<? extends T> type) {
+		return get(type, () -> null);
 	}
 
 	private <T> T get(Class<? extends T> type, Supplier<T> supplier) {
@@ -134,14 +219,16 @@ class RestifyProxyCdiBeanFactory {
 		return instance.isUnsatisfied() ? supplier.get() : instance.get();
 	}
 
-	private <T> Collection<T> all(Class<? extends T> type) {
+	private <T> Stream<? extends T> all(Class<? extends T> type) {
 		Instance<? extends T> instance = CDI.current().select(type);
+		return instance.stream();
+	}
 
-		Collection<T> types = new ArrayList<>();
-
-		instance.forEach(types::add);
-
-		return types;
+	private <T> Optional<T> configured(Function<RestifyProxyConfiguration, T> function) {
+		return configurations.stream()
+				.map(function)
+				.filter(Objects::nonNull)
+				.findFirst();
 	}
 
 	@SuppressWarnings("serial")

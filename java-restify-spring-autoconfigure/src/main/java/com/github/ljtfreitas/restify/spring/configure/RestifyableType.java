@@ -28,7 +28,10 @@ package com.github.ljtfreitas.restify.spring.configure;
 import static org.springframework.core.annotation.AnnotationUtils.findAnnotation;
 
 import java.beans.Introspector;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import com.github.ljtfreitas.restify.util.Try;
 
@@ -49,11 +52,11 @@ class RestifyableType {
 				.orElseThrow(() -> new IllegalArgumentException("[" + objectType.getCanonicalName() + "] must be annotated with @Restifyable."));
 	}
 
-	public Class<?> objectType() {
+	Class<?> objectType() {
 		return objectType;
 	}
 
-	public String name() {
+	String name() {
 		return Optional.ofNullable(restifyable.name())
 				.filter(n -> !n.isEmpty())
 					.map(RestifyableTypeName::new)
@@ -61,12 +64,16 @@ class RestifyableType {
 							.toString();
 	}
 
-	public String description() {
+	String description() {
 		return restifyable.description();
 	}
 
-	public Optional<String> endpoint() {
+	Optional<String> endpoint() {
 		return Optional.ofNullable(restifyable.endpoint()).filter(endpoint -> !endpoint.isEmpty());
+	}
+
+	Collection<Class<? extends RestifyProxyConfiguration>> configurations() {
+		return Arrays.stream(restifyable.configuration()).collect(Collectors.toList());
 	}
 
 	private static class RestifyableTypeName {

@@ -40,7 +40,7 @@ public class RestifyContractConfiguration {
 	@Configuration
 	@ConditionalOnProperty(name = "restify.contract", havingValue = "jax-rs")
 	@ConditionalOnClass(JaxRsContractReader.class)
-	static class RestifyJaxRSContractConfiguration {
+	static class JaxRSContractConfiguration {
 
 		@ConditionalOnMissingBean
 		@Bean

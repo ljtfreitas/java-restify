@@ -52,10 +52,10 @@ public class RestifyAsyncConfiguration {
 	@Conditional(RestifyAsyncConfiguration.RestifyAsyncTaskExecutorCondition.class)
 	@Bean @Async
 	public AsyncListenableTaskExecutor restifyAsyncTaskExecutor() {
-		return new SimpleAsyncTaskExecutor("RestifyAsyncTaskExecutor");
+		return new SimpleAsyncTaskExecutor("restify-async-task-executor");
 	}
 
-	@Conditional(RestifyAsyncConfiguration.RestifyAsyncExecutorServiceCondition.class)
+	@Conditional(RestifyAsyncExecutorServiceCondition.class)
 	@Bean(name = Async.EXECUTOR_SERVICE_BEAN_NAME) @Async
 	public ExecutorService restifyAsyncExecutorService(@Async AsyncTaskExecutor executor) {
 		return new ExecutorServiceAdapter(executor);
@@ -96,23 +96,6 @@ public class RestifyAsyncConfiguration {
 		return new WebAsyncTaskEndpointCallHandlerAdapter<>(properties.getAsync().getTimeout(), executor);
 	}
 
-	static class RestifyAsyncTaskExecutorCondition extends AllNestedConditions {
-
-		RestifyAsyncTaskExecutorCondition() {
-			super(ConfigurationPhase.REGISTER_BEAN);
-		}
-
-		@ConditionalOnMissingBean(value = AsyncListenableTaskExecutor.class, annotation = Async.class)
-		@Async
-		static class OnRestifyAsyncTaskExecutorMissing {
-		}
-
-		@ConditionalOnMissingBean(value = AsyncListenableTaskExecutor.class, ignored = {
-				SchedulingTaskExecutor.class, TaskScheduler.class, ScheduledExecutorService.class })
-		static class OnAsyncListenableTaskExecutorMissing {
-		}
-	}
-
 	static class RestifyAsyncExecutorServiceCondition extends AllNestedConditions {
 
 		RestifyAsyncExecutorServiceCondition() {
@@ -127,6 +110,23 @@ public class RestifyAsyncConfiguration {
 		@ConditionalOnMissingBean(value = ExecutorService.class, ignored = { SchedulingTaskExecutor.class,
 				TaskScheduler.class, ScheduledExecutorService.class })
 		static class OnExecutorServiceMissing {
+		}
+	}
+
+	static class RestifyAsyncTaskExecutorCondition extends AllNestedConditions {
+
+		RestifyAsyncTaskExecutorCondition() {
+			super(ConfigurationPhase.REGISTER_BEAN);
+		}
+
+		@ConditionalOnMissingBean(value = AsyncListenableTaskExecutor.class, annotation = Async.class)
+		@Async
+		static class OnRestifyAsyncTaskExecutorMissing {
+		}
+
+		@ConditionalOnMissingBean(value = AsyncListenableTaskExecutor.class, ignored = {
+				SchedulingTaskExecutor.class, TaskScheduler.class, ScheduledExecutorService.class })
+		static class OnAsyncListenableTaskExecutorMissing {
 		}
 	}
 }

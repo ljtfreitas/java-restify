@@ -40,6 +40,9 @@ import com.github.ljtfreitas.restify.http.client.request.EndpointRequestExecutor
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponseErrorFallback;
 import com.github.ljtfreitas.restify.http.spring.client.request.async.WebClientEndpointRequestExecutor;
 
+import reactor.core.scheduler.Scheduler;
+import reactor.core.scheduler.Schedulers;
+
 @Configuration
 @ConditionalOnClass(WebClient.class)
 public class RestifySpringWebFluxConfiguration {
@@ -59,6 +62,12 @@ public class RestifySpringWebFluxConfiguration {
 	@Configuration
 	@ConditionalOnClass(FluxEndpointCallHandlerAdapter.class)
 	static class ReactiveHandlersConfiguration {
+
+		@ConditionalOnMissingBean
+		@Bean @Async
+		public Scheduler reactorScheduler() {
+			return Schedulers.newElastic("java-restify-reactor-scheduler");
+		}
 
 		@ConditionalOnMissingBean
 		@Bean

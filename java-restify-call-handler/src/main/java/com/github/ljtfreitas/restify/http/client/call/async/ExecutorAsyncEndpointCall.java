@@ -64,7 +64,6 @@ public class ExecutorAsyncEndpointCall<T> implements AsyncEndpointCall<T> {
 	}
 
 	private CompletionStage<T> doExecuteAsync() {
-		return CompletableFuture
-				.supplyAsync(() -> source.execute(), executor);
+		return CompletableFuture.supplyAsync(source::execute, executor);
 	}
 }

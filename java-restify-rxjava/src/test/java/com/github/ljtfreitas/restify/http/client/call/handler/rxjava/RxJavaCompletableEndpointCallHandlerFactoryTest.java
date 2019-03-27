@@ -103,6 +103,8 @@ public class RxJavaCompletableEndpointCallHandlerFactoryTest {
 
 		AssertableSubscriber<Void> subscriber = completable.test();
 
+		Thread.sleep(1000);
+
 		subscriber.assertCompleted()
 			.assertNoErrors()
 			.assertNoValues();

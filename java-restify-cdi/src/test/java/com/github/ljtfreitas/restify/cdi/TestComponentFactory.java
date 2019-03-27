@@ -32,15 +32,15 @@ import javax.enterprise.inject.Produces;
 import com.github.ljtfreitas.restify.http.client.message.converter.wildcard.SimpleTextMessageConverter;
 import com.github.ljtfreitas.restify.http.client.request.interceptor.EndpointRequestInterceptor;
 
-public class TestComponentFactory {
+class TestComponentFactory {
 
 	@Produces
-	public SimpleTextMessageConverter simpleTextMessageConverter() {
+	SimpleTextMessageConverter simpleTextMessageConverter() {
 		return new SimpleTextMessageConverter();
 	}
 
 	@Produces
-	public EndpointRequestInterceptor simpleEndpointRequestInterceptor() {
+	EndpointRequestInterceptor simpleEndpointRequestInterceptor() {
 		final Logger log = Logger.getLogger(SimpleEndpointRequestInterceptor.class.getCanonicalName());
 
 		return request -> {

@@ -18,6 +18,7 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
 import com.github.ljtfreitas.restify.http.client.request.interceptor.EndpointRequestInterceptor;
+import com.github.ljtfreitas.restify.util.async.DisposableExecutors;
 
 @RunWith(MockitoJUnitRunner.class)
 public class AsyncEndpointRequestInterceptorChainTest {
@@ -49,7 +50,7 @@ public class AsyncEndpointRequestInterceptorChainTest {
 		when(syncInterceptor.intercepts(notNull(EndpointRequest.class)))
 			.then(returnsFirstArg());
 
-		AsyncEndpointRequestInterceptorChain chain = AsyncEndpointRequestInterceptorChain.of(Arrays.asList(syncInterceptor));
+		AsyncEndpointRequestInterceptorChain chain = AsyncEndpointRequestInterceptorChain.of(Arrays.asList(syncInterceptor), DisposableExecutors.immediate());
 
 		EndpointRequest request = new EndpointRequest(URI.create("http://whatever"), "GET");
 

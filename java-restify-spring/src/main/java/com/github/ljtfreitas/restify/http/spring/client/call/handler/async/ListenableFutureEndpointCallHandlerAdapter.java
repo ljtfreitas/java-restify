@@ -39,10 +39,15 @@ import com.github.ljtfreitas.restify.http.client.call.handler.async.AsyncEndpoin
 import com.github.ljtfreitas.restify.http.client.call.handler.async.AsyncEndpointCallHandlerAdapter;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethod;
 import com.github.ljtfreitas.restify.reflection.JavaType;
+import com.github.ljtfreitas.restify.util.async.DisposableExecutors;
 
 public class ListenableFutureEndpointCallHandlerAdapter<T, O> implements AsyncEndpointCallHandlerAdapter<ListenableFuture<T>, T, O> {
 
 	private final Executor executor;
+
+	public ListenableFutureEndpointCallHandlerAdapter() {
+		this(DisposableExecutors.newCachedThreadPool());
+	}
 
 	public ListenableFutureEndpointCallHandlerAdapter(Executor executor) {
 		this.executor = executor;
