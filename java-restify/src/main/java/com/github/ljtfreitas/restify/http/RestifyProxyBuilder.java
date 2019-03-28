@@ -250,7 +250,7 @@ public class RestifyProxyBuilder {
 		}
 
 		private RestifyProxyHandler doBuild() {
-			EndpointTarget target = new EndpointTarget(type, Optional.ofNullable(endpoint).orElse(null));
+			EndpointTarget target = new EndpointTarget(type, endpoint);
 
 			EndpointMethodExecutor endpointMethodExecutor = new EndpointMethodExecutor(
 					endpointRequestFactory(),

@@ -1,6 +1,9 @@
 package com.github.ljtfreitas.restify.http.spring.client.call.handler;
 
+import static org.hamcrest.Matchers.is;
+import static org.hamcrest.Matchers.nullValue;
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertThat;
 
 import java.util.Arrays;
 
@@ -14,6 +17,7 @@ import com.github.ljtfreitas.restify.http.client.message.Header;
 import com.github.ljtfreitas.restify.http.client.message.Headers;
 import com.github.ljtfreitas.restify.http.client.message.response.StatusCode;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
+import com.github.ljtfreitas.restify.http.client.response.EndpointResponseInternalServerErrorException;
 
 public class ResponseEntityConverterTest {
 
@@ -31,7 +35,7 @@ public class ResponseEntityConverterTest {
 	}
 
 	@Test
-	public void shouldConvertRestifyEndpointResponseToResponseEntity() {
+	public void shouldConvertEndpointResponseToResponseEntity() {
 		ResponseEntity<String> responseEntity = converter.convert(endpointResponse);
 
 		assertEquals(MediaType.TEXT_PLAIN, responseEntity.getHeaders().getContentType());
@@ -42,13 +46,16 @@ public class ResponseEntityConverterTest {
 		assertEquals(HttpStatus.OK, responseEntity.getStatusCode());
 	}
 
-	@Test(expected = RestifyEndpointResponseInternalServerErrorException.class)
-	public void shouldThrowExceptionWhenEndpointResponseIsError() {
-		RestifyEndpointResponseInternalServerErrorException exception = new RestifyEndpointResponseInternalServerErrorException("Internal Server Error",
+	@Test
+	public void shouldReturnEmptyResponseEntityWhenEndpointResponseIsError() {
+		EndpointResponseInternalServerErrorException exception = new EndpointResponseInternalServerErrorException("Internal Server Error",
 				new Headers(), "oops...");
 
 		endpointResponse = EndpointResponse.error(exception);
 
-		converter.convert(endpointResponse);
+		ResponseEntity<String> responseEntity = converter.convert(endpointResponse);
+		
+		assertThat(responseEntity.getStatusCode(), is(HttpStatus.INTERNAL_SERVER_ERROR));
+		assertThat(responseEntity.getBody(), nullValue());
 	}
 }

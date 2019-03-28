@@ -62,7 +62,7 @@ public class HystrixCommandMetadataFactoryTest {
 		EmptyHystrixCommand command = new EmptyHystrixCommand(hystrixCommandProperties);
 
 		assertEquals("MyApiWithCircuitBreaker", command.getCommandGroup().name());
-		assertEquals("simple", command.getCommandKey().name());
+		assertEquals("MyApiWithCircuitBreaker.simple", command.getCommandKey().name());
 		assertEquals("MyApiWithCircuitBreaker", command.getThreadPoolKey().name());
 	}
 
@@ -75,7 +75,7 @@ public class HystrixCommandMetadataFactoryTest {
 		EmptyHystrixObservableCommand command = new EmptyHystrixObservableCommand(hystrixCommandProperties);
 
 		assertEquals("MyApiWithCircuitBreaker", command.getCommandGroup().name());
-		assertEquals("simple", command.getCommandKey().name());
+		assertEquals("MyApiWithCircuitBreaker.simple", command.getCommandKey().name());
 		assertEquals("MyApiWithCircuitBreaker", command.getThreadPoolKey().name());
 	}
 
@@ -125,7 +125,7 @@ public class HystrixCommandMetadataFactoryTest {
 		EmptyHystrixCommand command = new EmptyHystrixCommand(hystrixCommandProperties);
 
 		assertEquals("MyApiWithCircuitBreaker", command.getCommandGroup().name());
-		assertEquals("customizedProperties", command.getCommandKey().name());
+		assertEquals("MyApiWithCircuitBreaker.customizedProperties", command.getCommandKey().name());
 		assertEquals("MyApiWithCircuitBreaker", command.getThreadPoolKey().name());
 
 		assertEquals(ExecutionIsolationStrategy.SEMAPHORE, command.getProperties().executionIsolationStrategy().get());
@@ -141,7 +141,7 @@ public class HystrixCommandMetadataFactoryTest {
 		EmptyHystrixObservableCommand command = new EmptyHystrixObservableCommand(hystrixCommandProperties);
 
 		assertEquals("MyApiWithCircuitBreaker", command.getCommandGroup().name());
-		assertEquals("customizedProperties", command.getCommandKey().name());
+		assertEquals("MyApiWithCircuitBreaker.customizedProperties", command.getCommandKey().name());
 		assertEquals("MyApiWithCircuitBreaker", command.getThreadPoolKey().name());
 
 		assertEquals(ExecutionIsolationStrategy.SEMAPHORE, command.getProperties().executionIsolationStrategy().get());

@@ -1,6 +1,7 @@
 package com.github.ljtfreitas.restify.http.netflix.client.call.handler.hystrix;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertTrue;
 import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyVararg;
 import static org.mockito.Matchers.notNull;
@@ -15,7 +16,6 @@ import java.util.concurrent.Future;
 import org.junit.Before;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Spy;
 import org.mockito.runners.MockitoJUnitRunner;
@@ -39,13 +39,17 @@ public class HystrixCommandFallbackEndpointCallHandlerAdapterTest {
 	private EndpointCallHandler<String, String> delegate;
 
 	@Mock
+	private EndpointCallHandler<Optional<String>, String> delegateToOptional;
+
+	@Mock
 	private OnCircuitBreakerMetadataResolver onCircuitBreakerMetadataResolver;
 
 	@Mock
 	private OnCircuitBreakerMetadata onCircuitBreakerMetadata;
 
-	@InjectMocks
 	private HystrixCommandEndpointCallHandlerAdapter<String, String> adapter;
+
+	private HystrixCommandEndpointCallHandlerAdapter<Optional<String>, String> adapterToOptional;
 
 	@Spy
 	private FallbackOfSameType fallback = new FallbackOfSameType();
@@ -60,7 +64,12 @@ public class HystrixCommandFallbackEndpointCallHandlerAdapterTest {
 	public void setup() {
 		adapter = new HystrixCommandEndpointCallHandlerAdapter<>(Fallback.of(fallback), onCircuitBreakerMetadataResolver);
 
+		adapterToOptional = new HystrixCommandEndpointCallHandlerAdapter<>(Fallback.of(fallback), onCircuitBreakerMetadataResolver);
+
 		when(delegate.handle(notNull(EndpointCall.class), anyVararg()))
+			.then(invocation -> invocation.getArgumentAt(0, EndpointCall.class).execute());
+
+		when(delegateToOptional.handle(notNull(EndpointCall.class), anyVararg()))
 			.then(invocation -> invocation.getArgumentAt(0, EndpointCall.class).execute());
 
 		when(delegate.returnType())
@@ -313,6 +322,24 @@ public class HystrixCommandFallbackEndpointCallHandlerAdapterTest {
 
 		verify(delegate).handle(notNull(EndpointCall.class), anyVararg());
 	}
+	
+	@SuppressWarnings("unchecked")
+	@Test
+	public void shouldExecuteFallbackValueWhenHystrixCommandExecuionThrowExceptionOnMethodWithReturnTypeDifferentOfHandledType() throws Exception {
+
+		EndpointCallHandler<HystrixCommand<Optional<String>>, String> handler = adapterToOptional
+				.adapt(new SimpleEndpointMethod(SomeType.class.getMethod("optional")), delegateToOptional);
+
+		HystrixCommand<Optional<String>> hystrixCommand = handler.handle(() -> {throw exception;}, null);
+
+		Optional<String> result = hystrixCommand.execute();
+
+		assertTrue(result.isPresent());
+		assertEquals("optional fallback", result.get());
+
+		verify(delegateToOptional).handle(notNull(EndpointCall.class), anyVararg());
+		verify(fallback).optional();		
+	}
 
 	interface SomeType {
 
@@ -322,6 +349,8 @@ public class HystrixCommandFallbackEndpointCallHandlerAdapterTest {
 		HystrixCommand dumbCommand();
 
 		String string();
+		
+		Optional<String> optional();
 
 		Future<String> future();
 
@@ -369,6 +398,11 @@ public class HystrixCommandFallbackEndpointCallHandlerAdapterTest {
 			return "string fallback";
 		}
 
+		@Override
+		public Optional<String> optional() {
+			return Optional.of("optional fallback");
+		}
+		
 		@Override
 		public Future<String> future() {
 			return CompletableFuture.completedFuture("future fallback");

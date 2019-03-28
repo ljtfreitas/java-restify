@@ -77,6 +77,17 @@ public class CompletionStageAsyncEndpointCallTest {
 	}
 
 	@Test
+	public void shouldCallSuccessCallbackWhenReturnIsEmpty() throws Exception {
+		CompletableFuture<String> emptyFuture = CompletableFuture.completedFuture(null);
+
+		asyncCall = new CompletionStageAsyncEndpointCall<>(emptyFuture, r -> r.run());
+
+		asyncCall.executeAsync(callback);
+
+		verify(callback).onSuccess(null);
+	}
+
+	@Test
 	public void shouldCallFailureCallbackWhenFutureThrowException() {
 		RuntimeException exception = new RuntimeException("oops");
 

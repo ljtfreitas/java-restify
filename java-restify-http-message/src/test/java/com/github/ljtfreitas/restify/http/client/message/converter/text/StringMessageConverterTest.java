@@ -18,8 +18,8 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import com.github.ljtfreitas.restify.http.client.message.ContentType;
+import com.github.ljtfreitas.restify.http.client.message.Encoding;
 import com.github.ljtfreitas.restify.http.client.message.request.BufferedByteArrayHttpRequestBody;
-import com.github.ljtfreitas.restify.http.client.message.request.BufferedHttpRequestBody;
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
 import com.github.ljtfreitas.restify.http.client.message.response.HttpResponseMessage;
 
@@ -36,6 +36,8 @@ public class StringMessageConverterTest {
 
 	private String message;
 
+	private BufferedByteArrayHttpRequestBody output;
+
 	@Before
 	public void setup() {
 		converter = new StringMessageConverter() {
@@ -49,6 +51,10 @@ public class StringMessageConverterTest {
 
 		when(request.charset())
 			.thenReturn(Charset.forName("UTF-8"));
+
+		output = new BufferedByteArrayHttpRequestBody();
+		
+		when(request.body()).thenReturn(output);
 	}
 
 	@Test
@@ -73,25 +79,22 @@ public class StringMessageConverterTest {
 
 	@Test
 	public void shouldWriteStringMessage() {
-		BufferedHttpRequestBody output = new BufferedByteArrayHttpRequestBody();
-
-		when(request.body()).thenReturn(output);
-
 		converter.write(message, request);
 
 		assertEquals(message, new String(output.asBytes()));
 	}
 
 	@Test
-	public void shouldWriteStringMessageUsingCharset() throws Exception {
-		ByteArrayOutputStream output = new ByteArrayOutputStream();
-
+	public void shouldWriteStringMessageUsingOtherCharset() throws Exception {
 		message = new String("Hellóòú".getBytes("UTF-8"));
 
-		converter.write(message, new SimpleHttpRequestMessage(output, Encoding.ISO_8859_1));
+		when(request.charset())
+			.thenReturn(Encoding.ISO_8859_1.charset());
+		
+		converter.write(message, request);
 
 		assertEquals(new String(message.getBytes("ISO-8859-1")),
-				output.toString());
+				new String(output.asBytes()));
 	}
 
 	@Test

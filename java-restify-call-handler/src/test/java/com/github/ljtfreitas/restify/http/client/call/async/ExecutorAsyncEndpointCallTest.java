@@ -38,9 +38,9 @@ public class ExecutorAsyncEndpointCallTest {
 
 	@Test
 	public void shouldCallSuccessCallbackOnEndpointCallWhenNotReturnsResult() throws Exception {
-		asyncCall = new DefaultAsyncEndpointCall<>(r -> r.run(), () -> null);
+		asyncCall = new ExecutorAsyncEndpointCall<>(() -> null, r -> r.run());
 
-		asyncCall.execute(callback);
+		asyncCall.executeAsync(callback);
 
 		verify(callback).onSuccess(null);
 	}
