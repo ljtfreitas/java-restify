@@ -51,8 +51,8 @@ import com.github.ljtfreitas.restify.spi.Provider;
 
 public class OAuth2AuthenticationBuilder {
 
-	private OAuth2AuthenticationGrantTypeBuilder grantTypeBuilder = new OAuth2AuthenticationGrantTypeBuilder(this);
-	private OAuth2AuthorizationServerBuilder authorizationServerBuilder = new OAuth2AuthorizationServerBuilder(this);
+	private OAuth2AuthenticationGrantTypeBuilder grantTypeBuilder = new OAuth2AuthenticationGrantTypeBuilder();
+	private OAuth2AuthorizationServerBuilder authorizationServerBuilder = new OAuth2AuthorizationServerBuilder();
 
 	private AccessTokenProvider accessTokenProvider;
 	private AccessTokenRepository accessTokenRepository = null;
@@ -108,18 +108,12 @@ public class OAuth2AuthenticationBuilder {
 
 	public class OAuth2AuthorizationServerBuilder {
 
-		private final OAuth2AuthenticationBuilder context;
-
 		private AuthorizationServer authorizationServer;
 		private EndpointRequestExecutor endpointRequestExecutor;
 		private HttpClientRequestFactory httpClientRequestFactory;
 		private ClientAuthenticationMethod authenticationMethod = ClientAuthenticationMethod.HEADER;
 
-		private OAuth2AuthorizationServerHttpMessageConvertersBuilder httpMessageConvertersBuilder;
-
-		private OAuth2AuthorizationServerBuilder(OAuth2AuthenticationBuilder context) {
-			this.context = context;
-		}
+		private final OAuth2AuthorizationServerHttpMessageConvertersBuilder httpMessageConvertersBuilder = new OAuth2AuthorizationServerHttpMessageConvertersBuilder();
 
 		public OAuth2AuthorizationServerBuilder executor(EndpointRequestExecutor endpointRequestExecutor) {
 			this.endpointRequestExecutor = endpointRequestExecutor;
@@ -127,12 +121,11 @@ public class OAuth2AuthenticationBuilder {
 		}
 
 		public OAuth2AuthorizationServerHttpMessageConvertersBuilder converters() {
-			return (httpMessageConvertersBuilder = new OAuth2AuthorizationServerHttpMessageConvertersBuilder(this));
+			return httpMessageConvertersBuilder;
 		}
 
 		public OAuth2AuthorizationServerBuilder converters(HttpMessageConverter... converters) {
-			this.httpMessageConvertersBuilder = new OAuth2AuthorizationServerHttpMessageConvertersBuilder(this,
-					Arrays.asList(converters));
+			this.httpMessageConvertersBuilder.add(converters);
 			return this;
 		}
 
@@ -148,11 +141,11 @@ public class OAuth2AuthenticationBuilder {
 
 		public OAuth2AuthenticationBuilder using(AuthorizationServer authorizationServer) {
 			this.authorizationServer = authorizationServer;
-			return context;
+			return OAuth2AuthenticationBuilder.this;
 		}
 
 		public OAuth2AuthenticationBuilder and() {
-			return context;
+			return OAuth2AuthenticationBuilder.this;
 		}
 
 		private AuthorizationServer build() {
@@ -179,69 +172,65 @@ public class OAuth2AuthenticationBuilder {
 
 		public class OAuth2AuthorizationServerHttpMessageConvertersBuilder {
 
-			private final OAuth2AuthorizationServerBuilder delegate;
 			private final Collection<HttpMessageConverter> converters = new ArrayList<>(Arrays.asList(
 					new TextPlainMessageConverter(), new FormURLEncodedParametersMessageConverter()));
 
+			private final Collection<HttpMessageConverter> customized = new ArrayList<>();
+
 			private final Provider provider = new Provider();
 
-			private OAuth2AuthorizationServerHttpMessageConvertersBuilder(OAuth2AuthorizationServerBuilder context) {
-				this.delegate = context;
-			}
-
-			private OAuth2AuthorizationServerHttpMessageConvertersBuilder(OAuth2AuthorizationServerBuilder context,
-					Collection<HttpMessageConverter> converters) {
-				this.delegate = context;
-				this.converters.addAll(converters);
+			public OAuth2AuthorizationServerHttpMessageConvertersBuilder add(HttpMessageConverter... converters) {
+				this.customized.addAll(Arrays.asList(converters));
+				return this;
 			}
 
 			public OAuth2AuthorizationServerHttpMessageConvertersBuilder json() {
-				provider.single(JsonMessageConverter.class).ifPresent(converters::add);
+				provider.single(JsonMessageConverter.class).ifPresent(customized::add);
 				return this;
 			}
 
 			public OAuth2AuthorizationServerHttpMessageConvertersBuilder xml() {
-				provider.single(XmlMessageConverter.class).ifPresent(converters::add);
+				provider.single(XmlMessageConverter.class).ifPresent(customized::add);
 				return this;
 			}
 
 			public OAuth2AuthenticationBuilder and() {
-				return delegate.context;
+				return OAuth2AuthenticationBuilder.this;
 			}
 
 			private HttpMessageConverters build() {
-				return new HttpMessageConverters(converters);
+				return customized.isEmpty() ? new HttpMessageConverters(json().xml().all()) : new HttpMessageConverters(all());
+			}
+
+			private Collection<HttpMessageConverter> all() {
+				Collection<HttpMessageConverter> all = new ArrayList<>(converters);
+				all.addAll(customized);
+				return all;
 			}
 		}
 	}
 
 	public class OAuth2AuthenticationGrantTypeBuilder {
 
-		private final OAuth2AuthenticationBuilder context;
-
 		private OAuth2AuthenticationGrantPropertiesBuilder properties = null;
 
-		private OAuth2AuthenticationGrantTypeBuilder(OAuth2AuthenticationBuilder context) {
-			this.context = context;
-		}
-
 		public OAuth2ClientCredentialsGrantBuilder clientCredentials() {
-			properties = new OAuth2ClientCredentialsGrantBuilder(context);
+			properties = new OAuth2ClientCredentialsGrantBuilder();
 			return (OAuth2ClientCredentialsGrantBuilder) properties;
 		}
 
 		public OAuth2ResourceOwnerGrantBuilder resourceOwner() {
-			properties = new OAuth2ResourceOwnerGrantBuilder(context);
+			properties = new OAuth2ResourceOwnerGrantBuilder();
 			return (OAuth2ResourceOwnerGrantBuilder) properties;
 		}
 
 		public OAuth2ImplicitGrantBuilder implicit() {
-			properties = new OAuth2ImplicitGrantBuilder(context);
+			properties = new OAuth2ImplicitGrantBuilder();
 			return (OAuth2ImplicitGrantBuilder) properties;
 		}
 
 		public OAuth2AuthorizationCodeGrantBuilder authorizationCode() {
-			properties = new OAuth2AuthorizationCodeGrantBuilder(context);
+			properties = new OAuth2AuthorizationCodeGrantBuilder();
 			return (OAuth2AuthorizationCodeGrantBuilder) properties;
 		}
 	}
@@ -260,12 +249,7 @@ public class OAuth2AuthenticationBuilder {
 
 	public class OAuth2ClientCredentialsGrantBuilder extends OAuth2AuthenticationGrantPropertiesBuilder {
 
-		private final OAuth2AuthenticationBuilder context;
 		private final ClientCredentialsGrantProperties.Builder delegate = GrantProperties.Builder.clientCredentials();
-
-		private OAuth2ClientCredentialsGrantBuilder(OAuth2AuthenticationBuilder context) {
-			this.context = context;
-		}
 
 		public OAuth2ClientCredentialsGrantBuilder accessTokenUri(String accessTokenUri) {
 			delegate.accessTokenUri(accessTokenUri);
@@ -308,7 +292,7 @@ public class OAuth2AuthenticationBuilder {
 		}
 
 		public OAuth2AuthenticationBuilder and() {
-			return context;
+			return OAuth2AuthenticationBuilder.this;
 		}
 
 		@Override
@@ -324,12 +308,7 @@ public class OAuth2AuthenticationBuilder {
 
 	public class OAuth2ResourceOwnerGrantBuilder extends OAuth2AuthenticationGrantPropertiesBuilder {
 
-		private final OAuth2AuthenticationBuilder context;
 		private final ResourceOwnerGrantProperties.Builder delegate = GrantProperties.Builder.resourceOwner();
-
-		private OAuth2ResourceOwnerGrantBuilder(OAuth2AuthenticationBuilder context) {
-			this.context = context;
-		}
 
 		public OAuth2ResourceOwnerGrantBuilder accessTokenUri(String accessTokenUri) {
 			delegate.accessTokenUri(accessTokenUri);
@@ -387,7 +366,7 @@ public class OAuth2AuthenticationBuilder {
 		}
 
 		public OAuth2AuthenticationBuilder and() {
-			return context;
+			return OAuth2AuthenticationBuilder.this;
 		}
 
 		@Override
@@ -403,12 +382,7 @@ public class OAuth2AuthenticationBuilder {
 
 	public class OAuth2ImplicitGrantBuilder extends OAuth2AuthenticationGrantPropertiesBuilder {
 
-		private final OAuth2AuthenticationBuilder context;
 		private final ImplicitGrantProperties.Builder delegate = GrantProperties.Builder.implicit();
-
-		private OAuth2ImplicitGrantBuilder(OAuth2AuthenticationBuilder context) {
-			this.context = context;
-		}
 
 		public OAuth2ImplicitGrantBuilder accessTokenUri(String accessTokenUri) {
 			delegate.accessTokenUri(accessTokenUri);
@@ -531,7 +505,7 @@ public class OAuth2AuthenticationBuilder {
 		}
 
 		public OAuth2AuthenticationBuilder and() {
-			return context;
+			return OAuth2AuthenticationBuilder.this;
 		}
 
 		@Override
@@ -552,14 +526,9 @@ public class OAuth2AuthenticationBuilder {
 
 	public class OAuth2AuthorizationCodeGrantBuilder extends OAuth2AuthenticationGrantPropertiesBuilder {
 
-		private final OAuth2AuthenticationBuilder context;
 		private final AuthorizationCodeGrantProperties.Builder delegate = GrantProperties.Builder.authorizationCode();
 
 		private AuthorizationCodeProvider authorizationCodeProvider;
-
-		private OAuth2AuthorizationCodeGrantBuilder(OAuth2AuthenticationBuilder context) {
-			this.context = context;
-		}
 
 		public OAuth2AuthorizationCodeGrantBuilder accessTokenUri(String accessTokenUri) {
 			delegate.accessTokenUri(accessTokenUri);
@@ -688,7 +657,7 @@ public class OAuth2AuthenticationBuilder {
 		}
 
 		public OAuth2AuthenticationBuilder and() {
-			return context;
+			return OAuth2AuthenticationBuilder.this;
 		}
 
 		@Override

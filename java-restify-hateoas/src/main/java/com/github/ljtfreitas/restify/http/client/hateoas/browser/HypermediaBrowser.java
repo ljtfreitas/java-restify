@@ -35,6 +35,7 @@ import java.util.Map;
 import java.util.Queue;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
+import java.util.concurrent.Executor;
 
 import com.github.ljtfreitas.restify.http.client.hateoas.Link;
 import com.github.ljtfreitas.restify.http.client.hateoas.Resource;
@@ -50,19 +51,21 @@ public class HypermediaBrowser {
 	private final LinkRequestExecutor linkRequestExecutor;
 	private final HypermediaLinkDiscovery resourceLinkDiscovery;
 	private final URL baseURL;
+	private final Executor executor;
 
-	public HypermediaBrowser(LinkRequestExecutor linkRequestExecutor) {
-		this(linkRequestExecutor, HypermediaLinkDiscovery.all(), null);
+	public HypermediaBrowser(LinkRequestExecutor linkRequestExecutor, Executor executor) {
+		this(linkRequestExecutor, HypermediaLinkDiscovery.all(), null, executor);
 	}
 
-	public HypermediaBrowser(LinkRequestExecutor linkRequestExecutor, HypermediaLinkDiscovery resourceLinkDiscovery) {
-		this(linkRequestExecutor, resourceLinkDiscovery, null);
+	public HypermediaBrowser(LinkRequestExecutor linkRequestExecutor, HypermediaLinkDiscovery hypermediaLinkDiscovery, Executor executor) {
+		this(linkRequestExecutor, hypermediaLinkDiscovery, null, executor);
 	}
 
-	public HypermediaBrowser(LinkRequestExecutor linkRequestExecutor, HypermediaLinkDiscovery resourceLinkDiscovery, URL baseURL) {
+	public HypermediaBrowser(LinkRequestExecutor linkRequestExecutor, HypermediaLinkDiscovery hypermediaLinkDiscovery, URL baseURL, Executor executor) {
 		this.linkRequestExecutor = linkRequestExecutor;
-		this.resourceLinkDiscovery = resourceLinkDiscovery;
+		this.resourceLinkDiscovery = hypermediaLinkDiscovery;
 		this.baseURL = baseURL;
+		this.executor = executor;
 	}
 
 	public HypermediaBrowserTraverson follow(Link link) {
@@ -116,17 +119,17 @@ public class HypermediaBrowser {
 
 		public <T> CompletionStage<T> as(Type type) {
 			CompletionStage<EndpointResponse<T>> response = tryExecute(JavaType.of(type));
-			return response.thenApply(e -> e.body());
+			return response.thenApplyAsync(EndpointResponse::body, executor);
 		}
 
 		public <T> CompletionStage<Collection<T>> asCollection(Type type) {
 			CompletionStage<EndpointResponse<List<T>>> response = tryExecute(JavaType.parameterizedType(List.class, type));
-			return response.thenApply(e -> e.body());
+			return response.thenApplyAsync(EndpointResponse::body, executor);
 		}
 
 		public <T> CompletionStage<Resource<T>> asResource(Type type) {
 			CompletionStage<EndpointResponse<Resource<T>>> response = tryExecute(JavaType.parameterizedType(Resource.class, type));
-			return response.thenApply(e -> e.body());
+			return response.thenApplyAsync(EndpointResponse::body, executor);
 		}
 
 		public <T> CompletionStage<EndpointResponse<T>> asResponse(Type type) {
@@ -139,10 +142,14 @@ public class HypermediaBrowser {
 
 		private <T> CompletionStage<EndpointResponse<T>> tryExecute(JavaType responseType) {
 			CompletionStage<EndpointResponse<T>> responseAsFuture = traverse()
-					.thenCompose(linkURI -> execute(linkURI, responseType));
+					.thenComposeAsync(linkURI -> execute(linkURI, responseType), executor);
 
 			return responseAsFuture
-					.exceptionally(e -> {throw new HypermediaBrowserException("Could not follow link [" + link + "]", e);});
+					.exceptionally(this::onFailure);
+		}
+
+		private <T> T onFailure(Throwable t) {
+			throw new HypermediaBrowserException("Could not follow link [" + link + "]", t);
 		}
 
 		private CompletionStage<LinkURI> traverse() {
@@ -155,20 +162,21 @@ public class HypermediaBrowser {
 			if (relation == null) return CompletableFuture.completedFuture(linkURI);
 
 			return execute(linkURI, JavaType.of(String.class))
-				.thenCompose(resource -> {
+				.thenComposeAsync(resource -> follow(resource, relation), executor);
+		}
 
-					String resourceBody = (String) resource.body();
+		private <T> CompletionStage<LinkURI> follow(EndpointResponse<T> resource, Hop relation) {
+			String resourceBody = (String) resource.body();
 
-					ContentType contentType = resource.headers().get(Headers.CONTENT_TYPE)
-							.map(h -> ContentType.of(h.value()))
-							.orElseThrow(() -> new IllegalArgumentException("Your response body does not have a Content-Type header?"));
+			ContentType contentType = resource.headers().get(Headers.CONTENT_TYPE)
+					.map(h -> ContentType.of(h.value()))
+					.orElseThrow(() -> new IllegalArgumentException("Your response body does not have a Content-Type header."));
 
-					Link relationLink = resourceLinkDiscovery.discovery(relation.rel(), RawResource.of(resourceBody, contentType))
-							.orElseThrow(() -> new IllegalStateException("Expected to find link [" + relation.rel() + "] "
-									+ "in resource [" + resourceBody + "]."));
+			Link relationLink = resourceLinkDiscovery.discovery(relation.rel(), RawResource.of(resourceBody, contentType))
+					.orElseThrow(() -> new IllegalStateException("Expected to find link [" + relation.rel() + "] "
+							+ "in resource [" + resourceBody + "]."));
 
-					return traverse(new LinkURI(relationLink, relation), relations.poll());
-				});
+			return traverse(new LinkURI(relationLink, relation), relations.poll());
 		}
 
 		private <T> CompletionStage<EndpointResponse<T>> execute(LinkURI linkURI, JavaType responseType) {

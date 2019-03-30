@@ -45,12 +45,11 @@ public class HypermediaLinkDiscovery {
 	}
 
 	public Optional<Link> discovery(String rel, RawResource resource) {
-		LinkDiscovery discovery = resolvers.stream()
+		return resolvers.stream()
 			.filter(r -> r.supports(resource.contentType()))
 				.findFirst()
+				.map(discovery -> discovery.find(rel, resource))
 					.orElseThrow(() -> new IllegalArgumentException("Cannot discovery links in a response of ContenType [" + resource.contentType() + "]."));
-
-		return discovery.find(rel, resource);
 	}
 
 	public static HypermediaLinkDiscovery all() {

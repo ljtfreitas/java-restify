@@ -124,6 +124,15 @@ public class HypermediaBrowserBuilder {
 		return endpointRequestExecutorBuilder;
 	}
 
+	public HypermediaBrowserBuilder client(HttpClientRequestFactory httpClientRequestFactory) {
+		this.httpClientRequestFactoryBuilder.httpClientRequestFactory = httpClientRequestFactory;
+		return this;
+	}
+
+	public HttpClientRequestFactoryBuilder client() {
+		return httpClientRequestFactoryBuilder;
+	}
+
 	public HypermediaBrowserBuilder converters(HttpMessageConverter...converters) {
 		this.httpMessageConvertersBuilder.add(converters);
 		return this;
@@ -161,7 +170,7 @@ public class HypermediaBrowserBuilder {
 		LinkRequestExecutor linkRequestExecutor = linkRequestExecutor();
 		HypermediaLinkDiscovery resourceLinkDiscovery = resourceLinkDiscoveryBuilder.build();
 
-		return new HypermediaBrowser(linkRequestExecutor, resourceLinkDiscovery, baseURL);
+		return new HypermediaBrowser(linkRequestExecutor, resourceLinkDiscovery, baseURL, asyncBuilder.executor);
 	}
 
 	private LinkRequestExecutor linkRequestExecutor() {

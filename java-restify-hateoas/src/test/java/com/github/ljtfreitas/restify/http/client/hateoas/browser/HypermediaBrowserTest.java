@@ -3,13 +3,11 @@ package com.github.ljtfreitas.restify.http.client.hateoas.browser;
 import static com.github.ljtfreitas.restify.http.client.hateoas.browser.Hop.rel;
 import static org.hamcrest.Matchers.hasItem;
 import static org.hamcrest.Matchers.hasSize;
+import static org.hamcrest.Matchers.instanceOf;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.AdditionalAnswers.returnsFirstArg;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.when;
 import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
 import static org.mockserver.model.JsonBody.json;
@@ -18,14 +16,13 @@ import static org.mockserver.verify.VerificationTimes.exactly;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.CompletionStage;
 
-import org.hamcrest.Matchers;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
 import org.junit.runner.RunWith;
-import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 import org.mockserver.client.server.MockServerClient;
 import org.mockserver.junit.MockServerRule;
@@ -39,13 +36,9 @@ import com.github.ljtfreitas.restify.http.client.hateoas.Resource;
 import com.github.ljtfreitas.restify.http.client.message.ContentType;
 import com.github.ljtfreitas.restify.http.client.message.Header;
 import com.github.ljtfreitas.restify.http.client.message.response.HttpStatusCode;
-import com.github.ljtfreitas.restify.http.client.request.interceptor.EndpointRequestInterceptorChain;
 
 @RunWith(MockitoJUnitRunner.class)
 public class HypermediaBrowserTest {
-
-	@Mock
-	private EndpointRequestInterceptorChain endpointRequestInterceptorStack;
 
 	@Rule
 	public MockServerRule mockServerRule = new MockServerRule(this, 7080);
@@ -56,8 +49,6 @@ public class HypermediaBrowserTest {
 
 	@Before
 	public void setup() {
-		when(endpointRequestInterceptorStack.apply(any())).then(returnsFirstArg());
-
 		hypermediaBrowser = new HypermediaBrowserBuilder().build();
 
 		mockServerClient = new MockServerClient("localhost", 7080);
@@ -128,10 +119,10 @@ public class HypermediaBrowserTest {
 
 		Collection<Person> friends = friendsAsFuture.toCompletableFuture().join();
 
-		assertThat(friends, Matchers.hasSize(3));
-		assertThat(friends, Matchers.hasItem(new Person("Fulano de Tal", "1985-08-02")));
-		assertThat(friends, Matchers.hasItem(new Person("Beltrano da Silva", "1985-09-02")));
-		assertThat(friends, Matchers.hasItem(new Person("Sicrano dos Santos", "1985-10-02")));
+		assertThat(friends, hasSize(3));
+		assertThat(friends, hasItem(new Person("Fulano de Tal", "1985-08-02")));
+		assertThat(friends, hasItem(new Person("Beltrano da Silva", "1985-09-02")));
+		assertThat(friends, hasItem(new Person("Sicrano dos Santos", "1985-10-02")));
 
 		mockServerClient.verify(personRequest, friendsRequest);
 	}
@@ -625,6 +616,31 @@ public class HypermediaBrowserTest {
 
 		assertEquals("Tiago de Freitas Lima", person.name);
 		assertEquals("1985-07-02", person.birthDate);
+
+		mockServerClient.verify(httpRequest);
+	}
+
+	@Test
+	public void shouldThrowHypermediaBrowserExceptionWhenSomeRequestReturnsHttpException() {
+		HttpRequest httpRequest = request()
+			.withMethod("GET")
+			.withPath("/me");
+
+		mockServerClient.when(httpRequest)
+			.respond(
+				response()
+					.withStatusCode(400));
+
+		hypermediaBrowser = new HypermediaBrowserBuilder().build();
+
+		CompletionStage<Person> personAsFuture = hypermediaBrowser
+			.follow(Link.self("http://localhost:7080/me"))
+				.as(Person.class);
+
+		Throwable exception = personAsFuture.toCompletableFuture().handle((a, b) -> b).join();
+
+		assertThat(exception, instanceOf(CompletionException.class));
+		assertThat(exception.getCause(), instanceOf(HypermediaBrowserException.class));
 
 		mockServerClient.verify(httpRequest);
 	}
