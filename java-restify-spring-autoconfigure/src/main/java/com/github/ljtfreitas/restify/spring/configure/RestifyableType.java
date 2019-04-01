@@ -28,7 +28,12 @@ package com.github.ljtfreitas.restify.spring.configure;
 import static org.springframework.core.annotation.AnnotationUtils.findAnnotation;
 
 import java.beans.Introspector;
+import java.util.Arrays;
+import java.util.Collection;
 import java.util.Optional;
+import java.util.stream.Collectors;
+
+import com.github.ljtfreitas.restify.util.Try;
 
 class RestifyableType {
 
@@ -36,33 +41,53 @@ class RestifyableType {
 	private final Restifyable restifyable;
 
 	RestifyableType(String objectTypeName) {
-		try {
-			this.objectType = Class.forName(objectTypeName);
-		} catch (ClassNotFoundException e) {
-			throw new RuntimeException("@Restifyable type not found on classpath: [" + objectTypeName + "]", e);
-		}
-		this.restifyable = findAnnotation(this.objectType, Restifyable.class);
+		this(Try.of(() -> Class.forName(objectTypeName))
+				.error(e -> new IllegalArgumentException("@Restifyable type not found on classpath: [" + objectTypeName + "]", e))
+					.get());
 	}
 
-	public Class<?> objectType() {
+	RestifyableType(Class<?> objectType) {
+		this.objectType = objectType;
+		this.restifyable = Optional.ofNullable(findAnnotation(this.objectType, Restifyable.class))
+				.orElseThrow(() -> new IllegalArgumentException("[" + objectType.getCanonicalName() + "] must be annotated with @Restifyable."));
+	}
+
+	Class<?> objectType() {
 		return objectType;
 	}
 
-	public String name() {
-		return doName();
-	}
-
-	private String doName() {
+	String name() {
 		return Optional.ofNullable(restifyable.name())
 				.filter(n -> !n.isEmpty())
-					.orElseGet(() -> Introspector.decapitalize(objectType.getSimpleName()));
+					.map(RestifyableTypeName::new)
+						.orElseGet(() -> new RestifyableTypeName(objectType.getSimpleName()))
+							.toString();
 	}
 
-	public String description() {
+	String description() {
 		return restifyable.description();
 	}
 
-	public Optional<String> endpoint() {
+	Optional<String> endpoint() {
 		return Optional.ofNullable(restifyable.endpoint()).filter(endpoint -> !endpoint.isEmpty());
+	}
+
+	Collection<Class<? extends RestifyProxyConfiguration>> configurations() {
+		return Arrays.stream(restifyable.configuration()).collect(Collectors.toList());
+	}
+
+	private static class RestifyableTypeName {
+
+		private final String name;
+
+		private RestifyableTypeName(String name) {
+			this.name = Introspector.decapitalize(name).replaceAll("([a-z])([A-Z])", "$1-$2")
+					.toLowerCase();
+		}
+
+		@Override
+		public String toString() {
+			return name;
+		}
 	}
 }

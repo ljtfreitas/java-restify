@@ -1,0 +1,3 @@
+com.github.ljtfreitas.restify.http.client.message.converter.form.FormURLEncodedFormObjectMessageConverter
+com.github.ljtfreitas.restify.http.client.message.converter.form.FormURLEncodedMapMessageConverter
+com.github.ljtfreitas.restify.http.client.message.converter.form.FormURLEncodedParametersMessageConverter

@@ -30,9 +30,9 @@ import org.springframework.beans.factory.config.BeanExpressionResolver;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.expression.StandardBeanExpressionResolver;
 
-import com.github.ljtfreitas.restify.http.contract.metadata.RestifyContractExpressionResolver;
+import com.github.ljtfreitas.restify.http.contract.metadata.ContractExpressionResolver;
 
-public class SpelDynamicParameterExpressionResolver implements RestifyContractExpressionResolver {
+public class SpelDynamicParameterExpressionResolver implements ContractExpressionResolver {
 
 	private final ConfigurableBeanFactory beanFactory;
 	private final BeanExpressionResolver resolver;

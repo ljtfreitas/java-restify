@@ -1,10 +1,12 @@
 package com.github.ljtfreitas.restify.http.jaxrs.contract;
 
 import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
 
 import java.lang.reflect.Type;
+import java.net.URL;
 import java.util.Collection;
 import java.util.List;
 import java.util.Map;
@@ -12,6 +14,7 @@ import java.util.Optional;
 
 import javax.ws.rs.ApplicationPath;
 import javax.ws.rs.Consumes;
+import javax.ws.rs.CookieParam;
 import javax.ws.rs.DELETE;
 import javax.ws.rs.GET;
 import javax.ws.rs.HeaderParam;
@@ -29,10 +32,10 @@ import com.github.ljtfreitas.restify.http.contract.metadata.EndpointHeader;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethod;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethodParameter;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointTarget;
-import com.github.ljtfreitas.restify.http.contract.metadata.reflection.SimpleGenericArrayType;
-import com.github.ljtfreitas.restify.http.contract.metadata.reflection.SimpleParameterizedType;
-import com.github.ljtfreitas.restify.http.contract.metadata.reflection.SimpleWildcardType;
-import com.github.ljtfreitas.restify.http.jaxrs.contract.JaxRsContractReader;
+import com.github.ljtfreitas.restify.http.jaxrs.contract.metadata.JaxRsContractReader;
+import com.github.ljtfreitas.restify.reflection.SimpleGenericArrayType;
+import com.github.ljtfreitas.restify.reflection.SimpleParameterizedType;
+import com.github.ljtfreitas.restify.reflection.SimpleWildcardType;
 
 public class JaxRsContractReaderTest {
 
@@ -45,6 +48,8 @@ public class JaxRsContractReaderTest {
 	private EndpointTarget myContextApiTarget;
 
 	private EndpointTarget mySimpleCrudApiTarget;
+
+	private EndpointTarget myFullyDynamicApiTarget;
 
 	private JaxRsContractReader jaxRsContractReader;
 
@@ -60,13 +65,16 @@ public class JaxRsContractReaderTest {
 
 		mySimpleCrudApiTarget = new EndpointTarget(MySimpleCrudApi.class, "http://my.api.com");
 
+		myFullyDynamicApiTarget = new EndpointTarget(MyFullyDynamicApi.class);
+
 		jaxRsContractReader = new JaxRsContractReader();
 	}
 
 	@Test
 	public void shouldCreateEndpointMethodWhenMethodHasSingleParameter() throws Exception {
-		EndpointMethod endpointMethod = jaxRsContractReader.read(myApiTypeTarget,
-				MyApiType.class.getMethod("method", new Class[] { String.class }));
+		EndpointMethod endpointMethod = jaxRsContractReader.read(myApiTypeTarget)
+				.find(MyApiType.class.getMethod("method", new Class[] { String.class }))
+					.orElseThrow(() -> new IllegalStateException("Method not found..."));
 
 		assertEquals("GET", endpointMethod.httpMethod());
 		assertEquals("http://my.api.com/{path}", endpointMethod.path());
@@ -81,8 +89,9 @@ public class JaxRsContractReaderTest {
 
 	@Test
 	public void shouldCreateEndpointMethodWhenMethodHasMultiplesParameters() throws Exception {
-		EndpointMethod endpointMethod = jaxRsContractReader.read(myApiTypeTarget,
-				MyApiType.class.getMethod("method", new Class[] { String.class, String.class, Object.class }));
+		EndpointMethod endpointMethod = jaxRsContractReader.read(myApiTypeTarget)
+				.find(MyApiType.class.getMethod("method", new Class[] { String.class, String.class, Object.class }))
+					.orElseThrow(() -> new IllegalStateException("Method not found..."));
 
 		assertEquals("GET", endpointMethod.httpMethod());
 		assertEquals("http://my.api.com/{path}", endpointMethod.path());
@@ -105,9 +114,10 @@ public class JaxRsContractReaderTest {
 	}
 
 	@Test
-	public void shouldCreateEndpointMethodWithHeadersWhenMethodHasHeaderParameters() throws Exception {
-		EndpointMethod endpointMethod = jaxRsContractReader.read(myApiTypeTarget,
-				MyApiType.class.getMethod("headers", new Class[] { String.class, String.class }));
+	public void shouldCreateEndpointMethodWithoutIncludeHeaderParametersOnHeadersCollection() throws Exception {
+		EndpointMethod endpointMethod = jaxRsContractReader.read(myApiTypeTarget)
+				.find(MyApiType.class.getMethod("headers", new Class[] { String.class, String.class }))
+					.orElseThrow(() -> new IllegalStateException("Method not found..."));
 
 		assertEquals("GET", endpointMethod.httpMethod());
 		assertEquals("http://my.api.com/headers", endpointMethod.path());
@@ -123,19 +133,15 @@ public class JaxRsContractReaderTest {
 		assertEquals("X-Other-Custom-Header", otherCustomHeaderParameter.get().name());
 		assertTrue(otherCustomHeaderParameter.get().header());
 
-		EndpointHeader customHeader = endpointMethod.headers().first("X-Custom-Header").orElse(null);
-		assertNotNull(customHeader);
-		assertEquals("{X-Custom-Header}", customHeader.value());
-
-		EndpointHeader otherCustomHeader = endpointMethod.headers().first("X-Other-Custom-Header").orElse(null);
-		assertNotNull(otherCustomHeader);
-		assertEquals("{X-Other-Custom-Header}", otherCustomHeader.value());
+		assertFalse(endpointMethod.headers().first("X-Custom-Header").isPresent());
+		assertFalse(endpointMethod.headers().first("X-Other-Custom-Header").isPresent());
 	}
 
 	@Test
 	public void shouldCreateEndpointMethodWithContentTypeHeaderWhenMethodHasConsumesAnnotation() throws Exception {
-		EndpointMethod endpointMethod = jaxRsContractReader.read(myApiTypeTarget,
-				MyApiType.class.getMethod("consumes", new Class[] { Object.class }));
+		EndpointMethod endpointMethod = jaxRsContractReader.read(myApiTypeTarget)
+				.find(MyApiType.class.getMethod("consumes", new Class[] { Object.class }))
+					.orElseThrow(() -> new IllegalStateException("Method not found..."));
 
 		assertEquals("GET", endpointMethod.httpMethod());
 		assertEquals("http://my.api.com/consumes", endpointMethod.path());
@@ -152,8 +158,9 @@ public class JaxRsContractReaderTest {
 
 	@Test
 	public void shouldCreateEndpointMethodWithAcceptHeaderWhenMethodHasProducesAnnotation() throws Exception {
-		EndpointMethod endpointMethod = jaxRsContractReader.read(myApiTypeTarget,
-				MyApiType.class.getMethod("produces", new Class[0]));
+		EndpointMethod endpointMethod = jaxRsContractReader.read(myApiTypeTarget)
+				.find(MyApiType.class.getMethod("produces", new Class[0]))
+					.orElseThrow(() -> new IllegalStateException("Method not found..."));
 
 		assertEquals("GET", endpointMethod.httpMethod());
 		assertEquals("http://my.api.com/produces", endpointMethod.path());
@@ -166,8 +173,9 @@ public class JaxRsContractReaderTest {
 
 	@Test
 	public void shouldCreateEndpointMethodWithAcceptHeaderWhenMethodHasProducesAnnotationWithMultiplesValues() throws Exception {
-		EndpointMethod endpointMethod = jaxRsContractReader.read(myApiTypeTarget,
-				MyApiType.class.getMethod("multipleProduces", new Class[0]));
+		EndpointMethod endpointMethod = jaxRsContractReader.read(myApiTypeTarget)
+				.find(MyApiType.class.getMethod("multipleProduces", new Class[0]))
+					.orElseThrow(() -> new IllegalStateException("Method not found..."));
 
 		assertEquals("GET", endpointMethod.httpMethod());
 		assertEquals("http://my.api.com/produces", endpointMethod.path());
@@ -179,9 +187,10 @@ public class JaxRsContractReaderTest {
 	}
 
 	@Test
-	public void shouldCreateEndpointMethodMergingMethodHeaderAnnotationsWithHeaderParameters() throws Exception {
-		EndpointMethod endpointMethod = jaxRsContractReader.read(myApiTypeTarget,
-				MyApiType.class.getMethod("mergeHeaders", new Class[] { Object.class, String.class }));
+	public void shouldCreateEndpointMethodMergingMethodHeaders() throws Exception {
+		EndpointMethod endpointMethod = jaxRsContractReader.read(myApiTypeTarget)
+				.find(MyApiType.class.getMethod("mergeHeaders", new Class[] { Object.class }))
+					.orElseThrow(() -> new IllegalStateException("Method not found..."));
 
 		assertEquals("GET", endpointMethod.httpMethod());
 		assertEquals("http://my.api.com/mergeHeaders", endpointMethod.path());
@@ -194,28 +203,23 @@ public class JaxRsContractReaderTest {
 		EndpointHeader acceptHeader = endpointMethod.headers().first("Accept").orElse(null);
 		assertNotNull(acceptHeader);
 		assertEquals("application/json", acceptHeader.value());
-
-		EndpointHeader customHeader = endpointMethod.headers().first("X-Custom-Header").orElse(null);
-		assertNotNull(customHeader);
-		assertEquals("{X-Custom-Header}", customHeader.value());
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void shouldThrowExceptionWhenMethodHasNotAPathAnnotation() throws Exception {
-		jaxRsContractReader.read(myApiTypeTarget,
-				MyApiType.class.getMethod("withoutPath"));
+		jaxRsContractReader.read(new EndpointTarget(MyWrongApiWithoutPath.class));
 	}
 
 	@Test(expected = IllegalArgumentException.class)
 	public void shouldThrowExceptionWhenMethodHasNotAHttpMethodAnnotation() throws Exception {
-		jaxRsContractReader.read(myApiTypeTarget,
-				MyApiType.class.getMethod("withoutHttpMethod"));
+		jaxRsContractReader.read(new EndpointTarget(MyWrongApiWithoutHttpMethod.class));
 	}
 
 	@Test
 	public void shouldCreateEndpointMethodWhenPathAnnotationOnMethodHasNoSlashOnStart() throws Exception {
-		EndpointMethod endpointMethod = jaxRsContractReader.read(myApiTypeTarget,
-				MyApiType.class.getMethod("pathWithoutSlash"));
+		EndpointMethod endpointMethod = jaxRsContractReader.read(myApiTypeTarget)
+				.find(MyApiType.class.getMethod("pathWithoutSlash"))
+					.orElseThrow(() -> new IllegalStateException("Method not found..."));;
 
 		assertEquals("GET", endpointMethod.httpMethod());
 		assertEquals("http://my.api.com/path", endpointMethod.path());
@@ -224,8 +228,9 @@ public class JaxRsContractReaderTest {
 
 	@Test
 	public void shouldCreateEndpointMethodWhenMethodHasCustomizedParameterNames() throws Exception {
-		EndpointMethod endpointMethod = jaxRsContractReader.read(myApiTypeTarget,
-				MyApiType.class.getMethod("customizedNames", new Class[] { String.class }));
+		EndpointMethod endpointMethod = jaxRsContractReader.read(myApiTypeTarget)
+				.find(MyApiType.class.getMethod("customizedNames", new Class[] { String.class }))
+					.orElseThrow(() -> new IllegalStateException("Method not found..."));
 
 		assertEquals("GET", endpointMethod.httpMethod());
 		assertEquals("http://my.api.com/{customArgumentPath}", endpointMethod.path());
@@ -239,8 +244,9 @@ public class JaxRsContractReaderTest {
 
 	@Test
 	public void shouldCreateEndpointMethodOfMethodWithHttpMethodMetaAnnotation() throws Exception {
-		EndpointMethod endpointMethod = jaxRsContractReader.read(myApiTypeTarget,
-				MyApiType.class.getMethod("metaAnnotationOfHttpMethod"));
+		EndpointMethod endpointMethod = jaxRsContractReader.read(myApiTypeTarget)
+				.find(MyApiType.class.getMethod("metaAnnotationOfHttpMethod"))
+					.orElseThrow(() -> new IllegalStateException("Method not found..."));
 
 		assertEquals("POST", endpointMethod.httpMethod());
 		assertEquals("http://my.api.com/some-method", endpointMethod.path());
@@ -249,8 +255,9 @@ public class JaxRsContractReaderTest {
 
 	@Test
 	public void shouldCreateEndpointMethodOfMethodWithQueryStringParameter() throws Exception {
-		EndpointMethod endpointMethod = jaxRsContractReader.read(myApiTypeTarget,
-				MyApiType.class.getMethod("queryString", new Class[] { String.class, int.class }));
+		EndpointMethod endpointMethod = jaxRsContractReader.read(myApiTypeTarget)
+				.find(MyApiType.class.getMethod("queryString", new Class[] { String.class, int.class }))
+					.orElseThrow(() -> new IllegalStateException("Method not found..."));
 
 		assertEquals("GET", endpointMethod.httpMethod());
 		assertEquals("http://my.api.com/query", endpointMethod.path());
@@ -269,36 +276,38 @@ public class JaxRsContractReaderTest {
 
 	@Test(expected = IllegalArgumentException.class)
 	public void shouldThrowExceptionWhenMethodHasMoreThanOneBodyParameter() throws Exception {
-		jaxRsContractReader.read(myApiTypeTarget,
-				MyApiType.class.getMethod("methodWithTwoBodyParameters", new Class[] { Object.class, Object.class }));
+		jaxRsContractReader.read(new EndpointTarget(MyWrongApiWithTwoBodyParameters.class));
 	}
 
 	@Test
 	public void shouldCreateEndpointMethodWhenInterfaceHasAInheritance() throws Exception {
-		EndpointMethod endpointMethod = jaxRsContractReader.read(myInheritanceApiTarget,
-				MyInheritanceApiType.class.getMethod("method"));
+		EndpointMethod endpointMethod = jaxRsContractReader.read(myInheritanceApiTarget)
+				.find(MyInheritanceApiType.class.getMethod("method"))
+					.orElseThrow(() -> new IllegalStateException("Method not found..."));
 
 		assertEquals("http://my.api.com/simple", endpointMethod.path());
 	}
 
 	@Test
 	public void shouldCreateEndpointMethodWhenMethodIsInherited() throws Exception {
-		EndpointMethod endpointMethod = jaxRsContractReader.read(myInheritanceApiTarget,
-				MyInheritanceApiType.class.getMethod("inheritedMethod"));
+		EndpointMethod endpointMethod = jaxRsContractReader.read(myInheritanceApiTarget)
+				.find(MyInheritanceApiType.class.getMethod("inheritedMethod"))
+					.orElseThrow(() -> new IllegalStateException("Method not found..."));
 
 		assertEquals("http://my.api.com/inherited", endpointMethod.path());
 	}
 
 	@Test
 	public void shouldCreateEndpointMethodWithInheritedProducesAnnotation() throws Exception {
-		EndpointMethod endpointMethod = jaxRsContractReader.read(myInheritanceApiTarget,
-				MyInheritanceApiType.class.getMethod("getWithHeaders", new Class[] { String.class }));
+		EndpointMethod endpointMethod = jaxRsContractReader.read(myInheritanceApiTarget)
+				.find(MyInheritanceApiType.class.getMethod("getWithHeaders", new Class[] { String.class }))
+					.orElseThrow(() -> new IllegalStateException("Method not found..."));
 
 		assertEquals("http://my.api.com/getWithHeaders", endpointMethod.path());
 
-		EndpointHeader customHeader = endpointMethod.headers().first("X-Custom-Header").orElse(null);
-		assertNotNull(customHeader);
-		assertEquals("{X-Custom-Header}", customHeader.value());
+		Optional<EndpointMethodParameter> headerParameter = endpointMethod.parameters().get(0);
+		assertTrue(headerParameter.isPresent());
+		assertEquals("X-Custom-Header", headerParameter.get().name());
 
 		EndpointHeader acceptHeader = endpointMethod.headers().first("Accept").orElse(null);
 		assertNotNull(acceptHeader);
@@ -307,8 +316,9 @@ public class JaxRsContractReaderTest {
 
 	@Test
 	public void shouldCreateEndpointMethodWhenMethodHasAGenericParameter() throws Exception {
-		EndpointMethod endpointMethod = jaxRsContractReader.read(myGenericSpecificApiTarget,
-				MySpecificApi.class.getMethod("create", new Class[] { Object.class }));
+		EndpointMethod endpointMethod = jaxRsContractReader.read(myGenericSpecificApiTarget)
+				.find(MySpecificApi.class.getMethod("create", new Class[] { Object.class }))
+					.orElseThrow(() -> new IllegalStateException("Method not found..."));
 
 		assertEquals("http://my.model.api/create", endpointMethod.path());
 
@@ -319,8 +329,9 @@ public class JaxRsContractReaderTest {
 
 	@Test
 	public void shouldCreateEndpointMethodWhenMethodReturnTypeIsASimpleGenericType() throws Exception {
-		EndpointMethod endpointMethod = jaxRsContractReader.read(myGenericSpecificApiTarget,
-				MySpecificApi.class.getMethod("find", new Class[] { int.class }));
+		EndpointMethod endpointMethod = jaxRsContractReader.read(myGenericSpecificApiTarget)
+				.find(MySpecificApi.class.getMethod("find", new Class[] { int.class }))
+					.orElseThrow(() -> new IllegalStateException("Method not found..."));
 
 		assertEquals("http://my.model.api/find", endpointMethod.path());
 		assertEquals(MyModel.class, endpointMethod.returnType().classType());
@@ -328,8 +339,9 @@ public class JaxRsContractReaderTest {
 
 	@Test
 	public void shouldCreateEndpointMethodWhenMethodReturnTypeIsACollectionWithGenericType() throws Exception {
-		EndpointMethod endpointMethod = jaxRsContractReader.read(myGenericSpecificApiTarget,
-				MySpecificApi.class.getMethod("allAsList"));
+		EndpointMethod endpointMethod = jaxRsContractReader.read(myGenericSpecificApiTarget)
+				.find(MySpecificApi.class.getMethod("allAsList"))
+					.orElseThrow(() -> new IllegalStateException("Method not found..."));
 
 		assertEquals("http://my.model.api/all", endpointMethod.path());
 		assertEquals(new SimpleParameterizedType(List.class, null, MyModel.class), endpointMethod.returnType().unwrap());
@@ -337,8 +349,9 @@ public class JaxRsContractReaderTest {
 
 	@Test
 	public void shouldCreateEndpointMethodWhenMethodReturnTypeIsGenericArray() throws Exception {
-		EndpointMethod endpointMethod = jaxRsContractReader.read(myGenericSpecificApiTarget,
-				MySpecificApi.class.getMethod("allAsArray"));
+		EndpointMethod endpointMethod = jaxRsContractReader.read(myGenericSpecificApiTarget)
+				.find(MySpecificApi.class.getMethod("allAsArray"))
+					.orElseThrow(() -> new IllegalStateException("Method not found..."));
 
 		assertEquals("http://my.model.api/all", endpointMethod.path());
 		assertEquals(new SimpleGenericArrayType(MyModel.class), endpointMethod.returnType().unwrap());
@@ -346,8 +359,9 @@ public class JaxRsContractReaderTest {
 
 	@Test
 	public void shouldCreateEndpointMethodWhenMethodReturnTypeIsArray() throws Exception {
-		EndpointMethod endpointMethod = jaxRsContractReader.read(myGenericSpecificApiTarget,
-				MySpecificApi.class.getMethod("myModelArray"));
+		EndpointMethod endpointMethod = jaxRsContractReader.read(myGenericSpecificApiTarget)
+				.find(MySpecificApi.class.getMethod("myModelArray"))
+					.orElseThrow(() -> new IllegalStateException("Method not found..."));
 
 		assertEquals("http://my.model.api/all", endpointMethod.path());
 		assertEquals(MyModel[].class, endpointMethod.returnType().classType());
@@ -355,8 +369,9 @@ public class JaxRsContractReaderTest {
 
 	@Test
 	public void shouldCreateEndpointMethodWhenMethodReturnTypeIsMap() throws Exception {
-		EndpointMethod endpointMethod = jaxRsContractReader.read(myGenericSpecificApiTarget,
-				MySpecificApi.class.getMethod("myModelAsMap"));
+		EndpointMethod endpointMethod = jaxRsContractReader.read(myGenericSpecificApiTarget)
+				.find(MySpecificApi.class.getMethod("myModelAsMap"))
+					.orElseThrow(() -> new IllegalStateException("Method not found..."));
 
 		assertEquals("http://my.model.api/all", endpointMethod.path());
 		assertEquals(new SimpleParameterizedType(Map.class, null, String.class, MyModel.class),
@@ -365,8 +380,9 @@ public class JaxRsContractReaderTest {
 
 	@Test
 	public void shouldCreateEndpointMethodWhenMethodReturnTypeIsMapWithGenericValue() throws Exception {
-		EndpointMethod endpointMethod = jaxRsContractReader.read(myGenericSpecificApiTarget,
-				MySpecificApi.class.getMethod("allAsMap"));
+		EndpointMethod endpointMethod = jaxRsContractReader.read(myGenericSpecificApiTarget)
+				.find(MySpecificApi.class.getMethod("allAsMap"))
+					.orElseThrow(() -> new IllegalStateException("Method not found..."));
 
 		assertEquals("http://my.model.api/all", endpointMethod.path());
 		assertEquals(new SimpleParameterizedType(Map.class, null, String.class, MyModel.class),
@@ -375,8 +391,9 @@ public class JaxRsContractReaderTest {
 
 	@Test
 	public void shouldCreateEndpointMethodWhenMethodReturnTypeIsMapWithGenericKeyAndValue() throws Exception {
-		EndpointMethod endpointMethod = jaxRsContractReader.read(myGenericSpecificApiTarget,
-				MySpecificApi.class.getMethod("anyAsMap"));
+		EndpointMethod endpointMethod = jaxRsContractReader.read(myGenericSpecificApiTarget)
+				.find(MySpecificApi.class.getMethod("anyAsMap"))
+					.orElseThrow(() -> new IllegalStateException("Method not found..."));
 
 		assertEquals("http://my.model.api/any", endpointMethod.path());
 		assertEquals(
@@ -388,15 +405,18 @@ public class JaxRsContractReaderTest {
 
 	@Test
 	public void shouldCreateEndpointMethodWhenTargetHasEndpointUrl() throws Exception {
-		EndpointMethod endpointMethod = jaxRsContractReader.read(myContextApiTarget,
-				MyContextApi.class.getMethod("method"));
+		EndpointMethod endpointMethod = jaxRsContractReader.read(myContextApiTarget)
+				.find(MyContextApi.class.getMethod("method"))
+					.orElseThrow(() -> new IllegalStateException("Method not found..."));
 
 		assertEquals("http://my.api.com/context/any", endpointMethod.path());
 	}
 
 	@Test
 	public void shouldCreateEndpointMethodWhenJavaMethodHasNotPathAnnotation() throws Exception {
-		EndpointMethod endpointMethod = jaxRsContractReader.read(mySimpleCrudApiTarget, MySimpleCrudApi.class.getMethod("post", MyModel.class));
+		EndpointMethod endpointMethod = jaxRsContractReader.read(mySimpleCrudApiTarget)
+				.find(MySimpleCrudApi.class.getMethod("post", MyModel.class))
+					.orElseThrow(() -> new IllegalStateException("Method not found..."));;
 
 		assertEquals("http://my.api.com/context", endpointMethod.path());
 		assertEquals("POST", endpointMethod.httpMethod());
@@ -404,8 +424,38 @@ public class JaxRsContractReaderTest {
 
 	@Test(expected = IllegalArgumentException.class)
 	public void shouldThrowExceptionWhenInterfaceTypeIsAnnotatedWithApplicationPathAndPathAnnotations() throws Exception {
-		jaxRsContractReader.read(new EndpointTarget(MyWrongApi.class),
-				MyWrongApi.class.getMethod("wrong"));
+		jaxRsContractReader.read(new EndpointTarget(MyWrongApi.class));
+	}
+
+	@Test
+	public void shouldCreateEndpointMethodWithDynamicUrlDefinition() throws Exception {
+		EndpointMethod endpointMethod = jaxRsContractReader.read(myFullyDynamicApiTarget)
+			.find(MyFullyDynamicApi.class.getMethod("dynamic", URL.class))
+				.orElseThrow(() -> new IllegalStateException("Method not found..."));;
+
+		assertEquals("{endpoint}", endpointMethod.path());
+
+		Optional<EndpointMethodParameter> parameter = endpointMethod.parameters().get(0);
+
+		assertTrue(parameter.isPresent());
+		assertEquals("endpoint", parameter.get().name());
+		assertEquals(URL.class, parameter.get().javaType().unwrap());
+	}
+
+	@Test
+	public void shouldCreateEndpointMethodWithDynamicCookieParameter() throws Exception {
+		EndpointMethod endpointMethod = jaxRsContractReader.read(myApiTypeTarget)
+			.find(MyApiType.class.getMethod("cookie", String.class))
+				.orElseThrow(() -> new IllegalStateException("Method not found..."));;
+
+		assertEquals("http://my.api.com/cookie", endpointMethod.path());
+
+		Optional<EndpointMethodParameter> parameter = endpointMethod.parameters().get(0);
+
+		assertTrue(parameter.isPresent());
+		assertTrue(parameter.get().cookie());
+		assertEquals("my-cookie", parameter.get().name());
+		assertEquals(String.class, parameter.get().javaType().unwrap());
 	}
 
 	@ApplicationPath("http://my.api.com")
@@ -435,10 +485,6 @@ public class JaxRsContractReaderTest {
 		@GET
 		public void queryString(@QueryParam("name") String name, @QueryParam("age") int age);
 
-		@Path("/twoBodyParameters")
-		@GET
-		public String methodWithTwoBodyParameters(Object first, Object second);
-
 		@Path("/headers")
 		@GET
 		public String headers(@HeaderParam("X-Custom-Header") String customHeader, @HeaderParam("X-Other-Custom-Header") String otherCustomHeader);
@@ -462,12 +508,31 @@ public class JaxRsContractReaderTest {
 		@GET
 		@Consumes("application/json")
 		@Produces("application/json")
-		public Object mergeHeaders(Object body, @HeaderParam("X-Custom-Header") String customHeader);
+		public Object mergeHeaders(Object body);
+
+		@Path("/cookie")
+		@GET
+		public String cookie(@CookieParam("my-cookie") String cookie);
+
+	}
+
+	interface MyWrongApiWithoutPath {
 
 		public void withoutPath();
+	}
+
+	interface MyWrongApiWithoutHttpMethod {
 
 		@Path("/withoutHttpMethod")
 		public void withoutHttpMethod();
+	}
+
+	@ApplicationPath("http://my.api.com")
+	interface MyWrongApiWithTwoBodyParameters {
+
+		@Path("/twoBodyParameters")
+		@GET
+		public String methodWithTwoBodyParameters(Object first, Object second);
 	}
 
 	@ApplicationPath("http://my.api.com")
@@ -566,6 +631,13 @@ public class JaxRsContractReaderTest {
 	interface MyWrongApi {
 
 		public void wrong();
+	}
+
+	interface MyFullyDynamicApi {
+
+		@Path("{endpoint}")
+		@GET
+		public String dynamic(@PathParam("endpoint") URL endpoint);
 	}
 
 	class MyModel {

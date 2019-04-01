@@ -33,14 +33,16 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.client.ResourceAccessException;
 import org.springframework.web.client.RestClientResponseException;
 import org.springframework.web.client.RestOperations;
+import org.springframework.web.client.RestTemplate;
 
-import com.github.ljtfreitas.restify.http.RestifyHttpException;
+import com.github.ljtfreitas.restify.http.client.HttpClientException;
+import com.github.ljtfreitas.restify.http.client.HttpException;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequestExecutor;
 import com.github.ljtfreitas.restify.http.client.response.DefaultEndpointResponseErrorFallback;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponseErrorFallback;
-import com.github.ljtfreitas.restify.http.contract.metadata.reflection.JavaType;
+import com.github.ljtfreitas.restify.reflection.JavaType;
 
 public class RestOperationsEndpointRequestExecutor implements EndpointRequestExecutor {
 
@@ -48,6 +50,10 @@ public class RestOperationsEndpointRequestExecutor implements EndpointRequestExe
 	private final EndpointResponseErrorFallback endpointResponseErrorFallback;
 	private final RequestEntityConverter requestEntityConverter;
 	private final EndpointResponseConverter responseEntityConverter;
+
+	public RestOperationsEndpointRequestExecutor() {
+		this(new RestTemplate(), new DefaultEndpointResponseErrorFallback());
+	}
 
 	public RestOperationsEndpointRequestExecutor(RestOperations rest) {
 		this(rest, new DefaultEndpointResponseErrorFallback());
@@ -76,13 +82,13 @@ public class RestOperationsEndpointRequestExecutor implements EndpointRequestExe
 			return (EndpointResponse<T>) responseEntityConverter.convert(response);
 
 		} catch (RestClientResponseException e) {
-			return endpointResponseErrorFallback.onError(ErrorHttpResponseMessage.from(request, e), endpointRequest.responseType());
+			return endpointResponseErrorFallback.onError(HttpErrorResponse.from(request, e), endpointRequest.responseType());
 
 		} catch (ResourceAccessException e) {
-			throw new RestifyHttpException("I/O error on HTTP request: [" + request.getMethod() + " " + request.getUrl() + "]", e);
+			throw new HttpClientException("I/O error on HTTP request: [" + request.getMethod() + " " + request.getUrl() + "]", e);
 
 		} catch (Exception e) {
-			throw new RestifyHttpException("Error on HTTP request: [" + request.getMethod() + " " + request.getUrl() + "]", e);
+			throw new HttpException("Error on HTTP request: [" + request.getMethod() + " " + request.getUrl() + "]", e);
 		}
 	}
 
@@ -101,8 +107,9 @@ public class RestOperationsEndpointRequestExecutor implements EndpointRequestExe
 
 		@Override
 		public boolean equals(Object obj) {
-			return (this == obj || (obj instanceof ParameterizedTypeReference
-					&& type.equals(((ParameterizedTypeReference<?>) obj).getType())));
+			if ((obj instanceof JavaTypeReference)) return false;
+			JavaTypeReference that = (JavaTypeReference) obj;
+			return this == that || this.type.equals(that.type);
 		}
 
 		@Override

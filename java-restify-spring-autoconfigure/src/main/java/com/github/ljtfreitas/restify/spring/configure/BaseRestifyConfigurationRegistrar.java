@@ -25,8 +25,10 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.spring.configure;
 
+import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,11 +41,6 @@ import org.springframework.beans.factory.support.BeanDefinitionRegistry;
 import org.springframework.context.EnvironmentAware;
 import org.springframework.context.annotation.ImportBeanDefinitionRegistrar;
 import org.springframework.core.env.Environment;
-
-import com.github.ljtfreitas.restify.http.client.authentication.Authentication;
-import com.github.ljtfreitas.restify.http.client.authentication.BasicAuthentication;
-import com.github.ljtfreitas.restify.spring.configure.RestifyApiClient.Basic;
-import com.github.ljtfreitas.restify.spring.configure.RestifyApiClient.RestifyApiAuthentication;
 
 public abstract class BaseRestifyConfigurationRegistrar implements ImportBeanDefinitionRegistrar, BeanFactoryAware, EnvironmentAware {
 
@@ -67,13 +64,12 @@ public abstract class BaseRestifyConfigurationRegistrar implements ImportBeanDef
 
 		String endpoint = type.endpoint().map(e -> resolve(e)).orElseGet(restifyApiClient::getEndpoint);
 
-		RestifyProxyBeanBuilder builder = new RestifyProxyBeanBuilder()
+		BeanDefinition bean = new RestifyProxyBeanBuilder()
 				.objectType(type.objectType())
-					.endpoint(endpoint)
-						.asyncExecutorServiceName("restifyAsyncExecutorService")
-							.authentication(apiAuthentication(restifyApiClient.getAuthentication()));
-
-		BeanDefinition bean = builder.build();
+				.endpoint(endpoint)
+				.asyncExecutorServiceName(Async.EXECUTOR_SERVICE_BEAN_NAME)
+				.configurations(configurationsOf(type))
+					.build();
 
 		registry.registerBeanDefinition(type.name(), bean);
 
@@ -81,19 +77,15 @@ public abstract class BaseRestifyConfigurationRegistrar implements ImportBeanDef
 				type.objectType(), type.name(), type.description(), endpoint);
 	}
 
+	private Collection<RestifyProxyConfiguration> configurationsOf(RestifyableType type) {
+		return type.configurations().stream()
+				.map(beanFactory::getBean)
+					.collect(Collectors.toList());
+	}
+
 	private String resolve(String expression) {
 		return Optional.ofNullable(properties.resolve(expression))
 				.orElseGet(() -> ((ConfigurableBeanFactory) beanFactory).resolveEmbeddedValue(expression));
-	}
-
-	private Authentication apiAuthentication(RestifyApiAuthentication restifyApiAuthentication) {
-		if (restifyApiAuthentication != null) {
-			Basic basic = restifyApiAuthentication.getBasic();
-			if (basic != null) {
-				return new BasicAuthentication(basic.getUsername(), basic.getPassword());
-			}
-		}
-		return null;
 	}
 
 	@Override

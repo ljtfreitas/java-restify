@@ -27,9 +27,10 @@ package com.github.ljtfreitas.restify.spring.configure;
 
 import java.util.Optional;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.web.client.RestTemplateBuilder;
 import org.springframework.context.annotation.Bean;
@@ -39,46 +40,44 @@ import org.springframework.web.client.RestTemplate;
 
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequestExecutor;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponseErrorFallback;
-import com.github.ljtfreitas.restify.http.contract.metadata.RestifyContractExpressionResolver;
-import com.github.ljtfreitas.restify.http.contract.metadata.RestifyContractReader;
+import com.github.ljtfreitas.restify.http.contract.metadata.ContractExpressionResolver;
+import com.github.ljtfreitas.restify.http.contract.metadata.ContractReader;
 import com.github.ljtfreitas.restify.http.spring.client.request.RestOperationsEndpointRequestExecutor;
-import com.github.ljtfreitas.restify.http.spring.contract.SpringWebContractReader;
 import com.github.ljtfreitas.restify.http.spring.contract.metadata.SpelDynamicParameterExpressionResolver;
+import com.github.ljtfreitas.restify.http.spring.contract.metadata.SpringWebContractReader;
 
 @Configuration
 public class RestifySpringWebConfiguration {
 
-	@Autowired(required = false)
-	private RestTemplateBuilder restTemplateBuilder;
-
-	@Autowired(required = false)
-	private RestOperations restTemplate;
-
 	@ConditionalOnMissingBean
+	@ConditionalOnMissingClass("org.springframework.web.reactive.function.client.WebClient")
 	@Bean
-	public EndpointRequestExecutor endpointRequestExecutor(EndpointResponseErrorFallback endpointResponseErrorFallback) {
-		RestOperations restOperations = Optional.ofNullable(restTemplate)
-				.orElseGet(() -> Optional.ofNullable(restTemplateBuilder)
+	public EndpointRequestExecutor endpointRequestExecutor(EndpointResponseErrorFallback endpointResponseErrorFallback,
+			ObjectProvider<RestTemplateBuilder> restTemplateBuilderProvider,
+			ObjectProvider<RestOperations> restOperationsProvider) {
+
+		RestOperations restOperations = Optional.ofNullable(restOperationsProvider.getIfAvailable())
+				.orElseGet(() -> Optional.ofNullable(restTemplateBuilderProvider.getIfAvailable())
 					.map(builder -> builder.build())
 						.orElseGet(() -> new RestTemplate()));
 
 		return new RestOperationsEndpointRequestExecutor(restOperations, endpointResponseErrorFallback);
 	}
 
+	@ConditionalOnMissingBean
+	@Bean
+	public ContractExpressionResolver spelDynamicExpressionResolver(ConfigurableBeanFactory beanFactory) {
+		return new SpelDynamicParameterExpressionResolver(beanFactory);
+	}
+
 	@Configuration
 	@ConditionalOnProperty(name = "restify.contract", havingValue = "spring-web", matchIfMissing = true)
-	public static class RestifySpringWebContractConfiguration {
+	static class SpringWebContractConfiguration {
 
 		@ConditionalOnMissingBean
 		@Bean
-		public RestifyContractReader restifyContractReader(RestifyContractExpressionResolver expressionResolver) {
+		public ContractReader springWebContractReader(ContractExpressionResolver expressionResolver) {
 			return new SpringWebContractReader(expressionResolver);
-		}
-
-		@ConditionalOnMissingBean
-		@Bean
-		public RestifyContractExpressionResolver expressionResolver(ConfigurableBeanFactory beanFactory) {
-			return new SpelDynamicParameterExpressionResolver(beanFactory);
 		}
 	}
 }

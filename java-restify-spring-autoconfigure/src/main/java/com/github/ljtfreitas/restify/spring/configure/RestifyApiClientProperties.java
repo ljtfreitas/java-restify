@@ -25,28 +25,27 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.spring.configure;
 
-import org.springframework.boot.bind.PropertySourcesPropertyValues;
-import org.springframework.boot.bind.RelaxedDataBinder;
+import org.springframework.boot.context.properties.bind.BindResult;
+import org.springframework.boot.context.properties.bind.Binder;
 import org.springframework.core.env.ConfigurableEnvironment;
 import org.springframework.core.env.Environment;
 
 class RestifyApiClientProperties {
 
+	private static final String RESTIFY_PROPERTY_PREFIX = "restify.";
+
 	private final Environment environment;
+	private final Binder binder;
 
 	RestifyApiClientProperties(Environment environment) {
 		this.environment = environment;
+		this.binder = Binder.get(environment);
 	}
 
 	public RestifyApiClient client(RestifyableType type) {
-		RestifyApiClient restifyApiClient = new RestifyApiClient();
+		BindResult<RestifyApiClient> result = binder.bind(RESTIFY_PROPERTY_PREFIX + type.name(), RestifyApiClient.class);
 
-		RelaxedDataBinder dataBinder = new RelaxedDataBinder(restifyApiClient, "restify." + type.name());
-
-		ConfigurableEnvironment configurableEnvironment = (ConfigurableEnvironment) environment;
-		dataBinder.bind(new PropertySourcesPropertyValues(configurableEnvironment.getPropertySources()));
-
-		return restifyApiClient;
+		return result.orElseGet(RestifyApiClient::new);
 	}
 
 	public String resolve(String expression) {

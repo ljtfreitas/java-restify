@@ -27,27 +27,26 @@ package com.github.ljtfreitas.restify.http.spring.contract.metadata;
 
 import java.lang.reflect.Type;
 
-import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethodParameterSerializer;
-import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethodQueryParameterSerializer;
-import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethodQueryParametersSerializer;
-import com.github.ljtfreitas.restify.http.contract.metadata.SimpleEndpointMethodParameterSerializer;
-import com.github.ljtfreitas.restify.http.spring.contract.metadata.reflection.SpringWebJavaMethodParameterMetadata;
+import com.github.ljtfreitas.restify.http.contract.ParameterSerializer;
+import com.github.ljtfreitas.restify.http.contract.QueryParameterSerializer;
+import com.github.ljtfreitas.restify.http.contract.QueryParametersSerializer;
+import com.github.ljtfreitas.restify.http.contract.DefaultParameterSerializer;
 
-public class SpringWebEndpointMethodParameterSerializer {
+class SpringWebEndpointMethodParameterSerializer {
 
-	public static Class<? extends EndpointMethodParameterSerializer> of(SpringWebJavaMethodParameterMetadata parameter) {
+	static Class<? extends ParameterSerializer> of(SpringWebJavaMethodParameterMetadata parameter) {
 		if (parameter.query()) {
 			return SpringWebQueryParameterSerializer.class;
 		} else {
-			return SimpleEndpointMethodParameterSerializer.class;
+			return DefaultParameterSerializer.class;
 		}
 	}
 
-	public static class SpringWebQueryParameterSerializer implements EndpointMethodParameterSerializer {
+	public static class SpringWebQueryParameterSerializer implements ParameterSerializer {
 
-		private final EndpointMethodQueryParameterSerializer queryParameterSerializer = new EndpointMethodQueryParameterSerializer();
+		private final QueryParameterSerializer queryParameterSerializer = new QueryParameterSerializer();
 
-		private final EndpointMethodQueryParametersSerializer queryParametersSerializer = new EndpointMethodQueryParametersSerializer();
+		private final QueryParametersSerializer queryParametersSerializer = new QueryParametersSerializer();
 
 		@Override
 		public String serialize(String name, Type type, Object source) {

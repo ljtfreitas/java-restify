@@ -4,7 +4,7 @@
 	<parent>
 		<groupId>com.github.ljtfreitas</groupId>
 		<artifactId>java-restify-group</artifactId>
-		<version>1.6.5-SNAPSHOT</version>
+		<version>2.0.0-SNAPSHOT</version>
 	</parent>
 	<artifactId>java-restify</artifactId>
 
@@ -13,94 +13,81 @@
 
 	<dependencies>
 		<dependency>
-			<groupId>com.fasterxml.jackson.core</groupId>
-			<artifactId>jackson-databind</artifactId>
-			<version>2.8.0</version>
-			<scope>provided</scope>
-			<optional>true</optional>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>java-restify-contract</artifactId>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>org.apache.httpcomponents</groupId>
-			<artifactId>httpclient</artifactId>
-			<version>4.5.2</version>
-			<scope>provided</scope>
-			<optional>true</optional>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>java-restify-util</artifactId>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>com.squareup.okhttp3</groupId>
-			<artifactId>okhttp</artifactId>
-			<version>3.4.1</version>
-			<scope>provided</scope>
-			<optional>true</optional>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>java-restify-util-async</artifactId>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>com.google.code.gson</groupId>
-			<artifactId>gson</artifactId>
-			<version>2.7</version>
-			<scope>provided</scope>
-			<optional>true</optional>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>java-restify-reflection</artifactId>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>com.google.guava</groupId>
-			<artifactId>guava</artifactId>
-			<version>19.0</version>
-			<scope>provided</scope>
-			<optional>true</optional>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>java-restify-call-handler</artifactId>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>io.reactivex</groupId>
-			<artifactId>rxjava</artifactId>
-			<version>1.2.3</version>
-			<optional>true</optional>
-			<scope>provided</scope>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>java-restify-http-client</artifactId>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>io.reactivex.rxjava2</groupId>
-			<artifactId>rxjava</artifactId>
-			<version>2.0.2</version>
-			<optional>true</optional>
-			<scope>provided</scope>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>java-restify-http-message</artifactId>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>javax.json</groupId>
-			<artifactId>javax.json-api</artifactId>
-			<version>1.0</version>
-			<optional>true</optional>
-			<scope>provided</scope>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>java-restify-spi</artifactId>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>io.netty</groupId>
-			<artifactId>netty-transport</artifactId>
-			<version>4.0.34.Final</version>
-			<optional>true</optional>
-			<scope>provided</scope>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>java-restify-retry</artifactId>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>io.netty</groupId>
-			<artifactId>netty-codec-http</artifactId>
-			<version>4.0.34.Final</version>
-			<optional>true</optional>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>io.netty</groupId>
-			<artifactId>netty-buffer</artifactId>
-			<version>4.0.34.Final</version>
-			<optional>true</optional>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>io.netty</groupId>
-			<artifactId>netty-common</artifactId>
-			<version>4.0.34.Final</version>
-			<optional>true</optional>
-			<scope>provided</scope>
-		</dependency>
-		<dependency>
-			<groupId>org.glassfish</groupId>
-			<artifactId>javax.json</artifactId>
-			<version>1.0.4</version>
-			<scope>test</scope>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>java-restify-wildcard-converter</artifactId>
+			<version>${project.version}</version>
 		</dependency>
 	</dependencies>
+
+	<profiles>
+		<profile>
+			<id>shade</id>
+			<build>
+				<plugins>
+					<plugin>
+						<groupId>org.apache.maven.plugins</groupId>
+						<artifactId>maven-shade-plugin</artifactId>
+						<version>3.1.0</version>
+						<configuration>
+							<createSourcesJar>true</createSourcesJar>
+							<shadeSourcesContent>true</shadeSourcesContent>
+						</configuration>
+						<executions>
+							<execution>
+								<phase>package</phase>
+								<goals>
+									<goal>shade</goal>
+								</goals>
+							</execution>
+						</executions>
+					</plugin>
+				</plugins>
+			</build>
+		</profile>
+	</profiles>
 </project>

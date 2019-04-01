@@ -1,6 +1,8 @@
 package com.github.ljtfreitas.restify.http.client.request.interceptor;
 
-import static org.junit.Assert.*;
+import static org.junit.Assert.assertEquals;
+import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertTrue;
 
 import java.net.URI;
 import java.util.Optional;
@@ -8,7 +10,7 @@ import java.util.Optional;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.github.ljtfreitas.restify.http.client.Header;
+import com.github.ljtfreitas.restify.http.client.message.Header;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
 import com.github.ljtfreitas.restify.http.client.request.EndpointVersion;
 

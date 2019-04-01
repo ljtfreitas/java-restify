@@ -25,11 +25,11 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.spring.configure;
 
+import java.util.Collection;
+
 import org.springframework.beans.factory.config.BeanDefinition;
 import org.springframework.beans.factory.support.AbstractBeanDefinition;
 import org.springframework.beans.factory.support.BeanDefinitionBuilder;
-
-import com.github.ljtfreitas.restify.http.client.authentication.Authentication;
 
 class RestifyProxyBeanBuilder {
 
@@ -39,25 +39,23 @@ class RestifyProxyBeanBuilder {
 		this.builder = BeanDefinitionBuilder.genericBeanDefinition(RestifyProxyFactoryBean.class);
 	}
 
-	public RestifyProxyBeanBuilder objectType(Class<?> objectType) {
+	RestifyProxyBeanBuilder objectType(Class<?> objectType) {
 		builder.addPropertyValue("objectType", objectType);
 		return this;
 	}
 
-	public RestifyProxyBeanBuilder endpoint(String endpoint) {
+	RestifyProxyBeanBuilder endpoint(String endpoint) {
 		builder.addPropertyValue("endpoint", endpoint);
 		return this;
 	}
 
-	public RestifyProxyBeanBuilder asyncExecutorServiceName(String executorServiceName) {
+	RestifyProxyBeanBuilder asyncExecutorServiceName(String executorServiceName) {
 		builder.addPropertyReference("asyncExecutorService", executorServiceName);
 		return this;
 	}
 
-	public RestifyProxyBeanBuilder authentication(Authentication authentication) {
-		if (authentication != null) {
-			builder.addPropertyValue("authentication", authentication);
-		}
+	RestifyProxyBeanBuilder configurations(Collection<RestifyProxyConfiguration> configurations) {
+		builder.addPropertyValue("configurations", configurations);
 		return this;
 	}
 
@@ -69,7 +67,8 @@ class RestifyProxyBeanBuilder {
 
 	private BeanDefinition doBuild() {
 		return builder.setAutowireMode(AbstractBeanDefinition.AUTOWIRE_BY_TYPE)
-						.setLazyInit(true)
-							.getBeanDefinition();
+					.setLazyInit(true)
+						.getBeanDefinition();
 	}
+
 }

@@ -29,22 +29,21 @@ import org.springframework.core.convert.converter.Converter;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
 
-import com.github.ljtfreitas.restify.http.client.Headers;
+import com.github.ljtfreitas.restify.http.client.message.Headers;
+import com.github.ljtfreitas.restify.http.client.message.response.StatusCode;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
-import com.github.ljtfreitas.restify.http.client.response.StatusCode;
 
-class EndpointResponseConverter implements Converter<ResponseEntity<Object>, EndpointResponse<Object>> {
+public class EndpointResponseConverter implements Converter<ResponseEntity<Object>, EndpointResponse<Object>> {
 
 	@Override
 	public EndpointResponse<Object> convert(ResponseEntity<Object> source) {
 		StatusCode status = StatusCode.of(source.getStatusCodeValue(), source.getStatusCode().getReasonPhrase());
 		Headers headers = headersOf(source.getHeaders());
-		return new EndpointResponse<>(status, headers, source.getBody());
+		return EndpointResponse.of(status, source.getBody(), headers);
 	}
 
 	private Headers headersOf(HttpHeaders httpHeaders) {
-		Headers headers = new Headers();
-		httpHeaders.forEach((k, v) -> headers.put(k, v));
-		return headers;
+		return httpHeaders.entrySet().stream()
+				.reduce(new Headers(), (a, b) -> a.add(b.getKey(), b.getValue()), (a, b) -> b);
 	}
 }

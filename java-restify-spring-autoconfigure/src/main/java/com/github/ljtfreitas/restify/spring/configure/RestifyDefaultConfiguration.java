@@ -26,60 +26,41 @@
 package com.github.ljtfreitas.restify.spring.configure;
 
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
-import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.github.ljtfreitas.restify.http.client.request.HttpClientRequestFactory;
-import com.github.ljtfreitas.restify.http.client.request.apache.httpclient.ApacheHttpClientRequestFactory;
-import com.github.ljtfreitas.restify.http.client.request.jdk.JdkHttpClientRequestFactory;
-import com.github.ljtfreitas.restify.http.client.request.okhttp.OkHttpClientRequestFactory;
 import com.github.ljtfreitas.restify.http.client.response.DefaultEndpointResponseErrorFallback;
+import com.github.ljtfreitas.restify.http.client.response.EmptyOnNotFoundEndpointResponseErrorFallback;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponseErrorFallback;
-import com.github.ljtfreitas.restify.http.spring.client.call.exec.HttpHeadersEndpointCallExecutableFactory;
-import com.github.ljtfreitas.restify.http.spring.client.call.exec.ResponseEntityEndpointCallExecutableFactory;
+import com.github.ljtfreitas.restify.http.spring.client.call.handler.HttpHeadersEndpointCallHandlerAdapter;
+import com.github.ljtfreitas.restify.http.spring.client.call.handler.HttpStatusEndpointCallHandlerAdapter;
+import com.github.ljtfreitas.restify.http.spring.client.call.handler.ResponseEntityEndpointCallHandlerFactory;
 
 @Configuration
 public class RestifyDefaultConfiguration {
 
 	@ConditionalOnMissingBean
-	@ConditionalOnProperty(name = "restify.http.client", havingValue = "jdk", matchIfMissing = true)
 	@Bean
-	public HttpClientRequestFactory jdkHttpClientRequestFactory() {
-		return new JdkHttpClientRequestFactory();
-	}
-
-	@ConditionalOnMissingBean
-	@ConditionalOnProperty(name = "restify.http.client", havingValue = "http-client")
-	@Bean
-	public HttpClientRequestFactory apacheHttpClientRequestFactory() {
-		return new ApacheHttpClientRequestFactory();
-	}
-
-	@ConditionalOnMissingBean
-	@ConditionalOnProperty(name = "restify.http.client", havingValue = "ok-http")
-	@Bean
-	public HttpClientRequestFactory okHttpClientRequestFactory() {
-		return new OkHttpClientRequestFactory();
+	public HttpHeadersEndpointCallHandlerAdapter httpHeadersEndpointCallHandlerAdapter() {
+		return new HttpHeadersEndpointCallHandlerAdapter();
 	}
 
 	@ConditionalOnMissingBean
 	@Bean
-	public HttpHeadersEndpointCallExecutableFactory httpHeadersEndpointCallExecutableFactory() {
-		return new HttpHeadersEndpointCallExecutableFactory();
+	public HttpStatusEndpointCallHandlerAdapter httpStatusEndpointCallHandlerAdapter() {
+		return new HttpStatusEndpointCallHandlerAdapter();
 	}
 
 	@ConditionalOnMissingBean
 	@Bean
-	public ResponseEntityEndpointCallExecutableFactory<Object> responseEntityEndpointCallExecutableFactory() {
-		return new ResponseEntityEndpointCallExecutableFactory<>();
+	public ResponseEntityEndpointCallHandlerFactory<Object> responseEntityEndpointCallHandlerFactory() {
+		return new ResponseEntityEndpointCallHandlerFactory<>();
 	}
 
 	@ConditionalOnMissingBean
 	@Bean
 	public EndpointResponseErrorFallback endpointResponseErrorFallback(RestifyConfigurationProperties properties) {
 		return properties.getError().isEmptyOnNotFound() ?
-				DefaultEndpointResponseErrorFallback.emptyOnNotFound() : new DefaultEndpointResponseErrorFallback();
+				new EmptyOnNotFoundEndpointResponseErrorFallback() : new DefaultEndpointResponseErrorFallback();
 	}
-
 }

@@ -27,17 +27,24 @@ package com.github.ljtfreitas.restify.http;
 
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.Proxy;
+import java.util.Optional;
 
 class ProxyFactory {
 
 	private final InvocationHandler handler;
+	private final ClassLoader classLoader;
 
 	public ProxyFactory(InvocationHandler handler) {
+		this(handler, null);
+	}
+
+	public ProxyFactory(InvocationHandler handler, ClassLoader classLoader) {
 		this.handler = handler;
+		this.classLoader = classLoader;
 	}
 
 	@SuppressWarnings("unchecked")
 	public <T> T create(Class<T> type) {
-		return (T) Proxy.newProxyInstance(this.getClass().getClassLoader(), new Class[] {type}, handler);
+		return (T) Proxy.newProxyInstance(Optional.ofNullable(classLoader).orElseGet(type::getClassLoader), new Class[] {type}, handler);
 	}
 }

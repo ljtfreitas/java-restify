@@ -22,7 +22,7 @@ import com.github.ljtfreitas.restify.http.contract.Get;
 import com.github.ljtfreitas.restify.http.contract.Path;
 
 @RunWith(CdiRunner.class)
-@AdditionalClasses(value = {Extension.class, RestifyCdiExtension.class})
+@AdditionalClasses(value = {Extension.class, RestifyCdiExtension.class, TestComponentFactory.class})
 public class RestifyCdiExtensionTest {
 
 	@Restifyable(endpoint = "http://localhost:8090/api")

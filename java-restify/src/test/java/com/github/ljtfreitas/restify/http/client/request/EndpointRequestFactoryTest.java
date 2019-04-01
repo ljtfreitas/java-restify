@@ -1,53 +1,41 @@
 package com.github.ljtfreitas.restify.http.client.request;
 
+import static org.hamcrest.Matchers.hasSize;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.AdditionalAnswers.returnsFirstArg;
-import static org.mockito.Matchers.any;
-import static org.mockito.Mockito.when;
 
 import java.util.Arrays;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
-import org.junit.Before;
+import org.apache.xerces.util.URI;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.InjectMocks;
-import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
-import com.github.ljtfreitas.restify.http.client.request.EndpointRequestFactory;
-import com.github.ljtfreitas.restify.http.client.request.interceptor.EndpointRequestInterceptorStack;
+import com.github.ljtfreitas.restify.http.client.message.Header;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
 import com.github.ljtfreitas.restify.http.contract.Parameters;
+import com.github.ljtfreitas.restify.http.contract.QueryParameterSerializer;
+import com.github.ljtfreitas.restify.http.contract.QueryParametersSerializer;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointHeader;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointHeaders;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethod;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethodParameter;
-import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethodParameters;
-import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethodQueryParameterSerializer;
-import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethodQueryParametersSerializer;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethodParameter.EndpointMethodParameterType;
-import com.github.ljtfreitas.restify.http.contract.metadata.reflection.JavaType;
+import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethodParameters;
+import com.github.ljtfreitas.restify.reflection.JavaType;
 
 @RunWith(MockitoJUnitRunner.class)
 public class EndpointRequestFactoryTest {
 
-	@Mock
-	private EndpointRequestInterceptorStack endpointRequestInterceptorStackMock;
-
 	@InjectMocks
 	private EndpointRequestFactory endpointRequestFactory;
-
-	@Before
-	public void setup() {
-		when(endpointRequestInterceptorStackMock.apply(any()))
-			.then(returnsFirstArg());
-	}
 
 	@Test
 	public void shouldCreateEndpointRequestUsingEndpointMethodWithoutParameters() throws Exception {
@@ -68,8 +56,8 @@ public class EndpointRequestFactoryTest {
 
 	@Test
 	public void shouldCreateEndpointRequestUsingEndpointMethodWithDynamicPathParameter() throws Exception {
-		EndpointMethodParameters endpointMethodParameters = new EndpointMethodParameters();
-		endpointMethodParameters.put(new EndpointMethodParameter(0, "path", String.class));
+		EndpointMethodParameters endpointMethodParameters = new EndpointMethodParameters()
+				.put(new EndpointMethodParameter(0, "path", String.class));
 
 		EndpointMethod endpointMethod = new EndpointMethod(TargetType.class.getMethod("path", new Class[]{String.class}),
 				"http://my.api.com/some/{path}", "GET", endpointMethodParameters);
@@ -90,10 +78,10 @@ public class EndpointRequestFactoryTest {
 
 	@Test
 	public void shouldCreateEndpointRequestUsingEndpointMethodWithMultiplesDynamicPathParameters() throws Exception {
-		EndpointMethodParameters endpointMethodParameters = new EndpointMethodParameters();
-		endpointMethodParameters.put(new EndpointMethodParameter(0, "path", String.class));
-		endpointMethodParameters.put(new EndpointMethodParameter(1, "secondPath", String.class));
-		endpointMethodParameters.put(new EndpointMethodParameter(2, "thirdPath", String.class));
+		EndpointMethodParameters endpointMethodParameters = new EndpointMethodParameters()
+				.put(new EndpointMethodParameter(0, "path", String.class))
+				.put(new EndpointMethodParameter(1, "secondPath", String.class))
+				.put(new EndpointMethodParameter(2, "thirdPath", String.class));
 
 		EndpointMethod endpointMethod = new EndpointMethod(TargetType.class.getMethod("path", new Class[]{String.class, String.class, String.class}),
 				"http://my.api.com/some/{path}/{secondPath}/{thirdPath}", "GET", endpointMethodParameters);
@@ -116,8 +104,8 @@ public class EndpointRequestFactoryTest {
 
 	@Test
 	public void shouldCreateEndpointRequestUsingEndpointMethodWithBodyParameter() throws Exception {
-		EndpointMethodParameters endpointMethodParameters = new EndpointMethodParameters();
-		endpointMethodParameters.put(new EndpointMethodParameter(0, "body", Object.class, EndpointMethodParameterType.BODY));
+		EndpointMethodParameters endpointMethodParameters = new EndpointMethodParameters()
+				.put(new EndpointMethodParameter(0, "body", Object.class, EndpointMethodParameterType.BODY));
 
 		EndpointMethod endpointMethod = new EndpointMethod(TargetType.class.getMethod("body", new Class[]{Object.class}),
 				"http://my.api.com/some", "POST", endpointMethodParameters);
@@ -139,14 +127,11 @@ public class EndpointRequestFactoryTest {
 
 	@Test
 	public void shouldCreateEndpointRequestUsingEndpointMethodWithDynamicHeaderParameter() throws Exception {
-		EndpointMethodParameters endpointMethodParameters = new EndpointMethodParameters();
-		endpointMethodParameters.put(new EndpointMethodParameter(0, "header", String.class, EndpointMethodParameterType.HEADER));
-
-		EndpointHeaders endpointHeaders = new EndpointHeaders();
-		endpointHeaders.put(new EndpointHeader("X-My-Custom-Header", "{header}"));
+		EndpointMethodParameters endpointMethodParameters = new EndpointMethodParameters()
+				.put(new EndpointMethodParameter(0, "X-My-Custom-Header", String.class, EndpointMethodParameterType.HEADER));
 
 		EndpointMethod endpointMethod = new EndpointMethod(TargetType.class.getMethod("header", new Class[]{String.class}),
-				"http://my.api.com/some", "GET", endpointMethodParameters, endpointHeaders);
+				"http://my.api.com/some", "GET", endpointMethodParameters);
 
 		Object[] args = new Object[]{"my custom header"};
 
@@ -163,17 +148,39 @@ public class EndpointRequestFactoryTest {
 	}
 
 	@Test
+	public void shouldCreateEndpointRequestUsingEndpointMethodWithDynamicCookieParameter() throws Exception {
+		EndpointMethodParameters endpointMethodParameters = new EndpointMethodParameters()
+				.put(new EndpointMethodParameter(0, "JSESSIONID", String.class, EndpointMethodParameterType.COOKIE));
+
+		EndpointMethod endpointMethod = new EndpointMethod(TargetType.class.getMethod("cookie", new Class[]{String.class}),
+				"http://my.api.com/some", "GET", endpointMethodParameters);
+
+		Object[] args = new Object[]{"abc1234"};
+
+		EndpointRequest endpointRequest = endpointRequestFactory.createWith(endpointMethod, args);
+
+		assertEquals("http://my.api.com/some", endpointRequest.endpoint().toString());
+		assertEquals(endpointMethod.httpMethod(), endpointRequest.method());
+
+		assertFalse(endpointRequest.body().isPresent());
+
+		assertEquals("JSESSIONID=abc1234", endpointRequest.headers().get("Cookie").get().value());
+
+		assertEquals(JavaType.of(String.class), endpointRequest.responseType());
+	}
+
+	@Test
 	public void shouldCreateEndpointRequestUsingEndpointMethodWithQueryStringParameter() throws Exception {
-		EndpointMethodParameters endpointMethodParameters = new EndpointMethodParameters();
-		endpointMethodParameters.put(new EndpointMethodParameter(0, "parameters", Parameters.class, EndpointMethodParameterType.QUERY_STRING,
-				new EndpointMethodQueryParametersSerializer()));
+		EndpointMethodParameters endpointMethodParameters = new EndpointMethodParameters()
+				.put(new EndpointMethodParameter(0, "parameters", Parameters.class, EndpointMethodParameterType.QUERY_STRING,
+						new QueryParametersSerializer()));
 
 		EndpointMethod endpointMethod = new EndpointMethod(TargetType.class.getMethod("queryString", new Class[]{Parameters.class}),
 				"http://my.api.com/query", "GET", endpointMethodParameters);
 
-		Parameters parameters = new Parameters();
-		parameters.put("param1", "value1");
-		parameters.put("param2", "value2");
+		Parameters parameters = new Parameters()
+				.put("param1", "value1")
+				.put("param2", "value2");
 
 		Object[] args = new Object[]{parameters};
 
@@ -189,9 +196,9 @@ public class EndpointRequestFactoryTest {
 
 	@Test
 	public void shouldCreateEndpointRequestUsingEndpointMethodWithQueryStringParameterAsMap() throws Exception {
-		EndpointMethodParameters endpointMethodParameters = new EndpointMethodParameters();
-		endpointMethodParameters.put(new EndpointMethodParameter(0, "parameters", Map.class, EndpointMethodParameterType.QUERY_STRING,
-				new EndpointMethodQueryParametersSerializer()));
+		EndpointMethodParameters endpointMethodParameters = new EndpointMethodParameters()
+				.put(new EndpointMethodParameter(0, "parameters", Map.class, EndpointMethodParameterType.QUERY_STRING,
+						new QueryParametersSerializer()));
 
 		EndpointMethod endpointMethod = new EndpointMethod(TargetType.class.getMethod("queryStringAsMap", new Class[]{Map.class}),
 				"http://my.api.com/query", "GET", endpointMethodParameters);
@@ -214,9 +221,9 @@ public class EndpointRequestFactoryTest {
 
 	@Test
 	public void shouldCreateEndpointRequestUsingEndpointMethodWithQueryStringParameterAsMapWithMultiplesValues() throws Exception {
-		EndpointMethodParameters endpointMethodParameters = new EndpointMethodParameters();
-		endpointMethodParameters.put(new EndpointMethodParameter(0, "parameters", Map.class, EndpointMethodParameterType.QUERY_STRING,
-				new EndpointMethodQueryParametersSerializer()));
+		EndpointMethodParameters endpointMethodParameters = new EndpointMethodParameters()
+				.put(new EndpointMethodParameter(0, "parameters", Map.class, EndpointMethodParameterType.QUERY_STRING,
+						new QueryParametersSerializer()));
 
 		EndpointMethod endpointMethod = new EndpointMethod(TargetType.class.getMethod("queryStringAsMultiValueMap", new Class[]{Map.class}),
 				"http://my.api.com/query", "GET", endpointMethodParameters);
@@ -241,9 +248,9 @@ public class EndpointRequestFactoryTest {
 
 	@Test
 	public void shouldCreateEndpointRequestUsingEndpointMethodWithSimpleQueryStringParameter() throws Exception {
-		EndpointMethodParameters endpointMethodParameters = new EndpointMethodParameters();
-		endpointMethodParameters.put(new EndpointMethodParameter(0, "parameter", String.class, EndpointMethodParameterType.QUERY_STRING,
-				new EndpointMethodQueryParameterSerializer()));
+		EndpointMethodParameters endpointMethodParameters = new EndpointMethodParameters()
+				.put(new EndpointMethodParameter(0, "parameter", String.class, EndpointMethodParameterType.QUERY_STRING,
+						new QueryParameterSerializer()));
 
 		EndpointMethod endpointMethod = new EndpointMethod(TargetType.class.getMethod("simpleQueryString", new Class[]{String.class}),
 				"http://my.api.com/query", "GET", endpointMethodParameters);
@@ -265,16 +272,13 @@ public class EndpointRequestFactoryTest {
 
 	@Test
 	public void shouldCreateEndpointRequestFactoryUsingEndpointMethodWithMultiplesTypesOfDynamicParameters() throws Exception {
-		EndpointMethodParameters endpointMethodParameters = new EndpointMethodParameters();
-		endpointMethodParameters.put(new EndpointMethodParameter(0, "path", String.class));
-		endpointMethodParameters.put(new EndpointMethodParameter(1, "header", String.class, EndpointMethodParameterType.HEADER));
-		endpointMethodParameters.put(new EndpointMethodParameter(2, "body", Object.class, EndpointMethodParameterType.BODY));
-
-		EndpointHeaders endpointHeaders = new EndpointHeaders();
-		endpointHeaders.put(new EndpointHeader("X-My-Custom-Header", "{header}"));
+		EndpointMethodParameters endpointMethodParameters = new EndpointMethodParameters()
+				.put(new EndpointMethodParameter(0, "path", String.class))
+				.put(new EndpointMethodParameter(1, "X-My-Custom-Header", String.class, EndpointMethodParameterType.HEADER))
+				.put(new EndpointMethodParameter(2, "body", Object.class, EndpointMethodParameterType.BODY));
 
 		EndpointMethod endpointMethod = new EndpointMethod(TargetType.class.getMethod("multiple", new Class[]{String.class, String.class, Object.class}),
-				"http://my.api.com/some/{path}", "POST", endpointMethodParameters, endpointHeaders);
+				"http://my.api.com/some/{path}", "POST", endpointMethodParameters);
 
 		Object[] args = new Object[]{"argument", "my custom header", "my body"};
 
@@ -321,6 +325,51 @@ public class EndpointRequestFactoryTest {
 		assertEquals("v1", version.get());
 	}
 
+	@Test
+	public void shouldMergeQueryParametersPresenOnEnpointPathWithMethodParameters() throws Exception {
+		EndpointMethodParameters endpointMethodParameters = new EndpointMethodParameters()
+				.put(new EndpointMethodParameter(0, "parameter", String.class, EndpointMethodParameterType.QUERY_STRING,
+						new QueryParameterSerializer()));
+
+		EndpointMethod endpointMethod = new EndpointMethod(TargetType.class.getMethod("simpleQueryString", String.class),
+				"http://my.api.com/some?a=value&b=other-value", "GET", endpointMethodParameters);
+
+		Object[] args = new Object[] { "my-query-parameter" };
+
+		EndpointRequest endpointRequest = endpointRequestFactory.createWith(endpointMethod, args, JavaType.of(String.class));
+
+		assertEquals(new URI("http://my.api.com/some?a=value&b=other-value&parameter=my-query-parameter").toString(),
+				endpointRequest.endpoint().toString());
+	}
+
+	@Test
+	public void shouldApplyEndpointMethodHeaders() throws Exception {
+		EndpointHeaders headers = new EndpointHeaders()
+				.put(new EndpointHeader("X-My-Header", "my-header"))
+				.put(new EndpointHeader("X-Custom-Header", "custom-header"));
+
+		EndpointMethod endpointMethod = new EndpointMethod(TargetType.class.getMethod("simple"), "http://my.api.com/some",
+				"GET", new EndpointMethodParameters(), headers);
+
+		EndpointRequest endpointRequest = endpointRequestFactory.createWith(endpointMethod, new Object[0]);
+
+		assertEquals(endpointMethod.path(), endpointRequest.endpoint().toString());
+		assertEquals(endpointMethod.httpMethod(), endpointRequest.method());
+
+		assertFalse(endpointRequest.body().isPresent());
+		assertEquals(JavaType.of(String.class), endpointRequest.responseType());
+
+		assertThat(endpointRequest.headers().all(), hasSize(2));
+
+		Optional<Header> myHeader = endpointRequest.headers().get("X-My-Header");
+		assertTrue(myHeader.isPresent());
+		assertEquals("my-header", myHeader.get().value());
+
+		Optional<Header> customHeader = endpointRequest.headers().get("X-Custom-Header");
+		assertTrue(customHeader.isPresent());
+		assertEquals("custom-header", customHeader.get().value());
+	}
+
 	interface TargetType {
 
 		public String simple();
@@ -330,6 +379,8 @@ public class EndpointRequestFactoryTest {
 		public String path(String path, String secondPath, String thirdPath);
 
 		public String header(String header);
+
+		public String cookie(String cookie);
 
 		public String body(Object body);
 

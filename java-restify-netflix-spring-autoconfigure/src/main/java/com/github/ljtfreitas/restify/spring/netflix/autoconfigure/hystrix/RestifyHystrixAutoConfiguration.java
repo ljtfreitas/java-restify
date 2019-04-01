@@ -28,44 +28,150 @@ package com.github.ljtfreitas.restify.spring.netflix.autoconfigure.hystrix;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.BeanFactory;
 import org.springframework.beans.factory.BeanFactoryAware;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
+import org.springframework.context.ApplicationContext;
+import org.springframework.context.ApplicationContextAware;
+import org.springframework.context.EnvironmentAware;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.core.Ordered;
+import org.springframework.core.annotation.Order;
+import org.springframework.core.env.Environment;
 
+import com.github.ljtfreitas.restify.http.client.call.handler.circuitbreaker.OnCircuitBreaker;
+import com.github.ljtfreitas.restify.http.client.call.handler.circuitbreaker.OnCircuitBreakerMetadataResolver;
+import com.github.ljtfreitas.restify.http.client.call.handler.reactor.HystrixFluxEndpointCallHandlerAdapter;
+import com.github.ljtfreitas.restify.http.client.call.handler.reactor.HystrixMonoEndpointCallHandlerAdapter;
+import com.github.ljtfreitas.restify.http.netflix.client.call.handler.hystrix.HystrixCommandEndpointCallHandlerAdapter;
+import com.github.ljtfreitas.restify.http.netflix.client.call.handler.hystrix.HystrixEndpointCallHandlerAdapter;
+import com.github.ljtfreitas.restify.http.netflix.client.call.handler.hystrix.HystrixFutureEndpointCallHandlerAdapter;
+import com.github.ljtfreitas.restify.http.netflix.client.call.handler.hystrix.HystrixObservableCommandEndpointCallHandlerAdapter;
+import com.github.ljtfreitas.restify.http.netflix.client.call.handler.hystrix.HystrixObservableEndpointCallHandlerAdapter;
 import com.github.ljtfreitas.restify.spring.autoconfigure.RestifyAutoConfiguration;
 
 @Configuration
+@ConditionalOnClass(OnCircuitBreaker.class)
 @AutoConfigureBefore(RestifyAutoConfiguration.class)
 public class RestifyHystrixAutoConfiguration {
 
+	private static final int HYSTRIX_HANDLER_BEANS_PRIORITY_ORDER = Ordered.HIGHEST_PRECEDENCE + 10;
+
 	@ConditionalOnMissingBean
 	@Bean
-	public HystrixCommandSpringFallbackEndpointCallExecutableFactory hystrixCommandEndpointCallExecutableFactory(
-			HystrixFallbackBeanFactory fallbackObjectFactory) {
-		return new HystrixCommandSpringFallbackEndpointCallExecutableFactory(fallbackObjectFactory);
+	@Order(HYSTRIX_HANDLER_BEANS_PRIORITY_ORDER + 1)
+	public HystrixEndpointCallHandlerAdapter<Object, Object> hystrixEndpointCallHandlerAdapter() {
+		return new HystrixEndpointCallHandlerAdapter<>();
 	}
 
 	@ConditionalOnMissingBean
 	@Bean
-	public HystrixCircuitBreakerSpringFallbackEndpointCallExecutableFactory hystrixCircuitBreakerSpringFallbackEndpointCallExecutableFactory(
-			HystrixFallbackBeanFactory fallbackObjectFactory) {
-		return new HystrixCircuitBreakerSpringFallbackEndpointCallExecutableFactory(fallbackObjectFactory);
+	@Order(HYSTRIX_HANDLER_BEANS_PRIORITY_ORDER + 1)
+	public HystrixFutureEndpointCallHandlerAdapter<Object, Object> hystrixFutureEndpointCallHandlerAdapter(
+			HystrixFallbackRegistry fallbackObjectFactory, OnCircuitBreakerMetadataResolver onCircuitBreakerMetadataResolver) {
+		return new HystrixFutureEndpointCallHandlerAdapter<>();
+	}
+
+	@ConditionalOnMissingBean
+	@Bean
+	@Order(HYSTRIX_HANDLER_BEANS_PRIORITY_ORDER + 1)
+	public HystrixObservableEndpointCallHandlerAdapter<Object, Object> hystrixObservableEndpointCallHandlerAdapter() {
+		return new HystrixObservableEndpointCallHandlerAdapter<>();
+	}
+
+	@ConditionalOnMissingBean
+	@Bean
+	@Order(HYSTRIX_HANDLER_BEANS_PRIORITY_ORDER + 10)
+	public HystrixCommandEndpointCallHandlerAdapter<Object, Object> hystrixCommandFallbackEndpointCallHandlerAdapter(
+			HystrixFallbackProvider hystrixFallbackProvider, OnCircuitBreakerMetadataResolver onCircuitBreakerMetadataResolver) {
+		return new HystrixCommandEndpointCallHandlerAdapter<>(hystrixFallbackProvider, onCircuitBreakerMetadataResolver);
+	}
+
+	@ConditionalOnMissingBean
+	@Bean
+	@Order(HYSTRIX_HANDLER_BEANS_PRIORITY_ORDER + 10)
+	public HystrixObservableCommandEndpointCallHandlerAdapter<Object, Object> hystrixObservableCommandFallbackEndpointCallHandlerAdapter(
+			HystrixFallbackProvider hystrixFallbackProvider, OnCircuitBreakerMetadataResolver onCircuitBreakerMetadataResolver) {
+		return new HystrixObservableCommandEndpointCallHandlerAdapter<>(hystrixFallbackProvider, onCircuitBreakerMetadataResolver);
 	}
 
 	@Configuration
-	protected static class RestifyHystrixFallbackConfiguration implements BeanFactoryAware {
+	protected static class HystrixFallbackConfiguration implements BeanFactoryAware {
 
 		private BeanFactory beanFactory;
 
 		@Bean
-		public HystrixFallbackBeanFactory restifyFallbackObjectFactory() {
-			return new HystrixFallbackBeanFactory(beanFactory);
+		@ConditionalOnMissingBean
+		public HystrixFallbackProvider hystrixFallbackProvider() {
+			return new HystrixFallbackProvider(hystrixFallbackRegistry());
+		}
+
+		@Bean
+		public HystrixFallbackRegistry hystrixFallbackRegistry() {
+			return new HystrixFallbackRegistry(beanFactory);
 		}
 
 		@Override
 		public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
 			this.beanFactory = beanFactory;
+		}
+	}
+
+	@Configuration
+	protected static class HystrixOnCircuitBreakerMetadataResolverConfiguration
+		implements BeanFactoryAware, ApplicationContextAware, EnvironmentAware {
+
+		private BeanFactory beanFactory;
+		private Environment environment;
+		private ApplicationContext applicationContext;
+
+		@Bean
+		@ConditionalOnMissingBean
+		public OnCircuitBreakerMetadataResolver onCircuitBreakerMetadataResolver() {
+			return new SpelOnCircuitBreakerMetadataResolver((ConfigurableBeanFactory) beanFactory, applicationContext, onCircuitBreakerProperties());
+		}
+
+		@Bean
+		public OnCircuitBreakerProperties onCircuitBreakerProperties() {
+			return new OnCircuitBreakerProperties(environment);
+		}
+
+		@Override
+		public void setBeanFactory(BeanFactory beanFactory) throws BeansException {
+			this.beanFactory = beanFactory;
+		}
+
+		@Override
+		public void setEnvironment(Environment environment) {
+			this.environment = environment;
+		}
+
+		@Override
+		public void setApplicationContext(ApplicationContext applicationContext) throws BeansException {
+			this.applicationContext = applicationContext;
+		}
+	}
+
+	@Configuration
+	@ConditionalOnClass(value = {HystrixFluxEndpointCallHandlerAdapter.class, HystrixMonoEndpointCallHandlerAdapter.class})
+	protected static class ReactorHystrixConfiguration {
+
+		@Bean
+		@ConditionalOnMissingBean
+		@Order(HYSTRIX_HANDLER_BEANS_PRIORITY_ORDER + 2)
+		public 	HystrixFluxEndpointCallHandlerAdapter<Object, Object> hystrixFluxEndpointCallHandlerAdapter(
+				HystrixFallbackProvider hystrixFallbackProvider, OnCircuitBreakerMetadataResolver onCircuitBreakerMetadataResolver) {
+			return new HystrixFluxEndpointCallHandlerAdapter<>(hystrixFallbackProvider, onCircuitBreakerMetadataResolver);
+		}
+
+		@Bean
+		@ConditionalOnMissingBean
+		@Order(HYSTRIX_HANDLER_BEANS_PRIORITY_ORDER + 2)
+		public 	HystrixMonoEndpointCallHandlerAdapter<Object, Object> hystrixMonoEndpointCallHandlerAdapter(
+				HystrixFallbackProvider hystrixFallbackProvider, OnCircuitBreakerMetadataResolver onCircuitBreakerMetadataResolver) {
+			return new HystrixMonoEndpointCallHandlerAdapter<>(hystrixFallbackProvider, onCircuitBreakerMetadataResolver);
 		}
 	}
 }

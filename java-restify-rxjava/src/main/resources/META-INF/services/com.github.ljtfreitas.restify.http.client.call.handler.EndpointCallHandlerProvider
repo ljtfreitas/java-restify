@@ -1,0 +1,3 @@
+com.github.ljtfreitas.restify.http.client.call.handler.rxjava.RxJavaCompletableEndpointCallHandlerFactory
+com.github.ljtfreitas.restify.http.client.call.handler.rxjava.RxJavaObservableEndpointCallHandlerAdapter
+com.github.ljtfreitas.restify.http.client.call.handler.rxjava.RxJavaSingleEndpointCallHandlerAdapter

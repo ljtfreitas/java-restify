@@ -6,6 +6,9 @@ import static org.mockserver.integration.ClientAndServer.startClientAndServer;
 import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
 
+import java.util.Arrays;
+import java.util.Collection;
+
 import javax.enterprise.inject.spi.Extension;
 import javax.inject.Inject;
 
@@ -18,14 +21,16 @@ import org.junit.runner.RunWith;
 import org.mockserver.client.server.MockServerClient;
 import org.mockserver.integration.ClientAndServer;
 
+import com.github.ljtfreitas.restify.http.client.request.interceptor.HttpClientRequestInterceptor;
+import com.github.ljtfreitas.restify.http.client.request.interceptor.log.LogHttpClientRequestInterceptor;
 import com.github.ljtfreitas.restify.http.contract.Get;
 import com.github.ljtfreitas.restify.http.contract.Path;
 
 @RunWith(CdiRunner.class)
-@AdditionalClasses(value = {Extension.class, RestifyCdiExtension.class, SimpleEndpointRequestInterceptor.class})
+@AdditionalClasses(value = {Extension.class, RestifyCdiExtension.class, TestComponentFactory.class, RestifyCdiExtensionExtendedTest.MyApiConfiguration.class})
 public class RestifyCdiExtensionExtendedTest {
 
-	@Restifyable(endpoint = "http://localhost:8090/api")
+	@Restifyable(endpoint = "http://localhost:8090/api", configuration = MyApiConfiguration.class)
 	public interface MyApiType {
 
 		@Path("/test")
@@ -50,7 +55,7 @@ public class RestifyCdiExtensionExtendedTest {
 				.withPath("/api/test"))
 			.respond(response()
 				.withStatusCode(200)
-				.withHeader("Content-Type", "text/plain; charset=UTF-8")
+				.withHeader("Content-Type", "text/plain")
 				.withBody("Hello, Restify CDI extension it's works!"));
 	}
 
@@ -64,5 +69,13 @@ public class RestifyCdiExtensionExtendedTest {
 		assertNotNull(myApiType);
 
 		assertEquals("Hello, Restify CDI extension it's works!", myApiType.test());
+	}
+
+	static class MyApiConfiguration implements RestifyProxyConfiguration {
+
+		@Override
+		public Collection<HttpClientRequestInterceptor> httpClientRequestInterceptors() {
+			return Arrays.asList(new LogHttpClientRequestInterceptor());
+		}
 	}
 }

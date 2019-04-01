@@ -27,50 +27,70 @@ package com.github.ljtfreitas.restify.http.client.request;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import java.util.Optional;
 
-import com.github.ljtfreitas.restify.http.RestifyHttpException;
-import com.github.ljtfreitas.restify.http.client.Header;
-import com.github.ljtfreitas.restify.http.client.Headers;
-import com.github.ljtfreitas.restify.http.client.request.interceptor.EndpointRequestInterceptorStack;
-import com.github.ljtfreitas.restify.http.contract.metadata.EndpointHeaderParameterResolver;
+import com.github.ljtfreitas.restify.http.client.HttpException;
+import com.github.ljtfreitas.restify.http.client.message.Cookies;
+import com.github.ljtfreitas.restify.http.client.message.Header;
+import com.github.ljtfreitas.restify.http.client.message.Headers;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethod;
-import com.github.ljtfreitas.restify.http.contract.metadata.reflection.JavaType;
+import com.github.ljtfreitas.restify.reflection.JavaType;
 
 public class EndpointRequestFactory {
 
-	private final EndpointRequestInterceptorStack interceptors;
-
-	public EndpointRequestFactory(EndpointRequestInterceptorStack interceptors) {
-		this.interceptors = interceptors;
-	}
-
 	public EndpointRequest createWith(EndpointMethod endpointMethod, Object[] args) {
-		return interceptors.apply(newRequest(endpointMethod, args, endpointMethod.returnType()));
+		return newRequest(endpointMethod, args, endpointMethod.returnType());
 	}
 
 	public EndpointRequest createWith(EndpointMethod endpointMethod, Object[] args, JavaType responseType) {
-		return interceptors.apply(newRequest(endpointMethod, args, responseType));
+		return newRequest(endpointMethod, args, responseType);
 	}
 
 	private EndpointRequest newRequest(EndpointMethod endpointMethod, Object[] args, JavaType responseType) {
 		try {
-			URI endpoint = new URI(endpointMethod.expand(args));
+			URI endpoint = endpointMethod.expand(args);
 
-			Object body = endpointMethod.parameters()
-					.ofBody()
-						.map(p -> args[p.position()]).orElse(null);
+			Object body = bodyOf(endpointMethod, args);
 
-			Headers headers = new Headers();
-			endpointMethod.headers().all().stream()
-				.forEach(h -> headers.add(new Header(h.name(), new EndpointHeaderParameterResolver(h.value(), endpointMethod.parameters())
-						.resolve(args))));
+			Headers headers = headersOf(endpointMethod, args);
 
 			EndpointVersion version = endpointMethod.version().map(EndpointVersion::of).orElse(null);
 
-			return new EndpointRequest(endpoint, endpointMethod.httpMethod(), headers, body, responseType, version);
+			EndpointRequestMetadata metadata = new EndpointRequestMetadata(endpointMethod.metadata().all());
+
+			return new EndpointRequest(endpoint, endpointMethod.httpMethod(), headers, body, responseType, version, metadata);
 
 		} catch (URISyntaxException e) {
-			throw new RestifyHttpException(e);
+			throw new HttpException(e);
 		}
+	}
+
+	private Object bodyOf(EndpointMethod endpointMethod, Object[] args) {
+		return endpointMethod.parameters()
+				.body()
+					.map(p -> args[p.position()]).orElse(null);
+	}
+
+	private Headers headersOf(EndpointMethod endpointMethod, Object[] args) {
+		Headers headers = endpointMethod.headers().all()
+				.stream()
+					.reduce(new Headers(), (a, b) -> a.add(new Header(b.name(), b.value())), (a, b) -> b)
+				.addAll(endpointMethod.parameters().header()
+						.stream()
+							.reduce(new Headers(),
+									(a, b) -> a.add(new Header(b.name(), b.resolve(args[b.position()]))), (a, b) -> b));
+
+		return cookiesOf(endpointMethod, args)
+				.map(headers::add)
+					.orElse(headers);
+	}
+
+	private Optional<Header> cookiesOf(EndpointMethod endpointMethod, Object[] args) {
+		Cookies cookies = endpointMethod.parameters().cookie()
+			.stream()
+				.reduce(new Cookies(),
+						(a, b) -> a.add(b.name(), b.resolve(args[b.position()])), (a, b) -> b);
+
+		return cookies.empty() ? Optional.empty() : Optional.of(Header.cookie(cookies));
 	}
 }
