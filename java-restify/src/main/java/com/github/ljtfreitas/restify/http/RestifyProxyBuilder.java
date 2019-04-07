@@ -315,8 +315,7 @@ public class RestifyProxyBuilder {
 		private EndpointRequestExecutor asyncEndpointRequestExecutor(AsyncHttpClientRequestFactory asyncHttpClientRequestFactory,
 				EndpointRequestWriter writer, EndpointResponseReader reader) {
 			return new DefaultAsyncEndpointRequestExecutor(asyncBuilder.executor,
-					asyncHttpClientRequestFactory, writer, reader,
-						endpointRequestExecutor(asyncHttpClientRequestFactory, writer, reader));
+					asyncHttpClientRequestFactory, writer, reader);
 		}
 
 		private EndpointRequestExecutor endpointRequestExecutor(HttpClientRequestFactory httpClientRequestFactory,

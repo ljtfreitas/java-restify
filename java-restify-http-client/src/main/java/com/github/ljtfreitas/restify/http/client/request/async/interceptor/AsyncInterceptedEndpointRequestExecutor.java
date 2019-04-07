@@ -48,6 +48,6 @@ public class AsyncInterceptedEndpointRequestExecutor implements AsyncEndpointReq
 
 	@Override
 	public <T> CompletionStage<EndpointResponse<T>> executeAsync(EndpointRequest endpointRequest) {
-		return interceptors.applyAsync(endpointRequest).thenCompose(r -> delegate.executeAsync(r));
+		return interceptors.applyAsync(endpointRequest).thenComposeAsync(delegate::executeAsync);
 	}
 }

@@ -81,7 +81,7 @@ public class AuthorizationServerHttpClientFactory {
 		ExecutorService threadPool = DisposableExecutors.newCachedThreadPool();
 		return httpClientRequestFactory instanceof AsyncHttpClientRequestFactory ?
 			new DefaultAsyncEndpointRequestExecutor(threadPool, (AsyncHttpClientRequestFactory) httpClientRequestFactory,
-					endpointRequestWriter(converters), endpointResponseReader(converters), doCreate()) :
+					endpointRequestWriter(converters), endpointResponseReader(converters)) :
 				new AsyncEndpointRequestExecutorAdapter(threadPool, doCreate());
 	}
 
