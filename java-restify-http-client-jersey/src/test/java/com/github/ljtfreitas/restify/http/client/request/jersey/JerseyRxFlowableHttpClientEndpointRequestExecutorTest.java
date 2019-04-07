@@ -1,7 +1,9 @@
 package com.github.ljtfreitas.restify.http.client.request.jersey;
 
+import static org.hamcrest.Matchers.is;
 import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertNull;
+import static org.junit.Assert.assertThat;
 import static org.junit.Assert.assertTrue;
 import static org.mockserver.model.HttpRequest.request;
 import static org.mockserver.model.HttpResponse.response;
@@ -28,9 +30,9 @@ import com.github.ljtfreitas.restify.http.client.message.Header;
 import com.github.ljtfreitas.restify.http.client.message.Headers;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
-import com.github.ljtfreitas.restify.http.client.response.EndpointResponseInternalServerErrorException;
+import com.github.ljtfreitas.restify.http.client.response.EndpointResponseException;
 
-public class JaxRsHttpClientEndpointRequestExecutorTest {
+public class JerseyRxFlowableHttpClientEndpointRequestExecutorTest {
 
 	@Rule
 	public MockServerRule mockServerRule = new MockServerRule(this, 7080);
@@ -38,7 +40,7 @@ public class JaxRsHttpClientEndpointRequestExecutorTest {
 	@Rule
 	public ExpectedException expectedException = ExpectedException.none();
 
-	private JaxRsHttpClientEndpointRequestExecutor executor;
+	private JerseyRxFlowableHttpClientEndpointRequestExecutor executor;
 
 	private MockServerClient mockServerClient;
 
@@ -46,7 +48,7 @@ public class JaxRsHttpClientEndpointRequestExecutorTest {
 	public void setup() {
 		mockServerClient = new MockServerClient("localhost", 7080);
 
-		executor = new JaxRsHttpClientEndpointRequestExecutor();
+		executor = new JerseyRxFlowableHttpClientEndpointRequestExecutor();
 	}
 
 	@Test
@@ -62,7 +64,8 @@ public class JaxRsHttpClientEndpointRequestExecutorTest {
 
 		EndpointRequest endpointRequest = new EndpointRequest(URI.create("http://localhost:7080/json"), "GET", MyModel.class);
 
-		EndpointResponse<MyModel> myModelResponse = executor.execute(endpointRequest);
+		EndpointResponse<MyModel> myModelResponse = executor.<MyModel> executeAsync(endpointRequest)
+				.toCompletableFuture().join();
 
 		assertTrue(myModelResponse.status().isOk());
 
@@ -95,7 +98,9 @@ public class JaxRsHttpClientEndpointRequestExecutorTest {
 		EndpointRequest endpointRequest = new EndpointRequest(URI.create("http://localhost:7080/json"), "POST", headers,
 				myModel, String.class);
 
-		EndpointResponse<String> myModelResponse = executor.execute(endpointRequest);
+		EndpointResponse<String> myModelResponse = executor.<String> executeAsync(endpointRequest)
+				.toCompletableFuture()
+					.join();
 
 		assertTrue(myModelResponse.status().isCreated());
 
@@ -117,7 +122,9 @@ public class JaxRsHttpClientEndpointRequestExecutorTest {
 
 		EndpointRequest endpointRequest = new EndpointRequest(URI.create("http://localhost:7080/xml"), "GET", MyModel.class);
 
-		EndpointResponse<MyModel> myModelResponse = executor.execute(endpointRequest);
+		EndpointResponse<MyModel> myModelResponse = executor.<MyModel> executeAsync(endpointRequest)
+				.toCompletableFuture()
+					.join();
 
 		assertTrue(myModelResponse.status().isOk());
 
@@ -150,7 +157,9 @@ public class JaxRsHttpClientEndpointRequestExecutorTest {
 		EndpointRequest endpointRequest = new EndpointRequest(URI.create("http://localhost:7080/xml"), "POST", headers,
 				myModel, String.class);
 
-		EndpointResponse<String> myModelResponse = executor.execute(endpointRequest);
+		EndpointResponse<String> myModelResponse = executor.<String> executeAsync(endpointRequest)
+				.toCompletableFuture()
+					.join();
 
 		assertTrue(myModelResponse.status().isCreated());
 
@@ -159,7 +168,7 @@ public class JaxRsHttpClientEndpointRequestExecutorTest {
 		mockServerClient.verify(httpRequest, once());
 	}
 
-	@Test(expected = EndpointResponseInternalServerErrorException.class)
+	@Test
 	public void shouldReadServerErrorResponse() {
 		mockServerClient
 			.when(request()
@@ -170,7 +179,12 @@ public class JaxRsHttpClientEndpointRequestExecutorTest {
 
 		EndpointRequest endpointRequest = new EndpointRequest(URI.create("http://localhost:7080/json"), "GET", MyModel.class);
 
-		executor.execute(endpointRequest);
+		EndpointResponse<Object> endpointResponse = executor.executeAsync(endpointRequest)
+			.exceptionally(e -> EndpointResponse.error((EndpointResponseException) e))
+				.toCompletableFuture()
+					.join();
+
+		assertThat(endpointResponse.status().isInternalServerError(), is(true));
 	}
 
 	@Test
@@ -184,7 +198,9 @@ public class JaxRsHttpClientEndpointRequestExecutorTest {
 
 		EndpointRequest endpointRequest = new EndpointRequest(URI.create("http://localhost:7080/json"), "GET", MyModel.class);
 
-		EndpointResponse<Object> endpointResponse = executor.execute(endpointRequest);
+		EndpointResponse<Object> endpointResponse = executor.<Object> executeAsync(endpointRequest)
+				.toCompletableFuture()
+					.join();
 
 		assertTrue(endpointResponse.status().isNotFound());
 		assertNull(endpointResponse.body());
