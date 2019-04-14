@@ -84,17 +84,6 @@ class AsyncLoggableHttpClientRequest implements AsyncHttpClientRequest {
 	}
 
 	@Override
-	public HttpClientResponse execute() throws HttpClientException {
-		log.info(requestAsLog());
-
-		LoggableHttpClientResponse response = new LoggableHttpClientResponse(source.execute());
-
-		log.info(responseAsLog(response));
-
-		return response;
-	}
-
-	@Override
 	public CompletionStage<HttpClientResponse> executeAsync() throws HttpClientException {
 		log.info(requestAsLog());
 

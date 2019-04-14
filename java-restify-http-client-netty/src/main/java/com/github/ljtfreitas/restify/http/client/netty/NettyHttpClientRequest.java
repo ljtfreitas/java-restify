@@ -29,7 +29,6 @@ import java.net.URI;
 import java.nio.charset.Charset;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionStage;
-import java.util.concurrent.ExecutionException;
 
 import com.github.ljtfreitas.restify.http.client.HttpClientException;
 import com.github.ljtfreitas.restify.http.client.message.Header;
@@ -109,16 +108,6 @@ class NettyHttpClientRequest implements AsyncHttpClientRequest {
 	@Override
 	public CompletionStage<HttpClientResponse> executeAsync() throws HttpClientException {
 		return doExecuteAsync();
-	}
-
-	@Override
-	public HttpClientResponse execute() throws HttpClientException {
-		try {
-			return doExecuteAsync().get();
-
-		} catch (InterruptedException | ExecutionException e) {
-			throw new HttpClientException("I/O error on HTTP request: [" + method + " " + uri + "]", e);
-		}
 	}
 
 	private CompletableFuture<HttpClientResponse> doExecuteAsync() {

@@ -28,6 +28,7 @@ package com.github.ljtfreitas.restify.http.client.netty;
 import java.io.InputStream;
 import java.util.concurrent.CompletableFuture;
 
+import com.github.ljtfreitas.restify.http.client.HttpClientException;
 import com.github.ljtfreitas.restify.http.client.message.Header;
 import com.github.ljtfreitas.restify.http.client.message.Headers;
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
@@ -79,6 +80,11 @@ class NettyRequestExecuteHandler extends SimpleChannelInboundHandler<FullHttpRes
 
 	@Override
 	public void exceptionCaught(ChannelHandlerContext context, Throwable cause) throws Exception {
-		future.completeExceptionally(cause);
+		System.out.println("failure");
+		future.completeExceptionally(handle(cause));
+	}
+
+	private Throwable handle(Throwable cause) {
+		return new HttpClientException("I/O error on HTTP request: [" + source.method() + " " + source.uri() + "]", cause);
 	}
 }

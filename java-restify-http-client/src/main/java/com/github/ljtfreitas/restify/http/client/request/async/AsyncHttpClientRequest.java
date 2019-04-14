@@ -25,13 +25,26 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.request.async;
 
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.CompletionStage;
+import java.util.concurrent.ExecutionException;
 
 import com.github.ljtfreitas.restify.http.client.HttpClientException;
 import com.github.ljtfreitas.restify.http.client.request.HttpClientRequest;
 import com.github.ljtfreitas.restify.http.client.response.HttpClientResponse;
+import com.github.ljtfreitas.restify.util.Try;
 
 public interface AsyncHttpClientRequest extends HttpClientRequest {
+
+	@Override
+	default HttpClientResponse execute() throws HttpClientException {
+		return Try.of(() -> executeAsync().toCompletableFuture().get())
+				.recover(CompletionException.class, e -> Try.failure(e.getCause()))
+				.recover(ExecutionException.class, e -> Try.failure(e.getCause()))
+				.recover(InterruptedException.class, e -> Try.failure(e.getCause()))
+				.recover(Try::failure)
+				.get();
+	}
 
 	public CompletionStage<HttpClientResponse> executeAsync() throws HttpClientException;
 }

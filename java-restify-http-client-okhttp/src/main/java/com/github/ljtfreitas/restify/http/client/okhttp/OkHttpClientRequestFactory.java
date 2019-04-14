@@ -59,12 +59,6 @@ public class OkHttpClientRequestFactory implements AsyncHttpClientRequestFactory
 	}
 
 	@Override
-	public OkHttpClientRequest createOf(EndpointRequest endpointRequest) {
-		return new OkHttpClientRequest(okHttpClient, endpointRequest.endpoint(), endpointRequest.method(), endpointRequest.headers(),
-				charset);
-	}
-
-	@Override
 	public AsyncHttpClientRequest createAsyncOf(EndpointRequest endpointRequest) {
 		return new OkHttpClientRequest(okHttpClient, endpointRequest.endpoint(), endpointRequest.method(), endpointRequest.headers(),
 				charset);

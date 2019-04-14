@@ -406,8 +406,7 @@ public class NettyHttpClientRequestFactoryTest {
 		return new BaseMatcher<Throwable>() {
 			@Override
 			public boolean matches(Object argument) {
-				Throwable exception = (Throwable) argument;
-				Throwable cause = exception.getCause();
+				Throwable cause = (Throwable) argument;
 
 				while (cause != null) {
 					if (expectedCause.isInstance(cause)) return true;

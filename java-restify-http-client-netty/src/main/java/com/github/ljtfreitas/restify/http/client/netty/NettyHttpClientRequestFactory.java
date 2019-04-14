@@ -57,15 +57,6 @@ public class NettyHttpClientRequestFactory implements AsyncHttpClientRequestFact
 	}
 
 	@Override
-	public NettyHttpClientRequest createOf(EndpointRequest endpointRequest) {
-		Bootstrap bootstrap = new NettyBootstrapFactory(eventLoopGroup, nettyHttpClientRequestConfiguration)
-				.createTo(endpointRequest);
-
-		return new NettyHttpClientRequest(bootstrap, endpointRequest.endpoint(), endpointRequest.headers(), endpointRequest.method(),
-				nettyHttpClientRequestConfiguration.charset());
-	}
-
-	@Override
 	public NettyHttpClientRequest createAsyncOf(EndpointRequest endpointRequest) {
 		Bootstrap bootstrap = new NettyBootstrapFactory(eventLoopGroup, nettyHttpClientRequestConfiguration)
 				.createTo(endpointRequest);
