@@ -25,72 +25,86 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.request.jersey;
 
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.CompletionStage;
+
 import javax.ws.rs.WebApplicationException;
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.ClientBuilder;
-import javax.ws.rs.client.Invocation;
 import javax.ws.rs.core.Configuration;
 import javax.ws.rs.core.Response;
+
+import org.glassfish.jersey.client.rx.rxjava.RxObservableInvoker;
+import org.glassfish.jersey.client.rx.rxjava.RxObservableInvokerProvider;
 
 import com.github.ljtfreitas.restify.http.client.HttpException;
 import com.github.ljtfreitas.restify.http.client.message.converter.HttpMessageReadException;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
-import com.github.ljtfreitas.restify.http.client.request.EndpointRequestExecutor;
+import com.github.ljtfreitas.restify.http.client.request.async.AsyncEndpointRequestExecutor;
 import com.github.ljtfreitas.restify.http.client.response.EmptyOnNotFoundEndpointResponseErrorFallback;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponseErrorFallback;
 
-public class JaxRsHttpClientEndpointRequestExecutor implements EndpointRequestExecutor {
+import rx.Observable;
 
-	private final InvocationConverter invocationConverter;
+public class JerseyRxObservableHttpClientEndpointRequestExecutor implements AsyncEndpointRequestExecutor {
+
+	private final InvocationBuilder invocationBuilder;
 	private final EndpointResponseConverter endpointResponseConverter;
 
-	public JaxRsHttpClientEndpointRequestExecutor() {
+	public JerseyRxObservableHttpClientEndpointRequestExecutor() {
 		this(ClientBuilder.newClient());
 	}
 
-	public JaxRsHttpClientEndpointRequestExecutor(EndpointResponseErrorFallback endpointResponseErrorFallback) {
+	public JerseyRxObservableHttpClientEndpointRequestExecutor(EndpointResponseErrorFallback endpointResponseErrorFallback) {
 		this(ClientBuilder.newClient(), endpointResponseErrorFallback);
 	}
 
-	public JaxRsHttpClientEndpointRequestExecutor(Configuration configuration) {
+	public JerseyRxObservableHttpClientEndpointRequestExecutor(Configuration configuration) {
 		this(ClientBuilder.newClient(configuration));
 	}
 
-	public JaxRsHttpClientEndpointRequestExecutor(Configuration configuration, EndpointResponseErrorFallback endpointResponseErrorFallback) {
+	public JerseyRxObservableHttpClientEndpointRequestExecutor(Configuration configuration, EndpointResponseErrorFallback endpointResponseErrorFallback) {
 		this(ClientBuilder.newClient(configuration), endpointResponseErrorFallback);
 	}
 
-	public JaxRsHttpClientEndpointRequestExecutor(Client client) {
+	public JerseyRxObservableHttpClientEndpointRequestExecutor(Client client) {
 		this(client, new EmptyOnNotFoundEndpointResponseErrorFallback());
 	}
 
-	public JaxRsHttpClientEndpointRequestExecutor(Client client, EndpointResponseErrorFallback endpointResponseErrorFallback) {
-		this.invocationConverter = new InvocationConverter(client);
+	public JerseyRxObservableHttpClientEndpointRequestExecutor(Client client, EndpointResponseErrorFallback endpointResponseErrorFallback) {
+		this.invocationBuilder = new InvocationBuilder(configure(client));
 		this.endpointResponseConverter = new EndpointResponseConverter(endpointResponseErrorFallback);
 	}
 
+	private Client configure(Client client) {
+		return client.register(RxObservableInvokerProvider.class);
+	}
+
+	@SuppressWarnings("unchecked")
 	@Override
-	public <T> EndpointResponse<T> execute(EndpointRequest endpointRequest) {
-		try {
-			Invocation invocation = invocationConverter.convert(endpointRequest);
+	public <T> CompletionStage<EndpointResponse<T>> executeAsync(EndpointRequest endpointRequest) {
+		Observable<Response> observable = invocationBuilder.of(endpointRequest).rx(RxObservableInvoker.class);
 
-			Response response = invocation.invoke();
+		CompletableFuture<EndpointResponse<T>> future = new CompletableFuture<>();
 
-			EndpointResponse<T> endpointResponse = endpointResponseConverter.convert(response, endpointRequest);
+		observable
+			.<EndpointResponse<T>> map(response -> endpointResponseConverter.convert(response, endpointRequest))
+			.onErrorResumeNext(e -> handleException(e, endpointRequest))
+				.subscribe(future::complete, future::completeExceptionally);
 
-			response.close();
+		return future;
+	}
 
-			return endpointResponse;
+	private <T> Observable<EndpointResponse<T>> handleException(Throwable throwable, EndpointRequest endpointRequest) {
+		if (throwable instanceof HttpException) {
+			return Observable.error(throwable);
 
-		} catch (HttpException e) {
-			throw e;
+		} else if (throwable instanceof WebApplicationException) {
+			return Observable.error(new HttpMessageReadException(throwable));
 
-		} catch (WebApplicationException e) {
-			throw new HttpMessageReadException(e);
-
-		} catch (Exception e) {
-			throw new HttpException("Error on HTTP request: [" + endpointRequest.method() + " " + endpointRequest.endpoint() + "]", e);
+		} else {
+			return Observable.error(new HttpException("Error on HTTP request: [" + endpointRequest.method() + " " + endpointRequest.endpoint() + "]", throwable));
 		}
 	}
 }

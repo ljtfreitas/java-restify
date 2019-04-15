@@ -86,14 +86,6 @@ public class WebClientEndpointRequestExecutor implements AsyncEndpointRequestExe
 		this.fallback = fallback;
 	}
 
-	@SuppressWarnings("unchecked")
-	@Override
-	public <T> EndpointResponse<T> execute(EndpointRequest endpointRequest) {
-		return doExecute(endpointRequest)
-			.map(e -> (EndpointResponse<T>) e)
-			.block();
-	}
-
 	@Override
 	public <T> CompletionStage<EndpointResponse<T>> executeAsync(EndpointRequest endpointRequest) {
 		Mono<EndpointResponse<T>> mono = doExecute(endpointRequest);

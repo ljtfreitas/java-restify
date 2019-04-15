@@ -38,14 +38,12 @@ import com.github.ljtfreitas.restify.http.client.retry.RetryConfiguration;
 import com.github.ljtfreitas.restify.http.client.retry.RetryConfigurationFactory;
 import com.github.ljtfreitas.restify.http.client.retry.RetryPolicy;
 import com.github.ljtfreitas.restify.http.client.retry.RetryPolicyFactory;
-import com.github.ljtfreitas.restify.http.client.retry.RetryableEndpointRequestExecutor;
 
 public class AsyncRetryableEndpointRequestExecutor implements AsyncEndpointRequestExecutor {
 
 	private final AsyncEndpointRequestExecutor asyncEndpointRequestExecutor;
 	private final ScheduledExecutorService scheduler;
 	private final RetryConfigurationFactory retryConfigurationFactory;
-	private final RetryableEndpointRequestExecutor delegate;
 
 	public AsyncRetryableEndpointRequestExecutor(AsyncEndpointRequestExecutor asyncEndpointRequestExecutor,
 			ScheduledExecutorService scheduledExecutorService) {
@@ -54,21 +52,9 @@ public class AsyncRetryableEndpointRequestExecutor implements AsyncEndpointReque
 
 	public AsyncRetryableEndpointRequestExecutor(AsyncEndpointRequestExecutor asyncEndpointRequestExecutor,
 			ScheduledExecutorService scheduledExecutorService, RetryConfiguration configuration) {
-		this(asyncEndpointRequestExecutor, scheduledExecutorService, configuration,
-				new RetryableEndpointRequestExecutor(asyncEndpointRequestExecutor, configuration));
-	}
-
-	public AsyncRetryableEndpointRequestExecutor(AsyncEndpointRequestExecutor asyncEndpointRequestExecutor,
-			ScheduledExecutorService scheduledExecutorService, RetryConfiguration configuration, RetryableEndpointRequestExecutor delegate) {
 		this.asyncEndpointRequestExecutor = asyncEndpointRequestExecutor;
 		this.scheduler = scheduledExecutorService;
 		this.retryConfigurationFactory = new RetryConfigurationFactory(configuration);
-		this.delegate = delegate;
-	}
-
-	@Override
-	public <T> EndpointResponse<T> execute(EndpointRequest endpointRequest) {
-		return delegate.execute(endpointRequest);
 	}
 
 	@Override

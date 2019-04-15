@@ -25,26 +25,30 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.request.jersey;
 
+import java.util.concurrent.CompletionStage;
+
 import javax.ws.rs.client.Client;
 import javax.ws.rs.client.Entity;
 import javax.ws.rs.client.Invocation;
+import javax.ws.rs.client.RxInvoker;
 import javax.ws.rs.client.WebTarget;
 import javax.ws.rs.core.MediaType;
+import javax.ws.rs.core.Response;
 
 import com.github.ljtfreitas.restify.http.client.message.Header;
 import com.github.ljtfreitas.restify.http.client.message.Headers;
 import com.github.ljtfreitas.restify.http.client.message.converter.HttpMessageWriteException;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
 
-class InvocationConverter {
+class InvocationBuilder {
 
 	private final Client client;
 
-	public InvocationConverter(Client client) {
+	InvocationBuilder(Client client) {
 		this.client = client;
 	}
 
-	public Invocation convert(EndpointRequest endpointRequest) {
+	InvocationBuilderUsingRequest of(EndpointRequest endpointRequest) {
 		WebTarget target = client.target(endpointRequest.endpoint());
 
 		Invocation.Builder builder = target.request();
@@ -56,9 +60,33 @@ class InvocationConverter {
 			.map(body -> entity(body, endpointRequest.headers()))
 				.orElse(null);
 
-		Invocation invocation = builder.build(endpointRequest.method(), entity);
 
-		return invocation;
+		return new InvocationBuilderUsingRequest(builder, endpointRequest, entity);
+	}
+
+	class InvocationBuilderUsingRequest {
+
+		private final Invocation.Builder builder;
+		private final EndpointRequest endpointRequest;
+		private final Entity<Object> entity;
+
+		InvocationBuilderUsingRequest(Invocation.Builder builder, EndpointRequest endpointRequest, Entity<Object> entity) {
+			this.builder = builder;
+			this.endpointRequest = endpointRequest;
+			this.entity = entity;
+		}
+
+		Invocation build() {
+			return builder.build(endpointRequest.method(), entity);
+		}
+
+		public CompletionStage<Response> rx() {
+			return builder.rx().method(endpointRequest.method(), entity);
+		}
+
+		public <T, I extends RxInvoker<T>> T rx(Class<I> invokerType) {
+			return builder.rx(invokerType).method(endpointRequest.method(), entity);
+		}
 	}
 
 	private Entity<Object> entity(Object body, Headers headers) {

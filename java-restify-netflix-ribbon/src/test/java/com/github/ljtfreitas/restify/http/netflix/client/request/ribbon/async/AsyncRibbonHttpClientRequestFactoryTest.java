@@ -82,7 +82,7 @@ public class AsyncRibbonHttpClientRequestFactoryTest {
 		executor = DisposableExecutors.newSingleThreadExecutor();
 
 		requestExecutor = new DefaultAsyncEndpointRequestExecutor(executor, asyncRibbonHttpClientRequestFactory, new EndpointRequestWriter(messageConverters),
-				new EndpointResponseReader(messageConverters), null);
+				new EndpointResponseReader(messageConverters));
 	}
 
 	@Test

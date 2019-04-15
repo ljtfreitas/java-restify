@@ -25,13 +25,24 @@
  *******************************************************************************/
 package com.github.ljtfreitas.restify.http.client.request.async;
 
+import java.util.concurrent.CompletionException;
 import java.util.concurrent.CompletionStage;
+import java.util.concurrent.ExecutionException;
 
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequestExecutor;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
+import com.github.ljtfreitas.restify.util.Try;
 
 public interface AsyncEndpointRequestExecutor extends EndpointRequestExecutor {
+
+	@Override
+	default <T> EndpointResponse<T> execute(EndpointRequest endpointRequest) {
+		return Try.of(() -> this.<T> executeAsync(endpointRequest).toCompletableFuture().join())
+					.recover(CompletionException.class, e -> Try.failure(e.getCause()))
+					.recover(ExecutionException.class, e -> Try.failure(e.getCause()))
+					.get();
+	}
 
 	public <T> CompletionStage<EndpointResponse<T>> executeAsync(EndpointRequest endpointRequest);
 }
