@@ -31,7 +31,6 @@ import java.nio.charset.Charset;
 import java.util.concurrent.CompletionStage;
 
 import com.github.ljtfreitas.restify.http.client.HttpClientException;
-import com.github.ljtfreitas.restify.http.client.HttpException;
 import com.github.ljtfreitas.restify.http.client.message.Header;
 import com.github.ljtfreitas.restify.http.client.message.Headers;
 import com.github.ljtfreitas.restify.http.client.message.request.BufferedByteArrayHttpRequestBody;
@@ -47,7 +46,6 @@ import com.github.ljtfreitas.restify.http.netflix.client.request.ribbon.RibbonHt
 import com.github.ljtfreitas.restify.http.netflix.client.request.ribbon.RibbonRequest;
 import com.github.ljtfreitas.restify.http.netflix.client.request.ribbon.RibbonResponse;
 import com.github.ljtfreitas.restify.util.Try;
-import com.netflix.client.ClientException;
 
 public class AsyncRibbonHttpClientRequest extends BaseRibbonHttpClientRequest implements AsyncHttpClientRequest {
 
@@ -117,22 +115,8 @@ public class AsyncRibbonHttpClientRequest extends BaseRibbonHttpClientRequest im
 	}
 
 	@Override
-	public HttpClientResponse execute() throws HttpException {
-		try {
-			RibbonResponse response = ribbonLoadBalancedClient.withLoadBalancer(new RibbonRequest(this));
-
-			return response.unwrap();
-
-		} catch (ClientException e) {
-			throw new HttpClientException("Error on HTTP request: [" + endpointRequest.method() + " " +
-					endpointRequest.endpoint() + "]", e);
-		}
-	}
-
-
-	@Override
 	public CompletionStage<HttpClientResponse> executeAsync() throws HttpClientException {
 		return ribbonLoadBalancedClient.executeAsync(new RibbonRequest(this))
-			.thenApply(RibbonResponse::unwrap);
+			.thenApplyAsync(RibbonResponse::unwrap);
 	}
 }

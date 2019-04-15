@@ -23,7 +23,7 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.http.client.okhttp;
+package com.github.ljtfreitas.restify.http.client.request.grizzly;
 
 import java.io.Closeable;
 import java.io.IOException;
@@ -31,45 +31,47 @@ import java.nio.charset.Charset;
 
 import com.github.ljtfreitas.restify.http.client.message.Encoding;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
-import com.github.ljtfreitas.restify.http.client.request.async.AsyncHttpClientRequest;
 import com.github.ljtfreitas.restify.http.client.request.async.AsyncHttpClientRequestFactory;
+import com.ning.http.client.AsyncHttpClient;
+import com.ning.http.client.AsyncHttpClientConfig;
 
-import okhttp3.OkHttpClient;
+public class GrizzlyHttpClientRequestFactory implements AsyncHttpClientRequestFactory, Closeable {
 
-public class OkHttpClientRequestFactory implements AsyncHttpClientRequestFactory, Closeable {
-
-	private final OkHttpClient okHttpClient;
+	private final AsyncHttpClient asyncHttpClient;
 	private final Charset charset;
 
-	public OkHttpClientRequestFactory() {
-		this(new OkHttpClient());
+	public GrizzlyHttpClientRequestFactory() {
+		this(new AsyncHttpClient());
+	}
+	
+	public GrizzlyHttpClientRequestFactory(AsyncHttpClient asyncHttpClient) {
+		this(asyncHttpClient, Encoding.UTF_8.charset());
 	}
 
-	public OkHttpClientRequestFactory(OkHttpClient okHttpClient) {
-		this(okHttpClient, Encoding.UTF_8.charset());
+	public GrizzlyHttpClientRequestFactory(Charset charset) {
+		this(new AsyncHttpClient(), charset);
 	}
 
-	public OkHttpClientRequestFactory(Charset charset) {
-		this(new OkHttpClient(), charset);
+	public GrizzlyHttpClientRequestFactory(AsyncHttpClientConfig asyncHttpClientConfig) {
+		this(new AsyncHttpClient(asyncHttpClientConfig));
 	}
 
-	public OkHttpClientRequestFactory(OkHttpClient okHttpClient, Charset charset) {
-		this.okHttpClient = okHttpClient;
+	public GrizzlyHttpClientRequestFactory(AsyncHttpClientConfig asyncHttpClientConfig, Charset charset) {
+		this(new AsyncHttpClient(asyncHttpClientConfig), charset);
+	}
+
+	public GrizzlyHttpClientRequestFactory(AsyncHttpClient asyncHttpClient, Charset charset) {
+		this.asyncHttpClient = asyncHttpClient;
 		this.charset = charset;
 	}
 
 	@Override
-	public AsyncHttpClientRequest createAsyncOf(EndpointRequest endpointRequest) {
-		return new OkHttpClientRequest(okHttpClient, endpointRequest.endpoint(), endpointRequest.method(), endpointRequest.headers(),
-				charset);
+	public GrizzlyHttpClientRequest createAsyncOf(EndpointRequest endpointRequest) {
+		return new GrizzlyHttpClientRequest(asyncHttpClient, endpointRequest, charset);
 	}
 
 	@Override
 	public void close() throws IOException {
-		if (okHttpClient.cache() != null) {
-			okHttpClient.cache().close();
-		}
-
-		okHttpClient.dispatcher().executorService().shutdown();
+		asyncHttpClient.close();
 	}
 }

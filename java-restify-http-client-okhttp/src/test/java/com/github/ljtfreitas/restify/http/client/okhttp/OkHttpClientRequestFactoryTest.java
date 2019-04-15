@@ -121,7 +121,7 @@ public class OkHttpClientRequestFactoryTest {
 		EndpointRequest endpointRequest = new EndpointRequest(URI.create("http://localhost:7080/json"), "POST",
 				new Headers(Header.contentType("application/json")), requestBody);
 
-		OkHttpClientRequest request = okHttpClientRequestFactory.createOf(endpointRequest);
+		OkHttpClientRequest request = (OkHttpClientRequest) okHttpClientRequestFactory.createOf(endpointRequest);
 		request.body().output().write(requestBody.getBytes());
 		request.body().output().flush();
 
@@ -155,7 +155,7 @@ public class OkHttpClientRequestFactoryTest {
 		EndpointRequest endpointRequest = new EndpointRequest(URI.create("http://localhost:7080/json"), "POST",
 				new Headers(Header.contentType("application/json")), requestBody);
 
-		OkHttpClientRequest request = okHttpClientRequestFactory.createOf(endpointRequest);
+		OkHttpClientRequest request = (OkHttpClientRequest) okHttpClientRequestFactory.createOf(endpointRequest);
 		request.body().output().write(requestBody.getBytes());
 		request.body().output().flush();
 

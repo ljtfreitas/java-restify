@@ -23,28 +23,26 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.http.client.request.async;
+package com.github.ljtfreitas.restify.http.client.request.grizzly;
 
-import java.util.concurrent.CompletionException;
-import java.util.concurrent.CompletionStage;
-import java.util.concurrent.ExecutionException;
+import java.io.IOException;
+import java.io.InputStream;
 
-import com.github.ljtfreitas.restify.http.client.HttpClientException;
-import com.github.ljtfreitas.restify.http.client.request.HttpClientRequest;
-import com.github.ljtfreitas.restify.http.client.response.HttpClientResponse;
-import com.github.ljtfreitas.restify.util.Try;
+import com.github.ljtfreitas.restify.http.client.message.Headers;
+import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
+import com.github.ljtfreitas.restify.http.client.message.response.StatusCode;
+import com.github.ljtfreitas.restify.http.client.response.BaseHttpClientResponse;
 
-public interface AsyncHttpClientRequest extends HttpClientRequest {
+class GrizzlyHttpClientResponse extends BaseHttpClientResponse {
 
-	@Override
-	default HttpClientResponse execute() throws HttpClientException {
-		return Try.of(() -> executeAsync().toCompletableFuture().get())
-				.recover(CompletionException.class, e -> Try.failure(e.getCause()))
-				.recover(ExecutionException.class, e -> Try.failure(e.getCause()))
-				.recover(InterruptedException.class, e -> Try.failure(e.getCause()))
-				.recover(Try::failure)
-				.get();
+	protected GrizzlyHttpClientResponse(StatusCode status, Headers headers, InputStream body,
+			HttpRequestMessage httpRequest) {
+		super(status, headers, body, httpRequest);
 	}
 
-	public CompletionStage<HttpClientResponse> executeAsync() throws HttpClientException;
+	@Override
+	public void close() throws IOException {
+		
+	}
+
 }

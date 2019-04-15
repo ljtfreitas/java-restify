@@ -139,11 +139,6 @@ class ApacheAsyncHttpClientRequest implements AsyncHttpClientRequest {
 		}
 	}
 
-	@Override
-	public HttpClientResponse execute() throws HttpClientException {
-		return doExecuteAsync().toCompletableFuture().join();
-	}
-
 	private class ApacheHttpAsyncRequestCallback implements FutureCallback<HttpResponse> {
 
 		private final CompletableFuture<HttpClientResponse> future;

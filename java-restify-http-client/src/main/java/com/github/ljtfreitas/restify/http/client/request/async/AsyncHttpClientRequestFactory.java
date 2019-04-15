@@ -26,9 +26,15 @@
 package com.github.ljtfreitas.restify.http.client.request.async;
 
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
+import com.github.ljtfreitas.restify.http.client.request.HttpClientRequest;
 import com.github.ljtfreitas.restify.http.client.request.HttpClientRequestFactory;
 
 public interface AsyncHttpClientRequestFactory extends HttpClientRequestFactory {
+
+	@Override
+	default HttpClientRequest createOf(EndpointRequest endpointRequest) {
+		return createAsyncOf(endpointRequest);
+	}
 
 	public AsyncHttpClientRequest createAsyncOf(EndpointRequest endpointRequest);
 }
