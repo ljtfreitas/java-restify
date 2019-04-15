@@ -1,6 +1,7 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <configuration>
-    <logger name="org.mockserver" level="OFF"/>
+    <logger name="org.mockserver" level="DEBUG"/>
+    <logger name="io.netty" level="INFO"/>
 
     <root level="INFO">
         <appender class="ch.qos.logback.core.ConsoleAppender">
