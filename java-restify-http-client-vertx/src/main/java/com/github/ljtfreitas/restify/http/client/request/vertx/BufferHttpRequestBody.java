@@ -23,28 +23,45 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.http.client.request.grizzly;
+package com.github.ljtfreitas.restify.http.client.request.vertx;
 
 import java.io.IOException;
-import java.io.InputStream;
+import java.io.OutputStream;
 
-import com.github.ljtfreitas.restify.http.client.message.Headers;
-import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
-import com.github.ljtfreitas.restify.http.client.message.response.StatusCode;
-import com.github.ljtfreitas.restify.http.client.response.BaseHttpClientResponse;
+import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestBody;
 
-class GrizzlyHttpClientResponse extends BaseHttpClientResponse {
+import io.vertx.core.buffer.Buffer;
 
-	private final InputStream body;
+class BufferHttpRequestBody implements HttpRequestBody {
 
-	GrizzlyHttpClientResponse(StatusCode status, Headers headers, InputStream body,
-			HttpRequestMessage httpRequest) {
-		super(status, headers, body, httpRequest);
-		this.body = body;
-	}
+	private final BufferOutputStream output = new BufferOutputStream();
 
 	@Override
-	public void close() throws IOException {
-		body.close();
+	public OutputStream output() {
+		return output;
+	}
+
+	Buffer buffer() {
+		return output.buffer;
+	}
+
+	private class BufferOutputStream extends OutputStream {
+
+		private final Buffer buffer = Buffer.buffer();
+
+		@Override
+		public void write(int b) throws IOException {
+			buffer.appendByte((byte) b);
+		}
+
+		@Override
+		public void write(byte[] b) throws IOException {
+			buffer.appendBytes(b);
+		}
+
+		@Override
+		public void write(byte[] b, int off, int len) throws IOException {
+			buffer.appendBytes(b, off, len);
+		}
 	}
 }

@@ -23,28 +23,42 @@
  * SOFTWARE.
  *
  *******************************************************************************/
-package com.github.ljtfreitas.restify.http.client.request.grizzly;
+package com.github.ljtfreitas.restify.http.client.request.vertx;
 
+import java.io.ByteArrayInputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.util.Optional;
 
 import com.github.ljtfreitas.restify.http.client.message.Headers;
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
 import com.github.ljtfreitas.restify.http.client.message.response.StatusCode;
 import com.github.ljtfreitas.restify.http.client.response.BaseHttpClientResponse;
 
-class GrizzlyHttpClientResponse extends BaseHttpClientResponse {
+import io.vertx.core.buffer.Buffer;
+import io.vertx.ext.web.client.HttpResponse;
 
-	private final InputStream body;
+class VertxHttpClientResponse extends BaseHttpClientResponse {
 
-	GrizzlyHttpClientResponse(StatusCode status, Headers headers, InputStream body,
-			HttpRequestMessage httpRequest) {
+	VertxHttpClientResponse(StatusCode status, Headers headers, InputStream body, HttpRequestMessage httpRequest) {
 		super(status, headers, body, httpRequest);
-		this.body = body;
 	}
 
 	@Override
 	public void close() throws IOException {
-		body.close();
+	}
+
+	static VertxHttpClientResponse read(HttpResponse<Buffer> result, HttpRequestMessage source) {
+		InputStream body = Optional.ofNullable(result.body())
+				.map(Buffer::getBytes)
+				.map(ByteArrayInputStream::new)
+				.orElse(null);
+
+		Headers headers = result.headers().entries().stream()
+				.reduce(new Headers(), (a, h) -> a.add(h.getKey(), h.getValue()) , (a, b) -> b);
+
+		StatusCode status = StatusCode.of(result.statusCode(), result.statusMessage());
+
+		return new VertxHttpClientResponse(status, headers, body, source);
 	}
 }
