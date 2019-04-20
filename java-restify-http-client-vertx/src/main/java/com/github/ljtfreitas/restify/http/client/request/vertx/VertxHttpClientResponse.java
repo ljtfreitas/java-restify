@@ -40,12 +40,16 @@ import io.vertx.ext.web.client.HttpResponse;
 
 class VertxHttpClientResponse extends BaseHttpClientResponse {
 
+	private final InputStream body;
+
 	VertxHttpClientResponse(StatusCode status, Headers headers, InputStream body, HttpRequestMessage httpRequest) {
 		super(status, headers, body, httpRequest);
+		this.body = body;
 	}
 
 	@Override
 	public void close() throws IOException {
+		body.close();
 	}
 
 	static VertxHttpClientResponse read(HttpResponse<Buffer> result, HttpRequestMessage source) {

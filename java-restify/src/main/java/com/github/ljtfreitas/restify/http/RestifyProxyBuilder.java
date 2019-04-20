@@ -876,7 +876,7 @@ public class RestifyProxyBuilder {
 		}
 
 		public RestifyProxyBuilder using(RetryConfiguration configuration) {
-			this.enabled = true;
+			this.enabled = (configuration != null);
 			this.configuration = configuration;
 			return RestifyProxyBuilder.this;
 		}
