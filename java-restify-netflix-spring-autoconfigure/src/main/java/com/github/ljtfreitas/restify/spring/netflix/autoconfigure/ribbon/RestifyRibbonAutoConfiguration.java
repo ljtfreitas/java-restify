@@ -27,6 +27,7 @@ package com.github.ljtfreitas.restify.spring.netflix.autoconfigure.ribbon;
 
 import org.springframework.boot.autoconfigure.AutoConfigureAfter;
 import org.springframework.boot.autoconfigure.AutoConfigureBefore;
+import org.springframework.boot.autoconfigure.condition.AllNestedConditions;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnBean;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnClass;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -37,6 +38,7 @@ import org.springframework.cloud.client.loadbalancer.LoadBalancerClient;
 import org.springframework.cloud.client.loadbalancer.reactive.ReactiveLoadBalancerAutoConfiguration;
 import org.springframework.cloud.netflix.ribbon.RibbonAutoConfiguration;
 import org.springframework.context.annotation.Bean;
+import org.springframework.context.annotation.Conditional;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.reactive.function.client.WebClient;
@@ -61,15 +63,25 @@ public class RestifyRibbonAutoConfiguration {
 
 		@ConditionalOnMissingBean
 		@Bean
-		public EndpointRequestExecutor endpointRequestExecutor(@LoadBalanced RestTemplate restTemplate) {
+		public EndpointRequestExecutor loadBalancedEndpointRequestExecutor(@LoadBalanced RestTemplate restTemplate) {
 			return new RestOperationsEndpointRequestExecutor(restTemplate);
 		}
 
-		@ConditionalOnMissingBean
-		@Bean
-		@LoadBalanced
-		public RestTemplate restifyRestTemplate() {
+		@Conditional(LoadBalancedRestTemplateCondition.class)
+		@Bean @LoadBalanced
+		public RestTemplate loadBalancedRestTemplate() {
 			return new RestTemplate();
+		}
+		
+		static class LoadBalancedRestTemplateCondition extends AllNestedConditions {
+
+			LoadBalancedRestTemplateCondition() {
+				super(ConfigurationPhase.REGISTER_BEAN);
+			}
+
+			@ConditionalOnMissingBean(annotation = LoadBalanced.class)
+			static class LoadBalancedQualifiedBeanMissing {
+			}
 		}
 	}
 
@@ -80,15 +92,25 @@ public class RestifyRibbonAutoConfiguration {
 
 		@ConditionalOnMissingBean
 		@Bean
-		public EndpointRequestExecutor endpointRequestExecutor(@LoadBalanced WebClient.Builder webClientBuilder) {
+		public EndpointRequestExecutor loadBalancedEndpointRequestExecutor(@LoadBalanced WebClient.Builder webClientBuilder) {
 			return new WebClientEndpointRequestExecutor(webClientBuilder);
 		}
 
-		@ConditionalOnMissingBean
-		@Bean
-		@LoadBalanced
-		public WebClient.Builder restifyWebClientBuilder() {
+		@Conditional(LoadBalancedWebClientCondition.class)
+		@Bean @LoadBalanced
+		public WebClient.Builder loadBalancedWebClientBuilder() {
 			return WebClient.builder();
 		}
-	}
+
+		static class LoadBalancedWebClientCondition extends AllNestedConditions {
+			
+			LoadBalancedWebClientCondition() {
+				super(ConfigurationPhase.REGISTER_BEAN);
+			}
+			
+			@ConditionalOnMissingBean(annotation = LoadBalanced.class)
+			static class LoadBalancedQualifiedBeanMissing {
+			}
+		}
+	}	
 }

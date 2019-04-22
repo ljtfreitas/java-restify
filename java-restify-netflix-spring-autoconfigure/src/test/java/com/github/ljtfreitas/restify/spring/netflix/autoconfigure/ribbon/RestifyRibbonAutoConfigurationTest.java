@@ -12,6 +12,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockserver.client.server.MockServerClient;
 import org.mockserver.junit.MockServerRule;
+import org.mockserver.model.HttpRequest;
 import org.springframework.beans.factory.ObjectProvider;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
@@ -36,19 +37,21 @@ public class RestifyRibbonAutoConfigurationTest {
 	@Before
 	public void setup() {
 		mockServerClient = new MockServerClient("localhost", 8080);
-
-		mockServerClient
-			.when(request()
-					.withMethod("GET")
-					.withPath("/get"))
-			.respond(response()
-					.withStatusCode(200)
-					.withHeader("Content-Type", "text/plain")
-					.withBody(json("Ribbon it's works!")));
 	}
 	
 	@Test
 	public void shouldCreateBeanOfLoadBalancedApiType() {
+		HttpRequest request = request()
+				.withMethod("GET")
+				.withPath("/get");
+		
+		mockServerClient
+			.when(request)
+			.respond(response()
+					.withStatusCode(200)
+					.withHeader("Content-Type", "text/plain")
+					.withBody(json("Ribbon it's works!")));
+
 		LoadBalancedApi loadBalancedApi = provider.getIfAvailable();
 
 		assertNotNull(loadBalancedApi);
@@ -57,13 +60,15 @@ public class RestifyRibbonAutoConfigurationTest {
 		String result = loadBalancedApi.get();
 
 		assertEquals("Ribbon it's works!", result);
+
+		mockServerClient.verify(request);
 	}
 
 	@SpringBootApplication
 	public static class SampleSpringApplication {
 
 		public static void main(String[] args) {
-			SpringApplication.run(SampleSpringApplication.class, args);
+			SpringApplication.run(SampleSpringApplication.class);
 		}
 	}
 }

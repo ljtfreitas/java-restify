@@ -31,9 +31,7 @@ import com.github.ljtfreitas.restify.http.client.request.EndpointRequestWriter;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponseReader;
 import com.github.ljtfreitas.restify.http.netflix.client.request.ribbon.RibbonHttpClientRequestFactory;
-import com.github.ljtfreitas.restify.http.netflix.client.request.ribbon.discovery.kubernetes.DefaultKubernetesServiceDiscovery;
-import com.github.ljtfreitas.restify.http.netflix.client.request.ribbon.discovery.kubernetes.KubernetesServerList;
-import com.netflix.client.config.DefaultClientConfigImpl;
+import com.netflix.client.config.IClientConfig;
 import com.netflix.loadbalancer.ILoadBalancer;
 import com.netflix.loadbalancer.LoadBalancerBuilder;
 
@@ -85,8 +83,7 @@ public class DefaultKubernetesServiceDiscoveryTest {
 				.withDynamicServerList(kubernetesServers)
 					.buildDynamicServerListLoadBalancer();
 
-		DefaultClientConfigImpl config = new DefaultClientConfigImpl();
-		config.setClientName("myApi");
+		IClientConfig config = IClientConfig.Builder.newBuilder("myApi").build();
 
 		RibbonHttpClientRequestFactory ribbonHttpClientRequestFactory = new RibbonHttpClientRequestFactory(loadBalancer, config);
 

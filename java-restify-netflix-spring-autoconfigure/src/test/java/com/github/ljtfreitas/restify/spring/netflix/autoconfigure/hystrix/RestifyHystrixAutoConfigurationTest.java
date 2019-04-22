@@ -10,13 +10,12 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockserver.client.server.MockServerClient;
 import org.mockserver.junit.MockServerRule;
+import org.mockserver.model.HttpRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.context.annotation.Bean;
 import org.springframework.test.context.junit4.SpringRunner;
-import org.springframework.web.client.RestTemplate;
 
 import com.github.ljtfreitas.restify.spring.netflix.autoconfigure.hystrix.RestifyHystrixAutoConfigurationTest.SampleSpringApplication;
 import com.netflix.hystrix.HystrixCommand;
@@ -46,10 +45,12 @@ public class RestifyHystrixAutoConfigurationTest {
 
 	@Test
 	public void shouldGetFallbackToBadApiWhenOnCircuitBreakerMethodIsCalled() {
+		HttpRequest request = request()
+				.withMethod("GET")
+				.withPath("/bad");
+		
 		mockServerClient
-			.when(request()
-					.withMethod("GET")
-					.withPath("/bad"))
+			.when(request)
 			.respond(response()
 					.withStatusCode(500));
 
@@ -57,14 +58,18 @@ public class RestifyHystrixAutoConfigurationTest {
 
 		// see FallbackBadApi class
 		assertEquals("this is BadApi fallback!", result);
+
+		mockServerClient.verify(request);
 	}
 
 	@Test
 	public void shouldGetFallbackToBadApiWhenHystrixCommandIsCalled() {
+		HttpRequest request = request()
+				.withMethod("GET")
+				.withPath("/bad");
+
 		mockServerClient
-			.when(request()
-					.withMethod("GET")
-					.withPath("/bad"))
+			.when(request)
 			.respond(response()
 					.withStatusCode(500));
 
@@ -74,6 +79,8 @@ public class RestifyHystrixAutoConfigurationTest {
 
 		// see FallbackBadApi class
 		assertEquals("this is BadApi (command) fallback!", result);
+
+		mockServerClient.verify(request);
 	}
 
 	@Test
@@ -127,11 +134,6 @@ public class RestifyHystrixAutoConfigurationTest {
 
 	@SpringBootApplication
 	public static class SampleSpringApplication {
-
-		@Bean
-		public RestTemplate restTemplate() {
-			return new RestTemplate();
-		}
 
 		public static void main(String[] args) {
 			SpringApplication.run(SampleSpringApplication.class, args);

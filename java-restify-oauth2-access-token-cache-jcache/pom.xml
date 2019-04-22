@@ -33,7 +33,7 @@
 		<dependency>
             <groupId>com.github.ben-manes.caffeine</groupId>
             <artifactId>jcache</artifactId>
-            <version>2.6.2</version>
+            <version>2.7.0</version>
             <scope>test</scope>
         </dependency>
         <dependency>

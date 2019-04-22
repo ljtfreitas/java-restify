@@ -32,9 +32,9 @@ import org.apache.curator.x.discovery.ServiceInstance;
 import org.apache.curator.x.discovery.ServiceType;
 import org.apache.curator.x.discovery.UriSpec;
 import org.apache.curator.x.discovery.details.InstanceSerializer;
-import org.codehaus.jackson.JsonNode;
-import org.codehaus.jackson.map.ObjectMapper;
 
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.github.ljtfreitas.restify.util.Try;
 
 public class ZookeeperInstanceSerializer implements InstanceSerializer<ZookeeperServiceInstance> {
@@ -80,7 +80,7 @@ public class ZookeeperInstanceSerializer implements InstanceSerializer<Zookeeper
 		JsonNode payload = tree.get("payload");
 
 		ZookeeperServiceInstance zookeeperInstance = Optional.ofNullable(payload)
-				.map(p -> Try.of(() -> mapper.readValue(p, ZookeeperServiceInstance.class)).get())
+				.map(p -> Try.of(() -> mapper.treeToValue(p, ZookeeperServiceInstance.class)).get())
 					.orElse(null);
 
 		return new ServiceInstance<>(name, id, address, port, sslPort, zookeeperInstance, registrationTimeUTC,

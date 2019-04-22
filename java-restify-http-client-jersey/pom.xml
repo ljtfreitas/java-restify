@@ -9,6 +9,10 @@
 	</parent>
 	<artifactId>java-restify-http-client-jersey</artifactId>
 
+	<properties>
+		<jersey.http.client.version>2.28</jersey.http.client.version>
+	</properties>
+
 	<dependencies>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
@@ -31,34 +35,34 @@
 		<dependency>
 			<groupId>org.glassfish.jersey.core</groupId>
 			<artifactId>jersey-client</artifactId>
-			<version>2.27</version>
+			<version>${jersey.http.client.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.glassfish.jersey.ext.rx</groupId>
 			<artifactId>jersey-rx-client-rxjava</artifactId>
-			<version>2.28</version>
+			<version>${jersey.http.client.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.glassfish.jersey.ext.rx</groupId>
 			<artifactId>jersey-rx-client-rxjava2</artifactId>
-			<version>2.28</version>
+			<version>${jersey.http.client.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.glassfish.jersey.media</groupId>
 			<artifactId>jersey-media-json-jackson</artifactId>
-			<version>2.27</version>
+			<version>${jersey.http.client.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.glassfish.jersey.media</groupId>
 			<artifactId>jersey-media-jaxb</artifactId>
-			<version>2.27</version>
+			<version>${jersey.http.client.version}</version>
 			<scope>test</scope>
 		</dependency>
 		<dependency>
 			<groupId>org.glassfish.jersey.inject</groupId>
 			<artifactId>jersey-hk2</artifactId>
-			<version>2.27</version>
+			<version>${jersey.http.client.version}</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>

@@ -35,7 +35,6 @@ import com.netflix.client.AbstractLoadBalancerAwareClient;
 import com.netflix.client.ClientException;
 import com.netflix.client.RequestSpecificRetryHandler;
 import com.netflix.client.RetryHandler;
-import com.netflix.client.config.DefaultClientConfigImpl;
 import com.netflix.client.config.IClientConfig;
 import com.netflix.client.config.IClientConfigKey;
 import com.netflix.loadbalancer.ILoadBalancer;
@@ -48,7 +47,7 @@ public class DefaultRibbonLoadBalancedClient extends AbstractLoadBalancerAwareCl
 	private final RibbonExceptionHandler ribbonExceptionHandler;
 
 	public DefaultRibbonLoadBalancedClient(ILoadBalancer loadBalancer) {
-		this(loadBalancer, new DefaultClientConfigImpl(), new JdkHttpClientRequestFactory(), new SimpleRibbonExceptionHandler());
+		this(loadBalancer, IClientConfig.Builder.newBuilder().build(), new JdkHttpClientRequestFactory(), new SimpleRibbonExceptionHandler());
 	}
 
 	public DefaultRibbonLoadBalancedClient(ILoadBalancer loadBalancer, IClientConfig clientConfig) {
@@ -60,11 +59,11 @@ public class DefaultRibbonLoadBalancedClient extends AbstractLoadBalancerAwareCl
 	}
 
 	public DefaultRibbonLoadBalancedClient(ILoadBalancer loadBalancer, HttpClientRequestFactory httpClientRequestFactory) {
-		this(loadBalancer, new DefaultClientConfigImpl(), httpClientRequestFactory, new SimpleRibbonExceptionHandler());
+		this(loadBalancer, IClientConfig.Builder.newBuilder().build(), httpClientRequestFactory, new SimpleRibbonExceptionHandler());
 	}
 
 	public DefaultRibbonLoadBalancedClient(ILoadBalancer loadBalancer, RibbonExceptionHandler ribbonExceptionHandler) {
-		this(loadBalancer, new DefaultClientConfigImpl(), new JdkHttpClientRequestFactory(), ribbonExceptionHandler);
+		this(loadBalancer, IClientConfig.Builder.newBuilder().build(), new JdkHttpClientRequestFactory(), ribbonExceptionHandler);
 	}
 
 	public DefaultRibbonLoadBalancedClient(ILoadBalancer loadBalancer, IClientConfig clientConfig, RibbonExceptionHandler ribbonExceptionHandler) {
@@ -105,7 +104,7 @@ public class DefaultRibbonLoadBalancedClient extends AbstractLoadBalancerAwareCl
 	public RequestSpecificRetryHandler getRequestSpecificRetryHandler(RibbonRequest request, IClientConfig requestConfig) {
 		IClientConfig ribbonRequestConfiguration = Optional.ofNullable(requestConfig).orElse(clientConfig);
 		boolean retryAllOperations = ribbonRequestConfiguration.get(IClientConfigKey.Keys.OkToRetryOnAllOperations,
-				DefaultClientConfigImpl.DEFAULT_OK_TO_RETRY_ON_ALL_OPERATIONS);
+				false);
 
 		return new RequestSpecificRetryHandler(true, (retryAllOperations || request.isGet()) , RetryHandler.DEFAULT, ribbonRequestConfiguration);
 	}
