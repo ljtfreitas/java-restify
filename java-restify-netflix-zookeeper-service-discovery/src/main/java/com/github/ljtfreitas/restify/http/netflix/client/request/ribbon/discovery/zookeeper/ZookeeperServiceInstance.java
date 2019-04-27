@@ -30,9 +30,8 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 
-import org.codehaus.jackson.annotate.JsonIgnoreProperties;
-import org.codehaus.jackson.annotate.JsonProperty;
-
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.github.ljtfreitas.restify.http.netflix.client.request.ribbon.discovery.ServiceInstance;
 
 @JsonIgnoreProperties(ignoreUnknown = true)

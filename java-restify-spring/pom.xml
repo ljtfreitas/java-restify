@@ -11,7 +11,7 @@
 	<description>Java Restify Spring Extension</description>
 
 	<properties>
-		<spring.framework.version>5.0.8.RELEASE</spring.framework.version>
+		<spring.framework.version>5.1.6.RELEASE</spring.framework.version>
 	</properties>
 
 	<dependencies>
@@ -78,7 +78,7 @@
 		<dependency>
 			<groupId>com.fasterxml.jackson.core</groupId>
 			<artifactId>jackson-databind</artifactId>
-			<version>2.9.0</version>
+			<version>2.9.8</version>
 			<scope>test</scope>
 		</dependency>
 	</dependencies>

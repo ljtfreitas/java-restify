@@ -1,4 +1,6 @@
-<project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<parent>
 		<groupId>com.github.ljtfreitas</groupId>
@@ -8,9 +10,9 @@
 	<artifactId>java-restify-netflix-ribbon</artifactId>
 
 	<properties>
-		<netflix.ribbon.version>2.3.0</netflix.ribbon.version>
+		<netflix.ribbon.version>2.4.3</netflix.ribbon.version>
 		<rx.java.version>1.0.9</rx.java.version>
-		<slf4j.version>1.7.21</slf4j.version>
+		<slf4j.version>1.7.26</slf4j.version>
 	</properties>
 
 	<dependencies>
@@ -51,6 +53,11 @@
 		<dependency>
 			<groupId>com.netflix.ribbon</groupId>
 			<artifactId>ribbon-httpclient</artifactId>
+			<version>${netflix.ribbon.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.netflix.ribbon</groupId>
+			<artifactId>ribbon-archaius</artifactId>
 			<version>${netflix.ribbon.version}</version>
 		</dependency>
 		<dependency>

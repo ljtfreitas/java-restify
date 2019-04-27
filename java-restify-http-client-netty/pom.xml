@@ -7,6 +7,10 @@
 	</parent>
 	<artifactId>java-restify-http-client-netty</artifactId>
 
+	<properties>
+		<netty.http.client.version>4.1.35.Final</netty.http.client.version>
+	</properties>
+
 	<dependencies>
 		<dependency>
 			<groupId>${project.groupId}</groupId>
@@ -23,27 +27,27 @@
 		<dependency>
 			<groupId>io.netty</groupId>
 			<artifactId>netty-transport</artifactId>
-			<version>4.1.28.Final</version>
+			<version>${netty.http.client.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>io.netty</groupId>
 			<artifactId>netty-codec-http</artifactId>
-			<version>4.1.28.Final</version>
+			<version>${netty.http.client.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>io.netty</groupId>
 			<artifactId>netty-buffer</artifactId>
-			<version>4.1.28.Final</version>
+			<version>${netty.http.client.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>io.netty</groupId>
 			<artifactId>netty-common</artifactId>
-			<version>4.1.28.Final</version>
+			<version>${netty.http.client.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>io.netty</groupId>
 			<artifactId>netty-handler</artifactId>
-			<version>4.1.28.Final</version>
+			<version>${netty.http.client.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>${project.groupId}</groupId>

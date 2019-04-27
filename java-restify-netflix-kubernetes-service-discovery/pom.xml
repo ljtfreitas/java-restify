@@ -8,7 +8,7 @@
 	<artifactId>java-restify-netflix-kubernetes-service-discovery</artifactId>
 
 	<properties>
-		<kubernetes.client.version>4.0.3</kubernetes.client.version>
+		<kubernetes.client.version>4.2.2</kubernetes.client.version>
 	</properties>
 
 	<dependencies>

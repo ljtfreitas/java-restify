@@ -8,7 +8,7 @@
 	<artifactId>java-restify-netflix-hystrix</artifactId>
 
 	<properties>
-		<netflix.hystrix.version>1.5.12</netflix.hystrix.version>
+		<netflix.hystrix.version>1.5.18</netflix.hystrix.version>
 	</properties>
 
 	<dependencies>

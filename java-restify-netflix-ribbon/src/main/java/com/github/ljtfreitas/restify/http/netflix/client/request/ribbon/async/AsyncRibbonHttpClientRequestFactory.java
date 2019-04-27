@@ -34,7 +34,6 @@ import com.github.ljtfreitas.restify.http.client.request.async.AsyncHttpClientRe
 import com.github.ljtfreitas.restify.http.client.request.async.AsyncHttpClientRequestFactory;
 import com.github.ljtfreitas.restify.http.netflix.client.request.ribbon.DefaultRibbonHttpClientRequest;
 import com.github.ljtfreitas.restify.http.netflix.client.request.ribbon.RibbonExceptionHandler;
-import com.netflix.client.config.DefaultClientConfigImpl;
 import com.netflix.client.config.IClientConfig;
 import com.netflix.loadbalancer.ILoadBalancer;
 
@@ -44,7 +43,7 @@ public class AsyncRibbonHttpClientRequestFactory implements AsyncHttpClientReque
 	private final Charset charset;
 
 	public AsyncRibbonHttpClientRequestFactory(AsyncHttpClientRequestFactory delegate, ILoadBalancer loadBalancer) {
-		this(delegate, loadBalancer, new DefaultClientConfigImpl());
+		this(delegate, loadBalancer, IClientConfig.Builder.newBuilder().build());
 	}
 
 	public AsyncRibbonHttpClientRequestFactory(AsyncHttpClientRequestFactory delegate, ILoadBalancer loadBalancer,
@@ -54,7 +53,7 @@ public class AsyncRibbonHttpClientRequestFactory implements AsyncHttpClientReque
 
 	public AsyncRibbonHttpClientRequestFactory(AsyncHttpClientRequestFactory delegate, ILoadBalancer loadBalancer,
 			RibbonExceptionHandler ribbonExceptionHandler) {
-		this(delegate, loadBalancer, new DefaultClientConfigImpl(), ribbonExceptionHandler);
+		this(delegate, loadBalancer, IClientConfig.Builder.newBuilder().build(), ribbonExceptionHandler);
 	}
 
 	public AsyncRibbonHttpClientRequestFactory(AsyncHttpClientRequestFactory delegate, ILoadBalancer loadBalancer,

@@ -32,7 +32,6 @@ import com.github.ljtfreitas.restify.http.client.message.Encoding;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
 import com.github.ljtfreitas.restify.http.client.request.HttpClientRequest;
 import com.github.ljtfreitas.restify.http.client.request.HttpClientRequestFactory;
-import com.netflix.client.config.DefaultClientConfigImpl;
 import com.netflix.client.config.IClientConfig;
 import com.netflix.loadbalancer.ILoadBalancer;
 
@@ -42,7 +41,7 @@ public class RibbonHttpClientRequestFactory implements HttpClientRequestFactory 
 	private final Charset charset;
 
 	public RibbonHttpClientRequestFactory(ILoadBalancer loadBalancer) {
-		this(loadBalancer, new DefaultClientConfigImpl());
+		this(loadBalancer, IClientConfig.Builder.newBuilder().build());
 	}
 
 	public RibbonHttpClientRequestFactory(ILoadBalancer loadBalancer, IClientConfig clientConfig) {
@@ -50,7 +49,7 @@ public class RibbonHttpClientRequestFactory implements HttpClientRequestFactory 
 	}
 
 	public RibbonHttpClientRequestFactory(ILoadBalancer loadBalancer, HttpClientRequestFactory delegate) {
-		this(loadBalancer, new DefaultClientConfigImpl(), delegate);
+		this(loadBalancer, IClientConfig.Builder.newBuilder().build(), delegate);
 	}
 
 	public RibbonHttpClientRequestFactory(ILoadBalancer loadBalancer, IClientConfig clientConfig, HttpClientRequestFactory delegate) {
@@ -58,7 +57,7 @@ public class RibbonHttpClientRequestFactory implements HttpClientRequestFactory 
 	}
 
 	public RibbonHttpClientRequestFactory(ILoadBalancer loadBalancer, RibbonExceptionHandler ribbonExceptionHandler) {
-		this(loadBalancer, new DefaultClientConfigImpl(), ribbonExceptionHandler);
+		this(loadBalancer, IClientConfig.Builder.newBuilder().build(), ribbonExceptionHandler);
 	}
 
 	public RibbonHttpClientRequestFactory(ILoadBalancer loadBalancer, IClientConfig clientConfig, RibbonExceptionHandler ribbonExceptionHandler) {

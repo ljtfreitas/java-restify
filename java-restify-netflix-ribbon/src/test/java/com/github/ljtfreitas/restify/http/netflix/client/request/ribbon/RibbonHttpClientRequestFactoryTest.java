@@ -33,8 +33,6 @@ import com.github.ljtfreitas.restify.http.client.request.EndpointRequestExecutor
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequestWriter;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponseReader;
-import com.github.ljtfreitas.restify.http.netflix.client.request.ribbon.RibbonHttpClientRequestFactory;
-import com.netflix.client.config.DefaultClientConfigImpl;
 import com.netflix.client.config.IClientConfig;
 import com.netflix.loadbalancer.BaseLoadBalancer;
 import com.netflix.loadbalancer.ILoadBalancer;
@@ -56,7 +54,7 @@ public class RibbonHttpClientRequestFactoryTest {
 		loadBalancer.addServers(Arrays.asList(new Server("localhost", 7081)));
 		loadBalancer.addServers(Arrays.asList(new Server("localhost", 7082)));
 
-		IClientConfig clientConfig = new DefaultClientConfigImpl();
+		IClientConfig clientConfig = IClientConfig.Builder.newBuilder().build();
 
 		RibbonHttpClientRequestFactory ribbonHttpClientRequestFactory = new RibbonHttpClientRequestFactory(loadBalancer, clientConfig);
 
