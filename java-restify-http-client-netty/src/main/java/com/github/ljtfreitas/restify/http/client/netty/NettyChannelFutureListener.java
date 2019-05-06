@@ -35,7 +35,7 @@ class NettyChannelFutureListener implements ChannelFutureListener {
 	private final HttpRequest nettyHttpRequest;
 	private final NettyRequestExecuteHandler nettyRequestExecuteHandler;
 
-	public NettyChannelFutureListener(HttpRequest nettyHttpRequest, NettyRequestExecuteHandler nettyRequestExecuteHandler) {
+	NettyChannelFutureListener(HttpRequest nettyHttpRequest, NettyRequestExecuteHandler nettyRequestExecuteHandler) {
 		this.nettyHttpRequest = nettyHttpRequest;
 		this.nettyRequestExecuteHandler = nettyRequestExecuteHandler;
 	}

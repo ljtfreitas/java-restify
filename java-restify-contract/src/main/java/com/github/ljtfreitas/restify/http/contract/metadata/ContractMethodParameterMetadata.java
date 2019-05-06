@@ -42,7 +42,7 @@ import com.github.ljtfreitas.restify.http.contract.PathParameter;
 import com.github.ljtfreitas.restify.http.contract.QueryParameter;
 import com.github.ljtfreitas.restify.http.contract.QueryParameters;
 import com.github.ljtfreitas.restify.http.contract.DefaultParameterSerializer;
-import com.github.ljtfreitas.restify.reflection.JavaAnnotationScanner;
+import com.github.ljtfreitas.restify.reflection.AnnotationScanner;
 import com.github.ljtfreitas.restify.reflection.JavaType;
 import com.github.ljtfreitas.restify.reflection.JavaTypeResolver;
 
@@ -53,14 +53,14 @@ class ContractMethodParameterMetadata {
 	private final Annotation annotationParameter;
 	private final Class<? extends ParameterSerializer> serializerType;
 
-	public ContractMethodParameterMetadata(java.lang.reflect.Parameter javaMethodParameter) {
+	ContractMethodParameterMetadata(java.lang.reflect.Parameter javaMethodParameter) {
 		this(javaMethodParameter, javaMethodParameter.getDeclaringExecutable().getDeclaringClass());
 	}
 
-	public ContractMethodParameterMetadata(java.lang.reflect.Parameter javaMethodParameter, Class<?> targetClassType) {
+	ContractMethodParameterMetadata(java.lang.reflect.Parameter javaMethodParameter, Class<?> targetClassType) {
 		this.type = JavaType.of(new JavaTypeResolver(targetClassType).parameterizedTypeOf(javaMethodParameter));
 
-		JavaAnnotationScanner annotationScanner = new JavaAnnotationScanner(javaMethodParameter);
+		AnnotationScanner annotationScanner = new AnnotationScanner(javaMethodParameter);
 
 		Optional<PathParameter> pathParameter = annotationScanner.scan(PathParameter.class);
 		Optional<HeaderParameter> headerParameter = annotationScanner.scan(HeaderParameter.class);
@@ -101,39 +101,39 @@ class ContractMethodParameterMetadata {
 			|| annotationParameter instanceof CookieParameter;
 	}
 
-	public String name() {
+	String name() {
 		return name;
 	}
 
-	public JavaType javaType() {
+	JavaType javaType() {
 		return type;
 	}
 
-	public boolean path() {
+	boolean path() {
 		return annotationParameter instanceof PathParameter || annotationParameter == null;
 	}
 
-	public boolean body() {
+	boolean body() {
 		return annotationParameter instanceof BodyParameter;
 	}
 
-	public boolean header() {
+	boolean header() {
 		return annotationParameter instanceof HeaderParameter;
 	}
 
-	public boolean cookie() {
+	boolean cookie() {
 		return annotationParameter instanceof CookieParameter;
 	}
 
-	public boolean query() {
+	boolean query() {
 		return annotationParameter instanceof QueryParameter || annotationParameter instanceof QueryParameters;
 	}
 
-	public boolean callback() {
+	boolean callback() {
 		return annotationParameter instanceof CallbackParameter;
 	}
 
-	public Class<? extends ParameterSerializer> serializer() {
+	Class<? extends ParameterSerializer> serializer() {
 		return serializerType;
 	}
 }

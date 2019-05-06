@@ -38,7 +38,7 @@ public interface XmlMessageConverter<T> extends HttpMessageReader<T>, HttpMessag
 	public static final ContentType TEXT_XML_CONTENT_TYPE = ContentType.of("text/xml");
 
 	@Override
-	public default Collection<ContentType> contentTypes() {
+	default Collection<ContentType> contentTypes() {
 		return Arrays.asList(APPLICATION_XML_CONTENT_TYPE, TEXT_XML_CONTENT_TYPE);
 	}
 }

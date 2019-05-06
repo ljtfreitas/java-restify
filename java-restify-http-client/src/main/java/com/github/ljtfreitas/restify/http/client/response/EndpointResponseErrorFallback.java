@@ -30,5 +30,5 @@ import com.github.ljtfreitas.restify.reflection.JavaType;
 
 public interface EndpointResponseErrorFallback {
 
-	public <T> EndpointResponse<T> onError(HttpResponseMessage response, JavaType responseType);
+	<T> EndpointResponse<T> onError(HttpResponseMessage response, JavaType responseType);
 }

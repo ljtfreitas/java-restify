@@ -29,6 +29,6 @@ import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
 
 public interface EndpointRequestExecutor {
 
-	public <T> EndpointResponse<T> execute(EndpointRequest endpointRequest);
+	<T> EndpointResponse<T> execute(EndpointRequest endpointRequest);
 
 }

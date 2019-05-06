@@ -14,7 +14,7 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import com.github.ljtfreitas.restify.reflection.SimpleParameterizedType;
+import com.github.ljtfreitas.restify.reflection.JavaType;
 
 @RunWith(MockitoJUnitRunner.class)
 public class QueryParametersSerializerTest {
@@ -63,8 +63,8 @@ public class QueryParametersSerializerTest {
 		parameters.put(0, "zero");
 		parameters.put(1, "one");
 
-		ParameterizedType parameterizedMapType = new SimpleParameterizedType(Map.class, null,
-				new Type[] { Integer.class, String.class });
+		ParameterizedType parameterizedMapType = JavaType.parameterizedType(Map.class, null,
+				new Type[] { Integer.class, String.class }).as(ParameterizedType.class);
 
 		serializer.serialize("", parameterizedMapType, parameters);
 	}

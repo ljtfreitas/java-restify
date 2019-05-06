@@ -30,7 +30,7 @@ import com.github.ljtfreitas.restify.reflection.JavaType;
 
 public interface EndpointCallHandler<M, T> {
 
-	public JavaType returnType();
+	JavaType returnType();
 
-	public M handle(EndpointCall<T> call, Object[] args);
+	M handle(EndpointCall<T> call, Object[] args);
 }

@@ -21,12 +21,13 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import com.github.ljtfreitas.restify.http.client.message.Header;
 import com.github.ljtfreitas.restify.http.client.message.Headers;
+import com.github.ljtfreitas.restify.http.client.message.converter.form.multipart.provided.MultipartFormObjectMessageWriter;
 import com.github.ljtfreitas.restify.http.client.message.request.BufferedByteArrayHttpRequestBody;
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
-import com.github.ljtfreitas.restify.http.contract.Form;
-import com.github.ljtfreitas.restify.http.contract.Form.Field;
-import com.github.ljtfreitas.restify.http.contract.MultipartField;
-import com.github.ljtfreitas.restify.http.contract.Notation;
+import com.github.ljtfreitas.restify.http.contract.form.Form;
+import com.github.ljtfreitas.restify.http.contract.form.MultipartField;
+import com.github.ljtfreitas.restify.http.contract.form.Notation;
+import com.github.ljtfreitas.restify.http.contract.form.Form.Field;
 
 @RunWith(MockitoJUnitRunner.class)
 public class MultipartFormObjectMessageWriterTest {

@@ -46,5 +46,5 @@ public interface AsyncHttpClientRequest extends HttpClientRequest {
 				.get();
 	}
 
-	public CompletionStage<HttpClientResponse> executeAsync() throws HttpClientException;
+	CompletionStage<HttpClientResponse> executeAsync() throws HttpClientException;
 }

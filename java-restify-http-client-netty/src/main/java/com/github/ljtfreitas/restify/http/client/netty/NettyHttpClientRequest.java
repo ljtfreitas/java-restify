@@ -62,7 +62,7 @@ class NettyHttpClientRequest implements AsyncHttpClientRequest {
 	private final Charset charset;
 	private final ByteBufRequestBody body;
 
-	public NettyHttpClientRequest(Bootstrap bootstrap, URI uri, Headers headers, String method, Charset charset) {
+	NettyHttpClientRequest(Bootstrap bootstrap, URI uri, Headers headers, String method, Charset charset) {
 		this(bootstrap, uri, headers, method, charset, new ByteBufRequestBody());
 	}
 

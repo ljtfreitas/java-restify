@@ -36,7 +36,7 @@ import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponseErrorFallback;
 import com.github.ljtfreitas.restify.reflection.JavaType;
 
-public class EndpointResponseConverter {
+class EndpointResponseConverter {
 
 	private final EndpointResponseErrorFallback endpointResponseErrorFallback;
 

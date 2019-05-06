@@ -4,7 +4,7 @@ import com.github.ljtfreitas.restify.http.client.call.EndpointCall;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethod;
 import com.github.ljtfreitas.restify.reflection.JavaType;
 
-class DefaultEndpointCallHandlerFactory<M> implements EndpointCallHandlerFactory<M, M> {
+public class DefaultEndpointCallHandlerFactory<M> implements EndpointCallHandlerFactory<M, M> {
 
 	@Override
 	public boolean supports(EndpointMethod endpointMethod) {

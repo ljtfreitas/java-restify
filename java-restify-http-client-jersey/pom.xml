@@ -33,6 +33,12 @@
 			<scope>provided</scope>
 		</dependency>
 		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>java-restify-contract</artifactId>
+			<version>${project.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
 			<groupId>org.glassfish.jersey.core</groupId>
 			<artifactId>jersey-client</artifactId>
 			<version>${jersey.http.client.version}</version>
@@ -40,11 +46,6 @@
 		<dependency>
 			<groupId>org.glassfish.jersey.ext.rx</groupId>
 			<artifactId>jersey-rx-client-rxjava</artifactId>
-			<version>${jersey.http.client.version}</version>
-		</dependency>
-		<dependency>
-			<groupId>org.glassfish.jersey.ext.rx</groupId>
-			<artifactId>jersey-rx-client-rxjava2</artifactId>
 			<version>${jersey.http.client.version}</version>
 		</dependency>
 		<dependency>
@@ -64,6 +65,16 @@
 			<artifactId>jersey-hk2</artifactId>
 			<version>${jersey.http.client.version}</version>
 			<scope>test</scope>
+		</dependency>
+		<dependency>
+			<groupId>javax.xml.bind</groupId>
+			<artifactId>jaxb-api</artifactId>
+			<version>2.3.0</version>
+		</dependency>
+		<dependency>
+		    <groupId>com.sun.activation</groupId>
+		    <artifactId>javax.activation</artifactId>
+		    <version>1.2.0</version>
 		</dependency>
 	</dependencies>
 </project>

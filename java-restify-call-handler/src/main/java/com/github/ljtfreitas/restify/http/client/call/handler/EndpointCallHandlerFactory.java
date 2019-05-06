@@ -29,5 +29,5 @@ import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethod;
 
 public interface EndpointCallHandlerFactory<M, T> extends EndpointCallHandlerProvider {
 
-	public EndpointCallHandler<M, T> create(EndpointMethod endpointMethod);
+	EndpointCallHandler<M, T> create(EndpointMethod endpointMethod);
 }

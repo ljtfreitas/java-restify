@@ -30,12 +30,12 @@ import java.lang.reflect.WildcardType;
 import java.util.Arrays;
 import java.util.Objects;
 
-public class SimpleWildcardType implements WildcardType {
+class SimpleWildcardType implements WildcardType {
 
 	private final Type[] upperBounds;
 	private final Type[] lowerBounds;
 
-	public SimpleWildcardType(Type[] upperBounds, Type[] lowerBounds) {
+	SimpleWildcardType(Type[] upperBounds, Type[] lowerBounds) {
 		this.upperBounds = upperBounds;
 		this.lowerBounds = lowerBounds;
 	}

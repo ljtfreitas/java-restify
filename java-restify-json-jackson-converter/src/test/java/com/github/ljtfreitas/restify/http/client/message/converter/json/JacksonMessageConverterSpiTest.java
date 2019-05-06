@@ -8,6 +8,8 @@ import java.util.ServiceLoader;
 
 import org.junit.Test;
 
+import com.github.ljtfreitas.restify.http.client.message.converter.json.jackson.JacksonMessageConverter;
+
 public class JacksonMessageConverterSpiTest {
 
 	@SuppressWarnings({ "rawtypes" })

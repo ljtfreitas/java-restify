@@ -38,8 +38,8 @@ import java.util.stream.Stream;
 import org.springframework.beans.factory.FactoryBean;
 
 import com.github.ljtfreitas.restify.http.RestifyProxyBuilder;
+import com.github.ljtfreitas.restify.http.client.HttpClientRequestConfiguration;
 import com.github.ljtfreitas.restify.http.client.call.handler.EndpointCallHandlerProvider;
-import com.github.ljtfreitas.restify.http.client.jdk.HttpClientRequestConfiguration;
 import com.github.ljtfreitas.restify.http.client.message.converter.HttpMessageConverter;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequestExecutor;
 import com.github.ljtfreitas.restify.http.client.request.HttpClientRequestFactory;

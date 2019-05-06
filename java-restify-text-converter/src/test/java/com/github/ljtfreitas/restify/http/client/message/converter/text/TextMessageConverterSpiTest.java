@@ -8,6 +8,10 @@ import java.util.ServiceLoader;
 
 import org.junit.Test;
 
+import com.github.ljtfreitas.restify.http.client.message.converter.text.provided.ScalarMessageConverter;
+import com.github.ljtfreitas.restify.http.client.message.converter.text.provided.TextHtmlMessageConverter;
+import com.github.ljtfreitas.restify.http.client.message.converter.text.provided.TextPlainMessageConverter;
+
 public class TextMessageConverterSpiTest {
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })

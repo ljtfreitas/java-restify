@@ -32,7 +32,8 @@ import javax.ws.rs.client.Invocation;
 import javax.ws.rs.core.Configuration;
 import javax.ws.rs.core.Response;
 
-import com.github.ljtfreitas.restify.http.client.HttpException;
+import com.github.ljtfreitas.restify.http.client.HttpClientException;
+import com.github.ljtfreitas.restify.http.client.message.HttpMessageException;
 import com.github.ljtfreitas.restify.http.client.message.converter.HttpMessageReadException;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequestExecutor;
@@ -83,14 +84,14 @@ public class JerseyHttpClientEndpointRequestExecutor implements EndpointRequestE
 
 			return endpointResponse;
 
-		} catch (HttpException e) {
+		} catch (HttpClientException | HttpMessageException e) {
 			throw e;
 
 		} catch (WebApplicationException e) {
 			throw new HttpMessageReadException(e);
 
 		} catch (Exception e) {
-			throw new HttpException("Error on HTTP request: [" + endpointRequest.method() + " " + endpointRequest.endpoint() + "]", e);
+			throw new HttpClientException("Error on HTTP request: [" + endpointRequest.method() + " " + endpointRequest.endpoint() + "]", e);
 		}
 	}
 }

@@ -31,7 +31,7 @@ import com.github.ljtfreitas.restify.http.client.message.response.HttpResponseMe
 
 public interface HttpMessageReader<T> extends HttpMessageConverter {
 
-	public boolean canRead(Type type);
+	boolean canRead(Type type);
 
-	public T read(HttpResponseMessage httpResponseMessage, Type expectedType) throws HttpMessageReadException;
+	T read(HttpResponseMessage httpResponseMessage, Type expectedType) throws HttpMessageReadException;
 }

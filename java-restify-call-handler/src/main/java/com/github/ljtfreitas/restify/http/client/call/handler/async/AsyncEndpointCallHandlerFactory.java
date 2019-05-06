@@ -31,10 +31,10 @@ import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethod;
 
 public interface AsyncEndpointCallHandlerFactory<M, T> extends EndpointCallHandlerFactory<M, T> {
 
-	public AsyncEndpointCallHandler<M, T> createAsync(EndpointMethod endpointMethod);
+	AsyncEndpointCallHandler<M, T> createAsync(EndpointMethod endpointMethod);
 
 	@Override
-	public default EndpointCallHandler<M, T> create(EndpointMethod endpointMethod) {
+	default EndpointCallHandler<M, T> create(EndpointMethod endpointMethod) {
 		return createAsync(endpointMethod);
 	}
 }

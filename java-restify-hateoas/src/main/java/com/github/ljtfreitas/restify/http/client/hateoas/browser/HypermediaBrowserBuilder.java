@@ -42,6 +42,8 @@ import java.util.concurrent.ScheduledExecutorService;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLSocketFactory;
 
+import com.github.ljtfreitas.restify.http.client.HttpClientRequestConfiguration;
+import com.github.ljtfreitas.restify.http.client.JdkHttpClientRequestFactory;
 import com.github.ljtfreitas.restify.http.client.hateoas.JacksonHypermediaJsonMessageConverter;
 import com.github.ljtfreitas.restify.http.client.hateoas.browser.discovery.HypermediaHalJsonPathLinkDiscovery;
 import com.github.ljtfreitas.restify.http.client.hateoas.browser.discovery.HypermediaJsonPathLinkDiscovery;
@@ -49,11 +51,9 @@ import com.github.ljtfreitas.restify.http.client.hateoas.browser.discovery.Hyper
 import com.github.ljtfreitas.restify.http.client.hateoas.browser.discovery.JsonPathLinkDiscovery;
 import com.github.ljtfreitas.restify.http.client.hateoas.browser.discovery.LinkDiscovery;
 import com.github.ljtfreitas.restify.http.client.hateoas.hal.JacksonHypermediaHalJsonMessageConverter;
-import com.github.ljtfreitas.restify.http.client.jdk.HttpClientRequestConfiguration;
-import com.github.ljtfreitas.restify.http.client.jdk.JdkHttpClientRequestFactory;
 import com.github.ljtfreitas.restify.http.client.message.converter.HttpMessageConverter;
 import com.github.ljtfreitas.restify.http.client.message.converter.HttpMessageConverters;
-import com.github.ljtfreitas.restify.http.client.message.converter.wildcard.SimpleTextMessageConverter;
+import com.github.ljtfreitas.restify.http.client.message.converter.wildcard.provided.SimpleTextMessageConverter;
 import com.github.ljtfreitas.restify.http.client.message.response.HttpStatusCode;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequestExecutor;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequestWriter;

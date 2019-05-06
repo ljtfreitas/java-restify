@@ -29,6 +29,6 @@ import java.io.InputStream;
 
 public interface HttpResponseBody {
 
-	public InputStream input();
+	InputStream input();
 
 }

@@ -33,7 +33,7 @@ class DefaultEndpointCall<T> implements EndpointCall<T> {
 	private final EndpointRequest endpointRequest;
 	private final EndpointRequestExecutor endpointRequestExecutor;
 
-	public DefaultEndpointCall(EndpointRequest endpointRequest, EndpointRequestExecutor endpointRequestExecutor) {
+	DefaultEndpointCall(EndpointRequest endpointRequest, EndpointRequestExecutor endpointRequestExecutor) {
 		this.endpointRequest = endpointRequest;
 		this.endpointRequestExecutor = endpointRequestExecutor;
 	}

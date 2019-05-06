@@ -39,7 +39,7 @@ import com.github.ljtfreitas.restify.http.contract.Header;
 import com.github.ljtfreitas.restify.http.contract.Headers;
 import com.github.ljtfreitas.restify.http.contract.Path;
 import com.github.ljtfreitas.restify.http.contract.Version;
-import com.github.ljtfreitas.restify.reflection.JavaAnnotationScanner;
+import com.github.ljtfreitas.restify.reflection.AnnotationScanner;
 
 class ContractTypeMetadata {
 
@@ -50,14 +50,14 @@ class ContractTypeMetadata {
 	private final Version version;
 	private final ContractTypeMetadata parent;
 
-	public ContractTypeMetadata(Class<?> javaType) {
+	ContractTypeMetadata(Class<?> javaType) {
 		isTrue(javaType.isInterface(), "Your type must be a Java interface.");
 		isTrue(javaType.getInterfaces().length <= 1, "Only single inheritance is supported.");
 
 		this.javaType = javaType;
 		this.parent = javaType.getInterfaces().length == 1 ? new ContractTypeMetadata(javaType.getInterfaces()[0]) : null;
 
-		JavaAnnotationScanner annotationScanner = new JavaAnnotationScanner(javaType);
+		AnnotationScanner annotationScanner = new AnnotationScanner(javaType);
 
 		this.path = annotationScanner.scan(Path.class).orElse(null);
 
@@ -74,11 +74,11 @@ class ContractTypeMetadata {
 		this.version = javaType.getAnnotation(Version.class);
 	}
 
-	public Optional<Path> path() {
+	Optional<Path> path() {
 		return Optional.ofNullable(path);
 	}
 
-	public Path[] paths() {
+	Path[] paths() {
 		ArrayList<Path> paths = new ArrayList<>();
 
 		Optional.ofNullable(parent)
@@ -91,7 +91,7 @@ class ContractTypeMetadata {
 		return paths.toArray(new Path[0]);
 	}
 
-	public Collection<Header> headers() {
+	Collection<Header> headers() {
 		Collection<Header> headers = new ArrayList<>();
 
 		Optional.ofNullable(parent)
@@ -103,7 +103,7 @@ class ContractTypeMetadata {
 		return headers;
 	}
 
-	public Collection<Cookie> cookies() {
+	Collection<Cookie> cookies() {
 		Collection<Cookie> cookies = new ArrayList<>();
 
 		Optional.ofNullable(parent)
@@ -115,15 +115,15 @@ class ContractTypeMetadata {
 		return cookies;
 	}
 
-	public Class<?> javaType() {
+	Class<?> javaType() {
 		return javaType;
 	}
 
-	public Optional<ContractTypeMetadata> parent() {
+	Optional<ContractTypeMetadata> parent() {
 		return Optional.ofNullable(parent);
 	}
 
-	public Optional<Version> version() {
+	Optional<Version> version() {
 		return version == null ? Optional.ofNullable(parent).flatMap(ContractTypeMetadata::version) : Optional.of(version);
 	}
 }

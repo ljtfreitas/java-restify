@@ -31,5 +31,5 @@ import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
 
 public interface AsyncAuthentication {
 
-	public CompletionStage<String> contentAsync(EndpointRequest endpointRequest);
+	CompletionStage<String> contentAsync(EndpointRequest endpointRequest);
 }

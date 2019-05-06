@@ -40,7 +40,7 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.HttpHeaders;
 
-import com.github.ljtfreitas.restify.reflection.JavaAnnotationScanner;
+import com.github.ljtfreitas.restify.reflection.AnnotationScanner;
 import com.github.ljtfreitas.restify.reflection.JavaTypeResolver;
 
 class JaxRsJavaMethodMetadata {
@@ -54,7 +54,7 @@ class JaxRsJavaMethodMetadata {
 	public JaxRsJavaMethodMetadata(java.lang.reflect.Method javaMethod) {
 		this.javaMethod = javaMethod;
 
-		JavaAnnotationScanner annotationScanner = new JavaAnnotationScanner(javaMethod);
+		AnnotationScanner annotationScanner = new AnnotationScanner(javaMethod);
 
 		this.path = annotationScanner.scan(Path.class).orElse(null);
 

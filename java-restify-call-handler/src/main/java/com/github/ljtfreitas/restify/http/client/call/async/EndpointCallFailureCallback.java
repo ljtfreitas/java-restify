@@ -27,5 +27,5 @@ package com.github.ljtfreitas.restify.http.client.call.async;
 
 public interface EndpointCallFailureCallback {
 
-	public void onFailure(Throwable throwable);
+	void onFailure(Throwable throwable);
 }

@@ -31,6 +31,7 @@ import java.nio.charset.Charset;
 
 import com.github.ljtfreitas.restify.http.client.message.Encoding;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
+import com.github.ljtfreitas.restify.http.client.request.async.AsyncHttpClientRequest;
 import com.github.ljtfreitas.restify.http.client.request.async.AsyncHttpClientRequestFactory;
 import com.ning.http.client.AsyncHttpClient;
 import com.ning.http.client.AsyncHttpClientConfig;
@@ -66,7 +67,7 @@ public class GrizzlyHttpClientRequestFactory implements AsyncHttpClientRequestFa
 	}
 
 	@Override
-	public GrizzlyHttpClientRequest createAsyncOf(EndpointRequest endpointRequest) {
+	public AsyncHttpClientRequest createAsyncOf(EndpointRequest endpointRequest) {
 		return new GrizzlyHttpClientRequest(asyncHttpClient, endpointRequest, charset);
 	}
 

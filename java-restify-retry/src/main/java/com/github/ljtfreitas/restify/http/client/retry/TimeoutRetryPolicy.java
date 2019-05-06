@@ -33,7 +33,7 @@ class TimeoutRetryPolicy implements RetryPolicy {
 	private final Duration timeout;
 	private final Instant limit;
 
-	public TimeoutRetryPolicy(Duration timeout) {
+	TimeoutRetryPolicy(Duration timeout) {
 		this.timeout = timeout;
 		this.limit = Instant.now().plus(timeout);
 	}

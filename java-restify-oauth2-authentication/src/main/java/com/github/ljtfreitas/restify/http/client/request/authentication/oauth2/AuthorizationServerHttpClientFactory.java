@@ -29,13 +29,13 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.concurrent.ExecutorService;
 
-import com.github.ljtfreitas.restify.http.client.jdk.HttpClientRequestConfiguration;
-import com.github.ljtfreitas.restify.http.client.jdk.JdkHttpClientRequestFactory;
+import com.github.ljtfreitas.restify.http.client.HttpClientRequestConfiguration;
+import com.github.ljtfreitas.restify.http.client.JdkHttpClientRequestFactory;
 import com.github.ljtfreitas.restify.http.client.message.converter.HttpMessageConverter;
 import com.github.ljtfreitas.restify.http.client.message.converter.HttpMessageConverters;
-import com.github.ljtfreitas.restify.http.client.message.converter.form.FormURLEncodedParametersMessageConverter;
+import com.github.ljtfreitas.restify.http.client.message.converter.form.provided.FormURLEncodedParametersMessageConverter;
 import com.github.ljtfreitas.restify.http.client.message.converter.json.JsonMessageConverter;
-import com.github.ljtfreitas.restify.http.client.message.converter.text.TextPlainMessageConverter;
+import com.github.ljtfreitas.restify.http.client.message.converter.text.provided.TextPlainMessageConverter;
 import com.github.ljtfreitas.restify.http.client.message.converter.xml.XmlMessageConverter;
 import com.github.ljtfreitas.restify.http.client.request.DefaultEndpointRequestExecutor;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequestExecutor;

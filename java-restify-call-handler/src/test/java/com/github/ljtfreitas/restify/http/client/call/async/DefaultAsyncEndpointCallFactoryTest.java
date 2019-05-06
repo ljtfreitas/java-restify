@@ -18,7 +18,6 @@ import com.github.ljtfreitas.restify.http.client.request.async.AsyncEndpointRequ
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethod;
 import com.github.ljtfreitas.restify.reflection.JavaType;
-import com.github.ljtfreitas.restify.reflection.SimpleParameterizedType;
 
 @RunWith(MockitoJUnitRunner.class)
 public class DefaultAsyncEndpointCallFactoryTest {
@@ -55,9 +54,7 @@ public class DefaultAsyncEndpointCallFactoryTest {
 
 	@Test
 	public void shouldExtractRawResponseTypeWhenReturnTypeIsParameterizedEndpointResponse() {
-		SimpleParameterizedType endpointResponseType = new SimpleParameterizedType(EndpointResponse.class, null, String.class);
-
-		JavaType returnType = JavaType.of(endpointResponseType);
+		JavaType returnType = JavaType.parameterizedType(EndpointResponse.class, null, String.class);
 
 		EndpointCall<Object> call = factory.createWith(endpointRequest, returnType);
 

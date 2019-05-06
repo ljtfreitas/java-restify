@@ -29,6 +29,7 @@ import java.io.Closeable;
 import java.io.IOException;
 
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
+import com.github.ljtfreitas.restify.http.client.request.async.AsyncHttpClientRequest;
 import com.github.ljtfreitas.restify.http.client.request.async.AsyncHttpClientRequestFactory;
 
 import io.netty.bootstrap.Bootstrap;
@@ -57,7 +58,7 @@ public class NettyHttpClientRequestFactory implements AsyncHttpClientRequestFact
 	}
 
 	@Override
-	public NettyHttpClientRequest createAsyncOf(EndpointRequest endpointRequest) {
+	public AsyncHttpClientRequest createAsyncOf(EndpointRequest endpointRequest) {
 		Bootstrap bootstrap = new NettyBootstrapFactory(eventLoopGroup, nettyHttpClientRequestConfiguration)
 				.createTo(endpointRequest);
 

@@ -29,5 +29,5 @@ import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
 
 public interface Authentication {
 
-	public String content(EndpointRequest endpointRequest);
+	String content(EndpointRequest endpointRequest);
 }

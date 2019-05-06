@@ -29,7 +29,7 @@ import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMess
 
 public interface HttpMessageWriter<T> extends HttpMessageConverter {
 
-	public boolean canWrite(Class<?> type);
+	boolean canWrite(Class<?> type);
 
-	public void write(T body, HttpRequestMessage httpRequestMessage) throws HttpMessageWriteException;
+	void write(T body, HttpRequestMessage httpRequestMessage) throws HttpMessageWriteException;
 }

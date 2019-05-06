@@ -33,38 +33,35 @@ import com.github.ljtfreitas.restify.http.client.message.response.StatusCode;
 
 public interface EndpointResponse<T> {
 
-	public Headers headers();
+	Headers headers();
 
-	public StatusCode status();
+	StatusCode status();
 
-	public T body();
+	T body();
 
-	public EndpointResponse<T> recover(
-			Function<EndpointResponseException, EndpointResponse<T>> mapper);
+	EndpointResponse<T> recover(Function<EndpointResponseException, EndpointResponse<T>> mapper);
 
-	public EndpointResponse<T> recover(Predicate<EndpointResponseException> predicate,
-			Function<EndpointResponseException, EndpointResponse<T>> mapper);
+	EndpointResponse<T> recover(Predicate<EndpointResponseException> predicate, Function<EndpointResponseException, EndpointResponse<T>> mapper);
 
-	public <E extends EndpointResponseException> EndpointResponse<T> recover(Class<? extends E> predicate,
-			Function<E, EndpointResponse<T>> mapper);
+	<E extends EndpointResponseException> EndpointResponse<T> recover(Class<? extends E> predicate, Function<E, EndpointResponse<T>> mapper);
 
-	public static <T> EndpointResponse<T> of(StatusCode statusCode, T body) {
+	static <T> EndpointResponse<T> of(StatusCode statusCode, T body) {
 		return new SimpleEndpointResponse<T>(statusCode, Headers.empty(), body);
 	}
 
-	public static <T> EndpointResponse<T> of(StatusCode statusCode, T body, Headers headers) {
+	static <T> EndpointResponse<T> of(StatusCode statusCode, T body, Headers headers) {
 		return new SimpleEndpointResponse<>(statusCode, headers, body);
 	}
 
-	public static <T> EndpointResponse<T> empty(StatusCode statusCode) {
+	static <T> EndpointResponse<T> empty(StatusCode statusCode) {
 		return empty(statusCode, Headers.empty());
 	}
 
-	public static <T> EndpointResponse<T> empty(StatusCode statusCode, Headers headers) {
+	static <T> EndpointResponse<T> empty(StatusCode statusCode, Headers headers) {
 		return new SimpleEndpointResponse<>(statusCode, headers, null);
 	}
 
-	public static <T> EndpointResponse<T> error(EndpointResponseException e) {
+	static <T> EndpointResponse<T> error(EndpointResponseException e) {
 		return new FailureEndpointResponse<>(e);
 	}
 }

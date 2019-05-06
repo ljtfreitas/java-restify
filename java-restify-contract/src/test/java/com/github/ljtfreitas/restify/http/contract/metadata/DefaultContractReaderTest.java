@@ -37,9 +37,7 @@ import com.github.ljtfreitas.restify.http.contract.Post;
 import com.github.ljtfreitas.restify.http.contract.Put;
 import com.github.ljtfreitas.restify.http.contract.QueryParameters;
 import com.github.ljtfreitas.restify.http.contract.Version;
-import com.github.ljtfreitas.restify.reflection.SimpleGenericArrayType;
-import com.github.ljtfreitas.restify.reflection.SimpleParameterizedType;
-import com.github.ljtfreitas.restify.reflection.SimpleWildcardType;
+import com.github.ljtfreitas.restify.reflection.JavaType;
 
 public class DefaultContractReaderTest {
 
@@ -277,7 +275,7 @@ public class DefaultContractReaderTest {
 		assertTrue(callbackParameter.isPresent());
 		assertEquals("callback", callbackParameter.get().name());
 		assertTrue(callbackParameter.get().callback());
-		assertEquals(new SimpleParameterizedType(AsyncCallback.class, this.getClass(), String.class), callbackParameter.get().javaType().unwrap());
+		assertEquals(JavaType.parameterizedType(AsyncCallback.class, this.getClass(), String.class), callbackParameter.get().javaType());
 
 		assertFalse(endpointMethod.parameters().callbacks().isEmpty());
 	}
@@ -298,7 +296,7 @@ public class DefaultContractReaderTest {
 		assertTrue(successCallbackParameter.isPresent());
 		assertEquals("successCallback", successCallbackParameter.get().name());
 		assertTrue(successCallbackParameter.get().callback());
-		assertEquals(new SimpleParameterizedType(AsyncSuccessCallback.class, this.getClass(), String.class), successCallbackParameter.get().javaType().unwrap());
+		assertEquals(JavaType.parameterizedType(AsyncSuccessCallback.class, this.getClass(), String.class), successCallbackParameter.get().javaType());
 
 		Optional<EndpointMethodParameter> failureCallbackParameter = endpointMethod.parameters().get(1);
 		assertTrue(failureCallbackParameter.isPresent());
@@ -367,7 +365,7 @@ public class DefaultContractReaderTest {
 			.orElseThrow(() -> new IllegalStateException("Method not found..."));
 
 		assertEquals("http://my.model.api/all", endpointMethod.path());
-		assertEquals(new SimpleParameterizedType(List.class, null, MyModel.class), endpointMethod.returnType().unwrap());
+		assertEquals(JavaType.parameterizedType(List.class, null, MyModel.class), endpointMethod.returnType());
 	}
 
 	@Test
@@ -378,7 +376,7 @@ public class DefaultContractReaderTest {
 			.orElseThrow(() -> new IllegalStateException("Method not found..."));
 
 		assertEquals("http://my.model.api/all", endpointMethod.path());
-		assertEquals(new SimpleGenericArrayType(MyModel.class), endpointMethod.returnType().unwrap());
+		assertEquals(JavaType.arrayType(MyModel.class), endpointMethod.returnType());
 	}
 
 	@Test
@@ -400,8 +398,8 @@ public class DefaultContractReaderTest {
 			.orElseThrow(() -> new IllegalStateException("Method not found..."));;
 
 		assertEquals("http://my.model.api/all", endpointMethod.path());
-		assertEquals(new SimpleParameterizedType(Map.class, null, String.class, MyModel.class),
-				endpointMethod.returnType().unwrap());
+		assertEquals(JavaType.parameterizedType(Map.class, null, String.class, MyModel.class),
+				endpointMethod.returnType());
 	}
 
 	@Test
@@ -412,8 +410,8 @@ public class DefaultContractReaderTest {
 				.orElseThrow(() -> new IllegalStateException("Method not found..."));
 
 		assertEquals("http://my.model.api/all", endpointMethod.path());
-		assertEquals(new SimpleParameterizedType(Map.class, null, String.class, MyModel.class),
-				endpointMethod.returnType().unwrap());
+		assertEquals(JavaType.parameterizedType(Map.class, null, String.class, MyModel.class),
+				endpointMethod.returnType());
 	}
 
 	@Test
@@ -425,9 +423,9 @@ public class DefaultContractReaderTest {
 
 		assertEquals("http://my.model.api/any", endpointMethod.path());
 		assertEquals(
-				new SimpleParameterizedType(Map.class, null,
-						new SimpleWildcardType(new Type[] { Number.class }, new Type[0]),
-						new SimpleWildcardType(new Type[] { MyModel.class }, new Type[0])),
+				JavaType.parameterizedType(Map.class, null,
+						JavaType.wildcardType(new Type[] { Number.class }, new Type[0]).unwrap(),
+						JavaType.wildcardType(new Type[] { MyModel.class }, new Type[0]).unwrap()),
 				endpointMethod.returnType().unwrap());
 	}
 
@@ -447,7 +445,7 @@ public class DefaultContractReaderTest {
 		assertTrue(callbackParameter.isPresent());
 		assertEquals("callback", callbackParameter.get().name());
 		assertTrue(callbackParameter.get().callback());
-		assertEquals(new SimpleParameterizedType(AsyncCallback.class, this.getClass(), MyModel.class), callbackParameter.get().javaType().unwrap());
+		assertEquals(JavaType.parameterizedType(AsyncCallback.class, this.getClass(), MyModel.class), callbackParameter.get().javaType());
 
 		assertFalse(endpointMethod.parameters().callbacks().isEmpty());
 	}

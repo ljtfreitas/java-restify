@@ -41,7 +41,7 @@ class NettyHttpClientResponse extends BaseHttpClientResponse {
 	private final ChannelHandlerContext context;
 	private final FullHttpResponse nettyResponse;
 
-	public NettyHttpClientResponse(StatusCode statusCode, Headers headers, InputStream body, HttpRequestMessage httpRequest,
+	NettyHttpClientResponse(StatusCode statusCode, Headers headers, InputStream body, HttpRequestMessage httpRequest,
 			ChannelHandlerContext context, FullHttpResponse nettyResponse) {
 		super(statusCode, headers, body, httpRequest);
 		this.context = context;

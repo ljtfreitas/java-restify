@@ -31,10 +31,10 @@ import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethod;
 
 public interface AsyncEndpointCallHandlerAdapter<M, T, O> extends EndpointCallHandlerAdapter<M, T, O> {
 
-	public AsyncEndpointCallHandler<M, O> adaptAsync(EndpointMethod endpointMethod, EndpointCallHandler<T, O> handler);
+	AsyncEndpointCallHandler<M, O> adaptAsync(EndpointMethod endpointMethod, EndpointCallHandler<T, O> handler);
 
 	@Override
-	public default EndpointCallHandler<M, O> adapt(EndpointMethod endpointMethod, EndpointCallHandler<T, O> handler) {
+	default EndpointCallHandler<M, O> adapt(EndpointMethod endpointMethod, EndpointCallHandler<T, O> handler) {
 		return adaptAsync(endpointMethod, handler);
 	}
 }

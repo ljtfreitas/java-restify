@@ -23,7 +23,7 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 import com.github.ljtfreitas.restify.http.client.message.Header;
 import com.github.ljtfreitas.restify.http.client.message.Headers;
 import com.github.ljtfreitas.restify.http.client.message.converter.HttpMessageConverters;
-import com.github.ljtfreitas.restify.http.client.message.converter.json.JacksonMessageConverter;
+import com.github.ljtfreitas.restify.http.client.message.converter.json.jackson.JacksonMessageConverter;
 import com.github.ljtfreitas.restify.http.client.request.DefaultEndpointRequestExecutor;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequestExecutor;

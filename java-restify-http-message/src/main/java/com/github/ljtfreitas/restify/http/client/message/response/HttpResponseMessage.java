@@ -32,12 +32,12 @@ import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMess
 
 public interface HttpResponseMessage extends HttpMessage, Closeable {
 
-	public StatusCode status();
+	StatusCode status();
 
-	public HttpResponseBody body();
+	HttpResponseBody body();
 
-	public boolean available();
+	boolean available();
 
-	public HttpRequestMessage request();
+	HttpRequestMessage request();
 
 }

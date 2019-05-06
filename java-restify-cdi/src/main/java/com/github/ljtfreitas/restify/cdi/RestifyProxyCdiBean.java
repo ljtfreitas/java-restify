@@ -44,7 +44,7 @@ import javax.enterprise.util.AnnotationLiteral;
 import javax.inject.Qualifier;
 import javax.inject.Scope;
 
-import com.github.ljtfreitas.restify.reflection.JavaAnnotationScanner;
+import com.github.ljtfreitas.restify.reflection.AnnotationScanner;
 
 class RestifyProxyCdiBean implements Bean<Object> {
 
@@ -72,7 +72,7 @@ class RestifyProxyCdiBean implements Bean<Object> {
 	public Set<Annotation> getQualifiers() {
 		Set<Annotation> qualifiers = new LinkedHashSet<>();
 
-		JavaAnnotationScanner scanner = new JavaAnnotationScanner(javaType);
+		AnnotationScanner scanner = new AnnotationScanner(javaType);
 
 		Collection<Annotation> annotations = scanner.allWith(Qualifier.class);
 

@@ -30,7 +30,7 @@ import java.util.concurrent.CompletionStage;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 
-import com.github.ljtfreitas.restify.http.client.HttpException;
+import com.github.ljtfreitas.restify.http.client.HttpClientException;
 
 public class CompletionStageAsyncEndpointCall<T> implements AsyncEndpointCall<T> {
 
@@ -47,10 +47,10 @@ public class CompletionStageAsyncEndpointCall<T> implements AsyncEndpointCall<T>
 		try {
 			return stage.toCompletableFuture().get();
 		} catch (InterruptedException e) {
-			throw new HttpException("Interrupted exception on execute request.", e);
+			throw new HttpClientException(new IllegalStateException("Interrupted exception on execute request.", e));
 
 		} catch (ExecutionException e) {
-			throw new HttpException(deepCause(e));
+			throw new HttpClientException(new IllegalStateException(deepCause(e)));
 		}
 	}
 

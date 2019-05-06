@@ -37,7 +37,7 @@ public interface FormURLEncodedMessageConverter<T> extends HttpMessageReader<T>,
 	public static final ContentType APPLICATION_X_WWW_FORM_URLENCODED = ContentType.of("application/x-www-form-urlencoded");
 
 	@Override
-	public default Collection<ContentType> contentTypes() {
+	default Collection<ContentType> contentTypes() {
 		return Arrays.asList(APPLICATION_X_WWW_FORM_URLENCODED);
 	}
 }

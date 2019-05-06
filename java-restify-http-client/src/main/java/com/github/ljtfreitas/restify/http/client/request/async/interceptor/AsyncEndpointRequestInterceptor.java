@@ -33,10 +33,10 @@ import com.github.ljtfreitas.restify.http.client.request.interceptor.EndpointReq
 
 public interface AsyncEndpointRequestInterceptor extends EndpointRequestInterceptor {
 
-	public CompletionStage<EndpointRequest> interceptsAsync(CompletionStage<EndpointRequest> endpointRequest);
+	CompletionStage<EndpointRequest> interceptsAsync(CompletionStage<EndpointRequest> endpointRequest);
 
 	@Override
-	public default EndpointRequest intercepts(EndpointRequest endpointRequest) {
+	default EndpointRequest intercepts(EndpointRequest endpointRequest) {
 		return interceptsAsync(CompletableFuture.completedFuture(endpointRequest))
 				.toCompletableFuture()
 					.join();

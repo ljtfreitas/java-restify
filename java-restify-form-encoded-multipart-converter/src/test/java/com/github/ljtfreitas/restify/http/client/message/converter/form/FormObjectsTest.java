@@ -10,12 +10,12 @@ import java.util.Date;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.github.ljtfreitas.restify.http.client.message.converter.form.FormObject;
-import com.github.ljtfreitas.restify.http.client.message.converter.form.FormObjects;
-import com.github.ljtfreitas.restify.http.contract.Form;
-import com.github.ljtfreitas.restify.http.contract.FormFieldSerializer;
-import com.github.ljtfreitas.restify.http.contract.Notation;
-import com.github.ljtfreitas.restify.http.contract.Form.Field;
+import com.github.ljtfreitas.restify.http.client.message.converter.form.provided.internal.FormObject;
+import com.github.ljtfreitas.restify.http.client.message.converter.form.provided.internal.FormObjects;
+import com.github.ljtfreitas.restify.http.contract.form.Form;
+import com.github.ljtfreitas.restify.http.contract.form.FormFieldSerializer;
+import com.github.ljtfreitas.restify.http.contract.form.Notation;
+import com.github.ljtfreitas.restify.http.contract.form.Form.Field;
 
 public class FormObjectsTest {
 

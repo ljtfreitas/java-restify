@@ -41,6 +41,7 @@ import org.apache.http.protocol.HttpContext;
 
 import com.github.ljtfreitas.restify.http.client.message.Encoding;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
+import com.github.ljtfreitas.restify.http.client.request.HttpClientRequest;
 import com.github.ljtfreitas.restify.http.client.request.HttpClientRequestFactory;
 import com.github.ljtfreitas.restify.http.client.request.Timeout;
 
@@ -87,7 +88,7 @@ public class ApacheHttpClientRequestFactory implements HttpClientRequestFactory,
 	}
 
 	@Override
-	public ApacheHttpClientRequest createOf(EndpointRequest endpointRequest) {
+	public HttpClientRequest createOf(EndpointRequest endpointRequest) {
 		HttpUriRequest httpRequest = HttpUriRequestStrategy.of(endpointRequest.method())
 				.create(endpointRequest.endpoint().toString());
 

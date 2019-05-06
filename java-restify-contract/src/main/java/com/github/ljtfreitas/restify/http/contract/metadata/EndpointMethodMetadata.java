@@ -35,7 +35,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
-import com.github.ljtfreitas.restify.reflection.JavaAnnotationScanner;
+import com.github.ljtfreitas.restify.reflection.AnnotationScanner;
 
 public class EndpointMethodMetadata {
 
@@ -47,8 +47,8 @@ public class EndpointMethodMetadata {
 
 	private List<Annotation> scan(Method javaMethod) {
 		List<Annotation> annotations = new ArrayList<>();
-		annotations.addAll(new JavaAnnotationScanner(javaMethod).allWith(Metadata.class));
-		annotations.addAll(new JavaAnnotationScanner(javaMethod.getDeclaringClass()).allWith(Metadata.class));
+		annotations.addAll(new AnnotationScanner(javaMethod).allWith(Metadata.class));
+		annotations.addAll(new AnnotationScanner(javaMethod.getDeclaringClass()).allWith(Metadata.class));
 		return annotations;
 	}
 

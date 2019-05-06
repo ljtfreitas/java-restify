@@ -30,6 +30,8 @@ import org.mockserver.model.HttpRequest;
 import org.mockserver.socket.SSLFactory;
 
 import com.github.ljtfreitas.restify.http.client.HttpClientException;
+import com.github.ljtfreitas.restify.http.client.HttpClientRequestConfiguration;
+import com.github.ljtfreitas.restify.http.client.JdkHttpClientRequestFactory;
 import com.github.ljtfreitas.restify.http.client.message.Header;
 import com.github.ljtfreitas.restify.http.client.message.Headers;
 import com.github.ljtfreitas.restify.http.client.message.io.InputStreamContent;

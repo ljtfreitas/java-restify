@@ -24,11 +24,11 @@ import org.junit.Test;
 
 public class JavaAnnotationScannerTest {
 
-	private JavaAnnotationScanner scanner;
+	private AnnotationScanner scanner;
 
 	@Before
 	public void setup() {
-		scanner = new JavaAnnotationScanner(MyType.class);
+		scanner = new AnnotationScanner(MyType.class);
 	}
 
 	@Test
@@ -56,7 +56,7 @@ public class JavaAnnotationScannerTest {
 
 	@Test
 	public void shouldScanAllAnnotationByType() throws Exception {
-		scanner = new JavaAnnotationScanner(MyType.class.getMethod("method"));
+		scanner = new AnnotationScanner(MyType.class.getMethod("method"));
 
 		Collection<Meta> annotations = scanner.scanAll(Meta.class);
 
@@ -66,7 +66,7 @@ public class JavaAnnotationScannerTest {
 
 	@Test
 	public void shouldScanAllMetaAnnotationsByType() throws Exception {
-		scanner = new JavaAnnotationScanner(MyType.class.getMethod("method"));
+		scanner = new AnnotationScanner(MyType.class.getMethod("method"));
 
 		Collection<Annotation> annotations = scanner.allWith(Embedded.class);
 

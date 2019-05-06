@@ -33,11 +33,11 @@ class QueryParameterResolver {
 
 	private final Collection<EndpointMethodParameter> parameters;
 
-	public QueryParameterResolver(Collection<EndpointMethodParameter> parameters) {
+	QueryParameterResolver(Collection<EndpointMethodParameter> parameters) {
 		this.parameters = parameters;
 	}
 
-	public String resolve(Object[] args) {
+	String resolve(Object[] args) {
 		String query = parameters.stream().filter(EndpointMethodParameter::query)
 			.map(p -> resolve(p, args))
 				.filter(p -> !"".equals(p))

@@ -8,7 +8,7 @@
 	<artifactId>java-restify-reactor</artifactId>
 
 	<properties>
-		<reactor.version>3.2.8.RELEASE</reactor.version>
+		<reactor.version>3.2.9.RELEASE</reactor.version>
 	</properties>
 
 	<dependencies>
@@ -33,6 +33,18 @@
 		<dependency>
 			<groupId>${project.groupId}</groupId>
 			<artifactId>java-restify-util</artifactId>
+			<version>${project.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>java-restify-http-client</artifactId>
+			<version>${project.version}</version>
+			<scope>provided</scope>
+		</dependency>
+		<dependency>
+			<groupId>${project.groupId}</groupId>
+			<artifactId>java-restify-http-message</artifactId>
 			<version>${project.version}</version>
 			<scope>provided</scope>
 		</dependency>

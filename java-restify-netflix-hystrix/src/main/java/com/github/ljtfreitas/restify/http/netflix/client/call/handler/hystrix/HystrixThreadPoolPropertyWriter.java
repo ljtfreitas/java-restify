@@ -46,11 +46,11 @@ class HystrixThreadPoolPropertyWriter {
 
 	private final Map<String, String> properties;
 
-	public HystrixThreadPoolPropertyWriter(Map<String, String> properties) {
+	HystrixThreadPoolPropertyWriter(Map<String, String> properties) {
 		this.properties = properties;
 	}
 
-	public void applyTo(HystrixThreadPoolProperties.Setter hystrixtThreadPoolProperties) {
+	void applyTo(HystrixThreadPoolProperties.Setter hystrixtThreadPoolProperties) {
 		properties.entrySet().stream()
 			.forEach(property -> Optional.ofNullable(HYSTRIX_THREAD_POOL_PROPERTIES_SETTERS.get(property.getKey()))
 					.ifPresent(s -> s.set(hystrixtThreadPoolProperties, property.getValue())));

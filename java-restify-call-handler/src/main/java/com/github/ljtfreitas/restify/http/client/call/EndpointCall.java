@@ -27,6 +27,6 @@ package com.github.ljtfreitas.restify.http.client.call;
 
 public interface EndpointCall<T> {
 
-	public T execute();
+	T execute();
 
 }

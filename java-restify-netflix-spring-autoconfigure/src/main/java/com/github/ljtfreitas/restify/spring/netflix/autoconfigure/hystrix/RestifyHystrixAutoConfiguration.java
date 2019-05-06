@@ -43,8 +43,8 @@ import org.springframework.core.env.Environment;
 
 import com.github.ljtfreitas.restify.http.client.call.handler.circuitbreaker.OnCircuitBreaker;
 import com.github.ljtfreitas.restify.http.client.call.handler.circuitbreaker.OnCircuitBreakerMetadataResolver;
-import com.github.ljtfreitas.restify.http.client.call.handler.reactor.HystrixFluxEndpointCallHandlerAdapter;
-import com.github.ljtfreitas.restify.http.client.call.handler.reactor.HystrixMonoEndpointCallHandlerAdapter;
+import com.github.ljtfreitas.restify.http.client.call.handler.reactor.circuitbreaker.hystrix.HystrixFluxEndpointCallHandlerAdapter;
+import com.github.ljtfreitas.restify.http.client.call.handler.reactor.circuitbreaker.hystrix.HystrixMonoEndpointCallHandlerAdapter;
 import com.github.ljtfreitas.restify.http.netflix.client.call.handler.hystrix.HystrixCommandEndpointCallHandlerAdapter;
 import com.github.ljtfreitas.restify.http.netflix.client.call.handler.hystrix.HystrixEndpointCallHandlerAdapter;
 import com.github.ljtfreitas.restify.http.netflix.client.call.handler.hystrix.HystrixFutureEndpointCallHandlerAdapter;

@@ -45,14 +45,13 @@ public interface Encoding {
 		}
 	};
 
-	public Charset charset();
+	Charset charset();
 
-	public default String encode(String value) {
+	default String encode(String value) {
 		try {
 			return URLEncoder.encode(value, charset().name());
 		} catch (UnsupportedEncodingException e) {
 			return value;
 		}
 	}
-
 }

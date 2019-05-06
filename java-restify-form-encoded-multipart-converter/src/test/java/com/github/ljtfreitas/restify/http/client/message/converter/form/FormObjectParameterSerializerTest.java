@@ -31,8 +31,9 @@ import static org.junit.Assert.assertNull;
 import org.junit.Before;
 import org.junit.Test;
 
-import com.github.ljtfreitas.restify.http.contract.Form;
-import com.github.ljtfreitas.restify.http.contract.Form.Field;
+import com.github.ljtfreitas.restify.http.client.message.converter.form.provided.FormObjectParameterSerializer;
+import com.github.ljtfreitas.restify.http.contract.form.Form;
+import com.github.ljtfreitas.restify.http.contract.form.Form.Field;
 
 public class FormObjectParameterSerializerTest {
 

@@ -31,9 +31,9 @@ import com.github.ljtfreitas.restify.http.client.call.EndpointCall;
 
 public interface AsyncEndpointCall<T> extends EndpointCall<T> {
 
-	public void executeAsync(EndpointCallCallback<T> callback);
+	void executeAsync(EndpointCallCallback<T> callback);
 
-	public void executeAsync(EndpointCallSuccessCallback<T> success, EndpointCallFailureCallback failure);
+	void executeAsync(EndpointCallSuccessCallback<T> success, EndpointCallFailureCallback failure);
 
-	public CompletionStage<T> executeAsync();
+	CompletionStage<T> executeAsync();
 }

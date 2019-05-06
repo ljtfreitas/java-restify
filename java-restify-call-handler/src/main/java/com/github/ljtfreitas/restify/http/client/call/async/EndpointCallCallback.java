@@ -26,5 +26,4 @@
 package com.github.ljtfreitas.restify.http.client.call.async;
 
 public interface EndpointCallCallback<T> extends EndpointCallSuccessCallback<T>, EndpointCallFailureCallback {
-
 }

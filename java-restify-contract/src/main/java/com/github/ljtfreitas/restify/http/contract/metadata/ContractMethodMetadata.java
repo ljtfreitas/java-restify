@@ -34,7 +34,7 @@ import com.github.ljtfreitas.restify.http.contract.Header;
 import com.github.ljtfreitas.restify.http.contract.Method;
 import com.github.ljtfreitas.restify.http.contract.Path;
 import com.github.ljtfreitas.restify.http.contract.Version;
-import com.github.ljtfreitas.restify.reflection.JavaAnnotationScanner;
+import com.github.ljtfreitas.restify.reflection.AnnotationScanner;
 import com.github.ljtfreitas.restify.reflection.JavaTypeResolver;
 
 class ContractMethodMetadata {
@@ -46,12 +46,12 @@ class ContractMethodMetadata {
 	private final Collection<Cookie> cookies;
 	private final Version version;
 
-	public ContractMethodMetadata(java.lang.reflect.Method javaMethod) {
+	ContractMethodMetadata(java.lang.reflect.Method javaMethod) {
 		this.javaMethod = javaMethod;
 
 		this.path = javaMethod.getAnnotation(Path.class);
 
-		JavaAnnotationScanner annotationScanner = new JavaAnnotationScanner(javaMethod);
+		AnnotationScanner annotationScanner = new AnnotationScanner(javaMethod);
 
 		this.httpMethod = annotationScanner.scan(Method.class)
 				.orElseThrow(() -> new IllegalArgumentException("Method " + javaMethod + " does not have a @Method annotation"));
@@ -61,31 +61,31 @@ class ContractMethodMetadata {
 		this.version = annotationScanner.scan(Version.class).orElse(null);
 	}
 
-	public Optional<Path> path() {
+	Optional<Path> path() {
 		return Optional.ofNullable(path);
 	}
 
-	public Method httpMethod() {
+	Method httpMethod() {
 		return httpMethod;
 	}
 
-	public java.lang.reflect.Method javaMethod() {
+	java.lang.reflect.Method javaMethod() {
 		return javaMethod;
 	}
 
-	public Collection<Header> headers() {
+	Collection<Header> headers() {
 		return headers;
 	}
 
-	public Collection<Cookie> cookies() {
+	Collection<Cookie> cookies() {
 		return cookies;
 	}
 
-	public Type returnType(Class<?> rawType) {
+	Type returnType(Class<?> rawType) {
 		return new JavaTypeResolver(rawType).returnTypeOf(javaMethod);
 	}
 
-	public Optional<Version> version() {
+	Optional<Version> version() {
 		return Optional.ofNullable(version);
 	}
 }

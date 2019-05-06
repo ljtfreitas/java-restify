@@ -42,6 +42,7 @@ import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequestMetadata;
 import com.github.ljtfreitas.restify.http.client.request.HttpClientRequest;
 import com.github.ljtfreitas.restify.http.client.request.Timeout;
+import com.github.ljtfreitas.restify.http.client.request.async.AsyncHttpClientRequest;
 import com.github.ljtfreitas.restify.http.client.response.HttpClientResponse;
 
 import io.netty.handler.ssl.SslContext;
@@ -168,7 +169,7 @@ public class NettyHttpClientRequestFactoryTest {
 		EndpointRequest endpointRequest = new EndpointRequest(URI.create("http://localhost:7080/json"), "POST",
 				new Headers(Header.contentType("application/json")), requestBody);
 
-		NettyHttpClientRequest request = nettyHttpClientRequestFactory.createAsyncOf(endpointRequest);
+		AsyncHttpClientRequest request = nettyHttpClientRequestFactory.createAsyncOf(endpointRequest);
 		request.body().output().write(requestBody.getBytes());
 		request.body().output().flush();
 

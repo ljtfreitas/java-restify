@@ -25,7 +25,6 @@ import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethodParame
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethodParameter.EndpointMethodParameterType;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethodParameters;
 import com.github.ljtfreitas.restify.reflection.JavaType;
-import com.github.ljtfreitas.restify.reflection.SimpleParameterizedType;
 import com.google.common.util.concurrent.FutureCallback;
 import com.google.common.util.concurrent.MoreExecutors;
 
@@ -54,7 +53,7 @@ public class ListenableFutureCallbackEndpointCallHandlerAdapterTest {
 
 		EndpointMethodParameters parameters = new EndpointMethodParameters()
 				.put(new EndpointMethodParameter(0, "callback",
-						new SimpleParameterizedType(FutureCallback.class, null, String.class), EndpointMethodParameterType.ENDPOINT_CALLBACK));
+						JavaType.parameterizedType(FutureCallback.class, null, String.class).unwrap(), EndpointMethodParameterType.ENDPOINT_CALLBACK));
 
 		futureWithCallbackEndpointMethod = new SimpleEndpointMethod(SomeType.class.getMethod("futureWithCallback", FutureCallback.class),
 				parameters);

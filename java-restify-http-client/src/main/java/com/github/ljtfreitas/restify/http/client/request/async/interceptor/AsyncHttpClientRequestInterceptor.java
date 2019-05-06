@@ -30,6 +30,6 @@ import com.github.ljtfreitas.restify.http.client.request.interceptor.HttpClientR
 
 public interface AsyncHttpClientRequestInterceptor extends HttpClientRequestInterceptor {
 
-	public AsyncHttpClientRequest interceptsAsync(AsyncHttpClientRequest request);
+	AsyncHttpClientRequest interceptsAsync(AsyncHttpClientRequest request);
 
 }

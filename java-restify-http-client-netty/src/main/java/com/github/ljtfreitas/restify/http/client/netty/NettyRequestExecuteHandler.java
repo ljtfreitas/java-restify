@@ -45,7 +45,7 @@ class NettyRequestExecuteHandler extends SimpleChannelInboundHandler<FullHttpRes
 	private final CompletableFuture<HttpClientResponse> future;
 	private final HttpRequestMessage source;
 
-	public NettyRequestExecuteHandler(CompletableFuture<HttpClientResponse> future, NettyHttpClientRequest source) {
+	NettyRequestExecuteHandler(CompletableFuture<HttpClientResponse> future, NettyHttpClientRequest source) {
 		this.future = future;
 		this.source = source;
 	}

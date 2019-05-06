@@ -32,7 +32,6 @@ import java.util.concurrent.ExecutionException;
 import java.util.concurrent.Executor;
 
 import com.github.ljtfreitas.restify.http.client.HttpClientException;
-import com.github.ljtfreitas.restify.http.client.HttpException;
 import com.github.ljtfreitas.restify.http.client.message.HttpMessageException;
 import com.github.ljtfreitas.restify.http.client.message.response.HttpResponseMessage;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
@@ -104,7 +103,7 @@ public class DefaultAsyncEndpointRequestExecutor implements AsyncEndpointRequest
 					endpointRequest.endpoint() + "]", exception);
 
 		} else {
-			throw new HttpException("Error on HTTP request: [" + endpointRequest.method() + " " +
+			throw new HttpClientException("Error on HTTP request: [" + endpointRequest.method() + " " +
 					endpointRequest.endpoint() + "]", exception);
 		}
 	}

@@ -16,7 +16,6 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import com.github.ljtfreitas.restify.http.client.call.EndpointMethodExecutor;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethod;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethods;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointTarget;
@@ -28,7 +27,7 @@ public class RestifyProxyHandlerTest {
 	@Mock
 	private EndpointMethodExecutor endpointMethodExecutorMock;
 
-	private RestifyProxyHandler restifyProxyHandler;
+	private EndpointMethodProxyHandler restifyProxyHandler;
 
 	private TargetType targetType;
 
@@ -47,7 +46,7 @@ public class RestifyProxyHandlerTest {
 		when(endpointMethodExecutorMock.execute(same(endpointMethod), any()))
 			.thenReturn("Result");
 
-		restifyProxyHandler = new RestifyProxyHandler(endpointType, endpointMethodExecutorMock);
+		restifyProxyHandler = new EndpointMethodProxyHandler(endpointType, endpointMethodExecutorMock);
 
 		targetType = (TargetType) Proxy.newProxyInstance(this.getClass().getClassLoader(), new Class[]{TargetType.class}, restifyProxyHandler);
 	}

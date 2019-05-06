@@ -42,7 +42,7 @@ class AsyncEndpointCallAdapter<T> implements AsyncEndpointCall<T> {
 
 	private final ExecutorAsyncEndpointCall<T> delegate;
 
-	public AsyncEndpointCallAdapter(EndpointCall<T> delegate) {
+	AsyncEndpointCallAdapter(EndpointCall<T> delegate) {
 		this.delegate = new ExecutorAsyncEndpointCall<>(delegate, DEFAULT_EXECUTOR);
 	}
 

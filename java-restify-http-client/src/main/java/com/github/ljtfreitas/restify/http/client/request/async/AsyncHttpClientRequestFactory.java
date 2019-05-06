@@ -36,5 +36,5 @@ public interface AsyncHttpClientRequestFactory extends HttpClientRequestFactory 
 		return createAsyncOf(endpointRequest);
 	}
 
-	public AsyncHttpClientRequest createAsyncOf(EndpointRequest endpointRequest);
+	AsyncHttpClientRequest createAsyncOf(EndpointRequest endpointRequest);
 }

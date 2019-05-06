@@ -19,10 +19,11 @@ import org.mockito.runners.MockitoJUnitRunner;
 
 import com.github.ljtfreitas.restify.http.client.message.Header;
 import com.github.ljtfreitas.restify.http.client.message.Headers;
+import com.github.ljtfreitas.restify.http.client.message.converter.form.multipart.provided.MultipartFormParametersMessageWriter;
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
+import com.github.ljtfreitas.restify.http.contract.form.MultipartFile;
+import com.github.ljtfreitas.restify.http.contract.form.MultipartParameters;
 import com.github.ljtfreitas.restify.http.client.message.request.BufferedByteArrayHttpRequestBody;
-import com.github.ljtfreitas.restify.http.contract.MultipartFile;
-import com.github.ljtfreitas.restify.http.contract.MultipartParameters;
 
 @RunWith(MockitoJUnitRunner.class)
 public class MultipartFormParametersMessageWriterTest {

@@ -28,7 +28,7 @@ package com.github.ljtfreitas.restify.http.client.message.converter.form.multipa
 import java.lang.reflect.Type;
 import java.util.Date;
 
-import com.github.ljtfreitas.restify.http.contract.FormFieldSerializer;
+import com.github.ljtfreitas.restify.http.contract.form.FormFieldSerializer;
 
 public class TimestampFieldSerializer implements FormFieldSerializer {
 

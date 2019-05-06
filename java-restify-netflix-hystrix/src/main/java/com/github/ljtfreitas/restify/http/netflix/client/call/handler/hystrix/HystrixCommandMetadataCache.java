@@ -31,25 +31,22 @@ import java.util.function.Supplier;
 
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethod;
 
-public class HystrixCommandMetadataCache {
+class HystrixCommandMetadataCache {
 
 	private static final HystrixCommandMetadataCache SINGLE_INSTANCE = new HystrixCommandMetadataCache();
 
 	private final Map<EndpointMethod, HystrixCommandMetadata> cache = new ConcurrentHashMap<>();
 
-	private HystrixCommandMetadataCache() {
-	}
-
-	public HystrixCommandMetadata compute(EndpointMethod endpointMethod, Supplier<HystrixCommandMetadata> supplier) {
+	HystrixCommandMetadata compute(EndpointMethod endpointMethod, Supplier<HystrixCommandMetadata> supplier) {
 		return cache.computeIfAbsent(endpointMethod, e -> supplier.get());
 	}
 
-	public HystrixCommandMetadata put(EndpointMethod endpointMethod, HystrixCommandMetadata metadata) {
+	HystrixCommandMetadata put(EndpointMethod endpointMethod, HystrixCommandMetadata metadata) {
 		cache.put(endpointMethod, metadata);
 		return metadata;
 	}
 
-	public static HystrixCommandMetadataCache instance() {
+	static HystrixCommandMetadataCache instance() {
 		return SINGLE_INSTANCE;
 	}
 }

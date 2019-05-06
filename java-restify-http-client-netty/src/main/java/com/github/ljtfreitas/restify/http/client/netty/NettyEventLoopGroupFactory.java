@@ -30,7 +30,7 @@ import io.netty.channel.nio.NioEventLoopGroup;
 
 class NettyEventLoopGroupFactory {
 
-	public EventLoopGroup create() {
+	EventLoopGroup create() {
 		return new NioEventLoopGroup(availableProcessors());
 	}
 

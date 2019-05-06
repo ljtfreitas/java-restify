@@ -29,5 +29,5 @@ import com.github.ljtfreitas.restify.http.contract.metadata.EndpointMethod;
 
 public interface EndpointCallHandlerProvider {
 
-	public boolean supports(EndpointMethod endpointMethod);
+	boolean supports(EndpointMethod endpointMethod);
 }

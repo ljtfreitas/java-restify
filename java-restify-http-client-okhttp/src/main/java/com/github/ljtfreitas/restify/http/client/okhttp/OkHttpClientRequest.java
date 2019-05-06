@@ -61,7 +61,7 @@ class OkHttpClientRequest implements AsyncHttpClientRequest {
 	private final Charset charset;
 	private final BufferedHttpRequestBody body;
 
-	public OkHttpClientRequest(OkHttpClient okHttpClient, URI uri, String method, Headers headers, Charset charset) {
+	OkHttpClientRequest(OkHttpClient okHttpClient, URI uri, String method, Headers headers, Charset charset) {
 		this(okHttpClient, uri, method, headers, charset, new BufferedByteArrayHttpRequestBody(charset));
 	}
 

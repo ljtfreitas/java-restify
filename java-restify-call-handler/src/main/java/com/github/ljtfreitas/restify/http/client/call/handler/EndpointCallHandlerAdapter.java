@@ -30,7 +30,7 @@ import com.github.ljtfreitas.restify.reflection.JavaType;
 
 public interface EndpointCallHandlerAdapter<M, T, O> extends EndpointCallHandlerProvider {
 
-	public JavaType returnType(EndpointMethod endpointMethod);
+	JavaType returnType(EndpointMethod endpointMethod);
 
-	public EndpointCallHandler<M, O> adapt(EndpointMethod endpointMethod, EndpointCallHandler<T, O> handler);
+	EndpointCallHandler<M, O> adapt(EndpointMethod endpointMethod, EndpointCallHandler<T, O> handler);
 }

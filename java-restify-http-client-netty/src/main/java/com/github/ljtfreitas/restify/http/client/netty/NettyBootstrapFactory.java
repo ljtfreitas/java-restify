@@ -46,12 +46,12 @@ class NettyBootstrapFactory {
 	private final EventLoopGroup eventLoopGroup;
 	private final NettyHttpClientRequestConfiguration nettyHttpClientRequestConfiguration;
 
-	public NettyBootstrapFactory(EventLoopGroup eventLoopGroup, NettyHttpClientRequestConfiguration nettyHttpClientRequestConfiguration) {
+	NettyBootstrapFactory(EventLoopGroup eventLoopGroup, NettyHttpClientRequestConfiguration nettyHttpClientRequestConfiguration) {
 		this.eventLoopGroup = eventLoopGroup;
 		this.nettyHttpClientRequestConfiguration = nettyHttpClientRequestConfiguration;
 	}
 
-	public Bootstrap createTo(EndpointRequest source) {
+	Bootstrap createTo(EndpointRequest source) {
 		Bootstrap bootstrap = new Bootstrap();
 
 		bootstrap.group(this.eventLoopGroup)

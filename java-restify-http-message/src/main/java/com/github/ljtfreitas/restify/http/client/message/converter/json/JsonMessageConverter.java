@@ -37,7 +37,7 @@ public interface JsonMessageConverter<T> extends HttpMessageReader<T>, HttpMessa
 	public static final ContentType APPLICATION_JSON_CONTENT_TYPE = ContentType.of("application/json");
 
 	@Override
-	public default Collection<ContentType> contentTypes() {
+	default Collection<ContentType> contentTypes() {
 		return Arrays.asList(APPLICATION_JSON_CONTENT_TYPE);
 	}
 

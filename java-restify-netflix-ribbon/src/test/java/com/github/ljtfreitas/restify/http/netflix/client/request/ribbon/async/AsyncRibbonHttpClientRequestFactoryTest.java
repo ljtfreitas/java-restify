@@ -27,12 +27,12 @@ import org.mockserver.model.HttpRequest;
 
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.github.ljtfreitas.restify.http.client.HttpClientException;
-import com.github.ljtfreitas.restify.http.client.jdk.JdkHttpClientRequestFactory;
+import com.github.ljtfreitas.restify.http.client.JdkHttpClientRequestFactory;
 import com.github.ljtfreitas.restify.http.client.message.Header;
 import com.github.ljtfreitas.restify.http.client.message.Headers;
 import com.github.ljtfreitas.restify.http.client.message.converter.HttpMessageConverters;
-import com.github.ljtfreitas.restify.http.client.message.converter.json.JacksonMessageConverter;
-import com.github.ljtfreitas.restify.http.client.message.converter.xml.JaxBXmlMessageConverter;
+import com.github.ljtfreitas.restify.http.client.message.converter.json.jackson.JacksonMessageConverter;
+import com.github.ljtfreitas.restify.http.client.message.converter.xml.jaxb.JaxBXmlMessageConverter;
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestBody;
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;

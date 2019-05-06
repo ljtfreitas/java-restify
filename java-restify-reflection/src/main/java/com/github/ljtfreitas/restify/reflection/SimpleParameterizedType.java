@@ -30,13 +30,13 @@ import java.lang.reflect.Type;
 import java.util.Arrays;
 import java.util.Objects;
 
-public class SimpleParameterizedType implements ParameterizedType {
+class SimpleParameterizedType implements ParameterizedType {
 
 	private final Type rawType;
 	private final Type ownerType;
 	private final Type[] typeArguments;
 
-	public SimpleParameterizedType(Type rawType, Type ownerType, Type...typeArguments) {
+	SimpleParameterizedType(Type rawType, Type ownerType, Type...typeArguments) {
 		this.rawType = rawType;
 		this.ownerType = ownerType;
 		this.typeArguments = typeArguments;

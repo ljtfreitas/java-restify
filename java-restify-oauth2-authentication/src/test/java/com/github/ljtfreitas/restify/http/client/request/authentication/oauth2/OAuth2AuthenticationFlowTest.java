@@ -18,11 +18,11 @@ import org.mockserver.junit.MockServerRule;
 import org.mockserver.model.HttpRequest;
 import org.mockserver.model.Parameter;
 
-import com.github.ljtfreitas.restify.http.client.jdk.JdkHttpClientRequestFactory;
+import com.github.ljtfreitas.restify.http.client.JdkHttpClientRequestFactory;
 import com.github.ljtfreitas.restify.http.client.message.Cookie;
 import com.github.ljtfreitas.restify.http.client.message.Header;
 import com.github.ljtfreitas.restify.http.client.message.Headers;
-import com.github.ljtfreitas.restify.http.client.message.converter.text.TextPlainMessageConverter;
+import com.github.ljtfreitas.restify.http.client.message.converter.text.provided.TextPlainMessageConverter;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequestMetadata;
 import com.github.ljtfreitas.restify.http.client.request.HttpClientRequestFactory;

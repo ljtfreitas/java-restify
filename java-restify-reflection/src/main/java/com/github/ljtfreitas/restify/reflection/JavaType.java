@@ -36,10 +36,6 @@ public class JavaType {
 		this.type = type;
 	}
 
-	public static JavaType of(Type type) {
-		return new JavaType(type);
-	}
-
 	public Class<?> classType() {
 		return rawClassType();
 	}
@@ -92,8 +88,12 @@ public class JavaType {
 		return type.toString();
 	}
 
-	public static JavaType parameterizedType(Class<?> rawType, Type... typeArguments) {
-		return new JavaType(new SimpleParameterizedType(rawType, null, typeArguments));
+	public static JavaType of(Type type) {
+	    return new JavaType(type);
+	}
+
+	public static JavaType parameterizedType(Class<?> rawType, Type ownerType, Type... typeArguments) {
+		return new JavaType(new SimpleParameterizedType(rawType, ownerType, typeArguments));
 	}
 
 	public static JavaType arrayType(Type componentType) {

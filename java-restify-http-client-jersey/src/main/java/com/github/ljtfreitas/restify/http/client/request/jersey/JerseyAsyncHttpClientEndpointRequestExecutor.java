@@ -33,7 +33,8 @@ import javax.ws.rs.client.ClientBuilder;
 import javax.ws.rs.core.Configuration;
 import javax.ws.rs.core.Response;
 
-import com.github.ljtfreitas.restify.http.client.HttpException;
+import com.github.ljtfreitas.restify.http.client.HttpClientException;
+import com.github.ljtfreitas.restify.http.client.message.HttpMessageException;
 import com.github.ljtfreitas.restify.http.client.message.converter.HttpMessageReadException;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
 import com.github.ljtfreitas.restify.http.client.request.async.AsyncEndpointRequestExecutor;
@@ -80,14 +81,17 @@ public class JerseyAsyncHttpClientEndpointRequestExecutor implements AsyncEndpoi
 
 	private <T> void doHandle(EndpointResponse<T> response, Throwable throwable, EndpointRequest endpointRequest) {
 		if (throwable != null) {
-			if (throwable instanceof HttpException) {
-				throw (HttpException) throwable;
+			if (throwable instanceof HttpClientException) {
+				throw (HttpClientException) throwable;
+
+			} else if (throwable instanceof HttpMessageException) {
+	                throw (HttpMessageException) throwable;
 
 			} else if (throwable instanceof WebApplicationException) {
 				throw new HttpMessageReadException(throwable);
 
 			} else {
-				throw new HttpException("Error on HTTP request: [" + endpointRequest.method() + " " + endpointRequest.endpoint() + "]", throwable);
+				throw new HttpClientException("Error on HTTP request: [" + endpointRequest.method() + " " + endpointRequest.endpoint() + "]", throwable);
 			}
 		}
 	}

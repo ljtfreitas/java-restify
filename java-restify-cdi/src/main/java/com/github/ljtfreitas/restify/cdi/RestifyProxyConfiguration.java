@@ -29,8 +29,8 @@ import java.util.Collection;
 import java.util.Collections;
 import java.util.concurrent.Executor;
 
+import com.github.ljtfreitas.restify.http.client.HttpClientRequestConfiguration;
 import com.github.ljtfreitas.restify.http.client.call.handler.EndpointCallHandlerProvider;
-import com.github.ljtfreitas.restify.http.client.jdk.HttpClientRequestConfiguration;
 import com.github.ljtfreitas.restify.http.client.message.converter.HttpMessageConverter;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequestExecutor;
 import com.github.ljtfreitas.restify.http.client.request.HttpClientRequestFactory;

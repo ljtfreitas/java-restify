@@ -8,6 +8,10 @@ import java.util.ServiceLoader;
 
 import org.junit.Test;
 
+import com.github.ljtfreitas.restify.http.client.message.converter.form.provided.FormURLEncodedFormObjectMessageConverter;
+import com.github.ljtfreitas.restify.http.client.message.converter.form.provided.FormURLEncodedMapMessageConverter;
+import com.github.ljtfreitas.restify.http.client.message.converter.form.provided.FormURLEncodedParametersMessageConverter;
+
 public class FormURLEncodedMessageConverterSpiTest {
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })

@@ -68,7 +68,7 @@ class AsyncRetryableLoop {
 		this.retryPolicy = nonNull(retryPolicy, "Retry policy cannot be null");
 	}
 
-	public <T> CompletionStage<T> repeat(int attempts, AsyncRetryable<T> retryable) {
+	<T> CompletionStage<T> repeat(int attempts, AsyncRetryable<T> retryable) {
 		AsyncRetryLoop loop = new AsyncRetryLoop(attempts, retryPolicy.refresh(), backOffPolicy);
 		return loop.repeat(retryable).thenApply(Try::get);
 	}

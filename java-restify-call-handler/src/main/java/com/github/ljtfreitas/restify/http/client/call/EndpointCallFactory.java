@@ -30,5 +30,5 @@ import com.github.ljtfreitas.restify.reflection.JavaType;
 
 public interface EndpointCallFactory {
 
-	public <T> EndpointCall<T> createWith(EndpointRequest endpointRequest, JavaType returnType);
+	<T> EndpointCall<T> createWith(EndpointRequest endpointRequest, JavaType returnType);
 }

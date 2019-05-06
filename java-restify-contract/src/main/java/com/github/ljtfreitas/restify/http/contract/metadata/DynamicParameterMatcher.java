@@ -32,7 +32,7 @@ class DynamicParameterMatcher {
 
 	private static final Pattern DYNAMIC_PARAMETER_PATTERN = Pattern.compile("\\{([a-zA-Z\\-\\_]+)\\}");
 
-	public static Matcher matches(String source) {
+	static Matcher matches(String source) {
 		return DYNAMIC_PARAMETER_PATTERN.matcher(source);
 	}
 }

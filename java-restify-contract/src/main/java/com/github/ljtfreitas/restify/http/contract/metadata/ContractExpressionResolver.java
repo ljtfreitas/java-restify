@@ -27,5 +27,5 @@ package com.github.ljtfreitas.restify.http.contract.metadata;
 
 public interface ContractExpressionResolver {
 
-	public String resolve(String expression);
+	String resolve(String expression);
 }

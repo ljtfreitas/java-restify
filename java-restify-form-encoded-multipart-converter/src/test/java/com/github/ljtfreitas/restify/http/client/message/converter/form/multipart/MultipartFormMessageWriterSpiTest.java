@@ -8,6 +8,11 @@ import java.util.ServiceLoader;
 
 import org.junit.Test;
 
+import com.github.ljtfreitas.restify.http.client.message.converter.form.multipart.provided.MultipartFormFileObjectMessageWriter;
+import com.github.ljtfreitas.restify.http.client.message.converter.form.multipart.provided.MultipartFormMapMessageWriter;
+import com.github.ljtfreitas.restify.http.client.message.converter.form.multipart.provided.MultipartFormObjectMessageWriter;
+import com.github.ljtfreitas.restify.http.client.message.converter.form.multipart.provided.MultipartFormParametersMessageWriter;
+
 public class MultipartFormMessageWriterSpiTest {
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })

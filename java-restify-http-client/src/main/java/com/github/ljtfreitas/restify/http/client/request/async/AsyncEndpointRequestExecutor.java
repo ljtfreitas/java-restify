@@ -44,5 +44,5 @@ public interface AsyncEndpointRequestExecutor extends EndpointRequestExecutor {
 					.get();
 	}
 
-	public <T> CompletionStage<EndpointResponse<T>> executeAsync(EndpointRequest endpointRequest);
+	<T> CompletionStage<EndpointResponse<T>> executeAsync(EndpointRequest endpointRequest);
 }

@@ -43,33 +43,32 @@ import java.util.concurrent.ScheduledExecutorService;
 import javax.net.ssl.HostnameVerifier;
 import javax.net.ssl.SSLSocketFactory;
 
+import com.github.ljtfreitas.restify.http.call.EndpointCallHandlers;
+import com.github.ljtfreitas.restify.http.call.handler.AsyncCallbackEndpointCallHandlerAdapter;
+import com.github.ljtfreitas.restify.http.call.handler.AsyncEndpointCallObjectHandlerAdapter;
+import com.github.ljtfreitas.restify.http.call.handler.CallableEndpointCallHandlerFactory;
+import com.github.ljtfreitas.restify.http.call.handler.CollectionEndpointCallHandlerFactory;
+import com.github.ljtfreitas.restify.http.call.handler.CompletionStageCallbackEndpointCallHandlerAdapter;
+import com.github.ljtfreitas.restify.http.call.handler.CompletionStageEndpointCallHandlerAdapter;
+import com.github.ljtfreitas.restify.http.call.handler.EnumerationEndpointCallHandlerAdapter;
+import com.github.ljtfreitas.restify.http.call.handler.FutureEndpointCallHandlerAdapter;
+import com.github.ljtfreitas.restify.http.call.handler.FutureTaskEndpointCallHandlerAdapter;
+import com.github.ljtfreitas.restify.http.call.handler.HeadersEndpointCallHandlerAdapter;
+import com.github.ljtfreitas.restify.http.call.handler.IterableEndpointCallHandlerAdapter;
+import com.github.ljtfreitas.restify.http.call.handler.IteratorEndpointCallHandlerAdapter;
+import com.github.ljtfreitas.restify.http.call.handler.ListIteratorEndpointCallHandlerAdapter;
+import com.github.ljtfreitas.restify.http.call.handler.OptionalEndpointCallHandlerFactory;
+import com.github.ljtfreitas.restify.http.call.handler.QueueEndpointCallHandlerAdapter;
+import com.github.ljtfreitas.restify.http.call.handler.RunnableEndpointCallHandlerFactory;
+import com.github.ljtfreitas.restify.http.call.handler.StatusCodeEndpointCallHandlerAdapter;
+import com.github.ljtfreitas.restify.http.call.handler.StreamEndpointCallHandlerAdapter;
+import com.github.ljtfreitas.restify.http.client.HttpClientRequestConfiguration;
+import com.github.ljtfreitas.restify.http.client.JdkHttpClientRequestFactory;
 import com.github.ljtfreitas.restify.http.client.call.DefaultEndpointCallFactory;
 import com.github.ljtfreitas.restify.http.client.call.EndpointCallFactory;
-import com.github.ljtfreitas.restify.http.client.call.EndpointMethodExecutor;
 import com.github.ljtfreitas.restify.http.client.call.async.DefaultAsyncEndpointCallFactory;
 import com.github.ljtfreitas.restify.http.client.call.handler.EndpointCallHandlerProvider;
-import com.github.ljtfreitas.restify.http.client.call.handler.EndpointCallHandlers;
 import com.github.ljtfreitas.restify.http.client.call.handler.EndpointCallObjectHandlerAdapter;
-import com.github.ljtfreitas.restify.http.client.call.handler.HeadersEndpointCallHandlerAdapter;
-import com.github.ljtfreitas.restify.http.client.call.handler.StatusCodeEndpointCallHandlerAdapter;
-import com.github.ljtfreitas.restify.http.client.call.handler.async.AsyncCallbackEndpointCallHandlerAdapter;
-import com.github.ljtfreitas.restify.http.client.call.handler.async.AsyncEndpointCallObjectHandlerAdapter;
-import com.github.ljtfreitas.restify.http.client.call.handler.jdk.CallableEndpointCallHandlerFactory;
-import com.github.ljtfreitas.restify.http.client.call.handler.jdk.CollectionEndpointCallHandlerFactory;
-import com.github.ljtfreitas.restify.http.client.call.handler.jdk.CompletionStageCallbackEndpointCallHandlerAdapter;
-import com.github.ljtfreitas.restify.http.client.call.handler.jdk.CompletionStageEndpointCallHandlerAdapter;
-import com.github.ljtfreitas.restify.http.client.call.handler.jdk.EnumerationEndpointCallHandlerAdapter;
-import com.github.ljtfreitas.restify.http.client.call.handler.jdk.FutureEndpointCallHandlerAdapter;
-import com.github.ljtfreitas.restify.http.client.call.handler.jdk.FutureTaskEndpointCallHandlerAdapter;
-import com.github.ljtfreitas.restify.http.client.call.handler.jdk.IterableEndpointCallHandlerAdapter;
-import com.github.ljtfreitas.restify.http.client.call.handler.jdk.IteratorEndpointCallHandlerAdapter;
-import com.github.ljtfreitas.restify.http.client.call.handler.jdk.ListIteratorEndpointCallHandlerAdapter;
-import com.github.ljtfreitas.restify.http.client.call.handler.jdk.OptionalEndpointCallHandlerFactory;
-import com.github.ljtfreitas.restify.http.client.call.handler.jdk.QueueEndpointCallHandlerAdapter;
-import com.github.ljtfreitas.restify.http.client.call.handler.jdk.RunnableEndpointCallHandlerFactory;
-import com.github.ljtfreitas.restify.http.client.call.handler.jdk.StreamEndpointCallHandlerAdapter;
-import com.github.ljtfreitas.restify.http.client.jdk.HttpClientRequestConfiguration;
-import com.github.ljtfreitas.restify.http.client.jdk.JdkHttpClientRequestFactory;
 import com.github.ljtfreitas.restify.http.client.message.Header;
 import com.github.ljtfreitas.restify.http.client.message.Headers;
 import com.github.ljtfreitas.restify.http.client.message.converter.HttpMessageConverter;
@@ -84,7 +83,6 @@ import com.github.ljtfreitas.restify.http.client.message.converter.xml.XmlMessag
 import com.github.ljtfreitas.restify.http.client.message.response.HttpStatusCode;
 import com.github.ljtfreitas.restify.http.client.request.DefaultEndpointRequestExecutor;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequestExecutor;
-import com.github.ljtfreitas.restify.http.client.request.EndpointRequestFactory;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequestWriter;
 import com.github.ljtfreitas.restify.http.client.request.EndpointVersion;
 import com.github.ljtfreitas.restify.http.client.request.HttpClientRequestFactory;
@@ -96,10 +94,8 @@ import com.github.ljtfreitas.restify.http.client.request.async.interceptor.Async
 import com.github.ljtfreitas.restify.http.client.request.async.interceptor.AsyncInterceptedEndpointRequestExecutor;
 import com.github.ljtfreitas.restify.http.client.request.async.interceptor.AsyncInterceptedHttpClientRequestFactory;
 import com.github.ljtfreitas.restify.http.client.request.authentication.Authentication;
-import com.github.ljtfreitas.restify.http.client.request.interceptor.AcceptVersionHeaderEndpointRequestInterceptor;
 import com.github.ljtfreitas.restify.http.client.request.interceptor.EndpointRequestInterceptor;
 import com.github.ljtfreitas.restify.http.client.request.interceptor.EndpointRequestInterceptorChain;
-import com.github.ljtfreitas.restify.http.client.request.interceptor.HeaderEndpointRequestInterceptor;
 import com.github.ljtfreitas.restify.http.client.request.interceptor.HttpClientRequestInterceptor;
 import com.github.ljtfreitas.restify.http.client.request.interceptor.HttpClientRequestInterceptorChain;
 import com.github.ljtfreitas.restify.http.client.request.interceptor.InterceptedEndpointRequestExecutor;
@@ -122,6 +118,8 @@ import com.github.ljtfreitas.restify.http.contract.metadata.ContractReader;
 import com.github.ljtfreitas.restify.http.contract.metadata.DefaultContractReader;
 import com.github.ljtfreitas.restify.http.contract.metadata.EndpointTarget;
 import com.github.ljtfreitas.restify.http.contract.metadata.SimpleContractExpressionResolver;
+import com.github.ljtfreitas.restify.http.interceptor.AcceptVersionHeaderEndpointRequestInterceptor;
+import com.github.ljtfreitas.restify.http.interceptor.HeaderEndpointRequestInterceptor;
 import com.github.ljtfreitas.restify.spi.Provider;
 import com.github.ljtfreitas.restify.util.async.DisposableExecutors;
 
@@ -244,12 +242,12 @@ public class RestifyProxyBuilder {
 		}
 
 		public T build() {
-			RestifyProxyHandler restifyProxyHandler = doBuild();
+			EndpointMethodProxyHandler restifyProxyHandler = doBuild();
 
 			return new ProxyFactory(restifyProxyHandler, classloader).create(type);
 		}
 
-		private RestifyProxyHandler doBuild() {
+		private EndpointMethodProxyHandler doBuild() {
 			EndpointTarget target = new EndpointTarget(type, endpoint);
 
 			EndpointMethodExecutor endpointMethodExecutor = new EndpointMethodExecutor(
@@ -259,7 +257,7 @@ public class RestifyProxyBuilder {
 
 			Contract contract = contract();
 
-			return new RestifyProxyHandler(contract.read(target), endpointMethodExecutor);
+			return new EndpointMethodProxyHandler(contract.read(target), endpointMethodExecutor);
 		}
 
 		private EndpointRequestFactory endpointRequestFactory() {

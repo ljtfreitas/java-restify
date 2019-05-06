@@ -1,6 +1,6 @@
 package com.github.ljtfreitas.restify.http.client.message.converter.form.multipart;
 
-import com.github.ljtfreitas.restify.http.client.message.converter.form.multipart.MultipartFormBoundaryGenerator;
+import com.github.ljtfreitas.restify.http.client.message.converter.form.multipart.provided.MultipartFormBoundaryGenerator;
 
 class SimpleMultipartFormBoundaryGenerator implements MultipartFormBoundaryGenerator {
 

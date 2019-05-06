@@ -33,12 +33,12 @@ import com.github.ljtfreitas.restify.http.client.message.converter.HttpMessageWr
 public interface TextMessageConverter<T> extends HttpMessageReader<T>, HttpMessageWriter<T> {
 
 	@Override
-	public default boolean canRead(Type type) {
+	default boolean canRead(Type type) {
 		return String.class == type;
 	}
 
 	@Override
-	public default boolean canWrite(Class<?> type) {
+	default boolean canWrite(Class<?> type) {
 		return String.class == type;
 	}
 }

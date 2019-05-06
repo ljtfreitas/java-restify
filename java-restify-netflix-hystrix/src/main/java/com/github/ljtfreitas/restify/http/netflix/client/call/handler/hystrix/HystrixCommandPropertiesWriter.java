@@ -61,11 +61,11 @@ class HystrixCommandPropertiesWriter {
 
 	private final Map<String, String> properties;
 
-	public HystrixCommandPropertiesWriter(Map<String, String> properties) {
+	HystrixCommandPropertiesWriter(Map<String, String> properties) {
 		this.properties = properties;
 	}
 
-	public void applyTo(HystrixCommandProperties.Setter hystrixCommandProperties) {
+	void applyTo(HystrixCommandProperties.Setter hystrixCommandProperties) {
 		properties.entrySet().stream()
 			.forEach(property -> Optional.ofNullable(HYSTRIX_COMMAND_PROPERTY_WRITERS.get(property.getKey()))
 					.ifPresent(s -> s.set(hystrixCommandProperties, property.getValue())));

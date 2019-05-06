@@ -8,6 +8,10 @@ import java.util.ServiceLoader;
 
 import org.junit.Test;
 
+import com.github.ljtfreitas.restify.http.client.message.converter.octet.provided.OctetByteArrayMessageConverter;
+import com.github.ljtfreitas.restify.http.client.message.converter.octet.provided.OctetInputStreamMessageConverter;
+import com.github.ljtfreitas.restify.http.client.message.converter.octet.provided.OctetSerializableMessageConverter;
+
 public class OctetStreamMessageConverterSpiTest {
 
 	@SuppressWarnings({ "rawtypes", "unchecked" })

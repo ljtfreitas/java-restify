@@ -29,5 +29,5 @@ import java.lang.reflect.Type;
 
 public interface ParameterSerializer {
 
-	public String serialize(String name, Type type, Object source);
+	String serialize(String name, Type type, Object source);
 }

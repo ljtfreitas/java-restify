@@ -33,8 +33,8 @@ import org.springframework.context.annotation.Configuration;
 import com.github.ljtfreitas.restify.http.client.message.Header;
 import com.github.ljtfreitas.restify.http.client.request.authentication.BasicAuthentication;
 import com.github.ljtfreitas.restify.http.client.request.interceptor.EndpointRequestInterceptor;
-import com.github.ljtfreitas.restify.http.client.request.interceptor.HeaderEndpointRequestInterceptor;
 import com.github.ljtfreitas.restify.http.client.request.interceptor.authentication.AuthenticationEndpoinRequestInterceptor;
+import com.github.ljtfreitas.restify.http.interceptor.HeaderEndpointRequestInterceptor;
 import com.github.ljtfreitas.restify.spring.configure.RestifyProxyConfiguration;
 
 @Configuration

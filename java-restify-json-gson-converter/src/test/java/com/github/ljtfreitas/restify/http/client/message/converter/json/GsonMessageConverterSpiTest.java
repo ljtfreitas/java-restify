@@ -8,6 +8,8 @@ import java.util.ServiceLoader;
 
 import org.junit.Test;
 
+import com.github.ljtfreitas.restify.http.client.message.converter.json.gson.GsonMessageConverter;
+
 public class GsonMessageConverterSpiTest {
 
 	@SuppressWarnings({ "rawtypes" })

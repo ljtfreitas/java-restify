@@ -41,6 +41,7 @@ import com.github.ljtfreitas.restify.http.client.message.response.HttpResponseMe
 import com.github.ljtfreitas.restify.http.client.message.response.StatusCode;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequestMetadata;
+import com.github.ljtfreitas.restify.http.client.request.HttpClientRequest;
 import com.github.ljtfreitas.restify.http.client.request.Timeout;
 
 public class ApacheHttpClientRequestFactoryTest {
@@ -104,7 +105,7 @@ public class ApacheHttpClientRequestFactoryTest {
 		EndpointRequest endpointRequest = new EndpointRequest(URI.create("http://localhost:7080/json"), "POST",
 				new Headers(Header.contentType("application/json")), requestBody);
 
-		ApacheHttpClientRequest request = apacheHttpClientRequestFactory.createOf(endpointRequest);
+		HttpClientRequest request = apacheHttpClientRequestFactory.createOf(endpointRequest);
 		request.body().output().write(requestBody.getBytes());
 		request.body().output().flush();
 

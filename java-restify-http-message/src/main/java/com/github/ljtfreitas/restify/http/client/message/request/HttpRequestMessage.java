@@ -33,13 +33,13 @@ import com.github.ljtfreitas.restify.http.client.message.HttpMessage;
 
 public interface HttpRequestMessage extends HttpMessage {
 
-	public URI uri();
+	URI uri();
 
-	public String method();
+	String method();
 
-	public HttpRequestBody body();
+	HttpRequestBody body();
 
-	public Charset charset();
+	Charset charset();
 
-	public HttpRequestMessage replace(Header header);
+	HttpRequestMessage replace(Header header);
 }

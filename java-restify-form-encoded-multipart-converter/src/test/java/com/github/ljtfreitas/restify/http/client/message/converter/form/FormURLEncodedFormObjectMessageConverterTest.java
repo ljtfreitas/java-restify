@@ -14,12 +14,13 @@ import org.mockito.Answers;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
+import com.github.ljtfreitas.restify.http.client.message.converter.form.provided.FormURLEncodedFormObjectMessageConverter;
 import com.github.ljtfreitas.restify.http.client.message.request.BufferedByteArrayHttpRequestBody;
 import com.github.ljtfreitas.restify.http.client.message.request.BufferedHttpRequestBody;
 import com.github.ljtfreitas.restify.http.client.message.request.HttpRequestMessage;
 import com.github.ljtfreitas.restify.http.client.message.response.HttpResponseMessage;
-import com.github.ljtfreitas.restify.http.contract.Form;
-import com.github.ljtfreitas.restify.http.contract.Form.Field;
+import com.github.ljtfreitas.restify.http.contract.form.Form;
+import com.github.ljtfreitas.restify.http.contract.form.Form.Field;
 
 @RunWith(MockitoJUnitRunner.class)
 public class FormURLEncodedFormObjectMessageConverterTest {

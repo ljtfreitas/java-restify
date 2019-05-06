@@ -29,5 +29,5 @@ import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
 
 public interface EndpointRequestInterceptor {
 
-	public EndpointRequest intercepts(EndpointRequest endpointRequest);
+	EndpointRequest intercepts(EndpointRequest endpointRequest);
 }

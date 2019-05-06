@@ -29,11 +29,11 @@ import java.lang.reflect.GenericArrayType;
 import java.lang.reflect.Type;
 import java.util.Objects;
 
-public class SimpleGenericArrayType implements GenericArrayType {
+class SimpleGenericArrayType implements GenericArrayType {
 
 	private final Type componentType;
 
-	public SimpleGenericArrayType(Type componentType) {
+	SimpleGenericArrayType(Type componentType) {
 		this.componentType = componentType;
 	}
 

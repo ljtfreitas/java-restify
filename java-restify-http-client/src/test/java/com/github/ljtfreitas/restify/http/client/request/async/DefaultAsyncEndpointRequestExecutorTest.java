@@ -24,7 +24,6 @@ import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
 import com.github.ljtfreitas.restify.http.client.HttpClientException;
-import com.github.ljtfreitas.restify.http.client.HttpException;
 import com.github.ljtfreitas.restify.http.client.message.Headers;
 import com.github.ljtfreitas.restify.http.client.message.HttpMessageException;
 import com.github.ljtfreitas.restify.http.client.message.response.StatusCode;
@@ -173,7 +172,7 @@ public class DefaultAsyncEndpointRequestExecutorTest {
 		CompletionStage<EndpointResponse<Object>> result = subject.executeAsync(endpointRequest);
 
 		expectedException.expect(ExecutionException.class);
-		expectedException.expectCause(isA(HttpException.class));
+		expectedException.expectCause(isA(HttpClientException.class));
 
 		result.toCompletableFuture().get();
 	}

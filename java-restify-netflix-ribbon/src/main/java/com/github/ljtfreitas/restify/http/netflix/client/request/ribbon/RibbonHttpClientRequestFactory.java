@@ -27,7 +27,7 @@ package com.github.ljtfreitas.restify.http.netflix.client.request.ribbon;
 
 import java.nio.charset.Charset;
 
-import com.github.ljtfreitas.restify.http.client.jdk.JdkHttpClientRequestFactory;
+import com.github.ljtfreitas.restify.http.client.JdkHttpClientRequestFactory;
 import com.github.ljtfreitas.restify.http.client.message.Encoding;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
 import com.github.ljtfreitas.restify.http.client.request.HttpClientRequest;

@@ -27,5 +27,5 @@ package com.github.ljtfreitas.restify.http.client.call.async;
 
 public interface EndpointCallSuccessCallback<T> {
 
-	public void onSuccess(T response);
+	void onSuccess(T response);
 }

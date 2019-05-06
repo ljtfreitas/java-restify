@@ -36,7 +36,7 @@ public interface WildcardMessageConverter<T> extends HttpMessageReader<T> {
 	public  static final ContentType WILDCARD_CONTENT_TYPE = ContentType.of("*/*");
 
 	@Override
-	public default Collection<ContentType> contentTypes() {
+	default Collection<ContentType> contentTypes() {
 		return Arrays.asList(WILDCARD_CONTENT_TYPE);
 	}
 }

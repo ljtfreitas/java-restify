@@ -39,7 +39,7 @@ import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
 
 public interface RetryCondition {
 
-	public interface StatusCodeRetryCondition extends RetryCondition, Predicate<StatusCode> {
+	interface StatusCodeRetryCondition extends RetryCondition, Predicate<StatusCode> {
 
 		public static StatusCodeRetryCondition any4xx() {
 			return (s) -> s.isClientError();
@@ -60,7 +60,7 @@ public interface RetryCondition {
 		}
 	}
 
-	public interface HeadersRetryCondition extends RetryCondition, Predicate<Headers> {
+	interface HeadersRetryCondition extends RetryCondition, Predicate<Headers> {
 
 		public static HeadersRetryCondition contains(Header header) {
 			return (headers) -> headers.get(header.name()).filter(h -> h.equals(header)).isPresent();
@@ -71,10 +71,10 @@ public interface RetryCondition {
 		}
 	}
 
-	public interface EndpointResponseRetryCondition extends RetryCondition, Predicate<EndpointResponse<String>> {
+	interface EndpointResponseRetryCondition extends RetryCondition, Predicate<EndpointResponse<String>> {
 	}
 
-	public interface ThrowableRetryCondition extends RetryCondition, Predicate<Throwable> {
+	interface ThrowableRetryCondition extends RetryCondition, Predicate<Throwable> {
 
 		public static ThrowableRetryCondition ioFailure() {
 			return any(IOException.class);

@@ -27,6 +27,7 @@ package com.github.ljtfreitas.restify.http.contract.metadata;
 
 import static com.github.ljtfreitas.restify.util.Preconditions.isTrue;
 
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.lang.reflect.Type;
@@ -165,8 +166,8 @@ public class DefaultContractReader implements ContractReader {
 
 	private ParameterSerializer serializerOf(ContractMethodParameterMetadata javaMethodParameterMetadata) {
 		try {
-			return javaMethodParameterMetadata.serializer().newInstance();
-		} catch (InstantiationException | IllegalAccessException e) {
+			return javaMethodParameterMetadata.serializer().getDeclaredConstructor().newInstance();
+		} catch (InstantiationException | IllegalAccessException | IllegalArgumentException | InvocationTargetException | NoSuchMethodException | SecurityException e) {
 			throw new UnsupportedOperationException("Cannot create new instance of EndpointMethodParameterSerializer type " + javaMethodParameterMetadata.serializer());
 		}
 	}

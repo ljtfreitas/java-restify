@@ -31,6 +31,7 @@ import java.nio.charset.Charset;
 
 import com.github.ljtfreitas.restify.http.client.message.Encoding;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
+import com.github.ljtfreitas.restify.http.client.request.async.AsyncHttpClientRequest;
 import com.github.ljtfreitas.restify.http.client.request.async.AsyncHttpClientRequestFactory;
 
 import io.vertx.core.Vertx;
@@ -64,7 +65,7 @@ public class VertxHttpClientRequestFactory implements AsyncHttpClientRequestFact
 	}
 
 	@Override
-	public VertxHttpClientRequest createAsyncOf(EndpointRequest endpointRequest) {
+	public AsyncHttpClientRequest createAsyncOf(EndpointRequest endpointRequest) {
 		return new VertxHttpClientRequest(webClient, endpointRequest, DEFAULT_VERTX_CHARSET);
 	}
 

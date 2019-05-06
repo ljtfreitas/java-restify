@@ -39,6 +39,8 @@ import org.apache.http.protocol.HttpContext;
 
 import com.github.ljtfreitas.restify.http.client.message.Encoding;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
+import com.github.ljtfreitas.restify.http.client.request.HttpClientRequest;
+import com.github.ljtfreitas.restify.http.client.request.async.AsyncHttpClientRequest;
 import com.github.ljtfreitas.restify.http.client.request.async.AsyncHttpClientRequestFactory;
 
 public class ApacheAsyncHttpClientRequestFactory implements AsyncHttpClientRequestFactory, Closeable {
@@ -100,12 +102,12 @@ public class ApacheAsyncHttpClientRequestFactory implements AsyncHttpClientReque
 	}
 
 	@Override
-	public ApacheHttpClientRequest createOf(EndpointRequest endpointRequest) {
+	public HttpClientRequest createOf(EndpointRequest endpointRequest) {
 		return delegate.createOf(endpointRequest);
 	}
 
 	@Override
-	public ApacheAsyncHttpClientRequest createAsyncOf(EndpointRequest endpointRequest) {
+	public AsyncHttpClientRequest createAsyncOf(EndpointRequest endpointRequest) {
 		HttpUriRequest httpRequest = HttpUriRequestStrategy.of(endpointRequest.method())
 				.create(endpointRequest.endpoint().toString());
 

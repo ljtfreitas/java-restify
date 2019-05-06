@@ -56,7 +56,7 @@ class ApacheHttpClientRequest implements HttpClientRequest {
 
 	private final BufferedByteArrayHttpRequestBody body;
 
-	public ApacheHttpClientRequest(HttpClient httpClient, HttpUriRequest httpRequest, HttpContext httpContext, Charset charset,
+	ApacheHttpClientRequest(HttpClient httpClient, HttpUriRequest httpRequest, HttpContext httpContext, Charset charset,
 			Headers headers) {
 		this(httpClient, httpRequest, httpContext, charset, headers, new BufferedByteArrayHttpRequestBody(charset));
 	}

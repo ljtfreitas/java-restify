@@ -36,7 +36,7 @@ public interface MultipartFormMessageWriter<T> extends HttpMessageWriter<T> {
 	public static final ContentType MULTIPART_FORM_DATA_CONTENT_TYPE = ContentType.of("multipart/form-data");
 
 	@Override
-	public default Collection<ContentType> contentTypes() {
+	default Collection<ContentType> contentTypes() {
 		return Arrays.asList(MULTIPART_FORM_DATA_CONTENT_TYPE);
 	}
 }

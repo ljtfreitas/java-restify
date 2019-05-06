@@ -27,7 +27,7 @@ package com.github.ljtfreitas.restify.http.netflix.client.request.ribbon;
 
 import java.util.Optional;
 
-import com.github.ljtfreitas.restify.http.client.jdk.JdkHttpClientRequestFactory;
+import com.github.ljtfreitas.restify.http.client.JdkHttpClientRequestFactory;
 import com.github.ljtfreitas.restify.http.client.request.HttpClientRequest;
 import com.github.ljtfreitas.restify.http.client.request.HttpClientRequestFactory;
 import com.github.ljtfreitas.restify.http.client.response.HttpClientResponse;

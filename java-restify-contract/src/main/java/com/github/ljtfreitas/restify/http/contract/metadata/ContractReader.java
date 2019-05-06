@@ -27,6 +27,6 @@ package com.github.ljtfreitas.restify.http.contract.metadata;
 
 public interface ContractReader {
 
-	public EndpointMethods read(EndpointTarget endpointTarget);
+	EndpointMethods read(EndpointTarget endpointTarget);
 
 }

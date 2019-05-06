@@ -40,7 +40,7 @@ class DefaultAsyncEndpointCall<T> implements AsyncEndpointCall<T> {
 	private final Executor executor;
 	private final EndpointCall<T> delegate;
 
-	public DefaultAsyncEndpointCall(EndpointRequest endpointRequest, AsyncEndpointRequestExecutor endpointRequestExecutor,
+	DefaultAsyncEndpointCall(EndpointRequest endpointRequest, AsyncEndpointRequestExecutor endpointRequestExecutor,
 			Executor executor, EndpointCall<T> delegate) {
 		this.endpointRequest = endpointRequest;
 		this.asyncEndpointRequestExecutor = endpointRequestExecutor;

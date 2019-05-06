@@ -52,7 +52,7 @@ class RetryableLoop {
 		this.retryPolicy = nonNull(retryPolicy, "Retry policy cannot be null");
 	}
 
-	public <T> T repeat(int attempts, Retryable<T> retryable) throws RetryExhaustedException {
+	<T> T repeat(int attempts, Retryable<T> retryable) throws RetryExhaustedException {
 		RetryLoop loop = new RetryLoop(attempts, retryPolicy.refresh(), backOffPolicy);
 		return loop.repeat(retryable).get();
 	}

@@ -28,7 +28,6 @@ package com.github.ljtfreitas.restify.http.client.request;
 import java.io.IOException;
 
 import com.github.ljtfreitas.restify.http.client.HttpClientException;
-import com.github.ljtfreitas.restify.http.client.HttpException;
 import com.github.ljtfreitas.restify.http.client.message.HttpMessageException;
 import com.github.ljtfreitas.restify.http.client.message.response.HttpResponseMessage;
 import com.github.ljtfreitas.restify.http.client.response.EndpointResponse;
@@ -61,7 +60,7 @@ public class DefaultEndpointRequestExecutor implements EndpointRequestExecutor {
 					endpointRequest.endpoint() + "]", e);
 
 		} catch (Exception e) {
-			throw new HttpException("Error on HTTP request: [" + endpointRequest.method() + " " +
+			throw new HttpClientException("Error on HTTP request: [" + endpointRequest.method() + " " +
 					endpointRequest.endpoint() + "]", e);
 		}
 	}

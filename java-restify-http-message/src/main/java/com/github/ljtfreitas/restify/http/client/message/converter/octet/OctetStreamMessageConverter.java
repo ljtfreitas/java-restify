@@ -37,7 +37,7 @@ public interface OctetStreamMessageConverter<T> extends HttpMessageReader<T>, Ht
 	public static final ContentType OCTET_STREAM_MEDIA_TYPE = ContentType.of("application/octet-stream");
 
 	@Override
-	public default Collection<ContentType> contentTypes() {
+	default Collection<ContentType> contentTypes() {
 		return Arrays.asList(OCTET_STREAM_MEDIA_TYPE);
 	}
 }

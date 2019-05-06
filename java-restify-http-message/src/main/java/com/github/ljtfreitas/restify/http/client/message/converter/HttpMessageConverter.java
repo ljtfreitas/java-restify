@@ -31,6 +31,6 @@ import com.github.ljtfreitas.restify.http.client.message.ContentType;
 
 public interface HttpMessageConverter {
 
-	public Collection<ContentType> contentTypes();
+	Collection<ContentType> contentTypes();
 
 }

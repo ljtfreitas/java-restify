@@ -37,6 +37,7 @@ import com.github.ljtfreitas.restify.http.client.message.response.StatusCode;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequest;
 import com.github.ljtfreitas.restify.http.client.request.EndpointRequestMetadata;
 import com.github.ljtfreitas.restify.http.client.request.Timeout;
+import com.github.ljtfreitas.restify.http.client.request.async.AsyncHttpClientRequest;
 import com.github.ljtfreitas.restify.http.client.response.HttpClientResponse;
 import com.ning.http.client.AsyncHttpClientConfig;
 import com.ning.http.client.Realm;
@@ -107,7 +108,7 @@ public class GrizzlyHttpClientRequestFactoryTest {
 		EndpointRequest endpointRequest = new EndpointRequest(URI.create("http://localhost:7080/json"), "POST",
 				new Headers(Header.contentType("application/json")), requestBody);
 
-		GrizzlyHttpClientRequest request = subject.createAsyncOf(endpointRequest);
+		AsyncHttpClientRequest request = subject.createAsyncOf(endpointRequest);
 		request.body().output().write(requestBody.getBytes());
 		request.body().output().flush();
 

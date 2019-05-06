@@ -34,12 +34,12 @@ class PathParameterResolver {
 	private final String path;
 	private final EndpointMethodParameters parameters;
 
-	public PathParameterResolver(String path, EndpointMethodParameters parameters) {
+	PathParameterResolver(String path, EndpointMethodParameters parameters) {
 		this.path = path;
 		this.parameters = parameters;
 	}
 
-	public String resolve(Object[] args) {
+	String resolve(Object[] args) {
 		StringBuilder endpoint = new StringBuilder();
 
 		endpoint.append(path(args));

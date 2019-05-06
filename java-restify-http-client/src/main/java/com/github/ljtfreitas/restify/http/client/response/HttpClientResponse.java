@@ -28,5 +28,4 @@ package com.github.ljtfreitas.restify.http.client.response;
 import com.github.ljtfreitas.restify.http.client.message.response.HttpResponseMessage;
 
 public interface HttpClientResponse extends HttpResponseMessage {
-
 }

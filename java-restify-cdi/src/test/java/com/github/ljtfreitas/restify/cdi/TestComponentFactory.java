@@ -29,7 +29,7 @@ import java.util.logging.Logger;
 
 import javax.enterprise.inject.Produces;
 
-import com.github.ljtfreitas.restify.http.client.message.converter.wildcard.SimpleTextMessageConverter;
+import com.github.ljtfreitas.restify.http.client.message.converter.wildcard.provided.SimpleTextMessageConverter;
 import com.github.ljtfreitas.restify.http.client.request.interceptor.EndpointRequestInterceptor;
 
 class TestComponentFactory {

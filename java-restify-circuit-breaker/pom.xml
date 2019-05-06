@@ -24,7 +24,7 @@
 			<groupId>com.github.ljtfreitas</groupId>
 			<artifactId>java-restify-reflection</artifactId>
 			<version>${project.version}</version>
-			<scope>test</scope>
+			<scope>provided</scope>
 		</dependency>
 	</dependencies>
 </project>

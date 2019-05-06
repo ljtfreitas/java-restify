@@ -31,10 +31,10 @@ import com.github.ljtfreitas.restify.http.client.call.handler.EndpointCallHandle
 
 public interface AsyncEndpointCallHandler<M, T> extends EndpointCallHandler<M, T> {
 
-	public M handleAsync(AsyncEndpointCall<T> call, Object[] args);
+	M handleAsync(AsyncEndpointCall<T> call, Object[] args);
 
 	@Override
-	public default M handle(EndpointCall<T> call, Object[] args) {
+	default M handle(EndpointCall<T> call, Object[] args) {
 		AsyncEndpointCall<T> asyncCall = (call instanceof AsyncEndpointCall) ?
 				(AsyncEndpointCall<T>) call
 					: new AsyncEndpointCallAdapter<>(call);
