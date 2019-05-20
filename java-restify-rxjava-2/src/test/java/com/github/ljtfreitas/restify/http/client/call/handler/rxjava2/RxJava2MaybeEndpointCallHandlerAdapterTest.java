@@ -40,9 +40,23 @@ public class RxJava2MaybeEndpointCallHandlerAdapterTest {
 
 	private RxJava2MaybeEndpointCallHandlerAdapter<String, String> adapter;
 
-	@Before
+    private String result;
+
+	@SuppressWarnings("unchecked")
+    @Before
 	public void setup() {
 		adapter = new RxJava2MaybeEndpointCallHandlerAdapter<>(Schedulers.single());
+
+		result = "maybe result";
+
+		when(asyncEndpointCall.executeAsync())
+		    .thenReturn(CompletableFuture.completedFuture(result));
+
+		when(endpointCall.execute())
+		    .thenReturn(result);
+
+		when(delegate.handle(notNull(EndpointCall.class), anyVararg()))
+		    .then(i -> i.getArgumentAt(0, EndpointCall.class).execute());
 	}
 
 	@Test
@@ -65,19 +79,10 @@ public class RxJava2MaybeEndpointCallHandlerAdapterTest {
 		assertEquals(JavaType.of(Object.class), adapter.returnType(new SimpleEndpointMethod(SomeType.class.getMethod("dumbMaybe"))));
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test
-	public void shouldCreateHandlerFromEndpointMethodWithRxJava2MaybeReturnType() throws Exception {
+	public void shouldGetMaybeWithResponseOfCall() throws Exception {
 		AsyncEndpointCallHandler<Maybe<String>, String> handler = adapter
 				.adaptAsync(new SimpleEndpointMethod(SomeType.class.getMethod("maybe")), delegate);
-
-		String result = "maybe result";
-
-		when(asyncEndpointCall.executeAsync())
-			.thenReturn(CompletableFuture.completedFuture(result));
-
-		when(delegate.handle(notNull(EndpointCall.class), anyVararg()))
-			.then(i -> i.getArgumentAt(0, EndpointCall.class).execute());
 
 		Maybe<String> maybe = handler.handleAsync(asyncEndpointCall, null);
 
@@ -91,31 +96,28 @@ public class RxJava2MaybeEndpointCallHandlerAdapterTest {
 			.assertResult(result);
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test
-	public void shouldCreateMaybeOnHandlerWhenAsyncEndpointCallResultIsNull() throws Exception {
+	public void shouldGetEmptyMaybeWhenEndpointCallReturnsNull() throws Exception {
 		AsyncEndpointCallHandler<Maybe<String>, String> handler = adapter
 				.adaptAsync(new SimpleEndpointMethod(SomeType.class.getMethod("maybe")), delegate);
 
 		when(asyncEndpointCall.executeAsync())
 			.thenReturn(CompletableFuture.completedFuture(null));
 
-		when(delegate.handle(notNull(EndpointCall.class), anyVararg()))
-			.then(i -> i.getArgumentAt(0, EndpointCall.class).execute());
-
 		Maybe<String> maybe = handler.handleAsync(asyncEndpointCall, null);
 
 		assertNotNull(maybe);
 
 		TestObserver<String> subscriber = maybe.test();
-		subscriber.await();
 
-		subscriber.assertNoErrors()
+		subscriber
+		    .await()
+		    .assertNoErrors()
 			.assertComplete();
 	}
 
 	@Test
-	public void shouldSubscribeErrorOnMaybeWhenCreatedHandlerWithRxJava2MaybeReturnTypeThrowException() throws Exception {
+	public void shouldGetMaybeWithErrorWhenEndpointCallThrowsException() throws Exception {
 		AsyncEndpointCallHandler<Maybe<String>, String> handler = adapter
 				.adaptAsync(new SimpleEndpointMethod(SomeType.class.getMethod("maybe")), delegate);
 
@@ -133,32 +135,24 @@ public class RxJava2MaybeEndpointCallHandlerAdapterTest {
 
 		TestObserver<String> subscriber = maybe.test();
 
-		subscriber.await()
-				  .assertError(exception);
+		subscriber
+		    .await()
+			.assertError(exception);
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test
-	public void shouldCreateSyncHandlerFromEndpointMethodWithRxJava2MaybeReturnType() throws Exception {
+	public void shouldGetMaybeWithResponseOfSyncCall() throws Exception {
 		EndpointCallHandler<Maybe<String>, String> handler = adapter
 				.adapt(new SimpleEndpointMethod(SomeType.class.getMethod("maybe")), delegate);
-
-		String result = "maybe result";
-
-		when(endpointCall.execute())
-			.thenReturn(result);
-
-		when(delegate.handle(notNull(EndpointCall.class), anyVararg()))
-			.then(i -> i.getArgumentAt(0, EndpointCall.class).execute());
 
 		Maybe<String> maybe = handler.handle(endpointCall, null);
 
 		assertNotNull(maybe);
 
 		TestObserver<String> subscriber = maybe.test();
-		subscriber.await();
 
-		subscriber.assertNoErrors()
+		subscriber.await()
+		    .assertNoErrors()
 			.assertComplete()
 			.assertResult(result);
 	}

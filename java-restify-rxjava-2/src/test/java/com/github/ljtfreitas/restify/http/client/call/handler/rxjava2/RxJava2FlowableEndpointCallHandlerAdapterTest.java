@@ -4,7 +4,6 @@ import static org.junit.Assert.assertEquals;
 import static org.junit.Assert.assertFalse;
 import static org.junit.Assert.assertNotNull;
 import static org.junit.Assert.assertTrue;
-import static org.mockito.Matchers.any;
 import static org.mockito.Matchers.anyVararg;
 import static org.mockito.Matchers.notNull;
 import static org.mockito.Mockito.verify;
@@ -44,9 +43,23 @@ public class RxJava2FlowableEndpointCallHandlerAdapterTest {
 
 	private RxJava2FlowableEndpointCallHandlerAdapter<String, Collection<String>> adapter;
 
-	@Before
+    private String result;
+
+	@SuppressWarnings("unchecked")
+    @Before
 	public void setup() {
 		adapter = new RxJava2FlowableEndpointCallHandlerAdapter<>(Schedulers.single());
+
+		result = "flowable result";
+
+		when(asyncEndpointCallMock.executeAsync())
+		    .thenReturn(CompletableFuture.completedFuture(Arrays.asList(result)));
+
+		when(endpointCallMock.execute())
+		    .thenReturn(Arrays.asList(result));
+
+		when(delegate.handle(notNull(EndpointCall.class), anyVararg()))
+		    .then(i -> i.getArgumentAt(0, EndpointCall.class).execute());
 	}
 
 	@Test
@@ -71,17 +84,9 @@ public class RxJava2FlowableEndpointCallHandlerAdapterTest {
 
 	@SuppressWarnings("unchecked")
 	@Test
-	public void shouldCreateHandlerFromEndpointMethodWithRxJava2FlowableReturnType() throws Exception {
+	public void shouldGetFlowableWithResponseOfCall() throws Exception {
 		AsyncEndpointCallHandler<Flowable<String>, Collection<String>> handler = adapter
 				.adaptAsync(new SimpleEndpointMethod(SomeType.class.getMethod("flowable")), delegate);
-
-		String result = "flowable result";
-
-		when(asyncEndpointCallMock.executeAsync())
-			.thenReturn(CompletableFuture.completedFuture(Arrays.asList(result)));
-
-		when(delegate.handle(notNull(EndpointCall.class), anyVararg()))
-			.then(i -> i.getArgumentAt(0, EndpointCall.class).execute());
 
 		Flowable<String> flowable = handler.handleAsync(asyncEndpointCallMock, null);
 
@@ -98,8 +103,29 @@ public class RxJava2FlowableEndpointCallHandlerAdapterTest {
 		verify(delegate).handle(notNull(EndpointCall.class), anyVararg());
 	}
 
-	@Test
-	public void shouldSubscribeErrorOnFlowableWhenCreatedHandlerWithRxJava2FlowableReturnTypeThrowException() throws Exception {
+    @Test
+    public void shouldGetEmptyFlowableWhenEndpointCallReturnsNull() throws Exception {
+        AsyncEndpointCallHandler<Flowable<String>, Collection<String>> handler = adapter
+                .adaptAsync(new SimpleEndpointMethod(SomeType.class.getMethod("flowable")), delegate);
+
+        when(asyncEndpointCallMock.executeAsync())
+            .thenReturn(CompletableFuture.completedFuture(null));
+
+        Flowable<String> flowable = handler.handleAsync(asyncEndpointCallMock, null);
+
+        assertNotNull(flowable);
+
+        TestSubscriber<String> subscriber = flowable.test();
+        subscriber
+            .await()
+            .assertNoErrors()
+            .assertComplete();
+
+        verify(asyncEndpointCallMock).executeAsync();
+    }
+
+    @Test
+	public void shouldGetFlowableWithErrorWhenEndpointCallThrowsException() throws Exception {
 		AsyncEndpointCallHandler<Flowable<String>, Collection<String>> handler = adapter
 				.adaptAsync(new SimpleEndpointMethod(SomeType.class.getMethod("flowable")), delegate);
 
@@ -123,19 +149,10 @@ public class RxJava2FlowableEndpointCallHandlerAdapterTest {
 		verify(asyncEndpointCallMock).executeAsync();
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test
-	public void shouldCreateSyncHandlerFromEndpointMethodWithRxJava2FlowableReturnType() throws Exception {
+	public void shouldGetFlowableWithResponseOfSyncCall() throws Exception {
 		EndpointCallHandler<Flowable<String>, Collection<String>> handler = adapter
 				.adapt(new SimpleEndpointMethod(SomeType.class.getMethod("flowable")), delegate);
-
-		String result = "flowable result";
-
-		when(endpointCallMock.execute())
-			.thenReturn(Arrays.asList(result));
-
-		when(delegate.handle(any(EndpointCall.class), any()))
-			.then(i -> i.getArgumentAt(0, EndpointCall.class).execute());
 
 		Flowable<String> flowable = handler.handle(endpointCallMock, null);
 

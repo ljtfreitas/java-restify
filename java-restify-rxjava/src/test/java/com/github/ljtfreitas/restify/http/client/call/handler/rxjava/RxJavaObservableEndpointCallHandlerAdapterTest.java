@@ -45,12 +45,23 @@ public class RxJavaObservableEndpointCallHandlerAdapterTest {
 
 	private RxJavaObservableEndpointCallHandlerAdapter<String, Collection<String>> adapter;
 
-	@Before
+    private String result;
+
+	@SuppressWarnings("unchecked")
+    @Before
 	public void setup() {
 		adapter = new RxJavaObservableEndpointCallHandlerAdapter<>(Schedulers.immediate());
 
 		when(delegate.returnType())
 			.thenReturn(JavaType.of(String.class));
+
+		result = "observable result";
+
+		when(asyncEndpointCallMock.executeAsync())
+		    .thenReturn(CompletableFuture.completedFuture(Arrays.asList(result)));
+
+		when(delegate.handle(notNull(EndpointCall.class), anyVararg()))
+		    .then(i -> i.getArgumentAt(0, EndpointCall.class).execute());
 	}
 
 	@Test
@@ -75,17 +86,10 @@ public class RxJavaObservableEndpointCallHandlerAdapterTest {
 
 	@SuppressWarnings("unchecked")
 	@Test
-	public void shouldCreateHandlerFromEndpointMethodWithRxJavaObservableReturnType() throws Exception {
+	public void shouldGetObservableWithResponseOfCall() throws Exception {
 		AsyncEndpointCallHandler<Observable<String>, Collection<String>> handler = adapter
 				.adaptAsync(new SimpleEndpointMethod(SomeType.class.getMethod("observable")), delegate);
 
-		String result = "observable result";
-
-		when(asyncEndpointCallMock.executeAsync())
-			.thenReturn(CompletableFuture.completedFuture(Arrays.asList(result)));
-
-		when(delegate.handle(notNull(EndpointCall.class), anyVararg()))
-			.then(i -> i.getArgumentAt(0, EndpointCall.class).execute());
 
 		Observable<String> observable = handler.handleAsync(asyncEndpointCallMock, null);
 
@@ -101,7 +105,7 @@ public class RxJavaObservableEndpointCallHandlerAdapterTest {
 	}
 
 	@Test
-	public void shouldSubscribeErrorOnObservableWhenCreatedHandlerWithRxJavaObservableReturnTypeThrowException() throws Exception {
+	public void shouldGetObservableWithErrorWhenEndpointCallThrowsException() throws Exception {
 		AsyncEndpointCallHandler<Observable<String>, Collection<String>> handler = adapter
 				.adaptAsync(new SimpleEndpointMethod(SomeType.class.getMethod("observable")), delegate);
 
@@ -124,19 +128,37 @@ public class RxJavaObservableEndpointCallHandlerAdapterTest {
 		verify(delegate, never()).handle(any(), anyVararg());
 	}
 
+    @SuppressWarnings("unchecked")
+    @Test
+    public void shouldGetEmptyObservableWithResponseOfCall() throws Exception {
+        when(asyncEndpointCallMock.executeAsync())
+                .thenReturn(CompletableFuture.completedFuture(null));
+
+        AsyncEndpointCallHandler<Observable<String>, Collection<String>> handler = adapter
+                .adaptAsync(new SimpleEndpointMethod(SomeType.class.getMethod("observable")), delegate);
+
+        when(delegate.handle(notNull(EndpointCall.class), anyVararg()))
+                .then(i -> i.getArgumentAt(0, EndpointCall.class).execute());
+
+        Observable<String> observable = handler.handleAsync(asyncEndpointCallMock, null);
+
+        assertNotNull(observable);
+
+        AssertableSubscriber<String> subscriber = observable.test();
+
+        subscriber
+            .assertCompleted()
+            .assertNoErrors();
+    }
+
 	@SuppressWarnings("unchecked")
 	@Test
-	public void shouldCreateSyncHandlerFromEndpointMethodWithRxJavaObservableReturnType() throws Exception {
-		EndpointCallHandler<Observable<String>, Collection<String>> handler = adapter
+	public void shouldGetObservableWithResponseOfSyncCall() throws Exception {
+        when(endpointCallMock.execute())
+            .thenReturn(Arrays.asList(result));
+
+        EndpointCallHandler<Observable<String>, Collection<String>> handler = adapter
 				.adapt(new SimpleEndpointMethod(SomeType.class.getMethod("observable")), delegate);
-
-		String result = "observable result";
-
-		when(endpointCallMock.execute())
-			.thenReturn(Arrays.asList(result));
-
-		when(delegate.handle(notNull(EndpointCall.class), anyVararg()))
-			.then(i -> i.getArgumentAt(0, EndpointCall.class).execute());
 
 		Observable<String> observable = handler.handle(endpointCallMock, null);
 
@@ -144,7 +166,8 @@ public class RxJavaObservableEndpointCallHandlerAdapterTest {
 
 		AssertableSubscriber<String> subscriber = observable.test();
 
-		subscriber.assertValue(result)
+		subscriber.awaitTerminalEvent()
+		    .assertValue(result)
 			.assertCompleted()
 			.assertNoErrors();
 

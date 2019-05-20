@@ -45,11 +45,25 @@ public class RxJava2ObservableEndpointCallHandlerAdapterTest {
 
 	private Scheduler scheduler;
 
-	@Before
+    private String result;
+
+	@SuppressWarnings("unchecked")
+    @Before
 	public void setup() {
 		scheduler = Schedulers.single();
 
 		adapter = new RxJava2ObservableEndpointCallHandlerAdapter<>(scheduler);
+
+		result = "observable result";
+
+		when(asyncEndpointCall.executeAsync())
+		    .thenReturn(CompletableFuture.completedFuture(Arrays.asList(result)));
+
+		when(endpointCall.execute())
+		    .thenReturn(Arrays.asList(result));
+
+		when(delegate.handle(notNull(EndpointCall.class), anyVararg()))
+		    .then(i -> i.getArgumentAt(0, EndpointCall.class).execute());
 	}
 
 	@Test
@@ -72,34 +86,44 @@ public class RxJava2ObservableEndpointCallHandlerAdapterTest {
 		assertEquals(JavaType.parameterizedType(Collection.class, Object.class), adapter.returnType(new SimpleEndpointMethod(SomeType.class.getMethod("dumbObservable"))));
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test
-	public void shouldCreateHandlerFromEndpointMethodWithRxJava2ObservableReturnType() throws Exception {
+	public void shouldGetObservableWithResponseOfCall() throws Exception {
 		AsyncEndpointCallHandler<Observable<String>, Collection<String>> handler = adapter
 				.adaptAsync(new SimpleEndpointMethod(SomeType.class.getMethod("observable")), delegate);
-
-		String result = "observable result";
-
-		when(asyncEndpointCall.executeAsync())
-			.thenReturn(CompletableFuture.completedFuture(Arrays.asList(result)));
-
-		when(delegate.handle(notNull(EndpointCall.class), anyVararg()))
-			.then(i -> i.getArgumentAt(0, EndpointCall.class).execute());
 
 		Observable<String> observable = handler.handleAsync(asyncEndpointCall, null);
 
 		assertNotNull(observable);
 
 		TestObserver<String> subscriber = observable.subscribeOn(scheduler).test();
-		subscriber.await();
 
-		subscriber.assertNoErrors()
+		subscriber.await()
+		    .assertNoErrors()
 			.assertComplete()
 			.assertResult(result);
 	}
 
-	@Test
-	public void shouldSubscribeErrorOnObservableWhenCreatedHandlerWithRxJava2ObservableReturnTypeThrowException() throws Exception {
+    @Test
+    public void shouldGetEmptyObservableWhenEndpointCallReturnsNull() throws Exception {
+        when(asyncEndpointCall.executeAsync())
+            .thenReturn(CompletableFuture.completedFuture(null));
+
+        AsyncEndpointCallHandler<Observable<String>, Collection<String>> handler = adapter
+                .adaptAsync(new SimpleEndpointMethod(SomeType.class.getMethod("observable")), delegate);
+
+        Observable<String> observable = handler.handleAsync(asyncEndpointCall, null);
+
+        assertNotNull(observable);
+
+        TestObserver<String> subscriber = observable.subscribeOn(scheduler).test();
+
+        subscriber.await()
+            .assertNoErrors()
+            .assertComplete();
+    }
+
+    @Test
+	public void shouldGetObservableWithErrorWhenEndpointCallThrowsException() throws Exception {
 		AsyncEndpointCallHandler<Observable<String>, Collection<String>> handler = adapter
 				.adaptAsync(new SimpleEndpointMethod(SomeType.class.getMethod("observable")), delegate);
 
@@ -121,28 +145,19 @@ public class RxJava2ObservableEndpointCallHandlerAdapterTest {
 				  .assertError(exception);
 	}
 
-	@SuppressWarnings("unchecked")
 	@Test
-	public void shouldCreateSyncHandlerFromEndpointMethodWithRxJava2ObservableReturnType() throws Exception {
+	public void shouldGetObservableWithResponseOfSyncCall() throws Exception {
 		EndpointCallHandler<Observable<String>, Collection<String>> handler = adapter
 				.adapt(new SimpleEndpointMethod(SomeType.class.getMethod("observable")), delegate);
-
-		String result = "observable result";
-
-		when(endpointCall.execute())
-			.thenReturn(Arrays.asList(result));
-
-		when(delegate.handle(notNull(EndpointCall.class), anyVararg()))
-			.then(i -> i.getArgumentAt(0, EndpointCall.class).execute());
 
 		Observable<String> observable = handler.handle(endpointCall, null);
 
 		assertNotNull(observable);
 
 		TestObserver<String> subscriber = observable.subscribeOn(scheduler).test();
-		subscriber.await();
 
-		subscriber.assertNoErrors()
+		subscriber.await()
+		    .assertNoErrors()
 			.assertComplete()
 			.assertResult(result);
 	}
