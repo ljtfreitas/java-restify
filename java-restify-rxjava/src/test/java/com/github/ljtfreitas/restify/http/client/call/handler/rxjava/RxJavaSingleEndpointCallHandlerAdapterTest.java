@@ -40,12 +40,26 @@ public class RxJavaSingleEndpointCallHandlerAdapterTest {
 
 	private RxJavaSingleEndpointCallHandlerAdapter<String, String> adapter;
 
+    private CompletableFuture<String> resultAsFuture;
+
+    private String result;
+
 	@Before
 	public void setup() {
 		adapter = new RxJavaSingleEndpointCallHandlerAdapter<>(Schedulers.immediate());
 
 		when(delegate.returnType())
 			.thenReturn(JavaType.of(String.class));
+
+		result = "single result";
+
+		when(endpointCall.execute())
+		    .thenReturn(result);
+
+		resultAsFuture = CompletableFuture.completedFuture(result);
+
+		when(asyncEndpointCall.executeAsync())
+		    .thenReturn(resultAsFuture);
 	}
 
 	@Test
@@ -70,16 +84,9 @@ public class RxJavaSingleEndpointCallHandlerAdapterTest {
 	}
 
 	@Test
-	public void shouldCreateHandlerFromEndpointMethodWithRxJavaSingleReturnType() throws Exception {
+	public void shouldGetSingleWithResponseOfCall() throws Exception {
 		AsyncEndpointCallHandler<Single<String>, String> handler = adapter
 				.adaptAsync(new SimpleEndpointMethod(SomeType.class.getMethod("single")), delegate);
-
-		String result = "single result";
-
-		CompletableFuture<String> resultAsFuture = CompletableFuture.completedFuture(result);
-
-		when(asyncEndpointCall.executeAsync())
-			.thenReturn(resultAsFuture);
 
 		when(delegate.handle(any(), anyVararg()))
 			.thenReturn(resultAsFuture.join());
@@ -96,7 +103,7 @@ public class RxJavaSingleEndpointCallHandlerAdapterTest {
 	}
 
 	@Test
-	public void shouldSubscribeErrorOnSingleWhenCreatedHandlerWithRxJavaSingleReturnTypeThrowException() throws Exception {
+	public void shouldSingleWithErrorWhenEndpointcallThrowsException() throws Exception {
 		AsyncEndpointCallHandler<Single<String>, String> handler = adapter
 				.adaptAsync(new SimpleEndpointMethod(SomeType.class.getMethod("single")), delegate);
 
@@ -118,7 +125,7 @@ public class RxJavaSingleEndpointCallHandlerAdapterTest {
 	}
 
 	@Test
-	public void shouldCreateSyncHandlerFromEndpointMethodWithRxJavaSingleReturnType() throws Exception {
+	public void shouldGetSingleWithResponseOfSyncCall() throws Exception {
 		EndpointCallHandler<Single<String>, String> handler = adapter
 				.adapt(new SimpleEndpointMethod(SomeType.class.getMethod("single")), delegate);
 

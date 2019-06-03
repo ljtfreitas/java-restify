@@ -125,6 +125,8 @@ public class RxJavaObservableEndpointCallHandlerAdapter<T, O> implements AsyncEn
 			future.whenComplete((value, throwable) -> {
 				if (throwable != null) {
 					emitter.onError(throwable);
+				} else if (value == null) {
+				    emitter.onCompleted();
 				} else {
 					emitter.onNext(value);
 					emitter.onCompleted();

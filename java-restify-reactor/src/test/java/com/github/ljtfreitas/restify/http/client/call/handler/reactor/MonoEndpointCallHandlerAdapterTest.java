@@ -73,7 +73,7 @@ public class MonoEndpointCallHandlerAdapterTest {
 	}
 
 	@Test
-	public void shouldCreateHandlerFromEndpointMethodWithMonoReturnType() throws Exception {
+	public void shouldGetMonoWithResponseOfCall() throws Exception {
 		AsyncEndpointCallHandler<Mono<String>, String> handler = adapter
 				.adaptAsync(new SimpleEndpointMethod(SomeType.class.getMethod("mono")), delegate);
 
@@ -88,7 +88,7 @@ public class MonoEndpointCallHandlerAdapterTest {
 	}
 
 	@Test
-	public void shouldSubscribeErrorOnSingleWhenCreatedHandlerWithRxJava2SingleReturnTypeThrowException() throws Exception {
+	public void shouldGetMonoWithErrorWhenEndpointCallThrowsException() throws Exception {
 		AsyncEndpointCallHandler<Mono<String>, String> handler = adapter
 				.adaptAsync(new SimpleEndpointMethod(SomeType.class.getMethod("mono")), delegate);
 
@@ -109,8 +109,25 @@ public class MonoEndpointCallHandlerAdapterTest {
 			.verify();
 	}
 
+    @Test
+    public void shouldGetEmptyMonoWhenEndpointCallReturnsNull() throws Exception {
+        when(asyncEndpointCall.executeAsync())
+            .thenReturn(CompletableFuture.completedFuture(null));
+
+        AsyncEndpointCallHandler<Mono<String>, String> handler = adapter
+            .adaptAsync(new SimpleEndpointMethod(SomeType.class.getMethod("mono")), delegate);
+
+        Mono<String> mono = handler.handleAsync(asyncEndpointCall, null);
+
+        assertNotNull(mono);
+
+        StepVerifier.create(mono)
+            .expectComplete()
+            .verify();
+    }
+
 	@Test
-	public void shouldCreateSyncHandlerFromEndpointMethodWithMonoReturnType() throws Exception {
+	public void shouldGetMonoWithResponseOfSyncCall() throws Exception {
 		EndpointCallHandler<Mono<String>, String> handler = adapter
 				.adapt(new SimpleEndpointMethod(SomeType.class.getMethod("mono")), delegate);
 

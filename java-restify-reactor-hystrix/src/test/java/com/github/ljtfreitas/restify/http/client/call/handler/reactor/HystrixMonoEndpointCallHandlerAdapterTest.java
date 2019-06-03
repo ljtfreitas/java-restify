@@ -56,7 +56,7 @@ public class HystrixMonoEndpointCallHandlerAdapterTest {
 	}
 
 	@Test
-	public void shouldCreateMonoFromHystrixCommand() throws Exception {
+	public void shouldGetMonoFromHystrixCommand() throws Exception {
 		AsyncEndpointCallHandler<Mono<String>, String> handler = adapter
 				.adaptAsync(new SimpleEndpointMethod(SomeType.class.getMethod("monoOnCircuitBreaker")), delegate);
 
@@ -68,7 +68,7 @@ public class HystrixMonoEndpointCallHandlerAdapterTest {
 	}
 
 	@Test
-	public void shouldCreateMonoFromFallbackWhenHystrixCommandFail() throws Exception {
+	public void shouldGetMonoWithFallbackWhenHystrixCommandFail() throws Exception {
 		CompletableFuture<String> exceptionAsFuture = new CompletableFuture<>();
 		exceptionAsFuture.completeExceptionally(new RuntimeException("ooops"));
 

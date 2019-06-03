@@ -76,7 +76,7 @@ public class FluxEndpointCallHandlerAdapterTest {
 	}
 
 	@Test
-	public void shouldCreateHandlerFromEndpointMethodWithFluxReturnType() throws Exception {
+	public void shouldGetFluxWithResponseOfCall() throws Exception {
 		AsyncEndpointCallHandler<Flux<String>, Collection<String>> handler = adapter
 				.adaptAsync(new SimpleEndpointMethod(SomeType.class.getMethod("flux")), delegate);
 
@@ -91,7 +91,7 @@ public class FluxEndpointCallHandlerAdapterTest {
 	}
 
 	@Test
-	public void shouldSubscribeErrorOnFluxWhenCreatedHandlerWithFluxReturnTypeThrowException() throws Exception {
+	public void shouldGetFluxWithErrorWhenEndpointCallThrowsException() throws Exception {
 		AsyncEndpointCallHandler<Flux<String>, Collection<String>> handler = adapter
 				.adaptAsync(new SimpleEndpointMethod(SomeType.class.getMethod("flux")), delegate);
 
@@ -112,17 +112,34 @@ public class FluxEndpointCallHandlerAdapterTest {
 			.verify();
 	}
 
+    @Test
+    public void shouldGetEmptyFluxWhenEndpointCallReturnsNull() throws Exception {
+        when(asyncEndpointCall.executeAsync())
+            .thenReturn(CompletableFuture.completedFuture(null));
+
+        AsyncEndpointCallHandler<Flux<String>, Collection<String>> handler = adapter
+            .adaptAsync(new SimpleEndpointMethod(SomeType.class.getMethod("flux")), delegate);
+
+        Flux<String> flux = handler.handleAsync(asyncEndpointCall, null);
+
+        assertNotNull(flux);
+
+        StepVerifier.create(flux)
+            .expectComplete()
+            .verify();
+    }
+
 	@Test
-	public void shouldCreateSyncHandlerFromEndpointMethodWithFluxReturnType() throws Exception {
+	public void shouldGetFluxWithResponseOfSyncCall() throws Exception {
 		EndpointCallHandler<Flux<String>, Collection<String>> handler = adapter
 				.adapt(new SimpleEndpointMethod(SomeType.class.getMethod("flux")), delegate);
 
 		when(asyncEndpointCall.execute())
 			.thenReturn(Arrays.asList(expectedAsyncResult));
 
-		Flux<String> flux = handler.handle(asyncEndpointCall, null);
+        Flux<String> flux = handler.handle(asyncEndpointCall, null);
 
-		assertNotNull(flux);
+        assertNotNull(flux);
 
 		StepVerifier.create(flux)
 			.expectNext(expectedAsyncResult)

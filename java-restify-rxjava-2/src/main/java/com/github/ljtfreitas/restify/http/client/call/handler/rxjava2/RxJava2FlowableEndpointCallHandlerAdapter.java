@@ -125,6 +125,8 @@ public class RxJava2FlowableEndpointCallHandlerAdapter<T, O> implements AsyncEnd
 			future.whenComplete((value, throwable) -> {
 				if (throwable != null) {
 					emitter.onError(throwable);
+				} else if (value == null) {
+				    emitter.onComplete();
 				} else {
 					emitter.onNext(value);
 					emitter.onComplete();

@@ -124,6 +124,8 @@ public class RxJava2ObservableEndpointCallHandlerAdapter<T, O> implements AsyncE
 			future.whenComplete((value, throwable) -> {
 				if (throwable != null) {
 					emitter.onError(throwable);
+				} else if (value == null) {
+				    emitter.onComplete();
 				} else {
 					emitter.onNext(value);
 					emitter.onComplete();
