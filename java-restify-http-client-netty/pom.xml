@@ -8,7 +8,7 @@
 	<artifactId>java-restify-http-client-netty</artifactId>
 
 	<properties>
-		<netty.http.client.version>4.1.35.Final</netty.http.client.version>
+		<netty.http.client.version>4.1.71.Final</netty.http.client.version>
 	</properties>
 
 	<dependencies>
